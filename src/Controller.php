@@ -1,6 +1,6 @@
 <?php
 
-namespace churros;
+namespace santilin\Churros;
 
 use Yii;
 use yii\web\NotFoundHttpException;
@@ -9,7 +9,7 @@ use yii\filters\VerbFilter;
 /**
  * BaseController implements the CRUD actions for yii2gen models
  */
-class Controller extends yii\web\Controller
+class Controller extends \yii\web\Controller
 {
     public function behaviors()
     {

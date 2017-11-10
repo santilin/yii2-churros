@@ -1,6 +1,6 @@
 <?php 
 
-namespace churros;
+namespace santilin\Churros;
 
 class Model extends \yii\db\ActiveRecord
 {
