@@ -158,7 +158,7 @@ class Controller extends \yii\web\Controller
     * @return mixed
     */
     public function actionSaveAsNew($id) {
-        $model = $this->findModel($id);
+        $model = $this->findModel();
 
         if (Yii::$app->request->post('_asnew') != '1') {
             $model = $this->findModel($id);
