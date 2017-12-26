@@ -1,13 +1,18 @@
 {
     "name": "santilin/yii2-churros",
-    "description": "Parar realizar programas como churros",
     "type": "yii2-extension",
+    "description": "Parar realizar programas como churros",
     "keywords": ["yii2","extension"],
     "license": "LGPL-3.0+",
+	"homepage": "http://github.com/santilin/yii2-churros",
+    "support": {
+        "issues": "https://github.com/santilin/yii2-churros/issues",
+        "source": "https://github.com/santilin/yii2-churros"
+    },
     "authors": [
         {
             "name": "Santiago Capel Torres",
-            "email": "santi@noviolento.es"
+            "email": "software@noviolento.es"
         }
     ],
     "require": {

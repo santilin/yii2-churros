@@ -74,7 +74,11 @@ class Controller extends \yii\web\Controller
         $model = $this->findModel();
 
         if ($model->loadAll(Yii::$app->request->post()) && $model->saveAll()) {
-            return $this->redirect(['view', 'id' => $model->id]);
+			if (Yii::$app->request->post('_and_create') != '1') {
+				return $this->redirect(['view', 'id' => $model->id]);
+			} else {
+				return $this->redirect(['create']);
+			}
         } else {
             return $this->render('create', [
                 'model' => $model,
