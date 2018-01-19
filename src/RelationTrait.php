@@ -230,7 +230,7 @@ trait RelationTrait
 									}
 								}
 							}
-if( !$error ) {							
+						if( !$error ) {					
                             $notDeletedPK = [];
                             $notDeletedFK = [];
                             $relPKAttr = ($AQ->multiple) ? $records[0]->primaryKey() : $records->primaryKey();

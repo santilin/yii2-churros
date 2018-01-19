@@ -60,7 +60,8 @@ class Controller extends \yii\web\Controller
     {
         $model = $this->findModel($id);
         return $this->render('view', [
-            'model' => $model
+            'model' => $model,
+            'relationsProviders' => $this->getRelationsProviders($model)
         ]);
     }
 
@@ -176,5 +177,10 @@ class Controller extends \yii\web\Controller
             ]);
         }
     }
+    
+    protected function getRelationsProviders($model)
+    {
+		return [];
+	}
     
 }
