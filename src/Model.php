@@ -11,6 +11,21 @@ class Model extends \yii\db\ActiveRecord
 		return get_called_class();
 	}
 	
+	public function getFileAttributes()
+	{
+		$ret = [];
+		foreach( $this->rules() as $key => $rule ) {
+			if( $rule[1] == 'image' || $rule[1] == 'file' ) {
+				if( is_array($rule[0]) ) {
+					$ret = array_merge( $ret, $rule[0]);
+				} else {
+					$ret[] = explode(",", $rule[0]);
+				}
+			}
+		}
+		return $ret;
+	}
+	
 	public function increment( $fldname, $increment, $conds = '', $usegaps = true)
 	{
 		$tablename = $this->tableName();

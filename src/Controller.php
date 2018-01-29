@@ -5,7 +5,7 @@ namespace santilin\Churros;
 use Yii;
 use yii\web\NotFoundHttpException;
 use yii\filters\VerbFilter;
-
+use yii\web\UploadedFile;
 /**
  * BaseController implements the CRUD actions for yii2gen models
  */
@@ -75,6 +75,7 @@ class Controller extends \yii\web\Controller
         $model = $this->findModel();
 
         if ($model->loadAll(Yii::$app->request->post()) && $model->saveAll()) {
+			$this->saveFileInstances($model);
 			if (Yii::$app->request->post('_and_create') != '1') {
 				return $this->redirect(['view', 'id' => $model->id]);
 			} else {
@@ -101,8 +102,11 @@ class Controller extends \yii\web\Controller
             $model = $this->findModel($id);
         }
 
-        if ($model->loadAll(Yii::$app->request->post()) && $model->saveAll()) {
-            return $this->redirect(['view', 'id' => $model->id]);
+        if ($model->loadAll(Yii::$app->request->post())) {
+			$this->saveFileInstances($model);
+			if ($model->saveAll()) {
+				return $this->redirect(['view', 'id' => $model->id]);
+			}
         } else {
             return $this->render('update', [
                 'model' => $model,
@@ -182,5 +186,16 @@ class Controller extends \yii\web\Controller
     {
 		return [];
 	}
-    
+
+	protected function saveFileInstances($model)
+	{
+		foreach( $model->getFileAttributes() as $attr ) {
+			$instances = UploadedFile::getInstances($model, $attr);
+			foreach($instances as $file) {
+				$model->$attr = uniqid($attr . "_", true) . "." . $file->getExtension();
+				$file->saveAs( Yii::getAlias('@runtime/uploads/') . $model->$attr);
+			}
+		}
+	}
+	
 }
