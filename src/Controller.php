@@ -6,7 +6,10 @@ use Yii;
 use yii\web\NotFoundHttpException;
 use yii\filters\VerbFilter;
 use yii\web\UploadedFile;
+use yii\web\HttpException;
+
 use SaveModelException;
+use DataException;
 
 /**
  * BaseController implements the CRUD actions for yii2gen models
@@ -78,7 +81,7 @@ class Controller extends \yii\web\Controller
 
         if ($model->loadAll(Yii::$app->request->post())) {
 			$saved = false;
-			$fileAttributes = $this->setFileInstances($model);
+			$fileAttributes = $this->addFileInstances($model);
 			if( count($fileAttributes) == 0 ) {
 				$saved = $model->saveAll();
 			} else {
@@ -120,17 +123,16 @@ class Controller extends \yii\web\Controller
             $model = $this->findModel($id);
         }
 
-		$oldModelAttributes = $model->getAttributes();
         if ($model->loadAll(Yii::$app->request->post())) {
 			$saved = false;
-			$fileAttributes = $this->setFileInstances($model);
+			$fileAttributes = $this->addFileInstances($model);
 			if( count($fileAttributes) == 0 ) {
 				$saved = $model->saveAll();
 			} else {
 				$transaction = $model->getDb()->beginTransaction();
 				$saved = $model->saveAll();
 				if ($saved) {
-					$saved = $this->saveFileInstances($model, $fileAttributes, $oldModelAttributes);
+					$saved = $this->saveFileInstances($model, $fileAttributes);
 				}
 				if ($saved) {
 					$transaction->commit();
@@ -221,44 +223,61 @@ class Controller extends \yii\web\Controller
     {
 		return [];
 	}
-
-	protected function setFileInstances($model)
+	
+	// Método para eliminar una imagen de una galería
+	public function actionRemoveImage($id, $field, $filename)
+	{
+		$model = $this->findModel($id);
+		if( $model->$field == '' ) {
+			throw new DataException($model->className() . "->$field is empty when removing an image");
+		} 
+		$images = unserialize($model->$field);
+		if( !is_array($images) ) {
+			throw new DataException($model->className() . "->$field is not an array");
+		}
+		if( isset($images[$filename]) ) {
+			if ($this->unlinkImage($model, $filename) ) {
+				unset($images[$filename]);
+				$model->$field = serialize($images);
+				if (!$model->save()) {
+					throw new SaveModelException($model);
+				}
+			} else {
+				throw new DataException("Unable to delete " . $model->className() . "->$field[$filename]");
+			}
+		}
+		return json_encode("Ok");
+	}
+	
+	
+	protected function addFileInstances($model)
 	{
 		$fileAttributes = $model->getFileAttributes();
-		foreach( $fileAttributes as $attr ) {
+		foreach( $fileAttributes as $key => $attr ) {
 			$instances = UploadedFile::getInstances($model, $attr);
 			if (count($instances) == 0 ) {
-				unset($fileAttributes[$attr]);
+				unset($fileAttributes[$key]);
 				$model->$attr = null;
 			} else {
-				$attr_value = [];
+				$attr_value = ($model->getOldAttribute($attr) != '' ? unserialize($model->getOldAttribute($attr)) : []);
 				foreach ($instances as $file) {
-					$filename = $this->getFileInstanceKey($file, $model, $attr);
-					$attr_value[$filename] = [ $file->name, $file->size ];
+					if( $file->error == 0 ) {
+						$filename = $this->getFileInstanceKey($file, $model, $attr);
+						$attr_value[$filename] = [ $file->name, $file->size ];
+					} else {
+						throw new HttpException(500, $this->fileUploadErrorMessage($model, $attr, $file));
+					}
 				}
-				$model->$attr = $attr_value == [] ? null : serialize($attr_value);
+				$model->$attr = serialize($attr_value);
 			}
 		}
 		return $fileAttributes;
 	}
 
-	protected function saveFileInstances($model, $fileAttributes, $oldModelAttributes = null)
+	protected function saveFileInstances($model, $fileAttributes)
 	{
 		$saved = true;
 		foreach( $fileAttributes as $attr ) {
-			// For each image attribute, delete the old file or gallery
-			if( $oldModelAttributes != null ) {
-				if( isset($oldModelAttributes[$attr]) && $oldModelAttributes[$attr] != '' ) {
-					$attr_files = unserialize($oldModelAttributes[$attr]);
-					foreach( $attr_files as $filename => $titleandsize ) {
-						$oldfilename = Yii::getAlias('@runtime/uploads/') . $filename;
-						if (!@unlink($oldfilename) && file_exists($oldfilename) ) {
-							$model->addError($attr, "No se ha podido borrar el archivo $oldfilename" . posix_strerror( $file->error ));
-							return false;
-						}
-					}
-				}
-			}
 			$instances = UploadedFile::getInstances($model, $attr);
 			foreach($instances as $file) {
 				$filename = $this->getFileInstanceKey($file, $model, $attr);
@@ -283,6 +302,47 @@ class Controller extends \yii\web\Controller
 	{
 		$filename = basename(str_replace('\\', '/', $model->className())) . "_$attr" . "_" . basename($uploadedfile->tempName) . "." . $uploadedfile->getExtension();
 		return $filename;
+	}
+	
+	private function unlinkImage($model, $filename)
+	{
+		$oldfilename = Yii::getAlias('@runtime/uploads/') . $filename;
+		if ( file_exists($oldfilename) && !@unlink($oldfilename) ) {
+			$model->addError($attr, "No se ha podido borrar el archivo $oldfilename" . posix_strerror( $file->error ));
+			return false;
+		} else {
+			return true;
+		}
+	}
+	
+	private function fileUploadErrorMessage($model, $attr, $file)
+	{
+		$message = "Error uploading " . $model->className() . ".$attr: ";
+		switch( $file->error ) {
+		case UPLOAD_ERR_OK:
+			return "";
+		case UPLOAD_ERR_INI_SIZE:
+			$message .= "The uploaded file exceeds the upload_max_filesize directive in php.ini.";
+			break;
+		case UPLOAD_ERR_FORM_SIZE:
+			$message .=  "The uploaded file exceeds the MAX_FILE_SIZE directive that was specified in the HTML form.";
+			break;
+		case UPLOAD_ERR_PARTIAL:
+			$message .= "The uploaded file was only partially uploaded.";
+			break;
+		case UPLOAD_ERR_NO_FILE:
+			$message .= "No file was uploaded.";
+			break;
+		case UPLOAD_ERR_NO_TMP_DIR:
+			$message .= "Missing a temporary folder.";
+			break;
+		case UPLOAD_ERR_CANT_WRITE:
+			$message .= "Failed to write file to disk.";
+			break;
+		case UPLOAD_ERR_EXTENSION:
+			break;
+		}
+		return $message;
 	}
 	
 }
