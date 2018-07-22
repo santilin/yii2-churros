@@ -36,7 +36,7 @@ class SaveModelException extends \Exception
     public function __toString()
     {
         return parent::__toString() . PHP_EOL
-        . 'Error message:' . PHP_EOL . print_r($this->model->getErrors(), true);
+        . 'Error message:' . PHP_EOL . print_r($this->model->getErrors(), true)
         . 'Additional info:' . PHP_EOL . print_r($this->errorInfo, true);
     }
 }
