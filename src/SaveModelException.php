@@ -19,7 +19,7 @@ class SaveModelException extends \Exception
 	public function __construct($model, $errorInfo = [], $code = 0, \Exception $previous = null)
 	{
 		$this->model = $model;
-        parent::__construct("Error saving " . (string)$model, $errorInfo, $code, $previous);
+        parent::__construct("Error saving " . $model->getHumanDesc(), $errorInfo, $code, $previous);
     }
 
     /**
