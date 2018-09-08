@@ -6,9 +6,48 @@ use Faker\Factory as Faker;
 class Model extends \yii\db\ActiveRecord
 {
 	use RelationTrait;
+		
+	public function maleWord($word) {
+		if( $this->getModelInfo('female') === true ) {
+			return $word;
+		}
+		static $male_words = [ 
+			"la" => "el",
+			"La" => "El",
+			"las" => "los",
+			"Las" => "Los",
+			"una" => "uno",
+			"Una" => "Uno"
+		];
+		foreach( $male_words as $female_word => $male_word) {
+			if( $female_word == $word ) {
+				return $male_word;
+			}
+		}
+		return $word;
+	}
 	
-	public function humanDesc($format=null) {
-		return get_called_class();
+	public function t( $category, $message, $params = [], $language = null ) {
+		$placeholders = [
+			'{title}' => lcfirst($this->getModelInfo('title')),
+			'{title_plural}' => lcfirst($this->getModelInfo('title_plural')),
+			'{Title}' => ucfirst($this->getModelInfo('title')),
+			'{Title_plural}' => ucfirst($this->getModelInfo('title_plural')),
+			'{record}' => $this->recordDesc(),
+			'{record_long}' => $this->recordDesc('long'),
+			'{la}' => $this->maleWord('la'),
+			'{La}' => $this->maleWord('La'),
+			'{las}' => $this->maleWord('las'),
+			'{Las}' => $this->maleWord('Las'),
+			'{una}' => $this->maleWord('una'),
+			'{Una}' => $this->maleWord('Una'),
+		];
+		$message = strtr($message, $placeholders);
+		return Yii::t($category, $message, $params, $language);
+	}
+	
+	public function recordDesc($format=null) {
+		return "(not defined)";
 	}
 	
 	public function getFileAttributes()

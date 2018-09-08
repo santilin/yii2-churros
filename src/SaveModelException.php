@@ -13,13 +13,13 @@ namespace santilin\Churros;
  * @author santilin <software@noviolento.es>
  * @since 1.0
  */
-class SaveModelException extends \Exception
+class SaveModelException extends \yii\web\NotFoundHttpException
 {
 
-	public function __construct($model, $errorInfo = [], $code = 0, \Exception $previous = null)
+	public function __construct($model, $code = 0, \Exception $previous = null)
 	{
 		$this->model = $model;
-        parent::__construct("Error saving " . $model->getHumanDesc(), $errorInfo, $code, $previous);
+        parent::__construct(Yii::t('churros', "Error grabando " . $model->humanDesc('{el} {model}'), $code, $previous);
     }
 
     /**

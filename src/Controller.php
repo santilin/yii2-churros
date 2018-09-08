@@ -30,7 +30,7 @@ class Controller extends \yii\web\Controller
 //                 'rules' => [
 //                     [
 //                         'allow' => true,
-//                         'actions' => ['index', 'view', 'create', 'update', 'delete', 'pdf', 'save-as-new'],
+//                         'actions' => ['index', 'view', 'create', 'update', 'delete', 'pdf', 'duplicate'],
 //                         'roles' => ['@']
 //                     ],
 //                     [
@@ -71,7 +71,7 @@ class Controller extends \yii\web\Controller
     }
 
     /**
-     * Creates a new BaseField model.
+     * Creates a new model.
      * If creation is successful, the browser will be redirected to the 'view' page.
      * @return mixed
      */
@@ -97,6 +97,8 @@ class Controller extends \yii\web\Controller
 				}
 			}
 			if ($saved) {
+				Yii::$app->session->setFlash('success', 
+					$model->t('app', "{La} {title} {record} se ha creado correctamente."));
 				if (Yii::$app->request->post('_and_create') != '1') {
 					return $this->redirect(['view', 'id' => $model->id]);
 				} else {
@@ -109,19 +111,63 @@ class Controller extends \yii\web\Controller
 		]);
     }
 
+	/**
+     * Creates a new model by another data,
+     * so user don't need to input all field from scratch.
+     * If creation is successful, the browser will be redirected to the 'view' page.
+     *
+     * @param mixed $id
+     * @return mixed
+    */
+    public function actionDuplicate($id) 
+    {
+        $model = $this->findModel($id);
+
+        if (Yii::$app->request->post('_asnew') != 0) {
+            $model = $this->findModel(Yii::$app->request->post('_asnew'));
+        }
+    
+        if ($model->loadAll(Yii::$app->request->post())) {
+			$model->setIsNewRecord(true);
+			foreach( $model->primaryKey() as $primary_key ) {
+				$model->$primary_key = null;
+			}
+			$saved = false;
+			$fileAttributes = $this->addFileInstances($model);
+			if( count($fileAttributes) == 0 ) {
+				$saved = $model->saveAll();
+			} else {
+				$transaction = $model->getDb()->beginTransaction();
+				$saved = $model->saveAll();
+				if ($saved) {
+					$saved = $this->saveFileInstances($model, $fileAttributes);
+				}
+				if ($saved) {
+					$transaction->commit();
+				} else {
+					$transaction->rollBack();
+				}
+			}
+			if ($saved) {
+				Yii::$app->session->setFlash('success', 
+					$model->t('app', "{La} {title} {record} se ha duplicado correctamente."));
+				return $this->redirect(['view', 'id' => $model->id]);
+			}
+        }
+		return $this->render('saveAsNew', [
+			'model' => $model,
+		]);
+    }
+    
     /**
-     * Updates an existing BaseField model.
+     * Updates an existing model.
      * If update is successful, the browser will be redirected to the 'view' page.
      * @param integer $id
      * @return mixed
      */
     public function actionUpdate($id)
     {
-        if (Yii::$app->request->post('_asnew') == '1') {
-            $model = $this->findModel();
-        } else {
-            $model = $this->findModel($id);
-        }
+		$model = $this->findModel($id);
 
         if ($model->loadAll(Yii::$app->request->post())) {
 			$saved = false;
@@ -141,6 +187,8 @@ class Controller extends \yii\web\Controller
 				}
 			}
 			if ($saved) {
+				Yii::$app->session->setFlash('success', 
+					$model->t('app', "{La} {title} {record} se ha modificado correctamente."));
 				return $this->redirect(['view', 'id' => $model->id]);
 			}
 		}
@@ -150,7 +198,7 @@ class Controller extends \yii\web\Controller
     }
 
     /**
-     * Deletes an existing BaseField model.
+     * Deletes an existing model.
      * If deletion is successful, the browser will be redirected to the 'index' page.
      * @param integer $id
      * @return mixed
@@ -158,19 +206,22 @@ class Controller extends \yii\web\Controller
      */
     public function actionDelete($id)
     {
-        $this->findModel($id)->deleteWithRelated();
-
+		$model = $this->findModel($id);
+        $model->deleteWithRelated();
+		Yii::$app->session->setFlash('success', 
+			$model->t('app', "{La} {title} {record} se ha  borrado correctamente."));
         return $this->redirect(['index']);
     }
     
     /**
      * 
-     * Export BaseField information into PDF format.
+     * Export model information into PDF format.
      * @param integer $id
      * @return mixed
      */
     public function actionPdf($id) {
         $model = $this->findModel($id);
+        $this->layout = 'pdf_model';
 
         $content = $this->renderAjax('_pdf', [
             'model' => $model,
@@ -194,30 +245,6 @@ class Controller extends \yii\web\Controller
         return $pdf->render();
     }
 
-    /**
-    * Creates a new BaseField model by another data,
-    * so user don't need to input all field from scratch.
-    * If creation is successful, the browser will be redirected to the 'view' page.
-    *
-    * @param mixed $id
-    * @return mixed
-    * @todo manage uploaded files
-    */
-    public function actionSaveAsNew($id) {
-        $model = $this->findModel();
-
-        if (Yii::$app->request->post('_asnew') != '1') {
-            $model = $this->findModel($id);
-        }
-    
-        if ($model->loadAll(Yii::$app->request->post()) && $model->saveAll()) {
-            return $this->redirect(['view', 'id' => $model->id]);
-        } else {
-            return $this->render('saveAsNew', [
-                'model' => $model,
-            ]);
-        }
-    }
     
     protected function getRelationsProviders($model)
     {
