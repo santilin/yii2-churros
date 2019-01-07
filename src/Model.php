@@ -1,17 +1,18 @@
 <?php namespace santilin\Churros;
 
 use Yii;
+use \yii\helpers\ArrayHelper;
 use Faker\Factory as Faker;
 
 class Model extends \yii\db\ActiveRecord
 {
 	use RelationTrait;
-		
+
 	public function maleWord($word) {
 		if( $this->getModelInfo('female') === true ) {
 			return $word;
 		}
-		static $male_words = [ 
+		static $male_words = [
 			"la" => "el",
 			"La" => "El",
 			"las" => "los",
@@ -26,7 +27,7 @@ class Model extends \yii\db\ActiveRecord
 		}
 		return $word;
 	}
-	
+
 	public function t( $category, $message, $params = [], $language = null ) {
 		$placeholders = [
 			'{title}' => lcfirst($this->getModelInfo('title')),
@@ -45,11 +46,11 @@ class Model extends \yii\db\ActiveRecord
 		$message = strtr($message, $placeholders);
 		return Yii::t($category, $message, $params, $language);
 	}
-	
+
 	public function recordDesc($format=null) {
 		return "(not defined)";
 	}
-	
+
 	public function getFileAttributes()
 	{
 		$ret = [];
@@ -64,7 +65,7 @@ class Model extends \yii\db\ActiveRecord
 		}
 		return $ret;
 	}
-	
+
 	public function increment( $fldname, $increment, $conds = '', $usegaps = true)
 	{
 		$tablename = $this->tableName();
@@ -102,15 +103,15 @@ class Model extends \yii\db\ActiveRecord
 //         } else throw;
 //     }
     }
-	
+
 	public function setDefaultValues()
 	{
 	}
-	
+
 	public function setFakerValues($faker)
 	{
 	}
-	
+
 	static public function createFromDefault($number = 1)
     {
 		$ret = [];
@@ -120,13 +121,13 @@ class Model extends \yii\db\ActiveRecord
 			$model->setDefaultValues();
 			if( $number == 1 ) {
 				return $model;
-			} else { 
+			} else {
 				$ret[] = $model;
 			}
 		}
-		return $ret;	
+		return $ret;
     }
-    
+
     static public function createFromFaker($number = 1, $language = null)
     {
 		if( $language == null ) {
@@ -140,13 +141,13 @@ class Model extends \yii\db\ActiveRecord
 			$model->setFakerValues($faker);
 			if( $number == 1 ) {
 				return $model;
-			} else { 
+			} else {
 				$ret[] = $model;
 			}
 		}
-		return $ret;	
+		return $ret;
     }
-    
+
     static public function createFromFixture($fixture_file, $fixture_id)
     {
 		$models = include($fixture_file);
@@ -156,14 +157,31 @@ class Model extends \yii\db\ActiveRecord
 				$model = new self($models[$fixture_id]);
 				if( $number == 1 ) {
 					return $model;
-				} else { 
+				} else {
 					$ret[] = $model;
 				}
 			}
-			return $ret;	
+			return $ret;
 		} else {
 			throw new \app\helpers\ProgrammerException("No se encuentra un " . self::className() . "de id $fixture_id en el fichero $fixture_file");
 		}
     }
-	
+
+    static public function valuesAndLabels()
+    {
+		$model = new static;
+		$code_field = $model->getModelInfo('code_field');
+		$desc_field = $model->getModelInfo('desc_field');
+		$id_field = "ID"; /// @todo $model->getPrimaryKey();
+		if( $code_field && $desc_field ) {
+			return ArrayHelper::map($model->find()->select([$id_field, "CONCAT({{" . $code_field . "}}, '.- ', {{" . $desc_field . "}}) AS DESCRIPTION"])->asArray()->all(), $id_field, 'DESCRIPTION');
+		} else if( $code_field ) {
+			return ArrayHelper::map($model->find()->select([$id_field, $code_field])->asArray()->all(), $id_field, $code_field);
+		} else if( $desc_field ) {
+			return ArrayHelper::map($model->find()->select([$id_field, $desc_field])->asArray()->all(), $id_field, $code_field);
+		} else {
+			return [];
+		}
+    }
+
 } // class Model

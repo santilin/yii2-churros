@@ -97,15 +97,15 @@ class Controller extends \yii\web\Controller
 				}
 			}
 			if ($saved) {
-				Yii::$app->session->setFlash('success', 
+				Yii::$app->session->setFlash('success',
 					$model->t('app', "{La} {title} {record} se ha creado correctamente."));
 				if (Yii::$app->request->post('_and_create') != '1') {
-					return $this->redirect(['view', 'id' => $model->id]);
+					return $this->redirect(['view', 'id' => $model->getPrimaryKey()]);
 				} else {
 					return $this->redirect(['create']);
 				}
 			}
-        } 
+        }
 		return $this->render('create', [
 			'model' => $model,
 		]);
@@ -119,14 +119,14 @@ class Controller extends \yii\web\Controller
      * @param mixed $id
      * @return mixed
     */
-    public function actionDuplicate($id) 
+    public function actionDuplicate($id)
     {
         $model = $this->findModel($id);
 
         if (Yii::$app->request->post('_asnew') != 0) {
             $model = $this->findModel(Yii::$app->request->post('_asnew'));
         }
-    
+
         if ($model->loadAll(Yii::$app->request->post())) {
 			$model->setIsNewRecord(true);
 			foreach( $model->primaryKey() as $primary_key ) {
@@ -149,16 +149,16 @@ class Controller extends \yii\web\Controller
 				}
 			}
 			if ($saved) {
-				Yii::$app->session->setFlash('success', 
+				Yii::$app->session->setFlash('success',
 					$model->t('app', "{La} {title} {record} se ha duplicado correctamente."));
-				return $this->redirect(['view', 'id' => $model->id]);
+				return $this->redirect(['view', 'id' => $model->getPrimaryKey()]);
 			}
         }
 		return $this->render('saveAsNew', [
 			'model' => $model,
 		]);
     }
-    
+
     /**
      * Updates an existing model.
      * If update is successful, the browser will be redirected to the 'view' page.
@@ -187,9 +187,9 @@ class Controller extends \yii\web\Controller
 				}
 			}
 			if ($saved) {
-				Yii::$app->session->setFlash('success', 
+				Yii::$app->session->setFlash('success',
 					$model->t('app', "{La} {title} {record} se ha modificado correctamente."));
-				return $this->redirect(['view', 'id' => $model->id]);
+				return $this->redirect(['view', 'id' => $model->getPrimaryKey()]);
 			}
 		}
 		return $this->render('update', [
@@ -208,13 +208,13 @@ class Controller extends \yii\web\Controller
     {
 		$model = $this->findModel($id);
         $model->deleteWithRelated();
-		Yii::$app->session->setFlash('success', 
+		Yii::$app->session->setFlash('success',
 			$model->t('app', "{La} {title} {record} se ha  borrado correctamente."));
         return $this->redirect(['index']);
     }
-    
+
     /**
-     * 
+     *
      * Export model information into PDF format.
      * @param integer $id
      * @return mixed
@@ -245,19 +245,19 @@ class Controller extends \yii\web\Controller
         return $pdf->render();
     }
 
-    
+
     protected function getRelationsProviders($model)
     {
 		return [];
 	}
-	
+
 	// Método para eliminar una imagen de una galería
 	public function actionRemoveImage($id, $field, $filename)
 	{
 		$model = $this->findModel($id);
 		if( $model->$field == '' ) {
 			throw new DataException($model->className() . "->$field is empty when removing an image");
-		} 
+		}
 		$images = unserialize($model->$field);
 		if( !is_array($images) ) {
 			throw new DataException($model->className() . "->$field is not an array");
@@ -275,8 +275,8 @@ class Controller extends \yii\web\Controller
 		}
 		return json_encode("Ok");
 	}
-	
-	
+
+
 	protected function addFileInstances($model)
 	{
 		$fileAttributes = $model->getFileAttributes();
@@ -320,17 +320,17 @@ class Controller extends \yii\web\Controller
 				if (!$saved) {
 					break;
 				}
-			}			
+			}
 		}
 		return $saved;
 	}
-	
+
 	private function getFileInstanceKey($uploadedfile, $model, $attr)
 	{
 		$filename = basename(str_replace('\\', '/', $model->className())) . "_$attr" . "_" . basename($uploadedfile->tempName) . "." . $uploadedfile->getExtension();
 		return $filename;
 	}
-	
+
 	private function unlinkImage($model, $filename)
 	{
 		$oldfilename = Yii::getAlias('@runtime/uploads/') . $filename;
@@ -341,7 +341,7 @@ class Controller extends \yii\web\Controller
 			return true;
 		}
 	}
-	
+
 	private function fileUploadErrorMessage($model, $attr, $file)
 	{
 		$message = "Error uploading " . $model->className() . ".$attr: ";
@@ -371,5 +371,5 @@ class Controller extends \yii\web\Controller
 		}
 		return $message;
 	}
-	
+
 }
