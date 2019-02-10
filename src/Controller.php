@@ -7,6 +7,7 @@ use yii\web\NotFoundHttpException;
 use yii\filters\VerbFilter;
 use yii\web\UploadedFile;
 use yii\web\HttpException;
+use yii\base\ErrorException;
 use SaveModelException;
 use DataException;
 
@@ -278,7 +279,11 @@ class Controller extends \yii\web\Controller {
                 // Recupera el valor sobreescrito por el LoadAll del controller
                 $model->$attr = $model->getOldAttribute($attr);
             } else {
+				try {
                 $attr_value = ($model->getOldAttribute($attr) != '' ? unserialize($model->getOldAttribute($attr)) : []);
+                } catch( ErrorException $e) {
+					throw new ErrorException($e->getMessage() . "<br/>\n" . $model->getOldAttribute($attr));
+                }
                 foreach ($instances as $file) {
                     if ($file->error == 0) {
                         $filename = $this->getFileInstanceKey($file, $model, $attr);
