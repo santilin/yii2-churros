@@ -5,7 +5,7 @@ use Yii;
 use yii\helpers\ArrayHelper;
 use yii\helpers\Html;
 use yii\helpers\Url;
-use app\helpers\AppHelper;
+use santilin\Churros\helpers\AppHelper;
 
 /**
  * Alert widget renders a message from session flash. All flash messages are
