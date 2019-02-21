@@ -75,14 +75,14 @@ class Controller extends \yii\web\Controller {
     public function actionCreate() {
         $model = $this->findModel();
 
-        if ($model->loadAll(Yii::$app->request->post())) {
+        if ($model->loadAll(Yii::$app->request->post(), $this->formRelations()) ) {
             $saved = false;
             $fileAttributes = $this->addFileInstances($model);
             if (count($fileAttributes) == 0) {
-                $saved = $model->saveAll();
+                $saved = $model->saveAll($this->formRelations());
             } else {
                 $transaction = $model->getDb()->beginTransaction();
-                $saved = $model->saveAll();
+                $saved = $model->saveAll($this->formRelations());
                 if ($saved) {
                     $saved = $this->saveFileInstances($model, $fileAttributes);
                 }
@@ -122,7 +122,7 @@ class Controller extends \yii\web\Controller {
             $model = $this->findModel(Yii::$app->request->post('_asnew'));
         }
 
-        if ($model->loadAll(Yii::$app->request->post())) {
+        if ($model->loadAll(Yii::$app->request->post(), $this->formRelations())) {
             $model->setIsNewRecord(true);
             foreach ($model->primaryKey() as $primary_key) {
                 $model->$primary_key = null;
@@ -130,10 +130,10 @@ class Controller extends \yii\web\Controller {
             $saved = false;
             $fileAttributes = $this->addFileInstances($model);
             if (count($fileAttributes) == 0) {
-                $saved = $model->saveAll();
+                $saved = $model->saveAll($this->formRelations());
             } else {
                 $transaction = $model->getDb()->beginTransaction();
-                $saved = $model->saveAll();
+                $saved = $model->saveAll($this->formRelations());
                 if ($saved) {
                     $saved = $this->saveFileInstances($model, $fileAttributes);
                 }
@@ -163,14 +163,14 @@ class Controller extends \yii\web\Controller {
     public function actionUpdate($id) {
         $model = $this->findModel($id);
 
-        if ($model->loadAll(Yii::$app->request->post())) {
+        if ($model->loadAll(Yii::$app->request->post(), $this->formRelations()) ) {
             $saved = false;
             $fileAttributes = $this->addFileInstances($model);
             if (count($fileAttributes) == 0) {
-                $saved = $model->saveAll();
+                $saved = $model->saveAll($this->formRelations());
             } else {
                 $transaction = $model->getDb()->beginTransaction();
-                $saved = $model->saveAll();
+                $saved = $model->saveAll($this->formRelations());
                 if ($saved) {
                     $saved = $this->saveFileInstances($model, $fileAttributes);
                 }
@@ -370,6 +370,11 @@ class Controller extends \yii\web\Controller {
                 break;
         }
         return $message;
+    }
+
+    protected function formRelations()
+    {
+		return [];
     }
 
 }
