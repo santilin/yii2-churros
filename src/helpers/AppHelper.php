@@ -11,6 +11,12 @@ use Yii;
 
 class AppHelper
 {
+
+    static public function empty($value)
+    {
+		return empty($value);
+	}
+
 	static public function getAppLocaleLanguage()
 	{
 		return str_replace("-", "_", Yii::$app->language);

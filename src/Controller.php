@@ -41,7 +41,7 @@ class Controller extends \yii\web\Controller {
     }
 
     /**
-     * Lists all BaseField models.
+     * Lists all models.
      * @return mixed
      */
     public function actionIndex() {
@@ -55,7 +55,7 @@ class Controller extends \yii\web\Controller {
     }
 
     /**
-     * Displays a single BaseField model.
+     * Displays a single model.
      * @param integer $id
      * @return mixed
      */

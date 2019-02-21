@@ -74,7 +74,7 @@ trait RelationTrait
                     } else {
                         $isHasMany = is_array($attr) && is_array(current($attr));
                         $relName = ($isHasMany) ? lcfirst(Inflector::pluralize($model)) : lcfirst($model);
-                        if (in_array($relName, $skippedRelations) || !array_key_exists($relName, $relData)) {
+                        if (!array_key_exists($relName, $relData)) {
                             continue;
                         }
                         $this->loadToRelation($isHasMany, $relName, $attr);
@@ -183,7 +183,7 @@ trait RelationTrait
 
     /**
      * Save model including all related models already loaded
-     * @param array $skippedRelations
+     * @param array $relations The relations to consider for this form
      * @return bool
      * @throws Exception
      */
@@ -200,9 +200,6 @@ trait RelationTrait
                 if (!empty($this->relatedRecords)) {
                     /* @var $records ActiveRecord | ActiveRecord[] */
                     foreach ($this->relatedRecords as $name => $records) {
-                        if (in_array($name, $skippedRelations))
-                            continue;
-
                         $AQ = $this->getRelation($name);
                         $link = $AQ->link;
                         if (!empty($records)) {
@@ -395,7 +392,7 @@ trait RelationTrait
 
     /**
      * Deleted model row with all related records
-     * @param array $skippedRelations
+     * @param array $relations The relations to consider for this form
      * @return bool
      * @throws Exception
      */
@@ -454,7 +451,7 @@ trait RelationTrait
 
     /**
      * Restore soft deleted row including all related records
-     * @param array $skippedRelations
+     * @param array $relations The relations to consider for this form
      * @return bool
      * @throws Exception
      */
