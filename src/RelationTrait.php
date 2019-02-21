@@ -66,7 +66,7 @@ trait RelationTrait
                         foreach ($attr as $relName => $relAttributes) {
                             if (is_array($relAttributes) && array_key_exists($relName, $relData) && !in_array($relName, $skippedRelations)) {
 								$relation_data = $relData[$relName];
-//                                 $isHasMany = $relation_data['via'] == null; 
+//                                 $isHasMany = $relation_data['via'] == null;
                                 $isHasMany = ArrayHelper::isAssociative($relAttributes);
                                 $this->loadToRelation($isHasMany, $relName, $relAttributes);
                             }
@@ -131,8 +131,8 @@ trait RelationTrait
 // 					$relName = $relName . Inflector::camel2words(StringHelper::basename($AQ->primaryModel::className()));
 // 					$relModelClass = $AQ->modelClass;
 // 					$relPKAttr = $relModelClass::primaryKey();
-// 					echo "<pre>"; print_r($relName); echo "</pre>"; 
-// 					echo "<pre>"; print_r($relModelClass); echo "</pre>"; 
+// 					echo "<pre>"; print_r($relName); echo "</pre>";
+// 					echo "<pre>"; print_r($relModelClass); echo "</pre>";
 // 					echo "<pre>"; print_r($relPKAttr); echo "</pre>"; die;
 					$condition = [];
 					$this_pk =  str_replace('%','',str_replace('{{','',str_replace('}}','',$this->tablename()))) . "_id";
@@ -202,11 +202,11 @@ trait RelationTrait
                     foreach ($this->relatedRecords as $name => $records) {
                         if (in_array($name, $skippedRelations))
                             continue;
-                            
+
                         $AQ = $this->getRelation($name);
-//                         echo "<pre>"; print_r($AQ); print_r($records); die;
                         $link = $AQ->link;
                         if (!empty($records)) {
+                        /// SCT Add error info
 							if( $AQ->via != null ) {
 								$records_copy = $records;
                                 foreach ($records as $index => $relModel) {
@@ -230,7 +230,7 @@ trait RelationTrait
 									}
 								}
 							}
-						if( !$error ) {					
+						if( !$error ) {
                             $notDeletedPK = [];
                             $notDeletedFK = [];
                             $relPKAttr = ($AQ->multiple) ? $records[0]->primaryKey() : $records->primaryKey();
