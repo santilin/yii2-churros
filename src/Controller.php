@@ -14,7 +14,10 @@ use DataException;
 /**
  * BaseController implements the CRUD actions for yii2gen models
  */
-class Controller extends \yii\web\Controller {
+class Controller extends \yii\web\Controller
+{
+
+	protected $parent_model = null;
 
     public function behaviors() {
         return [
@@ -40,16 +43,33 @@ class Controller extends \yii\web\Controller {
         ];
     }
 
+    public function beforeAction($action)
+    {
+        if (!parent::beforeAction($action)) {
+			return false;
+		}
+		$this->getParentFromRequest();
+		return true;
+	}
+
     /**
      * Lists all models.
      * @return mixed
      */
-    public function actionIndex() {
+    public function actionIndex()
+    {
         $searchModel = $this->createSearchModel();
-        $dataProvider = $searchModel->search(Yii::$app->request->queryParams);
+		$params = Yii::$app->request->queryParams;
+        if( $this->parent_model ) {
+			/// @todo $searchModel->getRelatedFieldForModel($parent);
+			$params[$searchModel->formName()][$searchModel->getRelatedFieldForModel($this->parent_model)]
+				= $this->parent_model->getPrimaryKey();
+		}
 
+        $dataProvider = $searchModel->search($params);
         return $this->render('index', [
                     'searchModel' => $searchModel,
+                    'parent' => $this->parent_model,
                     'dataProvider' => $dataProvider,
         ]);
     }
@@ -59,10 +79,12 @@ class Controller extends \yii\web\Controller {
      * @param integer $id
      * @return mixed
      */
-    public function actionView($id) {
+    public function actionView($id)
+    {
         $model = $this->findModel($id);
         return $this->render('view', [
                     'model' => $model,
+                    'parent' => $this->parent_model,
                     'relationsProviders' => $this->getRelationsProviders($model)
         ]);
     }
@@ -72,10 +94,13 @@ class Controller extends \yii\web\Controller {
      * If creation is successful, the browser will be redirected to the 'view' page.
      * @return mixed
      */
-    public function actionCreate() {
+    public function actionCreate()
+    {
         $model = $this->findModel();
-
         if ($model->loadAll(Yii::$app->request->post(), $this->formRelations()) ) {
+			if( $this->parent_model) {
+				$model->setAttribute( $model->getRelatedFieldForModel($this->parent_model), $this->parent_model->getPrimaryKey());
+			}
             $saved = false;
             $fileAttributes = $this->addFileInstances($model);
             if (count($fileAttributes) == 0) {
@@ -95,15 +120,14 @@ class Controller extends \yii\web\Controller {
             if ($saved) {
                 Yii::$app->session->setFlash('success',
                         $model->t('app', "{La} {title} <strong>{record}</strong> se ha creado correctamente."));
-                if (Yii::$app->request->post('_and_create') != '1') {
-                    return $this->redirect(['view', 'id' => $model->getPrimaryKey()]);
-                } else {
-                    return $this->redirect(['create']);
-                }
+				return $this->whereToGoNow('create', $model);
             }
         }
-        return $this->render('create', [
-                    'model' => $model,
+		$parent_id = Yii::$app->request->get('parent_id');
+		$parent_controller = Yii::$app->request->get('parent_controller');
+		return $this->render('create', [
+			'model' => $model,
+			'parent' => $this->parent_model
         ]);
     }
 
@@ -123,6 +147,9 @@ class Controller extends \yii\web\Controller {
         }
 
         if ($model->loadAll(Yii::$app->request->post(), $this->formRelations())) {
+			if( $this->parent_model) {
+				$model->setAttribute( $model->getRelatedFieldForModel($this->parent_model), $this->parent_model->getPrimaryKey());
+			}
             $model->setIsNewRecord(true);
             foreach ($model->primaryKey() as $primary_key) {
                 $model->$primary_key = null;
@@ -146,11 +173,12 @@ class Controller extends \yii\web\Controller {
             if ($saved) {
                 Yii::$app->session->setFlash('success',
                         $model->t('app', "{La} {title} <strong>{record}<strong> se ha duplicado correctamente."));
-                return $this->redirect(['view', 'id' => $model->getPrimaryKey()]);
+				return $this->whereTogoNow('create', $model);
             }
         }
         return $this->render('saveAsNew', [
-                    'model' => $model,
+			'model' => $model,
+			'parent' => $this->parent_model
         ]);
     }
 
@@ -164,6 +192,9 @@ class Controller extends \yii\web\Controller {
         $model = $this->findModel($id);
 
         if ($model->loadAll(Yii::$app->request->post(), $this->formRelations()) ) {
+			if( $this->parent_model) {
+				$model->setAttribute( $model->getRelatedFieldForModel($this->parent_model), $this->parent_model->getPrimaryKey());
+			}
             $saved = false;
             $fileAttributes = $this->addFileInstances($model);
             if (count($fileAttributes) == 0) {
@@ -182,13 +213,14 @@ class Controller extends \yii\web\Controller {
             }
             if ($saved) {
                 Yii::$app->session->setFlash('success',
-                        $model->t('app', "{La} {title} <strong>{record}</strong> se ha modificado correctamente."));
-                return $this->redirect(['view', 'id' => $model->getPrimaryKey()]);
+					$model->t('app', "{La} {title} <strong>{record}</strong> se ha modificado correctamente."));
+				return $this->whereTogoNow('update', $model);
             }
         }
-        return $this->render('update', [
-                    'model' => $model,
-        ]);
+		return $this->render('update', [
+			'model' => $model,
+			'parent' => $this->parent_model
+		]);
     }
 
     /**
@@ -198,12 +230,13 @@ class Controller extends \yii\web\Controller {
      * @return mixed
      * @todo delete uploaded files
      */
-    public function actionDelete($id) {
+    public function actionDelete($id)
+    {
         $model = $this->findModel($id);
         $model->deleteWithRelated();
         Yii::$app->session->setFlash('success',
-                $model->t('app', "{La} {title} <strong>{record}</strong> se ha  borrado correctamente."));
-        return $this->redirect(['index']);
+			$model->t('app', "{La} {title} <strong>{record}</strong> se ha  borrado correctamente."));
+		return $this->whereToGoNow('delete', $model);
     }
 
     /**
@@ -226,7 +259,7 @@ class Controller extends \yii\web\Controller {
             'orientation' => \kartik\mpdf\Pdf::ORIENT_PORTRAIT,
             'destination' => \kartik\mpdf\Pdf::DEST_BROWSER,
             'content' => $content,
-            'cssFile' => '@vendor/kartik-v/yii2-mpdf/assets/kv-mpdf-bootstrap.min.css',
+            'cssFile' => '@vendor/kartik-v/yii2-mpdf/src/assets/kv-mpdf-bootstrap.min.css',
             'cssInline' => '.kv-heading-1{font-size:18px}',
             'options' => ['title' => \Yii::$app->name],
             'methods' => [
@@ -376,5 +409,120 @@ class Controller extends \yii\web\Controller {
     {
 		return [];
     }
+
+    protected function whereToGoNow($from, $model)
+    {
+		$redirect = [];
+		if ($from == 'update') {
+			$redirect = ['view', 'id' => $model->getPrimaryKey()];
+		} else if ($from == 'create') {
+			if (Yii::$app->request->post('_and_create') != '1') {
+				$redirect = ['view', 'id' => $model->getPrimaryKey()];
+			} else {
+				$redirect = ['create'];
+			}
+		} else if ($from == 'duplicate') {
+			$redirect = ['view', 'id' => $model->getPrimaryKey()];
+		} else if ($from == 'delete') {
+			$redirect = ['index'];
+		} else {
+			throw new Exception("No sé donde volver");
+		}
+		if( $this->parent_model ) {
+			return $this->redirect( $this->prependParentRoute($redirect) );
+		} else {
+			return $this->redirect($redirect);
+		}
+    }
+
+	public function genBreadCrumbs($action, $model, $parent)
+	{
+		assert( $model instanceof Model );
+		assert( $parent == null || $parent instanceof Model );
+		$breadcrumbs = [];
+		if( isset($parent) ) {
+			$breadcrumbs[] = [
+				'label' => $parent->t('app', '{Title_plural}'),
+				'url' => [ $parent->controllerName() . '/index']];
+			$breadcrumbs[] = [
+				'label' => $parent->t('app', '{record}'),
+				'url' => [$parent->controllerName() . '/view', 'id' => $parent->getPrimaryKey() ] ];
+			if( $action != 'index') {
+				$breadcrumbs[] = [
+					'label' => $model->t('app', '{Title_plural}'),
+					'url' => [$parent->controllerName() . '/' . $parent->getPrimaryKey()
+							. '/' . $this->id . '/index' ]
+				];
+			}
+			switch( $action ) {
+				case 'update':
+					$breadcrumbs[] = [
+						'label' => $model->t('app', '{record}'),
+						'url' => [ $parent->controllerName() . '/' . strval($parent->getPrimaryKey())
+								. '/' . $this->id . '/view/' . strval($model->getPrimaryKey()) ] ];
+					break;
+				case 'index':
+					break;
+			}
+		} else {
+			$breadcrumbs[] = [
+				'label' => $model->t('app', '{Title_plural}'),
+				'url' => [ $this->id . '/index' ]
+			];
+			switch( $action ) {
+				case 'update':
+				case 'saveAsNew':
+					$breadcrumbs[] = [
+						'label' => $model->t('app', '{record}'),
+						'url' => [ 'view', 'id' => $model->getPrimaryKey() ]
+					];
+					break;
+				case 'view':
+				case 'create':
+					break;
+				case 'index':
+					break;
+				default:
+					die($action);
+			}
+		}
+		return $breadcrumbs;
+	}
+
+	public function prependParentRoute($model_route)
+	{
+		if( $this->parent_model) {
+			$prefix = $this->parent_model->controllerName() . '/' . $this->parent_model->getPrimaryKey()
+							. '/' . $this->id . '/';
+			if( is_array($model_route) ) {
+				$model_route[0] = $prefix . $model_route[0];
+			} else {
+				$model_route = $prefix . $model_route;
+			}
+		}
+		return $model_route;
+	}
+
+    protected function getParentFromRequest()
+    {
+		if( $this->parent_model != null ) {
+			return $this->parent_model;
+		}
+		$parent_id = intval(Yii::$app->request->get('parent_id', 0));
+		if( $parent_id !== 0 ) {
+			$parent_controller = Yii::$app->request->get('parent_controller');
+			assert($parent_controller != '');
+			$parent_model_name = 'app\\models\\'. ucfirst($parent_controller);
+			$parent_model = new $parent_model_name;
+			$this->parent_model = $parent_model->findOne($parent_id);
+			if ($this->parent_model == null) {
+				throw new NotFoundHttpException($parent_model->t('app',
+					"{La} {title} de id '$parent_id' no existe"));
+			}
+		} else {
+			return null;
+		}
+	}
+
 
 }

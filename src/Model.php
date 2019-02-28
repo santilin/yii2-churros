@@ -1,10 +1,11 @@
 <?php namespace santilin\Churros;
 
 use Yii;
+use santilin\Churros\helpers\AppHelper;
 use \yii\helpers\ArrayHelper;
 use Faker\Factory as Faker;
 
-class Model extends \yii\db\ActiveRecord
+trait Model
 {
 	use RelationTrait;
 
@@ -182,6 +183,16 @@ class Model extends \yii\db\ActiveRecord
 		} else {
 			return [];
 		}
+    }
+
+    public function controllerName($prefix = '')
+    {
+		return $prefix . lcfirst(AppHelper::stripNamespaceFromClassName($this));
+    }
+
+    public function getRelatedFieldForModel($related_model)
+    {
+		return null;
     }
 
 } // class Model
