@@ -33,7 +33,7 @@ class AppHelper
 		}
 		foreach((array)$models as $model) {
 			if( $model != null ) {
-				$url = "/" . lcfirst(self::stripNamespaceFromClassName($model)) . "/" . strval($model->getPrimaryKey()) . "?parent=". strtolower(self::stripNamespaceFromClassName($parentmodel)) . "&parent_id=" . strval($parentmodel->getPrimaryKey());
+				$url = "/" . lcfirst(self::stripNamespaceFromClassName($model)) . "/" . strval($model->getPrimaryKey()) . "?parent_controller=". strtolower(self::stripNamespaceFromClassName($parentmodel)) . "&parent_id=" . strval($parentmodel->getPrimaryKey());
 				$attrs[] = "<a href='$url'>" .  $model->$attribute . "</a>";
 			}
 		}

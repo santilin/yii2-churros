@@ -5,7 +5,7 @@ use santilin\Churros\helpers\AppHelper;
 use \yii\helpers\ArrayHelper;
 use Faker\Factory as Faker;
 
-trait Model
+trait ModelInfoTrait
 {
 	use RelationTrait;
 
@@ -192,7 +192,7 @@ trait Model
 
     public function getRelatedFieldForModel($related_model)
     {
-		return null;
+		throw new \Exception( $this->classname() . " no está relacionado con " . $related_model->classname() . ". Define getRelatedFieldForModel()");
     }
 
 } // class Model
