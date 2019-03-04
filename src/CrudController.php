@@ -5,6 +5,7 @@ namespace santilin\Churros;
 use Yii;
 use yii\web\NotFoundHttpException;
 use yii\filters\VerbFilter;
+use yii\filters\AccessControl;
 use yii\web\UploadedFile;
 use yii\web\HttpException;
 use yii\base\ErrorException;
@@ -12,9 +13,9 @@ use SaveModelException;
 use DataException;
 
 /**
- * BaseController implements the CRUD actions for yii2gen models
+ * CrudController implements the CRUD actions for yii2 models
  */
-class Controller extends \yii\web\Controller
+class CrudController extends \yii\web\Controller
 {
 
 	protected $parent_model = null;
@@ -25,21 +26,22 @@ class Controller extends \yii\web\Controller
                 'class' => VerbFilter::className(),
                 'actions' => [
                     'delete' => ['post'],
+                    'logout' => ['post'],
                 ],
             ],
-//             'access' => [
-//                 'class' => \yii\filters\AccessControl::className(),
-//                 'rules' => [
-//                     [
-//                         'allow' => true,
-//                         'actions' => ['index', 'view', 'create', 'update', 'delete', 'pdf', 'duplicate'],
-//                         'roles' => ['@']
-//                     ],
-//                     [
-//                         'allow' => false
-//                     ]
-//                 ]
-//             ]
+            'access' => [
+                'class' => AccessControl::className(),
+                'rules' => [
+                    [
+                        'allow' => true,
+                        'actions' => ['index', 'view', 'create', 'update', 'delete', 'pdf', 'duplicate','remove-image', 'about'],
+                        'roles' => ['@']
+                    ],
+                    [
+                        'allow' => false
+                    ]
+                ]
+            ]
         ];
     }
 
@@ -83,9 +85,9 @@ class Controller extends \yii\web\Controller
     {
         $model = $this->findModel($id);
         return $this->render('view', [
-                    'model' => $model,
-                    'parent' => $this->parent_model,
-                    'relationsProviders' => $this->getRelationsProviders($model)
+			'model' => $model,
+			'parent' => $this->parent_model,
+			'relationsProviders' => $this->getRelationsProviders($model)
         ]);
     }
 
@@ -172,7 +174,7 @@ class Controller extends \yii\web\Controller
             }
             if ($saved) {
                 Yii::$app->session->setFlash('success',
-                        $model->t('app', "{La} {title} <strong>{record}<strong> se ha duplicado correctamente."));
+					$model->t('app', "{La} {title} <strong>{record}</strong> se ha duplicado correctamente."));
 				return $this->whereTogoNow('create', $model);
             }
         }
@@ -429,7 +431,7 @@ class Controller extends \yii\web\Controller
 			throw new Exception("No sé donde volver");
 		}
 		if( $this->parent_model ) {
-			return $this->redirect( $this->prependParentRoute($redirect) );
+			return $this->redirect( $this->prependParentRoute($redirect, $model) );
 		} else {
 			return $this->redirect($redirect);
 		}
@@ -489,11 +491,12 @@ class Controller extends \yii\web\Controller
 		return $breadcrumbs;
 	}
 
-	public function prependParentRoute($model_route)
+	public function prependParentRoute($model_route, $model)
 	{
 		if( $this->parent_model) {
-			$prefix = $this->parent_model->controllerName() . '/' . $this->parent_model->getPrimaryKey()
-							. '/' . $this->id . '/';
+			$prefix = $this->parent_model->controllerName('/admin/')
+				. '/' . $this->parent_model->getPrimaryKey()
+				. '/' . $model->controllerName() . '/';
 			if( is_array($model_route) ) {
 				$model_route[0] = $prefix . $model_route[0];
 			} else {

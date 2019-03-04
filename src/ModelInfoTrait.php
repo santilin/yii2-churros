@@ -187,12 +187,35 @@ trait ModelInfoTrait
 
     public function controllerName($prefix = '')
     {
-		return $prefix . lcfirst(AppHelper::stripNamespaceFromClassName($this));
+		$c = AppHelper::stripNamespaceFromClassName($this);
+		$c = str_replace("Search", "", $c);
+		return $prefix . lcfirst($c);
     }
 
     public function getRelatedFieldForModel($related_model)
     {
 		throw new \Exception( $this->classname() . " no está relacionado con " . $related_model->classname() . ". Define getRelatedFieldForModel()");
     }
+
+	public function getImageData($fldname, $index=0)
+	{
+		$fldvalue = $this->$fldname;
+		if( $fldvalue != '') {
+			try {
+				$uns_images = unserialize($fldvalue);
+				foreach( $uns_images as $filename => $titleandsize) {
+					if( $index-- == 0 ) {
+						return (object) [
+							'src' => "/uploads/$filename",
+							'title' => $titleandsize[0],
+							'size' => $titleandsize[1]
+						];
+					}
+				}
+			} catch (\Exception $e ) {
+			}
+		}
+		return (object)[ 'src' => '', 'title' => '', 'size' => 0 ];
+	}
 
 } // class Model

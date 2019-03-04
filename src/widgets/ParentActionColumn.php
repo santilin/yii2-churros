@@ -18,8 +18,6 @@ class ParentActionColumn extends ActionColumn
 
         $params = is_array($key) ? $key : ['id' => (string) $key];
         $params[0] = $this->controller ? $this->controller . '/' . $action : $action;
-// 		$params['parent'] = AppHelper::stripNamespaceFromClassName($this->parent);
-// 		$params['parent_id'] = $this->parent->getPrimaryKey();
         return $this->prependParentRoute(Url::toRoute($params));
     }
 

@@ -5,6 +5,8 @@ namespace santilin\Churros\widgets;
 use yii\grid\DataColumn;
 use yii\helpers\Html;
 use yii\helpers\Url;
+use santilin\Churros\helpers\AppHelper;
+
 /**
  * Class LinkColumn
  * To add an UrlColumn to the gridview, add it to the [[GridView::columns|columns]] configuration as follows:
@@ -43,6 +45,12 @@ class GridMainColumn extends DataColumn
      * @var string
      */
     public $format = 'raw';
+
+    /**
+     * @var model
+     */
+    public $parent = null;
+
     /**
      * {@inheritdoc}
      * @throws \yii\base\InvalidArgumentException
@@ -62,16 +70,21 @@ class GridMainColumn extends DataColumn
      */
     protected function generateUrl($model)
     {
-		$url = $this->url;
-		$url[] = 'update';
-		$apk = $model->primaryKey();
-		$apk[0] = 'id';
-		$url += array_combine($apk, (array)$model->getPrimaryKey());
-        if (null !== $this->params && is_array($this->params)) {
-            foreach ($this->params as $key => $param) {
-                $url[$key] = $model->$param;
-            }
-        }
-        return Url::to($url);
+		if( !empty($this->url) ) {
+			$surl = (string)$this->url;
+		} else {
+			$surl = $this->grid->view->context->id;
+		}
+		$model_url = $model->controllerName();
+		if ($this->parent) {
+			return "/$surl/{$this->parent->id}/$model_url/update/".strval($model->getPrimaryKey());
+		} else {
+			return "/$surl/$model_url/update/".strval($model->getPrimaryKey());
+		}
+//         if (null !== $this->params && is_array($this->params)) {
+//             foreach ($this->params as $key => $param) {
+//                 $url[$key] = $model->$param;
+//             }
+//         }
     }
 }

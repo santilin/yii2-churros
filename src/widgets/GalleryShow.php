@@ -20,9 +20,10 @@ class GalleryShow extends \kartik\file\FileInput
 
     public function run()
     {
-		$controller = isset($this->controller_url)?$this->controller_url:strtolower(AppHelper::stripNamespaceFromClassName($this->model));
-		$images = Html::getAttributeValue($this->model,
-                $this->attribute);
+		if( $this->controller_url == '' || substr($this->controller_url,-1,1) == '/') {
+			$this->controller_url .= $this->model->controllerName();
+		}
+		$images = Html::getAttributeValue($this->model, $this->attribute);
 		try {
 			$images_plugin_options = [
 				'showUpload' => true,
@@ -37,7 +38,7 @@ class GalleryShow extends \kartik\file\FileInput
 			if(  $images != '' ) {
 				$uns_images = unserialize($images);
 				foreach( $uns_images as $filename => $titleandsize) {
-					$deleteUrl = Url::to(["$controller/remove-image", 'field' => 'imagenes', 'id' => $this->model->getPrimaryKey(), 'filename' => $filename ]);
+					$deleteUrl = Url::to(["{$this->controller_url}/remove-image", 'field' => 'imagenes', 'id' => $this->model->getPrimaryKey(), 'filename' => $filename ]);
 					$images_plugin_options['initialPreview'][] = "/uploads/" . $filename;
 					$images_plugin_options['initialPreviewConfig'][] = [ 'caption' => $titleandsize[0], 'size' => $titleandsize[1], 'url' => $deleteUrl ];
 				}
