@@ -13,44 +13,50 @@ class DateTimeHelper
 	const STRFTIME_TIME_SQL_FORMAT = '%H:%M:%S';
 	const DATETIME_TIME_SQL_FORMAT = 'H:i:s';
 
+
+    public static function getTimeStringAgoInWord($date)
+    {
+		return static::getTimeStampAgoInWord(static::anyDateTimeToUnixTime($date));
+    }
+
     /**
      * Returns time ago in words.
      * @param int $timestamp
      * @return string
      */
-    public static function getTimeAgoInWord($timestamp)
+    public static function getTimeStampAgoInWord($timestamp)
     {
         $difference = time() - $timestamp;
         // Few seconds ago
         if ($difference < 15) {
-            return \Yii::t('mgcode/helpers', 'Few seconds ago');
+            return \Yii::t('churros', 'Few seconds ago');
         } // Seconds ago
         else if ($difference < 60) {
-            return \Yii::t('mgcode/helpers', '{0, plural, =1{one second ago} other{# seconds ago}}', $difference);
+            return \Yii::t('churros', '{0, plural, =1{one second ago} other{# seconds ago}}', $difference);
         } // Minutes ago
         else if ($difference < 60 * 60) {
             $minutes = round($difference / 60);
-            return \Yii::t('mgcode/helpers', '{0, plural, =1{1 minute ago} other{# minutes ago}}', $minutes);
+            return \Yii::t('churros', '{0, plural, =1{1 minute ago} other{# minutes ago}}', $minutes);
         } // Hours ago
         else if ($difference < 24 * 60 * 60) {
             $hours = round($difference / 60 / 60);
-            return \Yii::t('mgcode/helpers', '{0, plural, =1{1 hour ago} other{# hours ago}}', $hours);
+            return \Yii::t('churros', '{0, plural, =1{1 hour ago} other{# hours ago}}', $hours);
         } // Days ago
         else if ($difference < 7 * 24 * 60 * 60) {
             $days = round($difference / 24 / 60 / 60);
-            return \Yii::t('mgcode/helpers', '{0, plural, =1{1 day ago} other{# days ago}}', $days);
+            return \Yii::t('churros', '{0, plural, =1{1 day ago} other{# days ago}}', $days);
         } // Weeks ago
         else if ($timestamp > strtotime('-1 month')) {
             $weeks = round($difference / 7 / 24 / 60 / 60);
-            return \Yii::t('mgcode/helpers', '{0, plural, =1{1 week ago} other{# weeks ago}}', $weeks);
+            return \Yii::t('churros', '{0, plural, =1{1 week ago} other{# weeks ago}}', $weeks);
         } // Months ago
         else if ($timestamp > strtotime('-1 year')) {
             $interval = date_diff((new DateTime(static::getTime($timestamp))), (new DateTime()));
-            return \Yii::t('mgcode/helpers', '{0, plural, =1{1 month ago} other{# months ago}}', $interval->m);
+            return \Yii::t('churros', '{0, plural, =1{1 month ago} other{# months ago}}', $interval->m);
         }
         // Years ago
         $interval = date_diff((new DateTime(static::getTime($timestamp))), (new DateTime()));
-        return \Yii::t('mgcode/helpers', '{0, plural, =1{1 year ago} other{# years ago}}', $interval->y);
+        return \Yii::t('churros', '{0, plural, =1{1 year ago} other{# years ago}}', $interval->y);
     }
 
     static public function dateToModelAttribute($date = null)
