@@ -69,6 +69,11 @@ class DateTimeHelper
 		}
     }
 
+    static public function ahora()
+    {
+		return static::dateTimeToModelAttribute();
+    }
+
 	static public function dateTimeToModelAttribute($date = null)
     {
 		if ($date == null) {

@@ -27,7 +27,6 @@ class FrontController extends CrudController
                     [
                         'allow' => true,
                         'actions' => ['login'],
-                        'roles' => ['*']
                     ],
                     [
                         'allow' => true,
@@ -35,7 +34,6 @@ class FrontController extends CrudController
                     ],
                     [
                         'allow' => false,
-                        'roles' => ['*']
                     ]
                 ]
             ]
