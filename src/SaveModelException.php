@@ -1,11 +1,12 @@
 <?php
 /**
- * @link 
- * @copyright 
- * @license 
+ * @link
+ * @copyright
+ * @license
  */
 
 namespace santilin\Churros;
+use Yii;
 
 /**
  * ProgrammerException represents an exception caused by an error in the programmer's code
@@ -19,7 +20,7 @@ class SaveModelException extends \yii\web\NotFoundHttpException
 	public function __construct($model, $code = 0, \Exception $previous = null)
 	{
 		$this->model = $model;
-        parent::__construct(Yii::t('churros', "Error grabando " . $model->humanDesc('{el} {model}'), $code, $previous);
+        parent::__construct($model->t('churros', "Error grabando {la} {title}"), $code, $previous);
     }
 
     /**

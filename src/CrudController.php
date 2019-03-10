@@ -5,6 +5,7 @@ namespace santilin\Churros;
 use Yii;
 use yii\web\NotFoundHttpException;
 use yii\filters\VerbFilter;
+use yii\helpers\ArrayHelper;
 use yii\filters\AccessControl;
 use yii\web\UploadedFile;
 use yii\web\HttpException;
@@ -19,6 +20,7 @@ class CrudController extends \yii\web\Controller
 {
 
 	protected $parent_model = null;
+	protected $allowedActions = [];
 
     public function behaviors() {
         return [
@@ -34,7 +36,7 @@ class CrudController extends \yii\web\Controller
                 'rules' => [
                     [
                         'allow' => true,
-                        'actions' => ['index', 'view', 'create', 'update', 'delete', 'pdf', 'duplicate','remove-image', 'about'],
+                        'actions' => ArrayHelper::merge(['index', 'view', 'create', 'update', 'delete', 'pdf', 'duplicate', 'remove-image', 'about'], $this->allowedActions),
                         'roles' => ['@']
                     ],
                     [
