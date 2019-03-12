@@ -218,4 +218,12 @@ trait ModelInfoTrait
 		return (object)[ 'src' => '', 'title' => '', 'size' => 0 ];
 	}
 
+	public function getOneError()
+	{
+		$errors = $this->getErrorSummary(false);
+		if( count($errors) ) {
+			return $errors[0];
+		}
+	}
+
 } // class Model

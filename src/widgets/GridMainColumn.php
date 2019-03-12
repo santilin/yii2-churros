@@ -79,7 +79,7 @@ class GridMainColumn extends DataColumn
 		if ($this->parent) {
 			return "/$surl/{$this->parent->id}/$model_url/update/".strval($model->getPrimaryKey());
 		} else {
-			return "/$surl/$model_url/update/".strval($model->getPrimaryKey());
+			return "/$surl/view/".strval($model->getPrimaryKey());
 		}
 //         if (null !== $this->params && is_array($this->params)) {
 //             foreach ($this->params as $key => $param) {
