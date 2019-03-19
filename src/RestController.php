@@ -1,9 +1,25 @@
 <?php namespace santilin\Churros;
 
 use Yii;
+use yii\web\Response;
+use yii\helpers\ArrayHelper;
+use yii\filters\ContentNegotiator;
 
 class RestController extends \yii\rest\ActiveController
 {
+    public $serializer = 'tuyakhov\jsonapi\Serializer';
+
+    public function behaviors()
+    {
+        return ArrayHelper::merge(parent::behaviors(), [
+            'contentNegotiator' => [
+                'class' => ContentNegotiator::className(),
+                'formats' => [
+                    'application/vnd.api+json' => Response::FORMAT_JSON,
+                ],
+            ]
+        ]);
+    }
 
     public function actions()
     {
@@ -15,8 +31,8 @@ class RestController extends \yii\rest\ActiveController
         ];
         return $actions;
     }
-    
-	protected function verbs()
+
+	protected function verbs2()
 	{
 		return [
 			'index' => ['GET', 'HEAD','OPTIONS'], //instead of  'index' => ['GET', 'HEAD']
@@ -29,19 +45,15 @@ class RestController extends \yii\rest\ActiveController
 
 	public function beforeAction($action)
 	{
-		if (!parent::beforeAction($action)) {
-			return false;
-		}
 		if (Yii::$app->getRequest()->getMethod() === 'OPTIONS') {
 			// https://developer.mozilla.org/en-US/docs/Web/HTTP/Headers/Access-Control-Allow-Methods
-            \Yii::$app->getResponse()->getHeaders()->set('Access-Control-Allow-Methods', 'POST,GET,PUT,PATCH,HEAD');
-            \Yii::$app->getResponse()->getHeaders()->set('Access-Control-Allow-Headers', 'Content-type');
-            \Yii::$app->end();
+            Yii::$app->getResponse()->getHeaders()->set('Access-Control-Allow-Headers', 'Origin, Methods');
+            Yii::$app->getResponse()->getHeaders()->set('Access-Control-Allow-Origin', '*');
+            Yii::$app->getResponse()->getHeaders()->set('Access-Control-Allow-Methods', 'POST,GET,PUT,PATCH,HEAD,OPTIONS');
         }
-		\Yii::$app->response->format = \yii\web\Response::FORMAT_JSON;
-		return true; // or false to not run the action
+		return parent::beforeAction($action);
 	}
-	
+
 }
 
 

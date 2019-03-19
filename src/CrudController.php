@@ -493,6 +493,17 @@ class CrudController extends \yii\web\Controller
 		return $breadcrumbs;
 	}
 
+	public function controllerRoute($prefix, $model_controller)
+	{
+		if( $this->parent_model ) {
+			return $this->parent_model->controllerName("/$prefix")
+				. '/' . $this->parent_model->getPrimaryKey()
+				. "/$model_controller";
+		} else {
+			return '';
+		}
+	}
+
 	public function prependParentRoute($model_route, $model)
 	{
 		if( $this->parent_model) {

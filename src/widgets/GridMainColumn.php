@@ -30,7 +30,12 @@ class GridMainColumn extends DataColumn
      * link
      * @var
      */
-    public $url = [];
+    public $controller = null;
+    /**
+     * defaultAction
+     * @var
+     */
+    public $defaultAction = 'view';
     /**
      * Params for link
      * @var
@@ -59,7 +64,7 @@ class GridMainColumn extends DataColumn
     {
         return Html::a(
             $model->{$this->attribute},
-            $this->generateUrl($model),
+            $this->generateUrl($model, $key, $index),
             $this->linkOptions
         );
     }
@@ -68,19 +73,11 @@ class GridMainColumn extends DataColumn
      * @throws \yii\base\InvalidArgumentException
      * @return string
      */
-    protected function generateUrl($model)
+    protected function generateUrl($model, $key, $index)
     {
-		if( !empty($this->url) ) {
-			$surl = (string)$this->url;
-		} else {
-			$surl = $this->grid->view->context->id;
-		}
-		$model_url = $model->controllerName();
-		if ($this->parent) {
-			return "/$surl/{$this->parent->id}/$model_url/update/".strval($model->getPrimaryKey());
-		} else {
-			return "/$surl/view/".strval($model->getPrimaryKey());
-		}
+        $params = is_array($key) ? $key : ['id' => (string) $key];
+        $params[0] = $this->controller ? $this->controller . '/' . $this->defaultAction : $this->defaultAction;
+        return Url::toRoute($params);
 //         if (null !== $this->params && is_array($this->params)) {
 //             foreach ($this->params as $key => $param) {
 //                 $url[$key] = $model->$param;
