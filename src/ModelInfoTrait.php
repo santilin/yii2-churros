@@ -52,6 +52,24 @@ trait ModelInfoTrait
 		return "(not defined)";
 	}
 
+	public function linkTo($action, $prefix = '')
+	{
+		$url = $prefix;
+		if ($url != '') {
+			$url .= "/";
+		}
+		$url .= $this->controllerName();
+		if( $this->getIsNewRecord() ) {
+			$url .= '/create';
+			return \yii\helpers\Html::a($this->t("Nuev{a} {title}"),
+					$url);
+		} else {
+			$url .= "/$action";
+			return \yii\helpers\Html::a($this->recordDesc('link'),
+					[$url, 'id' => $this->getPrimaryKey() ]);
+		}
+	}
+
 	public function getFileAttributes()
 	{
 		$ret = [];
