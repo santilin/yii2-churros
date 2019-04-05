@@ -1,5 +1,5 @@
 <?php
-namespace santilin\Churros\widgets;
+namespace santilin\Churros\yii;
 
 use Yii;
 use yii\helpers\ArrayHelper;

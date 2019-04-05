@@ -1,6 +1,6 @@
 <?php
 
-namespace santilin\Churros\widgets\bootstrap4;
+namespace santilin\Churros\yii\bootstrap4;
 
 use Yii;
 
@@ -24,7 +24,7 @@ use Yii;
  * @author Alexander Makarov <sam@rmcreative.ru>
  */
 
- class Alert extends \yii\bootstrap4\Alert
+ class SessionAlert extends \yii\bootstrap4\Alert
 {
     /**
      * @var array the alert types configuration for the flash messages.

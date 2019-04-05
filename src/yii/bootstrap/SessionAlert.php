@@ -1,6 +1,6 @@
 <?php
 
-namespace santilin\Churros\widgets\bootstrap;
+namespace santilin\Churros\yii\bootstrap;
 
 use Yii;
 
@@ -24,7 +24,7 @@ use Yii;
  * @author Alexander Makarov <sam@rmcreative.ru>
  */
 
- class Alert extends \yii\bootstrap\Alert
+ class SessionAlert extends \yii\bootstrap\Alert
 {
     /**
      * @var array the alert types configuration for the flash messages.
@@ -52,7 +52,7 @@ use Yii;
     {
         $session = Yii::$app->session;
         $flashes = $session->getAllFlashes();
-        $appendClass = isset($this->options['class']) ? ' ' . $this->options['class'] : '';
+        $appendClass = isset($this->options['options']['class']) ? ' ' . $this->options['options']['class'] : '';
 
         foreach ($flashes as $type => $flash) {
             if (!isset($this->alertTypes[$type])) {

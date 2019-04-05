@@ -1,6 +1,6 @@
 <?php
 
-namespace santilin\Churros\widgets;
+namespace santilin\Churros\yii;
 
 use yii\grid\DataColumn;
 use yii\helpers\Html;
