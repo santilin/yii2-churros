@@ -1,5 +1,5 @@
 <?php
-/*<<<<<MAIN*/
+
 namespace santilin\Churros\widgets\bootstrap4;
 
 use Yii;
@@ -73,5 +73,4 @@ use Yii;
             $session->removeFlash($type);
         }
     }
-/*>>>>>MAIN*/
 }
