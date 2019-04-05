@@ -1,6 +1,7 @@
 <?php namespace santilin\Churros;
 
 use Yii;
+use yii\filters\Cors;
 use yii\web\Response;
 use yii\helpers\ArrayHelper;
 use yii\filters\ContentNegotiator;
@@ -17,8 +18,19 @@ class RestController extends \yii\rest\ActiveController
                 'formats' => [
                     'application/vnd.api+json' => Response::FORMAT_JSON,
                 ],
-            ]
-        ]);
+            ],
+            'corsFilter' => [
+				'class' => Cors::className(),
+				'cors' => [
+					'Origin' => ['localhost'],
+					'Access-Control-Allow-Credentials' => true,
+
+					'Access-Control-Request-Method' => ['POST', 'PUT'],
+
+					'Access-Control-Expose-Headers' => ['Access_status_code'],
+				]
+			]
+		]);
     }
 
     public function actions()
@@ -41,17 +53,6 @@ class RestController extends \yii\rest\ActiveController
 			'update' => ['PUT', 'PATCH', 'OPTIONS'],
 			'delete' => ['DELETE'],
 		];
-	}
-
-	public function beforeAction($action)
-	{
-		if (Yii::$app->getRequest()->getMethod() === 'OPTIONS') {
-			// https://developer.mozilla.org/en-US/docs/Web/HTTP/Headers/Access-Control-Allow-Methods
-            Yii::$app->getResponse()->getHeaders()->set('Access-Control-Allow-Headers', 'Origin, Methods');
-            Yii::$app->getResponse()->getHeaders()->set('Access-Control-Allow-Origin', '*');
-            Yii::$app->getResponse()->getHeaders()->set('Access-Control-Allow-Methods', 'POST,GET,PUT,PATCH,HEAD,OPTIONS');
-        }
-		return parent::beforeAction($action);
 	}
 
 }

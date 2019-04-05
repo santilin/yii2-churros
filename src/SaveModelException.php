@@ -14,30 +14,18 @@ use Yii;
  * @author santilin <software@noviolento.es>
  * @since 1.0
  */
-class SaveModelException extends \yii\web\NotFoundHttpException
+class SaveModelException extends \yii\web\HttpException
 {
 
 	public function __construct($model, $code = 0, \Exception $previous = null)
 	{
 		$this->model = $model;
-        parent::__construct($model->t('churros', "Error grabando {la} {title}"), $code, $previous);
+        parent::__construct(400, $model->t('churros', "Error grabando {la} {title}"), $code, $previous);
     }
 
-    /**
-     * @return string the user-friendly name of this exception
-     */
-    public function getName()
+    public function getErrors()
     {
-        return 'SaveModel';
-    }
+		return print_r($this->model->getErrors());
+	}
 
-    /**
-     * @return string readable representation of exception
-     */
-    public function __toString()
-    {
-        return parent::__toString() . PHP_EOL
-        . 'Error message:' . PHP_EOL . print_r($this->model->getErrors(), true)
-        . 'Additional info:' . PHP_EOL . print_r($this->errorInfo, true);
-    }
 }

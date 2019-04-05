@@ -3,6 +3,7 @@
 namespace santilin\Churros;
 
 use Yii;
+use yii\helpers\Url;
 use yii\web\NotFoundHttpException;
 use yii\filters\VerbFilter;
 use yii\helpers\ArrayHelper;
@@ -20,6 +21,7 @@ class CrudController extends \yii\web\Controller
 {
 
 	protected $parent_model = null;
+	protected $parent_controller = null;
 	protected $allowedActions = [];
 
 	public function behaviors() {
@@ -444,26 +446,27 @@ class CrudController extends \yii\web\Controller
 		assert( $model instanceof Model );
 		assert( $parent == null || $parent instanceof Model );
 		$breadcrumbs = [];
+		list($prefix, $route) = $this->getRoutePrefix();
 		if( isset($parent) ) {
 			$breadcrumbs[] = [
 				'label' => $parent->t('app', '{Title_plural}'),
-				'url' => [ $parent->controllerName() . '/index']];
+				'url' => [ $prefix . $parent->controllerName() . '/index']];
 			$breadcrumbs[] = [
 				'label' => $parent->t('app', '{record}'),
-				'url' => [$parent->controllerName() . '/view', 'id' => $parent->getPrimaryKey() ] ];
+				'url' => [$prefix . $parent->controllerName() . '/view', 'id' => $parent->getPrimaryKey() ] ];
 			if( $action != 'index') {
 				$breadcrumbs[] = [
 					'label' => $model->t('app', '{Title_plural}'),
-					'url' => [$parent->controllerName() . '/' . $parent->getPrimaryKey()
-							. '/' . $this->id . '/index' ]
+					'url' => [$prefix . $parent->controllerName() . '/' . $parent->getPrimaryKey()
+							. '/' . $route . '/index' ]
 				];
 			}
 			switch( $action ) {
 				case 'update':
 					$breadcrumbs[] = [
 						'label' => $model->t('app', '{record}'),
-						'url' => [ $parent->controllerName() . '/' . strval($parent->getPrimaryKey())
-								. '/' . $this->id . '/view/' . strval($model->getPrimaryKey()) ] ];
+						'url' => [ $prefix . $parent->controllerName() . '/' . strval($parent->getPrimaryKey())
+								. '/' . $route . '/view/' . strval($model->getPrimaryKey()) ] ];
 					break;
 				case 'index':
 					break;
@@ -478,7 +481,7 @@ class CrudController extends \yii\web\Controller
 				case 'saveAsNew':
 					$breadcrumbs[] = [
 						'label' => $model->t('app', '{record}'),
-						'url' => [ 'view', 'id' => $model->getPrimaryKey() ]
+						'url' => [ $prefix . 'view', 'id' => $model->getPrimaryKey() ]
 					];
 					break;
 				case 'view':
@@ -487,36 +490,23 @@ class CrudController extends \yii\web\Controller
 				case 'index':
 					break;
 				default:
-					die($action);
+					throw new \Exception($action);
 			}
 		}
 		return $breadcrumbs;
 	}
 
-	public function controllerRoute($prefix, $model_controller)
+	public function controllerRoute($action)
 	{
 		if( $this->parent_model ) {
-			return $this->parent_model->controllerName("/$prefix")
+                        $action = Url::toRoute($action);
+			list($prefix, $route) = $this->getRoutePrefix($action);
+			return $prefix . $this->parent_controller
 				. '/' . $this->parent_model->getPrimaryKey()
-				. "/$model_controller";
+				. "/$route";
 		} else {
-			return '';
+			return Url::toRoute($action);
 		}
-	}
-
-	public function prependParentRoute($model_route, $model)
-	{
-		if( $this->parent_model) {
-			$prefix = $this->parent_model->controllerName('/admin/')
-				. '/' . $this->parent_model->getPrimaryKey()
-				. '/' . $model->controllerName() . '/';
-			if( is_array($model_route) ) {
-				$model_route[0] = $prefix . $model_route[0];
-			} else {
-				$model_route = $prefix . $model_route;
-			}
-		}
-		return $model_route;
 	}
 
 	protected function getParentFromRequest()
@@ -526,17 +516,36 @@ class CrudController extends \yii\web\Controller
 		}
 		$parent_id = intval(Yii::$app->request->get('parent_id', 0));
 		if( $parent_id !== 0 ) {
-			$parent_controller = Yii::$app->request->get('parent_controller');
-			assert($parent_controller != '');
-			$parent_model_name = 'app\\models\\'. ucfirst($parent_controller);
+			$this->parent_controller = Yii::$app->request->get('parent_controller');
+			assert($this->parent_controller != '');
+			$parent_model_name = 'app\\models\\'. ucfirst($this->parent_controller);
 			$parent_model = new $parent_model_name;
 			$this->parent_model = $parent_model->findOne($parent_id);
 			if ($this->parent_model == null) {
 				throw new NotFoundHttpException($parent_model->t('app',
-					"{La} {title} de id '$parent_id' no existe"));
+					"El registro madre {title} de id '$parent_id' no existe"));
 			}
 		} else {
 			return null;
+		}
+	}
+
+	protected function getRoutePrefix($route = null)
+	{
+            if( $route == null) {
+                $route = $this->id;
+            }
+                $is_abs = '';
+		$parts = explode("/", $route);
+		if( count($parts) == 0 ) {
+			return ["", $route];
+		} else if( count($parts) > 1) {
+                        if( $parts[0] == '') {
+                            $is_abs = '/';
+                            array_shift($parts);
+                        }
+                        $prefix = array_shift($parts);
+			return [$is_abs . $prefix . "/", join("/", $parts)];
 		}
 	}
 

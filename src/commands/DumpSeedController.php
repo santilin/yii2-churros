@@ -113,7 +113,8 @@ class DumpSeedController extends Controller
 		$runseeder = '';
 		$tables = $this->db->schema->getTableSchemas($schemaName, true);
 		foreach ($tables as $table) {
-			if( $table != 'migration' ) {
+			if( $table->name != 'migration' ) {
+				echo "Dumping {$table->name}\n";
 				$full_dump .= $this->dumpTable($table, $schemaName);
 				$runseeder .= "\t\t\$s = new {$table->name}Seeder(); \$s->run(\$db);\n";
 			}
