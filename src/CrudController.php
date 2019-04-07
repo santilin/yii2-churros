@@ -435,7 +435,7 @@ class CrudController extends \yii\web\Controller
 			throw new Exception("No sé donde volver");
 		}
 		if( $this->parent_model ) {
-			return $this->redirect( $this->prependParentRoute($redirect, $model) );
+			return $this->redirect( $this->controllerRoute($redirect) );
 		} else {
 			return $this->redirect($redirect);
 		}
