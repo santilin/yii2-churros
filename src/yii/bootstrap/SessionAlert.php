@@ -60,7 +60,7 @@ use Yii;
             }
 
             foreach ((array) $flash as $i => $message) {
-                echo \yii\bootstrap4\Alert::widget([
+                echo \yii\bootstrap\Alert::widget([
                     'body' => $message,
                     'closeButton' => $this->closeButton,
                     'options' => array_merge($this->options, [
