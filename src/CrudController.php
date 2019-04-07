@@ -496,7 +496,7 @@ class CrudController extends \yii\web\Controller
 		return $breadcrumbs;
 	}
 
-	public function controllerRoute($action)
+	public function controllerRoute($action = null)
 	{
 		if( $this->parent_model ) {
                         $action = Url::toRoute($action);
@@ -504,8 +504,10 @@ class CrudController extends \yii\web\Controller
 			return $prefix . $this->parent_controller
 				. '/' . $this->parent_model->getPrimaryKey()
 				. "/$route";
-		} else {
+		} else if( $action != '') {
 			return Url::toRoute($action);
+		} else {
+			return $this->id;
 		}
 	}
 
