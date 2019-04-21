@@ -24,7 +24,7 @@ use Yii;
  * @author Alexander Makarov <sam@rmcreative.ru>
  */
 
- class SessionAlert extends \yii\bootstrap\Alert
+ class SessionAlert extends \yii\bootstrap\Widget
 {
     /**
      * @var array the alert types configuration for the flash messages.

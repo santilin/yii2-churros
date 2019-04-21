@@ -2,6 +2,7 @@
 
 namespace santilin\Churros\helpers;
 
+use yii;
 use \DateTime;
 
 class DateTimeHelper
@@ -24,39 +25,17 @@ class DateTimeHelper
      * @param int $timestamp
      * @return string
      */
-    public static function getTimeStampAgoInWord($timestamp)
+    public static function asDuration($timestamp)
     {
-        $difference = time() - $timestamp;
-        // Few seconds ago
-        if ($difference < 15) {
-            return \Yii::t('churros', 'Hace unos segundos');
-        } // Seconds ago
-        else if ($difference < 60) {
-            return \Yii::t('churros', '{0, plural, =1{hace un segundo} other{hace # segundos}}', $difference);
-        } // Minutes ago
-        else if ($difference < 60 * 60) {
-            $minutes = round($difference / 60);
-            return \Yii::t('churros', '{0, plural, =1{hace un minuto} other{hace # minutos}}', $minutes);
-        } // Hours ago
-        else if ($difference < 24 * 60 * 60) {
-            $hours = round($difference / 60 / 60);
-            return \Yii::t('churros', '{0, plural, =1{hace una hora} other{hace # horas}}', $hours);
-        } // Days ago
-        else if ($difference < 7 * 24 * 60 * 60) {
-            $days = round($difference / 24 / 60 / 60);
-            return \Yii::t('churros', '{0, plural, =1{hace 1 día} other{hace # días}}', $days);
-        } // Weeks ago
-        else if ($timestamp > strtotime('-1 month')) {
-            $weeks = round($difference / 7 / 24 / 60 / 60);
-            return \Yii::t('churros', '{0, plural, =1{hace una semana} other{hace # semanas}}', $weeks);
-        } // Months ago
-        else if ($timestamp > strtotime('-1 year')) {
-            $interval = date_diff((new DateTime(static::getTime($timestamp))), (new DateTime()));
-            return \Yii::t('churros', '{0, plural, =1{hace un mes} other{hace # meses}}', $interval->m);
-        }
-        // Years ago
-        $interval = date_diff((new DateTime(static::getTime($timestamp))), (new DateTime()));
-        return \Yii::t('churros', '{0, plural, =1{hace un año} other{hace # años}}', $interval->y);
+
+        $difference = time() - static::anyDateTimeToUnixTime($timestamp);
+        $ret = Yii::$app->formatter->asDuration($difference, ",");
+        $parts = explode(",", $ret);
+        if( count($parts) >= 2 ) {
+			return $parts[0] . " y " . $parts[1];
+		} else {
+			return $ret;
+		}
     }
 
     static public function dateToModelAttribute($date = null)

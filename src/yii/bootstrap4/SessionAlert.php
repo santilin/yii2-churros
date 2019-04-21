@@ -24,7 +24,7 @@ use Yii;
  * @author Alexander Makarov <sam@rmcreative.ru>
  */
 
- class SessionAlert extends \yii\bootstrap4\Alert
+ class SessionAlert extends \yii\bootstrap4\Widget
 {
     /**
      * @var array the alert types configuration for the flash messages.
@@ -39,11 +39,6 @@ use Yii;
         'info'    => 'alert-info',
         'warning' => 'alert-warning'
     ];
-    /**
-     * @var array the options for rendering the close button tag.
-     * Array will be passed to [[yii\bootstrap\Alert::closeButton]].
-     */
-    public $closeButton = [];
 
     /**
      * {@inheritdoc}
