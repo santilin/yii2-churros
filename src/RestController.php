@@ -24,9 +24,8 @@ class RestController extends \yii\rest\ActiveController
 				'cors' => [
 					'Origin' => ['localhost'],
 					'Access-Control-Allow-Credentials' => true,
-
-					'Access-Control-Request-Method' => ['POST', 'PUT'],
-
+					'Access-Control-Allow-Headers' => ['content-type'],
+					'Access-Control-Request-Method' => ['GET', 'POST', 'PUT', 'PATCH', 'DELETE'],
 					'Access-Control-Expose-Headers' => ['Access_status_code'],
 				]
 			]
@@ -44,11 +43,11 @@ class RestController extends \yii\rest\ActiveController
         return $actions;
     }
 
-	protected function verbs2()
+	protected function verbs()
 	{
 		return [
-			'index' => ['GET', 'HEAD','OPTIONS'], //instead of  'index' => ['GET', 'HEAD']
-			'view' => ['GET', 'HEAD','OPTIONS'],
+			'index' => ['GET', 'HEAD', 'OPTIONS'], //instead of  'index' => ['GET', 'HEAD']
+			'view' => ['GET', 'HEAD', 'OPTIONS'],
 			'create' => ['POST','OPTIONS'],
 			'update' => ['PUT', 'PATCH', 'OPTIONS'],
 			'delete' => ['DELETE'],
