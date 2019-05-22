@@ -49,7 +49,16 @@ trait ModelInfoTrait
 	}
 
 	public function recordDesc($format=null) {
-		return "(not defined)";
+		$code_field = static::getModelInfo('code_field');
+		$desc_field = static::getModelInfo('desc_field');
+		if( $code_field!='' && $desc_field!='' ) {
+			return $this->$code_field . " " . $this->$desc_field;
+		} else if( $code_field != '' ) {
+			return $this->$code_field;
+		} else if( $desc_field != '' ) {
+			return $this->$desc_field;
+		}
+		return "";
 	}
 
 	public function linkTo($action, $prefix = '')
