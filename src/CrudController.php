@@ -422,20 +422,20 @@ class CrudController extends \yii\web\Controller
 		if ($from == 'update') {
 			$redirect = ['view', 'id' => $model->getPrimaryKey()];
 		} else if ($from == 'create') {
-			if (Yii::$app->request->post('_and_create') != '1') {
-				$redirect = ['view', 'id' => $model->getPrimaryKey()];
-			} else {
+			if (Yii::$app->request->post('_and_create') == '1') {
 				$redirect = ['create'];
+			} else {
+				$redirect = [ 'view', 'id' => $model->getPrimaryKey()];
 			}
 		} else if ($from == 'duplicate') {
 			$redirect = ['view', 'id' => $model->getPrimaryKey()];
 		} else if ($from == 'delete') {
-			$redirect = ['index'];
+			$redirect = ["index"];
 		} else {
 			throw new Exception("No sé donde volver");
 		}
 		if( $this->parent_model ) {
-			return $this->redirect( $this->controllerRoute($redirect) );
+			return $this->redirect( $this->controllerRoute('') );
 		} else {
 			return $this->redirect($redirect);
 		}
@@ -499,11 +499,13 @@ class CrudController extends \yii\web\Controller
 	public function controllerRoute($action = null)
 	{
 		if( $this->parent_model ) {
-                        $action = Url::toRoute($action);
-			list($prefix, $route) = $this->getRoutePrefix($action);
-			return $prefix . $this->parent_controller
-				. '/' . $this->parent_model->getPrimaryKey()
-				. "/$route";
+			if( $action != '' ) {
+				$action = Url::toRoute($action);
+			}
+			$parent_route = $this->parent_controller
+				. '/' . $this->parent_model->getPrimaryKey();
+			list($prefix, $route) = $this->getRoutePrefix($action, $parent_route);
+			return $prefix . $route;
 		} else if( $action != '') {
 			return Url::toRoute($action);
 		} else {
@@ -532,23 +534,29 @@ class CrudController extends \yii\web\Controller
 		}
 	}
 
-	protected function getRoutePrefix($route = null)
+	protected function getRoutePrefix($route = null, $parent_route = null)
 	{
-            if( $route == null) {
-                $route = $this->id;
-            }
-                $is_abs = '';
-		$parts = explode("/", $route);
-		if( count($parts) == 0 ) {
-			return ["", $route];
-		} else if( count($parts) > 1) {
-                        if( $parts[0] == '') {
-                            $is_abs = '/';
-                            array_shift($parts);
-                        }
-                        $prefix = array_shift($parts);
-			return [$is_abs . $prefix . "/", join("/", $parts)];
+		if( $route == null && $parent_route == null) {
+			$route = $this->id;
+			$prefix = '';
+		} else {
+			$request_url = Yii::$app->request->url;
+			$route_pos = strpos($request_url, $parent_route . "/" . $route);
+			if( $route_pos === false ) {
+				$route_pos = strpos($request_url, $parent_route . $route);
+			}
+			if( $route_pos === false ) {
+				$route_pos = strpos($request_url, $route);
+			}
+			$prefix = substr($request_url, 0, $route_pos);
+			if ($route != '') {
+				$route = substr($request_url, $route_pos);
+			} else {
+				$route = $parent_route;
+			}
 		}
+		return [ $prefix, $route ];
 	}
+
 
 }

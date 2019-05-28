@@ -30,6 +30,7 @@ class AppHelper
 		$attrs = [];
 		if ($attribute == null ) {
 			$attribute = $models[0]->getModelInfo('code_field');
+// 			die(print_r($models[0],true));
 		}
 		foreach((array)$models as $model) {
 			if( $model != null ) {
