@@ -125,7 +125,7 @@ class CrudController extends \yii\web\Controller
 			}
 			if ($saved) {
 				Yii::$app->session->setFlash('success',
-						$model->t('app', "{La} {title} <strong>{record}</strong> se ha creado correctamente."));
+						$model->t('app', "The {title} <strong>{record}</strong> has been successfully created."));
 				return $this->whereToGoNow('create', $model);
 			}
 		}
@@ -178,7 +178,7 @@ class CrudController extends \yii\web\Controller
 			}
 			if ($saved) {
 				Yii::$app->session->setFlash('success',
-					$model->t('app', "{La} {title} <strong>{record}</strong> se ha duplicado correctamente."));
+					$model->t('app', "{La} {title} <strong>{record}</strong> has been successfully duplicated."));
 				return $this->whereTogoNow('create', $model);
 			}
 		}
@@ -219,7 +219,7 @@ class CrudController extends \yii\web\Controller
 			}
 			if ($saved) {
 				Yii::$app->session->setFlash('success',
-					$model->t('app', "{La} {title} <strong>{record}</strong> se ha modificado correctamente."));
+					$model->t('app', "{La} {title} <strong>{record}</strong> has been successfully updated."));
 				return $this->whereTogoNow('update', $model);
 			}
 		}
@@ -241,7 +241,7 @@ class CrudController extends \yii\web\Controller
 		$model = $this->findModel($id);
 		$model->deleteWithRelated();
 		Yii::$app->session->setFlash('success',
-			$model->t('app', "{La} {title} <strong>{record}</strong> se ha  borrado correctamente."));
+			$model->t('app', "{La} {title} <strong>{record}</strong> has been successfully deleted"));
 		return $this->whereToGoNow('delete', $model);
 	}
 

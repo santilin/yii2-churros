@@ -70,7 +70,7 @@ trait ModelInfoTrait
 		$url .= $this->controllerName();
 		if( $this->getIsNewRecord() ) {
 			$url .= '/create';
-			return \yii\helpers\Html::a($this->t("Nuev{a} {title}"),
+			return \yii\helpers\Html::a($this->t("New {title}"),
 					$url);
 		} else {
 			$url .= "/$action";
