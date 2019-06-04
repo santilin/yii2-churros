@@ -5,11 +5,6 @@ class FakerAddress extends \Faker\Provider\es_ES\Address
     protected static $state = [
         'La Coruña', 'Álava', 'Albacete', 'Alicante', 'Almería', 'Asturias', 'Ávila', 'Badajoz', 'Barcelona', 'Burgos', 'Cáceres', 'Cádiz', 'Cantabria', 'Castellón', 'Ceuta', 'Ciudad Real', 'Cuenca', 'Córdoba', 'Gerona', 'Granada', 'Guadalajara', 'Guipúzcoa', 'Huelva', 'Huesca', 'Islas Baleares', 'Jaén', 'La Rioja', 'Las Palmas', 'León', 'Lérida', 'Lugo', 'Málaga', 'Madrid', 'Melilla', 'Murcia', 'Navarra', 'Orense', 'Palencia', 'Pontevedra', 'Salamanca', 'Segovia', 'Sevilla', 'Soria', 'Santa Cruz de Tenerife', 'Tarragona', 'Teruel', 'Toledo', 'Valencia', 'Valladolid', 'Vizcaya', 'Zamora', 'Zaragoza'];
 
-	public function description()
-	{
-		return $this->generator->text();
-	}
-
 	public function es_nombrepropio()
 	{
 		return $this->generator->name();
@@ -50,33 +45,65 @@ class FakerAddress extends \Faker\Provider\es_ES\Address
 		return substr($this->generator->text(20),0,$nchars);
     }
 
-    public function integer_big($digits = 16)
+    public function integer($digits = 16)
     {
-		$ret = $this->generator->randomElement(["-",""]);
-		if ($digits>0) {
-			$ret .= $this->generator->randomDigitNotNull();
-			for( $i=1; $i<$digits; ++$i) {
-				$ret .= $this->generator->randomDigit();
-			}
-		}
-		return $ret;
+		return $this->decimal($digits);
+    }
+
+    public function integer_unsigned($digits = 16)
+    {
+		return $this->decimal_unsigned($digits);
+    }
+
+	public function integer_small()
+    {
+		return $this->decimal(4);
+    }
+
+	public function integer_small_unsigned()
+    {
+		return $this->decimal_unsigned(4);
     }
 
 	public function decimal($digits = 16, $decimals = 0)
     {
+		assert($decimals < $digits);
 		$ret = $this->generator->randomElement(["-",""]);
 		if ($ret=="-") {
-            $digits -= 1;
-        }
-		return $ret . $this->integer_string($digits, $decimals);
+			$digits -= 1;
+		}
+		for( $i=1; $i<$digits; ++$i) {
+			if( $i == $digits - $decimals && $decimals > 0 ) {
+				$ret .= ".";
+			}
+			$ret .= $this->generator->randomDigit();
+		}
+		return $ret;
     }
 
+	public function decimal_unsigned($digits = 16, $decimals = 0)
+    {
+		assert($decimals < $digits);
+		$ret = "";
+		for( $i=1; $i<$digits; ++$i) {
+			if( $i == $digits - $decimals && $decimals > 0 ) {
+				$ret .= ".";
+			}
+			$ret .= $this->generator->randomDigit();
+		}
+		return $ret;
+    }
+
+	/**
+	 * string of numbers with exactly $digits chars
+	 */
 	public function integer_string($digits = 16, $decimals = 0)
     {
+		assert($decimals < $digits);
 		$ret = "";
 		if ($digits>0) {
 			$ret .= $this->generator->randomDigitNotNull();
-			for( $i=1; $i<$digits-2; ++$i) {
+			for( $i=1; $i<$digits-$decimals-2; ++$i) {
 				$ret .= $this->generator->randomDigit();
 			}
 		}
@@ -94,27 +121,19 @@ class FakerAddress extends \Faker\Provider\es_ES\Address
 		return $this->generator->boolean();
 	}
 
-	public function tasaciones_clave()
-	{
-		return $this->generator->randomDigit()
-			. $this->generator->randomLetter()
-			. $this->generator->randomDigitNotNull();
-	}
-
-	public function euros()
-	{
-		return $this->generator->randomFloat(2);
-	}
-
-	public function float($decimals = 2)
-	{
-		return $this->generator->randomFloat($decimals);
-	}
-
 	public function str_random($digits)
 	{
         return \str_random($digits);
     }
 
+    public function null()
+    {
+		return null;
+	}
+
+	public function image_binary()
+	{
+		return "Image";
+	}
 }
 
