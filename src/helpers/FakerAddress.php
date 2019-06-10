@@ -47,12 +47,20 @@ class FakerAddress extends \Faker\Provider\es_ES\Address
 
     public function integer($digits = 16)
     {
-		return $this->decimal($digits);
+		if( $digits == 1 ) {
+			return $this->randomDigitNotNull();
+		} else {
+			return $this->decimal($digits);
+		}
     }
 
     public function integer_unsigned($digits = 16)
     {
-		return $this->decimal_unsigned($digits);
+		if( $digits == 1 ) {
+			return $this->randomDigitNotNull();
+		} else {
+			return $this->decimal_unsigned($digits);
+		}
     }
 
 	public function integer_small()
