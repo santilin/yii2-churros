@@ -63,12 +63,12 @@ class FakerAddress extends \Faker\Provider\es_ES\Address
 		}
     }
 
-	public function integer_small()
+	public function smallInteger()
     {
 		return $this->decimal(4);
     }
 
-	public function integer_small_unsigned()
+	public function smallIntegerUnsigned()
     {
 		return $this->decimal_unsigned(4);
     }
