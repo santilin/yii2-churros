@@ -5,7 +5,7 @@
  * @license http://www.yiiframework.com/license/
  */
 
-namespace santilin\Churros\commands;
+namespace santilin\Churros\controllers;
 use Yii;
 use yii\di\Instance;
 use yii\db\Connection;

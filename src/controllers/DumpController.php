@@ -5,7 +5,7 @@
  * @license http://www.yiiframework.com/license/
  */
 
-namespace santilin\Churros\commands;
+namespace santilin\Churros\controllers;
 use Yii;
 use yii\di\Instance;
 use yii\db\Connection;
@@ -18,7 +18,7 @@ use yii\console\Controller;
  * @author Santilín <santi@noviolento.es>
  * @since 1.0
  */
-class DumpSeedController extends Controller
+class DumpController extends Controller
 {
 	/** The version of this command */
 	const VERSION = '0.1';
