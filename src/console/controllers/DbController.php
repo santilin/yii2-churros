@@ -5,7 +5,7 @@
  * @license http://www.yiiframework.com/license/
  */
 
-namespace santilin\Churros\controllers;
+namespace santilin\Churros\console\controllers;
 use Yii;
 use yii\di\Instance;
 use yii\db\Connection;
@@ -14,11 +14,10 @@ use yii\console\Controller;
 /**
  * Churros dump and seed commands
  *
- *
  * @author Santilín <santi@noviolento.es>
  * @since 1.0
  */
-class DumpController extends Controller
+class DbController extends Controller
 {
 	/** The version of this command */
 	const VERSION = '0.1';
@@ -92,7 +91,7 @@ class DumpController extends Controller
 					return "'" . str_replace("'", "\\'", $value). "'";
 				}
 			default:
-				throw new \Exception( "Type $phptype not supported in PosyakeController::getPhpValue" );
+				throw new \Exception( "Type $phptype not supported in Churros/DbController::getPhpValue" );
 		}
     }
 
@@ -105,8 +104,8 @@ class DumpController extends Controller
     {
 		$full_dump = "<?php\n"
 			. "/**\n"
-			. " * Posyake v" . strval(self::VERSION) . "\n"
-			. " * ./yii posyake/dump-schema " . ( $schemaName != '' ?:  $this->db->dsn ) . "\n"
+			. " * Churros v" . strval(self::VERSION) . "\n"
+			. " * ./yii churros/db/dump-schema " . ( $schemaName != '' ?:  $this->db->dsn ) . "\n"
 			. " * Timestamp: " . date('Y-m-d H:i:s', time() ) . "\n"
 			. " * \n"
 			. " */\n";
@@ -161,8 +160,8 @@ EOF;
 			throw new \Exception("$tableName not found in schema $schemaName");
 		}
 		$preamble = "<?php\n\n/**\n"
-			. " * Posyake v" . $this->version . "\n"
-			. " * ./yii posyake/dump-table $tableName of schema  " . ( $schemaName == '' ?:  $this->db->dsn ) . "\n"
+			. " * Churros v" . self::VERSION . "\n"
+			. " * ./yii churros/db/dump-table $tableName of schema  " . ( $schemaName == '' ?:  $this->db->dsn ) . "\n"
 			. " * Timestamp: " . date('Y-m-d H:M:S', time() ) . "\n"
 			. " * \n"
 			. " */";

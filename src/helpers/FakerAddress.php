@@ -141,7 +141,25 @@ class FakerAddress extends \Faker\Provider\es_ES\Address
 
 	public function image_binary()
 	{
-		return "Image";
+		$image = imagecreatetruecolor(200, 50);
+		$background_color = imagecolorallocate($image, 255, 255, 255);
+		$text_color = imagecolorallocate($image, 0, 0, 0);
+		imagefilledrectangle($image,0,0,200,50,$background_color);
+		$letters = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz';
+		$len = strlen($letters);
+		$word = '';
+		for ($i = 0; $i< 6;$i++) {
+			$letter = $letters[rand(0, $len-1)];
+			imagestring($image, 5,  5+($i*30), 20, $letter, $text_color);
+			$word.=$letter;
+		}
+		// start buffering
+		ob_start();
+		imagepng($image);
+		$contents =  ob_get_contents();
+		ob_end_clean();
+        imagedestroy($image);
+        return $contents;
 	}
 }
 

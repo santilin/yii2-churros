@@ -71,4 +71,27 @@ class AppHelper
 		return $str;
 	}
 
+	/**
+	 * Concatenates the values of each element of an array
+	 */
+	public function concatArrayValues($array, $keyname, $valuesname, $delimiter = ", ")
+	{
+		$ret = [];
+		foreach( $array as $element ) {
+			$key = $value = '';
+			foreach ( $element as $element_key => $element_value ) {
+				if( $element_key == $keyname ) {
+					$key = $element_value;
+				} else {
+					if( $value != '') {
+						$value .= $delimiter;
+					}
+					$value .= $element_value;
+				}
+			}
+			$ret[$key] = $value;
+		}
+		return $ret;
+	}
+
 }
