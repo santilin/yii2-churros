@@ -13,7 +13,7 @@ class ExpandableTextColumn extends DataColumn
      * Maximun text length
      * @var
      */
-    public $text_length = 100;
+    public $text_length = 30;
 
     /**
      * {@inheritdoc}

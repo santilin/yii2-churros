@@ -29,7 +29,8 @@ trait ModelInfoTrait
 		return $word;
 	}
 
-	public function t( $category, $message, $params = [], $language = null ) {
+	public function t( $category, $message, $params = [], $language = null )
+	{
 		$placeholders = [
 			'{title}' => lcfirst($this->getModelInfo('title')),
 			'{title_plural}' => lcfirst($this->getModelInfo('title_plural')),
@@ -48,11 +49,12 @@ trait ModelInfoTrait
 		return Yii::t($category, $message, $params, $language);
 	}
 
-	public function recordDesc($format=null) {
+	public function recordDesc($format=null)
+	{
 		$code_field = static::getModelInfo('code_field');
 		$desc_field = static::getModelInfo('desc_field');
 		if( $code_field!='' && $desc_field!='' ) {
-			return $this->$code_field . " " . $this->$desc_field;
+			return $this->$code_field . ", " . $this->$desc_field;
 		} else if( $code_field != '' ) {
 			return $this->$code_field;
 		} else if( $desc_field != '' ) {

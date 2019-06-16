@@ -124,8 +124,9 @@ class CrudController extends \yii\web\Controller
 				}
 			}
 			if ($saved) {
+				$m = $model->recordDesc();
 				Yii::$app->session->setFlash('success',
-						$model->t('app', "The {title} <strong>{record}</strong> has been successfully created."));
+						$model->t('app', "{La} {title} <strong>{record}</strong> has been successfully created."));
 				return $this->whereToGoNow('create', $model);
 			}
 		}

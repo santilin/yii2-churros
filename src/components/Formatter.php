@@ -1,6 +1,6 @@
 <?php
 
-namespace santilin\Churros;
+namespace santilin\Churros\components;
 
 use yii\helpers\Html;
 
@@ -20,6 +20,11 @@ class Formatter extends \yii\i18n\Formatter
 		} else {
 			return '';
 		}
+	}
+
+	public function asPercent100($value, $decimals = null, $options = [], $textOptions = [])
+	{
+		return parent::asPercent($value / 100, 2, $options, $textOptions);
 	}
 
 }

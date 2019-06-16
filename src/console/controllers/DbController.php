@@ -208,13 +208,73 @@ EOF;
 		$s->run($this->db);
 	}
 
+	/**
+	 * Creates a fixture data file for a table
+	 */
+	public function actionFixtureData($tableName, $schemaName = '')
+    {
+		if( $schemaName != '') {
+			$tableName = "$schemaName.$tableName";
+		}
+		$tableSchema = $this->db->schema->getTableSchema($tableName, true /*refresh*/);
+		if ($tableSchema == null) {
+			throw new \Exception("$tableName not found in schema $schemaName");
+		}
+		$preamble = "<?php\n\n/**\n"
+			. " * Churros v" . self::VERSION . "\n"
+			. " * ./yii churros/db/fixture-data $tableName of schema  " . ( $schemaName == '' ?:  $this->db->dsn ) . "\n"
+			. " * Timestamp: " . date('Y-m-d H:M:S', time() ) . "\n"
+			. " * \n"
+			. " */\n\n";
+		if ($this->createFile ) {
+			$write_file = true;
+			$filename = Yii::getAlias(Yii::$app->controllerMap['fixture']['fixtureDataPath']) . "/{$tableName}.php";
+			if (\file_exists($filename) && !$this->confirm("The file $filename already exists. Do you want to overwrite it?") ) {
+				$write_file = false;
+			}
+			if ($write_file) {
+				\file_put_contents($filename, $preamble . $this->fixtureData($tableSchema));
+				echo "Created fixture data for table $tableName in $filename\n";
+			}
+		} else {
+			echo $preamble . $this->fixtureData($tableSchema);
+		}
+
+	}
+
+	protected function fixtureData($tableSchema)
+    {
+		$txt_data = "return [\n";
+		$php_types = [];
+		$columna_names = [];
+		$table_name = $tableSchema->name;
+
+		foreach($tableSchema->columns as $column) {
+			$php_types[] = $column->phpType;
+			$column_names[] = $column->name;
+		}
+		$raw_data = $this->db->createCommand("SELECT * FROM $table_name")->queryAll();
+		$nrow = 0;
+		foreach( $raw_data as $row ) {
+			$ncolumn = 0;
+			$txt_data .= "\t'{$table_name}{$nrow}' => [\n";
+			foreach($row as $column) {
+				$txt_data .= "\t\t'" . $column_names[$ncolumn] . '\' => ' . $this->getPhpValue($column, $php_types[$ncolumn]) . ",\n";
+				$ncolumn++;
+			}
+			$txt_data .= "\t],\n";
+			$nrow++;
+		}
+		$txt_data .= "];";
+		return $txt_data;
+	}
+
+
 	protected function dumpTable($tableSchema)
     {
 		$txt_data = '';
-		$insert_sql = '';
 		$php_types = [];
 		$columna_names = [];
-		$insert_sql = '';
 		$table_name = $tableSchema->name;
 
 		$ret = "\nclass {$table_name}Seeder {\n";
