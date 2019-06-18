@@ -40,26 +40,33 @@ class FakerAddress extends \Faker\Provider\es_ES\Address
         return $this->generator->bankAccountNumber();
     }
 
-    public function shortString($nchars)
+    public function shortString($max_nchars)
     {
-		return substr($this->generator->text(20),0,$nchars);
+		$nchars = $this->generator->numberBetween(2, $max_nchars);
+		return substr($this->generator->text(20), 0, $nchars);
     }
 
-    public function integer($digits = 16)
+    public function string($nchars)
     {
-		if( $digits == 1 ) {
+		$nchars = $this->generator->numberBetween(10, $nchars);
+		return $this->generator->text($nchars);
+    }
+
+    public function integer($max_digits = 16)
+    {
+		if( $max_digits == 1 ) {
 			return $this->randomDigitNotNull();
 		} else {
-			return $this->decimal($digits);
+			return $this->decimal($max_digits);
 		}
     }
 
-    public function integer_unsigned($digits = 16)
+    public function integer_unsigned($max_digits = 16)
     {
-		if( $digits == 1 ) {
+		if( $max_digits == 1 ) {
 			return $this->randomDigitNotNull();
 		} else {
-			return $this->decimal_unsigned($digits);
+			return $this->decimal_unsigned($max_digits);
 		}
     }
 
@@ -73,15 +80,16 @@ class FakerAddress extends \Faker\Provider\es_ES\Address
 		return $this->decimal_unsigned(4);
     }
 
-	public function decimal($digits = 16, $decimals = 0)
+	public function decimal($max_digits = 16, $decimals = 0)
     {
-		assert($decimals < $digits);
+		assert($decimals < $max_digits);
+		$max_ditigs = $this->generator->numberBetween(2, $max_digits);
 		$ret = $this->generator->randomElement(["-",""]);
 		if ($ret=="-") {
-			$digits -= 1;
+			$max_digits -= 1;
 		}
-		for( $i=1; $i<$digits; ++$i) {
-			if( $i == $digits - $decimals && $decimals > 0 ) {
+		for( $i=1; $i<$max_digits; ++$i) {
+			if( $i == $max_digits - $decimals && $decimals > 0 ) {
 				$ret .= ".";
 			}
 			$ret .= $this->generator->randomDigit();
@@ -89,12 +97,13 @@ class FakerAddress extends \Faker\Provider\es_ES\Address
 		return $ret;
     }
 
-	public function decimal_unsigned($digits = 16, $decimals = 0)
+	public function decimal_unsigned($max_digits = 16, $decimals = 0)
     {
-		assert($decimals < $digits);
+		assert($decimals < $max_digits);
+		$max_ditigs = $this->generator->numberBetween(2, $max_digits);
 		$ret = "";
-		for( $i=1; $i<$digits; ++$i) {
-			if( $i == $digits - $decimals && $decimals > 0 ) {
+		for( $i=1; $i<$max_digits; ++$i) {
+			if( $i == $max_digits - $decimals && $decimals > 0 ) {
 				$ret .= ".";
 			}
 			$ret .= $this->generator->randomDigit();
@@ -103,15 +112,15 @@ class FakerAddress extends \Faker\Provider\es_ES\Address
     }
 
 	/**
-	 * string of numbers with exactly $digits chars
+	 * string of numbers with exactly $exact_digits chars
 	 */
-	public function integer_string($digits = 16, $decimals = 0)
+	public function integer_string($exact_digits = 16, $decimals = 0)
     {
-		assert($decimals < $digits);
+		assert($decimals < $exact_digits);
 		$ret = "";
-		if ($digits>0) {
+		if ($exact_digits>0) {
 			$ret .= $this->generator->randomDigitNotNull();
-			for( $i=1; $i<$digits-$decimals-2; ++$i) {
+			for( $i=1; $i<$exact_digits-$decimals-2; ++$i) {
 				$ret .= $this->generator->randomDigit();
 			}
 		}
@@ -129,9 +138,9 @@ class FakerAddress extends \Faker\Provider\es_ES\Address
 		return $this->generator->boolean();
 	}
 
-	public function str_random($digits)
+	public function str_random($max_digits)
 	{
-        return \str_random($digits);
+        return \str_random($max_digits);
     }
 
     public function null()

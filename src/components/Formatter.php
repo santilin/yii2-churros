@@ -12,7 +12,7 @@ class Formatter extends \yii\i18n\Formatter
 		return trim(substr($text, 0, 100)) . "&hellip;";
 	}
 
-	public function asTelephone($text)
+	public function asPhoneNumber($text)
 	{
 		if( trim($text) != '') {
 			return  Html::tag('span', '&nbsp;', ['class' => 'glyphicon glyphicon-phone-alt'])
