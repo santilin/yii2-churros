@@ -1,6 +1,6 @@
 <?php
 
-namespace santilin\Churros\yii\bootstrap4;
+namespace santilin\churros\yii\bootstrap4;
 
 use Yii;
 

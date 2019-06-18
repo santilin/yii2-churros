@@ -1,5 +1,5 @@
 <?php
-namespace santilin\Churros\components;
+namespace santilin\churros\validators;
 
 /**
 * @package churros

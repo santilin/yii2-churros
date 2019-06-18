@@ -1,4 +1,4 @@
-<?php namespace santilin\Churros;
+<?php namespace santilin\churros;
 
 use yii\behaviors\AttributeBehavior;
 

@@ -7,7 +7,7 @@
  * @since 1.0
  */
 
-namespace santilin\Churros;
+namespace santilin\churros;
 
 use Yii;
 use yii\db\ActiveQuery;

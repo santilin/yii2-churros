@@ -1,4 +1,4 @@
-<?php namespace santilin\Churros\helpers;
+<?php namespace santilin\churros\helpers;
 
 class FakerAddress extends \Faker\Provider\es_ES\Address
 {

@@ -1,11 +1,11 @@
 <?php
-namespace santilin\Churros\yii;
+namespace santilin\churros\yii;
 
 use Yii;
 use yii\helpers\Html;
 use yii\helpers\Url;
-use santilin\Churros\helpers\AppHelper;
-use santilin\Churros\yii\GalleryShow;
+use santilin\churros\helpers\AppHelper;
+use santilin\churros\yii\GalleryShow;
 
 /**
  * A blend of FileInput and GalleryShow

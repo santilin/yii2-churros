@@ -5,7 +5,7 @@
  * @license 
  */
 
-namespace santilin\Churros;
+namespace santilin\churros;
 
 /**
  * DataException represents an error in the user data

@@ -1,6 +1,6 @@
 <?php
 
-namespace santilin\Churros;
+namespace santilin\churros;
 
 use Yii;
 use yii\helpers\Url;

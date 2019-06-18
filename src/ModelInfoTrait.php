@@ -1,7 +1,7 @@
-<?php namespace santilin\Churros;
+<?php namespace santilin\churros;
 
 use Yii;
-use santilin\Churros\helpers\AppHelper;
+use santilin\churros\helpers\AppHelper;
 use \yii\helpers\ArrayHelper;
 use Faker\Factory as Faker;
 
@@ -45,8 +45,8 @@ trait ModelInfoTrait
 			'{una}' => $this->maleWord('una'),
 			'{Una}' => $this->maleWord('Una'),
 		];
-		$message = strtr($message, $placeholders);
-		return Yii::t($category, $message, $params, $language);
+		$translated = Yii::t($category, $message, $params, $language);
+		return strtr($translated, $placeholders);
 	}
 
 	public function recordDesc($format=null)
@@ -216,9 +216,12 @@ trait ModelInfoTrait
 
     public function controllerName($prefix = '')
     {
-		$c = AppHelper::stripNamespaceFromClassName($this);
-		$c = str_replace("Search", "", $c);
-		return $prefix . lcfirst($c);
+		$c = self::getModelInfo('controller_name');
+		if( $c == '' ) {
+			$c = AppHelper::stripNamespaceFromClassName($this);
+			$c = lcfirst(str_replace("Search", "", $c));
+		}
+		return $prefix . $c;
     }
 
     public function getRelatedFieldForModel($related_model)
@@ -252,7 +255,10 @@ trait ModelInfoTrait
 		$errors = $this->getErrorSummary(false);
 		if( count($errors) ) {
 			return $errors[0];
+		} else {
+			return null;
 		}
 	}
 
-} // class Model
+} // trait ModelInfoTrait
+

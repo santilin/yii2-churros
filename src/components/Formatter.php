@@ -1,6 +1,6 @@
 <?php
 
-namespace santilin\Churros\components;
+namespace santilin\churros\components;
 
 use yii\helpers\Html;
 

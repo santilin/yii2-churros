@@ -1,4 +1,4 @@
-<?php namespace santilin\Churros;
+<?php namespace santilin\churros;
 
 use Yii;
 use yii\filters\Cors;
@@ -36,7 +36,7 @@ class RestController extends \yii\rest\ActiveController
     {
 		$actions = parent::actions();
 		$actions['view'] = [
-			'class' => 'santilin\Churros\RestViewAction',
+			'class' => 'santilin\churros\RestViewAction',
 			'modelClass' => $this->modelClass,
 			'checkAccess' => [$this, 'checkAccess'],
         ];

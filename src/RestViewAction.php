@@ -5,7 +5,7 @@
  * @license http://www.yiiframework.com/license/
  */
 
-namespace santilin\Churros;
+namespace santilin\churros;
 
 use Yii;
 use yii\rest\ViewAction;

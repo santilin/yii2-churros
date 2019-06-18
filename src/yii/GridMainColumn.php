@@ -1,11 +1,11 @@
 <?php
 
-namespace santilin\Churros\yii;
+namespace santilin\churros\yii;
 
 use yii\grid\DataColumn;
 use yii\helpers\Html;
 use yii\helpers\Url;
-use santilin\Churros\helpers\AppHelper;
+use santilin\churros\helpers\AppHelper;
 
 /**
  * Class LinkColumn

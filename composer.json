@@ -20,7 +20,12 @@
     },
     "autoload": {
         "psr-4": {
-            "santilin\\Churros\\": "src/"
+            "santilin\\churros\\": "src/"
         }
-    }
+    },
+	"extra": {
+		"bootstrap": "santilin\\churros\\Bootstrap",
+		"version": "1.0.0"
+	}
+
 }

@@ -5,7 +5,7 @@
  * @license
  */
 
-namespace santilin\Churros;
+namespace santilin\churros;
 use Yii;
 
 /**

@@ -1,11 +1,11 @@
 <?php
-namespace santilin\Churros\yii;
+namespace santilin\churros\yii;
 
 use Yii;
 use yii\helpers\ArrayHelper;
 use yii\helpers\Html;
 use yii\helpers\Url;
-use santilin\Churros\helpers\AppHelper;
+use santilin\churros\helpers\AppHelper;
 
 /**
  * Alert widget renders a message from session flash. All flash messages are

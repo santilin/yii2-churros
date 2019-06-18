@@ -1,17 +1,18 @@
 <?php
-namespace santilin\Churros;
+namespace santilin\churros;
 
 use Yii;
 
-class ChurrosModule extends \yii\base\Module
+class Module extends \yii\base\Module
 {
-	public $controllerNamespace = 'santilin\Churros\controllers';
+	public $controllerNamespace = 'santilin\churros\controllers';
 
 	public function init()
 	{
 		parent::init();
 		if (Yii::$app instanceof \yii\console\Application) {
-			$this->controllerNamespace = 'santilin\Churros\console\controllers';
+			$this->controllerNamespace = 'santilin\churros\console\controllers';
 		}
 	}
-}
+
+} // class ChurrosModule

@@ -1,6 +1,6 @@
 <?php
 
-namespace santilin\Churros\helpers;
+namespace santilin\churros\helpers;
 
 use yii;
 use \DateTime;
