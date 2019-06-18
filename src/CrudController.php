@@ -126,7 +126,7 @@ class CrudController extends \yii\web\Controller
 			if ($saved) {
 				$m = $model->recordDesc();
 				Yii::$app->session->setFlash('success',
-						$model->t('app', "{La} {title} <strong>{record}</strong> has been successfully created."));
+						$model->t('churros', "{La} {title} <strong>{record}</strong> has been successfully created."));
 				return $this->whereToGoNow('create', $model);
 			}
 		}
@@ -179,7 +179,7 @@ class CrudController extends \yii\web\Controller
 			}
 			if ($saved) {
 				Yii::$app->session->setFlash('success',
-					$model->t('app', "{La} {title} <strong>{record}</strong> has been successfully duplicated."));
+					$model->t('churros', "{La} {title} <strong>{record}</strong> has been successfully duplicated."));
 				return $this->whereTogoNow('create', $model);
 			}
 		}
@@ -220,7 +220,7 @@ class CrudController extends \yii\web\Controller
 			}
 			if ($saved) {
 				Yii::$app->session->setFlash('success',
-					$model->t('app', "{La} {title} <strong>{record}</strong> has been successfully updated."));
+					$model->t('churros', "{La} {title} <strong>{record}</strong> has been successfully updated."));
 				return $this->whereTogoNow('update', $model);
 			}
 		}
@@ -242,7 +242,7 @@ class CrudController extends \yii\web\Controller
 		$model = $this->findModel($id);
 		$model->deleteWithRelated();
 		Yii::$app->session->setFlash('success',
-			$model->t('app', "{La} {title} <strong>{record}</strong> has been successfully deleted"));
+			$model->t('churros', "{La} {title} <strong>{record}</strong> has been successfully deleted"));
 		return $this->whereToGoNow('delete', $model);
 	}
 
@@ -450,14 +450,14 @@ class CrudController extends \yii\web\Controller
 		list($prefix, $route) = $this->getRoutePrefix();
 		if( isset($parent) ) {
 			$breadcrumbs[] = [
-				'label' => $parent->t('app', '{Title_plural}'),
+				'label' => $parent->t('churros', '{Title_plural}'),
 				'url' => [ $prefix . $parent->controllerName() . '/index']];
 			$breadcrumbs[] = [
-				'label' => $parent->t('app', '{record}'),
+				'label' => $parent->t('churros', '{record}'),
 				'url' => [$prefix . $parent->controllerName() . '/view', 'id' => $parent->getPrimaryKey() ] ];
 			if( $action != 'index') {
 				$breadcrumbs[] = [
-					'label' => $model->t('app', '{Title_plural}'),
+					'label' => $model->t('churros', '{Title_plural}'),
 					'url' => [$prefix . $parent->controllerName() . '/' . $parent->getPrimaryKey()
 							. '/' . $route . '/index' ]
 				];
@@ -465,7 +465,7 @@ class CrudController extends \yii\web\Controller
 			switch( $action ) {
 				case 'update':
 					$breadcrumbs[] = [
-						'label' => $model->t('app', '{record}'),
+						'label' => $model->t('churros', '{record}'),
 						'url' => [ $prefix . $parent->controllerName() . '/' . strval($parent->getPrimaryKey())
 								. '/' . $route . '/view/' . strval($model->getPrimaryKey()) ] ];
 					break;
@@ -474,14 +474,14 @@ class CrudController extends \yii\web\Controller
 			}
 		} else {
 			$breadcrumbs[] = [
-				'label' => $model->t('app', '{Title_plural}'),
+				'label' => $model->t('churros', '{Title_plural}'),
 				'url' => [ $this->id . '/index' ]
 			];
 			switch( $action ) {
 				case 'update':
 				case 'saveAsNew':
 					$breadcrumbs[] = [
-						'label' => $model->t('app', '{record}'),
+						'label' => $model->t('churros', '{record}'),
 						'url' => [ $prefix . 'view', 'id' => $model->getPrimaryKey() ]
 					];
 					break;
@@ -527,7 +527,7 @@ class CrudController extends \yii\web\Controller
 			$parent_model = new $parent_model_name;
 			$this->parent_model = $parent_model->findOne($parent_id);
 			if ($this->parent_model == null) {
-				throw new NotFoundHttpException($parent_model->t('app',
+				throw new NotFoundHttpException($parent_model->t('churros',
 					"El registro madre {title} de id '$parent_id' no existe"));
 			}
 		} else {

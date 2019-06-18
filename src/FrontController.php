@@ -52,7 +52,7 @@ class FrontController extends CrudController
     public function failIfUserNotAllowed($user_id, $message = null, $action = null )
     {
 		if( $message == null ) {
-			$message = User::t('app', "{La} {title_singular} no tiene acceso"
+			$message = User::t('churros', "{La} {title_singular} no tiene acceso"
 				. ($action == null ? '': " a la acción '$action'" ));
 		}
 		if( !$this->checkUserHasAccess($user_id, $action) ) {
