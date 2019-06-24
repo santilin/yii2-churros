@@ -48,8 +48,12 @@ class FakerAddress extends \Faker\Provider\es_ES\Address
 
     public function string($nchars)
     {
-		$nchars = $this->generator->numberBetween(10, $nchars);
-		return $this->generator->text($nchars);
+		$nchars = $this->generator->numberBetween($nchars/3, $nchars);
+		if ($nchars<5) {
+			return substr($this->generator->word, 0, $nchars);
+		} else {
+			return $this->generator->text($nchars);
+		}
     }
 
     public function integer($max_digits = 16)
@@ -61,12 +65,12 @@ class FakerAddress extends \Faker\Provider\es_ES\Address
 		}
     }
 
-    public function integer_unsigned($max_digits = 16)
+    public function integerUnsigned($max_digits = 16)
     {
 		if( $max_digits == 1 ) {
 			return $this->randomDigitNotNull();
 		} else {
-			return $this->decimal_unsigned($max_digits);
+			return $this->decimalUnsigned($max_digits);
 		}
     }
 
@@ -77,7 +81,7 @@ class FakerAddress extends \Faker\Provider\es_ES\Address
 
 	public function smallIntegerUnsigned()
     {
-		return $this->decimal_unsigned(4);
+		return $this->decimalUnsigned(4);
     }
 
 	public function decimal($max_digits = 16, $decimals = 0)
@@ -97,7 +101,7 @@ class FakerAddress extends \Faker\Provider\es_ES\Address
 		return $ret;
     }
 
-	public function decimal_unsigned($max_digits = 16, $decimals = 0)
+	public function decimalUnsigned($max_digits = 16, $decimals = 0)
     {
 		assert($decimals < $max_digits);
 		$max_ditigs = $this->generator->numberBetween(2, $max_digits);

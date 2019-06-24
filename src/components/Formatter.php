@@ -27,4 +27,9 @@ class Formatter extends \yii\i18n\Formatter
 		return parent::asPercent($value / 100, 2, $options, $textOptions);
 	}
 
+	public function asBooleanInversed($value)
+	{
+		return $this->asBoolean(!(bool)$value);
+	}
+
 }

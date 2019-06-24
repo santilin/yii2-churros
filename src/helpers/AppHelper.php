@@ -74,7 +74,7 @@ class AppHelper
 	/**
 	 * Concatenates the values of each element of an array
 	 */
-	public function concatArrayValues($array, $keyname, $valuesname, $delimiter = ", ")
+	static public function concatArrayValues($array, $keyname, $valuesname, $delimiter = ", ")
 	{
 		$ret = [];
 		foreach( $array as $element ) {
