@@ -13,6 +13,7 @@ use yii\web\HttpException;
 use yii\base\ErrorException;
 use SaveModelException;
 use DataException;
+use santilin\churros\helpers\AppHelper;
 
 /**
  * CrudController implements the CRUD actions for yii2 models
@@ -67,16 +68,14 @@ class CrudController extends \yii\web\Controller
 		$searchModel = $this->createSearchModel();
 		$params = Yii::$app->request->queryParams;
 		if( $this->parent_model ) {
-			/// @todo $searchModel->getRelatedFieldForModel($parent);
 			$params[$searchModel->formName()][$searchModel->getRelatedFieldForModel($this->parent_model)]
 				= $this->parent_model->getPrimaryKey();
 		}
 
-		$dataProvider = $searchModel->search($params);
 		return $this->render('index', [
-					'searchModel' => $searchModel,
-					'parent' => $this->parent_model,
-					'dataProvider' => $dataProvider,
+			'searchModel' => $searchModel,
+			'parent' => $this->parent_model,
+			'gridParams' => $params,
 		]);
 	}
 
@@ -103,17 +102,17 @@ class CrudController extends \yii\web\Controller
 	public function actionCreate()
 	{
 		$model = $this->findModel();
-		if ($model->loadAll(Yii::$app->request->post(), $this->formRelations()) ) {
+		if ($model->loadAll(Yii::$app->request->post()) ) {
 			if( $this->parent_model) {
 				$model->setAttribute( $model->getRelatedFieldForModel($this->parent_model), $this->parent_model->getPrimaryKey());
 			}
 			$saved = false;
 			$fileAttributes = $this->addFileInstances($model);
 			if (count($fileAttributes) == 0) {
-				$saved = $model->saveAll($this->formRelations());
+				$saved = $model->saveAll();
 			} else {
 				$transaction = $model->getDb()->beginTransaction();
-				$saved = $model->saveAll($this->formRelations());
+				$saved = $model->saveAll();
 				if ($saved) {
 					$saved = $this->saveFileInstances($model, $fileAttributes);
 				}
@@ -153,7 +152,7 @@ class CrudController extends \yii\web\Controller
 			$model = $this->findModel(Yii::$app->request->post('_asnew'));
 		}
 
-		if ($model->loadAll(Yii::$app->request->post(), $this->formRelations())) {
+		if ($model->loadAll(Yii::$app->request->post()) ) {
 			if( $this->parent_model) {
 				$model->setAttribute( $model->getRelatedFieldForModel($this->parent_model), $this->parent_model->getPrimaryKey());
 			}
@@ -164,10 +163,10 @@ class CrudController extends \yii\web\Controller
 			$saved = false;
 			$fileAttributes = $this->addFileInstances($model);
 			if (count($fileAttributes) == 0) {
-				$saved = $model->saveAll($this->formRelations());
+				$saved = $model->saveAll();
 			} else {
 				$transaction = $model->getDb()->beginTransaction();
-				$saved = $model->saveAll($this->formRelations());
+				$saved = $model->saveAll();
 				if ($saved) {
 					$saved = $this->saveFileInstances($model, $fileAttributes);
 				}
@@ -198,17 +197,17 @@ class CrudController extends \yii\web\Controller
 	public function actionUpdate($id) {
 		$model = $this->findModel($id);
 
-		if ($model->loadAll(Yii::$app->request->post(), $this->formRelations()) ) {
+		if ($model->loadAll(Yii::$app->request->post()) ) {
 			if( $this->parent_model) {
 				$model->setAttribute( $model->getRelatedFieldForModel($this->parent_model), $this->parent_model->getPrimaryKey());
 			}
 			$saved = false;
 			$fileAttributes = $this->addFileInstances($model);
 			if (count($fileAttributes) == 0) {
-				$saved = $model->saveAll($this->formRelations());
+				$saved = $model->saveAll();
 			} else {
 				$transaction = $model->getDb()->beginTransaction();
-				$saved = $model->saveAll($this->formRelations());
+				$saved = $model->saveAll();
 				if ($saved) {
 					$saved = $this->saveFileInstances($model, $fileAttributes);
 				}
@@ -247,15 +246,14 @@ class CrudController extends \yii\web\Controller
 	}
 
 	/**
-		*
-		* Export model information into PDF format.
-		* @param integer $id
-		* @return mixed
-		*/
+	 * Export model information into PDF format.
+	 * @param integer $id
+	 * @return mixed
+	 */
 	public function actionPdf($id) {
 		$model = $this->findModel($id);
-		$this->layout = 'pdf_model';
-
+		Yii::$app->getModule('debug')->instance->allowedIPs = [];
+		// https://stackoverflow.com/a/54568044/8711400
 		$content = $this->renderAjax('_pdf', [
 			'model' => $model,
 		]);
@@ -274,7 +272,6 @@ class CrudController extends \yii\web\Controller
 				'SetFooter' => ['{PAGENO}'],
 			]
 		]);
-
 		return $pdf->render();
 	}
 
@@ -497,6 +494,26 @@ class CrudController extends \yii\web\Controller
 		return $breadcrumbs;
 	}
 
+	public function moduleRoute($action = null)
+	{
+		if( $this->parent_model ) {
+			$parent_route = $this->parent_controller
+				. '/' . $this->parent_model->getPrimaryKey()
+				. '/'. $this->id;
+			$action = (array) $action;
+			if ($action[0] != '' && $action[0] == '/' ) {
+				$action[0] = $parent_route . $action[0];
+			} else {
+				$action[0] = $parent_route . '/' . $action[0];
+			}
+			return Url::toRoute($action);
+		} else if( $action != '') {
+			return Url::toRoute($action);
+		} else {
+			return Url::toRoute($this->id);
+		}
+	}
+
 	public function controllerRoute($action = null)
 	{
 		if( $this->parent_model ) {
@@ -523,7 +540,7 @@ class CrudController extends \yii\web\Controller
 		if( $parent_id !== 0 ) {
 			$this->parent_controller = Yii::$app->request->get('parent_controller');
 			assert($this->parent_controller != '');
-			$parent_model_name = 'app\\models\\'. ucfirst($this->parent_controller);
+			$parent_model_name = 'app\\models\\'. AppHelper::camelCase($this->parent_controller);
 			$parent_model = new $parent_model_name;
 			$this->parent_model = $parent_model->findOne($parent_id);
 			if ($this->parent_model == null) {

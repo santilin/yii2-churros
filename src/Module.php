@@ -15,4 +15,4 @@ class Module extends \yii\base\Module
 		}
 	}
 
-} // class ChurrosModule
+} // class Module
