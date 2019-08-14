@@ -15,8 +15,8 @@ class Formatter extends \yii\i18n\Formatter
 	public function asPhoneNumber($text)
 	{
 		if( trim($text) != '') {
-			return  Html::tag('span', '&nbsp;', ['class' => 'glyphicon glyphicon-phone-alt'])
-				. Html::a($text, "tel://$text");
+// 			return  Html::tag('span', '&nbsp;', ['class' => 'glyphicon glyphicon-phone-alt']) .
+			return Html::a($text, "tel://$text");
 		} else {
 			return '';
 		}
