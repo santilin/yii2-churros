@@ -252,7 +252,9 @@ class CrudController extends \yii\web\Controller
 	 */
 	public function actionPdf($id) {
 		$model = $this->findModel($id);
-		Yii::$app->getModule('debug')->instance->allowedIPs = [];
+		if( YII_DEBUG ) {
+            Yii::$app->getModule('debug')->instance->allowedIPs = [];
+        }
 		// https://stackoverflow.com/a/54568044/8711400
 		$content = $this->renderAjax('_pdf', [
 			'model' => $model,
