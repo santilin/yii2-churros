@@ -198,6 +198,11 @@ trait RelationTrait
         /* @var $this ActiveRecord */
         $db = $this->getDb();
         $trans = $db->beginTransaction();
+        if( $relations == [] ) {
+			if (isset($POST['_form_relations']) ) {
+				$relations = explode(",", $POST['_form_relations']);
+			}
+		}
         try {
             if ($this->save()) {
                 $error = false;
