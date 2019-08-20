@@ -8,9 +8,9 @@ use Faker\Factory as Faker;
 trait ModelInfoTrait
 {
 	use RelationTrait;
-
+	
 	public function maleWord($word) {
-		if( $this->getModelInfo('female') === true ) {
+		if( static::getModelInfo('female') === true ) {
 			return $word;
 		}
 		static $male_words = [
@@ -32,10 +32,10 @@ trait ModelInfoTrait
 	public function t( $category, $message, $params = [], $language = null )
 	{
 		$placeholders = [
-			'{title}' => lcfirst($this->getModelInfo('title')),
-			'{title_plural}' => lcfirst($this->getModelInfo('title_plural')),
-			'{Title}' => ucfirst($this->getModelInfo('title')),
-			'{Title_plural}' => ucfirst($this->getModelInfo('title_plural')),
+			'{title}' => lcfirst(static::getModelInfo('title')),
+			'{title_plural}' => lcfirst(static::getModelInfo('title_plural')),
+			'{Title}' => ucfirst(static::getModelInfo('title')),
+			'{Title_plural}' => ucfirst(static::getModelInfo('title_plural')),
 			'{record}' => $this->recordDesc(),
 			'{record_long}' => $this->recordDesc('long'),
 			'{la}' => $this->maleWord('la'),
