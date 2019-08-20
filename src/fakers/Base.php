@@ -1,45 +1,7 @@
-<?php namespace santilin\churros\helpers;
+<?php namespace santilin\churros\fakers;
 
-class FakerAddress extends \Faker\Provider\es_ES\Address
+class Base extends \Faker\Provider\Base 
 {
-    protected static $state = [
-        'La Coruña', 'Álava', 'Albacete', 'Alicante', 'Almería', 'Asturias', 'Ávila', 'Badajoz', 'Barcelona', 'Burgos', 'Cáceres', 'Cádiz', 'Cantabria', 'Castellón', 'Ceuta', 'Ciudad Real', 'Cuenca', 'Córdoba', 'Gerona', 'Granada', 'Guadalajara', 'Guipúzcoa', 'Huelva', 'Huesca', 'Islas Baleares', 'Jaén', 'La Rioja', 'Las Palmas', 'León', 'Lérida', 'Lugo', 'Málaga', 'Madrid', 'Melilla', 'Murcia', 'Navarra', 'Orense', 'Palencia', 'Pontevedra', 'Salamanca', 'Segovia', 'Sevilla', 'Soria', 'Santa Cruz de Tenerife', 'Tarragona', 'Teruel', 'Toledo', 'Valencia', 'Valladolid', 'Vizcaya', 'Zamora', 'Zaragoza'];
-
-	public function es_nombrepropio()
-	{
-		return $this->generator->name();
-	}
-
-    public function es_codigo_postal()
-    {
-        return $this->generator->postcode();
-    }
-
-    public function es_direccion()
-    {
-        return $this->generator->streetAddress();
-    }
-
-    public function es_poblacion()
-    {
-        return $this->generator->city();
-    }
-
-	public function es_provincia()
-    {
-        return $this->generator->state();
-    }
-
-    public function es_cif_nif()
-    {
-        return $this->generator->dni();
-    }
-
-	public function iban()
-    {
-        return $this->generator->bankAccountNumber();
-    }
-
     public function shortString($max_nchars)
     {
 		$nchars = $this->generator->numberBetween(2, $max_nchars);
@@ -73,6 +35,16 @@ class FakerAddress extends \Faker\Provider\es_ES\Address
 			return $this->decimalUnsigned($max_digits);
 		}
     }
+    
+    public function integerUnsignedOrNull($max_digits = 16)
+    {
+		$n = $this->integerUnsigned($max_digits);
+		if( $n == 0 ) {
+			return 'null';
+		} else {
+			return $n;
+		}
+	}
 
 	public function smallInteger()
     {
@@ -174,5 +146,5 @@ class FakerAddress extends \Faker\Provider\es_ES\Address
         imagedestroy($image);
         return $contents;
 	}
+ 
 }
-

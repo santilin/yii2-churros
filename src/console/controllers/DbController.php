@@ -309,6 +309,7 @@ EOF;
 		$ret .= "\t\t\$rows_$table_name = [\n$txt_data\t\t];\n";
 		$ret .= "\n";
 		if( $this->truncateTables ) {
+			$ret .= "\t\t\$db->createCommand()->checkIntegrity(false)->execute();\n";
 			$ret .= "\t\t\$db->createCommand(\"DELETE FROM $table_name\")->execute();\n";
 		}
 		$ret .= "\t\techo \"Seeding $table_name\\n\";\n";
