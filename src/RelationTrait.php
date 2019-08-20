@@ -198,6 +198,7 @@ trait RelationTrait
         /* @var $this ActiveRecord */
         $db = $this->getDb();
         $trans = $db->beginTransaction();
+		$isNewRecord = $this->isNewRecord;
         if( $relations == [] ) {
 			if (isset($POST['_form_relations']) ) {
 				$relations = explode(",", $POST['_form_relations']);
@@ -284,8 +285,8 @@ trait RelationTrait
     private function updateIds($relName, $records)
     {
 		$relation = $this->getRelation($relName);
-        $isNewRecord = $this->isNewRecord;
         $isSoftDelete = isset($this->_rt_softdelete);
+        $isNewRecord = $this->isNewRecord;
 		$notDeletedPK = [];
 		$notDeletedFK = [];
 		if ($relation->multiple) {
