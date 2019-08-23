@@ -277,5 +277,14 @@ trait ModelInfoTrait
 		}
 	}
 
+	public function getFormattedValue($attr)
+	{
+		$method_name = "get" . ucwords(str_replace("_","",$attr)) . "Label";
+		if( method_exists($this, $method_name) ) {
+			return $this->$method_name();
+		}
+		return $this->$attr;
+	}
+	
 } // trait ModelInfoTrait
 
