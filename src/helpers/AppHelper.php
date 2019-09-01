@@ -11,7 +11,8 @@ use Yii;
 
 class AppHelper
 {
-
+	static private $tabindex = 0;
+	
     static public function empty($value)
     {
 		return empty($value);
@@ -91,4 +92,14 @@ class AppHelper
 		return $ret;
 	}
 
+	static public function ti($inc=1)
+	{
+		static::$tabindex += $inc;
+		return static::$tabindex;
+	}
+	
+	static public function resetTabIndex($reset = 0)
+	{
+		static::$tabindex = $reset;
+	}
 }

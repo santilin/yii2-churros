@@ -2,7 +2,7 @@
 
 namespace santilin\churros\yii;
 
-use yii\grid\DataColumn;
+use kartik\grid\DataColumn;
 use yii\helpers\Html;
 use yii\helpers\Url;
 use santilin\churros\helpers\AppHelper;
@@ -63,7 +63,8 @@ class GridMainColumn extends DataColumn
     protected function renderDataCellContent($model, $key, $index)
     {
         return Html::a(
-            $model->{$this->attribute},
+			$this->grid->formatter->format(
+				$this->getDataCellValue($model, $key, $index), $this->format),
             $this->generateUrl($model, $key, $index),
             $this->linkOptions
         );

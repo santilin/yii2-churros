@@ -71,21 +71,19 @@ trait RelationTrait
 			// Look for arrays of relations data in the POST
             foreach ($POST as $post_variable => $post_data) {
                 if (is_array($post_data)) {
-                    if ($post_variable == $formName) { // Main form
+                    if ($post_variable == $formName) { // Main model
 						// Look for embedded relations data in the main form
                         foreach ($post_data as $relName => $relAttributes) {
                             if (is_array($relAttributes) && array_key_exists($relName, $relations_in_model) ) {
                                 $this->loadToRelation($relations_in_model[$relName], $relName, $relAttributes);
                             }
                         }
-                    } else {
-						throw new \Exception("Many to many relation");
-                        $isHasMany = is_array($post_data) && is_array(current($post_data));
-                        $relName = ($isHasMany) ? lcfirst(Inflector::pluralize($relation)) : lcfirst($relation);
+                    } else { // HasMany or Many2Many
+                        $relName = $post_variable;
                         if (!array_key_exists($relName, $relations_in_model)) {
                             continue;
                         }
-                        $this->loadToRelation($isHasMany, $relName, $post_data);
+                        $this->loadToRelation($relations_in_model[$relName], $relName, $post_data);
                     }
                 }
             }
@@ -112,6 +110,10 @@ trait RelationTrait
 		if (count($relPKAttr) > 1) { // Many to many
             $container = [];
             foreach ($v as $relPost) {
+				if( $relPost == null ) { 
+				// _POST[ 'mainform' => [], 'related' => [ 0 => , 1 => value]
+					continue;
+				}
                 if (is_array($relPost) ) {
 					// many2many relation with post = array of records
 					if( array_filter($relPost) ) {
@@ -138,7 +140,9 @@ trait RelationTrait
 // 					echo "<pre>"; print_r($relModelClass); echo "</pre>";
 // 					echo "<pre>"; print_r($relPKAttr); echo "</pre>"; die;
 					$condition = [];
-					$this_pk =  str_replace('%','',str_replace('{{','',str_replace('}}','',$this->tablename()))) . "_id";
+					$link = $relation['link'];
+					$link_keys = array_keys($link);
+					$this_pk = reset($link_keys);
 					foreach( $relPKAttr as $pk ) {
 						if( $pk == $this_pk ) {
 							$condition[$pk] = $this->primaryKey;
@@ -155,7 +159,6 @@ trait RelationTrait
 						$relObj = new $relModelClass;
 					}
 					$relObj->setAttributes($condition, false);
-//  					echo "<pre>"; print_r($relObj); echo "</pre>"; die;
 					$container[] = $relObj;
                 }
             }

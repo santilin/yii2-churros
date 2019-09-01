@@ -120,4 +120,122 @@ trait ModelRelatedSearchTrait
 		}
     }
 
+    // Advanced search with operators
+	protected function makeSearchParam($values)
+	{
+		if( $values['op'] == '=' ) {
+			return $values['lft'];
+		} else {
+			return json_encode($values);
+		}
+	}
+
+	protected function filterWhere(&$query, $name, $value)
+	{
+		if( substr($value,0,2) == '{"' && substr($value,-2) == '"}' ) {
+			$condition = json_decode($value);
+			if( $condition->lft == null ) {
+				return;
+			}
+			switch( $condition->op ) {
+				case "=":
+					return [ $name => $condition->lft ];
+				case "<>":
+				case ">=":
+				case "<=":
+				case ">":
+				case "<":
+				case "NOT LIKE":
+				case "LIKE":
+					$query->andFilterWhere([ $condition->op, $name, 
+						$condition->lft ]);
+						break;
+				case "BETWEEN":
+				case "NOT BETWEEN":
+					$query->andFilterWhere([ $condition->op, $name, 
+						$condition->lft, $condition->rgt ]);
+					break;
+			}
+		} else if( !empty($value) ) {
+			if( is_numeric($value) ) {
+				$query->andWhere([ $name => $value ]);
+			} else {
+				$query->andWhere([ 'like', $name, $value ]);
+			}
+		}
+	}
+	
+
+	public function load($params, $formName = null)
+	{
+		if( !isset($params['_pjax']) ) {
+			// join search form params
+			$scope = $formName === null ? $this->formName() : $formName;
+			$newparams = [];
+			if( isset($params[$scope]['_search_']) ) {
+				foreach( $params[$scope]['_search_'] as $name => $values) {
+					if( isset($values['lft'])  && !empty($values['lft']) ) {
+						$newparams[$name] = $this->makeSearchParam($values);
+					}
+				}
+			}
+			return parent::load([ $scope => $newparams], $formName);
+		}
+		return parent::load($params, $formName);
+	}
+
+	public static function searchField($model, $attribute)
+	{
+		$ret = '';
+		static $operators = [ 
+			'=' => '=', '<>' => '<>', 
+			'LIKE' => 'Contiene', 'NOT LIKE' => 'No contiene',
+			'>' => '>', '<' => '<', 
+			'>=' => '>=', '<=' => '<=', 
+			'BETWEEN' => 'entre', 'NOT BETWEEN' => 'no entre' ];
+		$scope = $model->formName();
+		$value = $model->$attribute;
+		if( substr($value,0,2) == '{"' && substr($value,-2) == '"}' ) {
+			$value = json_decode($value);
+			if( !isset($value->lft) ) {
+				$value = (object)[ 'op' => '', 'lft' => '', 'rgt' => ''];
+			}
+		} else {
+			$value = (object)['op' => '', 'lft' => $value, 'rgt' => ''];
+		}
+		$ret .= "<div class='row'>";
+		$ret .= "<div class='form-group'>";
+		$ret .= "<div class='control-label col-sm-3'>";
+		$ret .= Html::activeLabel($model, $attribute);
+		$ret .= "</div>";
+			
+		$ret .= "<div class='control-form col-sm-2'>";
+		$ret .= Html::dropDownList("${scope}[_search_][$attribute][op]",
+			$value->op, $operators, [ 
+			'id' => "drop-$attribute", 'class' => 'search-dropdown form-control col-sm-2'] );
+		$ret .= "</div>";
+			
+		$ret .= "<div class='control-form col-sm-4'>";
+		$ret .= Html::input('text', "${scope}[_search_][$attribute][lft]", 
+			$value->lft, [ 'class' => 'form-control col-sm-4']);
+		$ret .= "</div>";
+		$ret .= "</div><!-- row -->";
+		
+		
+		$ret .= "<div class='row gap10'>";
+		$ret .= "<div id='second-field-drop-$attribute' class='hideme'>";
+		$ret .= "<div class='control-form col-sm-2 col-sm-offset-3'>";
+		$ret .= "y:";
+		$ret .= "</div>";
+		$ret .= "<div class='control-form col-sm-4'>";
+		$ret .= Html::input('text', "${scope}[_search_][$attribute][rgt]", 
+			$value->rgt, [ 'class' => 'form-control col-sm-4']);
+		$ret .= "</div>";
+		$ret .= "</div><!-- row -->";
+		$ret .= "</div>";
+		$ret .= Html::activeHiddenInput($model, $attribute);
+		$ret .= "</div>";
+	}
+
+	
 }
