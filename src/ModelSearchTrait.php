@@ -1,6 +1,7 @@
 <?php namespace santilin\churros;
 
 use Yii;
+use yii\helpers\Html;
 
 /**
  * Eases the definition of filters and sorts in grids for search models
@@ -9,7 +10,7 @@ use Yii;
  * Extracts the sort and where properties from the related search model data provider
  * @todo Extract the rules from the related model
  */
-trait ModelRelatedSearchTrait
+trait ModelSearchTrait
 {
 	private $related_properties = [];
 	private $dynamic_rules = [];
@@ -132,6 +133,15 @@ trait ModelRelatedSearchTrait
 
 	protected function filterWhere(&$query, $name, $value)
 	{
+		if( $value == null ) {
+			return;
+		}
+		if( is_array($value) ) {
+			assert(false);
+		}
+		if( !in_array( $name, array_keys(self::$relations) ) ) {
+			$name = $this->tableName() . '.' . $name;
+		}
 		if( substr($value,0,2) == '{"' && substr($value,-2) == '"}' ) {
 			$condition = json_decode($value);
 			if( $condition->lft == null ) {
@@ -172,6 +182,7 @@ trait ModelRelatedSearchTrait
 			// join search form params
 			$scope = $formName === null ? $this->formName() : $formName;
 			$newparams = [];
+			parent::load($params, $formName);
 			if( isset($params[$scope]['_search_']) ) {
 				foreach( $params[$scope]['_search_'] as $name => $values) {
 					if( isset($values['lft'])  && !empty($values['lft']) ) {
@@ -184,6 +195,9 @@ trait ModelRelatedSearchTrait
 		return parent::load($params, $formName);
 	}
 
+	/**
+	 * Returns Html code to add an advanced search field to a form
+	 */
 	public static function searchField($model, $attribute)
 	{
 		$ret = '';
@@ -223,7 +237,7 @@ trait ModelRelatedSearchTrait
 		
 		
 		$ret .= "<div class='row gap10'>";
-		$ret .= "<div id='second-field-drop-$attribute' class='hideme'>";
+		$ret .= "<div id='second-field-drop-$attribute' style='display:none'>";
 		$ret .= "<div class='control-form col-sm-2 col-sm-offset-3'>";
 		$ret .= "y:";
 		$ret .= "</div>";
@@ -235,7 +249,20 @@ trait ModelRelatedSearchTrait
 		$ret .= "</div>";
 		$ret .= Html::activeHiddenInput($model, $attribute);
 		$ret .= "</div>";
+		return $ret;
 	}
+	
+	static public $searchFormJS = <<<JS
+$('.search-dropdown').change(function() {
+	let value= $(this).val();
+	console.log($('#second-field-' + this.id).html());
+	if( value == 'BETWEEN' || value == 'NOT BETWEEN' ) {
+		$('#second-field-' + this.id).show(200);
+	} else {
+		$('#second-field-' + this.id).hide(200);
+	}
+});
+JS;
 
 	
 }

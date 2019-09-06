@@ -8,6 +8,7 @@
 namespace santilin\churros\console\controllers;
 use Yii;
 use yii\di\Instance;
+use yii\base\InvalidConfigException;
 use yii\db\Connection;
 use yii\console\Controller;
 
@@ -22,12 +23,16 @@ class DbController extends Controller
 	/** The version of this command */
 	const VERSION = '0.1';
 
+	static const FORMATS = ['seeder', 'mysqldump', 'fixture', 'cvs'];
 	/**
      * @var Connection|array|string the DB connection object or the application component ID of the DB connection to use
      * when applying migrations. Starting from version 2.0.3, this can also be a configuration array
      * for creating the object.
      */
     public $db = 'db';
+    
+    /** @var one of FORMATS */
+    public $format = 'seeder';
 
 	/** @var bool Wether to add the DROP TABLE command */
 	public $truncateTables = true;
@@ -43,13 +48,14 @@ class DbController extends Controller
     {
         return array_merge(
             parent::options($actionID),
-            ['truncateTables','createFile','seedersPath']
+            ['format', 'truncateTables','createFile','seedersPath']
         );
     }
 
     public function optionAliases()
     {
         return array_merge(parent::optionAliases(), [
+            'f' => 'format',
             't' => 'truncateTables',
             'c' => 'createFile',
             'p' => 'seedersPath'
@@ -65,7 +71,9 @@ class DbController extends Controller
     public function beforeAction($action)
     {
         if (parent::beforeAction($action)) {
-			$this->db = Instance::ensure($this->db, Connection::className());
+			if( !in_array($this->format, self::FORMATS) ) {
+                throw new InvalidConfigException("{$this->format}: formato desconocido. Elige uno de " . join(self::$formats,","));
+                $this->db = Instance::ensure($this->db, Connection::className());
             return true;
         }
         return false;
@@ -102,13 +110,10 @@ class DbController extends Controller
      */
     public function actionDumpSchema($schemaName = '')
     {
-		$full_dump = "<?php\n"
-			. "/**\n"
-			. " * Churros v" . strval(self::VERSION) . "\n"
-			. " * ./yii churros/db/dump-schema " . ( $schemaName != '' ?:  $this->db->dsn ) . "\n"
-			. " * Timestamp: " . date('Y-m-d H:i:s', time() ) . "\n"
-			. " * \n"
-			. " */\n";
+		if( $this->format != 'seeder' ) {
+			throw new InvalidConfigException("{$this->format}: formato no contemplado. Sólo se contempla 'seeder'");
+		}
+		$preamble = $this->getPreamble('dump-schema', $schemaName);
 		$runseeder = '';
 		$tables = $this->db->schema->getTableSchemas($schemaName, true);
 		foreach ($tables as $table) {
@@ -154,17 +159,14 @@ EOF;
     {
 		if( $schemaName != '') {
 			$tableName = "$schemaName.$tableName";
+		} else {
+			$schemaName = $this->db->dsn; // only for preablme
 		}
 		$tableSchema = $this->db->schema->getTableSchema($tableName, true /*refresh*/);
 		if ($tableSchema == null) {
 			throw new \Exception("$tableName not found in schema $schemaName");
 		}
-		$preamble = "<?php\n\n/**\n"
-			. " * Churros v" . self::VERSION . "\n"
-			. " * ./yii churros/db/dump-table $tableName of schema  " . ( $schemaName == '' ?:  $this->db->dsn ) . "\n"
-			. " * Timestamp: " . date('Y-m-d H:M:S', time() ) . "\n"
-			. " * \n"
-			. " */";
+		$preamble = $this->getPreamble('dump-table', $tableName, $schemaName);
 		if ($this->createFile ) {
 			$write_file = true;
 			$filename = Yii::getAlias($this->seedersPath) . "/{$tableName}Seeder.php";
@@ -183,66 +185,52 @@ EOF;
 	/**
 	 * Seeds the specified table from the specified file or a default one [tablenameSeeder]
 	 */
-	public function actionSeedTable($tableName, $seedfilename = null )
+	public function actionSeedTable($tableName, $inputfilename = null )
 	{
-		if( $seedfilename == null ) {
-			$seedfilename = Yii::getAlias($this->seedersPath) . "/{$tableName}Seeder.php";
-		}
-		require_once($seedfilename);
-		$classname = "{$tableName}Seeder";
-		$class = new $classname;
-		$class->run($this->db);
+		switch( $this->format ) {
+		case 'seeder':
+			if( $inputfilename == null ) {
+				$inputfilename = Yii::getAlias($this->seedersPath) . "/{$tableName}Seeder.php";
+			}
+			require_once($inputfilename);
+			$classname = "{$tableName}Seeder";
+			$class = new $classname;
+			$class->run($this->db);
+			break;
+		case 'cvs':
+			$this->seedTableFromCsv($tablename, $inputfilename);
+			break;
+		default:
+			throw new InvalidArgumentException("seed-table: $this->format: no contemplado");
 	}
 
 	/**
 	 * Seeds the current schema with the specified file
 	 */
-	public function actionSeedSchema($seedfilename = null )
+	public function actionSeedSchema($inputfilename = null )
 	{
-		if( $seedfilename == null ) {
-			$seedfilename = Yii::getAlias($this->seedersPath) . "/SchemaSeeder.php";
+		if( $inputfilename == null ) {
+			$inputfilename = Yii::getAlias($this->seedersPath) . "/SchemaSeeder.php";
 		}
-		require_once($seedfilename);
+		require_once($inputfilename);
 		$s = new \SchemaSeeder;
-		echo "Seeding schema from $seedfilename\n";
+		echo "Seeding schema from $inputfilename\n";
 		$s->run($this->db);
 	}
-
-	/**
-	 * Creates a fixture data file for a table
-	 */
-	public function actionFixtureData($tableName, $schemaName = '')
-    {
-		if( $schemaName != '') {
-			$tableName = "$schemaName.$tableName";
+	
+	protected function dumpTable($tableSchema)
+	{
+		switch( $this->format ) {
+		case 'seeder':
+			return $this->dumpTableAsSeeder($tableSchema);
+		case 'fixture':
+			return $this->dumpTableAsFixture($tableSchame);
+		default:
+			throw new InvalidArgumentException("dump-table: $this->format: no contemplado");
 		}
-		$tableSchema = $this->db->schema->getTableSchema($tableName, true /*refresh*/);
-		if ($tableSchema == null) {
-			throw new \Exception("$tableName not found in schema $schemaName");
-		}
-		$preamble = "<?php\n\n/**\n"
-			. " * Churros v" . self::VERSION . "\n"
-			. " * ./yii churros/db/fixture-data $tableName of schema  " . ( $schemaName == '' ?:  $this->db->dsn ) . "\n"
-			. " * Timestamp: " . date('Y-m-d H:M:S', time() ) . "\n"
-			. " * \n"
-			. " */\n\n";
-		if ($this->createFile ) {
-			$write_file = true;
-			$filename = Yii::getAlias(Yii::$app->controllerMap['fixture']['fixtureDataPath']) . "/{$tableName}.php";
-			if (\file_exists($filename) && !$this->confirm("The file $filename already exists. Do you want to overwrite it?") ) {
-				$write_file = false;
-			}
-			if ($write_file) {
-				\file_put_contents($filename, $preamble . $this->fixtureData($tableSchema));
-				echo "Created fixture data for table $tableName in $filename\n";
-			}
-		} else {
-			echo $preamble . $this->fixtureData($tableSchema);
-		}
-
 	}
 
-	protected function fixtureData($tableSchema)
+	protected function dumpTableAsFixture($tableSchema)
     {
 		$txt_data = "return [\n";
 		$php_types = [];
@@ -269,8 +257,8 @@ EOF;
 		return $txt_data;
 	}
 
-
-	protected function dumpTable($tableSchema)
+	
+	protected function dumpTableAsSeeder($tableSchema)
     {
 		$txt_data = '';
 		$php_types = [];
@@ -323,5 +311,32 @@ EOF;
 		return $ret;
 	}
 
+	protected function getPreamble($command, $schema, $table = null)
+	{
+		$timestamp = date('Y-m-d H:M:S', time());
+		if ($table == null ) {
+			$table = $schema;
+		}
+		switch( $this->format ) {
+		case 'seeder':
+			$preamble = <<<PREAMBLE
+<?php
+
+/**
+ * Churros v {$self::VERSION}
+ * ./yii churros/db/$command --format {$this->format} $table 
+ * Schema: $schema
+ * Timestamp: $timestamp
+ */
+PREAMBLE;
+			break;
+		}
+		return $preamble;
+	}
+
+	protected function seedTableFromCsv($table, $inputfile)
+	{
+	}
+	
 } // class
 

@@ -25,6 +25,14 @@ class CrudController extends \yii\web\Controller
 	protected $parent_controller = null;
 	protected $allowedActions = [];
 
+	/**
+	 * An array of extra params to pass to the views
+	 **/ 
+	public function extraParams($action, $model)
+	{
+		return null;
+	}
+	
 	public function behaviors() {
 		return [
 			'verbs' => [
@@ -76,6 +84,7 @@ class CrudController extends \yii\web\Controller
 			'searchModel' => $searchModel,
 			'parent' => $this->parent_model,
 			'gridParams' => $params,
+			'extraParams' => $this->extraParams('index', $searchModel)
 		]);
 	}
 
@@ -90,7 +99,8 @@ class CrudController extends \yii\web\Controller
 		return $this->render('view', [
 			'model' => $model,
 			'parent' => $this->parent_model,
-			'relationsProviders' => $this->getRelationsProviders($model)
+			'relationsProviders' => $this->getRelationsProviders($model),
+			'extraParams' => $this->extraParams('view', $model)
 		]);
 	}
 
@@ -133,7 +143,8 @@ class CrudController extends \yii\web\Controller
 		$parent_controller = Yii::$app->request->get('parent_controller');
 		return $this->render('create', [
 			'model' => $model,
-			'parent' => $this->parent_model
+			'parent' => $this->parent_model,
+			'extraParams' => $this->extraParams('index', $model)
 		]);
 	}
 
@@ -184,7 +195,8 @@ class CrudController extends \yii\web\Controller
 		}
 		return $this->render('saveAsNew', [
 			'model' => $model,
-			'parent' => $this->parent_model
+			'parent' => $this->parent_model,
+			'extraParams' => $this->extraParams('index', $model)
 		]);
 	}
 
@@ -225,7 +237,8 @@ class CrudController extends \yii\web\Controller
 		}
 		return $this->render('update', [
 			'model' => $model,
-			'parent' => $this->parent_model
+			'parent' => $this->parent_model,
+			'extraParams' => $this->extraParams('index', $model)
 		]);
 	}
 
@@ -239,7 +252,11 @@ class CrudController extends \yii\web\Controller
 	public function actionDelete($id)
 	{
 		$model = $this->findModel($id);
-		$model->deleteWithRelated();
+		try {
+			$model->deleteWithRelated();
+		} catch (\yii\db\IntegrityException $e ) {
+			throw new \santilin\churros\DeleteModelException($model, $e);
+		}
 		Yii::$app->session->setFlash('success',
 			$model->t('churros', "{La} {title} <strong>{record}</strong> has been successfully deleted"));
 		return $this->whereToGoNow('delete', $model);
@@ -419,6 +436,10 @@ class CrudController extends \yii\web\Controller
 	protected function whereToGoNow($from, $model)
 	{
 		$redirect = [];
+		$referrer = Yii::$app->request->post("_form_referrer");
+		if ( $referrer ) {
+			return $this->redirect($referrer);
+		}
 		if ($from == 'update') {
 			$redirect = ['view', 'id' => $model->getPrimaryKey()];
 		} else if ($from == 'create') {
@@ -577,6 +598,5 @@ class CrudController extends \yii\web\Controller
 		}
 		return [ $prefix, $route ];
 	}
-
 
 }

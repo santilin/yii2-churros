@@ -31,5 +31,11 @@ class Formatter extends \yii\i18n\Formatter
 	{
 		return $this->asBoolean(!(bool)$value);
 	}
+	
+	public function asHours($minutes)
+	{
+		return substr("00" . floor($minutes / 60), -2)
+			. ":" . substr("00" . ($minutes % 60), -2);
+	}
 
 }

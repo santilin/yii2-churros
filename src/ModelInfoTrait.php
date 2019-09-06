@@ -19,7 +19,15 @@ trait ModelInfoTrait
 			"las" => "los",
 			"Las" => "Los",
 			"una" => "uno",
-			"Una" => "Uno"
+			"Una" => "Uno",
+			"esta" => "este",
+			"Esta" => "Este",
+			"estas" => "estos",
+			"Estas" => "Estos",
+			"otra" => "otro",
+			"Otra" => "Otra",
+			"otras" => "otras",
+			"Otras" => "Otras",
 		];
 		foreach( $male_words as $female_word => $male_word) {
 			if( $female_word == $word ) {
@@ -44,6 +52,10 @@ trait ModelInfoTrait
 			'{Las}' => $this->maleWord('Las'),
 			'{una}' => $this->maleWord('una'),
 			'{Una}' => $this->maleWord('Una'),
+			'{esta}' => $this->maleWord('esta'),
+			'{Esta}' => $this->maleWord('Esta'),
+			'{estas}' => $this->maleWord('estas'),
+			'{Estas}' => $this->maleWord('Estas'),
 		];
 		$translated = Yii::t($category, $message, $params, $language);
 		return strtr($translated, $placeholders);

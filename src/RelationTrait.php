@@ -519,7 +519,7 @@ trait RelationTrait
     }
 
     /**
-     * Deleted model row with all related records
+     * Delete model row with all related records
      * @param array $relations The relations to consider for this form
      * @return bool
      * @throws Exception
@@ -642,6 +642,8 @@ trait RelationTrait
             }
 		}
 /*
+		https://github.com/yiisoft/yii2/issues/1282
+		
         } else {
             $ARMethods = get_class_methods('\yii\db\ActiveRecord');
             $modelMethods = get_class_methods('\yii\base\Model');
