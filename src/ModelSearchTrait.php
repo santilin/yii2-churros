@@ -2,6 +2,7 @@
 
 use Yii;
 use yii\helpers\Html;
+use yii\helpers\ArrayHelper;
 
 /**
  * Eases the definition of filters and sorts in grids for search models
@@ -12,13 +13,13 @@ use yii\helpers\Html;
  */
 trait ModelSearchTrait
 {
-	private $related_properties = [];
+	protected $related_properties = [];
 	private $dynamic_rules = [];
 
     public function setAttributes($values, $safeOnly = true)
     {
 		foreach( $values as $attribute => $value ) {
-			if (!array_key_exists($attribute, $this->attributes) ) {
+			if (!array_key_exists($attribute, $this->attributes) && !is_array($value) ) {
 				$this->related_properties[$attribute] = $value;
 				unset($values[$attribute]);
 			}
@@ -28,10 +29,14 @@ trait ModelSearchTrait
 
     public function __get($name)
     {
-		if( isset($this->related_properties[$name]) ) {
-			return $this->related_properties[$name];
-		} else {
+		try {
 			return parent::__get($name);
+		} catch( \yii\base\UnknownPropertyException $e) {
+			if( isset($this->related_properties[$name]) ) {
+				return $this->related_properties[$name];
+			} else {
+				return ArrayHelper::getValue($this, $name);
+			}
 		}
 	}
 
@@ -73,18 +78,18 @@ trait ModelSearchTrait
 				$fldname = substr($attribute, $dotpos + 1);
 				$relation_name = substr($attribute, 0, $dotpos);
 			}
-			$relation = $this->getRelation($relation_name, false);
-			$filter_set = false;
-			if( $relation != null ) {
+			if (isset(self::$relations[$relation_name]) ) {
+				$related_model_class = self::$relations[$relation_name]['modelClass'];
+				$filter_set = false;
 				$table_alias = "as_$relation_name"; /// @todo check that the join is added only once
 				$provider->query->joinWith("$relation_name $table_alias");
+				$v = ArrayHelper::getValue($this, $attribute);
 				if ($fldname == '' ) { /// @todo junction tables
-					$related_model_class = $relation->modelClass;
 					list($code_field, $desc_field) = $related_model_class::getCodeDescFields();
 					if( $desc_field != '' && $code_field != '' ) {
 						$provider->query->andFilterWhere(['or',
-							[ 'LIKE', "$table_alias.$desc_field", $this->{$attribute} ],
-							[ 'LIKE', "$table_alias.$code_field", $this->{$attribute} ]
+							[ 'LIKE', "$table_alias.$desc_field", $v ],
+							[ 'LIKE', "$table_alias.$code_field", $v ]
 						]);
 						$filter_set = true;
 						$fldname = $code_field;
@@ -92,7 +97,7 @@ trait ModelSearchTrait
 				}
 				if (!$filter_set) {
 					$provider->query->andFilterWhere(
-						['LIKE', "$table_alias.$fldname", $this->{$attribute}]);
+						['LIKE', "$table_alias.$fldname", $v]);
 				}
 				if (!isset($provider->sort->attributes[$attribute])) {
 					// Set orders from the related search model
@@ -101,7 +106,7 @@ trait ModelSearchTrait
 						$related_model = new $related_model_search_class;
 						$related_model_provider = $related_model->search(
 							[ $related_model->formName() =>
-								[ $fldname => $this->{$attribute}]
+								[ $fldname => $v]
 							]);
 						if (isset( $related_model_provider->sort->attributes[$fldname]) ) {
 							$related_sort = $related_model_provider->sort->attributes[$fldname];
@@ -133,16 +138,19 @@ trait ModelSearchTrait
 
 	protected function filterWhere(&$query, $name, $value)
 	{
-		if( $value == null ) {
+		if( empty($value) ) {
 			return;
 		}
 		if( is_array($value) ) {
 			assert(false);
 		}
-		if( !in_array( $name, array_keys(self::$relations) ) ) {
+		// addColumnsSortsFiltersToProvider adds the join tables with AS `as_xxxxxxx`
+		if( strpos($name, '.') === FALSE ) {
 			$name = $this->tableName() . '.' . $name;
+		} else {
+			$name = "as_$name";
 		}
-		if( substr($value,0,2) == '{"' && substr($value,-2) == '"}' ) {
+		if( is_string($value) && substr($value,0,2) == '{"' && substr($value,-2) == '"}' ) {
 			$condition = json_decode($value);
 			if( $condition->lft == null ) {
 				return;
@@ -166,16 +174,17 @@ trait ModelSearchTrait
 						$condition->lft, $condition->rgt ]);
 					break;
 			}
-		} else if( !empty($value) ) {
-			if( is_numeric($value) ) {
-				$query->andWhere([ $name => $value ]);
-			} else {
-				$query->andWhere([ 'like', $name, $value ]);
-			}
+		} else if( is_numeric($value) || !is_string($value) ) {
+			$query->andWhere([ $name => $value ]);
+		} else {
+			$query->andWhere([ 'like', $name, $value ]);
 		}
 	}
 	
 
+	/** 
+	 * Loads the advanced search form data
+	 */ 
 	public function load($params, $formName = null)
 	{
 		if( !isset($params['_pjax']) ) {
@@ -196,7 +205,7 @@ trait ModelSearchTrait
 	}
 
 	/**
-	 * Returns Html code to add an advanced search field to a form
+	 * Returns Html code to add an advanced search field to a search form
 	 */
 	public static function searchField($model, $attribute)
 	{

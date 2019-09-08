@@ -238,9 +238,24 @@ trait ModelInfoTrait
 
     public function getRelatedFieldForModel($related_model)
     {
-		throw new \Exception( $this->classname() . " no está relacionado con " . $related_model->classname() . ". Define getRelatedFieldForModel()");
+		foreach( $this->relations as $relname => $rel_info ) {
+			if( $rel_info['model'] == $related_model->classname() ) {
+				return $rel_info['field'];
+			}
+		}
+		throw new \Exception( $this->classname() . " no está relacionado con " . $related_model->classname );
     }
 
+    public function getRelatedModelClass($relation_name)
+    {
+		if( isset($this->relations[$relation_name]) ) {
+			$rel_info = $this->relations[$relation_name];
+			return $rel_info['model'];
+		} else {
+			throw new \Exception( $this->classname() . " no está relacionado con " . $related_model->classname );
+		}
+	}    
+    
 	public function getImageData($fldname, $index=0)
 	{
 		$fldvalue = $this->$fldname;

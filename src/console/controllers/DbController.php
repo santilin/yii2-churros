@@ -23,7 +23,7 @@ class DbController extends Controller
 	/** The version of this command */
 	const VERSION = '0.1';
 
-	static const FORMATS = ['seeder', 'mysqldump', 'fixture', 'cvs'];
+	const FORMATS = ['seeder', 'mysqldump', 'fixture', 'cvs'];
 	/**
      * @var Connection|array|string the DB connection object or the application component ID of the DB connection to use
      * when applying migrations. Starting from version 2.0.3, this can also be a configuration array
@@ -73,7 +73,8 @@ class DbController extends Controller
         if (parent::beforeAction($action)) {
 			if( !in_array($this->format, self::FORMATS) ) {
                 throw new InvalidConfigException("{$this->format}: formato desconocido. Elige uno de " . join(self::$formats,","));
-                $this->db = Instance::ensure($this->db, Connection::className());
+			}
+			$this->db = Instance::ensure($this->db, Connection::className());
             return true;
         }
         return false;
@@ -202,6 +203,7 @@ EOF;
 			break;
 		default:
 			throw new InvalidArgumentException("seed-table: $this->format: no contemplado");
+		}
 	}
 
 	/**
@@ -224,7 +226,7 @@ EOF;
 		case 'seeder':
 			return $this->dumpTableAsSeeder($tableSchema);
 		case 'fixture':
-			return $this->dumpTableAsFixture($tableSchame);
+			return $this->dumpTableAsFixture($tableSchema);
 		default:
 			throw new InvalidArgumentException("dump-table: $this->format: no contemplado");
 		}
@@ -317,13 +319,15 @@ EOF;
 		if ($table == null ) {
 			$table = $schema;
 		}
+		$version = self::VERSION;
 		switch( $this->format ) {
 		case 'seeder':
+		case 'fixture':
 			$preamble = <<<PREAMBLE
 <?php
 
 /**
- * Churros v {$self::VERSION}
+ * Churros v $version
  * ./yii churros/db/$command --format {$this->format} $table 
  * Schema: $schema
  * Timestamp: $timestamp
