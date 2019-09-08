@@ -59,11 +59,11 @@ class Base extends \Faker\Provider\Base
 	public function decimal($max_digits = 16, $decimals = 0)
     {
 		assert($decimals < $max_digits);
-		$max_ditigs = $this->generator->numberBetween(2, $max_digits);
 		$ret = $this->generator->randomElement(["-",""]);
 		if ($ret=="-") {
 			$max_digits -= 1;
 		}
+		$max_digits = $this->generator->numberBetween(2, $max_digits);
 		for( $i=1; $i<$max_digits; ++$i) {
 			if( $i == $max_digits - $decimals && $decimals > 0 ) {
 				$ret .= ".";
@@ -76,7 +76,7 @@ class Base extends \Faker\Provider\Base
 	public function decimalUnsigned($max_digits = 16, $decimals = 0)
     {
 		assert($decimals < $max_digits);
-		$max_ditigs = $this->generator->numberBetween(2, $max_digits);
+		$max_digits = $this->generator->numberBetween(2, $max_digits);
 		$ret = "";
 		for( $i=1; $i<$max_digits; ++$i) {
 			if( $i == $max_digits - $decimals && $decimals > 0 ) {

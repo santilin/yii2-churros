@@ -201,11 +201,11 @@ class CrudController extends \yii\web\Controller
 	}
 
 	/**
-		* Updates an existing model.
-		* If update is successful, the browser will be redirected to the 'view' page.
-		* @param integer $id
-		* @return mixed
-		*/
+	 * Updates an existing model.
+	 * If update is successful, the browser will be redirected to the 'view' page.
+	 * @param integer $id
+	 * @return mixed
+	 */
 	public function actionUpdate($id) {
 		$model = $this->findModel($id);
 
