@@ -1,8 +1,11 @@
 <?php namespace santilin\churros;
 
 use Yii;
+use yii\data\ActiveDataProvider;
 use yii\helpers\Html;
 use yii\helpers\ArrayHelper;
+use yii\base\InvalidArgumentException;
+use kartik\grid\GridView;
 
 /**
  * Eases the definition of filters and sorts in grids for search models
@@ -15,6 +18,14 @@ trait ModelSearchTrait
 {
 	protected $related_properties = [];
 	private $dynamic_rules = [];
+	static private $operators = [ 
+			'=' => '=', '<>' => '<>', 
+			'LIKE' => 'Contiene', 'NOT LIKE' => 'No contiene',
+			'>' => '>', '<' => '<', 
+			'>=' => '>=', '<=' => '<=', 
+			'BETWEEN' => 'entre', 'NOT BETWEEN' => 'no entre' ];
+	static private $extra_operators = [ 
+			'BETWEEN', 'NOT BETWEEN' ];
 
     public function setAttributes($values, $safeOnly = true)
     {
@@ -64,7 +75,7 @@ trait ModelSearchTrait
 
 
 	/**
-	 * Adds related sorts and filters to dataproviders
+	 * Adds related sorts and filters to dataproviders for grids
 	*/
     public function addColumnsSortsFiltersToProvider($gridColumns, &$provider)
     {
@@ -72,11 +83,11 @@ trait ModelSearchTrait
 			if ( is_int($attribute) || array_key_exists($attribute, $this->attributes ) ) {
 				continue;
 			}
-			$fldname = '';
-			$relation_name = $attribute;
 			if( ($dotpos = strpos($attribute, '.')) !== FALSE ) {
-				$fldname = substr($attribute, $dotpos + 1);
-				$relation_name = substr($attribute, 0, $dotpos);
+				$relation_name = $attribute;
+				$fldname = '';
+			} else {
+				list($relation_name, $fldname) = self::splitFieldName($attribute);
 			}
 			if (isset(self::$relations[$relation_name]) ) {
 				$related_model_class = self::$relations[$relation_name]['modelClass'];
@@ -125,7 +136,7 @@ trait ModelSearchTrait
 			}
 		}
     }
-
+    
     // Advanced search with operators
 	protected function makeSearchParam($values)
 	{
@@ -141,23 +152,28 @@ trait ModelSearchTrait
 		if( empty($value) ) {
 			return;
 		}
-		if( is_array($value) ) {
-			assert(false);
-		}
 		// addColumnsSortsFiltersToProvider adds the join tables with AS `as_xxxxxxx`
 		if( strpos($name, '.') === FALSE ) {
 			$name = $this->tableName() . '.' . $name;
 		} else {
-			$name = "as_$name";
+			list($relation, $fldname) = self::splitFieldName($name);
+			if( isset(self::$relations[$relation]) ) {
+				$name = self::$relations[$relation]['relatedTablename'] . ".$fldname";
+			} else {
+				throw new InvalidArgumentException($relation . ": relation not found in model " . self::class);
+			}
 		}
 		if( is_string($value) && substr($value,0,2) == '{"' && substr($value,-2) == '"}' ) {
-			$condition = json_decode($value);
-			if( $condition->lft == null ) {
+			$value = json_decode($value, true);
+		} 
+		if( isset($value['lft']) ) {
+			if( $value['lft'] == null ) {
 				return;
 			}
-			switch( $condition->op ) {
+			switch( $value['op'] ) {
 				case "=":
-					return [ $name => $condition->lft ];
+					$query->andWhere([$name => $value['lft']]);
+					break;
 				case "<>":
 				case ">=":
 				case "<=":
@@ -165,13 +181,13 @@ trait ModelSearchTrait
 				case "<":
 				case "NOT LIKE":
 				case "LIKE":
-					$query->andFilterWhere([ $condition->op, $name, 
-						$condition->lft ]);
+					$query->andWhere([ $value['op'], $name, 
+						$value['lft'] ]);
 						break;
 				case "BETWEEN":
 				case "NOT BETWEEN":
-					$query->andFilterWhere([ $condition->op, $name, 
-						$condition->lft, $condition->rgt ]);
+					$query->andWhere([ $value['op'], $name, 
+						$value['lft'], $value['rgt'] ]);
 					break;
 			}
 		} else if( is_numeric($value) || !is_string($value) ) {
@@ -192,8 +208,8 @@ trait ModelSearchTrait
 			$scope = $formName === null ? $this->formName() : $formName;
 			$newparams = [];
 			parent::load($params, $formName);
-			if( isset($params[$scope]['_search_']) ) {
-				foreach( $params[$scope]['_search_'] as $name => $values) {
+			if( isset($params[$scope]['_adv_']) ) {
+				foreach( $params[$scope]['_adv_'] as $name => $values) {
 					if( isset($values['lft'])  && !empty($values['lft']) ) {
 						$newparams[$name] = $this->makeSearchParam($values);
 					}
@@ -210,21 +226,20 @@ trait ModelSearchTrait
 	public static function searchField($model, $attribute)
 	{
 		$ret = '';
-		static $operators = [ 
-			'=' => '=', '<>' => '<>', 
-			'LIKE' => 'Contiene', 'NOT LIKE' => 'No contiene',
-			'>' => '>', '<' => '<', 
-			'>=' => '>=', '<=' => '<=', 
-			'BETWEEN' => 'entre', 'NOT BETWEEN' => 'no entre' ];
 		$scope = $model->formName();
 		$value = $model->$attribute;
 		if( substr($value,0,2) == '{"' && substr($value,-2) == '"}' ) {
-			$value = json_decode($value);
-			if( !isset($value->lft) ) {
-				$value = (object)[ 'op' => '', 'lft' => '', 'rgt' => ''];
+			$value = json_decode($value, true);
+			if( !isset($value['lft']) ) {
+				$value = [ 'op' => '', 'lft' => '', 'rgt' => ''];
 			}
 		} else {
-			$value = (object)['op' => '', 'lft' => $value, 'rgt' => ''];
+			$value = ['op' => '', 'lft' => $value, 'rgt' => ''];
+		}
+		if( !in_array($value['op'], self::$extra_operators) ) {
+			$extra_visible = "display:none";
+		} else {
+			$extra_visible = '';
 		}
 		$ret .= "<div class='row'>";
 		$ret .= "<div class='form-group'>";
@@ -233,26 +248,26 @@ trait ModelSearchTrait
 		$ret .= "</div>";
 			
 		$ret .= "<div class='control-form col-sm-2'>";
-		$ret .= Html::dropDownList("${scope}[_search_][$attribute][op]",
-			$value->op, $operators, [ 
+		$ret .= Html::dropDownList("${scope}[_adv_][$attribute][op]",
+			$value['op'], self::$operators, [ 
 			'id' => "drop-$attribute", 'class' => 'search-dropdown form-control col-sm-2'] );
 		$ret .= "</div>";
 			
 		$ret .= "<div class='control-form col-sm-4'>";
-		$ret .= Html::input('text', "${scope}[_search_][$attribute][lft]", 
-			$value->lft, [ 'class' => 'form-control col-sm-4']);
+		$ret .= Html::input('text', "${scope}[_adv_][$attribute][lft]", 
+			$value['lft'], [ 'class' => 'form-control col-sm-4']);
 		$ret .= "</div>";
 		$ret .= "</div><!-- row -->";
 		
 		
 		$ret .= "<div class='row gap10'>";
-		$ret .= "<div id='second-field-drop-$attribute' style='display:none'>";
-		$ret .= "<div class='control-form col-sm-2 col-sm-offset-3'>";
+		$ret .= "<div id='second-field-drop-$attribute' style='$extra_visible'>";
+		$ret .= "<div class='control-form col-sm-2 col-sm-offset-3 text-right'>";
 		$ret .= "y:";
 		$ret .= "</div>";
 		$ret .= "<div class='control-form col-sm-4'>";
-		$ret .= Html::input('text', "${scope}[_search_][$attribute][rgt]", 
-			$value->rgt, [ 'class' => 'form-control col-sm-4']);
+		$ret .= Html::input('text', "${scope}[_adv_][$attribute][rgt]", 
+			$value['rgt'], [ 'class' => 'form-control col-sm-4']);
 		$ret .= "</div>";
 		$ret .= "</div><!-- row -->";
 		$ret .= "</div>";
@@ -260,10 +275,73 @@ trait ModelSearchTrait
 		$ret .= "</div>";
 		return $ret;
 	}
+
+	/**
+	 * Returns Html code to add an advanced search field to a search form
+	 * @param boolean $hidden Whether to include the general condition as a hidden input
+	 */
+	public static function searchFieldForReport($report, $model, $attribute, $dropdown_values = null)
+	{
+		$ret = '';
+		$scope = $model->formName();
+		if( isset( $report->report_filters[$attribute] ) ) {
+			$value = $report->report_filters[$attribute];
+		} else {
+			$value = [ 'op' => '', 'lft' => '', 'rgt' => ''];
+		}
+		if( !in_array($value['op'], self::$extra_operators) ) {
+			$extra_visible = "display:none";
+		} else {
+			$extra_visible = '';
+		}
+		$attr_class = str_replace('.','_',$attribute);
+		$ret .= "<div class='row'>";
+		$ret .= "<div class='form-group'>";
+		$ret .= "<div class='control-label col-sm-3'>";
+		$ret .= Html::activeLabel($model, $attribute);
+		$ret .= "</div>";
+			
+		$ret .= "<div class='control-form col-sm-2'>";
+		$ret .= Html::dropDownList("${scope}[_adv_][$attribute][op]",
+			$value['op'], self::$operators, [ 
+			'id' => "drop-$attr_class", 'class' => 'search-dropdown form-control col-sm-2'] );
+		$ret .= "</div>";
+		$ret .= "<div class='control-form col-sm-4'>";
+		if( is_array($dropdown_values) ) {
+			$ret .= Html::dropDownList("${scope}[_adv_][$attribute][lft]", 
+			$value['lft'], $dropdown_values, [ 'class' => 'form-control col-sm-4']);
+		} else {
+			$ret .= Html::input('text', "${scope}[_adv_][$attribute][lft]", 
+			$value['lft'], [ 'class' => 'form-control col-sm-4']);
+		}
+		$ret .= "</div>";
+		$ret .= "</div><!-- row -->";
+		
+		
+		$ret .= "<div class='row gap10'>";
+		$ret .= "<div style='$extra_visible' id='second-field-drop-$attr_class' >";
+		$ret .= "<div class='control-form col-sm-2 col-sm-offset-3 text-right'>";
+		$ret .= "y:";
+		$ret .= "</div>";
+		$ret .= "<div class='control-form col-sm-4'>";
+		if( is_array($dropdown_values) ) {
+			$ret .= Html::dropDownList("${scope}[_adv_][$attribute][rgt]", 
+			$value['rgt'], $dropdown_values, [ 'class' => 'form-control col-sm-4']);
+		} else {
+			$ret .= Html::input('text', "${scope}[_adv_][$attribute][rgt]", 
+				$value['rgt'], [ 'class' => 'form-control col-sm-4']);
+		}
+		$ret .= "</div>";
+		$ret .= "</div><!-- row -->";
+		$ret .= "</div>";
+		$ret .= "</div>";
+		return $ret;
+	}
 	
 	static public $searchFormJS = <<<JS
 $('.search-dropdown').change(function() {
 	let value= $(this).val();
+	console.log('#second-field-' + this.id);
 	console.log($('#second-field-' + this.id).html());
 	if( value == 'BETWEEN' || value == 'NOT BETWEEN' ) {
 		$('#second-field-' + this.id).show(200);
@@ -273,5 +351,213 @@ $('.search-dropdown').change(function() {
 });
 JS;
 
+
+	/**
+	 * Extracts the visible columns for this report
+	 */
+	public function selectedGridColumns($report, $allColumns)
+	{
+		$columns = [];
+		foreach( $report->report_columns as $colname => $col_attrs ) {
+			if( !isset($allColumns[$colname]) ) {
+				continue;
+			}
+			$new_column = $allColumns[$colname];
+			if( isset($report->report_columns[$colname]['summary']) 
+				&& $report->report_columns[$colname]['summary'] != '' )  {
+				$new_column['pageSummary'] = true;
+				$new_column['pageSummaryFunc'] = $report->report_columns[$colname]['summary'];
+			}
+			if( isset($report->report_columns[$colname]['title']) 
+				&& $report->report_columns[$colname]['title'] != '' )  {
+				$new_column['label'] = $report->report_columns[$colname]['title'];
+			}
+			$columns[$colname] = $new_column;
+		}
+		$groups = [];
+		foreach( $report->report_sorting as $colname => $sorting ) {
+			if( isset($sorting['group']) ) {
+				if( !isset($columns[$colname]) ) {
+					if( isset($allColumns[$colname]) ) {
+						$groups[$colname] = $allColumns[$colname];
+					}
+				}
+// 				$columns[$colname]['groupedRow'] = 
+					$columns[$colname]['group'] = $sorting['group'];
+// 				$columns[$colname]['groupFooter'] = function ($model, $key, $index, $widget) { // Closure method
+//                 return [
+// //                     'mergeColumns' => [[2, 3]], // columns to merge in summary
+//                     'content' => [              // content to show in each summary cell
+//                         5 => GridView::F_SUM,
+//                         6 => GridView::F_SUM,
+//                         7 => GridView::F_SUM,
+//                         8 => GridView::F_SUM,
+//                     ],
+//                     'contentFormats' => [      // content reformatting for each summary cell
+//                         4 => ['format' => 'number', 'decimals' => 2],
+//                         5 => ['format' => 'number', 'decimals' => 0],
+//                         6 => ['format' => 'number', 'decimals' => 2],
+//                     ],
+//                     'contentOptions' => [      // content html attributes for each summary cell
+//                         4 => ['style' => 'text-align:right'],
+//                         5 => ['style' => 'text-align:right'],
+//                         6 => ['style' => 'text-align:right'],
+//                     ],
+//                     // html attributes for group summary row
+//                     'options' => ['class' => 'success table-success','style' => 'font-weight:bold;']
+//                 ];
+//             };
+				
+			}
+		}
+		if( count($groups) ) {
+			return $groups + $columns;
+		} else {
+			return $columns;
+		}
+	}
 	
+	/**
+	 * Gets all columns that can be selected and configured for the report
+	 */
+	public function columnDefinitions($report, $allColumns)
+	{
+		$columns = [];
+		foreach( $allColumns as $colname => $grid_column ) {
+			if( isset( $grid_column['label'] ) ) {
+				$orig_title = $grid_column['label'];
+			} else if( isset( $column['attribute'] ) ) {
+				$orig_title = $this->getAttributeLabel($column['attribute']);
+			} else if( !is_numeric($colname) ) {
+				$orig_title = $this->getAttributeLabel($colname);
+			} else {
+				throw new \Exception("Imposible encontrar label para atributo $colname");
+			}
+			$column = [
+				'name' => $colname,
+				'width' => null,
+				'summary' => isset($grid_column['pageSummary']) ? $grid_column['pageSummary'] : false,
+			];
+			if( isset($report->report_columns[$colname]) ) {
+				$column = ArrayHelper::merge($report->report_columns[$colname], $column);
+			}
+			if( isset($column['title']) && $column['title'] != '' ) {
+				if( $orig_title == $column['title'] ) {
+					$column['title'] = '';
+					$column['is_custom_title'] = false;
+				} else {
+					$column['is_custom_title'] = true;
+				}
+			} else {
+				$column['is_custom_title'] = false;
+				$column['title'] = '';
+			}
+			$column['orig_title'] = $orig_title;
+			$column['dropdown_option'] = [ $colname, $orig_title];
+			$columns[$colname] = $column;
+		}
+		return $columns;
+	}
+	
+	/**
+	 * Creates the data provider for the grid.
+	 * Sets the query, select, joins, orderBy, groupBy and filters
+	 */
+	public function dataProviderForReport($report, $columns)
+    {
+        $query = new yii\db\Query(); // self::find();
+
+        $provider = new ActiveDataProvider([
+            'query' => $query->from(self::tableName()),
+            'pagination' => false,
+        ]);
+
+		$sort = [];
+		foreach( $report->report_sorting as $colname => $sorting_column ) {
+			list($model, $field) = self::splitFieldName($colname);
+			if( empty($model) ) {
+				$sort[$colname] = self::tableName() . '.' . $sorting_column['asc'];
+			} else {
+				$sort[$colname] = $sorting_column['asc'];
+			}
+		}
+		$provider->sort->attributes = [ 'default' =>  [ 'asc' => $sort ]];
+		$provider->sort->defaultOrder = [ 'default' => SORT_ASC ];
+
+		foreach( $report->report_filters as $colname => $value ) {
+ 			$this->filterWhere($query, $colname, $value);
+		}
+		$this->addSelectToReportQuery(
+			$columns, array_keys($report->report_filters), 
+				$query);
+		return $provider;
+	}
+
+	/**
+	 * Adds related select and joins to dataproviders for reports
+	 */
+	public function addSelectToReportQuery($columns, $filters, &$query)
+	{
+		$joins = [];
+		$groups = [];
+		$selects = [];
+		foreach( $columns as $attribute => $column_def ) {
+			if ( is_int($attribute) || array_key_exists($attribute, $this->attributes ) ) {
+				$selects[] = self::tableName() . ".$attribute";
+				continue;
+			}
+			$fldname = '';
+			$relation_name = $attribute;
+			if( ($dotpos = strpos($attribute, '.')) !== FALSE ) {
+				$fldname = substr($attribute, $dotpos + 1);
+				$relation_name = substr($attribute, 0, $dotpos);
+			}
+			if( isset(self::$relations[$relation_name]) ) {
+				if( !isset($joins[$relation_name]) ) {
+					$joins[$relation_name] = true;
+					$relation = self::$relations[$relation_name];
+					$query->leftJoin($relation['relatedTablename'],$relation['join']);
+				}
+				$selects[] = $column_def['attribute'];
+				if( !isset($groups[$relation['right']]) ) {
+					$groups[$relation['right']] = $relation['right'];
+				}
+			} else {
+ 				throw new InvalidArgumentException($attribute . " column not found in " . self::class);
+			}
+		}
+		$query->select($selects);
+		$query->groupBy($groups);
+    }
+	/**
+	 * Groups the available report columns by table and returns an array for a dropDownList
+	 */
+	public static function columnsForDropDown($report, $columns)
+	{
+		$dropdown_options = [];
+		$base_model = $report->getValue('model', '.');
+		foreach( $columns as $colname => $col_attrs ) {
+			list($model, $field) = self::splitFieldName($colname);
+			if( empty($model) ) {
+				$dropdown_options[$base_model][$colname] = $col_attrs['orig_title'];
+			} else {
+				$model = ucfirst($model);
+				$dropdown_options[$model][$colname] = $col_attrs['orig_title'] . " ($model)";
+			}
+		}
+		return $dropdown_options;
+	}
+	
+    static public function splitFieldName($fieldname) 
+    {
+		if( ($dotpos = strpos($fieldname, '.')) !== FALSE ) {
+			$fldname = substr($fieldname, $dotpos + 1);
+			$tablename = substr($fieldname, 0, $dotpos);
+			return [ $tablename, $fldname ];
+		} else {
+			return [ "", $fieldname ];
+		}
+	}
+    
+    
 }

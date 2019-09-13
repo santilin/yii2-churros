@@ -34,8 +34,12 @@ class Formatter extends \yii\i18n\Formatter
 	
 	public function asHours($minutes)
 	{
-		return str_pad(floor($minutes / 60), 2, "0", STR_PAD_LEFT)
-			. ":" . substr("00" . ($minutes % 60), -2);
+		if( empty($minutes) ) {
+			return "00:00";
+		} else {
+			return str_pad(floor($minutes / 60), 2, "0", STR_PAD_LEFT)
+				. ":" . substr("00" . ($minutes % 60), -2);
+		}
 	}
 
 }
