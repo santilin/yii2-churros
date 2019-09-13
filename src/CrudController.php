@@ -47,7 +47,7 @@ class CrudController extends \yii\web\Controller
 				'rules' => [
 					[
 						'allow' => true,
-						'actions' => ArrayHelper::merge(['index', 'view', 'create', 'update', 'delete', 'pdf', 'duplicate', 'remove-image', 'about'], $this->allowedActions),
+						'actions' => ArrayHelper::merge(['index', 'view', 'create', 'update', 'delete', 'pdf', 'duplicate', 'remove-image'], $this->allowedActions),
 						'roles' => ['@']
 					],
 					[
@@ -116,24 +116,7 @@ class CrudController extends \yii\web\Controller
 			if( $this->parent_model) {
 				$model->setAttribute( $model->getRelatedFieldForModel($this->parent_model), $this->parent_model->getPrimaryKey());
 			}
-			$saved = false;
-			$fileAttributes = $this->addFileInstances($model);
-			if (count($fileAttributes) == 0) {
-				$saved = $model->saveAll();
-			} else {
-				$transaction = $model->getDb()->beginTransaction();
-				$saved = $model->saveAll();
-				if ($saved) {
-					$saved = $this->saveFileInstances($model, $fileAttributes);
-				}
-				if ($saved) {
-					$transaction->commit();
-				} else {
-					$transaction->rollBack();
-				}
-			}
-			if ($saved) {
-				$m = $model->recordDesc();
+			if( $this->doSave($model) ) {
 				Yii::$app->session->setFlash('success',
 						$model->t('churros', "{La} {title} <strong>{record}</strong> has been successfully created."));
 				return $this->whereToGoNow('create', $model);
@@ -171,23 +154,7 @@ class CrudController extends \yii\web\Controller
 			foreach ($model->primaryKey() as $primary_key) {
 				$model->$primary_key = null;
 			}
-			$saved = false;
-			$fileAttributes = $this->addFileInstances($model);
-			if (count($fileAttributes) == 0) {
-				$saved = $model->saveAll();
-			} else {
-				$transaction = $model->getDb()->beginTransaction();
-				$saved = $model->saveAll();
-				if ($saved) {
-					$saved = $this->saveFileInstances($model, $fileAttributes);
-				}
-				if ($saved) {
-					$transaction->commit();
-				} else {
-					$transaction->rollBack();
-				}
-			}
-			if ($saved) {
+			if( $this->doSave($model) ) {
 				Yii::$app->session->setFlash('success',
 					$model->t('churros', "{La} {title} <strong>{record}</strong> has been successfully duplicated."));
 				return $this->whereTogoNow('create', $model);
@@ -213,23 +180,7 @@ class CrudController extends \yii\web\Controller
 			if( $this->parent_model) {
 				$model->setAttribute( $model->getRelatedFieldForModel($this->parent_model), $this->parent_model->getPrimaryKey());
 			}
-			$saved = false;
-			$fileAttributes = $this->addFileInstances($model);
-			if (count($fileAttributes) == 0) {
-				$saved = $model->saveAll();
-			} else {
-				$transaction = $model->getDb()->beginTransaction();
-				$saved = $model->saveAll();
-				if ($saved) {
-					$saved = $this->saveFileInstances($model, $fileAttributes);
-				}
-				if ($saved) {
-					$transaction->commit();
-				} else {
-					$transaction->rollBack();
-				}
-			}
-			if ($saved) {
+			if( $this->doSave($model) ) {
 				Yii::$app->session->setFlash('success',
 					$model->t('churros', "{La} {title} <strong>{record}</strong> has been successfully updated."));
 				return $this->whereTogoNow('update', $model);
@@ -240,6 +191,27 @@ class CrudController extends \yii\web\Controller
 			'parent' => $this->parent_model,
 			'extraParams' => $this->extraParams('index', $model)
 		]);
+	}
+
+	protected function doSave($model)
+	{
+		$saved = false;
+		$fileAttributes = $this->addFileInstances($model);
+		if (count($fileAttributes) == 0) {
+			$saved = $model->saveAll();
+		} else {
+			$transaction = $model->getDb()->beginTransaction();
+			$saved = $model->saveAll();
+			if ($saved) {
+				$saved = $this->saveFileInstances($model, $fileAttributes);
+			}
+			if ($saved) {
+				$transaction->commit();
+			} else {
+				$transaction->rollBack();
+			}
+		}
+		return $saved;
 	}
 
 	/**

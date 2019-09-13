@@ -228,12 +228,16 @@ trait ModelInfoTrait
 
     public function controllerName($prefix = '')
     {
-		$c = self::getModelInfo('controller_name');
-		if( $c == '' ) {
-			$c = AppHelper::stripNamespaceFromClassName($this);
-			$c = lcfirst(str_replace("Search", "", $c));
-		}
+		$c = AppHelper::stripNamespaceFromClassName($this);
+		$c = lcfirst(str_replace("Search", "", $c));
 		return $prefix . $c;
+    }
+
+    public function viewPath($prefix = '')
+    {
+		$c = AppHelper::stripNamespaceFromClassName($this);
+		$c = lcfirst(str_replace("Search", "", $c));
+		return "$prefix$c/";
     }
 
     public function getRelatedFieldForModel($related_model)

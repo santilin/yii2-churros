@@ -146,5 +146,11 @@ class Base extends \Faker\Provider\Base
         imagedestroy($image);
         return $contents;
 	}
+	
+	public function hours()
+	{
+		return str_pad($this->generator->numberBetween(0,23), 2, '0', STR_PAD_LEFT)
+		. ':' . str_pad($this->generator->numberBetween(0,59), 2, '0', STR_PAD_LEFT);
+	}
  
 }
