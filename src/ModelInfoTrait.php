@@ -316,6 +316,13 @@ trait ModelInfoTrait
 		}
 		return $this->$attr;
 	}
+
+	static public function addWithSep(& $source, $add, $sep = ', ')
+	{
+		if( !empty($add) ) {
+			$source = "$source$sep$add";
+		}
+	}
 	
 } // trait ModelInfoTrait
 

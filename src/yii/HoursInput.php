@@ -42,6 +42,11 @@ $('#$id').change( function() {
 	console.log("Minutos: ",minutos, toMinutes(minutos));
 	$('#{$this->_hidden_id}').val(toMinutes(minutos));
 });
+$('#$id').focus(function (e) {
+	var that = this;
+	setTimeout(function(){\$(that).select();},10);
+	return false;
+});
 JS;
 		$view->registerJs($js);
 	}
