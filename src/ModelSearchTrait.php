@@ -149,7 +149,7 @@ trait ModelSearchTrait
 
 	protected function filterWhere(&$query, $name, $value)
 	{
-		if( empty($value) ) {
+		if( $value === null || $value === '' ) {
 			return;
 		}
 		// addColumnsSortsFiltersToProvider adds the join tables with AS `as_xxxxxxx`

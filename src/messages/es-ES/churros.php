@@ -17,6 +17,7 @@
  * NOTE: this file must be saved in UTF-8 encoding.
  */
 return [
+	'All' => 'Todo',
     'The {attribute} \'{value}\' is not valid' => 'El valor \'{value}\' del campo \'{attribute}\' no es válido',
     'Active' => 'Activo',
     'Error saving the record {title}' => 'Error guardando el registro {title}',
