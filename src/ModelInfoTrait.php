@@ -2,6 +2,7 @@
 
 use Yii;
 use santilin\churros\helpers\AppHelper;
+use santilin\churros\ModelSearchTrait;
 use \yii\helpers\ArrayHelper;
 use Faker\Factory as Faker;
 
@@ -242,21 +243,27 @@ trait ModelInfoTrait
 
     public function getRelatedFieldForModel($related_model)
     {
-		foreach( $this->relations as $relname => $rel_info ) {
-			if( $rel_info['model'] == $related_model->classname() ) {
-				return $rel_info['field'];
+		foreach( self::$relations as $relname => $rel_info ) {
+			if( $rel_info['modelClass'] == $related_model->className() ) {
+				if( $rel_info['type'] == 'BelongsToOne' ) {
+					$related_field = $rel_info['right'];
+				} else {
+					$related_field = $rel_info['left'];
+				}
+				list($table, $field) = ModelSearchTrait::splitFieldName($related_field);
+				return $field;
 			}
 		}
-		throw new \Exception( $this->classname() . " no está relacionado con " . $related_model->classname );
+		throw new \Exception( self::className() . " no está relacionado con " . $related_model->className() );
     }
 
     public function getRelatedModelClass($relation_name)
     {
-		if( isset($this->relations[$relation_name]) ) {
+		if( isset(self::$relations[$relation_name]) ) {
 			$rel_info = $this->relations[$relation_name];
 			return $rel_info['model'];
 		} else {
-			throw new \Exception( $this->classname() . " no está relacionado con " . $related_model->classname );
+			throw new \Exception( self::className() . " no está relacionado con " . $related_model->className() );
 		}
 	}    
     

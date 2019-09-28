@@ -5,7 +5,7 @@
  * For the full copyright and license information, please view
  * the LICENSE file that was distributed with this source code.
  */
-namespace santilin\churros\yii;
+namespace santilin\churros\grid;
 
 use Yii;
 use yii\base\Model;

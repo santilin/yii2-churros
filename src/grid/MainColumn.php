@@ -1,6 +1,6 @@
 <?php
 
-namespace santilin\churros\yii;
+namespace santilin\churros\grid;
 
 use kartik\grid\DataColumn;
 use yii\helpers\Html;
