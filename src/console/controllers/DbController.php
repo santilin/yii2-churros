@@ -30,7 +30,7 @@ class DbController extends Controller
      * for creating the object.
      */
     public $db = 'db';
-    
+
     /** @var one of FORMATS */
     public $format = 'seeder';
 
@@ -117,6 +117,7 @@ class DbController extends Controller
 		$preamble = $this->getPreamble('dump-schema', $schemaName);
 		$runseeder = '';
 		$tables = $this->db->schema->getTableSchemas($schemaName, true);
+		$full_dump = $preamble;
 		foreach ($tables as $table) {
 			if( $table->name != 'migration' ) {
 				echo "Dumping {$table->name}\n";
@@ -219,7 +220,7 @@ EOF;
 		echo "Seeding schema from $inputfilename\n";
 		$s->run($this->db);
 	}
-	
+
 	protected function dumpTable($tableSchema)
 	{
 		switch( $this->format ) {
@@ -259,7 +260,7 @@ EOF;
 		return $txt_data;
 	}
 
-	
+
 	protected function dumpTableAsSeeder($tableSchema)
     {
 		$txt_data = '';
@@ -328,7 +329,7 @@ EOF;
 
 /**
  * Churros v $version
- * ./yii churros/db/$command --format {$this->format} $table 
+ * ./yii churros/db/$command --format {$this->format} $table
  * Schema: $schema
  * Timestamp: $timestamp
  */
@@ -341,6 +342,6 @@ PREAMBLE;
 	protected function seedTableFromCsv($table, $inputfile)
 	{
 	}
-	
+
 } // class
 
