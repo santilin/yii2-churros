@@ -24,7 +24,7 @@ use santilin\churros\helpers\AppHelper;
  *
  * @package edevelop\grid
  */
-class GridMainColumn extends DataColumn
+class MainColumn extends DataColumn
 {
     /**
      * link

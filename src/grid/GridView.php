@@ -13,7 +13,7 @@ class GridView extends BaseGridView
 	/**
 	 * The group headers and footers definitions
 	 */
-	public $groups;
+	public $groups = [];
 	/**
 	 * The column to group
 	 */
