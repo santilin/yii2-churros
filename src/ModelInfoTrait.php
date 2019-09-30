@@ -130,7 +130,7 @@ trait ModelInfoTrait
 			$sql .= "(" . join(" AND ", $conds) . ")";
 		}
 		if( $usegaps ) {
-			if( $conds != '' ) {
+			if( $conds != [] ) {
 				$sql .= " AND ";
 			}
 			$sql .= "(CAST([[$fldname]] AS SIGNED)$increment NOT IN (SELECT [[$fldname]] FROM $tablename";
