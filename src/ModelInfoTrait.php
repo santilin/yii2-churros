@@ -126,7 +126,7 @@ trait ModelInfoTrait
 		if( $usegaps || $conds != [] ) {
 			$sql .= " WHERE ";
 		}
-		if( $conds != '' ) {
+		if( $conds != [] ) {
 			$sql .= "(" . join(" AND ", $conds) . ")";
 		}
 		if( $usegaps ) {
@@ -134,8 +134,8 @@ trait ModelInfoTrait
 				$sql .= " AND ";
 			}
 			$sql .= "(CAST([[$fldname]] AS SIGNED)$increment NOT IN (SELECT [[$fldname]] FROM $tablename";
-			if( $conds != '' ) {
-				$sql .= " WHERE ($conds)";
+			if( $conds != [] ) {
+				$sql .= " WHERE (" . join(" AND ", $conds) . ")";
 			}
 			$sql .= ") )";
 		}
