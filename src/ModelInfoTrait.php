@@ -9,7 +9,7 @@ use Faker\Factory as Faker;
 trait ModelInfoTrait
 {
 	use RelationTrait;
-	
+
 	public function maleWord($word) {
 		if( static::getModelInfo('female') === true ) {
 			return $word;
@@ -111,6 +111,11 @@ trait ModelInfoTrait
 
 	public function increment( $fldname, $increment, $conds = '', $usegaps = true)
 	{
+		if( $increment == '' ) {
+			$increment = "+1";
+		} else if( $increment[0] != '+' ) {
+			$increment = "+$increment";
+		}
 		$tablename = $this->tableName();
 		if( $usegaps ) {
 			$sql = "SELECT [[$fldname]]";
@@ -128,14 +133,16 @@ trait ModelInfoTrait
 			if( $conds != '' ) {
 				$sql .= " AND ";
 			}
-			$sql .= "([[$fldname]]+$increment NOT IN (SELECT [[$fldname]] FROM $tablename";
+			$sql .= "(CAST([[$fldname]] AS SIGNED)$increment NOT IN (SELECT [[$fldname]] FROM $tablename";
 			if( $conds != '' ) {
 				$sql .= " WHERE ($conds)";
 			}
 			$sql .= ") )";
 		}
 //     try {
-        return Yii::$app->db->createCommand( $sql )->queryScalar() + intval($increment);
+		$val = Yii::$app->db->createCommand( $sql )->queryScalar();
+        $fval =  floatval($val) + floatval($increment);
+        return $fval;
 //     } catch( dbError &e ) {
 //         if( e.getNumber() == 1137 ) { // ERROR 1137 (HY000): Can't reopen table:
 //             sql = "SELECT MAX(" + nameToSQL( fldname ) + ")";
@@ -265,8 +272,8 @@ trait ModelInfoTrait
 		} else {
 			throw new \Exception( self::className() . " no está relacionado con " . $related_model->className() );
 		}
-	}    
-    
+	}
+
 	public function getImageData($fldname, $index=0)
 	{
 		$fldvalue = $this->$fldname;
@@ -330,6 +337,6 @@ trait ModelInfoTrait
 			$source = "$source$sep$add";
 		}
 	}
-	
+
 } // trait ModelInfoTrait
 

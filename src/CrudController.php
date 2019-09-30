@@ -27,12 +27,12 @@ class CrudController extends \yii\web\Controller
 
 	/**
 	 * An array of extra params to pass to the views
-	 **/ 
+	 **/
 	public function extraParams($action, $model)
 	{
 		return null;
 	}
-	
+
 	public function behaviors() {
 		return [
 			'verbs' => [
@@ -230,7 +230,7 @@ class CrudController extends \yii\web\Controller
 			throw new \santilin\churros\DeleteModelException($model, $e);
 		}
 		Yii::$app->session->setFlash('success',
-			$model->t('churros', "{La} {title} <strong>{record}</strong> has been successfully deleted"));
+			$model->t('churros', "{La} {title} <strong>{record}</strong> has been successfully deleted."));
 		return $this->whereToGoNow('delete', $model);
 	}
 

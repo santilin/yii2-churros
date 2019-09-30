@@ -26,11 +26,11 @@ return [
     'Inactive' => 'Inactivo',
     '{La} {title} <strong>{record}</strong> has been successfully created.' =>
     '{La} {title} <strong>{record}</strong> se ha creado correctamente.',
-    '{La} {title} <strong>{record}</strong> has been successfully deleted' =>
-    '{La} {title} <strong>{record}</strong> se ha borrado correctamente.', 
+    '{La} {title} <strong>{record}</strong> has been successfully deleted.' =>
+    '{La} {title} <strong>{record}</strong> se ha borrado correctamente.',
     '{La} {title} <strong>{record}</strong> has been successfully duplicated.' =>
     '{La} {title} <strong>{record}</strong> se ha duplicado correctamente.',
-    '{La} {title} <strong>{record}</strong> has been successfully updated.' => 
+    '{La} {title} <strong>{record}</strong> has been successfully updated.' =>
     '{La} {title} <strong>{record}</strong> se ha actualizado correctamente.',
     '{Title_plural}' => '{Title_plural}',
     '{inactive} since' => '{inactive} desde',
