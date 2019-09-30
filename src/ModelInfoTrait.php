@@ -109,7 +109,7 @@ trait ModelInfoTrait
 		return $ret;
 	}
 
-	public function increment( $fldname, $increment, $conds = '', $usegaps = true)
+	public function increment( $fldname, $increment, $conds = [], $usegaps = true)
 	{
 		if( $increment == '' ) {
 			$increment = "+1";
@@ -123,11 +123,11 @@ trait ModelInfoTrait
 			$sql = "SELECT MAX([[$fldname]])";
 		}
 		$sql .= " FROM $tablename";
-		if( $usegaps || $conds != '' ) {
+		if( $usegaps || $conds != [] ) {
 			$sql .= " WHERE ";
 		}
 		if( $conds != '' ) {
-			$sql .= "($conds)";
+			$sql .= "(" . join(" AND ", $conds) . ")";
 		}
 		if( $usegaps ) {
 			if( $conds != '' ) {

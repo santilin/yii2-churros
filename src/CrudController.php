@@ -139,11 +139,14 @@ class CrudController extends \yii\web\Controller
 		* @param mixed $id
 		* @return mixed
 		*/
-	public function actionDuplicate($id) {
-		$model = $this->findModel($id);
-
+	public function actionDuplicate($id)
+	{
 		if (Yii::$app->request->post('_asnew') != 0) {
-			$model = $this->findModel(Yii::$app->request->post('_asnew'));
+			$id = Yii::$app->request->post('_asnew');
+			$model = $this->findModel($id);
+			$model->setDefaultValues(true); // duplicating
+		} else {
+			$model = $this->findModel($id);
 		}
 
 		if ($model->loadAll(Yii::$app->request->post()) ) {

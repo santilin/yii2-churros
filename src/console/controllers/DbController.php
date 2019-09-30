@@ -304,7 +304,7 @@ EOF;
 			$ret .= "\t\t\$db->createCommand(\"DELETE FROM $table_name\")->execute();\n";
 		}
 		$ret .= <<<EOF
-		echo "Seeding $table_name";
+		echo "Seeding $table_name\n";
 		foreach( \$rows_$table_name as \$row ) {
 			foreach( \$this->columns as \$ck => \$cv ) {
 				if( \$cv == '' ) {
