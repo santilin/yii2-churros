@@ -409,6 +409,11 @@ class CrudController extends \yii\web\Controller
 	{
 		$redirect = [];
 		$referrer = Yii::$app->request->post("_form_referrer");
+		if ($from == 'create') {
+			if (Yii::$app->request->post('_and_create') == '1') {
+				$referrer = null;
+			}
+		}
 		if ( $referrer ) {
 			return $this->redirect($referrer);
 		}

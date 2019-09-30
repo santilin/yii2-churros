@@ -303,14 +303,22 @@ EOF;
 			$ret .= "\t\t\$db->createCommand()->checkIntegrity(false)->execute();\n";
 			$ret .= "\t\t\$db->createCommand(\"DELETE FROM $table_name\")->execute();\n";
 		}
-		$ret .= "\t\techo \"Seeding $table_name\\n\";\n";
-		$ret .= "\t\tforeach( \$rows_$table_name as \$row ) {\n";
-		$ret .= "\t\t\t\$db->schema->insert('$table_name', array_combine(\$this->columns, \$row));\n";
-		$ret .= "\t\t}\n";
-		$ret .= "\t}\n";
-		$ret .= "\n";
-		$ret .= "} // class \n";
-		$ret .= "\n";
+		$ret .= <<<EOF
+		echo "Seeding $table_name";
+		foreach( \$rows_$table_name as \$row ) {
+			foreach( \$this->columns as \$ck => \$cv ) {
+				if( \$cv == '' ) {
+					unset(\$row[\$ck]);
+					unset(\$this->columns[\$ck]);
+				}
+			}
+			\$db->schema->insert('$table_name', array_combine(\$this->columns, \$row));
+		}
+	}
+
+} // class
+
+EOF;
 		return $ret;
 	}
 
