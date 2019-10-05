@@ -41,12 +41,6 @@ trait ModelInfoTrait
 	public function t( $category, $message, $params = [], $language = null )
 	{
 		$placeholders = [
-			'{title}' => lcfirst(static::getModelInfo('title')),
-			'{title_plural}' => lcfirst(static::getModelInfo('title_plural')),
-			'{Title}' => ucfirst(static::getModelInfo('title')),
-			'{Title_plural}' => ucfirst(static::getModelInfo('title_plural')),
-			'{record}' => $this->recordDesc(),
-			'{record_long}' => $this->recordDesc('long'),
 			'{la}' => $this->maleWord('la'),
 			'{La}' => $this->maleWord('La'),
 			'{las}' => $this->maleWord('las'),
@@ -58,22 +52,70 @@ trait ModelInfoTrait
 			'{estas}' => $this->maleWord('estas'),
 			'{Estas}' => $this->maleWord('Estas'),
 		];
+		$matches = [];
+		if( preg_match_all('/({[a-zA-Z0-9\._]+})+/', $message, $matches) ) {
+			foreach( $matches[1] as $match ) {
+				switch( $match ) {
+				case '{title}':
+					$placeholders[$match] = lcfirst(static::getModelInfo('title'));
+					break;
+				case '{title_plural}':
+					$placeholders[$match] = lcfirst(static::getModelInfo('title_plural'));
+					break;
+				case '{Title}':
+					$placeholders[$match] = ucfirst(static::getModelInfo('title'));
+					break;
+				case '{Title_plural}':
+					$placeholders[$match] = ucfirst(static::getModelInfo('title_plural'));
+					break;
+				case '{record}':
+					$placeholders[$match] = $this->recordDesc();
+					break;
+				case '{record_long}':
+					$placeholders[$match] = $this->recordDesc('long');
+					break;
+				case '{record_short}':
+					$placeholders[$match] = $this->recordDesc('short');
+					break;
+				}
+			}
+		}
 		$translated = Yii::t($category, $message, $params, $language);
 		return strtr($translated, $placeholders);
 	}
 
 	public function recordDesc($format=null)
 	{
-		$code_field = static::getModelInfo('code_field');
-		$desc_field = static::getModelInfo('desc_field');
-		if( $code_field!='' && $desc_field!='' ) {
-			return $this->$code_field . ", " . $this->$desc_field;
-		} else if( $code_field != '' ) {
-			return $this->$code_field;
-		} else if( $desc_field != '' ) {
-			return $this->$desc_field;
+		if( $format == null ) {
+			$format = self::getModelInfo('record_desc_format');
+		} elseif( $format == 'long' ) {
+			$format = self::getModelInfo('record_desc_format_long');
+		} elseif( $format == 'short' ) {
+			$format = self::getModelInfo('record_desc_format_short');
 		}
-		return "";
+		$values = $matches = [];
+		if( preg_match_all('/{([a-zA-Z0-9\._]+)(\%([^}])*)*}+/', $format, $matches) ) {
+			foreach( $matches[0] as $n => $match ) {
+				$value = ArrayHelper::getValue($this, $matches[1][$n]);
+				$sprintf_part = $matches[2][$n];
+				if( $sprintf_part == '' ) {
+					$sprintf_part = "%s";
+				} else {
+					if( preg_match('/\.([0-9]+)/', $sprintf_part, $m ) ) {
+						$len = intval($m[1]);
+						if( strlen(strval($value)) > $len-3 ) {
+							$value = substr($value, 0, $len-3) .
+							'...';
+						}
+					}
+				}
+				$format = str_replace($match, $sprintf_part, $format);
+				$values[] = $value;
+			}
+			return sprintf($format, ...$values);
+		} else {
+			return $format;
+		}
 	}
 
 	public function linkTo($action, $prefix = '')
@@ -89,7 +131,7 @@ trait ModelInfoTrait
 					$url);
 		} else {
 			$url .= "/$action";
-			return \yii\helpers\Html::a($this->recordDesc('link'),
+			return \yii\helpers\Html::a($this->recordDesc(),
 					[$url, 'id' => $this->getPrimaryKey() ]);
 		}
 	}

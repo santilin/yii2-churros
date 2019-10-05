@@ -28,7 +28,7 @@ abstract class BaseImporter {
 	const ERROR = 1;
 	const RECORD_ERROR = 2;
 	const CSV_FILE_ERROR = 3;
-	
+
 	const TYPE_CSV = 1;
 	const TYPE_XML = 2;
 
@@ -51,7 +51,7 @@ abstract class BaseImporter {
      * @var a record
      */
     protected $record = null;
-    
+
     /**
      * @var integer el número de línea del fichero csv o el número de registro xml que se está leyendo
      */
@@ -62,7 +62,7 @@ abstract class BaseImporter {
      */
     protected $errors = [];
 
-    /** 
+    /**
      * @var The base import model
      */
     protected $model;
@@ -87,7 +87,7 @@ abstract class BaseImporter {
      */
 	protected $type;
 
-    public function __construct($type, $abort_on_error = false, $dry_run = true) 
+    public function __construct($type, $abort_on_error = false, $dry_run = true)
     {
 		$this->record = $this->createRecord();
 		$this->type = $type;
@@ -155,9 +155,7 @@ abstract class BaseImporter {
                 if (!$this->dry_run) {
 // 					echo "Movimiento importado de la línea {$this->csvline}\n";
 					try {
-						if ($r->save() ) {
-							$r->regeneraComisiones();
-						} else {
+						if (!$r->save() ) {
 							$this->addError($r->getErrorsAsString() );
 							$has_errors = true;
 						}
@@ -177,7 +175,6 @@ abstract class BaseImporter {
 			}
 			return self::RECORD_ERROR;
 		 } else {
-			// Marcar la importación como insertada correctamente
 			if (!$this->dry_run) {
   				$transaction->commit();
 			}
@@ -231,12 +228,12 @@ abstract class BaseImporter {
 				continue;
 			}
 			$record->$field = $value;
-/*			
+/*
 			if( $record->hasAttribute($field) ) {
 			} else {
 				$this->addError("El campo $field no existe en el registro de " . get_class($record));
 			}
-*/			
+*/
         }
         return $record->validate();
     }
@@ -264,7 +261,7 @@ abstract class BaseImporter {
      * @param string $csvquote
      * @return bool si no ha habido errors graves
      */
-    protected function readRecordsFromCSV($csvdelimiter, $csvquote) 
+    protected function readRecordsFromCSV($csvdelimiter, $csvquote)
     {
         // @holadoc php/ficheros No hace falta comprobar si existe un fichero si luego lo vamos a abrir. fopen ya nos da el error si no existe.
         if (($file = fopen($this->filename, 'r')) === false) {
@@ -285,7 +282,7 @@ abstract class BaseImporter {
             $this->errors[] = "El número de columnas del fichero (" . count($csvline) . ") no coincide con el del importador (" . count($csvheaders). ")";
             return false;
         }
-        if (array_diff($csvline,$csvheaders) != [] 
+        if (array_diff($csvline,$csvheaders) != []
         && array_diff($csvheaders,$csvline) != [] ) {
 			foreach( $csvline as $key=>$value) {
 				if( $csvline[$key] != $csvheaders[$key] ) {
@@ -452,8 +449,8 @@ abstract class BaseImporter {
     }
 
     protected function import_find_related_id($related_value, $array_csv,
-		$related_model, $related_fields, $related_field) 
-    {	
+		$related_model, $related_fields, $related_field)
+    {
 		$related_class = "\app\models\\$related_model";
 		$related_record = new $related_class;
 		if( !is_array($related_fields) ) {
@@ -467,7 +464,7 @@ abstract class BaseImporter {
 		}
 		return null;
     }
-    
+
     protected function import_find_in_array($value, $array_csv, $array)
     {
 		foreach($array as $arr_key=>$arr_value) {
@@ -477,7 +474,7 @@ abstract class BaseImporter {
 		}
 		return null;
     }
-    
+
     /**
      * Devuelve el array con la información de cómo se importa cada campo del csv.
      *

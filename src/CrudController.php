@@ -453,7 +453,7 @@ class CrudController extends \yii\web\Controller
 				'label' => $parent->t('churros', '{Title_plural}'),
 				'url' => [ $prefix . $parent->controllerName() . '/index']];
 			$breadcrumbs[] = [
-				'label' => $parent->t('churros', '{record}'),
+				'label' => $parent->t('churros', '{record_short}'),
 				'url' => [$prefix . $parent->controllerName() . '/view', 'id' => $parent->getPrimaryKey() ] ];
 			if( $action != 'index') {
 				$breadcrumbs[] = [
@@ -465,7 +465,7 @@ class CrudController extends \yii\web\Controller
 			switch( $action ) {
 				case 'update':
 					$breadcrumbs[] = [
-						'label' => $model->t('churros', '{record}'),
+						'label' => $model->t('churros', '{record_short}'),
 						'url' => [ $prefix . $parent->controllerName() . '/' . strval($parent->getPrimaryKey())
 								. '/' . $route . '/view/' . strval($model->getPrimaryKey()) ] ];
 					break;
@@ -481,7 +481,7 @@ class CrudController extends \yii\web\Controller
 				case 'update':
 				case 'saveAsNew':
 					$breadcrumbs[] = [
-						'label' => $model->t('churros', '{record}'),
+						'label' => $model->t('churros', '{record_short}'),
 						'url' => [ $prefix . 'view', 'id' => $model->getPrimaryKey() ]
 					];
 					break;
