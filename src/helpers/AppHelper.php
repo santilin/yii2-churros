@@ -12,7 +12,7 @@ use Yii;
 class AppHelper
 {
 	static private $tabindex = 0;
-	
+
     static public function empty($value)
     {
 		return empty($value);
@@ -23,20 +23,23 @@ class AppHelper
 		return str_replace("-", "_", Yii::$app->language);
 	}
 
-	static public function joinModels($glue, $parentmodel, $models, $attribute = null)
+	/**
+	 * @params string $route if null, the model controller
+	 */
+	static public function joinModels($glue, $models, $controller)
 	{
 		if( $models == null || count($models)==0 ) {
 			return "";
 		}
 		$attrs = [];
-		if ($attribute == null ) {
-			$attribute = $models[0]->getModelInfo('code_field');
-// 			die(print_r($models[0],true));
-		}
+		$route = null;
 		foreach((array)$models as $model) {
+			if( $route == null ) {
+				$route = $controller->controllerRoute($model);
+			}
 			if( $model != null ) {
-				$url = "/" . $model->controllerName() . "/" . strval($model->getPrimaryKey()) . "?parent_controller=". $parentmodel->controllerName() . "&parent_id=" . strval($parentmodel->getPrimaryKey());
-				$attrs[] = "<a href='$url'>" .  $model->$attribute . "</a>";
+				$url = $route . strval($model->getPrimaryKey());
+				$attrs[] = "<a href='$url'>" .  $model->recordDesc() . "</a>";
 			}
 		}
 		return join($glue, $attrs);
@@ -97,7 +100,7 @@ class AppHelper
 		static::$tabindex += $inc;
 		return static::$tabindex;
 	}
-	
+
 	static public function resetTabIndex($reset = 0)
 	{
 		static::$tabindex = $reset;

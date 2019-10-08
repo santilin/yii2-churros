@@ -5,6 +5,7 @@
 namespace santilin\churros\grid;
 
 use Yii;
+use yii\helpers\Html;
 use kartik\grid\GridView as BaseGridView;
 use santilin\churros\grid\GridGroup;
 
@@ -18,10 +19,10 @@ class GridView extends BaseGridView
 	 * The column to group
 	 */
 	public $column = null;
-	
+
 	protected $summaries = [];
 	protected $last_groups = [];
-	
+
 	public function init()
 	{
 		$this->initGroups();
@@ -33,7 +34,7 @@ class GridView extends BaseGridView
 		}
 		$this->initSorting();
 	}
-	
+
 	protected function initGroups()
 	{
 		foreach( $this->groups as $kg => $group_def ) {
@@ -56,9 +57,9 @@ class GridView extends BaseGridView
 			}
         }
 	}
-	
+
 	/**
-	 * Appends the groups orders to the default or current orders 
+	 * Appends the groups orders to the default or current orders
 	 */
 	protected function initSorting()
 	{
@@ -85,19 +86,43 @@ class GridView extends BaseGridView
 		$new_def_order += $def_order;
 		$s->setAttributeOrders($new_def_order);
 	}
-	
+
 	protected function groupHeader($model, $key, $index, $grid)
 	{
 		$ret = '';
 		$colspan = count($this->columns);
 		foreach( $this->groups as $kg => $group ) {
 			if( $group->updateHeader($model, $key, $index) ) {
-				$ret .= "<tr><td colspan=\"$colspan\">" . 
-					$group->getHeaderContent($model, $key, $index) 
+				$ret .= "<tr><td colspan=\"$colspan\">" .
+					$group->getHeaderContent($model, $key, $index)
 					. "</td></tr>";
 			}
 		}
 		return $ret;
 	}
-	
+
+
+    /**
+     * @inheritdoc
+     * Redefined to show the column of the error in case of error
+     */
+    public function renderFilters()
+    {
+        if ($this->filterModel !== null) {
+            $cells = [];
+            foreach ($this->columns as $column) {
+                /* @var $column Column */
+                try {
+					$cells[] = $column->renderFilterCell();
+				} catch( \Exception $e ) {
+					throw new \Exception($column->attribute . ": " . $e->getMessage());
+				}
+            }
+
+            return Html::tag('tr', implode('', $cells), $this->filterRowOptions);
+        }
+
+        return '';
+    }
+
 }

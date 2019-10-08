@@ -410,7 +410,10 @@ class CrudController extends \yii\web\Controller
 
 	protected function whereToGoNow($from, $model)
 	{
-		$redirect = [];
+		$returnTo = Yii::$app->request->get('returnTo');
+		if( $returnTo ) {
+			return $this->redirect($returnTo);
+		}
 		$referrer = Yii::$app->request->post("_form_referrer");
 		if ($from == 'create') {
 			if (Yii::$app->request->post('_and_create') == '1') {
@@ -436,7 +439,7 @@ class CrudController extends \yii\web\Controller
 			throw new Exception("No sé donde volver");
 		}
 		if( $this->parent_model ) {
-			return $this->redirect( $this->controllerRoute('') );
+			return $this->redirect( $this->controllerRoute() );
 		} else {
 			return $this->redirect($redirect);
 		}
@@ -447,27 +450,25 @@ class CrudController extends \yii\web\Controller
 		assert( $model instanceof Model );
 		assert( $parent == null || $parent instanceof Model );
 		$breadcrumbs = [];
-		list($prefix, $route) = $this->getRoutePrefix();
+		$prefix = $this->getRoutePrefix();
 		if( isset($parent) ) {
 			$breadcrumbs[] = [
 				'label' => $parent->t('churros', '{Title_plural}'),
-				'url' => [ $prefix . $parent->controllerName() . '/index']];
+				'url' => [ $prefix . '/index']
+			];
 			$breadcrumbs[] = [
 				'label' => $parent->t('churros', '{record_short}'),
-				'url' => [$prefix . $parent->controllerName() . '/view', 'id' => $parent->getPrimaryKey() ] ];
-			if( $action != 'index') {
-				$breadcrumbs[] = [
-					'label' => $model->t('churros', '{Title_plural}'),
-					'url' => [$prefix . $parent->controllerName() . '/' . $parent->getPrimaryKey()
-							. '/' . $route . '/index' ]
-				];
-			}
+				'url' => [$prefix . '/view' ]
+			];
+			$breadcrumbs[] = [
+				'label' => $model->t('churros', '{Title_plural}'),
+				'url' => [$prefix . $this->id ]
+			];
 			switch( $action ) {
 				case 'update':
 					$breadcrumbs[] = [
 						'label' => $model->t('churros', '{record_short}'),
-						'url' => [ $prefix . $parent->controllerName() . '/' . strval($parent->getPrimaryKey())
-								. '/' . $route . '/view/' . strval($model->getPrimaryKey()) ] ];
+						'url' => [ $prefix . $this->id. '/view/' . strval($model->getPrimaryKey()) ] ];
 					break;
 				case 'index':
 					break;
@@ -482,7 +483,7 @@ class CrudController extends \yii\web\Controller
 				case 'saveAsNew':
 					$breadcrumbs[] = [
 						'label' => $model->t('churros', '{record_short}'),
-						'url' => [ $prefix . 'view', 'id' => $model->getPrimaryKey() ]
+						'url' => [ $prefix . $this->id . '/view', 'id' => $model->getPrimaryKey() ]
 					];
 					break;
 				case 'view':
@@ -510,27 +511,10 @@ class CrudController extends \yii\web\Controller
 				$action[0] = $parent_route . '/' . $action[0];
 			}
 			return Url::toRoute($action);
-		} else if( $action != '') {
+		} else if( $action !== null) {
 			return Url::toRoute($action);
 		} else {
 			return Url::toRoute($this->id);
-		}
-	}
-
-	public function controllerRoute($action = null)
-	{
-		if( $this->parent_model ) {
-			if( $action != '' ) {
-				$action = Url::toRoute($action);
-			}
-			$parent_route = $this->parent_controller
-				. '/' . $this->parent_model->getPrimaryKey();
-			list($prefix, $route) = $this->getRoutePrefix($action, $parent_route);
-			return $prefix . $route;
-		} else if( $action != '') {
-			return Url::toRoute($action);
-		} else {
-			return $this->id;
 		}
 	}
 
@@ -555,28 +539,94 @@ class CrudController extends \yii\web\Controller
 		}
 	}
 
-	protected function getRoutePrefix($route = null, $parent_route = null)
+
+	/**
+	 * @param Model $parent The parent model (for detail_grids)
+	 */
+	public function controllerRoute($child = null)
 	{
-		if( $route == null && $parent_route == null) {
-			$route = $this->id;
-			$prefix = '';
-		} else {
-			$request_url = Yii::$app->request->url;
+		if( $child == null) { // for normal grids
+			$myroute = Url::toRoute('index');
+			if( $this->parent_model ) {
+				// myroute = /admin/model/11/update
+				// prefix = /admin/parent/22/
+				// result = /admin/parent/22/model/11/update
+				$parent_route = $this->parent_controller. '/' . $this->parent_model->getPrimaryKey() . '/';
+				$prefix = $this->getRoutePrefix() . $parent_route;
+				// https://stackoverflow.com/questions/7475437/find-first-character-that-is-different-between-two-strings
+				$pos_first_different = strspn($prefix ^ $myroute, "\0");
+				$ret = $prefix . substr($myroute, $pos_first_different);
+			} else {
+				$ret = $myroute;
+			}
+			if( ($pos = strrpos($ret, '/index')) !== FALSE ) {
+				$ret = substr($ret, 0, $pos);
+			}
+		} else { // for detail_grids
+			$ret = '/' . Yii::$app->request->getPathInfo()
+				. '/' .$child->controllerName();
+		}
+		return $ret;
+	}
+
+	protected function getRoutePrefix()
+	{
+		$route = $this->id;
+		$route_pos = false;
+		$request_url = '/' . Yii::$app->request->getPathInfo();
+		if( $this->parent_model ) {
+			$parent_route = $this->parent_controller . '/' . $this->parent_model->getPrimaryKey();
 			$route_pos = strpos($request_url, $parent_route . "/" . $route);
 			if( $route_pos === false ) {
 				$route_pos = strpos($request_url, $parent_route . $route);
 			}
-			if( $route_pos === false ) {
-				$route_pos = strpos($request_url, $route);
+		}
+		if( $route_pos === false ) {
+			$route_pos = strpos($request_url, $route);
+		}
+		$prefix = substr($request_url, 0, $route_pos);
+		if( substr($prefix, -1) != '/' ) {
+			$prefix .= '/';
+		}
+		return $prefix;
+	}
+
+	public function joinMany2ManyModels($glue, $models)
+	{
+		if( $models == null || count($models)==0 ) {
+			return "";
+		}
+		$attrs = [];
+		$route = null;
+		foreach((array)$models as $model) {
+			if( $route == null ) {
+				$route = $this->getRoutePrefix() . $model->controllerName() . '/';
 			}
-			$prefix = substr($request_url, 0, $route_pos);
-			if ($route != '') {
-				$route = substr($request_url, $route_pos);
-			} else {
-				$route = $parent_route;
+			if( $model != null ) {
+				$url = $route . strval($model->getPrimaryKey());
+				$attrs[] = "<a href='$url'>" .  $model->recordDesc() . "</a>";
 			}
 		}
-		return [ $prefix, $route ];
+		return join($glue, $attrs);
+	}
+
+	public function joinHasManyModels($glue, $models)
+	{
+		if( $models == null || count($models)==0 ) {
+			return "";
+		}
+		$attrs = [];
+		$route = null;
+		foreach((array)$models as $model) {
+			if( $route == null ) {
+				$route = $this->getRoutePrefix() . $model->controllerName() . '/';
+			}
+			if( $model != null ) {
+				$url = $route . strval($model->getPrimaryKey());
+				$attrs[] = "<a href='$url'>" .  $model->recordDesc() . "</a>";
+			}
+		}
+		return join($glue, $attrs);
 	}
 
 }
