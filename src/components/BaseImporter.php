@@ -5,17 +5,14 @@ namespace santilin\Churros\components;
 use santilin\Churros\components\ImportException;
 
 /**
- * Esta es la clase base abstracta de las importaciones desde tres orígenes distintos: AgroPelayo, TIB y Reale
+ * Esta es la clase base abstracta de las importaciones.
  * Contiene casi toda la funcionalidad. Las clases derivadas lo único que necesitan
- * definir es la estructura de los campos del csv, el número de proveedor y alguna función
+ * definir es la estructura de los campos del csv y alguna función
  * específica para transformar algún campo de la importación.
  *
- * En estos tipos de procesos donde lo normal es que se generen múltiples errors sin intervención
- * del usuario, lo más conveniente es tener una variable en la clase para almacenar estos errors
- * de modo que no haya que estar creando arrays y pasándolos función tras función.
- *
+*
  * El proceso es el siguiente:
- *   1.- Se instancia una clase ImportadorAgroPelayo, o ImportadorTIB o ImportadorReale pasándole
+ *   1.- Se instancia una clase derivada de BaseImporter pasándole
  * el nombre del fichero a importar.
  *   2.- Se llama al método importa, con un parámetro $dry_run que indica si hay que grabar
  * los registros importados o sólamente hacer el proceso para ver los errors.
@@ -94,6 +91,23 @@ abstract class BaseImporter {
         $this->abort_on_error = $abort_on_error;
         $this->dry_run = $dry_run;
     }
+
+    /**
+     * prints errors to the console if any
+     */
+    public function showErrors($result)
+    {
+		if( $result != self::OK ) {
+			foreach( $importer->getErrors() as $key => $error ) {
+				if ( is_array($error) ) {
+					$strerror = array_pop($error);
+				} else {
+					$strerror = & $error;
+				}
+				echo "$strerror\n";
+			}
+		}
+	}
 
     public function getErrors() {
         return $this->errors;
@@ -361,6 +375,23 @@ abstract class BaseImporter {
         }
         return true;
     }
+
+    /**
+     * dumps a CSV template with the fields defined in the derived importer
+     */
+    public function genCSVTemplate()
+    {
+        $import_fields_info = $this->getImportFieldsInfo();
+        $ret = '';
+        foreach( $import_fields_info as $key => $value ) {
+			if( $ret != '' ) {
+				$ret .= ",";
+			}
+			$ret .= "\"$key\"";
+        }
+        echo "$ret\n";
+    }
+
 
     // FUNCIONES ESPECÍFICAS PARA LA IMPORTACIÓN DE UN CAMPO
 
