@@ -18,6 +18,11 @@ class AppHelper
 		return empty($value);
 	}
 
+	static public function endsWith($stack, $needle)
+	{
+		return substr($stack, -strlen($needle)) == $needle;
+	}
+
 	static public function getAppLocaleLanguage()
 	{
 		return str_replace("-", "_", Yii::$app->language);

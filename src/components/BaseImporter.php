@@ -1,8 +1,9 @@
 <?php
 
-namespace santilin\Churros\components;
+namespace santilin\churros\components;
 
-use santilin\Churros\components\ImportException;
+use santilin\churros\helpers\AppHelper;
+use santilin\churros\components\ImportException;
 
 /**
  * Esta es la clase base abstracta de las importaciones.
@@ -22,12 +23,9 @@ abstract class BaseImporter {
 
 	/** Códigos de error del proceso de importación */
 	const OK = 0;
-	const ERROR = 1;
-	const RECORD_ERROR = 2;
-	const CSV_FILE_ERROR = 3;
-
-	const TYPE_CSV = 1;
-	const TYPE_XML = 2;
+	const RECORD_ERRORS = 2;
+	const IMPORTED_WITH_ERRORS = 3;
+	const CSV_FILE_ERROR = 4;
 
     /**
      * @var string ruta y nombre del fichero a importar
@@ -79,15 +77,9 @@ abstract class BaseImporter {
      */
     protected $dry_run = true;
 
-    /**
-     * var integer Import file type
-     */
-	protected $type;
-
-    public function __construct($type, $abort_on_error = false, $dry_run = true)
+    public function __construct($abort_on_error = false, $dry_run = true)
     {
 		$this->record = $this->createRecord();
-		$this->type = $type;
         $this->abort_on_error = $abort_on_error;
         $this->dry_run = $dry_run;
     }
@@ -98,7 +90,7 @@ abstract class BaseImporter {
     public function showErrors($result)
     {
 		if( $result != self::OK ) {
-			foreach( $importer->getErrors() as $key => $error ) {
+			foreach( $this->getErrors() as $key => $error ) {
 				if ( is_array($error) ) {
 					$strerror = array_pop($error);
 				} else {
@@ -134,9 +126,10 @@ abstract class BaseImporter {
 
 
 	/**
-	* Crea un movimiento para recoger los datos de cada linea y establece los valores iniciales
+	* Crea un registro para recoger los datos de cada linea y
+	* establece los valores iniciales
 	*
-	* @return \App\Models\MovimientoImportado
+	* @return \App\Models\...
 	*/
 	abstract protected function createRecord();
 
@@ -151,7 +144,8 @@ abstract class BaseImporter {
      *
      * @return int el código de error definido como constante en esta clase
      */
-    public function import($filename, $csvdelimiter = ",", $csvquote = '"') {
+    public function import($filename, $csvdelimiter = ",", $csvquote = '"')
+    {
         $this->filename = $filename;
         $this->errors = [];
         if (!$this->readRecords($csvdelimiter, $csvquote)) {
@@ -163,15 +157,17 @@ abstract class BaseImporter {
         $has_errors = false;
         foreach ($this->records_to_import as $record) {
 			$this->csvline = $record['csvline']; // Para recuperar el número de línea del registro erróneo
-// 			echo "Importando movimiento de la línea {$this->csvline}\n";
+ 			echo "Leyendo registro de la línea {$this->csvline}\n";
             $r = $this->createRecord();
-            if ($this->importaRecord($r, $record)) {
+            $r->setDefaultValues();
+            if ($this->validateRecord($r, $record)) {
                 if (!$this->dry_run) {
-// 					echo "Movimiento importado de la línea {$this->csvline}\n";
 					try {
 						if (!$r->save() ) {
 							$this->addError($r->getErrorsAsString() );
 							$has_errors = true;
+						} else {
+							echo "Importado registro " . $r->recordDesc() . "\n";
 						}
 					} catch( \App\Exceptions\InternalException $e ) {
 						$this->addError($e->getMessage());
@@ -184,16 +180,17 @@ abstract class BaseImporter {
             }
         }
         if ($has_errors) {
-			if (!$this->dry_run) {
-  				$transaction->rollBack();
+			if( $this->abort_on_error) {
+				if (!$this->dry_run) {
+					$transaction->rollBack();
+				}
+				return self::RECORD_ERRORS;
 			}
-			return self::RECORD_ERROR;
-		 } else {
-			if (!$this->dry_run) {
-  				$transaction->commit();
-			}
-			return self::OK;
 		}
+		if (!$this->dry_run) {
+			$transaction->commit();
+		}
+		return ($has_errors) ? self::IMPORTED_WITH_ERRORS : self::OK;
     }
 
 	/**
@@ -235,13 +232,15 @@ abstract class BaseImporter {
      * @param HolaModel $record
      * @param array $values Los valores a importar
      */
-    public function importaRecord(& $record, $values)
+    public function validateRecord(& $record, $values)
     {
         foreach ($values as $field => $value) {
 			if ($field == 'csvline') {
 				continue;
 			}
-			$record->$field = $value;
+			if( $value != null ) { // keep default values
+				$record->$field = $value;
+			}
 /*
 			if( $record->hasAttribute($field) ) {
 			} else {
@@ -261,9 +260,9 @@ abstract class BaseImporter {
      */
     protected function readRecords($csvdelimiter, $csvquote)
     {
-		if ($this->type == self::TYPE_XML) {
-			return $this->readRecordsFromXML();
-		} else if ($this->type == self::TYPE_CSV) {
+		if( AppHelper::endsWith($this->filename, ".xml") ) {
+			return $this->readRecordsFromXml();
+		} else {
 			return $this->readRecordsFromCSV($csvdelimiter, $csvquote);
 		}
 	}
@@ -309,77 +308,94 @@ abstract class BaseImporter {
         }
         $this->csvline = 1;
         // Lee el fichero linea a linea y convierte a array la linea
+        $ret = false;
+        $import_fields_info = $this->getImportFieldsInfo();
         while (($csvline = fgetcsv($file, 0, $csvdelimiter, $csvquote)) !== false) {
-            ++$this->csvline;
-            // @holadoc php/general Siempre comprobar los errors en cualquier función de php: fgetcsv
-            if ($csvline === null) {
-                $this->add_error_get_last();
-            } elseif ($csvline == []) {
-                // Saltar la línea vacía (ver docs de php:fgetcsv)
-            } elseif (count($csvline) !== count($csvheaders)) {
-                $this->errors[] = "El número de columnas de la línea $this->csvline no es correcto";
-                return false;
-            } else {
-                // añadimos la cabecera al array
-                $csvline = array_combine($csvheaders, $csvline);
-                $this->record_to_import = [];
-                foreach ($csvline as $csvindex => $csvvalue) {
-                    // Preparamos la llamada al método que va a importar este campo
-                    $fld_import_info = $import_fields_info[$csvindex];
-                    if ($fld_import_info != []) {
-                        $record_to_import_field = array_shift($fld_import_info);
-                        // Puede estar vacío (se ignora el campo), un campo o un array de campos
-                        if ($record_to_import_field != '') {
-                            $import_method = 'import_' . array_shift($fld_import_info);
-                            // Llamamos al método con los argumentos restantes
-                            try {
-                                // spat operator: ... pasa el array como parámetros indivuduales
-                                $import_value = $this->$import_method($csvvalue, $csvline, ...$fld_import_info);
-                                if (!is_array($record_to_import_field)) {
-                                    $record_to_import_field = [$record_to_import_field];
-                                }
-                                foreach ($record_to_import_field as $import_field) {
-                                    $this->record_to_import[$import_field] = $import_value;
-                                }
-                            } catch (ImportException $e) {
-                                $this->addError($e->getMessage());
-                            }
-                        }
-                    }
-                }
-                $this->afterReadLine($this->record_to_import, $csvline);
-                // Guarda la línea original de este registro por si da error poder mostrar la línea del error
-                $this->record_to_import['csvline'] = $this->csvline;
-                $this->records_to_import[] = $this->record_to_import;
-            }
+			$ret = $this->readCsvLine($import_fields_info, $csvheaders, $csvline);
+			if( !$ret ) {
+				break;
+			}
         }
         fclose($file);
-        return true;
+        return $ret;
     }
+
+
+    protected function readCsvLine($import_fields_info, $csvheaders, $csvline)
+    {
+		++$this->csvline;
+		// @holadoc php/general Siempre comprobar los errors en cualquier función de php: fgetcsv
+		if ($csvline === null) {
+			$this->add_error_get_last();
+		} elseif ($csvline == []) {
+			// Saltar la línea vacía (ver docs de php:fgetcsv)
+		} elseif (count($csvline) !== count($csvheaders)) {
+			$this->errors[] = "El número de columnas de la línea $this->csvline no es correcto";
+			return false;
+		} else {
+			// añadimos la cabecera al array
+			$csvline = array_combine($csvheaders, $csvline);
+			$this->record_to_import = [];
+			foreach ($csvline as $csvindex => $csvvalue) {
+				// Preparamos la llamada al método que va a importar este campo
+				$fld_import_info = $import_fields_info[$csvindex];
+				if ($fld_import_info != []) {
+					$record_to_import_field = array_shift($fld_import_info);
+					// Puede estar vacío (se ignora el campo), un campo o un array de campos
+					if ($record_to_import_field != '') {
+						$import_method = 'import_' . array_shift($fld_import_info);
+						// Llamamos al método con los argumentos restantes
+						try {
+							// spat operator: ... pasa el array como parámetros indivuduales
+							$import_value = $this->$import_method($csvvalue, $csvline, ...$fld_import_info);
+							if (!is_array($record_to_import_field)) {
+								$record_to_import_field = [$record_to_import_field];
+							}
+							foreach ($record_to_import_field as $import_field) {
+								$this->record_to_import[$import_field] = $import_value;
+							}
+						} catch (ImportException $e) {
+							$this->addError($e->getMessage());
+						}
+					}
+				}
+			}
+			$this->afterReadLine($this->record_to_import, $csvline);
+			// Guarda la línea original de este registro por si da error poder mostrar la línea del error
+			$this->record_to_import['csvline'] = $this->csvline;
+			$this->records_to_import[] = $this->record_to_import;
+		}
+		return true;
+	}
 
     /**
      * Lee el fichero XML y rellena la variable $records_to_import.
      * @return bool TRUE si no ha habido errors graves
      */
-    protected function readRecordsFromXML()
+    protected function readRecordsFromXml()
     {
         libxml_use_internal_errors(); // no mostrar errors, guardarlos
         $records = simplexml_load_file($this->filename);
-        $this->records_to_import = [];
-
-        $import_fields_info = $this->getImportFieldsInfo();
 
         $this->csvline = 0;
+        $this->records_to_import = [];
         // Obtenemos el atributo del nodo raíz del XML
-        foreach ($records->children() as $child) {
-        }
-        return true;
+		$csvlines = $this->xmlRecordToCSV($records->children());
+		$import_fields_info = $this->getImportFieldsInfo();
+		$csvheaders = array_keys($import_fields_info);
+		foreach($csvlines as $csvline) {
+			$ret = $this->readCsvLine($import_fields_info, $csvheaders, $csvline);
+			if( !$ret ) {
+				break;
+			}
+		}
+		return $ret;
     }
 
     /**
      * dumps a CSV template with the fields defined in the derived importer
      */
-    public function genCSVTemplate()
+    public function genCSVTemplate($echo = true)
     {
         $import_fields_info = $this->getImportFieldsInfo();
         $ret = '';
@@ -389,7 +405,11 @@ abstract class BaseImporter {
 			}
 			$ret .= "\"$key\"";
         }
-        echo "$ret\n";
+        if( $echo ) {
+			echo "$ret\n";
+		} else {
+			return $ret;
+		}
     }
 
 
