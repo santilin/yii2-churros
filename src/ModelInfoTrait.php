@@ -278,8 +278,11 @@ trait ModelInfoTrait
 
     public function controllerName($prefix = '')
     {
-		$c = AppHelper::stripNamespaceFromClassName($this);
-		$c = lcfirst(str_replace("Search", "", $c));
+		$c = self::getModelInfo('controller_name');
+		if( !$c ) {
+			$c = AppHelper::stripNamespaceFromClassName($this);
+			$c = lcfirst(str_replace("Search", "", $c));
+		}
 		return $prefix . $c;
     }
 

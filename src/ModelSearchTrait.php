@@ -227,7 +227,11 @@ trait ModelSearchTrait
 				}
 			}
 			if (!$filter_set) {
-				$query->andFilterWhere( ['LIKE', "$table_alias.$attribute", $value]);
+				if( $attribute == 'id' && intval($value) == $value) {
+					$query->andFilterWhere( ["$table_alias.$attribute" => intval($value)]);
+				} else {
+					$query->andFilterWhere( ['LIKE', "$table_alias.$attribute", $value]);
+				}
 			}
 		} else {
 			throw new InvalidArgumentException($relation . ": relation not found in model " . self::class);

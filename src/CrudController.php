@@ -450,30 +450,34 @@ class CrudController extends \yii\web\Controller
 		assert( $model instanceof Model );
 		assert( $parent == null || $parent instanceof Model );
 		$breadcrumbs = [];
-		$prefix = $this->getRoutePrefix();
 		if( isset($parent) ) {
+			$prefix = $this->getRoutePrefix() . $parent->controllerName();
 			$breadcrumbs[] = [
-				'label' => $parent->t('churros', '{Title_plural}'),
+				'label' => AppHelper::mb_ucfirst($parent->getModelInfo('title_plural')),
 				'url' => [ $prefix . '/index']
 			];
+			$keys = $parent->getPrimaryKey(true);
+			$keys[0] = $prefix . '/view';
 			$breadcrumbs[] = [
-				'label' => $parent->t('churros', '{record_short}'),
-				'url' => [$prefix . '/view' ]
+				'label' => $parent->recordDesc('short'),
+				'url' => $keys
 			];
+			// child
 			$breadcrumbs[] = [
-				'label' => $model->t('churros', '{Title_plural}'),
-				'url' => [$prefix . $this->id ]
+				'label' => AppHelper::mb_ucfirst($model->getModelInfo('title_plural')),
+				'url' => $this->controllerRoute() . '/index'
 			];
 			switch( $action ) {
 				case 'update':
 					$breadcrumbs[] = [
-						'label' => $model->t('churros', '{record_short}'),
+						'label' => $model->recordDesc('short'),
 						'url' => [ $prefix . $this->id. '/view/' . strval($model->getPrimaryKey()) ] ];
 					break;
 				case 'index':
 					break;
 			}
 		} else {
+			$prefix = $this->getRoutePrefix();
 			$breadcrumbs[] = [
 				'label' => $model->t('churros', '{Title_plural}'),
 				'url' => [ $this->id . '/index' ]
@@ -610,19 +614,18 @@ class CrudController extends \yii\web\Controller
 		return join($glue, $attrs);
 	}
 
-	public function joinHasManyModels($glue, $models)
+	public function joinHasManyModels($glue, $parent, $models)
 	{
 		if( $models == null || count($models)==0 ) {
 			return "";
 		}
+		$keys = $parent->getPrimaryKey(true);
+		$keys[0] = 'view';
+		$parent_route = Url::toRoute($keys);
 		$attrs = [];
-		$route = null;
 		foreach((array)$models as $model) {
-			if( $route == null ) {
-				$route = $this->getRoutePrefix() . $model->controllerName() . '/';
-			}
 			if( $model != null ) {
-				$url = $route . strval($model->getPrimaryKey());
+				$url = $parent_route . '/'.  $model->controllerName() . '/' . strval($model->getPrimaryKey());
 				$attrs[] = "<a href='$url'>" .  $model->recordDesc() . "</a>";
 			}
 		}
