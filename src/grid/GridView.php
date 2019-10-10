@@ -20,8 +20,9 @@ class GridView extends BaseGridView
 	 */
 	public $column = null;
 
-	protected $summaries = [];
-	protected $last_groups = [];
+	protected $summaryColumns = [];
+	protected $summaryValues = [];
+	protected $recno;
 
 	public function init()
 	{
@@ -31,9 +32,24 @@ class GridView extends BaseGridView
 			$this->beforeRow = function($model, $key, $index, $grid) {
 				return $grid->groupHeader($model, $key, $index, $grid);
 			};
+			$this->afterRow = function($model, $key, $index, $grid) {
+				return $grid->finalGroupFooter($model, $key, $index, $grid);
+			};
 		}
+		$this->recno = 0;
 		$this->initSorting();
+		$this->initSummaryColumns();
 	}
+
+	protected function initSummaryColumns()
+	{
+		foreach( $this->columns as $kc => $column ) {
+			if( $column->summary != '' ) {
+				$this->summaryColumns[$kc] = $column->summary;
+				$this->summaryValues[$kc] = null;
+			}
+		}
+
 
 	protected function initGroups()
 	{
@@ -110,21 +126,58 @@ class GridView extends BaseGridView
 	{
 		$ret = '';
 		$colspan = count($this->columns);
+		$this->recno++;
 		foreach( $this->groups as $kg => $group ) {
-			if( $group->footer && $group->willUpdateGroup($model, $key, $index) ) {
+			if( $group->footer &&
+				$group->willUpdateGroup($model, $key, $index ) ) {
 				$ret .= "<tr><td colspan=\"$colspan\">" .
 					$group->getFooterContent($model, $key, $index)
 					. "</td></tr>";
 			}
+			$this->updateSummaries($group->level);
 			if( $group->updateGroup($model, $key, $index) && $group->header ) {
 				$ret .= "<tr><td colspan=\"$colspan\">" .
 					$group->getHeaderContent($model, $key, $index)
 					. "</td></tr>";
+				$this->resetSummaries($group->level, $model);
 			}
 		}
 		return $ret;
 	}
 
+	public function resetSummaries($level)
+	{
+		foreach( $this->groups as $kg => $group ) {
+			if( $group->level >= $level ) {
+				$group->resetSummaries($this->summaryColumns);
+			}
+		}
+	}
+
+	public function updateSummaries($level)
+	{
+		foreach( $this->groups as $kg => $group ) {
+			if( $group->level <= $level ) {
+				$group->updateSummaries($this->summaryColumns, $model);
+			}
+		}
+// 		$this->updateTotalSummaries($model);
+	}
+
+	public function finalGroupFooter($model, $key, $index, $grid)
+	{
+		$colspan = count($this->columns);
+		$ret = '';
+		foreach( $this->groups as $kg => $group ) {
+			if( $group->footer &&
+				$this->dataProvider->getCount() == $this->recno )  {
+				$ret .= "<tr><td colspan=\"$colspan\">" .
+					$group->getFooterContent($model, $key, $index)
+					. "</td></tr>";
+			}
+		}
+		return $ret;
+	}
 
     /**
      * @inheritdoc
@@ -148,5 +201,4 @@ class GridView extends BaseGridView
 
         return '';
     }
-
 }

@@ -24,8 +24,6 @@ class GridGroup extends BaseObject
 	 */
 	public $column;
 
-	public $summaryColumns;
-
 	public $header;
 
 	public $footer;
@@ -45,16 +43,14 @@ class GridGroup extends BaseObject
 	public $footer_label;
 
 	public $level = 0;
-	protected $first_value = true;
+	protected $got_value = false;
 	protected $last_value = null, $current_value = null;
-	protected $last_summary = null, $current_summary = null;
-	protected $got_value = [];
+	protected $summary_values = [];
 
 	public function getCurrentValue()
 	{
 		return $this->current_value;
 	}
-
 	public function updateGroup($model, $key, $index)
 	{
 		// have we've got the value on willUpdateGroup?
@@ -77,6 +73,7 @@ class GridGroup extends BaseObject
 			$this->group_change = self::NO_GROUP_CHANGE;
 		}
 		$this->last_value = $this->current_value;
+		$this->updateSummaries();
 		return $this->group_change;
 	}
 
@@ -147,6 +144,22 @@ class GridGroup extends BaseObject
 			return Html::tag('div', $content, [
 				'class' => 'grid-group-head-' . strval($this->level)
 			]);
+		}
+	}
+
+	public function resetSummaries($summary_columns)
+	{
+		foreach( $summary_columns as $kc => $summary) {
+			$this->summary_values[$kc] = null;
+		}
+	}
+
+	public function updateSummaries($summary_columns, $row_values)
+	{
+		foreach( $summary_columns as $kc => $summary) {
+			switch( $summary ) {
+				$this->summary_values[$kc] += $row_values[$kc];
+			}
 		}
 	}
 
