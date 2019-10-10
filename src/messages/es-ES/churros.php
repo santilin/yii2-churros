@@ -17,22 +17,17 @@
  * NOTE: this file must be saved in UTF-8 encoding.
  */
 return [
-	'All' => 'Todo',
-    'The {attribute} \'{value}\' is not valid' => 'El valor \'{value}\' del campo \'{attribute}\' no es válido',
     'Active' => 'Activo',
+    'All' => 'Todo',
     'Error saving the record {title}' => 'Error guardando el registro {title}',
     'From \'{from}\' or until \'{until}\' dates are in invalid date format' => 'Las fechas desde: \'{from}\' o hasta: \'{until}\' no tienen un formato válido',
     'From date {from} can\'t be greater than until date {until}' => 'La fecha inicial: \'{from}\' no puede ser posterior a la fecha final: \'{until\'',
     'Inactive' => 'Inactivo',
-    '{La} {title} <strong>{record}</strong> has been successfully created.' =>
-    '{La} {title} <strong>{record}</strong> se ha creado correctamente.',
-    '{La} {title} <strong>{record}</strong> has been successfully deleted.' =>
-    '{La} {title} <strong>{record}</strong> se ha borrado correctamente.',
-    '{La} {title} <strong>{record}</strong> has been successfully duplicated.' =>
-    '{La} {title} <strong>{record}</strong> se ha duplicado correctamente.',
-    '{La} {title} <strong>{record}</strong> has been successfully updated.' =>
-    '{La} {title} <strong>{record}</strong> se ha actualizado correctamente.',
+    'The {attribute} \'{value}\' is not valid' => 'El valor \'{value}\' del campo \'{attribute}\' no es válido',
+    '{La} {title} <strong>{record}</strong> has been successfully created.' => '{La} {title} <strong>{record}</strong> se ha creado correctamente.',
+    '{La} {title} <strong>{record}</strong> has been successfully deleted.' => '{La} {title} <strong>{record}</strong> se ha borrado correctamente.',
+    '{La} {title} <strong>{record}</strong> has been successfully duplicated.' => '{La} {title} <strong>{record}</strong> se ha duplicado correctamente.',
+    '{La} {title} <strong>{record}</strong> has been successfully updated.' => '{La} {title} <strong>{record}</strong> se ha actualizado correctamente.',
     '{Title_plural}' => '{Title_plural}',
     '{inactive} since' => '{inactive} desde',
-    '{record}' => '{record}'
 ];
