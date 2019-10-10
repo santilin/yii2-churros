@@ -110,4 +110,19 @@ class AppHelper
 	{
 		static::$tabindex = $reset;
 	}
+
+    static public function mb_ucfirst($str, $encoding = 'UTF-8')
+    {
+        return mb_strtoupper( mb_substr($str, 0, 1, $encoding), $encoding)
+        . mb_substr($str, 1, mb_strlen($str), $encoding);
+    }
+
+    static public function mb_lcfirst($str, $encoding = 'UTF-8')
+    {
+        return mb_strtolower( mb_substr($str, 0, 1, $encoding), $encoding)
+        . mb_substr($str, 1, mb_strlen($str), $encoding);
+    }
+
+
+
 }
