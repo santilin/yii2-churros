@@ -19,7 +19,9 @@ trait ModelSearchTrait
 	protected $related_properties = [];
 	private $dynamic_rules = [];
 	static private $operators = [
-			'=' => '=', '<>' => '<>',
+			'=' => '=',
+			'===' => 'Exactamente', // Distinguish = (in grid filter) from === in search form
+			'<>' => '<>',
 			'LIKE' => 'Contiene', 'NOT LIKE' => 'No contiene',
 			'>' => '>', '<' => '<',
 			'>=' => '>=', '<=' => '<=',
@@ -40,12 +42,12 @@ trait ModelSearchTrait
 
     public function __get($name)
     {
-		try {
-			return parent::__get($name);
-		} catch( \yii\base\UnknownPropertyException $e) {
-			if( isset($this->related_properties[$name]) ) {
-				return $this->related_properties[$name];
-			} else {
+		if( isset($this->related_properties[$name]) ) {
+			return $this->related_properties[$name];
+		} else {
+			try {
+				return parent::__get($name);
+			} catch( \yii\base\UnknownPropertyException $e) {
 				return ArrayHelper::getValue($this, $name);
 			}
 		}
@@ -174,6 +176,7 @@ trait ModelSearchTrait
 				return;
 			}
 			switch( $value['op'] ) {
+				case "===":
 				case "=":
 					$query->andWhere([$name => $value['lft']]);
 					break;
@@ -193,7 +196,7 @@ trait ModelSearchTrait
 						$value['lft'], $value['rgt'] ]);
 					break;
 			}
-		} else if( is_numeric($value) || !is_string($value) ) {
+		} else if( is_numeric($value) && !is_string($value) ) {
 			$query->andWhere([ $name => $value ]);
 		} else {
 			$query->andWhere([ 'like', $name, $value ]);
