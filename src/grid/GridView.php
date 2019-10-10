@@ -25,7 +25,7 @@ class GridView extends BaseGridView
 
 	public function init()
 	{
-		$this->initGroups();
+		$this->initGroups(); // must be done before initColumns
 		parent::init();
 		if( count($this->groups) != 0 ) {
 			$this->beforeRow = function($model, $key, $index, $grid) {
@@ -37,6 +37,7 @@ class GridView extends BaseGridView
 
 	protected function initGroups()
 	{
+		$level = 1;
 		foreach( $this->groups as $kg => $group_def ) {
             if (is_string($group_def)) {
                 $group = $this->createGroup($group_def);
@@ -50,6 +51,7 @@ class GridView extends BaseGridView
                 unset($this->groups[$kg]);
                 continue;
             }
+            $group->level = $level++;
             $this->groups[$kg] = $group;
             // Hide the group column
             if( $group->column ) {
@@ -57,6 +59,23 @@ class GridView extends BaseGridView
 			}
         }
 	}
+
+	// Not all group columns are defined in the grid
+// 	protected function initGroupLabels()
+// 	{
+// 		foreach( $this->groups as $key => $group ) {
+// 			if( isset($group->label) ) {
+// 				continue;
+// 			}
+// 			if( !isset($group->header_label) ) {
+// 				$c = $this->columns;
+// 				$group->header_label = $this->columns[$group->column]['label'];
+// 			}
+// 			if( !isset($group->footer_label) ) {
+// 				$group->footer_label = $this->columns[$group->column]['label'];
+// 			}
+// 		}
+// 	}
 
 	/**
 	 * Appends the groups orders to the default or current orders
@@ -92,7 +111,12 @@ class GridView extends BaseGridView
 		$ret = '';
 		$colspan = count($this->columns);
 		foreach( $this->groups as $kg => $group ) {
-			if( $group->updateHeader($model, $key, $index) ) {
+			if( $group->footer && $group->willUpdateGroup($model, $key, $index) ) {
+				$ret .= "<tr><td colspan=\"$colspan\">" .
+					$group->getFooterContent($model, $key, $index)
+					. "</td></tr>";
+			}
+			if( $group->updateGroup($model, $key, $index) && $group->header ) {
 				$ret .= "<tr><td colspan=\"$colspan\">" .
 					$group->getHeaderContent($model, $key, $index)
 					. "</td></tr>";

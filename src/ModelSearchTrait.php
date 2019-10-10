@@ -266,7 +266,7 @@ trait ModelSearchTrait
 	/**
 	 * Returns Html code to add an advanced search field to a search form
 	 */
-	public static function searchField($model, $attribute)
+	static public function searchField($model, $attribute)
 	{
 		$ret = '';
 		$scope = $model->formName();
@@ -323,7 +323,7 @@ trait ModelSearchTrait
 	 * Returns Html code to add an advanced search field to a search form
 	 * @param boolean $hidden Whether to include the general condition as a hidden input
 	 */
-	public static function searchFieldForReport($report, $model, $attribute, $dropdown_values = null)
+	static public function searchFieldForReport($report, $model, $attribute, $dropdown_values = null)
 	{
 		$ret = '';
 		$scope = $model->formName();
@@ -474,7 +474,7 @@ JS;
 			} else if( !is_numeric($colname) ) {
 				$orig_title = $this->getAttributeLabel($colname);
 			} else {
-				throw new \Exception("Imposible encontrar label para atributo $colname");
+				throw new \Exception(Yii::t('churros', "label for '$colname' attribute not found."));
 			}
 			$column = [
 				'name' => $colname,
@@ -575,7 +575,7 @@ JS;
 	/**
 	 * Groups the available report columns by table and returns an array for a dropDownList
 	 */
-	public static function columnsForDropDown($report, $columns)
+	static public function columnsForDropDown($report, $columns)
 	{
 		$dropdown_options = [];
 		$base_model = $report->getValue('model', '.');
@@ -589,6 +589,26 @@ JS;
 			}
 		}
 		return $dropdown_options;
+	}
+
+	static public function groupsFromColumns($gridcolumns, $allColumns)
+	{
+		$groups = [];
+		foreach( $gridcolumns as $kc => $column ) {
+			if( isset($column['group']) && $column['group'] !== '' ) {
+				$title = $allColumns[$kc]['title'];
+				if ($title == '') {
+					$title = $allColumns[$kc]['orig_title'];
+				}
+				$groups[$column['attribute']] = [
+					'column' => $column['attribute'],
+					'format' => $title . ': {group_value}',
+					'header' => true,
+					'footer' => true
+				];
+			}
+		}
+		return $groups;
 	}
 
     static public function splitFieldName($fieldname)
