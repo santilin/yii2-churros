@@ -419,7 +419,7 @@ JS;
 		}
 		$groups = [];
 		foreach( $report->report_sorting as $colname => $sorting ) {
-			if( isset($sorting['group']) ) {
+			if( isset($sorting['group']) && $sorting['group'] == true ) {
 				if( !isset($columns[$colname]) ) {
 					if( isset($allColumns[$colname]) ) {
 						$groups[$colname] = $allColumns[$colname];
@@ -478,11 +478,10 @@ JS;
 			}
 			$column = [
 				'name' => $colname,
-				'width' => null,
-				'summary' => isset($grid_column['pageSummary']) ? $grid_column['pageSummary'] : false,
+				'width' => null
 			];
 			if( isset($report->report_columns[$colname]) ) {
-				$column = ArrayHelper::merge($report->report_columns[$colname], $column);
+				$column = ArrayHelper::merge($column, $report->report_columns[$colname]);
 			}
 			if( isset($column['title']) && $column['title'] != '' ) {
 				if( $orig_title == $column['title'] ) {

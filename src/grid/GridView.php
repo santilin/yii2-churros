@@ -19,6 +19,7 @@ class GridView extends BaseGridView
 	 * The column to group
 	 */
 	public $column = null;
+	public $totalsRow = false;
 
 	protected $summaryColumns = [];
 	protected $summaryValues = [];
@@ -28,28 +29,52 @@ class GridView extends BaseGridView
 	{
 		$this->initGroups(); // must be done before initColumns
 		parent::init();
-		if( count($this->groups) != 0 ) {
+		if( count($this->groups) != 0 || $this->totalsRow) {
 			$this->beforeRow = function($model, $key, $index, $grid) {
 				return $grid->groupHeader($model, $key, $index, $grid);
 			};
 			$this->afterRow = function($model, $key, $index, $grid) {
-				return $grid->finalGroupFooter($model, $key, $index, $grid);
+				return $grid->finalRow($model, $key, $index, $grid);
 			};
 		}
 		$this->recno = 0;
-		$this->initSorting();
 		$this->initSummaryColumns();
+		$this->initSorting();
 	}
 
+	/**
+	 * Creates the constant array of summary columns to be passed to the
+	 * summary functions of each group
+	 */
 	protected function initSummaryColumns()
 	{
 		foreach( $this->columns as $kc => $column ) {
-			if( $column->summary != '' ) {
-				$this->summaryColumns[$kc] = $column->summary;
+			if( isset($column->pageSummary) && $column->pageSummary != 0 ) {
+				$this->summaryColumns[$kc] = $column->pageSummaryFunc;
+				switch( $column->pageSummaryFunc) {
+					case 'f_sum':
+					case 'f_count':
+						$this->summaryValues[$kc] = 0;
+						break;
+					case 'f_avg':
+						$this->summaryValues[$kc] = [0, 0];
+						break;
+					case 'f_max':
+						$this->summaryValues[$kc] = null;
+						break;
+					case 'f_min':
+						$this->summaryValues[$kc] = null;
+						break;
+					case 'f_concat':
+					case 'f_distinct_concat':
+						$this->summaryValues[$kc] = [];
+						break;
+				}
 				$this->summaryValues[$kc] = null;
 			}
 		}
-
+		$this->resetSummaries(count($this->groups));
+	}
 
 	protected function initGroups()
 	{
@@ -105,7 +130,7 @@ class GridView extends BaseGridView
 		$nc = 0;
 		$def_order_columns = array_keys($def_order);
 		foreach( $this->groups as $key => $group ) {
-			if( $def_order_columns[$nc] == $group->column) {
+			if( isset($def_order_columns[$nc]) && $def_order_columns[$nc] == $group->column) {
 				$new_def_order[$group->column] = $def_order[$group->column];
 				$def_order[$group->column] = null;
 			} else {
@@ -125,59 +150,114 @@ class GridView extends BaseGridView
 	protected function groupHeader($model, $key, $index, $grid)
 	{
 		$ret = '';
-		$colspan = count($this->columns);
+		$tdoptions = [ 'colspan' => count($this->columns) ];
+		$summarized = false;
 		$this->recno++;
+		$this->updateSummaries($model);
 		foreach( $this->groups as $kg => $group ) {
+			// close previous footer on group change
 			if( $group->footer &&
 				$group->willUpdateGroup($model, $key, $index ) ) {
-				$ret .= "<tr><td colspan=\"$colspan\">" .
-					$group->getFooterContent($model, $key, $index)
-					. "</td></tr>";
+				$ret .= Html::tag('tr',
+					$group->getFooterContent($this->summaryColumns, $model, $key, $index, $tdoptions));
+				$this->resetSummaries($group->level);
 			}
-			$this->updateSummaries($group->level);
+			$this->updateGroupSummaries($group->level, $model);
 			if( $group->updateGroup($model, $key, $index) && $group->header ) {
-				$ret .= "<tr><td colspan=\"$colspan\">" .
-					$group->getHeaderContent($model, $key, $index)
-					. "</td></tr>";
-				$this->resetSummaries($group->level, $model);
+				$ret .= Html::tag('tr',
+					$group->getHeaderContent($model, $key, $index,  $tdoptions));
 			}
 		}
 		return $ret;
 	}
 
-	public function resetSummaries($level)
+	public function finalRow($model, $key, $index, $grid)
 	{
-		foreach( $this->groups as $kg => $group ) {
-			if( $group->level >= $level ) {
-				$group->resetSummaries($this->summaryColumns);
-			}
+		// Once the dataprovider has been consumed, print all the group footers and the grand total
+		if( $this->recno < $this->dataProvider->getCount() ) {
+			return '';
 		}
-	}
-
-	public function updateSummaries($level)
-	{
-		foreach( $this->groups as $kg => $group ) {
-			if( $group->level <= $level ) {
-				$group->updateSummaries($this->summaryColumns, $model);
-			}
-		}
-// 		$this->updateTotalSummaries($model);
-	}
-
-	public function finalGroupFooter($model, $key, $index, $grid)
-	{
-		$colspan = count($this->columns);
+		$tdoptions = [ 'colspan' => count($this->columns) ];
 		$ret = '';
 		foreach( $this->groups as $kg => $group ) {
-			if( $group->footer &&
-				$this->dataProvider->getCount() == $this->recno )  {
-				$ret .= "<tr><td colspan=\"$colspan\">" .
-					$group->getFooterContent($model, $key, $index)
-					. "</td></tr>";
+			if( $group->footer ) {
+				$ret .= Html::tag('tr',
+					$group->getFooterContent($this->summaryColumns, $model, $key, $index, $tdoptions));
+			}
+		}
+		if( $this->totalsRow ) {
+			$ret .= Html::tag('tr',
+				$this->getFooterSummary($this->summaryColumns, $tdoptions));
+		}
+		return $ret;
+	}
+
+	public function getFooterSummary($summary_columns, $tdoptions)
+	{
+		$colspan = 0;
+		foreach( $this->columns as $kc => $column ) {
+			if( !isset($summary_columns[$kc]) ) {
+				$colspan++;
+			} else {
+				break;
+			}
+		}
+		$ret = Html::tag('td',
+			Html::tag('div', "Totales ", [
+				'class' => 'grid-group-total' ]),
+			['colspan' => $colspan]);
+		$nc = 0;
+		foreach( $this->columns as $kc => $column ) {
+			if( $nc++ < $colspan ) {
+				continue;
+			}
+			if( isset($summary_columns[$kc]) ) {
+				$ret .= Html::tag('td', Html::tag('div',
+					$this->formatter->format(
+						$this->summaryValues[$kc], $column->format),
+						self::fetchColumnOptions($column, 0)));
+			} else {
+				$ret .= Html::tag('td', '');
 			}
 		}
 		return $ret;
 	}
+
+	// copied from kartik data column
+	static public function fetchColumnOptions($column, $level = null)
+    {
+		if( $level == null ) {
+			$options = [ 'class' => "grid-group-total" ];
+		} else {
+			$options = [ 'class' => "grid-group-foot-$level" ];
+		}
+        if ($column->hidden === true) {
+            Html::addCssClass($options, 'kv-grid-hide');
+        }
+        if ($column->hiddenFromExport === true) {
+            Html::addCssClass($options, 'skip-export');
+        }
+        if (is_array($column->hiddenFromExport) && !empty($column->hiddenFromExport)) {
+            $tag = 'skip-export-';
+            $css = $tag . implode(" {$tag}", $column->hiddenFromExport);
+            Html::addCssClass($options, $css);
+        }
+        if( $column->hAlign != '' ) {
+            Html::addCssClass($options, "kv-align-{$column->hAlign}");
+        }
+        if ($column->noWrap) {
+            Html::addCssClass($options, GridView::NOWRAP);
+        }
+        if( $column->vAlign != '' ) {
+            Html::addCssClass($options, "kv-align-{$column->vAlign}");
+        }
+        if (trim($column->width) != '') {
+            Html::addCssStyle($options, "width:{$column->width};");
+        }
+        return $options;
+    }
+
+
 
     /**
      * @inheritdoc
@@ -195,10 +275,65 @@ class GridView extends BaseGridView
 					throw new \Exception($column->attribute . ": " . $e->getMessage());
 				}
             }
-
             return Html::tag('tr', implode('', $cells), $this->filterRowOptions);
         }
-
         return '';
     }
+
+	public function resetSummaries($level)
+	{
+		foreach( $this->groups as $kg => $group ) {
+			if( $group->level >= $level ) {
+				$group->resetSummaries($this->summaryColumns);
+			}
+		}
+	}
+
+	public function updateGroupSummaries($level, $model)
+	{
+		foreach( $this->groups as $kg => $group ) {
+			if( $group->level <= $level ) {
+				$group->updateSummaries($this->summaryColumns, $model);
+			}
+		}
+	}
+
+	public function updateSummaries($model)
+	{
+		// same in GridGroup::updateSummaries
+		foreach( $this->summaryColumns as $key => $summary) {
+			$kc = str_replace('.', '_', $key);
+			switch( $summary ) {
+			case 'f_sum':
+				$this->summaryValues[$key] += $model[$kc];
+				break;
+			case 'f_count':
+				$this->summaryValues[$key] ++;
+				break;
+			case 'f_avg':
+				$this->summaryValues[$key][0] += $model[$kc];
+				$this->summaryValues[$key][1] ++;
+				break;
+			case 'f_max:':
+				if( $this->summaryValues[$key] < $model[$kc] ) {
+					$this->summaryValues[$key] = $model[$kc];
+				}
+				break;
+			case 'f_min:':
+				if( $this->summaryValues[$key] > $model[$kc] ) {
+					$this->summaryValues[$key] = $model[$kc];
+				}
+				break;
+			case 'f_concat:':
+				$this->summaryValues[$key][] = $model[$kc];
+				break;
+			case 'f_distinct_concat:':
+				if (!in_array($model[$key], $this->summaryValues[$kc])) {
+					$this->summaryValues[$key][] = $model[$kc];
+				}
+				break;
+			}
+		}
+	}
+
 }

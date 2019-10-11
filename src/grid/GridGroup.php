@@ -45,7 +45,7 @@ class GridGroup extends BaseObject
 	public $level = 0;
 	protected $got_value = false;
 	protected $last_value = null, $current_value = null;
-	protected $summary_values = [];
+	protected $summaryValues = [];
 
 	public function getCurrentValue()
 	{
@@ -73,7 +73,6 @@ class GridGroup extends BaseObject
 			$this->group_change = self::NO_GROUP_CHANGE;
 		}
 		$this->last_value = $this->current_value;
-		$this->updateSummaries();
 		return $this->group_change;
 	}
 
@@ -93,7 +92,7 @@ class GridGroup extends BaseObject
 		return false;
 	}
 
-	public function getHeaderContent($model, $key, $index)
+	public function getHeaderContent($model, $key, $index, $tdoptions)
 	{
 		$hc = isset($this->header['content']) ? $this->header['content'] : $this->header;
 		if( $hc instanceOf \Closure ) {
@@ -114,16 +113,21 @@ class GridGroup extends BaseObject
 					]);
 					break;
 			}
-			return Html::tag('div', $content, [
-				'class' => 'grid-group-head-' . strval($this->level)
-			]);
+			return Html::tag('td',
+				Html::tag('div', $content, [
+					'class' => 'grid-group-head-' . strval($this->level)
+					]),
+				$tdoptions);
 		}
 	}
 
-	public function getFooterContent($model, $key, $index)
+	public function getFooterContent($summary_columns, $model, $key, $index, $tdoptions)
 	{
+		$ret = '';
 		$fc = isset($this->footer['content']) ? $this->footer['content'] : $this->footer;
-		if( $fc instanceOf \Closure ) {
+		if( $fc === false ) {
+			return '';
+		} elseif( $fc instanceOf \Closure ) {
 			return call_user_func($hc, $model, $key, $index, $this);
 		} else {
 			$format = isset($this->footer_format) ? $this->footer_format : isset($this->format) ? $this->format : 'raw';
@@ -141,26 +145,110 @@ class GridGroup extends BaseObject
 					]);
 					break;
 			}
-			return Html::tag('div', $content, [
-				'class' => 'grid-group-head-' . strval($this->level)
-			]);
 		}
+		if( $fc === true /*'summary'*/ ) {
+			$ret .= $this->getSummaryContent($summary_columns, $content);
+		} else {
+			$ret = Html::tag('td',
+				Html::tag('div', $content, [
+					'class' => 'grid-group-foot-' . strval($this->level)
+					]),
+				$tdoptions);
+		}
+		return $ret;
+	}
+
+	public function getSummaryContent($summary_columns, $content)
+	{
+		$colspan = 0;
+		foreach( $this->grid->columns as $kc => $column ) {
+			if( !isset($summary_columns[$kc]) ) {
+				$colspan++;
+			} else {
+				break;
+			}
+		}
+		$ret = Html::tag('td',
+			Html::tag('div', "Totales ". $content, [
+				'class' => 'grid-group-foot-' . strval($this->level) ]),
+			['colspan' => $colspan]);
+		$nc = 0;
+		foreach( $this->grid->columns as $kc => $column ) {
+			if( $nc++ < $colspan ) {
+				continue;
+			}
+			if( isset($summary_columns[$kc]) ) {
+				$ret .= Html::tag('td', Html::tag('div',
+					$this->grid->formatter->format(
+						$this->summaryValues[$kc], $column->format),
+						GridView::fetchColumnOptions($column, $this->level)));
+			} else {
+				$ret .= Html::tag('td', '');
+			}
+		}
+		return $ret;
 	}
 
 	public function resetSummaries($summary_columns)
 	{
 		foreach( $summary_columns as $kc => $summary) {
-			$this->summary_values[$kc] = null;
+			switch( $summary ) {
+			case 'f_sum':
+			case 'f_count':
+				$this->summaryValues[$kc] = 0;
+				break;
+			case 'f_avg':
+				$this->summaryValues[$kc] = [0, 0];
+				break;
+			case 'f_max':
+				$this->summaryValues[$kc] = null;
+				break;
+			case 'f_min':
+				$this->summaryValues[$kc] = null;
+				break;
+			case 'f_concat':
+			case 'f_distinct_concat':
+				$this->summaryValues[$kc] = [];
+				break;
+			}
 		}
 	}
 
 	public function updateSummaries($summary_columns, $row_values)
 	{
-		foreach( $summary_columns as $kc => $summary) {
+		// same in GridView::updateSummaries
+		foreach( $summary_columns as $key => $summary) {
+			$kc = str_replace('.', '_', $key);
 			switch( $summary ) {
-				$this->summary_values[$kc] += $row_values[$kc];
+			case 'f_sum':
+				$this->summaryValues[$key] += $row_values[$kc];
+				break;
+			case 'f_count':
+				$this->summaryValues[$key] ++;
+				break;
+			case 'f_avg':
+				$this->summaryValues[$key][0] += $row_values[$kc];
+				$this->summaryValues[$key][1] ++;
+				break;
+			case 'f_max:':
+				if( $this->summaryValues[$key] < $row_values[$kc] ) {
+					$this->summaryValues[$key] = $row_values[$kc];
+				}
+				break;
+			case 'f_min:':
+				if( $this->summaryValues[$key] > $row_values[$kc] ) {
+					$this->summaryValues[$key] = $row_values[$kc];
+				}
+				break;
+			case 'f_concat:':
+				$this->summaryValues[$key][] = $row_values[$kc];
+				break;
+			case 'f_distinct_concat:':
+				if (!in_array($row_values[$key], $this->summaryValues[$kc])) {
+					$this->summaryValues[$key][] = $row_values[$kc];
+				}
+				break;
 			}
 		}
 	}
-
 }
