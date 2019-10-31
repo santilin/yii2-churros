@@ -61,7 +61,10 @@ class Base extends \Faker\Provider\Base
 		assert($decimals < $max_digits);
 		$ret = $this->generator->randomElement(["-",""]);
 		if ($ret=="-") {
-			$max_digits -= 1;
+			$max_digits--;
+			if( $max_digits == 1 ) {
+				return $this->generator->randomDigitNotNull();
+			}
 		}
 		$max_digits = $this->generator->numberBetween(2, $max_digits);
 		for( $i=1; $i<$max_digits; ++$i) {
