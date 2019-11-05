@@ -127,7 +127,7 @@ class CrudController extends \yii\web\Controller
 		return $this->render('create', [
 			'model' => $model,
 			'parent' => $this->parent_model,
-			'extraParams' => $this->extraParams('index', $model)
+			'extraParams' => $this->extraParams('create', $model)
 		]);
 	}
 
@@ -166,7 +166,7 @@ class CrudController extends \yii\web\Controller
 		return $this->render('saveAsNew', [
 			'model' => $model,
 			'parent' => $this->parent_model,
-			'extraParams' => $this->extraParams('index', $model)
+			'extraParams' => $this->extraParams('duplicate', $model)
 		]);
 	}
 
@@ -192,7 +192,7 @@ class CrudController extends \yii\web\Controller
 		return $this->render('update', [
 			'model' => $model,
 			'parent' => $this->parent_model,
-			'extraParams' => $this->extraParams('index', $model)
+			'extraParams' => $this->extraParams('update', $model)
 		]);
 	}
 
