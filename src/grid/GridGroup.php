@@ -51,6 +51,10 @@ class GridGroup extends BaseObject
 	{
 		return $this->current_value;
 	}
+	public function getLastValue()
+	{
+		return $this->last_value;
+	}
 	public function updateGroup($model, $key, $index)
 	{
 		// have we've got the value on willUpdateGroup?
@@ -151,7 +155,7 @@ class GridGroup extends BaseObject
 		} else {
 			$ret = Html::tag('td',
 				Html::tag('div', $content, [
-					'class' => 'grid-group-foot-' . strval($this->level)
+					'class' => 'grid-group-foot-total-' . strval($this->level) . ' grid-group-foot-' . strval($this->level)
 					]),
 				$tdoptions);
 		}

@@ -606,7 +606,7 @@ JS;
 	{
 		$groups = [];
 		foreach( $report->report_sorting as $colname => $column ) {
-			if( isset($column['group']) && $column['group'] !== '' ) {
+			if( isset($column['group']) && $column['group'] == true ) {
 				if( isset($report_columns[$colname]) ) {
 					$rc = $report_columns[$colname];
 					$groups[$rc['attribute']] = [

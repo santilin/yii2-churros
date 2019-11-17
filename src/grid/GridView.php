@@ -105,7 +105,7 @@ class GridView extends BaseGridView
             $this->groups[$kg] = $group;
             // Hide the group column
             if( $group->column ) {
-  				$this->columns[$group->column]['visible'] = false;
+  				$this->columns[$kg]['visible'] = false;
 			}
         }
 	}
@@ -145,21 +145,38 @@ class GridView extends BaseGridView
 		$tdoptions = [ 'colspan' => count($this->columns) ];
 		$this->recno++;
 		// close previous footers on group change
+		$updated_groups = [];
+		$previous_updated = false;
+		foreach( $this->groups as $kg => $group ) {
+			$previous_updated = $updated_groups[$kg] =
+				$previous_updated || $group->willUpdateGroup($model, $key, $index);
+		}
 		foreach( array_reverse($this->groups) as $kg => $group ) {
-			if( $group->level <= $this->current_level ) {
-				if( $group->willUpdateGroup($model, $key, $index ) ) {
+			if( $updated_groups[$kg] ) {
+				if ($group->footer ) {
 					$ret .= Html::tag('tr',
 						$group->getFooterContent($this->summaryColumns, $model, $key, $index, $tdoptions));
-					$group->resetSummaries($this->summaryColumns, $this->current_level, count($this->groups));
-					$this->current_level--;
 				}
+				$group->resetSummaries($this->summaryColumns, $this->current_level, count($this->groups));
+				$this->current_level--;
+			} else {
+				break;
 			}
 		}
 		$this->updateReportSummaries($model);
+		$updated_groups = [];
 		foreach( $this->groups as $kg => $group ) {
-			if( $group->updateGroup($model, $key, $index) && $group->header ) {
-				$ret .= Html::tag('tr',
-					$group->getHeaderContent($model, $key, $index,  $tdoptions));
+			$updated_groups[$kg] = $group->updateGroup($model, $key, $index);
+		}
+		$first_header_shown = false;
+		foreach( $this->groups as $kg => $group ) {
+			if( $updated_groups[$kg] || $first_header_shown ) {
+				$first_header_shown = true;
+				if( $group->header ) {
+					$ret .= Html::tag('tr',
+						$group->getHeaderContent($model, $key, $index,
+						$tdoptions));
+				}
 				$this->current_level++;
 				$group->resetSummaries($this->summaryColumns, $this->current_level, count($this->groups));
 			}
@@ -176,7 +193,7 @@ class GridView extends BaseGridView
 		}
 		$tdoptions = [ 'colspan' => count($this->columns) ];
 		$ret = '';
-		foreach( $this->groups as $kg => $group ) {
+		foreach( array_reverse($this->groups) as $kg => $group ) {
 			if( $group->footer ) {
 				$ret .= Html::tag('tr',
 					$group->getFooterContent($this->summaryColumns, $model, $key, $index, $tdoptions));
