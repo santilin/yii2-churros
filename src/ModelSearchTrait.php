@@ -610,7 +610,7 @@ JS;
 					\Yii::warning("Group column $kc not defined in all the columns for this report");
 					continue;
 				}
-				$title = $allColumns[$kc]['title'];
+				$title = $allColumns[$kc]['label'];
 				$groups[$column['attribute']] = [
 					'column' => $column['attribute'],
 					'format' => $title . ': {group_value}',
