@@ -396,13 +396,14 @@ JS;
 
 
 	/**
-	 * Extracts the visible columns for this report
+	 * Extracts the kartik columns for this report
 	 */
-	public function selectedGridColumns($report, $allColumns)
+	public function gridColumns($report, $allColumns)
 	{
 		$columns = [];
 		foreach( $report->report_columns as $colname => $col_attrs ) {
 			if( !isset($allColumns[$colname]) ) {
+				Yii::$app->session->addFlash("error", "Report '" . $report->name . "': column '$colname' not found");
 				continue;
 			}
 			$new_column = $allColumns[$colname];
@@ -411,46 +412,20 @@ JS;
 				$new_column['pageSummary'] = true;
 				$new_column['pageSummaryFunc'] = $report->report_columns[$colname]['summary'];
 			}
-			if( isset($report->report_columns[$colname]['title'])
-				&& $report->report_columns[$colname]['title'] != '' )  {
-				$new_column['label'] = $report->report_columns[$colname]['title'];
-			}
+			unset($new_column['aggregate'], $new_column['summary']);
 			$columns[$colname] = $new_column;
 		}
 		$groups = [];
 		foreach( $report->report_sorting as $colname => $sorting ) {
 			if( isset($sorting['group']) && $sorting['group'] == true ) {
 				if( !isset($columns[$colname]) ) {
-					if( isset($allColumns[$colname]) ) {
+					if( !isset($allColumns[$colname]) ) {
+						Yii::$app->session->addFlash("error", "Report '" . $report->name . "': group column '$colname' not found");
+					} else {
 						$groups[$colname] = $allColumns[$colname];
 					}
 				}
-// 				$columns[$colname]['groupedRow'] =
-					$columns[$colname]['group'] = $sorting['group'];
-// 				$columns[$colname]['groupFooter'] = function ($model, $key, $index, $widget) { // Closure method
-//                 return [
-// //                     'mergeColumns' => [[2, 3]], // columns to merge in summary
-//                     'content' => [              // content to show in each summary cell
-//                         5 => GridView::F_SUM,
-//                         6 => GridView::F_SUM,
-//                         7 => GridView::F_SUM,
-//                         8 => GridView::F_SUM,
-//                     ],
-//                     'contentFormats' => [      // content reformatting for each summary cell
-//                         4 => ['format' => 'number', 'decimals' => 2],
-//                         5 => ['format' => 'number', 'decimals' => 0],
-//                         6 => ['format' => 'number', 'decimals' => 2],
-//                     ],
-//                     'contentOptions' => [      // content html attributes for each summary cell
-//                         4 => ['style' => 'text-align:right'],
-//                         5 => ['style' => 'text-align:right'],
-//                         6 => ['style' => 'text-align:right'],
-//                     ],
-//                     // html attributes for group summary row
-//                     'options' => ['class' => 'success table-success','style' => 'font-weight:bold;']
-//                 ];
-//             };
-
+				$columns[$colname]['group'] = $sorting['group'];
 			}
 		}
 		if( count($groups) ) {
@@ -461,41 +436,47 @@ JS;
 	}
 
 	/**
-	 * Gets all columns that can be selected and configured for the report
+	 * Gets only the report columns
 	 */
-	public function columnDefinitions($report, $allColumns)
+	public function reportColumns($report, $allColumns)
+	{
+		$columns = [];
+		foreach( $report->report_columns as $colname => $column ) {
+			$columns[$colname] = $allColumns[$colname];
+		}
+		return $columns;
+	}
+
+
+	/**
+	 * Transforms kartik grid columns into report columns
+	 */
+	public function fixColumnDefinitions($report, $allColumns)
 	{
 		$columns = [];
 		foreach( $allColumns as $colname => $grid_column ) {
-			if( isset( $grid_column['label'] ) ) {
-				$orig_title = $grid_column['label'];
-			} else if( isset( $column['attribute'] ) ) {
-				$orig_title = $this->getAttributeLabel($column['attribute']);
-			} else if( !is_numeric($colname) ) {
-				$orig_title = $this->getAttributeLabel($colname);
+			$column = [];
+			if( preg_match('/^(sum|avg|max|min):(.*)$/i', $colname, $matches) ) {
+				$column['attribute'] = $matches[2];
+				$column['aggregate'] = $matches[1];
 			} else {
-				throw new \Exception(Yii::t('churros', "label for '$colname' attribute not found."));
+				$column['attribute'] = $colname;
+				$column['aggregate'] = '';
 			}
-			$column = [
-				'name' => $colname,
-				'width' => null
-			];
+			if( isset($grid_column['value']) ) {
+				$column['value'] = $grid_column['value'];
+			}
+			$orig_title = '';
 			if( isset($report->report_columns[$colname]) ) {
 				$column = ArrayHelper::merge($column, $report->report_columns[$colname]);
 			}
-			if( isset($column['title']) && $column['title'] != '' ) {
-				if( $orig_title == $column['title'] ) {
-					$column['title'] = '';
-					$column['is_custom_title'] = false;
+			if( empty($column['label']) ) {
+				if( isset( $grid_column['label'] ) ) {
+					$column['label'] = $grid_column['label'];
 				} else {
-					$column['is_custom_title'] = true;
+					$column['label'] = $this->getAttributeLabel($column['attribute']);
 				}
-			} else {
-				$column['is_custom_title'] = false;
-				$column['title'] = '';
 			}
-			$column['orig_title'] = $orig_title;
-			$column['dropdown_option'] = [ $colname, $orig_title];
 			$columns[$colname] = $column;
 		}
 		return $columns;
@@ -530,9 +511,32 @@ JS;
  			$this->filterWhere($query, $colname, $value);
 		}
 		$this->addSelectToReportQuery(
-			$columns, array_keys($report->report_filters),
-				$query);
+			$columns, array_keys($report->report_filters), $query);
 		return $provider;
+	}
+
+	public function addRelatedField($attribute, &$joins)
+	{
+		$alias = '';
+		$left_model = $this;
+		while( ($dotpos = strpos($attribute, '.')) !== FALSE ) {
+			$relation_name = substr($attribute, 0, $dotpos);
+			if( !empty($alias) ) { $alias .= "_"; }
+			$alias .= $relation_name;
+			$attribute = substr($attribute, $dotpos + 1);
+			if( isset($left_model::$relations[$relation_name]) ) {
+				$relation = $left_model::$relations[$relation_name];
+				$tablename = $relation['relatedTablename'];
+				if( !isset($joins[$relation['relatedTablename']]) ) {
+					$joins[$relation['relatedTablename']] = $relation['join'];
+				}
+				$left_model = new $relation['modelClass'];
+			} else {
+				throw new \Exception($relation_name . ": relation not found in model " . $left_model->className() . " with relations " . join(',', array_keys($left_model::$relations)));
+			}
+		}
+		$alias .= "_$attribute";
+		return [ $tablename, $attribute, $alias ];
 	}
 
 	/**
@@ -543,48 +547,52 @@ JS;
 		$joins = [];
 		$groups = [];
 		$selects = [];
-		foreach( $columns as $attribute => $column_def ) {
+		foreach( $columns as $column_def ) {
+			$attribute = $column_def['attribute'];
 			if ( is_int($attribute) || array_key_exists($attribute, $this->attributes ) ) {
-				$selects[] = self::tableName() . ".$attribute";
-				continue;
-			}
-			$fldname = '';
-			$relation_name = $attribute;
-			if( ($dotpos = strpos($attribute, '.')) !== FALSE ) {
-				$fldname = substr($attribute, $dotpos + 1);
-				$relation_name = substr($attribute, 0, $dotpos);
-			}
-			if( isset(self::$relations[$relation_name]) ) {
-				if( !isset($joins[$relation_name]) ) {
-					$joins[$relation_name] = true;
-					$relation = self::$relations[$relation_name];
-					$query->leftJoin($relation['relatedTablename'],$relation['join']);
-				}
-				$selects[] = $column_def['attribute'];
-				if( !isset($groups[$relation['right']]) ) {
-					$groups[$relation['right']] = $relation['right'];
-				}
+				$tablename = self::tableName();
+				$alias = $attribute;
+			} else if( ($dotpos = strpos($attribute, '.')) !== FALSE ) {
+				list($tablename, $attribute, $alias) = $this->addRelatedField($attribute, $joins);
 			} else {
- 				throw new InvalidArgumentException($attribute . " column not found in " . self::class);
+				throw \Exception($attribute);
 			}
+			if( !empty($column_def['aggregate']) ) {
+				$agg = $column_def['aggregate'];
+				$alias = $agg . "_" . $alias;
+				$groupby = $tablename . ".id";
+				if( !isset($groups[$groupby]) ) {
+					$groups[$groupby] = $groupby;
+				}
+				$select_field = $agg."(". $tablename . "." . $attribute . ") AS $alias";
+			} else {
+				$select_field = $tablename . "." . $attribute;
+				if( $alias != $attribute )
+					$select_field .= " AS $alias";
+			}
+			$selects[] = $select_field;
 		}
 		$query->select($selects);
+		foreach( $joins as $jk => $jv ) {
+			$query->leftJoin($jk, $jv);
+		}
 		$query->groupBy($groups);
     }
+
 	/**
 	 * Groups the available report columns by table and returns an array for a dropDownList
 	 */
-	static public function columnsForDropDown($report, $columns)
+	public function columnsForDropDown($report, $columns)
 	{
 		$dropdown_options = [];
 		$base_model = $report->getValue('model', '.');
 		foreach( $columns as $colname => $col_attrs ) {
-			list($model, $field) = self::splitFieldName($colname);
+			list($model, $field) = self::splitFieldName($col_attrs['attribute']);
 			if( empty($model) ) {
-				$dropdown_options[$base_model][$colname] = $col_attrs['orig_title'];
+				$dropdown_options[$base_model][$colname] = $col_attrs['label'];
 			} else {
 				$model = ucfirst($model);
-				$dropdown_options[$model][$colname] = $col_attrs['orig_title'] . " ($model)";
+				$dropdown_options[$model][$colname] = $col_attrs['label'] . " ($model)";
 			}
 		}
 		return $dropdown_options;
@@ -595,10 +603,11 @@ JS;
 		$groups = [];
 		foreach( $gridcolumns as $kc => $column ) {
 			if( isset($column['group']) && $column['group'] !== '' ) {
-				$title = $allColumns[$kc]['title'];
-				if ($title == '') {
-					$title = $allColumns[$kc]['orig_title'];
+				if( !isset($allColumns[$kc]) ) {
+					\Yii::warning("Group column $kc not defined in all the columns for this report");
+					continue;
 				}
+				$title = $allColumns[$kc]['title'];
 				$groups[$column['attribute']] = [
 					'column' => $column['attribute'],
 					'format' => $title . ': {group_value}',
