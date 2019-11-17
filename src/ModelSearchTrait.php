@@ -500,12 +500,7 @@ JS;
 
 		$sort = [];
 		foreach( $report->report_sorting as $colname => $sorting_column ) {
-			list($model, $field) = self::splitFieldName($colname);
-			if( empty($model) ) {
-				$sort[$colname] = self::tableName() . '.' . $sorting_column['asc'];
-			} else {
-				$sort[$colname] = $sorting_column['asc'];
-			}
+			$sort[str_replace(".", "_", $colname)] = $sorting_column['asc'];
 		}
 		$provider->sort->attributes = [ 'default' =>  [ 'asc' => $sort ]];
 		$provider->sort->defaultOrder = [ 'default' => SORT_ASC ];

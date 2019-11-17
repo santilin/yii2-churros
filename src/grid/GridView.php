@@ -73,7 +73,7 @@ class GridView extends BaseGridView
 				}
 			}
 		}
-		$this->resetSummaries(count($this->groups));
+		$this->resetSummaries(0);
 	}
 
 	protected function initGroups()
@@ -160,9 +160,9 @@ class GridView extends BaseGridView
 				$group->willUpdateGroup($model, $key, $index ) ) {
 				$ret .= Html::tag('tr',
 					$group->getFooterContent($this->summaryColumns, $model, $key, $index, $tdoptions));
-				$this->resetSummaries($group->level);
+				$group->resetSummaries($this->summaryColumns);
 			}
-			$this->updateGroupSummaries($group->level, $model);
+			$group->updateSummaries($this->summaryColumns, $model);
 			if( $group->updateGroup($model, $key, $index) && $group->header ) {
 				$ret .= Html::tag('tr',
 					$group->getHeaderContent($model, $key, $index,  $tdoptions));
@@ -265,8 +265,6 @@ class GridView extends BaseGridView
         return $options;
     }
 
-
-
     /**
      * @inheritdoc
      * Redefined to show the column of the error in case of error
@@ -293,15 +291,6 @@ class GridView extends BaseGridView
 		foreach( $this->groups as $kg => $group ) {
 			if( $group->level >= $level ) {
 				$group->resetSummaries($this->summaryColumns);
-			}
-		}
-	}
-
-	public function updateGroupSummaries($level, $model)
-	{
-		foreach( $this->groups as $kg => $group ) {
-			if( $group->level <= $level ) {
-				$group->updateSummaries($this->summaryColumns, $model);
 			}
 		}
 	}
