@@ -412,6 +412,9 @@ JS;
 				$new_column['pageSummary'] = true;
 				$new_column['pageSummaryFunc'] = $report->report_columns[$colname]['summary'];
 			}
+			if( !empty($new_column['aggregate']) ) {
+				$colname = $new_column['aggregate'] . "_" . $new_column['attribute'];
+			}
 			unset($new_column['aggregate'], $new_column['summary']);
 			$columns[$colname] = $new_column;
 		}

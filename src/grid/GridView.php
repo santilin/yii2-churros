@@ -57,7 +57,8 @@ class GridView extends BaseGridView
 						$this->summaryValues[$kc] = 0;
 						break;
 					case 'f_avg':
-						$this->summaryValues[$kc] = [0, 0];
+						$this->summaryValues[$kc][0] = 0;
+						$this->summaryValues[$kc][1] = 0;
 						break;
 					case 'f_max':
 						$this->summaryValues[$kc] = null;
@@ -70,7 +71,6 @@ class GridView extends BaseGridView
 						$this->summaryValues[$kc] = [];
 						break;
 				}
-				$this->summaryValues[$kc] = null;
 			}
 		}
 		$this->resetSummaries(count($this->groups));
@@ -212,9 +212,17 @@ class GridView extends BaseGridView
 				continue;
 			}
 			if( isset($summary_columns[$kc]) ) {
+				$value = 0.0;
+				if( $summary_columns[$kc] == 'f_avg' ) {
+					if ($this->summaryValues[$kc][1] != 0 ) {
+						$value = $this->summaryValues[$kc][0] / $this->summaryValues[$kc][1];
+					}
+				} else {
+					$value = $this->summaryValues[$kc];
+				}
 				$ret .= Html::tag('td', Html::tag('div',
 					$this->formatter->format(
-						$this->summaryValues[$kc], $column->format),
+						$value, $column->format),
 						self::fetchColumnOptions($column, 0)));
 			} else {
 				$ret .= Html::tag('td', '');
@@ -314,20 +322,24 @@ class GridView extends BaseGridView
 				$this->summaryValues[$key][0] += $model[$kc];
 				$this->summaryValues[$key][1] ++;
 				break;
-			case 'f_max:':
-				if( $this->summaryValues[$key] < $model[$kc] ) {
+			case 'f_max':
+				if( $this->summaryValues[$key] == null ) {
+					$this->summaryValues[$key] = $model[$kc];
+				} else if( $this->summaryValues[$key] < $model[$kc] ) {
 					$this->summaryValues[$key] = $model[$kc];
 				}
 				break;
-			case 'f_min:':
-				if( $this->summaryValues[$key] > $model[$kc] ) {
+			case 'f_min':
+				if( $this->summaryValues[$key] == null ) {
+					$this->summaryValues[$key] = $model[$kc];
+				} else if( $this->summaryValues[$key] > $model[$kc] ) {
 					$this->summaryValues[$key] = $model[$kc];
 				}
 				break;
-			case 'f_concat:':
+			case 'f_concat':
 				$this->summaryValues[$key][] = $model[$kc];
 				break;
-			case 'f_distinct_concat:':
+			case 'f_distinct_concat':
 				if (!in_array($model[$key], $this->summaryValues[$kc])) {
 					$this->summaryValues[$key][] = $model[$kc];
 				}

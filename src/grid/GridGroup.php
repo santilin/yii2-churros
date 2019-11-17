@@ -198,7 +198,8 @@ class GridGroup extends BaseObject
 				$this->summaryValues[$kc] = 0;
 				break;
 			case 'f_avg':
-				$this->summaryValues[$kc] = [0, 0];
+				$this->summaryValues[$kc][0] = 0;
+				$this->summaryValues[$kc][1] = 0;
 				break;
 			case 'f_max':
 				$this->summaryValues[$kc] = null;
@@ -230,20 +231,24 @@ class GridGroup extends BaseObject
 				$this->summaryValues[$key][0] += $row_values[$kc];
 				$this->summaryValues[$key][1] ++;
 				break;
-			case 'f_max:':
-				if( $this->summaryValues[$key] < $row_values[$kc] ) {
+			case 'f_max':
+				if( $this->summaryValues[$key] == null ) {
+					$this->summaryValues[$key] = $row_values[$kc];
+				} else if( $this->summaryValues[$key] < $row_values[$kc] ) {
 					$this->summaryValues[$key] = $row_values[$kc];
 				}
 				break;
-			case 'f_min:':
-				if( $this->summaryValues[$key] > $row_values[$kc] ) {
+			case 'f_min':
+				if( $this->summaryValues[$key] == null ) {
+					$this->summaryValues[$key] = $row_values[$kc];
+				} else if( $this->summaryValues[$key] > $row_values[$kc] ) {
 					$this->summaryValues[$key] = $row_values[$kc];
 				}
 				break;
-			case 'f_concat:':
+			case 'f_concat':
 				$this->summaryValues[$key][] = $row_values[$kc];
 				break;
-			case 'f_distinct_concat:':
+			case 'f_distinct_concat':
 				if (!in_array($row_values[$key], $this->summaryValues[$kc])) {
 					$this->summaryValues[$key][] = $row_values[$kc];
 				}
