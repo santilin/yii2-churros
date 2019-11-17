@@ -24,6 +24,7 @@ class GridView extends BaseGridView
 	protected $summaryColumns = [];
 	protected $summaryValues = [];
 	protected $recno;
+	protected $current_level = 0;
 
 	public function init()
 	{
@@ -39,11 +40,12 @@ class GridView extends BaseGridView
 		}
 		$this->recno = 0;
 		$this->initSummaryColumns();
+		$this->resetGroupsSummaries();
 		$this->initSorting();
 	}
 
 	/**
-	 * Creates the constant array of summary columns to be passed to the
+	 * Creates the constant array of summary columns to be used by the
 	 * summary functions of each group
 	 */
 	protected function initSummaryColumns()
@@ -73,11 +75,18 @@ class GridView extends BaseGridView
 				}
 			}
 		}
-		$this->resetSummaries(0);
+	}
+
+	protected function resetGroupsSummaries()
+	{
+		foreach( $this->groups as $kg => $group )  {
+			$group->resetSummaries($this->summaryColumns, 0, count($this->groups));
+		}
 	}
 
 	protected function initGroups()
 	{
+		$this->current_level = 0; // details
 		$level = 1;
 		foreach( $this->groups as $kg => $group_def ) {
             if (is_string($group_def)) {
@@ -100,23 +109,6 @@ class GridView extends BaseGridView
 			}
         }
 	}
-
-	// Not all group columns are defined in the grid
-// 	protected function initGroupLabels()
-// 	{
-// 		foreach( $this->groups as $key => $group ) {
-// 			if( isset($group->label) ) {
-// 				continue;
-// 			}
-// 			if( !isset($group->header_label) ) {
-// 				$c = $this->columns;
-// 				$group->header_label = $this->columns[$group->column]['label'];
-// 			}
-// 			if( !isset($group->footer_label) ) {
-// 				$group->footer_label = $this->columns[$group->column]['label'];
-// 			}
-// 		}
-// 	}
 
 	/**
 	 * Appends the groups orders to the default or current orders
@@ -151,22 +143,27 @@ class GridView extends BaseGridView
 	{
 		$ret = '';
 		$tdoptions = [ 'colspan' => count($this->columns) ];
-		$summarized = false;
 		$this->recno++;
-		$this->updateSummaries($model);
-		foreach( $this->groups as $kg => $group ) {
-			// close previous footer on group change
-			if( $group->footer &&
-				$group->willUpdateGroup($model, $key, $index ) ) {
-				$ret .= Html::tag('tr',
-					$group->getFooterContent($this->summaryColumns, $model, $key, $index, $tdoptions));
-				$group->resetSummaries($this->summaryColumns);
+		// close previous footers on group change
+		foreach( array_reverse($this->groups) as $kg => $group ) {
+			if( $group->level <= $this->current_level ) {
+				if( $group->willUpdateGroup($model, $key, $index ) ) {
+					$ret .= Html::tag('tr',
+						$group->getFooterContent($this->summaryColumns, $model, $key, $index, $tdoptions));
+					$group->resetSummaries($this->summaryColumns, $this->current_level, count($this->groups));
+					$this->current_level--;
+				}
 			}
-			$group->updateSummaries($this->summaryColumns, $model);
+		}
+		$this->updateReportSummaries($model);
+		foreach( $this->groups as $kg => $group ) {
 			if( $group->updateGroup($model, $key, $index) && $group->header ) {
 				$ret .= Html::tag('tr',
 					$group->getHeaderContent($model, $key, $index,  $tdoptions));
+				$this->current_level++;
+				$group->resetSummaries($this->summaryColumns, $this->current_level, count($this->groups));
 			}
+			$group->updateSummaries($this->summaryColumns, $this->current_level, $model);
 		}
 		return $ret;
 	}
@@ -286,16 +283,7 @@ class GridView extends BaseGridView
         return '';
     }
 
-	public function resetSummaries($level)
-	{
-		foreach( $this->groups as $kg => $group ) {
-			if( $group->level >= $level ) {
-				$group->resetSummaries($this->summaryColumns);
-			}
-		}
-	}
-
-	public function updateSummaries($model)
+	public function updateReportSummaries($model)
 	{
 		// same in GridGroup::updateSummaries
 		foreach( $this->summaryColumns as $key => $summary) {

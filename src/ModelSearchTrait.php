@@ -426,6 +426,7 @@ JS;
 						Yii::$app->session->addFlash("error", "Report '" . $report->name . "': group column '$colname' not found");
 					} else {
 						$groups[$colname] = $allColumns[$colname];
+						unset($groups[$colname]['aggregate'], $groups[$colname]['summary']);
 					}
 				}
 				$columns[$colname]['group'] = $sorting['group'];
@@ -446,6 +447,11 @@ JS;
 		$columns = [];
 		foreach( $report->report_columns as $colname => $column ) {
 			$columns[$colname] = $allColumns[$colname];
+		}
+		foreach( $report->report_sorting as $colname => $sorting ) {
+			if( !isset($columns[$colname]) ) {
+				$columns[$colname] = $allColumns[$colname];
+			}
 		}
 		return $columns;
 	}
@@ -596,22 +602,20 @@ JS;
 		return $dropdown_options;
 	}
 
-	static public function groupsFromColumns($gridcolumns, $allColumns)
+	static public function reportGroups($report, $report_columns)
 	{
 		$groups = [];
-		foreach( $gridcolumns as $kc => $column ) {
+		foreach( $report->report_sorting as $colname => $column ) {
 			if( isset($column['group']) && $column['group'] !== '' ) {
-				if( !isset($allColumns[$kc]) ) {
-					\Yii::warning("Group column $kc not defined in all the columns for this report");
-					continue;
+				if( isset($report_columns[$colname]) ) {
+					$rc = $report_columns[$colname];
+					$groups[$rc['attribute']] = [
+						'column' => str_replace('.','_',$rc['attribute']),
+						'format' => $rc['label'] . ': {group_value}',
+						'header' => true,
+						'footer' => true
+					];
 				}
-				$title = $allColumns[$kc]['label'];
-				$groups[$column['attribute']] = [
-					'column' => $column['attribute'],
-					'format' => $title . ': {group_value}',
-					'header' => true,
-					'footer' => true
-				];
 			}
 		}
 		return $groups;
