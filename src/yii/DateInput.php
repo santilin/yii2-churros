@@ -1,7 +1,11 @@
 <?php
+/*
+ * https://github.com/RobinHerbots/Inputmask
+ */
 namespace santilin\churros\yii;
 
 use yii\helpers\Html;
+use yii\web\View;
 use yii\widgets\MaskedInput;
 use santilin\churros\helper\DateTimeHelper;
 
@@ -53,41 +57,102 @@ class DateInput extends MaskedInput
 		return $ret;
     }
 
-    private static function addChange(&$options, $id)
+        /**
+     * Registers the needed client script and options.
+     */
+    public function registerClientScript()
     {
-		if( !isset($options['onchange']) ) {
-			$options['onchange'] = <<<EOF
-var fecha_val = $(this).val();
-debugger;
-var fecha_parts = fecha_val.split('/');
-var year = parseInt(fecha_parts[2]);
-if( isNaN(year) || year == 0 ) {
-	year = new Date().getFullYear();
-} else if (year<100) {
-	year += 2000;
+		parent::registerClientScript();
+		$view = $this->getView();
+		$js = <<<EOF
+function dateInputParseSpanishDate(datestr)
+{
+	var datestr_parts = datestr.split('/');
+	if( datestr_parts.length == 3 ) {
+		var year = parseInt(datestr_parts[2]);
+		if( isNaN(year) || year == 0 ) {
+			year = new Date().getFullYear();
+		} else if (year<100) {
+			year += 2000;
+		}
+		var month = parseInt(datestr_parts[1]);
+		if( isNaN(month) || month == 0 ) {
+			month = new Date().getMonth();
+		} else if (month > 12 ) {
+			return false;
+		}
+		var day = parseInt(datestr_parts[0]);
+		if( isNaN(day) ) {
+			day = 0;
+		} else if (day > 31) {
+			return false;
+		}
+		var d = new Date(year, month-1, day);
+		if( d.getFullYear() != year || d.getMonth() != month-1 || d.getDate() != day ) {
+			return false;
+		} else {
+			return d;
+		}
+	}
 }
-var month = parseInt(fecha_parts[1]);
-if( isNaN(month) || month == 0 ) {
-	month = new Date().getMonth();
-} else {
-	--month
+
+function dateToSpanishFormat(date)
+{
+	var year = date.getFullYear();
+	if( year < 1000 ) {
+		year = "0" + year;
+	}
+	var month = date.getMonth() + 1;
 	if (month < 10 ) {
 		month = "0" + month;
 	}
+	var day = date.getDate();
+	if( day < 10 ) {
+		day = "0" + day;
+	}
+	return day + "-" + month + "-" + year;
 }
-var day = parseInt(fecha_parts[0]);
-if( isNaN(day) || day == 0 ) {
-	day = new Date().getDate();
-} else if( day < 10 ) {
-	day = "0" + day;
+
+function dateToSQLFormat(date)
+{
+	var year = date.getFullYear();
+	var month = date.getMonth() + 1;
+	if (month < 10 ) {
+		month = "0" + month;
+	}
+	var day = date.getDate();
+	if( day < 10 ) {
+		day = "0" + day;
+	}
+	return year + "-" + month + "-" + day;
 }
-var fecha_js = new Date(year, month, day);
-var fecha_sql = fecha_js.getFullYear() + "-" + (fecha_js.getMonth()+1) + "-" + fecha_js.getDate();
-$('#$id').val(fecha_sql);
-$(this).val(day + "/" + (++month) + "/" + year );
-console.log($(this).val());
-console.log($('#$id').val());
+
+function dateInputChange(date_input, id)
+{
+	var date_js = dateInputParseSpanishDate(date_input.value);
+	if (date_js == false ) {
+		old_value = date_input.value;
+		date_input.value = "00/00/0000";
+		setTimeout(function() {
+			date_input.value = old_value;
+			date_input.focus();
+		}, 1000);
+	} else {
+		console.log(date_js);
+		date_input.value = dateToSpanishFormat( date_js );
+		console.log(date_input.value);
+		$('#' + id ).val( dateToSQLFormat( date_js ) );
+		console.log($('#' + id).val());
+	}
+}
 EOF;
+        $view->registerJs($js, View::POS_HEAD, 'DateInputWidgetJS');
+    }
+
+    private static function addChange(&$options, $id)
+    {
+		if( !isset($options['onchange']) ) {
+			$options['onchange'] = "dateInputChange(this,'$id');";
 		}
     }
 
