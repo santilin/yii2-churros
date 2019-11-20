@@ -94,6 +94,7 @@ class DbController extends Controller
 					return $value;
 				}
 			case "string":
+			case "resource": // blob
 				if( $value == null ) {
 					return "null";
 				} else {
