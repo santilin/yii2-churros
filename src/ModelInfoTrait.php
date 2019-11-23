@@ -88,7 +88,7 @@ trait ModelInfoTrait
 	{
 		if( $format == null ) {
 			$format = self::getModelInfo('record_desc_format');
-		} elseif( $format == 'long' ) {
+		} elseif( $format == 'long' || $format == 'link' ) {
 			$format = self::getModelInfo('record_desc_format_long');
 		} elseif( $format == 'short' ) {
 			$format = self::getModelInfo('record_desc_format_short');
@@ -118,7 +118,7 @@ trait ModelInfoTrait
 		}
 	}
 
-	public function linkTo($action, $prefix = '')
+	public function linkTo($action, $prefix = '', $format = 'short')
 	{
 		$url = $prefix;
 		if ($url != '') {
@@ -131,7 +131,7 @@ trait ModelInfoTrait
 					$url);
 		} else {
 			$url .= "/$action";
-			return \yii\helpers\Html::a($this->recordDesc(),
+			return \yii\helpers\Html::a($this->recordDesc($format),
 					[$url, 'id' => $this->getPrimaryKey() ]);
 		}
 	}

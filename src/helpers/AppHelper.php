@@ -123,6 +123,8 @@ class AppHelper
         . mb_substr($str, 1, mb_strlen($str), $encoding);
     }
 
-
-
+    static public function isUserAdmin()
+    {
+		return Yii::$app->user->identity && Yii::$app->user->identity->isAdmin;
+	}
 }
