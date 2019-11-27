@@ -91,7 +91,7 @@ function dateInputParseSpanishDate(datestr)
 		}
 		var month = parseInt(datestr_parts[1]);
 		if( isNaN(month) || month == 0 ) {
-			month = new Date().getMonth();
+			month = new Date().getMonth() + 1;
 		} else if (month > 12 ) {
 			return false;
 		}
