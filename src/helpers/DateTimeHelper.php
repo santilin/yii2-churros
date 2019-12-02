@@ -14,6 +14,25 @@ class DateTimeHelper
 	const STRFTIME_TIME_SQL_FORMAT = '%H:%M:%S';
 	const DATETIME_TIME_SQL_FORMAT = 'H:i:s';
 
+	public static function dateToSql($var)
+	{
+		if( $var instanceof DateTime ) {
+			return $var->format(self::DATETIME_DATE_SQL_FORMAT);
+		} elseif( is_int($var) ) {
+			return date(self::DATETIME_DATE_SQL_FORMAT, $var);
+		} else {
+			throw new Exception($var);
+		}
+	}
+
+	public static function dateTimeToSql($var)
+	{
+		if( $var instanceof DateTime ) {
+			return $var->format(self::DATETIME_DATETIME_SQL_FORMAT);
+		} else {
+			return date(self::DATETIME_DATETIME_SQL_FORMAT, $var);
+		}
+	}
 
     public static function getTimeStringAgoInWord($date)
     {

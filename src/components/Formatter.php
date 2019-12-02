@@ -31,8 +31,14 @@ class Formatter extends \yii\i18n\Formatter
 	{
 		return $this->asBoolean(!(bool)$value);
 	}
-	
+
 	public function asHours($minutes)
+	{
+		return number_format(($minutes / 60),2,',','');
+	}
+
+
+	public function asHoursMinutes($minutes)
 	{
 		if( empty($minutes) ) {
 			return "00:00";
