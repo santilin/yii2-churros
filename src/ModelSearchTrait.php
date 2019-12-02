@@ -446,7 +446,18 @@ JS;
 	{
 		$columns = [];
 		foreach( $report->report_columns as $colname => $column ) {
-			$columns[$colname] = $allColumns[$colname];
+			if( !isset($allColumns[$colname]) ) {
+				$point_parts = explode('.',$colname);
+				$last_part = array_pop($point_parts);
+				if( in_array($last_part, ['sum','avg','count','distinct count', 'concat', 'distinct concat', 'max', 'min']) ) {
+					$cn = $last_part . ":" . implode($point_parts, '.');
+					if(isset($allColumns[$cn])) {
+						$columns[$colname] = $allColumns[$cn];
+					}
+				}
+			} else {
+				$columns[$colname] = $allColumns[$colname];
+			}
 		}
 		foreach( $report->report_sorting as $colname => $sorting ) {
 			if( !isset($columns[$colname]) ) {

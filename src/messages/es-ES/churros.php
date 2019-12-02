@@ -21,7 +21,8 @@ return [
     'All' => 'Todo',
     'Error saving the record {title}' => 'Error guardando el registro {title}',
     'From \'{from}\' or until \'{until}\' dates are in invalid date format' => 'Las fechas desde: \'{from}\' o hasta: \'{until}\' no tienen un formato válido',
-    'From date {from} can\'t be greater than until date {until}' => 'La fecha inicial: \'{from}\' no puede ser posterior a la fecha final: \'{until\'',
+    '{from-label} {from} can\'t be greater than {until-label} {until}'
+     => '{from-label}: \'{from}\' no puede ser posterior a {until-label}: \'{until}\'',
     'Inactive' => 'Inactivo',
     'The {attribute} \'{value}\' is not valid' => 'El valor \'{value}\' del campo \'{attribute}\' no es válido',
     '{La} {title} <strong>{record}</strong> has been successfully created.' => '{La} {title} <strong>{record}</strong> se ha creado correctamente.',

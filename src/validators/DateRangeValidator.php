@@ -73,9 +73,11 @@ class DateRangeValidator extends Validator
 
 		if( $validationModel->parsedFrom > $validationModel->parsedUntil ) {
 			return $this->addError($model, $attribute, Yii::t('churros',
-				'From date {from} can\'t be greater than until date {until}', [
-					'from' => $validationModel->parsedFrom,
-					'until' => $validationModel->parsedUntil ]));
+				'{from-label} {from} can\'t be greater than {until-label} {until}', [
+					'from-label' => $model->getAttributeLabel($attribute),
+					'until-label' => $model->getAttributeLabel($this->untilAttribute),
+					'from' => Yii::$app->formatter->asDateTime($fromDate),
+					'until' => Yii::$app->formatter->asDateTime($untilDate)]));
 		}
 		return true;
     }
