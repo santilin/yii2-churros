@@ -65,6 +65,20 @@ class DateInput extends MaskedInput
 		parent::registerClientScript();
 		$view = $this->getView();
 		$js = <<<EOF
+// https://stackoverflow.com/a/499158
+function dateInputSetSelectionRange(input, selectionStart, selectionEnd) {
+  if (input.setSelectionRange) {
+    input.setSelectionRange(selectionStart, selectionEnd);
+  }
+  else if (input.createTextRange) {
+    var range = input.createTextRange();
+    range.collapse(true);
+    range.moveEnd('character', selectionEnd);
+    range.moveStart('character', selectionStart);
+    range.select();
+  }
+}
+
 function dateInputParseSpanishDate(datestr)
 {
 	var datestr_parts = datestr.split('/');
@@ -77,7 +91,7 @@ function dateInputParseSpanishDate(datestr)
 		}
 		var month = parseInt(datestr_parts[1]);
 		if( isNaN(month) || month == 0 ) {
-			month = new Date().getMonth();
+			month = new Date().getMonth() + 1;
 		} else if (month > 12 ) {
 			return false;
 		}
@@ -152,7 +166,10 @@ EOF;
     private static function addChange(&$options, $id)
     {
 		if( !isset($options['onchange']) ) {
-			$options['onchange'] = "dateInputChange(this,'$id');";
+			$options['onchange'] = "dateInputChange(this,'$id')";
+		}
+		if( !isset($options['onfocus']) ) {
+			$options['onfocus'] = "dateInputSetSelectionRange(this,0,0)";
 		}
     }
 
