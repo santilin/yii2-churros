@@ -201,13 +201,17 @@ class GridView extends BaseGridView
 		}
 		if( $this->totalsRow ) {
 			$ret .= Html::tag('tr',
-				$this->getFooterSummary($this->summaryColumns, $tdoptions));
+				$this->getFooterSummary($this->summaryColumns, $tdoptions),
+				[ 'class' => 'report-grand-total']);
 		}
 		return $ret;
 	}
 
 	public function getFooterSummary($summary_columns, $tdoptions)
 	{
+		if( count($summary_columns) == 0 ) {
+			return '';
+		}
 		$colspan = 0;
 		foreach( $this->columns as $kc => $column ) {
 			if( !isset($summary_columns[$kc]) ) {
@@ -216,10 +220,13 @@ class GridView extends BaseGridView
 				break;
 			}
 		}
-		$ret = Html::tag('td',
-			Html::tag('div', "Totales ", [
-				'class' => 'grid-group-total' ]),
-			['colspan' => $colspan]);
+		$ret = '';
+		if( $colspan!=0) {
+			$ret = Html::tag('td',
+				Html::tag('div', Yii::t('churros', "Totales "), [
+					'class' => 'grid-group-total' ]),
+				['colspan' => $colspan]);
+		}
 		$nc = 0;
 		foreach( $this->columns as $kc => $column ) {
 			if( $nc++ < $colspan ) {

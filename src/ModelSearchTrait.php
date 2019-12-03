@@ -476,6 +476,9 @@ JS;
 		$columns = [];
 		foreach( $allColumns as $colname => $grid_column ) {
 			$column = [];
+			if( isset($grid_column['hAlign']) ) {
+				$column['hAlign'] = $grid_column['hAlign'];
+			}
 			if( preg_match('/^(sum|avg|max|min):(.*)$/i', $colname, $matches) ) {
 				$column['attribute'] = $matches[2];
 				$column['aggregate'] = $matches[1];
