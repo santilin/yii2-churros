@@ -1,7 +1,6 @@
 <?php namespace santilin\churros;
 
 use Yii;
-use yii\data\ActiveDataProvider;
 use yii\helpers\Html;
 use yii\helpers\ArrayHelper;
 use yii\base\InvalidArgumentException;
@@ -18,7 +17,7 @@ trait ModelSearchTrait
 {
 	protected $related_properties = [];
 	private $dynamic_rules = [];
-	static private $operators = [
+	static public $operators = [
 			'=' => '=',
 			'===' => 'Exactamente', // Distinguish = (in grid filter) from === in search form
 			'<>' => '<>',
@@ -26,7 +25,7 @@ trait ModelSearchTrait
 			'>' => '>', '<' => '<',
 			'>=' => '>=', '<=' => '<=',
 			'BETWEEN' => 'entre', 'NOT BETWEEN' => 'no entre' ];
-	static private $extra_operators = [
+	static public $extra_operators = [
 			'BETWEEN', 'NOT BETWEEN' ];
 
     public function setAttributes($values, $safeOnly = true)
@@ -152,7 +151,7 @@ trait ModelSearchTrait
 		}
 	}
 
-	protected function filterWhere(&$query, $name, $value)
+	public function filterWhere(&$query, $name, $value)
 	{
 		if( $value === null || $value === '' ) {
 			return;
@@ -319,68 +318,6 @@ trait ModelSearchTrait
 		return $ret;
 	}
 
-	/**
-	 * Returns Html code to add an advanced search field to a search form
-	 * @param boolean $hidden Whether to include the general condition as a hidden input
-	 */
-	static public function searchFieldForReport($report, $model, $attribute, $dropdown_values = null)
-	{
-		$ret = '';
-		$scope = $model->formName();
-		if( isset( $report->report_filters[$attribute] ) ) {
-			$value = $report->report_filters[$attribute];
-		} else {
-			$value = [ 'op' => '', 'lft' => '', 'rgt' => ''];
-		}
-		if( !in_array($value['op'], self::$extra_operators) ) {
-			$extra_visible = "display:none";
-		} else {
-			$extra_visible = '';
-		}
-		$attr_class = str_replace('.','_',$attribute);
-		$ret .= "<div class='row'>";
-		$ret .= "<div class='form-group'>";
-		$ret .= "<div class='control-label col-sm-3'>";
-		$ret .= Html::activeLabel($model, $attribute);
-		$ret .= "</div>";
-
-		$ret .= "<div class='control-form col-sm-2'>";
-		$ret .= Html::dropDownList("${scope}[_adv_][$attribute][op]",
-			$value['op'], self::$operators, [
-			'id' => "drop-$attr_class", 'class' => 'search-dropdown form-control col-sm-2'] );
-		$ret .= "</div>";
-		$ret .= "<div class='control-form col-sm-4'>";
-		if( is_array($dropdown_values) ) {
-			$ret .= Html::dropDownList("${scope}[_adv_][$attribute][lft]",
-			$value['lft'], $dropdown_values, [ 'class' => 'form-control col-sm-4']);
-		} else {
-			$ret .= Html::input('text', "${scope}[_adv_][$attribute][lft]",
-			$value['lft'], [ 'class' => 'form-control col-sm-4']);
-		}
-		$ret .= "</div>";
-		$ret .= "</div><!-- row -->";
-
-
-		$ret .= "<div class='row gap10'>";
-		$ret .= "<div style='$extra_visible' id='second-field-drop-$attr_class' >";
-		$ret .= "<div class='control-form col-sm-2 col-sm-offset-3 text-right'>";
-		$ret .= "y:";
-		$ret .= "</div>";
-		$ret .= "<div class='control-form col-sm-4'>";
-		if( is_array($dropdown_values) ) {
-			$ret .= Html::dropDownList("${scope}[_adv_][$attribute][rgt]",
-			$value['rgt'], $dropdown_values, [ 'class' => 'form-control col-sm-4']);
-		} else {
-			$ret .= Html::input('text', "${scope}[_adv_][$attribute][rgt]",
-				$value['rgt'], [ 'class' => 'form-control col-sm-4']);
-		}
-		$ret .= "</div>";
-		$ret .= "</div><!-- row -->";
-		$ret .= "</div>";
-		$ret .= "</div>";
-		return $ret;
-	}
-
 	static public $searchFormJS = <<<JS
 $('.search-dropdown').change(function() {
 	let value= $(this).val();
@@ -393,145 +330,6 @@ $('.search-dropdown').change(function() {
 	}
 });
 JS;
-
-
-	/**
-	 * Extracts the kartik columns for this report
-	 */
-	public function gridColumns($report, $allColumns)
-	{
-		$columns = [];
-		foreach( $report->report_columns as $colname => $col_attrs ) {
-			if( !isset($allColumns[$colname]) ) {
-				Yii::$app->session->addFlash("error", "Report '" . $report->name . "': column '$colname' not found");
-				continue;
-			}
-			$new_column = $allColumns[$colname];
-			if( isset($report->report_columns[$colname]['summary'])
-				&& $report->report_columns[$colname]['summary'] != '' )  {
-				$new_column['pageSummary'] = true;
-				$new_column['pageSummaryFunc'] = $report->report_columns[$colname]['summary'];
-			}
-			if( !empty($new_column['aggregate']) ) {
-				$colname = $new_column['aggregate'] . "_" . $new_column['attribute'];
-			}
-			unset($new_column['aggregate'], $new_column['summary']);
-			$columns[$colname] = $new_column;
-		}
-		$groups = [];
-		foreach( $report->report_sorting as $colname => $sorting ) {
-			if( isset($sorting['group']) && $sorting['group'] == true ) {
-				if( !isset($columns[$colname]) ) {
-					if( !isset($allColumns[$colname]) ) {
-						Yii::$app->session->addFlash("error", "Report '" . $report->name . "': group column '$colname' not found");
-					} else {
-						$groups[$colname] = $allColumns[$colname];
-						unset($groups[$colname]['aggregate'], $groups[$colname]['summary']);
-					}
-				}
-				$columns[$colname]['group'] = $sorting['group'];
-			}
-		}
-		if( count($groups) ) {
-			return $groups + $columns;
-		} else {
-			return $columns;
-		}
-	}
-
-	/**
-	 * Gets only the report columns
-	 */
-	public function reportColumns($report, $allColumns)
-	{
-		$columns = [];
-		foreach( $report->report_columns as $colname => $column ) {
-			if( !isset($allColumns[$colname]) ) {
-				$point_parts = explode('.',$colname);
-				$last_part = array_pop($point_parts);
-				if( in_array($last_part, ['sum','avg','count','distinct count', 'concat', 'distinct concat', 'max', 'min']) ) {
-					$cn = $last_part . ":" . implode($point_parts, '.');
-					if(isset($allColumns[$cn])) {
-						$columns[$colname] = $allColumns[$cn];
-					}
-				}
-			} else {
-				$columns[$colname] = $allColumns[$colname];
-			}
-		}
-		foreach( $report->report_sorting as $colname => $sorting ) {
-			if( !isset($columns[$colname]) ) {
-				$columns[$colname] = $allColumns[$colname];
-			}
-		}
-		return $columns;
-	}
-
-
-	/**
-	 * Transforms kartik grid columns into report columns
-	 */
-	public function fixColumnDefinitions($report, $allColumns)
-	{
-		$columns = [];
-		foreach( $allColumns as $colname => $grid_column ) {
-			$column = [];
-			if( isset($grid_column['hAlign']) ) {
-				$column['hAlign'] = $grid_column['hAlign'];
-			}
-			if( preg_match('/^(sum|avg|max|min):(.*)$/i', $colname, $matches) ) {
-				$column['attribute'] = $matches[2];
-				$column['aggregate'] = $matches[1];
-			} else {
-				$column['attribute'] = $colname;
-				$column['aggregate'] = '';
-			}
-			if( isset($grid_column['value']) ) {
-				$column['value'] = $grid_column['value'];
-			}
-			$orig_title = '';
-			if( isset($report->report_columns[$colname]) ) {
-				$column = ArrayHelper::merge($column, $report->report_columns[$colname]);
-			}
-			if( empty($column['label']) ) {
-				if( isset( $grid_column['label'] ) ) {
-					$column['label'] = $grid_column['label'];
-				} else {
-					$column['label'] = $this->getAttributeLabel($column['attribute']);
-				}
-			}
-			$columns[$colname] = $column;
-		}
-		return $columns;
-	}
-
-	/**
-	 * Creates the data provider for the grid.
-	 * Sets the query, select, joins, orderBy, groupBy and filters
-	 */
-	public function dataProviderForReport($report, $columns)
-    {
-        $query = new yii\db\Query(); // self::find();
-
-        $provider = new ActiveDataProvider([
-            'query' => $query->from(self::tableName()),
-            'pagination' => false,
-        ]);
-
-		$sort = [];
-		foreach( $report->report_sorting as $colname => $sorting_column ) {
-			$sort[str_replace(".", "_", $colname)] = $sorting_column['asc'];
-		}
-		$provider->sort->attributes = [ 'default' =>  [ 'asc' => $sort ]];
-		$provider->sort->defaultOrder = [ 'default' => SORT_ASC ];
-
-		foreach( $report->report_filters as $colname => $value ) {
- 			$this->filterWhere($query, $colname, $value);
-		}
-		$this->addSelectToReportQuery(
-			$columns, array_keys($report->report_filters), $query);
-		return $provider;
-	}
 
 	public function addRelatedField($attribute, &$joins)
 	{
@@ -555,84 +353,6 @@ JS;
 		}
 		$alias .= "_$attribute";
 		return [ $tablename, $attribute, $alias ];
-	}
-
-	/**
-	 * Adds related select and joins to dataproviders for reports
-	 */
-	public function addSelectToReportQuery($columns, $filters, &$query)
-	{
-		$joins = [];
-		$groups = [];
-		$selects = [];
-		foreach( $columns as $column_def ) {
-			$attribute = $column_def['attribute'];
-			if ( is_int($attribute) || array_key_exists($attribute, $this->attributes ) ) {
-				$tablename = self::tableName();
-				$alias = $attribute;
-			} else if( ($dotpos = strpos($attribute, '.')) !== FALSE ) {
-				list($tablename, $attribute, $alias) = $this->addRelatedField($attribute, $joins);
-			} else {
-				throw \Exception($attribute);
-			}
-			if( !empty($column_def['aggregate']) ) {
-				$agg = $column_def['aggregate'];
-				$alias = $agg . "_" . $alias;
-				$groupby = $tablename . ".id";
-				if( !isset($groups[$groupby]) ) {
-					$groups[$groupby] = $groupby;
-				}
-				$select_field = $agg."(". $tablename . "." . $attribute . ") AS $alias";
-			} else {
-				$select_field = $tablename . "." . $attribute;
-				if( $alias != $attribute )
-					$select_field .= " AS $alias";
-			}
-			$selects[] = $select_field;
-		}
-		$query->select($selects);
-		foreach( $joins as $jk => $jv ) {
-			$query->leftJoin($jk, $jv);
-		}
-		$query->groupBy($groups);
-    }
-
-	/**
-	 * Groups the available report columns by table and returns an array for a dropDownList
-	 */
-	public function columnsForDropDown($report, $columns)
-	{
-		$dropdown_options = [];
-		$base_model = $report->getValue('model', '.');
-		foreach( $columns as $colname => $col_attrs ) {
-			list($model, $field) = self::splitFieldName($col_attrs['attribute']);
-			if( empty($model) ) {
-				$dropdown_options[$base_model][$colname] = $col_attrs['label'];
-			} else {
-				$model = ucfirst($model);
-				$dropdown_options[$model][$colname] = $col_attrs['label'] . " ($model)";
-			}
-		}
-		return $dropdown_options;
-	}
-
-	static public function reportGroups($report, $report_columns)
-	{
-		$groups = [];
-		foreach( $report->report_sorting as $colname => $column ) {
-			if( isset($column['group']) && $column['group'] == true ) {
-				if( isset($report_columns[$colname]) ) {
-					$rc = $report_columns[$colname];
-					$groups[$rc['attribute']] = [
-						'column' => str_replace('.','_',$rc['attribute']),
-						'format' => $rc['label'] . ': {group_value}',
-						'header' => true,
-						'footer' => true
-					];
-				}
-			}
-		}
-		return $groups;
 	}
 
     static public function splitFieldName($fieldname)

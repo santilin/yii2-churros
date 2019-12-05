@@ -33,16 +33,20 @@ class CrudController extends \yii\web\Controller
 		return null;
 	}
 
-	public function behaviors() {
-		return [
-			'verbs' => [
-				'class' => VerbFilter::className(),
-				'actions' => [
-					'delete' => ['post'],
-					'logout' => ['post'],
-				],
+	public function behaviors()
+	{
+		$ret = [];
+		$ret['verbs'] = [
+			'class' => VerbFilter::className(),
+			'actions' => [
+				'delete' => ['post'],
+				'logout' => ['post'],
 			],
-			'access' => [
+		];
+		try {
+			/// @fixme
+			$u = Yii::$app->user;
+			$ret['access'] = [
 				'class' => AccessControl::className(),
 				'rules' => [
 					[
@@ -54,8 +58,10 @@ class CrudController extends \yii\web\Controller
 						'allow' => false
 					]
 				]
-			]
-		];
+			];
+		} catch( yii\base\InvalidConfigException $e ) {
+		}
+		return $ret;
 	}
 
 	public function beforeAction($action)
