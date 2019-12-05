@@ -78,7 +78,7 @@ class MainColumn extends DataColumn
     {
         $params = is_array($key) ? $key : ['id' => (string) $key];
         if( $this->controller ) {
-			return Url::to($this->controller . '/' . $this->defaultAction . "&id=$key");
+			return Url::to($this->controller . '/' . $this->defaultAction . "?id=$key");
 		} else {
 			$params[0] = $this->defaultAction;
 			return Url::toRoute($params);
