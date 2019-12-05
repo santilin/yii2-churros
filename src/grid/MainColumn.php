@@ -77,12 +77,11 @@ class MainColumn extends DataColumn
     protected function generateUrl($model, $key, $index)
     {
         $params = is_array($key) ? $key : ['id' => (string) $key];
-        $params[0] = $this->controller ? $this->controller . '/' . $this->defaultAction : $this->defaultAction;
-        return Url::toRoute($params);
-//         if (null !== $this->params && is_array($this->params)) {
-//             foreach ($this->params as $key => $param) {
-//                 $url[$key] = $model->$param;
-//             }
-//         }
+        if( $this->controller ) {
+			return Url::to($this->controller . '/' . $this->defaultAction . "&id=$key");
+		} else {
+			$params[0] = $this->defaultAction;
+			return Url::toRoute($params);
+		}
     }
 }
