@@ -97,8 +97,15 @@ trait ReportsModelTrait
 	 * Returns Html code to add an advanced search field to a search form
 	 * @param boolean $hidden Whether to include the general condition as a hidden input
 	 */
-	public function createSearchField($model, $attribute, $dropdown_values = null)
+	public function createSearchField($model, $attribute, $options = [],
+		$dropdown_values = null )
 	{
+		if (isset($options['hideme']) && $options['hideme'] == true ) {
+			$main_div = ' class="row collapse hideme"';
+		} else {
+			$main_div = '';
+		}
+		unset($options['hideme']);
 		$ret = '';
 		$scope = $model->formName();
 		if( isset( $this->report_filters[$attribute] ) ) {
@@ -112,10 +119,10 @@ trait ReportsModelTrait
 			$extra_visible = '';
 		}
 		$attr_class = str_replace('.','_',$attribute);
-		$ret .= "<div class='row'>";
+		$ret .= "<div$main_div>";
 		$ret .= "<div class='form-group'>";
 		$ret .= "<div class='control-label col-sm-3'>";
-		$ret .= Html::activeLabel($model, $attribute);
+		$ret .= Html::activeLabel($model, $attribute, $options);
 		$ret .= "</div>";
 
 		$ret .= "<div class='control-form col-sm-2'>";
@@ -151,6 +158,7 @@ trait ReportsModelTrait
 		$ret .= "</div>";
 		$ret .= "</div><!-- row -->";
 		$ret .= "</div>";
+
 		$ret .= "</div>";
 		return $ret;
 	}
@@ -165,6 +173,9 @@ trait ReportsModelTrait
 			$column = [];
 			if( isset($grid_column['hAlign']) ) {
 				$column['hAlign'] = $grid_column['hAlign'];
+			}
+			if( isset($grid_column['format']) ) {
+				$column['format'] = $grid_column['format'];
 			}
 			if( preg_match('/^(sum|avg|max|min):(.*)$/i', $colname, $matches) ) {
 				$column['attribute'] = $matches[2];
@@ -241,9 +252,12 @@ trait ReportsModelTrait
 			if( !empty($column_def['aggregate']) ) {
 				$agg = $column_def['aggregate'];
 				$alias = $agg . "_" . $alias;
-				$groupby = $tablename . ".id";
-				if( !isset($groups[$groupby]) ) {
-					$groups[$groupby] = $groupby;
+				$pks = $model->primaryKey();
+				foreach( $pks as $pk ) {
+					$groupby = $model->tableName() . ".$pk";
+					if( !isset($groups[$groupby]) ) {
+						$groups[$groupby] = $groupby;
+					}
 				}
 				$select_field = $agg."(". $tablename . "." . $attribute . ") AS $alias";
 			} else {
