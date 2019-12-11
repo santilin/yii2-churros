@@ -269,7 +269,7 @@ trait ReportsModelTrait
 		}
 		$query->select($selects);
 		foreach( $joins as $jk => $jv ) {
-			$query->leftJoin($jk, $jv);
+			$query->innerJoin($jk, $jv);
 		}
 		$query->groupBy($groups);
     }
@@ -295,20 +295,24 @@ trait ReportsModelTrait
 				$colname = $new_column['aggregate'] . "_" . $new_column['attribute'];
 			}
 			unset($new_column['aggregate'], $new_column['summary']);
-			$columns[$colname] = $new_column;
+			$new_column['attribute'] = str_replace('.','_',$colname);
+			$columns[str_replace('.','_',$colname)] = $new_column;
 		}
 		$groups = [];
 		foreach( $this->report_sorting as $colname => $sorting ) {
 			if( isset($sorting['group']) && $sorting['group'] == true ) {
-				if( !isset($columns[$colname]) ) {
+				$repl_colname = str_replace('.','_',$colname);
+				if( !isset($columns[$repl_colname]) ) {
 					if( !isset($allColumns[$colname]) ) {
 						Yii::$app->session->addFlash("error", "Report '" . $this->name . "': group column '$colname' not found");
 					} else {
-						$groups[$colname] = $allColumns[$colname];
-						unset($groups[$colname]['aggregate'], $groups[$colname]['summary']);
+						$groups[$repl_colname] = $allColumns[$colname];
+						$groups[$repl_colname]['attribute'] = $repl_colname;
+						$groups[$repl_colname]['visible'] = false;
+						unset($groups[$repl_colname]['aggregate'], $groups[$repl_colname]['summary']);
 					}
 				}
-				$columns[$colname]['group'] = $sorting['group'];
+				$columns[$repl_colname]['group'] = true;
 			}
 		}
 		if( count($groups) ) {
