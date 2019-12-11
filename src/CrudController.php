@@ -51,8 +51,9 @@ class CrudController extends \yii\web\Controller
 				'rules' => [
 					[
 						'allow' => true,
-						'actions' => ArrayHelper::merge(['index', 'view', 'create', 'update', 'delete', 'pdf', 'duplicate', 'remove-image'], $this->allowedActions),
-						'roles' => ['@']
+						'actions' => ArrayHelper::merge(['index', 'view', 'create', 'update', 'delete',
+							'pdf', 'duplicate', 'remove-image', 'autocomplete'], $this->allowedActions),
+						'roles' => ['*']
 					],
 					[
 						'allow' => false
@@ -636,6 +637,22 @@ class CrudController extends \yii\web\Controller
 			}
 		}
 		return join($glue, $attrs);
+	}
+
+	public function actionAutocomplete(array $fields)
+	{
+		$ret = [];
+		static $clientIdGetParamName = 'query';
+		$value = $_GET[$clientIdGetParamName];
+		$searchModel = $this->createSearchModel();
+		$query = $searchModel->find();
+		foreach( (array)$fields as $field ) {
+			$query->orWhere( [ "like", $field, $value  ] );
+		}
+		foreach( $query->all() as $record) {
+			$ret[] = [ 'id' => $record->id, 'value' => $record->recordDesc('long') ];
+		}
+		echo json_encode($ret);
 	}
 
 }
