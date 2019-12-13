@@ -333,8 +333,8 @@ JS;
 
 	public function addRelatedField($attribute, &$joins)
 	{
-		$alias = '';
 		$left_model = $this;
+		$tablename = $alias = '';
 		while( ($dotpos = strpos($attribute, '.')) !== FALSE ) {
 			$relation_name = substr($attribute, 0, $dotpos);
 			if( !empty($alias) ) { $alias .= "_"; }
@@ -348,8 +348,8 @@ JS;
 				$relation = $left_model::$relations[$relation_name];
 				$tablename = $relation['relatedTablename'];
 				// @todo if more than one, ¿add with an alias x1, x2...?
-				if( !isset($joins[$relation['relatedTablename']]) ) {
-					$joins[$relation['relatedTablename']] = $relation['join'];
+				if( !isset($joins[$tablename]) ) {
+					$joins[$tablename] = $relation['join'];
 				}
 				$left_model = new $relation['modelClass'];
 			} else {

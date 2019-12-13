@@ -1,6 +1,7 @@
 <?php
 namespace santilin\churros;
 
+use yii;
 use yii\helpers\Html;
 use yii\helpers\ArrayHelper;
 use yii\db\Query;
@@ -184,10 +185,18 @@ trait ReportsModelTrait
 				$column['attribute'] = $colname;
 				$column['aggregate'] = '';
 			}
+			$ta = $column['attribute'];
+			// If the tablename of the column is this model, remove it
+			if( ($dotpos=strpos($ta, '.')) !== FALSE ) {
+				$t = substr($ta, 0, $dotpos);
+				if( $t == str_replace(['{','}','%'], '', $model->tableName() ) ) {
+					$a = substr($ta, $dotpos+1);
+					$column['attribute'] = $a;
+				}
+			}
 			if( isset($grid_column['value']) ) {
 				$column['value'] = $grid_column['value'];
 			}
-			$orig_title = '';
 			if( isset($this->report_columns[$colname]) ) {
 				$column = ArrayHelper::merge($column, $this->report_columns[$colname]);
 			}
@@ -218,7 +227,19 @@ trait ReportsModelTrait
 
 		$sort = [];
 		foreach( $this->report_sorting as $colname => $sorting_column ) {
-			$sort[str_replace(".", "_", $colname)] = $sorting_column['asc'];
+			$column_def = $columns[$colname];
+			$attribute = $column_def['attribute'];
+			if ( is_int($attribute) || array_key_exists($attribute, $model->attributes ) ) {
+				$tablename = $model->tableName();
+			} else if( ($dotpos = strpos($attribute, '.')) !== FALSE ) {
+				$joins = [];
+				list($tablename, $attribute, $alias) = $model->addRelatedField($attribute, $joins);
+				$sort_column = $tablename .'.' . $attribute;
+			} else {
+				throw new \Exception($attribute);
+			}
+			$sort_column = $tablename .'.' . $attribute;
+			$sort[$sort_column] = $sorting_column['asc'];
 		}
 		$provider->sort->attributes = [ 'default' =>  [ 'asc' => $sort ]];
 		$provider->sort->defaultOrder = [ 'default' => SORT_ASC ];
@@ -242,8 +263,8 @@ trait ReportsModelTrait
 		foreach( $columns as $column_def ) {
 			$attribute = $column_def['attribute'];
 			if ( is_int($attribute) || array_key_exists($attribute, $model->attributes ) ) {
-				$tablename = $model->tableName();
-				$alias = $attribute;
+				$tablename = str_replace(['{','}','%'], '', $model->tableName() );
+				$alias = $tablename .'_' . $attribute;
 			} else if( ($dotpos = strpos($attribute, '.')) !== FALSE ) {
 				list($tablename, $attribute, $alias) = $model->addRelatedField($attribute, $joins);
 			} else {
@@ -312,7 +333,7 @@ trait ReportsModelTrait
 						unset($groups[$repl_colname]['aggregate'], $groups[$repl_colname]['summary']);
 					}
 				}
-				$columns[$repl_colname]['group'] = true;
+ 				$columns[$repl_colname]['group'] = true;
 			}
 		}
 		if( count($groups) ) {
@@ -345,7 +366,7 @@ trait ReportsModelTrait
 		}
 		foreach( $this->report_sorting as $colname => $sorting ) {
 			if( !isset($columns[$colname]) ) {
-				$columns[$colname] = $allColumns[$colname];
+				@$columns[$colname] = $allColumns[$colname];
 			}
 		}
 		return $columns;
@@ -374,21 +395,23 @@ trait ReportsModelTrait
 	/**
 	 * Groups the available report columns by table and returns an array for a dropDownList
 	 */
-	public function columnsForDropDown($model, $columns)
+	public function columnsForDropDown($model, $columns, $titles)
 	{
-		$dropdown_options = [];
-		$title = $model->getModelInfo('title');
+ 		$dropdown_options = [];
+		$modeltablename = str_replace(['{','}','%'], '', $model->tableName());
 		foreach( $columns as $colname => $col_attrs ) {
-			list($modelname, $fieldname) = ModelSearchTrait::splitFieldName($col_attrs['attribute']);
-			if( empty($modelname) ) {
-				$dropdown_options[$title][$colname] = $col_attrs['label'];
+			if( preg_match('/^(sum|avg|max|min):(.*)$/i', $colname) ) {
+				$tablename = $modeltablename;
 			} else {
-				$modelname = ucfirst($modelname);
-				$dropdown_options[$modelname][$colname] = $col_attrs['label'] . " ($modelname)";
+				list($tablename, $fieldname) = ModelSearchTrait::splitFieldName($colname);
+				if( empty($tablename) ) {
+					$tablename = $modeltablename;
+				}
 			}
+			$title = $titles[$tablename];
+			$dropdown_options[$title][$colname] = $col_attrs['label'] . " ($title)";
 		}
 		return $dropdown_options;
 	}
-
 
 }
