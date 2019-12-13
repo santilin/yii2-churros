@@ -340,9 +340,14 @@ JS;
 			if( !empty($alias) ) { $alias .= "_"; }
 			$alias .= $relation_name;
 			$attribute = substr($attribute, $dotpos + 1);
+			if( $relation_name == str_replace(['{','}','%'],'',$this->tableName() ) ) {
+				$tablename = $relation_name;
+				continue;
+			}
 			if( isset($left_model::$relations[$relation_name]) ) {
 				$relation = $left_model::$relations[$relation_name];
 				$tablename = $relation['relatedTablename'];
+				// @todo if more than one, ¿add with an alias x1, x2...?
 				if( !isset($joins[$relation['relatedTablename']]) ) {
 					$joins[$relation['relatedTablename']] = $relation['join'];
 				}
