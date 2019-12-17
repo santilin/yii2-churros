@@ -211,7 +211,10 @@ trait RelationTrait
             if ($this->save()) {
                 $error = false;
 				foreach ($this->relatedRecords as $rel_name => $records) {
-				/* @var $records ActiveRecord | ActiveRecord[] */
+					/* @var $records ActiveRecord | ActiveRecord[] */
+					if( !isset($relations[$rel_name]) ) {
+						continue;
+					}
 					if (!empty($records)) {
 						$justUpdateIds = !$records[0] instanceof \yii\db\BaseActiveRecord;
 						if( $justUpdateIds ) {
