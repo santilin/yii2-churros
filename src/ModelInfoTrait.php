@@ -51,6 +51,8 @@ trait ModelInfoTrait
 			'{Esta}' => $this->maleWord('Esta'),
 			'{estas}' => $this->maleWord('estas'),
 			'{Estas}' => $this->maleWord('Estas'),
+			'{otra}' => $this->maleWord('otra'),
+			'{Otra}' => $this->maleWord('Otra'),
 		];
 		$matches = [];
 		if( preg_match_all('/({[a-zA-Z0-9\._]+})+/', $message, $matches) ) {

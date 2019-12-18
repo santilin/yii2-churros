@@ -70,14 +70,14 @@ abstract class BaseImporter {
     /**
      * @var boolean Si se para el proceso en el primer error
      */
-    protected $abort_on_error = false;
+    protected $abort_on_error = true;
 
     /**
      * var bool Si es una prueba o es una importación que grabará en la base de datos
      */
     protected $dry_run = true;
 
-    public function __construct($abort_on_error = false, $dry_run = true)
+    public function __construct($abort_on_error = true, $dry_run = true)
     {
 		$this->record = $this->createRecord();
         $this->abort_on_error = $abort_on_error;
@@ -136,7 +136,7 @@ abstract class BaseImporter {
     /**
 		Lee los registros del fichero y los guarda en un array con los nombres de campos del modelo Importacion
 		y con todas las transformaciones necesarias.
-		Si dectecta errors, los guarda en $this->errors;
+		Si detecta errores, los guarda en $this->errors;
      *
      * @param string $filename El fichero a importar
      * @param string $csvdelimiter
@@ -324,7 +324,7 @@ abstract class BaseImporter {
     protected function readCsvLine($import_fields_info, $csvheaders, $csvline)
     {
 		++$this->csvline;
-		// @holadoc php/general Siempre comprobar los errors en cualquier función de php: fgetcsv
+		// @holadoc php/general Siempre comprobar los errores en cualquier función de php: fgetcsv
 		if ($csvline === null) {
 			$this->add_error_get_last();
 		} elseif ($csvline == []) {
@@ -360,10 +360,18 @@ abstract class BaseImporter {
 					}
 				}
 			}
-			$this->afterReadLine($this->record_to_import, $csvline);
 			// Guarda la línea original de este registro por si da error poder mostrar la línea del error
 			$this->record_to_import['csvline'] = $this->csvline;
-			$this->records_to_import[] = $this->record_to_import;
+			$this->afterReadLine($this->record_to_import, $csvline);
+			if( count($this->record_to_import) > 0 ) {
+				if ( isset($this->record_to_import[0]) ) {
+					foreach( $this->record_to_import as $rti ) {
+						$this->records_to_import[] = $rti;
+					}
+				} else {
+					$this->records_to_import[] = $this->record_to_import;
+				}
+			}
 		}
 		return true;
 	}
@@ -513,7 +521,7 @@ abstract class BaseImporter {
 				return $found->$related_field;
 			}
 		}
-		return null;
+		throw new ImportException("$related_value not found in $related_model" . "[". implode($related_fields, ','). "]");
     }
 
     protected function import_find_in_array($value, $array_csv, $array)

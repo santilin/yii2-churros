@@ -281,7 +281,7 @@ EOF;
 			$ret .= "\t\t" . strval($ncolumn ++) . " => '" . $column->name . "', // " . $column->phpType . "\n";
 		}
 		$ret .= "\t];\n\n";
-		$raw_data = $this->db->createCommand("SELECT * FROM $table_name")->queryAll();
+		$raw_data = $this->db->createCommand('SELECT * FROM {{' . $table_name. '}}')->queryAll();
 		foreach( $raw_data as $row ) {
 			$ncolumn = 0;
 			$txt_data .= "[";
@@ -302,7 +302,7 @@ EOF;
 		$ret .= "\n";
 		if( $this->truncateTables ) {
 			$ret .= "\t\t\$db->createCommand()->checkIntegrity(false)->execute();\n";
-			$ret .= "\t\t\$db->createCommand(\"DELETE FROM $table_name\")->execute();\n";
+			$ret .= "\t\t\$db->createCommand('DELETE FROM {{" . $table_name . "}}')->execute();\n";
 		}
 		$ret .= <<<EOF
 		echo "Seeding $table_name\n";
@@ -313,7 +313,7 @@ EOF;
 					unset(\$this->columns[\$ck]);
 				}
 			}
-			\$db->schema->insert('$table_name', array_combine(\$this->columns, \$row));
+			\$db->schema->insert('{\{$table_name}}', array_combine(\$this->columns, \$row));
 		}
 	}
 
