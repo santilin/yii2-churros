@@ -307,8 +307,7 @@ trait ReportsModelTrait
 				continue;
 			}
 			$new_column = $allColumns[$colname];
-			if( isset($this->report_columns[$colname]['summary'])
-				&& $this->report_columns[$colname]['summary'] != '' )  {
+			if( isset($col_attrs['summary']) && $col_attrs['summary'] != '' )  {
 				$new_column['pageSummary'] = true;
 				$new_column['pageSummaryFunc'] = $this->report_columns[$colname]['summary'];
 			}
@@ -317,7 +316,7 @@ trait ReportsModelTrait
 			}
 			unset($new_column['aggregate'], $new_column['summary']);
 			$new_column['attribute'] = str_replace('.','_',$colname);
-			$columns[str_replace('.','_',$colname)] = $new_column;
+			$columns[$new_column['attribute']] = $new_column;
 		}
 		$groups = [];
 		foreach( $this->report_sorting as $colname => $sorting ) {
@@ -333,7 +332,7 @@ trait ReportsModelTrait
 						unset($groups[$repl_colname]['aggregate'], $groups[$repl_colname]['summary']);
 					}
 				}
- 				$columns[$repl_colname]['group'] = true;
+//  				$columns[$repl_colname]['group'] = true;
 			}
 		}
 		if( count($groups) ) {
@@ -345,7 +344,7 @@ trait ReportsModelTrait
 
 
 	/**
-	 * Gets only the report columns
+	 * Gets only the columns used in this report
 	 */
 	public function reportColumns($allColumns)
 	{
@@ -366,7 +365,7 @@ trait ReportsModelTrait
 		}
 		foreach( $this->report_sorting as $colname => $sorting ) {
 			if( !isset($columns[$colname]) ) {
-				@$columns[$colname] = $allColumns[$colname];
+				$columns[$colname] = $allColumns[$colname];
 			}
 		}
 		return $columns;
@@ -380,8 +379,9 @@ trait ReportsModelTrait
 			if( isset($column['group']) && $column['group'] == true ) {
 				if( isset($report_columns[$colname]) ) {
 					$rc = $report_columns[$colname];
-					$groups[$rc['attribute']] = [
-						'column' => str_replace('.','_',$rc['attribute']),
+					$repl_colname = str_replace('.','_',$colname);
+					$groups[$colname] = [
+						'column' => $repl_colname,
 						'format' => $rc['label'] . ': {group_value}',
 						'header' => true,
 						'footer' => true
