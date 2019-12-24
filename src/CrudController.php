@@ -119,7 +119,12 @@ class CrudController extends \yii\web\Controller
 	public function actionCreate()
 	{
 		$model = $this->findModel();
-		if ($model->loadAll(Yii::$app->request->post()) ) {
+		if (isset($POST['_form_relations']) ) {
+			$relations = explode(",", $POST['_form_relations']);
+		} else {
+			$relations = [];
+		}
+		if ($model->loadAll(Yii::$app->request->post(), $relations) ) {
 			if( $this->parent_model) {
 				$model->setAttribute( $model->getRelatedFieldForModel($this->parent_model), $this->parent_model->getPrimaryKey());
 			}
@@ -156,7 +161,12 @@ class CrudController extends \yii\web\Controller
 			$model = $this->findModel($id);
 		}
 
-		if ($model->loadAll(Yii::$app->request->post()) ) {
+		if (isset($POST['_form_relations']) ) {
+			$relations = explode(",", $POST['_form_relations']);
+		} else {
+			$relations = [];
+		}
+		if ($model->loadAll(Yii::$app->request->post(), $relations) ) {
 			if( $this->parent_model) {
 				$model->setAttribute( $model->getRelatedFieldForModel($this->parent_model), $this->parent_model->getPrimaryKey());
 			}
@@ -186,7 +196,12 @@ class CrudController extends \yii\web\Controller
 	public function actionUpdate($id) {
 		$model = $this->findModel($id);
 
-		if ($model->loadAll(Yii::$app->request->post()) ) {
+		if (isset($_POST['_form_relations']) ) {
+			$relations = explode(",", $_POST['_form_relations']);
+		} else {
+			$relations = [];
+		}
+		if ($model->loadAll(Yii::$app->request->post(), $relations) ) {
 			if( $this->parent_model) {
 				$model->setAttribute( $model->getRelatedFieldForModel($this->parent_model), $this->parent_model->getPrimaryKey());
 			}

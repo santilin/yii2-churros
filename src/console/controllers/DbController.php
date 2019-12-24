@@ -302,10 +302,10 @@ EOF;
 		$ret .= "\n";
 		if( $this->truncateTables ) {
 			$ret .= "\t\t\$db->createCommand()->checkIntegrity(false)->execute();\n";
-			$ret .= "\t\t\$db->createCommand('DELETE FROM {{" . $table_name . "}}')->execute();\n";
+			$ret .= "\t\t\$db->createCommand('DELETE FROM {{%" . $table_name . "}}')->execute();\n";
 		}
 		$ret .= <<<EOF
-		echo "Seeding $table_name\n";
+		echo "Seeding $table_name\\n";
 		foreach( \$rows_$table_name as \$row ) {
 			foreach( \$this->columns as \$ck => \$cv ) {
 				if( \$cv == '' ) {
@@ -313,7 +313,7 @@ EOF;
 					unset(\$this->columns[\$ck]);
 				}
 			}
-			\$db->schema->insert('{\{$table_name}}', array_combine(\$this->columns, \$row));
+			\$db->schema->insert("{{%$table_name}}", array_combine(\$this->columns, \$row));
 		}
 	}
 
