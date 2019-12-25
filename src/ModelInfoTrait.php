@@ -88,9 +88,7 @@ trait ModelInfoTrait
 
 	public function recordDesc($format=null)
 	{
-		if( $format == null ) {
-			$format = self::getModelInfo('record_desc_format');
-		} elseif( $format == 'long' || $format == 'link' ) {
+		if( $format == null || $format == 'long' || $format == 'link' ) {
 			$format = self::getModelInfo('record_desc_format_long');
 		} elseif( $format == 'short' ) {
 			$format = self::getModelInfo('record_desc_format_short');
