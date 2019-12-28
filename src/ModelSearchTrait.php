@@ -115,7 +115,7 @@ trait ModelSearchTrait
 // 						['LIKE', "$table_alias.$fldname", $v]);
 // 				}
 				if (!isset($provider->sort->attributes[$attribute])) {
-					$related_model_search_class = $related_model_class . "Search";
+					$related_model_search_class = $related_model_class::getSearchClass();
 					if( class_exists($related_model_search_class) ) {
 						// Set orders from the related search model
 						$related_model = new $related_model_search_class;
