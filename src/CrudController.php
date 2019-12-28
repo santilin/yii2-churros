@@ -106,7 +106,7 @@ class CrudController extends \yii\web\Controller
 		return $this->render('view', [
 			'model' => $model,
 			'parent' => $this->parent_model,
-			'relationsProviders' => $this->getRelationsProviders($model),
+// 			'relationsProviders' => $this->getRelationsProviders($model),
 			'extraParams' => $this->extraParams('view', $model)
 		]);
 	}
@@ -264,7 +264,8 @@ class CrudController extends \yii\web\Controller
 	 * @param integer $id
 	 * @return mixed
 	 */
-	public function actionPdf($id) {
+	public function actionPdf($id)
+	{
 		$model = $this->findModel($id);
 		if( YII_DEBUG ) {
             Yii::$app->getModule('debug')->instance->allowedIPs = [];
@@ -272,6 +273,9 @@ class CrudController extends \yii\web\Controller
 		// https://stackoverflow.com/a/54568044/8711400
 		$content = $this->renderAjax('_pdf', [
 			'model' => $model,
+			'parent' => $this->parent_model,
+// 			'relationsProviders' => $this->getRelationsProviders($model),
+			'extraParams' => $this->extraParams('view', $model)
 		]);
 
 		$pdf = new \kartik\mpdf\Pdf([
