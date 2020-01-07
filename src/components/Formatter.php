@@ -37,7 +37,7 @@ class Formatter extends \yii\i18n\Formatter
 		if( $minutes == '' ) {
 			$minutes = 0;
 		}
-		return $r = json_encode($minutes); return number_format(($minutes / 60),2,',','');
+		return number_format(($minutes / 60),2,',','');
 	}
 
 
