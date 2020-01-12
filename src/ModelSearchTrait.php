@@ -197,6 +197,8 @@ trait ModelSearchTrait
 			}
 		} else if( is_numeric($value) && !is_string($value) ) {
 			$query->andWhere([ $name => $value ]);
+		} else if( is_array($value) ) {
+			$query->andWhere([ 'in', $name, $value ]);
 		} else {
 			$query->andWhere([ 'like', $name, $value ]);
 		}
@@ -236,7 +238,7 @@ trait ModelSearchTrait
 				}
 			}
 		} else {
-			throw new InvalidArgumentException($relation . ": relation not found in model " . self::class);
+			throw new InvalidArgumentException($relation_name . ": relation not found in model " . self::class);
 		}
 	}
 
@@ -247,7 +249,7 @@ trait ModelSearchTrait
 	{
 		if( !isset($params['_pjax']) ) {
 			// join search form params
-			$scope = $formName === null ? $this->formName() : $formName;
+			$scope = ($formName === null) ? $this->formName() : $formName;
 			$newparams = [];
 			parent::load($params, $formName);
 			if( isset($params[$scope]['_adv_']) ) {
