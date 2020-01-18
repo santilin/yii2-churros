@@ -186,7 +186,12 @@ trait RelationTrait
                 $error = false;
 				foreach ($this->relatedRecords as $rel_name => $records) {
 					/* @var $records ActiveRecord | ActiveRecord[] */
-					if (!empty($records)) {
+					if( $records instanceof \yii\db\ActiveRecord && !$records->getIsNewRecord() ) {
+						continue;
+					} else if ( $records instanceof \yii\db\ActiveRecord ) {
+						$records = (array)$records;
+					}
+					if (count($records)>0) {
 						$justUpdateIds = !$records[0] instanceof \yii\db\BaseActiveRecord;
 						if( $justUpdateIds ) {
 							$this->updateIds($rel_name, $records);

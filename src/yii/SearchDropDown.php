@@ -29,20 +29,36 @@ class SearchDropDown extends \yii\widgets\InputWidget
 		$name = $this->options['name'];
 		$id = $this->options['id'];
 		$js = <<<JS
-$('#_search_box_$id').change( function() {
-	console.log("Changed");
+$('#_search_box_$id').keydown( function(e) {
+	if( e.keyCode == 9 ) {
+		var dropdown = $('#$id');
+		if( dropdown[0].selectedIndex > 0 ) {
+			console.log("Avanzando");
+			var next2 = $(":input:eq(" + ($(":input").index(dropdown) + 1) + ")");
+			next2.focus();
+		}
+	}
+});
+
+$('#_search_box_$id').keyup( function(e) {
 	var el = $(this);
-	console.log(el);
-	var text = el.val();
-	console.log(text);
-	options = $('#$id option')
+	var text = el.val().toUpperCase();
+	options = $('#$id option');
+	var found = false;
 	options.each(function(i, obj) {
-		console.log(obj);
-		console.log(obj.text);
+		if (obj.text.toUpperCase().indexOf(text) == 0) {
+			obj.selected = true;
+			found = true;
+			return false;
+		}
+	});
+	if (found) {
+		return;
+	}
+	options.each(function(i, obj) {
 		if (obj.text.toUpperCase().indexOf(text) > -1) {
-// 			obj.show();
-		} else {
-// 			obj.hide();
+			obj.selected = true;
+			return false;
 		}
 	});
 });
@@ -54,7 +70,9 @@ JS;
     {
         $this->registerClientScript();
         $id = $this->options['id'];
- 		$ret = Html::input('text', null, null, [ 'id' => "_search_box_$id"] );
+        $options_of_input = $this->options;
+        $options_of_input['id'] = "_search_box_$id";
+ 		$ret = Html::input('text', null, null, $options_of_input );
  		$ret .= Html::activeDropDownList($this->model, $this->attribute,
 				$this->items, $this->options);
 		return $ret;
