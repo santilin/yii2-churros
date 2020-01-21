@@ -27,6 +27,7 @@ class SearchDropDown extends \yii\widgets\InputWidget
     {
 		$view = $this->getView();
 		$name = $this->options['name'];
+		$next_tab = isset($this->options['next_tab'])?$this->options['next_tab']:'';
 		$id = $this->options['id'];
 		$js = <<<JS
 $('#_search_box_$id').keydown( function(e) {
@@ -34,8 +35,12 @@ $('#_search_box_$id').keydown( function(e) {
 		var dropdown = $('#$id');
 		if( dropdown[0].selectedIndex > 0 ) {
 			console.log("Avanzando");
-			var next2 = $(":input:eq(" + ($(":input").index(dropdown) + 1) + ")");
-			next2.focus();
+			if( '$next_tab' != '' ) {
+				$('#$next_tab').focus();
+			} else {
+				var next1 = $(":input:eq(" + ($(":input").index(dropdown) + 1) + ")");
+				setTimeout( function() { console.log(next1); next1.focus(); }, 100 );
+ 			}
 		}
 	}
 });
