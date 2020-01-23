@@ -7,7 +7,6 @@ use yii\web\Response;
 
 trait ReportsControllerTrait
 {
-
 	/**
 	 * Displays index page.
 	 *
@@ -50,7 +49,7 @@ trait ReportsControllerTrait
 			}
 		}
 		try {
-			return $this->render('/' . $search_model->viewPath() . 'report', [
+			return $this->render('report', [
 				'report' => $report,
 				'reportModel' => $search_model,
 				'params' => $params,
