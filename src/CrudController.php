@@ -4,10 +4,8 @@ namespace santilin\churros;
 
 use Yii;
 use yii\helpers\Url;
-use yii\web\NotFoundHttpException;
 use yii\filters\VerbFilter;
-use yii\helpers\ArrayHelper;
-use yii\filters\AccessControl;
+use yii\web\NotFoundHttpException;
 use yii\web\UploadedFile;
 use yii\web\HttpException;
 use yii\base\ErrorException;
@@ -43,25 +41,7 @@ class CrudController extends \yii\web\Controller
 				'logout' => ['post'],
 			],
 		];
-		try {
-			/// @fixme
-			$u = Yii::$app->user;
-			$ret['access'] = [
-				'class' => AccessControl::className(),
-				'rules' => [
-					[
-						'allow' => true,
-						'actions' => ArrayHelper::merge(['index', 'view', 'create', 'update', 'delete',
-							'pdf', 'duplicate', 'remove-image', 'autocomplete'], $this->allowedActions),
-						'roles' => ['*']
-					],
-					[
-						'allow' => false
-					]
-				]
-			];
-		} catch( yii\base\InvalidConfigException $e ) {
-		}
+		// Auth behaviors must be set on descendants of this controller
 		return $ret;
 	}
 
