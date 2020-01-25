@@ -42,38 +42,43 @@ class AuthHelper
 			foreach( [ 'Crea' => 'Crear',
 					   'View' => 'Ver',
 					   'Edit' => 'Editar',
-					   'Gest' => 'Gestionar ',
 					   'Dele' => 'Borrar',
 					   'Repo' => 'Informes de' ] as $perm_name => $perm_desc) {
-				try {
-					$permission = $auth->getItem(ucfirst($model::getModelInfo('controller_name')) . "_$perm_name");
-					if( !$permission ) {
-						$permission = $auth->createPermission(ucfirst($model::getModelInfo('controller_name')) . "_$perm_name" );
-						$permission->description = $perm_desc . $model->t('app', " {title_plural}");
-						$auth->add($permission);
-					}
-					if( $perm_name == 'View' || $perm_name == 'Repo' ) {
+				$permission = $auth->getItem(ucfirst($model::getModelInfo('controller_name')) . "_$perm_name");
+				if( !$permission ) {
+					$permission = $auth->createPermission(ucfirst($model::getModelInfo('controller_name')) . "_$perm_name" );
+					$permission->description = $perm_desc . $model->t('app', " {title_plural}");
+					$auth->add($permission);
+				}
+				$add_to_visora = ($perm_name == 'View' || $perm_name == 'Repo');
+				$add_to_editora = $add_to_visora || ($perm_name == 'Edit' || $perm_name == 'Crea' || $perm_name == "Dele");
+				if( $add_to_visora ) {
+					if( !$auth->hasChild($visora, $permission) ) {
 						$auth->addChild($visora, $permission);
 					} else {
-						$auth->addChild($editora, $permission);
+						echo "Error: permission {$permission->description} already exists in role {$visora->description}\n";
 					}
-					if( $perm_name == "Gest" ) {
+				}
+				if( $add_to_editora ) {
+					if( !$auth->hasChild($editora, $permission) ) {
 						$auth->addChild($editora, $permission);
+					} else {
+						echo "Error: permission {$permission->description} already exists in role {$editora->description}\n";
 					}
+				}
+				if( !$auth->hasChild($todo, $permission) ) {
 					$auth->addChild($todo, $permission);
 					echo $permission->name . ' => ' . $permission->description . ": permiso creado\n";
-					if( $perm_name == 'Crea' ) {
-						continue;
-					}
-					$permission = $auth->getItem(ucfirst($model::getModelInfo('controller_name')) . "_{$perm_name}_Propio");
-					if (!$permission ) {
-						$permission = $auth->createPermission(ucfirst($model::getModelInfo('controller_name')) . "_{$perm_name}_Propio" );
-						$permission->description = $perm_desc . $model->t('app', " {title_plural} que me pertenecen");
-						$auth->add($permission);
-						echo $permission->name . ' => ' . $permission->description . ": permiso creado\n";
-					}
-				} catch( \yii\db\IntegrityException $e ) {
-					echo "Error: permission $model_name::$perm_name already exists\n";
+				}
+				if( $perm_name == 'Crea' ) {
+					continue;
+				}
+				$permission_own = $auth->getItem(ucfirst($model::getModelInfo('controller_name')) . "_{$perm_name}_Own");
+				if (!$permission_own ) {
+					$permission_own = $auth->createPermission(ucfirst($model::getModelInfo('controller_name')) . "_{$perm_name}_Own" );
+					$permission_own->description = $perm_desc . $model->t('churros', " {title_plural} propi{-as}");
+					$auth->add($permission_own);
+					echo $permission_own->name . ' => ' . $permission_own->description . ": permiso creado\n";
 				}
 			}
 		}

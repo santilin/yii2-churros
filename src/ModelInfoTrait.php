@@ -15,6 +15,8 @@ trait ModelInfoTrait
 			return $word;
 		}
 		static $male_words = [
+			"a" => "o",
+			"as" => "os",
 			"la" => "el",
 			"La" => "El",
 			"las" => "los",
@@ -53,6 +55,8 @@ trait ModelInfoTrait
 			'{Estas}' => $this->maleWord('Estas'),
 			'{otra}' => $this->maleWord('otra'),
 			'{Otra}' => $this->maleWord('Otra'),
+			'{-a}' => $this->maleWord('a'),
+			'{-as}' => $this->maleWord('as'),
 		];
 		$matches = [];
 		if( preg_match_all('/({[a-zA-Z0-9\._]+})+/', $message, $matches) ) {
@@ -82,7 +86,7 @@ trait ModelInfoTrait
 				}
 			}
 		}
-		$translated = Yii::t($category, $message, $params, $language);
+		$translated = Yii:: t($category, $message, $params, $language);
 		return strtr($translated, $placeholders);
 	}
 
@@ -200,6 +204,7 @@ trait ModelInfoTrait
 	{
 	}
 
+	// @todo put all these in a trait
 	public function setFakerValues($faker)
 	{
 	}
@@ -380,6 +385,18 @@ trait ModelInfoTrait
 	{
 		if( !empty($add) ) {
 			$source = "$source$sep$add";
+		}
+	}
+
+	public function IAmOwner()
+	{
+		$blameable = $this->getBehavior('blameable');
+		if( $blameable ) {
+			$created_by = $blameable->createdByAttribute;
+			$author = $this->$created_by;
+			return $author != Yii::$app->user->id;
+		} else {
+			return false;
 		}
 	}
 

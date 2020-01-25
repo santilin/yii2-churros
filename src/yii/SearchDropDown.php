@@ -77,7 +77,10 @@ JS;
         $id = $this->options['id'];
         $options_of_input = $this->options;
         $options_of_input['id'] = "_search_box_$id";
- 		$ret = Html::input('text', null, null, $options_of_input );
+        $ret = '';
+        if( count($this->items)>1 ) {
+			$ret .= Html::input('text', null, null, $options_of_input );
+		}
  		$ret .= Html::activeDropDownList($this->model, $this->attribute,
 				$this->items, $this->options);
 		return $ret;

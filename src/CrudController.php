@@ -22,6 +22,7 @@ class CrudController extends \yii\web\Controller
 	protected $parent_model = null;
 	protected $parent_controller = null;
 	protected $allowedActions = [];
+	protected $accessOnlyOwner = false;
 
 	/**
 	 * An array of extra params to pass to the views
@@ -83,6 +84,12 @@ class CrudController extends \yii\web\Controller
 	public function actionView($id)
 	{
 		$model = $this->findModel($id);
+		if( $this->accessOnlyOwner ) {
+			if( !$model->IAmOwner() ) {
+				throw new \yii\web\ForbiddenHttpException(
+					$model->t('churros', "You can't view {esta} {title} because you are not the author"));
+			}
+		}
 		return $this->render('view', [
 			'model' => $model,
 			'parent' => $this->parent_model,
@@ -173,8 +180,15 @@ class CrudController extends \yii\web\Controller
 	 * @param integer $id
 	 * @return mixed
 	 */
-	public function actionUpdate($id) {
+	public function actionUpdate($id)
+	{
 		$model = $this->findModel($id);
+		if( $this->accessOnlyOwner ) {
+			if( !$model->IAmOwner() ) {
+				throw new \yii\web\ForbiddenHttpException(
+					$model->t('churros', "You can't update {esta} {title} because you are not the author"));
+			}
+		}
 
 		if (isset($_POST['_form_relations']) ) {
 			$relations = explode(",", $_POST['_form_relations']);
@@ -229,6 +243,12 @@ class CrudController extends \yii\web\Controller
 	public function actionDelete($id)
 	{
 		$model = $this->findModel($id);
+		if( $this->accessOnlyOwner ) {
+			if( !$model->IAmOwner() ) {
+				throw new \yii\web\ForbiddenHttpException(
+					$model->t('churros', "You can't delete {esta} {title} because you are not the author"));
+			}
+		}
 		try {
 			$model->deleteWithRelated();
 		} catch (\yii\db\IntegrityException $e ) {
@@ -247,6 +267,12 @@ class CrudController extends \yii\web\Controller
 	public function actionPdf($id)
 	{
 		$model = $this->findModel($id);
+		if( $this->accessOnlyOwner ) {
+			if( !$model->IAmOwner() ) {
+				throw new \yii\web\ForbiddenHttpException(
+					$model->t('churros', "You can't print to pdf {esta} {title} because you are not the author"));
+			}
+		}
 		if( YII_DEBUG ) {
             Yii::$app->getModule('debug')->instance->allowedIPs = [];
         }

@@ -24,7 +24,7 @@ class DeleteModelException extends \yii\web\HttpException
 		if( $previous->getCode() == 23000 ) {
 			$message .= ":\n{Esta} {title} se usa en algún otro fichero.";
 		}
-        parent::__construct(400, $model->t('churros', $message), 
+        parent::__construct(400, $model-> t('churros', $message),
 			$previous->getCode(), $previous);
     }
 
@@ -34,4 +34,4 @@ class DeleteModelException extends \yii\web\HttpException
 	}
 
 }
- 
+

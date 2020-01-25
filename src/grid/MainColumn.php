@@ -69,6 +69,7 @@ class MainColumn extends DataColumn
             $this->linkOptions
         );
     }
+
     /**
      * @param $model
      * @throws \yii\base\InvalidArgumentException

@@ -392,7 +392,7 @@ trait RelationTrait
 				if( $relModel->isNewRecord ) {
 					$relSave = $relModel->save();
 					if (!$relSave || !empty($relModel->errors)) {
-						$relModelWords = Yii::t('churros', Inflector::camel2words(StringHelper::basename($AQ->modelClass)));
+						$relModelWords = Yii:: t('churros', Inflector::camel2words(StringHelper::basename($AQ->modelClass)));
 						$index++;
 						foreach ($relModel->errors as $validation) {
 							foreach ($validation as $errorMsg) {
@@ -479,7 +479,7 @@ trait RelationTrait
 					$relSave = $relModel->save();
 
 					if (!$relSave || !empty($relModel->errors)) {
-						$relModelWords = Yii::t('churros', Inflector::camel2words(StringHelper::basename($AQ->modelClass)));
+						$relModelWords = Yii:: t('churros', Inflector::camel2words(StringHelper::basename($AQ->modelClass)));
 						$index++;
 						foreach ($relModel->errors as $validation) {
 							foreach ($validation as $errorMsg) {
@@ -496,7 +496,7 @@ trait RelationTrait
 				}
 				$relSave = $records->save();
 				if (!$relSave || !empty($records->errors)) {
-					$recordsWords = Yii::t('churros', Inflector::camel2words(StringHelper::basename($AQ->modelClass)));
+					$recordsWords = Yii:: t('churros', Inflector::camel2words(StringHelper::basename($AQ->modelClass)));
 					foreach ($records->errors as $validation) {
 						foreach ($validation as $errorMsg) {
 							$this->addError($rel_name, "$recordsWords : $errorMsg");

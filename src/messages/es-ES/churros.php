@@ -21,8 +21,6 @@ return [
     'All' => 'Todo',
     'Error saving the record {title}' => 'Error guardando el registro {title}',
     'From \'{from}\' or until \'{until}\' dates are in invalid date format' => 'Las fechas desde: \'{from}\' o hasta: \'{until}\' no tienen un formato válido',
-    '{from-label} {from} can\'t be greater than {until-label} {until}'
-     => '{from-label}: \'{from}\' no puede ser posterior a {until-label}: \'{until}\'',
     'Inactive' => 'Inactivo',
     'The {attribute} \'{value}\' is not valid' => 'El valor \'{value}\' del campo \'{attribute}\' no es válido',
     '{La} {title} <strong>{record}</strong> has been successfully created.' => '{La} {title} <strong>{record}</strong> se ha creado correctamente.',
@@ -30,5 +28,12 @@ return [
     '{La} {title} <strong>{record}</strong> has been successfully duplicated.' => '{La} {title} <strong>{record}</strong> se ha duplicado correctamente.',
     '{La} {title} <strong>{record}</strong> has been successfully updated.' => '{La} {title} <strong>{record}</strong> se ha actualizado correctamente.',
     '{Title_plural}' => '{Title_plural}',
+    '{from-label} {from} can\'t be greater than {until-label} {until}' => '{from-label}: \'{from}\' no puede ser posterior a {until-label}: \'{until}\'',
     '{inactive} since' => '{inactive} desde',
+    'Totals ' => 'Totales',
+    'You can\'t delete {esta} {title} because you are not the author' => 'No puedes borrar {esta} {title} porque no l{-a} has creado tú',
+    'You can\'t print to pdf {esta} {title} because you are not the author' => 'No puedes imprimir a pdf {esta} {title} porque no l{-a} has creado tú',
+    'You can\'t update {esta} {title} because you are not the author' => 'No puedes modificar {esta} {title} porque no l{-a} has creado tú',
+    'You can\'t view {esta} {title} because you are not the author' => 'No puedes ver {esta} {title} porque no l{-a} has creado tú',
+    '{record_short}' => '{record_short}',
 ];

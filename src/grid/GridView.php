@@ -224,7 +224,7 @@ class GridView extends BaseGridView
 		$ret = '';
 		if( $colspan!=0) {
 			$ret = Html::tag('td',
-				Html::tag('div', Yii::t('churros', "Totales "), [
+				Html::tag('div', Yii::t('churros', "Totals "), [
 					'class' => 'grid-group-total' ]),
 				['colspan' => $colspan]);
 		}

@@ -173,7 +173,7 @@ class GridGroup extends BaseObject
 			}
 		}
 		$ret = Html::tag('td',
-			Html::tag('div', "Totales ". $content, [
+			Html::tag('div', Yii::t('churros',"Totals ") . $content, [
 				'class' => 'grid-group-foot-' . strval($this->level) ]),
 			['colspan' => $colspan]);
 		$nc = 0;
