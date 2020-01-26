@@ -46,6 +46,9 @@ $('#_search_box_$id').keydown( function(e) {
 });
 
 $('#_search_box_$id').keyup( function(e) {
+	if( e.keyCode == 9 ) {
+		return; // The tab key pressed that got the focus
+	}
 	var el = $(this);
 	var text = el.val().toUpperCase();
 	options = $('#$id option');
@@ -77,6 +80,9 @@ JS;
         $id = $this->options['id'];
         $options_of_input = $this->options;
         $options_of_input['id'] = "_search_box_$id";
+        if( !isset($options_of_input['autocomplete']) ) {
+			$options_of_input['autocomplete'] = "off";
+		}
         $ret = '';
         if( count($this->items)>1 ) {
 			$ret .= Html::input('text', null, null, $options_of_input );

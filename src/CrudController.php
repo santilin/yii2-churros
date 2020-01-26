@@ -578,11 +578,12 @@ class CrudController extends \yii\web\Controller
 
 	/**
 	 * @param Model $parent The parent model (for detail_grids)
+	 * @param Model $child The parent model (for detail_grids)
 	 */
-	public function controllerRoute($child = null)
+	public function controllerRoute($parent = null, $child= null)
 	{
-		if( $child == null) { // for normal grids
-			$myroute = Url::toRoute('index');
+		$myroute = Url::toRoute('index');
+		if( $child == null && ($parent == null || $parent == $this->parent_model)) { // for normal grids
 			if( $this->parent_model ) {
 				// myroute = /admin/model/11/update
 				// prefix = /admin/parent/22/
@@ -595,23 +596,33 @@ class CrudController extends \yii\web\Controller
 			} else {
 				$ret = $myroute;
 			}
-			if( ($pos = strrpos($ret, '/index')) !== FALSE ) {
-				$ret = substr($ret, 0, $pos);
-			}
-		} else { // for detail_grids
-			$ret = '/' . Yii::$app->request->getPathInfo()
-				. '/' .$child->controllerName();
+		} else if( $child ) { // for detail_grids
+			$ret = $this->getRoutePrefix($parent);
+			$ret .= $parent->controllerName() . '/'
+				. $parent->getPrimaryKey() . '/';
+			$ret .= $child->controllerName();
+		} else {
+			return null;
+		}
+		if( ($pos = strrpos($ret, '/index')) !== FALSE ) {
+			$ret = substr($ret, 0, $pos);
 		}
 		return $ret;
 	}
 
-	protected function getRoutePrefix()
+	protected function getRoutePrefix($parent_model = null)
 	{
+		if( $parent_model == null ) {
+			$parent_model = $this->parent_model;
+			$parent_controller = $this->parent_controller;
+		} else {
+			$parent_controller = $parent_model->controllerName();
+		}
 		$route = $this->id;
 		$route_pos = false;
 		$request_url = '/' . Yii::$app->request->getPathInfo();
-		if( $this->parent_model ) {
-			$parent_route = $this->parent_controller . '/' . $this->parent_model->getPrimaryKey();
+		if( $parent_model ) {
+			$parent_route = $parent_controller . '/' . $parent_model->getPrimaryKey();
 			$route_pos = strpos($request_url, $parent_route . "/" . $route);
 			if( $route_pos === false ) {
 				$route_pos = strpos($request_url, $parent_route . $route);
