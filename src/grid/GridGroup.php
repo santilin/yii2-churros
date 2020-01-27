@@ -5,6 +5,7 @@
 
 namespace santilin\churros\grid;
 
+use Yii;
 use yii\base\BaseObject;
 use yii\helpers\Html;
 use yii\helpers\ArrayHelper;
