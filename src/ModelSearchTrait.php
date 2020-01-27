@@ -266,6 +266,8 @@ trait ModelSearchTrait
 
 	/**
 	 * Returns Html code to add an advanced search field to a search form
+	 * Almost identical to ReportsMOdelTrait::createSearchField
+	 * @todo dropdowns
 	 */
 	static public function searchField($model, $attribute)
 	{
@@ -291,10 +293,11 @@ trait ModelSearchTrait
 		$ret .= Html::activeLabel($model, $attribute);
 		$ret .= "</div>";
 
+		$attr_class = str_replace('.','_',$attribute);
 		$ret .= "<div class='control-form col-sm-2'>";
 		$ret .= Html::dropDownList("${scope}[_adv_][$attribute][op]",
 			$value['op'], self::$operators, [
-			'id' => "drop-$attribute", 'class' => 'search-dropdown form-control col-sm-2'] );
+			'id' => "drop-$attr_class", 'class' => 'search-dropdown form-control col-sm-2'] );
 		$ret .= "</div>";
 
 		$ret .= "<div class='control-form col-sm-4'>";
@@ -305,7 +308,7 @@ trait ModelSearchTrait
 
 
 		$ret .= "<div class='row gap10'>";
-		$ret .= "<div id='second-field-drop-$attribute' style='$extra_visible'>";
+		$ret .= "<div id='second-field-drop-$attr_class' style='$extra_visible'>";
 		$ret .= "<div class='control-form col-sm-2 col-sm-offset-3 text-right'>";
 		$ret .= "y:";
 		$ret .= "</div>";

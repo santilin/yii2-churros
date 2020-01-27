@@ -98,9 +98,13 @@ trait ReportsModelTrait
 	 * Returns Html code to add an advanced search field to a search form
 	 * @param boolean $hidden Whether to include the general condition as a hidden input
 	 */
-	public function createSearchField($model, $attribute, $options = [],
+	public function createSearchField($model, $attribute, $type = 'string', $options = [],
 		$dropdown_values = null )
 	{
+		$attr_class = str_replace('.','_',$attribute);
+		if( ($control_type = $type) == 'date' ) {
+			$control_type = 'string';
+		}
 		if (isset($options['hideme']) && $options['hideme'] == true ) {
 			$main_div = ' class="row collapse hideme"';
 		} else {
@@ -119,11 +123,13 @@ trait ReportsModelTrait
 		} else {
 			$extra_visible = '';
 		}
-		$attr_class = str_replace('.','_',$attribute);
 		$ret .= "<div$main_div>";
 		$ret .= "<div class='form-group'>";
 		$ret .= "<div class='control-label col-sm-3'>";
 		$ret .= Html::activeLabel($model, $attribute, $options);
+		if ($type == 'date' ) {
+			$ret .= "<br>Formato yyyy/mm/dd";
+		}
 		$ret .= "</div>";
 
 		$ret .= "<div class='control-form col-sm-2'>";
@@ -131,12 +137,13 @@ trait ReportsModelTrait
 			$value['op'], ModelSearchTrait::$operators, [
 			'id' => "drop-$attr_class", 'class' => 'search-dropdown form-control col-sm-2'] );
 		$ret .= "</div>";
+
 		$ret .= "<div class='control-form col-sm-4'>";
 		if( is_array($dropdown_values) ) {
 			$ret .= Html::dropDownList("${scope}[_adv_][$attribute][lft]",
 			$value['lft'], $dropdown_values, [ 'class' => 'form-control col-sm-4']);
 		} else {
-			$ret .= Html::input('text', "${scope}[_adv_][$attribute][lft]",
+			$ret .= Html::input($control_type, "${scope}[_adv_][$attribute][lft]",
 			$value['lft'], [ 'class' => 'form-control col-sm-4']);
 		}
 		$ret .= "</div>";
@@ -153,7 +160,7 @@ trait ReportsModelTrait
 			$ret .= Html::dropDownList("${scope}[_adv_][$attribute][rgt]",
 			$value['rgt'], $dropdown_values, [ 'class' => 'form-control col-sm-4']);
 		} else {
-			$ret .= Html::input('text', "${scope}[_adv_][$attribute][rgt]",
+			$ret .= Html::input($control_type, "${scope}[_adv_][$attribute][rgt]",
 				$value['rgt'], [ 'class' => 'form-control col-sm-4']);
 		}
 		$ret .= "</div>";

@@ -37,11 +37,21 @@ function minutesToHours(minutes)
 JS;
 		$view->registerJs($common_js, \yii\web\View::POS_READY, 'DecimalHoursInput');
 		$id = $this->options['id'];
+		// https://stackoverflow.com/a/44209883
 		$js = <<<JS
+$('#$id').keydown( function(e) {
+	if( e.keyCode == 190 ) { // change . into , (spanish hack)
+        var s = $(this).val();
+        var i = this.selectionStart;
+        s = s.substr(0, i) + "," + s.substr(this.selectionEnd);
+        $(this).val(s);
+        this.selectionStart = this.selectionEnd = i + 1;
+        return false;
+	}
+});
 $('#$id').change( function() {
-	console.log("Changed");
 	var minutos = Math.round(parseFloat($(this).val()) * 60);
-	console.log("Minutos: ",minutos, hoursToMinutes(minutos));
+// 	console.log("Minutos: ",minutos, hoursToMinutes(minutos));
 	$('#{$this->_hidden_id}').val(hoursToMinutes(minutos));
 });
 $('#$id').focus(function (e) {
