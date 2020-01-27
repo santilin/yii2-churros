@@ -440,6 +440,18 @@ class CrudController extends \yii\web\Controller
 		return [];
 	}
 
+	public function parentRoute()
+	{
+		if( $this->parent_model ) {
+			$parent_route = $this->getRoutePrefix()
+				. $this->parent_controller
+				. '/' . $this->parent_model->getPrimaryKey();
+		} else {
+			$parent_route = Url::toRoute('index');
+		}
+		return $parent_route;
+	}
+
 	protected function whereToGoNow($from, $model)
 	{
 		$returnTo = Yii::$app->request->get('returnTo');
@@ -455,24 +467,24 @@ class CrudController extends \yii\web\Controller
 		if ( $referrer ) {
 			return $this->redirect($referrer);
 		}
-		if ($from == 'update') {
-			$redirect = ['view', 'id' => $model->getPrimaryKey()];
-		} else if ($from == 'create') {
-			if (Yii::$app->request->post('_and_create') == '1') {
-				$redirect = ['create'];
-			} else {
-				$redirect = [ 'view', 'id' => $model->getPrimaryKey()];
-			}
-		} else if ($from == 'duplicate') {
-			$redirect = ['view', 'id' => $model->getPrimaryKey()];
-		} else if ($from == 'delete') {
-			$redirect = ["index"];
-		} else {
-			throw new Exception("No sé donde volver");
-		}
 		if( $this->parent_model ) {
-			return $this->redirect( $this->controllerRoute() );
+			return $this->redirect( $this->parentRoute() );
 		} else {
+			if ($from == 'update') {
+				$redirect = ['view', 'id' => $model->getPrimaryKey()];
+			} else if ($from == 'create') {
+				if (Yii::$app->request->post('_and_create') == '1') {
+					$redirect = ['create'];
+				} else {
+					$redirect = [ 'view', 'id' => $model->getPrimaryKey()];
+				}
+			} else if ($from == 'duplicate') {
+				$redirect = ['view', 'id' => $model->getPrimaryKey()];
+			} else if ($from == 'delete') {
+				$redirect = ["index"];
+			} else {
+				throw new Exception("No sé donde volver");
+			}
 			return $this->redirect($redirect);
 		}
 	}
@@ -574,7 +586,6 @@ class CrudController extends \yii\web\Controller
 			return null;
 		}
 	}
-
 
 	/**
 	 * @param Model $parent The parent model (for detail_grids)
