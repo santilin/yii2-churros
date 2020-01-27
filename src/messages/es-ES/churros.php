@@ -30,7 +30,7 @@ return [
     '{Title_plural}' => '{Title_plural}',
     '{from-label} {from} can\'t be greater than {until-label} {until}' => '{from-label}: \'{from}\' no puede ser posterior a {until-label}: \'{until}\'',
     '{inactive} since' => '{inactive} desde',
-    'Totals ' => 'Totales',
+    'Totals ' => 'Totales ',
     'You can\'t delete {esta} {title} because you are not the author' => 'No puedes borrar {esta} {title} porque no l{-a} has creado tú',
     'You can\'t print to pdf {esta} {title} because you are not the author' => 'No puedes imprimir a pdf {esta} {title} porque no l{-a} has creado tú',
     'You can\'t update {esta} {title} because you are not the author' => 'No puedes modificar {esta} {title} porque no l{-a} has creado tú',

@@ -10,6 +10,11 @@ trait ModelInfoTrait
 {
 	use RelationTrait;
 
+	static public function bareTableName()
+	{
+		return strtr( self::tableName(), [ '{' => '', '}' => '', '%' => '' ] );
+	}
+
 	public function maleWord($word) {
 		if( static::getModelInfo('female') === true ) {
 			return $word;
