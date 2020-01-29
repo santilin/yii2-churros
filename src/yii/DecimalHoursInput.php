@@ -10,8 +10,6 @@ class DecimalHoursInput extends \yii\bootstrap\InputWidget
 		parent::init();
 		$this->_hidden_id = $this->options['id'];
 		$this->options['id'] = $this->options['id'] . "_hours";
-		$this->options['enableClientValidation'] = false;
-		$this->options['step'] = 0.5;
 	}
 
     /**
@@ -40,7 +38,8 @@ JS;
 		// https://stackoverflow.com/a/44209883
 		$js = <<<JS
 $('#$id').keydown( function(e) {
-	if( e.keyCode == 190 ) { // change . into , (spanish hack)
+	if( e.keyCode == 190 && e.shiftKey == false ) {
+		// change . into , (spanish hack)
         var s = $(this).val();
         var i = this.selectionStart;
         s = s.substr(0, i) + "," + s.substr(this.selectionEnd);
@@ -50,16 +49,16 @@ $('#$id').keydown( function(e) {
 	}
 });
 $('#$id').change( function() {
-	var minutos = Math.round(parseFloat($(this).val()) * 60);
-// 	console.log("Minutos: ",minutos, hoursToMinutes(minutos));
-	$('#{$this->_hidden_id}').val(hoursToMinutes(minutos));
+	var v = $(this).val().replace(',','.');
+	var minutos = Math.round(parseFloat(v)*60);
+	$('#{$this->_hidden_id}').val(minutos);
 });
 $('#$id').focus(function (e) {
 	var that = $(this);
-	if (that.val() == 0 ) {
+	if (that.val() == 0 || isNaN(that.val()) || that.val() == 'NaN') {
 		that.val('');
 	} else {
-		setTimeout(function(){that.select();},10);
+		setTimeout(function(){that.select();},20);
 	}
 	return false;
 });
@@ -71,6 +70,6 @@ JS;
     {
 		$this->registerClientScript();
  		return Html::activeHiddenInput($this->model, $this->attribute)
-			. Html::input('number', null, $this->value, $this->options);
+			. Html::input('text', null, $this->value/60, $this->options);
     }
 }
