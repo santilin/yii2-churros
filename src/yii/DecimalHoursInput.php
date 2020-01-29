@@ -55,8 +55,12 @@ $('#$id').change( function() {
 	$('#{$this->_hidden_id}').val(hoursToMinutes(minutos));
 });
 $('#$id').focus(function (e) {
-	var that = this;
-	setTimeout(function(){\$(that).select();},10);
+	var that = $(this);
+	if (that.val() == 0 ) {
+		that.val('');
+	} else {
+		setTimeout(function(){that.select();},10);
+	}
 	return false;
 });
 JS;
@@ -67,8 +71,6 @@ JS;
     {
 		$this->registerClientScript();
  		return Html::activeHiddenInput($this->model, $this->attribute)
-			. Html::input('input', null, $this->value, $this->options);
-//  		return Html::activeInput("number", $this->model, $this->attribute)
-// 			. Html::input('number', null, $this->value, $this->options);
+			. Html::input('number', null, $this->value, $this->options);
     }
 }
