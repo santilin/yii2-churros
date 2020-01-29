@@ -38,7 +38,7 @@ JS;
 		// https://stackoverflow.com/a/44209883
 		$js = <<<JS
 $('#$id').keydown( function(e) {
-	if( e.keyCode == 190 && e.shiftKey == false ) {
+	if( e.keyCode == 190 ) {
 		// change . into , (spanish hack)
         var s = $(this).val();
         var i = this.selectionStart;
@@ -70,6 +70,6 @@ JS;
     {
 		$this->registerClientScript();
  		return Html::activeHiddenInput($this->model, $this->attribute)
-			. Html::input('text', null, $this->value/60, $this->options);
+			. Html::input('text', null, $this->value, $this->options);
     }
 }

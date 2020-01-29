@@ -31,7 +31,7 @@ class SearchDropDown extends \yii\widgets\InputWidget
 		$id = $this->options['id'];
 		$js = <<<JS
 $('#_search_box_$id').keydown( function(e) {
-	if( e.keyCode == 9 ) {
+	if( e.keyCode == 9 && e.shiftKey == false) {
 		var dropdown = $('#$id');
 		if( dropdown[0].selectedIndex > 0 ) {
 			console.log("Avanzando");
@@ -39,14 +39,14 @@ $('#_search_box_$id').keydown( function(e) {
 				$('#$next_tab').focus();
 			} else {
 				var next1 = $(":input:eq(" + ($(":input").index(dropdown) + 1) + ")");
-				setTimeout( function() { console.log(next1); next1.focus(); }, 100 );
+				setTimeout( function() { console.log(next1); next1.focus(); }, 200 );
  			}
 		}
 	}
 });
 
 $('#_search_box_$id').keyup( function(e) {
-	if( e.keyCode == 9 ) {
+	if( e.keyCode == 9 && e.shiftKey == false) {
 		return; // The tab key pressed that got the focus
 	}
 	var el = $(this);
