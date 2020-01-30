@@ -29,6 +29,7 @@ class SearchDropDown extends \yii\widgets\InputWidget
 		$name = $this->options['name'];
 		$next_tab = isset($this->options['next_tab'])?$this->options['next_tab']:'';
 		$id = $this->options['id'];
+		/// @todo next1: next non hidden input
 		$js = <<<JS
 $('#_search_box_$id').keydown( function(e) {
 	if( e.keyCode == 9 && e.shiftKey == false) {
@@ -36,10 +37,10 @@ $('#_search_box_$id').keydown( function(e) {
 		if( dropdown[0].selectedIndex > 0 ) {
 			console.log("Avanzando");
 			if( '$next_tab' != '' ) {
-				$('#$next_tab').focus();
+				setTimeout( function() { $('#$next_tab').focus(); }, 10 );
 			} else {
-				var next1 = $(":input:eq(" + ($(":input").index(dropdown) + 1) + ")");
-				setTimeout( function() { console.log(next1); next1.focus(); }, 200 );
+				var next1 = $(":input:not([type=hidden]):eq(" + ($(":input:not([type=hidden])").index(dropdown) + 1) + ")");
+				setTimeout( function() { console.log(next1); next1.focus(); }, 10 );
  			}
 		}
 	}

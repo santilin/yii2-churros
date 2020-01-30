@@ -58,7 +58,7 @@ $('#$id').focus(function (e) {
 	if (that.val() == 0 || isNaN(that.val()) || that.val() == 'NaN') {
 		that.val('');
 	} else {
-		setTimeout(function(){that.select();},20);
+		setTimeout(function(){that.select();},5);
 	}
 	return false;
 });
