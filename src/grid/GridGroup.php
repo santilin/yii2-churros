@@ -118,11 +118,8 @@ class GridGroup extends BaseObject
 					]);
 					break;
 			}
-			return Html::tag('td',
-				Html::tag('div', $content, [
-					'class' => 'grid-group-head-' . strval($this->level)
-					]),
-				$tdoptions);
+			Html::addCssClass($tdoptions, 'grid-group-head-' . strval($this->level) . ' w1');
+			return Html::tag('td', $content, $tdoptions);
 		}
 	}
 
@@ -154,11 +151,8 @@ class GridGroup extends BaseObject
 		if( $fc === true /*'summary'*/ ) {
 			$ret .= $this->getSummaryContent($summary_columns, $content);
 		} else {
-			$ret = Html::tag('td',
-				Html::tag('div', $content, [
-					'class' => 'grid-group-foot-total-' . strval($this->level) . ' grid-group-foot-' . strval($this->level)
-					]),
-				$tdoptions);
+			Html::addCssClass($tdoptions, 'grid-group-foot-total-' . strval($this->level) . ' grid-group-foot-' . strval($this->level) . ' w1');
+			$ret = Html::tag('td', $content, $tdoptions);
 		}
 		return $ret;
 	}
@@ -173,22 +167,25 @@ class GridGroup extends BaseObject
 				break;
 			}
 		}
-		$ret = Html::tag('td',
-			Html::tag('div', Yii::t('churros',"Totals ") . $content, [
-				'class' => 'grid-group-foot-' . strval($this->level) ]),
-			['colspan' => $colspan]);
+		$tdoptions = [
+			'class' => 'grid-group-foot-' . strval($this->level) . ' w1',
+			'colspan' => $colspan,
+		];
+		$ret = Html::tag('td', Yii::t('churros', "Totals ") . $content, $tdoptions );
 		$nc = 0;
+		$tdoptions = [ "class" => "w1" ];
 		foreach( $this->grid->columns as $kc => $column ) {
 			if( $nc++ < $colspan ) {
 				continue;
 			}
 			if( isset($summary_columns[$kc]) ) {
-				$ret .= Html::tag('td', Html::tag('div',
+				$ret .= Html::tag('td',
 					$this->grid->formatter->format(
 						$this->summaryValues[$this->level][$kc], $column->format),
-						GridView::fetchColumnOptions($column, $this->level)));
+						GridView::fetchColumnOptions($column, $this->level),
+						$tdoptions);
 			} else {
-				$ret .= Html::tag('td', '');
+				$ret .= Html::tag('td', '', $tdoptions);
 			}
 		}
 		return $ret;

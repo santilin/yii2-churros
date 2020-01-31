@@ -127,4 +127,5 @@ class AppHelper
     {
 		return Yii::$app->user->identity && Yii::$app->user->identity->isAdmin;
 	}
+
 }

@@ -223,12 +223,12 @@ class GridView extends BaseGridView
 		}
 		$ret = '';
 		if( $colspan!=0) {
-			$ret = Html::tag('td',
-				Html::tag('div', Yii::t('churros', "Totals "), [
-					'class' => 'grid-group-total' ]),
-				['colspan' => $colspan]);
+			$ret = Html::tag('td',Yii::t('churros', "Report totals "),
+				[ 'class' => 'grid-group-total w1',
+				  'colspan' => $colspan ] );
 		}
 		$nc = 0;
+		$tdoptions = [ 'class' => 'w1' ];
 		foreach( $this->columns as $kc => $column ) {
 			if( $nc++ < $colspan ) {
 				continue;
@@ -242,12 +242,12 @@ class GridView extends BaseGridView
 				} else {
 					$value = $this->summaryValues[$kc];
 				}
-				$ret .= Html::tag('td', Html::tag('div',
-					$this->formatter->format(
+				$ret .= Html::tag('td', $this->formatter->format(
 						$value, $column->format),
-						self::fetchColumnOptions($column, 0)));
+						self::fetchColumnOptions($column, 0),
+						$tdoptions);
 			} else {
-				$ret .= Html::tag('td', '');
+				$ret .= Html::tag('td', '', $tdoptions);
 			}
 		}
 		return $ret;
