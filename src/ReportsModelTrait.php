@@ -128,7 +128,7 @@ trait ReportsModelTrait
 		$ret .= "<div class='control-label col-sm-3'>";
 		$ret .= Html::activeLabel($model, $attribute, $options);
 		if ($type == 'date' ) {
-			$ret .= "<br>Formato yyyy/mm/dd";
+			$ret .= "<br>Formato yyyy-mm-dd";
 		}
 		$ret .= "</div>";
 

@@ -593,8 +593,8 @@ class CrudController extends \yii\web\Controller
 	 */
 	public function controllerRoute($parent = null, $child= null)
 	{
-		$myroute = Url::toRoute('index');
 		if( $child == null && ($parent == null || $parent == $this->parent_model)) { // for normal grids
+			$myroute = $this->getRoutePrefix() . $this->id;
 			if( $this->parent_model ) {
 				// myroute = /admin/model/11/update
 				// prefix = /admin/parent/22/
@@ -605,7 +605,7 @@ class CrudController extends \yii\web\Controller
 				$pos_first_different = strspn($prefix ^ $myroute, "\0");
 				$ret = $prefix . substr($myroute, $pos_first_different);
 			} else {
-				$ret = $myroute;
+				$ret = $my_route;
 			}
 		} else if( $child ) { // for detail_grids
 			$ret = $this->getRoutePrefix($parent);
@@ -614,9 +614,6 @@ class CrudController extends \yii\web\Controller
 			$ret .= $child->controllerName();
 		} else {
 			return null;
-		}
-		if( ($pos = strrpos($ret, '/index')) !== FALSE ) {
-			$ret = substr($ret, 0, $pos);
 		}
 		return $ret;
 	}
