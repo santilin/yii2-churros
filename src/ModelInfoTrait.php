@@ -307,11 +307,7 @@ trait ModelInfoTrait
     {
 		foreach( self::$relations as $relname => $rel_info ) {
 			if( $rel_info['modelClass'] == $related_model->className() ) {
-				if( $rel_info['type'] == 'BelongsToOne' ) {
-					$related_field = $rel_info['right'];
-				} else {
-					$related_field = $rel_info['left'];
-				}
+				$related_field = $rel_info['left'];
 				list($table, $field) = ModelSearchTrait::splitFieldName($related_field);
 				return $field;
 			}
