@@ -605,7 +605,7 @@ class CrudController extends \yii\web\Controller
 				$pos_first_different = strspn($prefix ^ $myroute, "\0");
 				$ret = $prefix . substr($myroute, $pos_first_different);
 			} else {
-				$ret = $my_route;
+				$ret = $myroute;
 			}
 		} else if( $child ) { // for detail_grids
 			$ret = $this->getRoutePrefix($parent);
