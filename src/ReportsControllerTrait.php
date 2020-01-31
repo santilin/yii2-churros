@@ -22,12 +22,12 @@ trait ReportsControllerTrait
 	/**
 	 * @param integer $id The id of the report to show
 	 */
-	public function actionView($id)
+	public function actionUpdate($id)
 	{
 		$report = $this->findModel($id);
 		$search_model_name = $report->model;
 		if( strpos($search_model_name, '\\') === FALSE ) {
-			$search_model_name= 'app\models\search\\' . $search_model_name;
+			$search_model_name= "app\models\search\\$search_model_name";
 		}
 		if( substr($search_model_name, -6) != "Search" ) {
 			$search_model_name .= "Search";
@@ -41,12 +41,10 @@ trait ReportsControllerTrait
 		$params = Yii::$app->request->post();
 		$report->decodeValue();
 		$report->load($params);
-		if( isset($params['save']) ) {
-			$report->encodeValue();
-			if( $this->doSave($report) ) {
-				Yii::$app->session->setFlash('success',
-					$report->t('churros', "El informe <strong>{record}</strong> se ha guardado correctamente."));
-			}
+		$report->encodeValue();
+		if( $this->doSave($report) ) {
+			Yii::$app->session->setFlash('success',
+				$report->t('churros', "El informe <strong>{record}</strong> se ha guardado correctamente."));
 		}
 		try {
 			return $this->render('report', [
@@ -59,7 +57,46 @@ trait ReportsControllerTrait
 			Yii::$app->session->setFlash('error',
 				$report->t('churros', "El informe <strong>{record}</strong> tiene errores en su definición"));
 			throw $e;
-// 			return $this->redirect(['view', 'id'=>$id]);
+		}
+	}
+
+	/**
+	 * @param integer $id The id of the report to show
+	 */
+	public function actionView($id)
+	{
+		$params = Yii::$app->request->post();
+		if( isset($params['save']) ) {
+			unset($params['save']);
+			return $this->redirect(['update', 'id' => $id]);
+		}
+		$report = $this->findModel($id);
+		$search_model_name = $report->model;
+		if( strpos($search_model_name, '\\') === FALSE ) {
+			$search_model_name= "app\models\search\\$search_model_name";
+		}
+		if( substr($search_model_name, -6) != "Search" ) {
+			$search_model_name .= "Search";
+		}
+		if( $report->model == '' || !class_exists($search_model_name) ) {
+			Yii::$app->session->setFlash('error',
+				$report->t('churros', "Informe <strong>{record}</strong>: no está definido el modelo"));
+			return $this->redirect(['view', 'id'=>$id]);
+		}
+		$search_model = new $search_model_name;
+		$report->decodeValue();
+		$report->load($params);
+		try {
+			return $this->render('report', [
+				'report' => $report,
+				'reportModel' => $search_model,
+				'params' => $params,
+				'extraParams' => $this->extraParams('report', $report)
+			]);
+		} catch( \yii\base\InvalidArgumentException $e ) {
+			Yii::$app->session->setFlash('error',
+				$report->t('churros', "El informe <strong>{record}</strong> tiene errores en su definición"));
+			throw $e;
 		}
 	}
 
