@@ -77,11 +77,12 @@ abstract class BaseImporter {
      */
     protected $dry_run = true;
 
-    public function __construct($abort_on_error = true, $dry_run = true)
+    public function __construct($options)
     {
+		foreach( $options as $option => $value ) {
+			$this->$option = $value;
+		}
 		$this->record = $this->createRecord();
-        $this->abort_on_error = $abort_on_error;
-        $this->dry_run = $dry_run;
     }
 
     /**
@@ -149,6 +150,7 @@ abstract class BaseImporter {
         $this->filename = $filename;
         $this->errors = [];
         if (!$this->readRecords($csvdelimiter, $csvquote)) {
+			$this->add_error_get_last();
             return self::CSV_FILE_ERROR;
         }
         if (!$this->dry_run) {
@@ -157,7 +159,7 @@ abstract class BaseImporter {
         $has_errors = false;
         foreach ($this->records_to_import as $record) {
 			$this->csvline = $record['csvline']; // Para recuperar el número de línea del registro erróneo
- 			echo "Leyendo registro de la línea {$this->csvline}\n";
+//  			echo "Leyendo registro de la línea {$this->csvline}\n";
             $r = $this->createRecord();
             $r->setDefaultValues();
             if ($this->validateRecord($r, $record)) {
@@ -277,7 +279,7 @@ abstract class BaseImporter {
     protected function readRecordsFromCSV($csvdelimiter, $csvquote)
     {
         // @holadoc php/ficheros No hace falta comprobar si existe un fichero si luego lo vamos a abrir. fopen ya nos da el error si no existe.
-        if (($file = fopen($this->filename, 'r')) === false) {
+        if (($file = @fopen($this->filename, 'r')) === false) {
             $this->errors['csv_open_file'] = error_get_last();
             return false;
         }
@@ -285,7 +287,7 @@ abstract class BaseImporter {
 
         // Descartamos la linea de las cabeceras
         if (($csvline = fgetcsv($file, 0, $csvdelimiter, $csvquote)) === false) {
-            $this->errors['csv_read_header'] = error_get_last();
+            $this->errors['csv_read_header'] = $this->filename . ": CSV file can not be read";
             return false;
         }
 
@@ -347,7 +349,7 @@ abstract class BaseImporter {
 						// Llamamos al método con los argumentos restantes
 						try {
 							// spat operator: ... pasa el array como parámetros indivuduales
-							$import_value = $this->$import_method($csvvalue, $csvline, ...$fld_import_info);
+							$import_value = $this->$import_method(trim($csvvalue), $csvline, ...$fld_import_info);
 							if (!is_array($record_to_import_field)) {
 								$record_to_import_field = [$record_to_import_field];
 							}
