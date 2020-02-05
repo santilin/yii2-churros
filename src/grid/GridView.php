@@ -106,7 +106,7 @@ class GridView extends BaseGridView
             $this->groups[$kg] = $group;
             // Hide the group column
             if( $group->column ) {
-  				$this->columns[$kg]['visible'] = false;
+  				$this->columns[str_replace('.', '_', $kg)]['visible'] = false;
 			}
         }
 	}
@@ -149,8 +149,12 @@ class GridView extends BaseGridView
 		$updated_groups = [];
 		$previous_updated = false;
 		foreach( $this->groups as $kg => $group ) {
-			$previous_updated = $updated_groups[$kg] =
-				$previous_updated || $group->willUpdateGroup($model, $key, $index);
+			$this_updated = $group->willUpdateGroup($model, $key, $index);
+			if( $previous_updated ) {
+				$updated_groups[$kg] = true;
+			} else {
+				$previous_updated = $updated_groups[$kg] = $this_updated;
+			}
 		}
 		foreach( array_reverse($this->groups) as $kg => $group ) {
 			if( $updated_groups[$kg] ) {
