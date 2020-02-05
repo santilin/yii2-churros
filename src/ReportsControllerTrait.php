@@ -20,7 +20,7 @@ trait ReportsControllerTrait
 	}
 
 	/**
-	 * @param integer $id The id of the report to show
+	 * @param integer $id The id of the report to update
 	 */
 	public function actionUpdate($id)
 	{
@@ -34,7 +34,7 @@ trait ReportsControllerTrait
 		}
 		if( $report->model == '' || !class_exists($search_model_name) ) {
 			Yii::$app->session->setFlash('error',
-				$report->t('churros', "Informe <strong>{record}</strong>: no está definido el modelo"));
+				$report->t('churros', "Informe <strong>{record}</strong>: no está definido el modelo $search_model_name"));
 			return $this->redirect(['view', 'id'=>$id]);
 		}
 		$search_model = new $search_model_name;
@@ -67,8 +67,7 @@ trait ReportsControllerTrait
 	{
 		$params = Yii::$app->request->post();
 		if( isset($params['save']) ) {
-			unset($params['save']);
-			return $this->redirect(['update', 'id' => $id]);
+			return $this->actionUpdate($id);
 		}
 		$report = $this->findModel($id);
 		$search_model_name = $report->model;
