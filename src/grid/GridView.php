@@ -140,6 +140,11 @@ class GridView extends BaseGridView
 		$s->setAttributeOrders($new_def_order);
 	}
 
+	public function renderTableRow($model, $key, $index)
+    {
+		return parent::renderTableRow($model, $key, $index);
+    }
+
 	protected function groupHeader($model, $key, $index, $grid)
 	{
 		$ret = '';
