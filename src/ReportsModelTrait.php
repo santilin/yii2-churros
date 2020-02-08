@@ -13,6 +13,7 @@ trait ReportsModelTrait
 	public $report_columns = [];
 	public $report_filters = [];
 	public $report_sorting = [];
+	public $only_totals = false;
 
 	public function getValue($var, $default)
 	{
@@ -27,10 +28,13 @@ trait ReportsModelTrait
 	/**
 	 * Loads the data from the form POST into the model
 	 */
-
 	public function load($data, $formName = null)
 	{
-		$ret = parent::load($data, $formName);
+		$scope = $formName === null ? $this->formName() : $formName;
+		$ret = parent::load($data, $scope);
+		if( isset($data[$scope]['only_totals'] ) ) {
+			$this->only_totals = boolval($data[$scope]['only_totals']);
+		}
 		if( isset($data['report_columns']) ) {
 			// The HTML form sends the data trasposed
 			$this->report_columns = [];
@@ -83,6 +87,7 @@ trait ReportsModelTrait
 		$value->report_columns = $this->report_columns;
 		$value->report_filters = $this->report_filters;
 		$value->report_sorting = $this->report_sorting;
+		$value->only_totals = $this->only_totals;
 		$this->value = json_encode($value);
 	}
 
@@ -92,6 +97,7 @@ trait ReportsModelTrait
 		$this->report_columns = isset($value['report_columns']) ? $value['report_columns'] : [];
 		$this->report_filters = isset($value['report_filters']) ? $value['report_filters'] : [];
 		$this->report_sorting = isset($value['report_sorting']) ? $value['report_sorting'] : [];
+		$this->only_totals = isset($value['only_totals']) ? $value['only_totals'] : false;
 	}
 
 	/**

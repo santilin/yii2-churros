@@ -44,9 +44,11 @@ class GridGroup extends BaseObject
 	public $footer_label;
 
 	public $level = 0;
+
 	protected $got_value = false;
 	protected $last_value = null, $current_value = null;
 	protected $summaryValues = [];
+	protected $last_model = null;
 
 	public function getCurrentValue()
 	{
@@ -83,6 +85,9 @@ class GridGroup extends BaseObject
 
 	public function willUpdateGroup($model, $key, $index)
 	{
+		if( $this->last_model == null ) {
+			$this->last_model = $model;
+		}
 		if( $this->value instanceOf \Closure ) {
 			$this->current_value = call_user_func($this->value, $model, $key, $index, $this->grid);
 		} else {
@@ -90,6 +95,7 @@ class GridGroup extends BaseObject
 		}
 		$this->got_value = true;
 		if( $this->last_value !== $this->current_value) {
+			$this->last_model = $model;
 			if( $this->last_value != null ) {
 				return true;
 			}
@@ -99,6 +105,9 @@ class GridGroup extends BaseObject
 
 	public function getHeaderContent($model, $key, $index, $tdoptions)
 	{
+		if( $this->grid->onlyTotals ) {
+			return null;
+		}
 		$hc = isset($this->header['content']) ? $this->header['content'] : $this->header;
 		if( $hc instanceOf \Closure ) {
 			return call_user_func($hc, $model, $key, $index, $this);
@@ -124,6 +133,40 @@ class GridGroup extends BaseObject
 	}
 
 	public function getFooterContent($summary_columns, $model, $key, $index, $tdoptions)
+	{
+		if( $this->grid->onlyTotals ) {
+			return $this->getOnlyTotalsContent($summary_columns, $model, $key, $index, $tdoptions);
+		} else {
+			return $this->getStandardFooterContent($summary_columns, $model, $key, $index, $tdoptions);
+		}
+	}
+
+	protected function getOnlyTotalsContent($summary_columns, $model, $key, $index, $tdoptions)
+	{
+		$ret = '';
+		if( !$this->last_model ) {
+			$this->last_model = $model;
+		}
+		foreach( $this->grid->columns as $kc => $column ) {
+			if( !isset($summary_columns[$kc]) ) {
+				$value = $this->last_model[$kc];
+				$tdoptions = [];
+			} else {
+				$value = $this->summaryValues[$this->level][$kc];
+				$tdoptions = [
+					'class' => 'grid-group-foot-' . strval($this->level) . ' w1',
+				];
+			}
+			$ret .= Html::tag('td',
+				$this->grid->formatter->format($value, $column->format),
+					GridView::fetchColumnOptions($column, $this->level),
+					$tdoptions);
+		}
+		return $ret;
+	}
+
+
+	protected function getStandardFooterContent($summary_columns, $model, $key, $index, $tdoptions)
 	{
 		$ret = '';
 		$fc = isset($this->footer['content']) ? $this->footer['content'] : $this->footer;

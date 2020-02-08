@@ -21,6 +21,7 @@ class GridView extends BaseGridView
 	 */
 	public $column = null;
 	public $totalsRow = false;
+	public $onlyTotals = false;
 
 	protected $summaryColumns = [];
 	protected $summaryValues = [];
@@ -104,8 +105,8 @@ class GridView extends BaseGridView
             }
             $group->level = $level++;
             $this->groups[$kg] = $group;
-            // Hide the group column
-            if( $group->column ) {
+            // Hide the group column if not only totals
+            if( $group->column && !$this->onlyTotals ) {
   				$this->columns[str_replace('.', '_', $kg)]['visible'] = false;
 			}
         }
@@ -142,7 +143,12 @@ class GridView extends BaseGridView
 
 	public function renderTableRow($model, $key, $index)
     {
-		return parent::renderTableRow($model, $key, $index);
+		$ret = parent::renderTableRow($model, $key, $index);
+		if( !$this->onlyTotals ) {
+			return $ret;
+		} else {
+			return null;
+		}
     }
 
 	protected function groupHeader($model, $key, $index, $grid)
