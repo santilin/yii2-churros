@@ -193,10 +193,11 @@ class GridView extends BaseGridView
 		foreach( $this->groups as $kg => $group ) {
 			if( $updated_groups[$kg] || $first_header_shown ) {
 				$first_header_shown = true;
-				if( $group->header && !$this->onlyTotals ) {
-					$ret .= Html::tag('tr',
-						$group->getHeaderContent($model, $key, $index,
-						$tdoptions));
+				if( $group->header ) {
+					if( $this->onlyTotals && $group->level < count($this->groups) ) {
+						$ret .= Html::tag('tr',
+							$group->getHeaderContent($model, $key, $index, $tdoptions));
+					}
 				}
 				$this->current_level++;
 				$group->resetSummaries($this->summaryColumns, $this->current_level, count($this->groups));

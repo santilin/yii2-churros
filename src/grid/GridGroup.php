@@ -101,9 +101,6 @@ class GridGroup extends BaseObject
 
 	public function getHeaderContent($model, $key, $index, $tdoptions)
 	{
-		if( $this->grid->onlyTotals ) {
-			return null;
-		}
 		$hc = isset($this->header['content']) ? $this->header['content'] : $this->header;
 		if( $hc instanceOf \Closure ) {
 			return call_user_func($hc, $model, $key, $index, $this);
@@ -130,7 +127,7 @@ class GridGroup extends BaseObject
 
 	public function getFooterContent($summary_columns, $model, $key, $index, $tdoptions)
 	{
-		if( $this->grid->onlyTotals ) {
+		if( $this->grid->onlyTotals && $this->level == count($this->grid->groups) ) {
 			return $this->getOnlyTotalsContent($summary_columns, $model, $key, $index, $tdoptions);
 		} else {
 			return $this->getStandardFooterContent($summary_columns, $model, $key, $index, $tdoptions);
