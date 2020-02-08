@@ -250,8 +250,8 @@ trait ModelSearchTrait
 		if( !isset($params['_pjax']) ) {
 			// join search form params
 			$scope = ($formName === null) ? $this->formName() : $formName;
-			$newparams = [];
 			parent::load($params, $formName);
+			$newparams = [];
 			if( isset($params[$scope]['_adv_']) ) {
 				foreach( $params[$scope]['_adv_'] as $name => $values) {
 					if( isset($values['lft'])  && !empty($values['lft']) ) {

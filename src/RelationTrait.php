@@ -101,7 +101,7 @@ trait RelationTrait
 		$relModelClass = $relation['modelClass'];
         $relPKAttr = $relModelClass::primaryKey();
 
-		if (count($relPKAttr) > 1) { // Many to many
+		if (count($relPKAttr) > 1) { // Many to many with junction model
             $container = [];
             foreach ($v as $relPost) {
 				if( $relPost == null ) {
@@ -141,7 +141,6 @@ trait RelationTrait
 					$container[] = $m2mkeys;
                 }
             }
-            $this->populateRelation($relName, $container);
         } else if ($relation['via'] == null) { // Has Many
             $container = [];
             foreach ($v as $relPost) {
@@ -160,12 +159,20 @@ trait RelationTrait
 					$container[] = [ $relPKAttr[0] => $relPost ];
 				}
             }
-            $this->populateRelation($relName, $container);
-        } else {
-            $relObj = (empty($v[$relPKAttr[0]])) ? new $relModelClass : $relModelClass::findOne($v[$relPKAttr[0]]);
-            $relObj->load($v, '');
-            $this->populateRelation($relName, $relObj);
+        } else { // Many2Many
+			foreach( $v as $relPost ) {
+				if( is_array($relPost) ) {
+					$id = $relPost[$relPKAttr[0]];
+					$relObj = empty($id) ? new $relModelClass : $relModelClass::findOne($id);
+					$relObj->load($relPost);
+				} else {
+					$id = $relPost;
+					$relObj = [ $relPKAttr[0] => $id ];
+				}
+				$container[] = $relObj;
+			}
         }
+		$this->populateRelation($relName, $container);
         return true;
     }
 
@@ -252,7 +259,7 @@ trait RelationTrait
                     $this->isNewRecord = $isNewRecord;
                     return false;
                 }
-                $trans->commit();
+					$trans->commit();
                 return true;
             } else {
                 return false;
