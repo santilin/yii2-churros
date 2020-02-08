@@ -48,7 +48,7 @@ class GridGroup extends BaseObject
 	protected $got_value = false;
 	protected $last_value = null, $current_value = null;
 	protected $summaryValues = [];
-	protected $last_model = null;
+	protected $last_group_changed = false;
 
 	public function getCurrentValue()
 	{
@@ -85,9 +85,6 @@ class GridGroup extends BaseObject
 
 	public function willUpdateGroup($model, $key, $index)
 	{
-		if( $this->last_model == null ) {
-			$this->last_model = $model;
-		}
 		if( $this->value instanceOf \Closure ) {
 			$this->current_value = call_user_func($this->value, $model, $key, $index, $this->grid);
 		} else {
@@ -95,7 +92,6 @@ class GridGroup extends BaseObject
 		}
 		$this->got_value = true;
 		if( $this->last_value !== $this->current_value) {
-			$this->last_model = $model;
 			if( $this->last_value != null ) {
 				return true;
 			}
@@ -144,12 +140,9 @@ class GridGroup extends BaseObject
 	protected function getOnlyTotalsContent($summary_columns, $model, $key, $index, $tdoptions)
 	{
 		$ret = '';
-		if( !$this->last_model ) {
-			$this->last_model = $model;
-		}
 		foreach( $this->grid->columns as $kc => $column ) {
 			if( !isset($summary_columns[$kc]) ) {
-				$value = $this->last_model[$kc];
+				$value = $model[$kc];
 				$tdoptions = [];
 			} else {
 				$value = $this->summaryValues[$this->level][$kc];

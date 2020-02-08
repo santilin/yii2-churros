@@ -25,6 +25,7 @@ class GridView extends BaseGridView
 
 	protected $summaryColumns = [];
 	protected $summaryValues = [];
+	protected $previousModel = null;
 	protected $recno;
 	protected $current_level = 0;
 
@@ -153,6 +154,9 @@ class GridView extends BaseGridView
 
 	protected function groupHeader($model, $key, $index, $grid)
 	{
+		if( $this->previousModel === null ) {
+			$this->previousModel = $model;
+		}
 		$ret = '';
 		$tdoptions = [ 'colspan' => count($this->columns) ];
 		$this->recno++;
@@ -171,7 +175,8 @@ class GridView extends BaseGridView
 			if( $updated_groups[$kg] ) {
 				if ($group->footer ) {
 					$ret .= Html::tag('tr',
-						$group->getFooterContent($this->summaryColumns, $model, $key, $index, $tdoptions));
+						$group->getFooterContent($this->summaryColumns,
+						$this->previousModel, $key, $index, $tdoptions));
 				}
 				$group->resetSummaries($this->summaryColumns, $this->current_level, count($this->groups));
 				$this->current_level--;
@@ -188,7 +193,7 @@ class GridView extends BaseGridView
 		foreach( $this->groups as $kg => $group ) {
 			if( $updated_groups[$kg] || $first_header_shown ) {
 				$first_header_shown = true;
-				if( $group->header ) {
+				if( $group->header && !$this->onlyTotals ) {
 					$ret .= Html::tag('tr',
 						$group->getHeaderContent($model, $key, $index,
 						$tdoptions));
@@ -198,6 +203,7 @@ class GridView extends BaseGridView
 			}
 			$group->updateSummaries($this->summaryColumns, $this->current_level, $model);
 		}
+		$this->previousModel = $model;
 		return $ret;
 	}
 
