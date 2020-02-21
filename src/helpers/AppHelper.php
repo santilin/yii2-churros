@@ -11,6 +11,12 @@ use Yii;
 
 class AppHelper
 {
+	const SEARCH_FIELDS_OWN_ALL = 1;
+	const SEARCH_FIELDS_OWN_CODES = 2;
+	const SEARCH_FIELDS_RELATED_CODES = 4;
+	const SEARCH_FIELDS_RELATED_ALL = 8;
+	const SEARCH_FIELDS_ID = 16;
+
 	static private $tabindex = 0;
 
     static public function empty($value)

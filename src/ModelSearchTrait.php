@@ -266,59 +266,83 @@ trait ModelSearchTrait
 
 	/**
 	 * Returns Html code to add an advanced search field to a search form
-	 * Almost identical to ReportsMOdelTrait::createSearchField
+	 * Almost identical to ReportsModelTrait::createSearchField
 	 * @todo dropdowns
 	 */
-	static public function searchField($model, $attribute)
+	/**
+	 * Returns Html code to add an advanced search field to a search form
+	 * @param boolean $hidden Whether to include the general condition as a hidden input
+	 */
+	public function createSearchField($model, $attribute, $type = 'string', $options = [],
+		$dropdown_values = null )
 	{
+		$attr_class = str_replace('.','_',$attribute);
+		if( ($control_type = $type) == 'date' ) {
+			$control_type = 'string';
+		}
+		if ( (isset($options['hideme']) && $options['hideme'] == true)
+			|| (isset($options['visible']) && $options['visible'] == false) ) {
+			$main_div = ' class="row collapse hideme"';
+		} else {
+			$main_div = '';
+		}
+		unset($options['hideme']);
 		$ret = '';
 		$scope = $model->formName();
-		$value = $model->$attribute;
-		if( substr($value,0,2) == '{"' && substr($value,-2) == '"}' ) {
-			$value = json_decode($value, true);
-			if( !isset($value['lft']) ) {
-				$value = [ 'op' => '', 'lft' => '', 'rgt' => ''];
-			}
+		if( isset( $this->report_filters[$attribute] ) ) {
+			$value = $this->report_filters[$attribute];
 		} else {
-			$value = ['op' => '', 'lft' => $value, 'rgt' => ''];
+			$value = [ 'op' => '', 'lft' => '', 'rgt' => ''];
 		}
-		if( !in_array($value['op'], self::$extra_operators) ) {
+		if( !in_array($value['op'], ModelSearchTrait::$extra_operators) ) {
 			$extra_visible = "display:none";
 		} else {
 			$extra_visible = '';
 		}
-		$ret .= "<div class='row'>";
+		$ret .= "<div$main_div>";
 		$ret .= "<div class='form-group'>";
 		$ret .= "<div class='control-label col-sm-3'>";
-		$ret .= Html::activeLabel($model, $attribute);
+		$ret .= Html::activeLabel($model, $attribute, $options);
+		if ($type == 'date' ) {
+			$ret .= "<br>Formato yyyy-mm-dd";
+		}
 		$ret .= "</div>";
 
-		$attr_class = str_replace('.','_',$attribute);
 		$ret .= "<div class='control-form col-sm-2'>";
 		$ret .= Html::dropDownList("${scope}[_adv_][$attribute][op]",
-			$value['op'], self::$operators, [
+			$value['op'], ModelSearchTrait::$operators, [
 			'id' => "drop-$attr_class", 'class' => 'search-dropdown form-control col-sm-2'] );
 		$ret .= "</div>";
 
 		$ret .= "<div class='control-form col-sm-4'>";
-		$ret .= Html::input('text', "${scope}[_adv_][$attribute][lft]",
+		if( is_array($dropdown_values) ) {
+			$ret .= Html::dropDownList("${scope}[_adv_][$attribute][lft]",
+			$value['lft'], $dropdown_values, [ 'class' => 'form-control col-sm-4']);
+		} else {
+			$ret .= Html::input($control_type, "${scope}[_adv_][$attribute][lft]",
 			$value['lft'], [ 'class' => 'form-control col-sm-4']);
+		}
 		$ret .= "</div>";
 		$ret .= "</div><!-- row -->";
 
 
 		$ret .= "<div class='row gap10'>";
-		$ret .= "<div id='second-field-drop-$attr_class' style='$extra_visible'>";
+		$ret .= "<div style='$extra_visible' id='second-field-drop-$attr_class' >";
 		$ret .= "<div class='control-form col-sm-2 col-sm-offset-3 text-right'>";
 		$ret .= "y:";
 		$ret .= "</div>";
 		$ret .= "<div class='control-form col-sm-4'>";
-		$ret .= Html::input('text', "${scope}[_adv_][$attribute][rgt]",
-			$value['rgt'], [ 'class' => 'form-control col-sm-4']);
+		if( is_array($dropdown_values) ) {
+			$ret .= Html::dropDownList("${scope}[_adv_][$attribute][rgt]",
+			$value['rgt'], $dropdown_values, [ 'class' => 'form-control col-sm-4']);
+		} else {
+			$ret .= Html::input($control_type, "${scope}[_adv_][$attribute][rgt]",
+				$value['rgt'], [ 'class' => 'form-control col-sm-4']);
+		}
 		$ret .= "</div>";
 		$ret .= "</div><!-- row -->";
 		$ret .= "</div>";
-		$ret .= Html::activeHiddenInput($model, $attribute);
+
 		$ret .= "</div>";
 		return $ret;
 	}
