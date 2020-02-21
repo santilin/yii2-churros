@@ -413,13 +413,9 @@ trait ReportsModelTrait
  		$dropdown_options = [];
 		$modeltablename = str_replace(['{','}','%'], '', $model->tableName());
 		foreach( $columns as $colname => $col_attrs ) {
-			if( preg_match('/^(sum|avg|max|min):(.*)$/i', $colname) ) {
+			list($tablename, $fieldname) = ModelSearchTrait::splitFieldName($colname);
+			if( empty($tablename) ) {
 				$tablename = $modeltablename;
-			} else {
-				list($tablename, $fieldname) = ModelSearchTrait::splitFieldName($colname);
-				if( empty($tablename) ) {
-					$tablename = $modeltablename;
-				}
 			}
 			$title = $titles[$tablename];
 			$dropdown_options[$title][$colname] = $col_attrs['label'] . " ($title)";
