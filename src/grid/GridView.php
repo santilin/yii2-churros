@@ -13,7 +13,7 @@ use santilin\churros\grid\GridGroup;
 class GridView extends BaseGridView
 {
 	/**
-	 * The group headers and footers definitions
+	 * The groups headers and footers definitions
 	 */
 	public $groups = [];
 	/**
@@ -142,6 +142,7 @@ class GridView extends BaseGridView
 		$s->setAttributeOrders($new_def_order);
 	}
 
+	// override
 	public function renderTableRow($model, $key, $index)
     {
 		$ret = parent::renderTableRow($model, $key, $index);
@@ -151,6 +152,18 @@ class GridView extends BaseGridView
 			return null;
 		}
     }
+
+	// override
+	public function getPageSummaryRow()
+	{
+		$p = $this->dataProvider->getPagination();
+		if( $p && $p->getPageCount() > 1 ) {
+			return '<td colspan="42">No muestro totales porque no se están mostrando todos los registros.</tr>';
+		} else {
+			return parent::getPageSummaryRow();
+		}
+	}
+
 
 	protected function groupHeader($model, $key, $index, $grid)
 	{
