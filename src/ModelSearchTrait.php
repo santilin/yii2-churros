@@ -144,11 +144,7 @@ trait ModelSearchTrait
     // Advanced search with operators
 	protected function makeSearchParam($values)
 	{
-		if( $values['op'] == '=' ) {
-			return $values['lft'];
-		} else {
-			return json_encode($values);
-		}
+		return json_encode($values);
 	}
 
 	public function filterWhere(&$query, $name, $value)
@@ -200,7 +196,11 @@ trait ModelSearchTrait
 		} else if( is_array($value) ) {
 			$query->andWhere([ 'in', $name, $value ]);
 		} else {
-			$query->andWhere([ 'like', $name, $value ]);
+			if( $value[0] == '=' ) {
+				$query->andWhere([ 'OR', [ 'like', $name, $value ], [ $name => substr($value,1) ]]);
+			} else {
+				$query->andWhere([ 'like', $name, $value ]);
+			}
 		}
 	}
 
@@ -247,21 +247,27 @@ trait ModelSearchTrait
 	 */
 	public function load($params, $formName = null)
 	{
-		if( !isset($params['_pjax']) ) {
+		if( isset($params['_pjax']) ) {
+			// filter form inside grid
+			return parent::load($params, $formName);
+		} else {
+			// filter form outside grid
 			// join search form params
 			$scope = ($formName === null) ? $this->formName() : $formName;
-			parent::load($params, $formName);
-			$newparams = [];
-			if( isset($params[$scope]['_adv_']) ) {
-				foreach( $params[$scope]['_adv_'] as $name => $values) {
-					if( isset($values['lft'])  && !empty($values['lft']) ) {
-						$newparams[$name] = $this->makeSearchParam($values);
+			$ret = parent::load($params, $formName);
+			if( $ret ) {
+				$newparams = [];
+				if( isset($params[$scope]['_adv_']) ) {
+					foreach( $params[$scope]['_adv_'] as $name => $values) {
+						if( isset($values['lft'])  && $values['lft']!=='' && $values['lft']!==null ) {
+							$newparams[$name] = $this->makeSearchParam($values);
+						}
 					}
+					return parent::load([ $scope => $newparams], $formName);
 				}
 			}
-			return parent::load([ $scope => $newparams], $formName);
+			return true;
 		}
-		return parent::load($params, $formName);
 	}
 
 	/**
@@ -289,10 +295,19 @@ trait ModelSearchTrait
 		unset($options['hideme']);
 		$ret = '';
 		$scope = $model->formName();
-		if( isset( $this->report_filters[$attribute] ) ) {
+		if( isset( $model->$attribute) ) {
+			$value = $model->$attribute;
+		} else if( isset( $this->report_filters[$attribute] ) ) {
 			$value = $this->report_filters[$attribute];
 		} else {
+			$value = null;
+		}
+		if( is_string($value) && substr($value,0,2) == '{"' && substr($value,-2) == '"}' ) {
+			$value = json_decode($value, true);
+		} else if( $value == '' ) {
 			$value = [ 'op' => '', 'lft' => '', 'rgt' => ''];
+		} else {
+			$value = [ 'op' => '=', 'lft' => $model->$attribute, 'rgt' => ''];
 		}
 		if( !in_array($value['op'], ModelSearchTrait::$extra_operators) ) {
 			$extra_visible = "display:none";
