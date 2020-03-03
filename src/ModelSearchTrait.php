@@ -95,34 +95,19 @@ trait ModelSearchTrait
 			}
 			if (isset(self::$relations[$relation_name]) ) {
 				$related_model_class = self::$relations[$relation_name]['modelClass'];
-				$v = ArrayHelper::getValue($this, $attribute);
-// 				$filter_set = false;
 				$table_alias = "as_$relation_name"; /// @todo check that the join is added only once
-				$provider->query->joinWith("$relation_name $table_alias");
 				if ($fldname == '' ) { /// @todo junction tables
 					list($code_field, $desc_field) = $related_model_class::getCodeDescFields();
 					if( $desc_field != '' && $code_field != '' ) {
-// 						$provider->query->andFilterWhere(['or',
-// 							[ 'LIKE', "$table_alias.$desc_field", $v ],
-// 							[ 'LIKE', "$table_alias.$code_field", $v ]
-// 						]);
-// 						$filter_set = true;
 						$fldname = $code_field;
 					}
 				}
-// 				if (!$filter_set) {
-// 					$provider->query->andFilterWhere(
-// 						['LIKE', "$table_alias.$fldname", $v]);
-// 				}
 				if (!isset($provider->sort->attributes[$attribute])) {
 					$related_model_search_class = $related_model_class::getSearchClass();
 					if( class_exists($related_model_search_class) ) {
 						// Set orders from the related search model
 						$related_model = new $related_model_search_class;
-						$related_model_provider = $related_model->search(
-							[ $related_model->formName() =>
-								[ $fldname => $v]
-							]);
+						$related_model_provider = $related_model->search([]);
 						if (isset( $related_model_provider->sort->attributes[$fldname]) ) {
 							$related_sort = $related_model_provider->sort->attributes[$fldname];
 							$new_related_sort = [ 'label' => $related_sort['label']];
@@ -144,8 +129,41 @@ trait ModelSearchTrait
     // Advanced search with operators
 	protected function makeSearchParam($values)
 	{
-		return json_encode($values);
+		if( is_array($values) ) {
+			return json_encode($values);
+		} else {
+			return $values;
+		}
 	}
+
+	public function transformGridFilterValues()
+	{
+		foreach( $this->attributes as $name => $value ) {
+			if( substr($value,0,2) == '{"' && substr($value,-2) == '"}' ) {
+				$value = json_decode($value, true);
+			}
+			if( isset($value['lft']) ) {
+				if( in_array($value['op'], ['=','<','>','<=','>=','<>'] ) ) {
+					$this->$name = $value['op'] . $value['lft'];
+				} else if( $value['op'] == 'LIKE' ) {
+					$this->$name = $value['lft'];
+				}
+			}
+		}
+	}
+
+	protected function toOpExpression($value, $strict)
+	{
+		if( is_string($value) && $value != '') {
+			if( substr($value,0,2) == '{"' && substr($value,-2) == '"}' ) {
+				return json_decode($value, true);
+			} else if( preg_match('/^(=|<>|<|<=|>|>=)(.*)$/', $value, $matches) ) {
+				return [ 'lft' => $matches[2], 'op' => $matches[1], 'rgt' => null ];
+			}
+		}
+		return [ 'op' => $strict ? '=' : 'LIKE', 'lft' => $value, 'rgt' => '' ];
+	}
+
 
 	public function filterWhere(&$query, $name, $value)
 	{
@@ -163,9 +181,7 @@ trait ModelSearchTrait
 				throw new InvalidArgumentException($relation . ": relation not found in model " . self::class);
 			}
 		}
-		if( is_string($value) && substr($value,0,2) == '{"' && substr($value,-2) == '"}' ) {
-			$value = json_decode($value, true);
-		}
+		$value = $this->toOpExpression($value, false );
 		if( isset($value['lft']) ) {
 			if( $value['lft'] == null ) {
 				return;
@@ -220,22 +236,22 @@ trait ModelSearchTrait
 			$filter_set = false;
 			$table_alias = "as_$relation_name"; /// @todo check that the join is added only once
 			$query->joinWith("$relation_name $table_alias");
+			$value = $this->toOpExpression($value, false );
 			if ($attribute == '' ) {
 				list($code_field, $desc_field) = $related_model_class::getCodeDescFields();
-				if( $desc_field != '' && $code_field != '' ) {
-					$query->andFilterWhere(['or',
-						[ 'LIKE', "$table_alias.$desc_field", $value ],
-						[ 'LIKE', "$table_alias.$code_field", $value ]
+				if( $desc_field != '' || $code_field != '' ) {
+					if( $code_field == '' ) {
+						$code_field = $desc_field;
+					}
+					$query->andFilterWhere([ $value['op'], "$table_alias.$code_field", $value['lft']
 					]);
 					$filter_set = true;
+				} else {
+					throw new \Exception("table $related_model_class doesn't have a code field");
 				}
 			}
 			if (!$filter_set) {
-				if( $attribute == 'id' && intval($value) == $value) {
-					$query->andFilterWhere( ["$table_alias.$attribute" => intval($value)]);
-				} else {
-					$query->andFilterWhere( ['LIKE', "$table_alias.$attribute", $value]);
-				}
+				$query->andFilterWhere([$value['op'], "$table_alias.$attribute", $value['lft'] ]);
 			}
 		} else {
 			throw new InvalidArgumentException($relation_name . ": relation not found in model " . self::class);
@@ -302,13 +318,7 @@ trait ModelSearchTrait
 		} else {
 			$value = null;
 		}
-		if( is_string($value) && substr($value,0,2) == '{"' && substr($value,-2) == '"}' ) {
-			$value = json_decode($value, true);
-		} else if( $value == '' ) {
-			$value = [ 'op' => '', 'lft' => '', 'rgt' => ''];
-		} else {
-			$value = [ 'op' => '=', 'lft' => $model->$attribute, 'rgt' => ''];
-		}
+		$value = $this->toOpExpression($value, false);
 		if( !in_array($value['op'], ModelSearchTrait::$extra_operators) ) {
 			$extra_visible = "display:none";
 		} else {
