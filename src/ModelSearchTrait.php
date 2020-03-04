@@ -81,7 +81,7 @@ trait ModelSearchTrait
 	/**
 	 * Adds related sorts and filters to dataproviders for grids
 	*/
-    public function addColumnsSortsFiltersToProvider($gridColumns, &$provider)
+    public function addColumnSortsToProvider($gridColumns, &$provider)
     {
 		foreach( $gridColumns as $attribute => $colum_def ) {
 			if ( is_int($attribute) || array_key_exists($attribute, $this->attributes ) ) {
@@ -154,7 +154,9 @@ trait ModelSearchTrait
 
 	protected function toOpExpression($value, $strict)
 	{
-		if( is_string($value) && $value != '') {
+		if( isset($value['op']) ) {
+			return $value;
+		} else if( is_string($value) && $value != '') {
 			if( substr($value,0,2) == '{"' && substr($value,-2) == '"}' ) {
 				return json_decode($value, true);
 			} else if( preg_match('/^(=|<>|<|<=|>|>=)(.*)$/', $value, $matches) ) {
@@ -167,10 +169,11 @@ trait ModelSearchTrait
 
 	public function filterWhere(&$query, $name, $value)
 	{
-		if( $value === null || $value === '' ) {
+		$value = $this->toOpExpression($value, false );
+		if( $value['lft'] == null ) {
 			return;
 		}
-		// addColumnsSortsFiltersToProvider adds the join tables with AS `as_xxxxxxx`
+		// addColumnSortsToProvider adds the join tables with AS `as_xxxxxxx`
 		if( strpos($name, '.') === FALSE ) {
 			$name = $this->tableName() . '.' . $name;
 		} else {
@@ -181,43 +184,38 @@ trait ModelSearchTrait
 				throw new InvalidArgumentException($relation . ": relation not found in model " . self::class);
 			}
 		}
-		$value = $this->toOpExpression($value, false );
-		if( isset($value['lft']) ) {
-			if( $value['lft'] == null ) {
-				return;
-			}
-			switch( $value['op'] ) {
-				case "===":
-				case "=":
-					$query->andWhere([$name => $value['lft']]);
+		switch( $value['op'] ) {
+			case "===":
+			case "=":
+				$query->andWhere([$name => $value['lft']]);
+				break;
+			case "<>":
+			case ">=":
+			case "<=":
+			case ">":
+			case "<":
+			case "NOT LIKE":
+			case "LIKE":
+				$query->andWhere([ $value['op'], $name,
+					$value['lft'] ]);
 					break;
-				case "<>":
-				case ">=":
-				case "<=":
-				case ">":
-				case "<":
-				case "NOT LIKE":
-				case "LIKE":
-					$query->andWhere([ $value['op'], $name,
-						$value['lft'] ]);
-						break;
-				case "BETWEEN":
-				case "NOT BETWEEN":
-					$query->andWhere([ $value['op'], $name,
-						$value['lft'], $value['rgt'] ]);
-					break;
-			}
-		} else if( is_numeric($value) && !is_string($value) ) {
-			$query->andWhere([ $name => $value ]);
-		} else if( is_array($value) ) {
-			$query->andWhere([ 'in', $name, $value ]);
-		} else {
-			if( $value[0] == '=' ) {
-				$query->andWhere([ 'OR', [ 'like', $name, $value ], [ $name => substr($value,1) ]]);
-			} else {
-				$query->andWhere([ 'like', $name, $value ]);
-			}
+			case "BETWEEN":
+			case "NOT BETWEEN":
+				$query->andWhere([ $value['op'], $name,
+					$value['lft'], $value['rgt'] ]);
+				break;
 		}
+// 		} else if( is_numeric($value) && !is_string($value) ) {
+// 			$query->andWhere([ $name => $value ]);
+// 		} else if( is_array($value) ) {
+// 			$query->andWhere([ 'in', $name, $value ]);
+// 		} else {
+// 			if( $value[0] == '=' ) {
+// 				$query->andWhere([ 'OR', [ 'like', $name, $value ], [ $name => substr($value,1) ]]);
+// 			} else {
+// 				$query->andWhere([ 'like', $name, $value ]);
+// 			}
+// 		}
 	}
 
 	protected function filterWhereRelated(&$query, $name, $value)
