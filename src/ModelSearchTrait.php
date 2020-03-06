@@ -385,7 +385,7 @@ JS;
 
 	static public function splitFieldName($fieldname)
 	{
-		if( ($dotpos = strpos($fieldname, '.')) !== FALSE ) {
+		if( ($dotpos = strrpos($fieldname, '.')) !== FALSE ) {
 			$fldname = substr($fieldname, $dotpos + 1);
 			$tablename = substr($fieldname, 0, $dotpos);
 			return [ $tablename, $fldname ];
