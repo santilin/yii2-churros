@@ -207,7 +207,8 @@ class GridView extends BaseGridView
 			if( $updated_groups[$kg] || $first_header_shown ) {
 				$first_header_shown = true;
 				if( $group->header ) {
-					if( $this->onlyTotals && $group->level < count($this->groups) ) {
+					if( ($this->onlyTotals && $group->level < count($this->groups))
+						|| $group->level <= count($this->groups) ) {
 						$ret .= Html::tag('tr',
 							$group->getHeaderContent($model, $key, $index, $tdoptions));
 					}
