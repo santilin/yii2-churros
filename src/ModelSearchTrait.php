@@ -383,6 +383,17 @@ $('.search-dropdown').change(function() {
 });
 JS;
 
+	static public function splitFieldName($fieldname)
+	{
+		if( ($dotpos = strpos($fieldname, '.')) !== FALSE ) {
+			$fldname = substr($fieldname, $dotpos + 1);
+			$tablename = substr($fieldname, 0, $dotpos);
+			return [ $tablename, $fldname ];
+		} else {
+			return [ "", $fieldname ];
+		}
+	}
+
 	public function addRelatedField($attribute, &$joins)
 	{
 		$left_model = $this;
@@ -410,17 +421,6 @@ JS;
 		}
 		$alias .= "_$attribute";
 		return [ $tablename, $attribute, $alias ];
-	}
-
-    static public function splitFieldName($fieldname)
-    {
-		if( ($dotpos = strpos($fieldname, '.')) !== FALSE ) {
-			$fldname = substr($fieldname, $dotpos + 1);
-			$tablename = substr($fieldname, 0, $dotpos);
-			return [ $tablename, $fldname ];
-		} else {
-			return [ "", $fieldname ];
-		}
 	}
 
 

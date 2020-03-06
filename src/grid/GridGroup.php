@@ -149,8 +149,7 @@ class GridGroup extends BaseObject
 			}
 			$ret .= Html::tag('td',
 				$this->grid->formatter->format($value, $column->format),
-					GridView::fetchColumnOptions($column, $this->level),
-					$tdoptions);
+					array_merge(GridView::fetchColumnOptions($column, $this->level), $tdoptions));
 		}
 		return $ret;
 	}
@@ -206,18 +205,18 @@ class GridGroup extends BaseObject
 		];
 		$ret = Html::tag('td', Yii::t('churros', "Totals ") . $content, $tdoptions );
 		$nc = 0;
-		$tdoptions = [ "class" => "w1" ];
 		foreach( $this->grid->columns as $kc => $column ) {
 			if( $nc++ < $colspan ) {
 				continue;
 			}
 			if( isset($summary_columns[$kc]) ) {
+				$tdoptions = [ 'class' => 'grid-group-foot-' . strval($this->level) . ' w1' ];
 				$ret .= Html::tag('td',
 					$this->grid->formatter->format(
 						$this->summaryValues[$this->level][$kc], $column->format),
-						GridView::fetchColumnOptions($column, $this->level),
-						$tdoptions);
+						array_merge(GridView::fetchColumnOptions($column, $this->level),$tdoptions));
 			} else {
+				$tdoptions = [ "class" => "w1" ];
 				$ret .= Html::tag('td', '', $tdoptions);
 			}
 		}

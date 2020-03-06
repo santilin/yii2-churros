@@ -291,11 +291,12 @@ class GridView extends BaseGridView
 	// copied from kartik data column
 	static public function fetchColumnOptions($column, $level = null)
     {
-		if( $level == null ) {
-			$options = [ 'class' => "grid-group-total" ];
-		} else {
-			$options = [ 'class' => "grid-group-foot-$level" ];
-		}
+		$options = [];
+// 		if( $level == null ) {
+// 			$options = [ 'class' => "grid-group-total" ];
+// 		} else {
+// 			$options = [ 'class' => "grid-group-foot-$level" ];
+// 		}
         if ($column->hidden === true) {
             Html::addCssClass($options, 'kv-grid-hide');
         }
