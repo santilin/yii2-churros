@@ -189,7 +189,9 @@ trait ModelSearchTrait
 				throw new InvalidArgumentException($relation . ": relation not found in model " . self::class);
 			}
 		}
-		switch( $value['op'] ) {
+		if( is_array($value['lft']) ) {
+ 			$query->andWhere([ 'in', $name, $value['lft']]);
+		} else switch( $value['op'] ) {
 			case "===":
 			case "=":
 				$query->andWhere([$name => $value['lft']]);
@@ -212,8 +214,6 @@ trait ModelSearchTrait
 		}
 // 		} else if( is_numeric($value) && !is_string($value) ) {
 // 			$query->andWhere([ $name => $value ]);
-// 		} else if( is_array($value) ) {
-// 			$query->andWhere([ 'in', $name, $value ]);
 // 		} else {
 // 			if( $value[0] == '=' ) {
 // 				$query->andWhere([ 'OR', [ 'like', $name, $value ], [ $name => substr($value,1) ]]);
