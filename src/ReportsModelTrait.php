@@ -163,6 +163,10 @@ trait ReportsModelTrait
 
 		$sort = [];
 		foreach( $this->report_sorting as $colname => $sorting_column ) {
+			if( !isset($columns[$colname]) ) {
+				Yii::$app->session->addFlash("error", "Report '" . $this->name . "': column '$colname' not found in sorting");
+				continue;
+			}
 			$column_def = $columns[$colname];
 			$attribute = $column_def['attribute'];
 			if ( is_int($attribute) || array_key_exists($attribute, $model->attributes ) ) {
@@ -301,7 +305,11 @@ trait ReportsModelTrait
 		}
 		foreach( $this->report_sorting as $colname => $sorting ) {
 			if( !isset($columns[$colname]) ) {
-				$columns[$colname] = $allColumns[$colname];
+				if( isset($allColumns[$colname]) ) {
+					$columns[$colname] = $allColumns[$colname];
+				} else {
+					Yii::$app->session->addFlash("error", "Report '" . $this->name . "': column '$colname' not found in sorting");
+				}
 			}
 		}
 		return $columns;
