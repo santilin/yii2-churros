@@ -28,6 +28,9 @@ trait ModelSearchTrait
 	static public $extra_operators = [
 			'BETWEEN', 'NOT BETWEEN' ];
 
+	/*
+	 * Called when setting a filter in search()
+	 */
     public function setAttributes($values, $safeOnly = true)
     {
 		foreach( $values as $attribute => $value ) {
@@ -95,7 +98,9 @@ trait ModelSearchTrait
 			}
 			if (isset(self::$relations[$relation_name]) ) {
 				$related_model_class = self::$relations[$relation_name]['modelClass'];
-				$table_alias = "as_$relation_name"; /// @todo check that the join is added only once
+				$table_alias = "as_$relation_name";
+				// Activequery removes duplicate joins
+				$provider->query->joinWith("$relation_name $table_alias");
 				if ($fldname == '' ) { /// @todo junction tables
 					list($code_field, $desc_field) = $related_model_class::getCodeDescFields();
 					if( $desc_field != '' && $code_field != '' ) {
@@ -232,7 +237,8 @@ trait ModelSearchTrait
 		if (isset(self::$relations[$relation_name]) ) {
 			$related_model_class = self::$relations[$relation_name]['modelClass'];
 			$filter_set = false;
-			$table_alias = "as_$relation_name"; /// @todo check that the join is added only once
+			$table_alias = "as_$relation_name";
+			// Activequery removes duplicate joins (added also in addSort)
 			$query->joinWith("$relation_name $table_alias");
 			$value = $this->toOpExpression($value, false );
 			if ($attribute == '' ) {
