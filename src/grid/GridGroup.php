@@ -101,6 +101,9 @@ class GridGroup extends BaseObject
 
 	public function getHeaderContent($model, $key, $index, $tdoptions)
 	{
+		if( $this->grid->onlyTotals && $this->level == count($this->grid->groups) ) {
+			return '';
+		}
 		$hc = isset($this->header['content']) ? $this->header['content'] : $this->header;
 		if( $hc instanceOf \Closure ) {
 			return call_user_func($hc, $model, $key, $index, $this);
@@ -143,13 +146,19 @@ class GridGroup extends BaseObject
 				$tdoptions = [];
 			} else {
 				$value = $this->summaryValues[$this->level][$kc];
-				$tdoptions = [
-					'class' => 'grid-group-foot-' . strval($this->level) . ' w1',
-				];
+				if( $this->level == count($this->grid->groups) ) {
+					$tdoptions = [
+						'class' => 'grid-detail w1',
+					];
+				} else {
+					$tdoptions = [
+						'class' => 'grid-group-foot-' . strval($this->level-1) . ' w1',
+					];
+				}
 			}
 			$ret .= Html::tag('td',
 				$this->grid->formatter->format($value, $column->format),
-					array_merge(GridView::fetchColumnOptions($column, $this->level), $tdoptions));
+					GridView::fetchColumnOptions($column, $tdoptions));
 		}
 		return $ret;
 	}
@@ -214,7 +223,7 @@ class GridGroup extends BaseObject
 				$ret .= Html::tag('td',
 					$this->grid->formatter->format(
 						$this->summaryValues[$this->level][$kc], $column->format),
-						array_merge(GridView::fetchColumnOptions($column, $this->level),$tdoptions));
+						GridView::fetchColumnOptions($column, $tdoptions));
 			} else {
 				$tdoptions = [ "class" => "w1" ];
 				$ret .= Html::tag('td', '', $tdoptions);

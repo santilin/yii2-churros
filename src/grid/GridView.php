@@ -280,8 +280,7 @@ class GridView extends BaseGridView
 				}
 				$ret .= Html::tag('td', $this->formatter->format(
 						$value, $column->format),
-						self::fetchColumnOptions($column, 0),
-						$tdoptions);
+						self::fetchColumnOptions($column, $tdoptions));
 			} else {
 				$ret .= Html::tag('td', '', $tdoptions);
 			}
@@ -290,14 +289,8 @@ class GridView extends BaseGridView
 	}
 
 	// copied from kartik data column
-	static public function fetchColumnOptions($column, $level = null)
+	static public function fetchColumnOptions($column, $options)
     {
-		$options = [];
-// 		if( $level == null ) {
-// 			$options = [ 'class' => "grid-group-total" ];
-// 		} else {
-// 			$options = [ 'class' => "grid-group-foot-$level" ];
-// 		}
         if ($column->hidden === true) {
             Html::addCssClass($options, 'kv-grid-hide');
         }
