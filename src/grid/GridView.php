@@ -106,8 +106,8 @@ class GridView extends BaseGridView
             }
             $group->level = $level++;
             $this->groups[$kg] = $group;
-            // Hide the group column if not only totals
-            if( $group->column && !$this->onlyTotals ) {
+            // Hide the group column
+            if( $group->column /*&& !$this->onlyTotals*/ ) {
   				$this->columns[str_replace('.', '_', $kg)]['visible'] = false;
 			}
         }
