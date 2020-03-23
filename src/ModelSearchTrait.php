@@ -292,14 +292,8 @@ trait ModelSearchTrait
 
 	/**
 	 * Returns Html code to add an advanced search field to a search form
-	 * Almost identical to ReportsModelTrait::createSearchField
-	 * @todo dropdowns
 	 */
-	/**
-	 * Returns Html code to add an advanced search field to a search form
-	 * @param boolean $hidden Whether to include the general condition as a hidden input
-	 */
-	public function createSearchField($model, $attribute, $type = 'string', $options = [],
+	public function createSearchField($attribute, $type = 'string', $options = [],
 		$dropdown_values = null )
 	{
 		$attr_class = str_replace('.','_',$attribute);
@@ -314,11 +308,9 @@ trait ModelSearchTrait
 		}
 		unset($options['hideme']);
 		$ret = '';
-		$scope = $model->formName();
-		if( isset( $model->$attribute) ) {
-			$value = $model->$attribute;
-		} else if( isset( $this->report_filters[$attribute] ) ) {
-			$value = $this->report_filters[$attribute];
+		$scope = $this->formName();
+		if( isset( $this->$attribute) ) {
+			$value = $this->$attribute;
 		} else {
 			$value = null;
 		}
@@ -331,7 +323,7 @@ trait ModelSearchTrait
 		$ret .= "<div$main_div>";
 		$ret .= "<div class='form-group'>";
 		$ret .= "<div class='control-label col-sm-3'>";
-		$ret .= Html::activeLabel($model, $attribute, $options);
+		$ret .= Html::activeLabel($this, $attribute, $options);
 		if ($type == 'date' ) {
 			$ret .= "<br>Formato yyyy-mm-dd";
 		}

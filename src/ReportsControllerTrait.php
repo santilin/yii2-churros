@@ -79,7 +79,7 @@ trait ReportsControllerTrait
 		}
 		if( $report->model == '' || !class_exists($search_model_name) ) {
 			Yii::$app->session->setFlash('error',
-				$report->t('churros', "Informe <strong>{record}</strong>: no está definido el modelo"));
+				$report->t('churros', "Informe <strong>{record}</strong>: no está definido el modelo '$search_model_name'"));
 			return $this->redirect(['view', 'id'=>$id]);
 		}
 		$search_model = new $search_model_name;

@@ -70,7 +70,7 @@ trait ReportsModelTrait
 			$svalues = $data[$searchScope]['_adv_'];
 			foreach($svalues as $key => $value ) {
 				if( $value['lft'] != '' || $value['rgt'] != ''
-					|| $value['op'] != '=' ) {
+					|| $value['op'] != 'LIKE' ) {
 					$this->report_filters[$key] = $value;
 				}
 			}
