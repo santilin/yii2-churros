@@ -172,29 +172,35 @@ trait ModelSearchTrait
 	}
 
 
-	public function filterWhere(&$query, $name, $value)
+	public function filterWhere(&$query, $fldname, $value)
 	{
 		$value = $this->toOpExpression($value, false );
 		if( $value['lft'] == null ) {
 			return;
 		}
 		// addColumnSortsToProvider adds the join tables with AS `as_xxxxxxx`
-		if( strpos($name, '.') === FALSE ) {
-			$name = $this->tableName() . '.' . $name;
-		} else {
-			list($relation, $fldname) = self::splitFieldName($name);
-			if( isset(self::$relations[$relation]) ) {
-				$name = self::$relations[$relation]['relatedTablename'] . ".$fldname";
-			} else {
-				throw new InvalidArgumentException($relation . ": relation not found in model " . self::class);
+		/// @todo add them as table1_table2_xxxxxx
+		$relfound = true;
+		$tablename = $this->tableName();
+		if( strpos($fldname, '.') !== FALSE ) {
+			$relmodel = $this->className();
+			while( strpos($fldname, '.') !== FALSE ) {
+				list($relation, $fldname) = self::splitFieldName($fldname, false /*no reverse*/);
+				if( isset($relmodel::$relations[$relation]) ) {
+					$tablename = $relmodel::$relations[$relation]['relatedTablename'];
+					$relmodel = $relmodel::$relations[$relation]['modelClass'];
+				} else {
+					throw new \Exception("$relation: relation not found in model $relmodel");
+				}
 			}
 		}
+		$fldname = $tablename . "." . $fldname;
 		if( is_array($value['lft']) ) {
- 			$query->andWhere([ 'in', $name, $value['lft']]);
+ 			$query->andWhere([ 'in', $fldname, $value['lft']]);
 		} else switch( $value['op'] ) {
 			case "===":
 			case "=":
-				$query->andWhere([$name => $value['lft']]);
+				$query->andWhere([$fldname => $value['lft']]);
 				break;
 			case "<>":
 			case ">=":
@@ -203,24 +209,15 @@ trait ModelSearchTrait
 			case "<":
 			case "NOT LIKE":
 			case "LIKE":
-				$query->andWhere([ $value['op'], $name,
+				$query->andWhere([ $value['op'], $fldname,
 					$value['lft'] ]);
 					break;
 			case "BETWEEN":
 			case "NOT BETWEEN":
-				$query->andWhere([ $value['op'], $name,
+				$query->andWhere([ $value['op'], $fldname,
 					$value['lft'], $value['rgt'] ]);
 				break;
 		}
-// 		} else if( is_numeric($value) && !is_string($value) ) {
-// 			$query->andWhere([ $name => $value ]);
-// 		} else {
-// 			if( $value[0] == '=' ) {
-// 				$query->andWhere([ 'OR', [ 'like', $name, $value ], [ $name => substr($value,1) ]]);
-// 			} else {
-// 				$query->andWhere([ 'like', $name, $value ]);
-// 			}
-// 		}
 	}
 
 	protected function filterWhereRelated(&$query, $name, $value)
@@ -297,7 +294,7 @@ trait ModelSearchTrait
 		$dropdown_values = null )
 	{
 		$relation = '';
-		if( ($dotpos = strpos($attribute, '.')) !== FALSE ) {
+		if( ($dotpos = strrpos($attribute, '.')) !== FALSE ) {
 			$relation = "&nbsp;(" . substr($attribute, 0, $dotpos) . ")";
 		}
 		unset($options['relation']);
@@ -386,9 +383,14 @@ $('.search-dropdown').change(function() {
 });
 JS;
 
-	static public function splitFieldName($fieldname)
+	static public function splitFieldName($fieldname, $reverse = true)
 	{
-		if( ($dotpos = strrpos($fieldname, '.')) !== FALSE ) {
+		if( $reverse ) {
+			$dotpos = strrpos($fieldname, '.');
+		} else {
+			$dotpos = strpos($fieldname, '.');
+		}
+		if( $dotpos !== FALSE ) {
 			$fldname = substr($fieldname, $dotpos + 1);
 			$tablename = substr($fieldname, 0, $dotpos);
 			return [ $tablename, $fldname ];
