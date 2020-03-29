@@ -296,6 +296,11 @@ trait ModelSearchTrait
 	public function createSearchField($attribute, $type = 'string', $options = [],
 		$dropdown_values = null )
 	{
+		$relation = '';
+		if( ($dotpos = strpos($attribute, '.')) !== FALSE ) {
+			$relation = "&nbsp;(" . substr($attribute, 0, $dotpos) . ")";
+		}
+		unset($options['relation']);
 		$attr_class = str_replace('.','_',$attribute);
 		if( ($control_type = $type) == 'date' ) {
 			$control_type = 'string';
@@ -309,7 +314,7 @@ trait ModelSearchTrait
 		unset($options['hideme']);
 		$ret = '';
 		$scope = $this->formName();
-		if( isset( $this->$attribute) ) {
+		if( isset($this->$attribute) || isset($this->related_properties[$attribute]) ) {
 			$value = $this->$attribute;
 		} else {
 			$value = null;
@@ -323,7 +328,7 @@ trait ModelSearchTrait
 		$ret .= "<div$main_div>";
 		$ret .= "<div class='form-group'>";
 		$ret .= "<div class='control-label col-sm-3'>";
-		$ret .= Html::activeLabel($this, $attribute, $options);
+		$ret .= Html::activeLabel($this, $attribute, $options) . $relation;
 		if ($type == 'date' ) {
 			$ret .= "<br>Formato yyyy-mm-dd";
 		}

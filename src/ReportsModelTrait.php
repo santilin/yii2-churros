@@ -86,6 +86,11 @@ trait ReportsModelTrait
 		}
 		$value->report_columns = $this->report_columns;
 		$value->report_filters = $this->report_filters;
+		foreach($value->report_filters as $key => $value ) {
+			if( is_array($value) && isset($value['left']) && $value['left'] === '' ) {
+				unset($value->report_filters[$key]);
+			}
+		}
 		$value->report_sorting = $this->report_sorting;
 		$value->only_totals = $this->only_totals;
 		$this->value = json_encode($value);

@@ -65,6 +65,7 @@ trait ReportsControllerTrait
 	 */
 	public function actionView($id)
 	{
+		// Columns, filters, etc from the GUI report builder
 		$params = Yii::$app->request->post();
 		if( isset($params['save']) ) {
 			return $this->actionUpdate($id);
@@ -83,7 +84,9 @@ trait ReportsControllerTrait
 			return $this->redirect(['view', 'id'=>$id]);
 		}
 		$search_model = new $search_model_name;
+		// The columns, filters, etc, from the saved definition
 		$report->decodeValue();
+		// Merge the post params and replace the saved ones
 		$report->load($params);
 		try {
 			return $this->render('report', [
