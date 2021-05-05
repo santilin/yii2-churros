@@ -67,6 +67,11 @@ trait ModelSearchTrait
 		}
 	}
 
+	public function __isset($name)
+	{
+		return parent::__isset($name);
+	}
+
 	/**
 	 * Adds related sorts and filters to dataproviders
 	*/
@@ -311,7 +316,7 @@ trait ModelSearchTrait
 		unset($options['hideme']);
 		$ret = '';
 		$scope = $this->formName();
-		if( isset($this->$attribute) || isset($this->related_properties[$attribute]) ) {
+		if ($this->hasAttribute($attribute) || isset($this->related_properties[$attribute]) ) {
 			$value = $this->$attribute;
 		} else {
 			$value = null;
