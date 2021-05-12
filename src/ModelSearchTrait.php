@@ -67,6 +67,11 @@ trait ModelSearchTrait
 		}
 	}
 
+	public function __isset($name)
+	{
+		return parent::__isset($name);
+	}
+
 	/**
 	 * Adds related sorts and filters to dataproviders
 	*/
