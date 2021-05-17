@@ -86,8 +86,8 @@ trait ReportsModelTrait
 		}
 		$value->report_columns = $this->report_columns;
 		$value->report_filters = $this->report_filters;
-		foreach($value->report_filters as $key => $value ) {
-			if( is_array($value) && isset($value['left']) && $value['left'] === '' ) {
+		foreach($value->report_filters as $key => $v ) {
+			if( is_array($v) && isset($v['left']) && $v['left'] === '' ) {
 				unset($value->report_filters[$key]);
 			}
 		}
