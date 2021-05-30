@@ -219,9 +219,12 @@ class CrudController extends \yii\web\Controller
 			$saved = $model->saveAll();
 		} else {
 			$transaction = $model->getDb()->beginTransaction();
-			$saved = $model->saveAll();
-			if ($saved) {
+			$saved = $model->validate();
+			if ($saved ) {
 				$saved = $this->saveFileInstances($model, $fileAttributes);
+			}
+			if ($saved) {
+				$saved = $model->saveAll(false); // Do not validate again
 			}
 			if ($saved) {
 				$transaction->commit();
@@ -332,7 +335,8 @@ class CrudController extends \yii\web\Controller
 		return json_encode("Ok");
 	}
 
-	protected function addFileInstances($model) {
+	protected function addFileInstances($model)
+	{
 		$fileAttributes = $model->getFileAttributes();
 		foreach ($fileAttributes as $key => $attr) {
 			$instances = UploadedFile::getInstances($model, $attr);
@@ -341,39 +345,33 @@ class CrudController extends \yii\web\Controller
 				// Recupera el valor sobreescrito por el LoadAll del controller
 				$model->$attr = $model->getOldAttribute($attr);
 			} else {
-				try {
-				$attr_value = ($model->getOldAttribute($attr) != '' ? unserialize($model->getOldAttribute($attr)) : []);
-				} catch( ErrorException $e) {
-					throw new ErrorException($e->getMessage() . "<br/>\n" . $model->getOldAttribute($attr));
-				}
-				foreach ($instances as $file) {
-					if ($file->error == 0) {
-						$filename = $this->getFileInstanceKey($file, $model, $attr);
-						$attr_value[$filename] = [$file->name, $file->size];
-					} else {
+// 				try {
+// 					$attr_value = ($model->getOldAttribute($attr) != '' ? unserialize($model->getOldAttribute($attr)) : []);
+// 				} catch( ErrorException $e) {
+// 					$attr_value = $model->getOldAttribute($attr);
+// // 					throw new ErrorException($e->getMessage() . "<br/>\n" . $model->getOldAttribute($attr));
+// 				}
+				foreach ($instances as $instance) {
+					if ($instance->error != 0) {
 						throw new HttpException(500, $this->fileUploadErrorMessage($model, $attr, $file));
 					}
 				}
-				if ($attr_value == []) {
-					$model->$attr = null;
-				} else {
-					$model->$attr = serialize($attr_value);
-				}
-			}
-			if ($model->$attr == []) {
-				$model->$attr = null;
+				$model->$attr = $instances;
 			}
 		}
 		return $fileAttributes;
 	}
 
-	protected function saveFileInstances($model, $fileAttributes) {
+	protected function saveFileInstances($model, $fileAttributes)
+	{
 		$saved = true;
 		foreach ($fileAttributes as $attr) {
+			$model_attr = [];
 			$instances = UploadedFile::getInstances($model, $attr);
 			foreach ($instances as $file) {
 				$filename = $this->getFileInstanceKey($file, $model, $attr);
 				$saved = false;
+				$model_attr[] = $filename;
 				try {
 					$saved = $file->saveAs(Yii::getAlias('@runtime/uploads/') . $filename);
 					if (!$saved) {
@@ -386,6 +384,7 @@ class CrudController extends \yii\web\Controller
 					break;
 				}
 			}
+			$model->$attr = serialize($model_attr);
 		}
 		return $saved;
 	}

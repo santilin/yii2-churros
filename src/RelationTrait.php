@@ -182,14 +182,14 @@ trait RelationTrait
      * @return bool
      * @throws Exception
      */
-    public function saveAll()
+    public function saveAll($runValidation = true)
     {
         /* @var $this ActiveRecord */
         $db = $this->getDb();
         $trans = $db->beginTransaction();
 		$isNewRecord = $this->isNewRecord;
         try {
-            if ($this->save()) {
+            if ($this->save($runValidation)) {
                 $error = false;
 				foreach ($this->relatedRecords as $rel_name => $records) {
 					/* @var $records ActiveRecord | ActiveRecord[] */
