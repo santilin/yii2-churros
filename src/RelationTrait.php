@@ -102,10 +102,12 @@ trait RelationTrait
         $relPKAttr = $relModelClass::primaryKey();
 
 		if (count($relPKAttr) > 1) { // Many to many with junction model
+			$link = $relation['link'];
+			$link_keys = array_keys($link);
+			$this_pk = reset($link_keys);
             $container = [];
             foreach ($v as $relPost) {
 				if( $relPost == null ) {
-				// _POST[ 'mainform' => [], 'related' => [ 0 => , 1 => value]
 					continue;
 				}
                 if (is_array($relPost) ) {
@@ -127,9 +129,6 @@ trait RelationTrait
 					}
                 } else {
 					// many2many relation with _POST = array of related ids
-					$link = $relation['link'];
-					$link_keys = array_keys($link);
-					$this_pk = reset($link_keys);
 					$m2mkeys = [];
 					foreach( $relPKAttr as $pk ) {
 						if( $pk == $this_pk ) {
@@ -187,7 +186,7 @@ trait RelationTrait
         /* @var $this ActiveRecord */
         $db = $this->getDb();
         $trans = $db->beginTransaction();
-		$isNewRecord = $this->isNewRecord;
+ 		$isNewRecord = $this->isNewRecord;
         try {
             if ($this->save($runValidation)) {
                 $error = false;
@@ -201,81 +200,34 @@ trait RelationTrait
 					if (count($records)>0) {
 						$justUpdateIds = !$records[0] instanceof \yii\db\BaseActiveRecord;
 						if( $justUpdateIds ) {
-							$this->updateIds($rel_name, $records);
+							$error = $this->updateIds($isNewRecord, $rel_name, $records);
 						} else {
-							$this->updateRecords($rel_name, $records);
+							$error = $this->updateRecords($isNewRecord, $rel_name, $records);
 						}
 					}
 				}
-//                 // Remove remaining children
-//                 $relAvail = array_keys($this->relatedRecords);
-//                 $relData = $this->getRelationData($relations);
-//                 $allRel = array_keys($relData);
-//                 $noChildren = array_diff($allRel, $relAvail);
-//
-//                 foreach ($noChildren as $relName) {
-//                     /* @var $relModel ActiveRecord */
-//                     if (empty($relData[$relName]['via']) ) {
-//                         $relModel = new $relData[$relName]['modelClass'];
-//                         $condition = [];
-//                         $isManyMany = count($relModel->primaryKey()) > 1;
-//                         if ($isManyMany) {
-//                             foreach ($relData[$relName]['link'] as $k => $v) {
-//                                 $condition[$k] = $this->$v;
-//                             }
-//                             try {
-//                                 if ($isSoftDelete) {
-//                                     $relModel->updateAll($this->_rt_softdelete, ['and', $condition]);
-//                                 } else {
-//                                     $relModel->deleteAll(['and', $condition]);
-//                                 }
-//                             } catch (IntegrityException $exc) {
-//                                 $this->addError($relData[$relName]['name'], Yii::t('churros', "Data can't be deleted because it's still used by another data."));
-//                                 $error = true;
-//                             }
-//                         } else {
-//                             if ($relData[$relName]['ismultiple']) {
-//                                 foreach ($relData[$relName]['link'] as $k => $v) {
-//                                     $condition[$k] = $this->$v;
-//                                 }
-//                                 try {
-//                                     if ($isSoftDelete) {
-//                                         $relModel->updateAll($this->_rt_softdelete, ['and', $condition]);
-//                                     } else {
-//                                         $relModel->deleteAll(['and', $condition]);
-//                                     }
-//                                 } catch (IntegrityException $exc) {
-//                                     $this->addError($relData[$relName]['name'], Yii::t('churros', "Data can't be deleted because it's still used by another data."));
-//                                     $error = true;
-//                                 }
-//                             }
-//                         }
-//                     }
-//                 }
-
-
                 if ($error) {
                     $trans->rollback();
                     $this->isNewRecord = $isNewRecord;
                     return false;
-                }
+                } else {
 					$trans->commit();
-                return true;
+					return true;
+				}
             } else {
                 return false;
             }
-        } catch (Exception $exc) {
+        } catch (\Exception $exc) {
             $trans->rollBack();
             $this->isNewRecord = $isNewRecord;
             throw $exc;
         }
     }
 
-    private function updateIds($relName, $records)
+    private function updateIds($isNewRecord, $relName, $records)
     {
 		$relation = $this->getRelation($relName);
         $isSoftDelete = isset($this->_rt_softdelete);
-        $isNewRecord = $this->isNewRecord;
 		$dontDeletePk = [];
 		$notDeletedFK = [];
 		$error = false;
@@ -284,19 +236,27 @@ trait RelationTrait
 			$relModelClass = $relation->modelClass;
 			$relModel = new $relModelClass;
 			$relPKAttr = $relModel->primarykey();
-			$isManyMany = (count($relPKAttr) > 1);
+			if( count($relPKAttr) > 1 ) {
+				$isManyMany = true;
+				foreach ($relPKAttr as $attr ) {
+					if (!in_array($attr, $links) ) {
+						$other_fk = $attr;
+					} else {
+						$this_fk = $attr;
+					}
+				}
+			}
+
 			if (!$isNewRecord) {
 				// Delete records not in the form post data
 				$query = [];
 				foreach ($relation->link as $foreign_key => $value ) {
 					$query = [ "AND", [ $foreign_key => $this->$value ] ];
 				}
-				$other_fk = null;
 				foreach ($records as $pk_values) {
 					if ($isManyMany) {
 						foreach ($relPKAttr as $attr ) {
 							if (!in_array($attr, $links) ) {
-								$other_fk = $attr;
 								$dontDeletePk[$attr][] = $pk_values[$attr];
 							}
 						}
@@ -336,9 +296,14 @@ trait RelationTrait
 						}
 					}
 				}
+				$records_in_database = $relation->select($other_fk)->asArray()->all();
+			} else {
+				$records_in_database = [];
+				foreach ($records as $index => $pk_values) {
+					$records[$index][$this_fk] = $this->getPrimaryKey();
+				}
 			}
 			// Get the ids already in the database
-			$records_in_database = $relation->select($other_fk)->asArray()->all();
  			// Save ids
 			foreach ($records as $index => $pk_values) {
 				$must_save = true;
@@ -384,11 +349,10 @@ trait RelationTrait
 		return $error;
     }
 
-    private function updateRecords($relName, $records)
+    private function updateRecords($isNewRecord, $relName, $records)
     {
 		$error = false;
 		$relation = $this->getRelation($relName);
-        $isNewRecord = $this->isNewRecord;
         $isSoftDelete = isset($this->_rt_softdelete);
 		$link = $relation->link;
 		/// SCT Add error info
