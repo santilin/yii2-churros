@@ -82,6 +82,9 @@ trait ModelInfoTrait
 				case '{record}':
 					$placeholders[$match] = $this->recordDesc();
 					break;
+				case '{record_link}':
+					$placeholders[$match] = $this->recordDesc('link');
+					break;
 				case '{record_long}':
 					$placeholders[$match] = $this->recordDesc('long');
 					break;
@@ -93,6 +96,12 @@ trait ModelInfoTrait
 		}
 		$translated = Yii:: t($category, $message, $params, $language);
 		return strtr($translated, $placeholders);
+	}
+
+	public function linkToMe($base_route = '', $action = 'view')
+	{
+		$link = self::getModelInfo('controller_name') . "/$action/" . $this->getPrimaryKey();
+		return $base_route . $link;
 	}
 
 	public function recordDesc($format=null)

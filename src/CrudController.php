@@ -105,8 +105,8 @@ class CrudController extends \yii\web\Controller
 	public function actionCreate()
 	{
 		$model = $this->findModel();
-		if (isset($POST['_form_relations']) ) {
-			$relations = explode(",", $POST['_form_relations']);
+		if (isset($_POST['_form_relations']) ) {
+			$relations = explode(",", $_POST['_form_relations']);
 		} else {
 			$relations = [];
 		}
@@ -115,8 +115,9 @@ class CrudController extends \yii\web\Controller
 				$model->setAttribute( $model->getRelatedFieldForModel($this->parent_model), $this->parent_model->getPrimaryKey());
 			}
 			if( $this->doSave($model) ) {
+				$link_to_me = $this->parentRoute('view') . '/' . $model->getPrimaryKey();
 				Yii::$app->session->setFlash('success',
-						$model->t('churros', "{La} {title} <strong>{record}</strong> has been successfully created."));
+						$model->t('churros', "{La} {title} <a href=\"$link_to_me\"<strong>{record}</strong></a> has been successfully created."));
 				return $this->whereToGoNow('create', $model);
 			}
 		}
@@ -147,8 +148,8 @@ class CrudController extends \yii\web\Controller
 			$model = $this->findModel($id);
 		}
 
-		if (isset($POST['_form_relations']) ) {
-			$relations = explode(",", $POST['_form_relations']);
+		if (isset($_POST['_form_relations']) ) {
+			$relations = explode(",", $_POST['_form_relations']);
 		} else {
 			$relations = [];
 		}
@@ -161,9 +162,10 @@ class CrudController extends \yii\web\Controller
 				$model->$primary_key = null;
 			}
 			if( $this->doSave($model) ) {
+				$link_to_me = $this->parentRoute('view') . '/' . $model->getPrimaryKey();
 				Yii::$app->session->setFlash('success',
-					$model->t('churros', "{La} {title} <strong>{record}</strong> has been successfully duplicated."));
-				return $this->whereTogoNow('create', $model);
+					$model->t('churros', "{La} {title} <a href=\"$link_to_me\"<strong>{record}</strong></a> has been successfully duplicated."));
+					return $this->whereTogoNow('create', $model);
 			}
 		}
 		return $this->render('saveAsNew', [
@@ -199,9 +201,10 @@ class CrudController extends \yii\web\Controller
 				$model->setAttribute( $model->getRelatedFieldForModel($this->parent_model), $this->parent_model->getPrimaryKey());
 			}
 			if( $this->doSave($model) ) {
+				$link_to_me = $this->parentRoute('view') . '/' . $model->getPrimaryKey();
 				Yii::$app->session->setFlash('success',
-					$model->t('churros', "{La} {title} <strong>{record}</strong> has been successfully updated."));
-				return $this->whereTogoNow('update', $model);
+					$model->t('churros', "{La} {title} <a href=\"$link_to_me\"<strong>{record}</strong></a> has been successfully updated."));
+					return $this->whereTogoNow('update', $model);
 			}
 		}
 		return $this->render('update', [
@@ -438,14 +441,14 @@ class CrudController extends \yii\web\Controller
 		return [];
 	}
 
-	public function parentRoute()
+	public function parentRoute($action_if_no_parent = 'index')
 	{
 		if( $this->parent_model ) {
 			$parent_route = $this->getRoutePrefix()
 				. $this->parent_controller
 				. '/' . $this->parent_model->getPrimaryKey();
 		} else {
-			$parent_route = Url::toRoute('index');
+			$parent_route = Url::toRoute($action_if_no_parent);
 		}
 		return $parent_route;
 	}
