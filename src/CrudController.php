@@ -567,6 +567,11 @@ class CrudController extends \yii\web\Controller
 		}
 	}
 
+	public function getParentModel()
+	{
+		return $this->parent_model;
+	}
+
 	protected function getParentFromRequest()
 	{
 		if( $this->parent_model != null ) {
