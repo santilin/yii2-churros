@@ -324,7 +324,7 @@ trait ModelSearchTrait
 		}
 		$ret .= "<div$main_div>";
 		$ret .= "<div class='form-group'>";
-		$ret .= "<div class='control-label col-sm-3'>";
+		$ret .= "<div class='control-label col-sm-2'>";
 		$ret .= Html::activeLabel($this, $attribute, $options) . $relation;
 		if ($type == 'date' ) {
 			$ret .= "<br>Formato yyyy-mm-dd";
@@ -337,30 +337,48 @@ trait ModelSearchTrait
 			'id' => "drop-$attr_class", 'class' => 'search-dropdown form-control col-sm-2'] );
 		$ret .= "</div>";
 
-		$ret .= "<div class='control-form col-sm-4'>";
 		if( is_array($dropdown_values) ) {
+			$ret .= "<div class='control-form col-sm-5'>";
 			$ret .= Html::dropDownList("${scope}[_adv_][$attribute][lft]",
 			$value['lft'], $dropdown_values, [ 'class' => 'form-control col-sm-4']);
+			$ret .= "</div>";
 		} else {
+			$ret .= <<<EOF
+	<div class="input-group col-sm-5">
+EOF;
 			$ret .= Html::input($control_type, "${scope}[_adv_][$attribute][lft]",
-			$value['lft'], [ 'class' => 'form-control col-sm-4']);
+			$value['lft'], [ 'class' => 'form-control' ]);
+			$ret .= <<<EOF
+	<span class="input-group-addon">
+        <a class="search-adv-field" data-input-name="${scope}[_adv_][$attribute][lft]" data-field="${scope}.$attribute" href="javascript:void(0)""><i class="fa fa-search"></i></a>
+    </span>
+    </div>
+EOF;
 		}
-		$ret .= "</div>";
 		$ret .= "</div><!-- row -->";
 
+		$ret .= <<<EOF
+<div class="row gap10">
+	<div style="$extra_visible" id="second-field-drop-$attr_class">
+		<div class='control-label col-sm-2'></div>
+		<div class='control-form col-sm-2 text-right'>
+y:
+</div>
+EOF;
 
-		$ret .= "<div class='row gap10'>";
-		$ret .= "<div style='$extra_visible' id='second-field-drop-$attr_class' >";
-		$ret .= "<div class='control-form col-sm-2 col-sm-offset-3 text-right'>";
-		$ret .= "y:";
-		$ret .= "</div>";
-		$ret .= "<div class='control-form col-sm-4'>";
 		if( is_array($dropdown_values) ) {
+			$ret .= "<div class='control-form col-sm-5'>";
 			$ret .= Html::dropDownList("${scope}[_adv_][$attribute][rgt]",
 			$value['rgt'], $dropdown_values, [ 'class' => 'form-control col-sm-4']);
 		} else {
+			$ret .= '<div class="input-group col-sm-5">';
 			$ret .= Html::input($control_type, "${scope}[_adv_][$attribute][rgt]",
-				$value['rgt'], [ 'class' => 'form-control col-sm-4']);
+				$value['rgt'], [ 'class' => 'form-control']);
+			$ret .= <<<EOF
+	<span class="input-group-addon">
+        <a class="search-adv-field" data-input-name="${scope}[_adv_][$attribute][rgt]" href="javascript:void(0)"><i class="fa fa-search"></i></a>
+    </span>
+EOF;
 		}
 		$ret .= "</div>";
 		$ret .= "</div><!-- row -->";
@@ -381,6 +399,12 @@ $('.search-dropdown').change(function() {
 		$('#second-field-' + this.id).hide(200);
 	}
 });
+
+$('.search-adv-field').click(function() {
+	console.log($(this).data('input-name'));
+
+});
+
 JS;
 
 	static public function splitFieldName($fieldname, $reverse = true)

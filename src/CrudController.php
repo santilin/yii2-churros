@@ -51,6 +51,13 @@ class CrudController extends \yii\web\Controller
 			return false;
 		}
 		$this->getParentFromRequest();
+		if (isset($this->junctionModel) && $this->junctionModel == true ) {
+			$id = $this->junctionIds();
+			if( $id ) {
+				call_user_func_array([$this, $action->actionMethod], $id);
+				return false;
+			}
+		}
 		return true;
 	}
 
