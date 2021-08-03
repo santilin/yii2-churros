@@ -67,17 +67,17 @@ trait RelationTrait
                 if (is_array($post_data)) {
                     if ($post_variable == $formName) { // Main model
 						// Look for embedded relations data in the main form
-                        foreach ($post_data as $relName => $relAttributes) {
-                            if (is_array($relAttributes) && array_key_exists($relName, $relations_in_model) ) {
-                                $this->loadToRelation($relations_in_model[$relName], $relName, $relAttributes);
+                        foreach ($post_data as $rel_name => $relAttributes) {
+                            if (is_array($relAttributes) && array_key_exists($rel_name, $relations_in_model) ) {
+                                $this->loadToRelation($relations_in_model[$rel_name], $rel_name, $relAttributes);
                             }
                         }
                     } else { // HasMany or Many2Many outside of formName
-                        $relName = &$post_variable;
-                        if (!array_key_exists($relName, $relations_in_model)) {
+                        $rel_name = &$post_variable;
+                        if (!array_key_exists($rel_name, $relations_in_model)) {
                             continue;
                         }
-                        $this->loadToRelation($relations_in_model[$relName], $relName, $post_data);
+                        $this->loadToRelation($relations_in_model[$rel_name], $rel_name, $post_data);
                     }
                 }
             }
@@ -89,11 +89,11 @@ trait RelationTrait
     /**
      * Refactored from loadAll() function
      * @param $relation skimmed relation data
-     * @param $relName
+     * @param $rel_name
      * @param $v form values
      * @return bool
      */
-    private function loadToRelation($relation, $relName, $v)
+    private function loadToRelation($relation, $rel_name, $v)
     {
         /* @var $this ActiveRecord */
         /* @var $relObj ActiveRecord */
@@ -171,7 +171,7 @@ trait RelationTrait
 				$container[] = $relObj;
 			}
         }
-		$this->populateRelation($relName, $container);
+		$this->populateRelation($rel_name, $container);
         return true;
     }
 
@@ -224,9 +224,9 @@ trait RelationTrait
         }
     }
 
-    private function updateIds($isNewRecord, $relName, $records)
+    private function updateIds($isNewRecord, $rel_name, $records)
     {
-		$relation = $this->getRelation($relName);
+		$relation = $this->getRelation($rel_name);
         $isSoftDelete = isset($this->_rt_softdelete);
 		$dontDeletePk = [];
 		$notDeletedFK = [];
@@ -255,13 +255,9 @@ trait RelationTrait
 				}
 				foreach ($records as $pk_values) {
 					if ($isManyMany) {
-						foreach ($relPKAttr as $attr ) {
-							if (!in_array($attr, $links) ) {
-								$dontDeletePk[$attr][] = $pk_values[$attr];
-							}
-						}
+						$dontDeletePk[$other_fk][] = $pk_values[$other_fk];
 					} else {
-						$dontDeletePk[] = $pk_value;
+						$dontDeletePk[] = $pk_values;
 					}
 				}
 				// DELETE WITH 'NOT IN' PK MODEL & REL MODEL
@@ -299,9 +295,6 @@ trait RelationTrait
 				$records_in_database = $relation->select($other_fk)->asArray()->all();
 			} else {
 				$records_in_database = [];
-				foreach ($records as $index => $pk_values) {
-					$records[$index][$this_fk] = $this->getPrimaryKey();
-				}
 			}
 			// Get the ids already in the database
  			// Save ids
@@ -316,11 +309,13 @@ trait RelationTrait
 				if( !$must_save ) {
 					continue;
 				}
+				$relModel->$this_fk = $this->getPrimaryKey();
+				$relModel->$other_fk = $pk_values[$other_fk];
 				$relModel->setIsNewRecord(true);
 				$relModel->setAttributes($pk_values, false);
 				$relSave = $relModel->save();
 				if (!$relSave || !empty($relModel->errors)) {
-					$relModelWords = $this->t('churros', "{title}");
+					$relModelWords = $relModel->t('churros', "{title}");
 					$index++;
 					foreach ($relModel->errors as $validation) {
 						foreach ($validation as $errorMsg) {
@@ -349,10 +344,10 @@ trait RelationTrait
 		return $error;
     }
 
-    private function updateRecords($isNewRecord, $relName, $records)
+    private function updateRecords($isNewRecord, $rel_name, $records)
     {
 		$error = false;
-		$relation = $this->getRelation($relName);
+		$relation = $this->getRelation($rel_name);
         $isSoftDelete = isset($this->_rt_softdelete);
 		$link = $relation->link;
 		/// SCT Add error info
@@ -372,9 +367,9 @@ trait RelationTrait
 						}
 						$error = true;
 					} else {
-					$relName = $relName . Inflector::camel2words(StringHelper::basename($AQ->primaryModel::className()));
-						$records[$index] = new $relName;
-						$relName->$link = $relModel->primaryKey;
+					$rel_name = $rel_name . Inflector::camel2words(StringHelper::basename($AQ->primaryModel::className()));
+						$records[$index] = new $rel_name;
+						$rel_name->$link = $relModel->primaryKey;
 					}
 				}
 			}
