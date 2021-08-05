@@ -5,7 +5,6 @@ use Yii;
 use yii\helpers\Html;
 use yii\helpers\Url;
 use santilin\churros\helpers\AppHelper;
-use santilin\churros\yii\GalleryShow;
 
 /**
  * A blend of FileInput and GalleryShow
@@ -40,11 +39,17 @@ class ImageInput extends \kartik\file\FileInput
 			'overwriteInitial' => true
 		];
 		$images = Html::getAttributeValue($this->model, $this->attribute);
-		if( $images != '' )  {
-			$images = unserialize($images);
-			foreach( $images as $filename ) {
-				$this->pluginOptions['initialPreview'][] = Yii::getAlias('@web') . '/uploads/' . $filename;
+		if( $images != '' && is_string($images))  {
+			$images_uns = @unserialize($images);
+			if ($images_uns !== false ) {
+				foreach( $images_uns as $filename ) {
+					$this->pluginOptions['initialPreview'][] = Yii::getAlias('@web') . '/uploads/' . $filename;
+				}
+			} else {
+				$this->pluginOptions['initialPreview'][] = Yii::getAlias('@web') . '/uploads/' . $images;
 			}
+		} else {
+		 	$this->model->setAttribute($this->attribute, null);
 		}
 		echo Html::tag('div', parent::run());
 	}

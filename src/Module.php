@@ -13,6 +13,7 @@ class Module extends \yii\base\Module
 		if (Yii::$app instanceof \yii\console\Application) {
 			$this->controllerNamespace = 'santilin\churros\console\controllers';
 		}
+
 	}
 
 } // class Module

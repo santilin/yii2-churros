@@ -348,12 +348,12 @@ class CrudController extends \yii\web\Controller
 	protected function addFileInstances($model)
 	{
 		$fileAttributes = $model->getFileAttributes();
-		foreach ($fileAttributes as $key => $attr) {
-			$instances = UploadedFile::getInstances($model, $attr);
+		foreach ($fileAttributes as $key => $multiple) {
+			$instances = UploadedFile::getInstances($model, $key);
 			if (count($instances) == 0) {
 				unset($fileAttributes[$key]);
 				// Recupera el valor sobreescrito por el LoadAll del controller
-				$model->$attr = $model->getOldAttribute($attr);
+				$model->$key = $model->getOldAttribute($key);
 			} else {
 // 				try {
 // 					$attr_value = ($model->getOldAttribute($attr) != '' ? unserialize($model->getOldAttribute($attr)) : []);
@@ -363,10 +363,14 @@ class CrudController extends \yii\web\Controller
 // 				}
 				foreach ($instances as $instance) {
 					if ($instance->error != 0) {
-						throw new HttpException(500, $this->fileUploadErrorMessage($model, $attr, $file));
+						throw new HttpException(500, $this->fileUploadErrorMessage($model, $key, $file));
 					}
 				}
-				$model->$attr = $instances;
+				if( $multiple == true ) {
+					$model->$key = $instances;
+				} else {
+					$model->$key = $instances[0];
+				}
 			}
 		}
 		return $fileAttributes;
@@ -375,7 +379,7 @@ class CrudController extends \yii\web\Controller
 	protected function saveFileInstances($model, $fileAttributes)
 	{
 		$saved = true;
-		foreach ($fileAttributes as $attr) {
+		foreach ($fileAttributes as $attr => $multiple) {
 			$model_attr = [];
 			$instances = UploadedFile::getInstances($model, $attr);
 			foreach ($instances as $file) {
@@ -394,7 +398,7 @@ class CrudController extends \yii\web\Controller
 					break;
 				}
 			}
-			$model->$attr = serialize($model_attr);
+			$model->$attr = $multiple?serialize($model_attr):$model_attr[0];
 		}
 		return $saved;
 	}

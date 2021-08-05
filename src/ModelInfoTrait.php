@@ -159,10 +159,13 @@ trait ModelInfoTrait
 		$ret = [];
 		foreach( $this->rules() as $key => $rule ) {
 			if( $rule[1] == 'image' || $rule[1] == 'file' ) {
-				if( is_array($rule[0]) ) {
-					$ret = array_merge( $ret, $rule[0]);
-				} else {
-					$ret[] = explode(",", $rule[0]);
+				$multiple = isset($rule['maxFiles']) && $rule['maxFiles'] != 1;
+				$attrs = $rule[0];
+				if( !is_array($attrs) ) {
+					$attrs = explode(',', $attrs);
+				}
+				foreach( $attrs as $attr) {
+					$ret[$attr] = $multiple;
 				}
 			}
 		}
