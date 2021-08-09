@@ -255,7 +255,7 @@ trait ModelSearchTrait
 				$query->andFilterWhere([$value['op'], "$table_alias.$attribute", $value['lft'] ]);
 			}
 		} else {
-			throw new InvalidArgumentException($relation_name . ": relation not found in model " . self::class);
+			throw new InvalidArgumentException($relation_name . ": relation not found in model " . self::class . '::$relations');
 		}
 	}
 
