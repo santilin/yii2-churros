@@ -124,7 +124,8 @@ class CrudController extends \yii\web\Controller
 			if( $this->doSave($model) ) {
 				$link_to_me = $this->parentRoute('view') . '/' . $model->getPrimaryKey();
 				Yii::$app->session->setFlash('success',
-						$model->t('churros', "{La} {title} <a href=\"$link_to_me\"<strong>{record}</strong></a> has been successfully created."));
+					strtr($model->t('churros', "{La} {title} <a href=\"{model_link}\">{record}</a> has been successfully created."),
+						['{model_link}' => $link_to_me]));
 				return $this->whereToGoNow('create', $model);
 			}
 		}
@@ -171,7 +172,8 @@ class CrudController extends \yii\web\Controller
 			if( $this->doSave($model) ) {
 				$link_to_me = $this->parentRoute('view') . '/' . $model->getPrimaryKey();
 				Yii::$app->session->setFlash('success',
-					$model->t('churros', "{La} {title} <a href=\"$link_to_me\"<strong>{record}</strong></a> has been successfully duplicated."));
+					strtr($model->t('churros', "{La} {title} <a href=\"{model_link}\">{record}</a> has been successfully duplicated."),
+						['{model_link}' => $link_to_me]));
 					return $this->whereTogoNow('create', $model);
 			}
 		}
@@ -210,7 +212,8 @@ class CrudController extends \yii\web\Controller
 			if( $this->doSave($model) ) {
 				$link_to_me = $this->parentRoute('view') . '/' . $model->getPrimaryKey();
 				Yii::$app->session->setFlash('success',
-					$model->t('churros', "{La} {title} <a href=\"$link_to_me\"<strong>{record}</strong></a> has been successfully updated."));
+					strtr($model->t('churros', "{La} {title} <a href=\"{model_link}\">{record}</a> has been successfully updated."),
+						['{model_link}' => $link_to_me]));
 					return $this->whereTogoNow('update', $model);
 			}
 		}
