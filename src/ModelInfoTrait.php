@@ -413,5 +413,10 @@ trait ModelInfoTrait
 		}
 	}
 
+	static public function findByPk($val, $pk = 'id')
+	{
+		return self::find()->where([$pk => $val])->one();
+	}
+
 } // trait ModelInfoTrait
 
