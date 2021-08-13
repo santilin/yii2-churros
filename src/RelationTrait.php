@@ -309,10 +309,10 @@ trait RelationTrait
 				if( !$must_save ) {
 					continue;
 				}
-				$relModel->$this_fk = $this->getPrimaryKey();
-				$relModel->$other_fk = $pk_values[$other_fk];
 				$relModel->setIsNewRecord(true);
 				$relModel->setAttributes($pk_values, false);
+				$relModel->$this_fk = $this->getPrimaryKey();
+				$relModel->$other_fk = $pk_values[$other_fk];
 				$relSave = $relModel->save();
 				if (!$relSave || !empty($relModel->errors)) {
 					$relModelWords = $relModel->t('churros', "{title}");

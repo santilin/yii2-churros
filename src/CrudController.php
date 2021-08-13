@@ -129,8 +129,8 @@ class CrudController extends \yii\web\Controller
 				return $this->whereToGoNow('create', $model);
 			}
 		}
-		$parent_id = Yii::$app->request->get('parent_id');
-		$parent_controller = Yii::$app->request->get('parent_controller');
+// 		$parent_id = Yii::$app->request->get('parent_id');
+// 		$parent_controller = Yii::$app->request->get('parent_controller');
 		return $this->render('create', [
 			'model' => $model,
 			'parent' => $this->parent_model,
@@ -475,9 +475,7 @@ class CrudController extends \yii\web\Controller
 		}
 		$referrer = Yii::$app->request->post("_form_referrer");
 		if ($from == 'create') {
-			if (Yii::$app->request->post('_and_create') == '1') {
-				$referrer = null;
-			}
+			$referrer = null;
 		}
 		if ( $referrer ) {
 			return $this->redirect($referrer);
@@ -491,7 +489,8 @@ class CrudController extends \yii\web\Controller
 				if (Yii::$app->request->post('_and_create') == '1') {
 					$redirect = ['create'];
 				} else {
-					$redirect = [ 'view', 'id' => $model->getPrimaryKey()];
+					$redirect = ["index"];
+// 					$redirect = [ 'view', 'id' => $model->getPrimaryKey()];
 				}
 			} else if ($from == 'duplicate') {
 				$redirect = ['view', 'id' => $model->getPrimaryKey()];
