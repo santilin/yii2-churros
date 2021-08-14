@@ -54,7 +54,11 @@ class CrudController extends \yii\web\Controller
 		if (isset($this->junctionModel) && $this->junctionModel == true ) {
 			$id = $this->junctionIds();
 			if( $id ) {
-				call_user_func_array([$this, $action->actionMethod], $id);
+				// hack, take care
+				$response = call_user_func_array([$this, $action->actionMethod], ['id' => $id]);
+				if (!$response instanceof \yii\web\Response) {
+					Yii::$app->response->data = $response;
+				}
 				return false;
 			}
 		}
@@ -129,8 +133,6 @@ class CrudController extends \yii\web\Controller
 				return $this->whereToGoNow('create', $model);
 			}
 		}
-// 		$parent_id = Yii::$app->request->get('parent_id');
-// 		$parent_controller = Yii::$app->request->get('parent_controller');
 		return $this->render('create', [
 			'model' => $model,
 			'parent' => $this->parent_model,
@@ -174,7 +176,7 @@ class CrudController extends \yii\web\Controller
 				Yii::$app->session->setFlash('success',
 					strtr($model->t('churros', "{La} {title} <a href=\"{model_link}\">{record}</a> has been successfully duplicated."),
 						['{model_link}' => $link_to_me]));
-					return $this->whereTogoNow('create', $model);
+					return $this->whereTogoNow('duplicate', $model);
 			}
 		}
 		return $this->render('saveAsNew', [
@@ -490,10 +492,9 @@ class CrudController extends \yii\web\Controller
 					$redirect = ['create'];
 				} else {
 					$redirect = ["index"];
-// 					$redirect = [ 'view', 'id' => $model->getPrimaryKey()];
 				}
 			} else if ($from == 'duplicate') {
-				$redirect = ['view', 'id' => $model->getPrimaryKey()];
+				$redirect = ["index"];
 			} else if ($from == 'delete') {
 				$redirect = ["index"];
 			} else {
@@ -505,8 +506,6 @@ class CrudController extends \yii\web\Controller
 
 	public function genBreadCrumbs($action, $model, $parent)
 	{
-		assert( $model instanceof Model );
-		assert( $parent == null || $parent instanceof Model );
 		$breadcrumbs = [];
 		if( isset($parent) ) {
 			$prefix = $this->getRoutePrefix() . $parent->controllerName();
@@ -517,7 +516,7 @@ class CrudController extends \yii\web\Controller
 			$keys = $parent->getPrimaryKey(true);
 			$keys[0] = $prefix . '/view';
 			$breadcrumbs[] = [
-				'label' => $parent->recordDesc('short'),
+				'label' => $parent->recordDesc('short', 25),
 				'url' => $keys
 			];
 			// child
@@ -528,8 +527,9 @@ class CrudController extends \yii\web\Controller
 			switch( $action ) {
 				case 'update':
 					$breadcrumbs[] = [
-						'label' => $model->recordDesc('short'),
-						'url' => [ $prefix . $this->id. '/view/' . strval($model->getPrimaryKey()) ] ];
+						'label' => $model->recordDesc('short', 25),
+						'url' => array_merge([ $prefix . $this->id. '/view'], $model->getPrimaryKey())
+					];
 					break;
 				case 'index':
 					break;
@@ -537,15 +537,15 @@ class CrudController extends \yii\web\Controller
 		} else {
 			$prefix = $this->getRoutePrefix();
 			$breadcrumbs[] = [
-				'label' => $model->t('churros', '{Title_plural}'),
+				'label' =>  $model->recordDesc('short', 20),
 				'url' => [ $this->id . '/index' ]
 			];
 			switch( $action ) {
 				case 'update':
 				case 'saveAsNew':
 					$breadcrumbs[] = [
-						'label' => $model->t('churros', '{record_short}'),
-						'url' => [ $prefix . $this->id . '/view', 'id' => $model->getPrimaryKey() ]
+						'label' => $model->recordDesc('short', 20),
+						'url' => array_merge([ $prefix . $this->id . '/view'], $model->getPrimaryKey())
 					];
 					break;
 				case 'view':

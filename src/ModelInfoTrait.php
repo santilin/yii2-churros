@@ -104,8 +104,9 @@ trait ModelInfoTrait
 		return $base_route . $link;
 	}
 
-	public function recordDesc($format=null)
+	public function recordDesc($format=null, $max_len = 0)
 	{
+		$ret = '';
 		if( $format == null || $format == 'long' || $format == 'link' ) {
 			$format = self::getModelInfo('record_desc_format_long');
 		} elseif( $format == 'short' ) {
@@ -130,10 +131,21 @@ trait ModelInfoTrait
 				$format = str_replace($match, $sprintf_part, $format);
 				$values[] = $value;
 			}
-			return sprintf($format, ...$values);
+			$ret = sprintf($format, ...$values);
 		} else {
-			return $format;
+			$ret = $format;
 		}
+		if( $max_len == 0 ) {
+			return $ret;
+		} else if ($max_len < 0 ) {
+			return substr($ret, 0, -$max_len);
+		} else {
+			$len = strlen($ret);
+			if( $len > $max_len ) {
+				$ret = mb_substr($ret, 0, ($max_len/2)-2) . '...' . mb_substr($ret, -($max_len/2)+2);
+			}
+		}
+		return $ret;
 	}
 
 	public function linkTo($action, $prefix = '', $format = 'short')
