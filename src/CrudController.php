@@ -212,7 +212,7 @@ class CrudController extends \yii\web\Controller
 				$model->setAttribute( $model->getRelatedFieldForModel($this->parent_model), $this->parent_model->getPrimaryKey());
 			}
 			if( $this->doSave($model) ) {
-				$link_to_me = $this->parentRoute('view') . '/' . $model->getPrimaryKey();
+				$link_to_me = Url::to(array_merge([$this->parentRoute('view')], (array)$model->getPrimaryKey()));
 				Yii::$app->session->setFlash('success',
 					strtr($model->t('churros', "{La} {title} <a href=\"{model_link}\">{record}</a> has been successfully updated."),
 						['{model_link}' => $link_to_me]));
@@ -528,7 +528,7 @@ class CrudController extends \yii\web\Controller
 				case 'update':
 					$breadcrumbs[] = [
 						'label' => $model->recordDesc('short', 25),
-						'url' => array_merge([ $prefix . $this->id. '/view'], $model->getPrimaryKey())
+						'url' => array_merge([ $prefix . $this->id. '/view'], (array)$model->getPrimaryKey())
 					];
 					break;
 				case 'index':
@@ -545,7 +545,7 @@ class CrudController extends \yii\web\Controller
 				case 'saveAsNew':
 					$breadcrumbs[] = [
 						'label' => $model->recordDesc('short', 20),
-						'url' => array_merge([ $prefix . $this->id . '/view'], $model->getPrimaryKey())
+						'url' => array_merge([ $prefix . $this->id . '/view'], (array)$model->getPrimaryKey())
 					];
 					break;
 				case 'view':
