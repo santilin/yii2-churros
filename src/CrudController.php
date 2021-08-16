@@ -537,7 +537,7 @@ class CrudController extends \yii\web\Controller
 		} else {
 			$prefix = $this->getRoutePrefix();
 			$breadcrumbs[] = [
-				'label' =>  $model->recordDesc('short', 20),
+				'label' =>  $model->getModelInfo('title_plural'),
 				'url' => [ $this->id . '/index' ]
 			];
 			switch( $action ) {
@@ -549,6 +549,8 @@ class CrudController extends \yii\web\Controller
 					];
 					break;
 				case 'view':
+					$breadcrumbs[] = $model->recordDesc('short', 20);
+					break;
 				case 'create':
 					break;
 				case 'index':
