@@ -126,10 +126,7 @@ class CrudController extends \yii\web\Controller
 				$model->setAttribute( $model->getRelatedFieldForModel($this->parent_model), $this->parent_model->getPrimaryKey());
 			}
 			if( $this->doSave($model) ) {
-				$link_to_me = $this->parentRoute('view') . '/' . $model->getPrimaryKey();
-				Yii::$app->session->setFlash('success',
-					strtr($model->t('churros', "{La} {title} <a href=\"{model_link}\">{record}</a> has been successfully created."),
-						['{model_link}' => $link_to_me]));
+				$this->showFlash('create', $model);
 				return $this->whereToGoNow('create', $model);
 			}
 		}
@@ -143,7 +140,6 @@ class CrudController extends \yii\web\Controller
 	/**
 		* Creates a new model by another data,
 		* so user don't need to input all field from scratch.
-		* If creation is successful, the browser will be redirected to the 'view' page.
 		*
 		* @param mixed $id
 		* @return mixed
@@ -172,11 +168,8 @@ class CrudController extends \yii\web\Controller
 				$model->$primary_key = null;
 			}
 			if( $this->doSave($model) ) {
-				$link_to_me = $this->parentRoute('view') . '/' . $model->getPrimaryKey();
-				Yii::$app->session->setFlash('success',
-					strtr($model->t('churros', "{La} {title} <a href=\"{model_link}\">{record}</a> has been successfully duplicated."),
-						['{model_link}' => $link_to_me]));
-					return $this->whereTogoNow('duplicate', $model);
+				$this->showFlash('create', $model);
+				return $this->whereTogoNow('duplicate', $model);
 			}
 		}
 		return $this->render('saveAsNew', [
@@ -212,11 +205,8 @@ class CrudController extends \yii\web\Controller
 				$model->setAttribute( $model->getRelatedFieldForModel($this->parent_model), $this->parent_model->getPrimaryKey());
 			}
 			if( $this->doSave($model) ) {
-				$link_to_me = Url::to(array_merge([$this->parentRoute('view')], (array)$model->getPrimaryKey()));
-				Yii::$app->session->setFlash('success',
-					strtr($model->t('churros', "{La} {title} <a href=\"{model_link}\">{record}</a> has been successfully updated."),
-						['{model_link}' => $link_to_me]));
-					return $this->whereTogoNow('update', $model);
+				$this->showFlash('update', $model);
+				return $this->whereTogoNow('update', $model);
 			}
 		}
 		return $this->render('update', [
@@ -271,8 +261,7 @@ class CrudController extends \yii\web\Controller
 		} catch (\yii\db\IntegrityException $e ) {
 			throw new \santilin\churros\DeleteModelException($model, $e);
 		}
-		Yii::$app->session->setFlash('success',
-			$model->t('churros', "{La} {title} <strong>{record}</strong> has been successfully deleted."));
+		$this->showFlash('delete', $model);
 		return $this->whereToGoNow('delete', $model);
 	}
 
@@ -471,7 +460,7 @@ class CrudController extends \yii\web\Controller
 
 	protected function whereToGoNow($from, $model)
 	{
-		$returnTo = Yii::$app->request->get('returnTo');
+		$returnTo = Yii::$app->request->getBodyParam('returnTo');
 		if( $returnTo ) {
 			return $this->redirect($returnTo);
 		}
@@ -719,5 +708,34 @@ class CrudController extends \yii\web\Controller
 		}
 		echo json_encode($ret);
 	}
+
+	protected function showFlash($action, $model)
+	{
+		switch( $action ) {
+		case 'create':
+			$link_to_me = Url::to(array_merge([$this->parentRoute('view')], $model->getPrimaryKey()));
+			Yii::$app->session->setFlash('success',
+				strtr($model->t('churros', "{La} {title} <a href=\"{model_link}\">{record}</a> has been successfully created."),
+					['{model_link}' => $link_to_me]));
+			break;
+		case 'duplicate':
+			$link_to_me = $this->parentRoute('view') . '/' . $model->getPrimaryKey();
+			Yii::$app->session->setFlash('success',
+				strtr($model->t('churros', "{La} {title} <a href=\"{model_link}\">{record}</a> has been successfully duplicated."),
+					['{model_link}' => $link_to_me]));
+			break;
+		case 'update':
+			$link_to_me = Url::to(array_merge([$this->parentRoute('view')], (array)$model->getPrimaryKey()));
+			Yii::$app->session->setFlash('success',
+				strtr($model->t('churros', "{La} {title} <a href=\"{model_link}\">{record}</a> has been successfully updated."),
+					['{model_link}' => $link_to_me]));
+			break;
+		case 'delete':
+			Yii::$app->session->setFlash('success',
+				$model->t('churros', "{La} {title} <strong>{record}</strong> has been successfully deleted."));
+			break;
+		}
+	}
+
 
 }
