@@ -86,10 +86,11 @@ trait ModelSearchTrait
 	*/
     public function addColumnSortsToProvider($gridColumns, &$provider)
     {
-		foreach( $gridColumns as $attribute => $colum_def ) {
+		foreach( $gridColumns as $attribute => $column_def ) {
 			if ( is_int($attribute) || array_key_exists($attribute, $this->attributes ) ) {
 				continue;
 			}
+			$attribute = $column_def['attribute'];
 			if( strpos($attribute, '.') === FALSE ) {
 				$relation_name = $attribute;
 				$fldname = '';
