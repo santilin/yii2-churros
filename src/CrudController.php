@@ -711,21 +711,24 @@ class CrudController extends \yii\web\Controller
 
 	protected function showFlash($action, $model)
 	{
+		$pk = $model->getPrimaryKey();
+		if( is_array($pk) ) {
+			$link_to_me = Url::to(array_merge([$this->parentRoute('view')], $pk));
+		} else {
+			$link_to_me = $this->parentRoute('view') . "/$pk";
+		}
 		switch( $action ) {
 		case 'create':
-			$link_to_me = Url::to(array_merge([$this->parentRoute('view')], $model->getPrimaryKey()));
 			Yii::$app->session->setFlash('success',
 				strtr($model->t('churros', "{La} {title} <a href=\"{model_link}\">{record}</a> has been successfully created."),
 					['{model_link}' => $link_to_me]));
 			break;
 		case 'duplicate':
-			$link_to_me = $this->parentRoute('view') . '/' . $model->getPrimaryKey();
 			Yii::$app->session->setFlash('success',
 				strtr($model->t('churros', "{La} {title} <a href=\"{model_link}\">{record}</a> has been successfully duplicated."),
 					['{model_link}' => $link_to_me]));
 			break;
 		case 'update':
-			$link_to_me = Url::to(array_merge([$this->parentRoute('view')], (array)$model->getPrimaryKey()));
 			Yii::$app->session->setFlash('success',
 				strtr($model->t('churros', "{La} {title} <a href=\"{model_link}\">{record}</a> has been successfully updated."),
 					['{model_link}' => $link_to_me]));
