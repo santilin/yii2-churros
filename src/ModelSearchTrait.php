@@ -351,7 +351,7 @@ EOF;
 			$value['lft'], [ 'class' => 'form-control' ]);
 			$ret .= <<<EOF
 	<span class="input-group-addon">
-        <a class="search-adv-field" data-input-name="${scope}[_adv_][$attribute][lft]" data-field="${scope}.$attribute" href="javascript:void(0)""><i class="fa fa-search"></i></a>
+        <a class="search-adv-field" data-input-name="${scope}[_adv_][$attribute][lft]" data-field="${scope}.$attribute" href="javascript:void(0)"><i class="fa fa-search"></i></a>
     </span>
     </div>
 EOF;
@@ -359,8 +359,8 @@ EOF;
 		$ret .= "</div><!-- row -->";
 
 		$ret .= <<<EOF
-<div class="row gap10">
 	<div style="$extra_visible" id="second-field-drop-$attr_class">
+<div class="row gap10">
 		<div class='control-label col-sm-2'></div>
 		<div class='control-form col-sm-2 text-right'>
 y:

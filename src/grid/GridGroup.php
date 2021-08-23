@@ -130,7 +130,7 @@ class GridGroup extends BaseObject
 
 	public function getFooterContent($summary_columns, $model, $key, $index, $tdoptions)
 	{
-		if( $this->grid->onlyTotals && $this->level == count($this->grid->groups) ) {
+		if( $this->grid->onlyTotals && $this->level > count($this->grid->groups) ) {
 			return $this->getOnlyTotalsContent($summary_columns, $model, $key, $index, $tdoptions);
 		} else {
 			return $this->getStandardFooterContent($summary_columns, $model, $key, $index, $tdoptions);
