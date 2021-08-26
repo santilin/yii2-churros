@@ -425,10 +425,49 @@ trait ModelInfoTrait
 		}
 	}
 
-	static public function findByPk($val, $pk = 'id')
-	{
-		return self::find()->where([$pk => $val])->one();
-	}
+  /**
+     * Find record(s) by pk. Allow use variants:
+     * - findByPk(1)
+     * - findByPk([1,2])
+     * - findByPk(['id1' => 1, 'id2' => 2])
+     * - findByPk([
+     *      ['id1' => 1, 'id2' => 2],
+     *      ['id1' => 3, 'id2' => 4]
+     *   ])
+     * @inheritdoc
+     * @return ActiveQueryInterface the newly created [[ActiveQueryInterface|ActiveQuery]] instance.
+     */
+    public static function findByPk($pk)
+    {
+        $query = static::find();
+        if (ArrayHelper::isAssociative($pk)) {
+            $keys = array_keys($pk);
+            if (!static::isPrimaryKey($keys)) {
+                throw new InvalidParamException(get_called_class() . ' has no composite primary key named "' . implode(', ', $keys) . '".');
+            }
+            // hash condition
+            return $query->andWhere($pk);
+        } elseif (ArrayHelper::isIndexed($pk, true)) {
+            if (is_array($pk[0])) {
+                $condition = ['or'];
+                foreach ($pk as $compositePk) {
+                    $keys = array_keys($compositePk);
+                    if (!static::isPrimaryKey($keys)) {
+                        throw new InvalidParamException(get_called_class() . ' has no composite primary key named "' . implode(', ', $keys) . '".');
+                    }
+                    $condition[] = ['and', $compositePk];
+                }
+                return $query->andWhere($condition);
+            }
+        }
+        // query by primary key
+        $primaryKey = static::primaryKey();
+        if (isset($primaryKey[0])) {
+            return $query->andWhere([$primaryKey[0] => $pk]);
+        } else {
+            throw new InvalidConfigException(get_called_class() . ' must have a primary key.');
+        }
+    }
 
 } // trait ModelInfoTrait
 
