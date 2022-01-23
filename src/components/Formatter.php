@@ -51,13 +51,22 @@ class Formatter extends \yii\i18n\Formatter
 		}
 	}
 
-	public function asUploadedImage($image, $options = [])
+	public function asUploadedImage($images, $options = [])
 	{
-		$images = unserialize($image);
-		if( is_array($images) ) {
-			$image = array_pop($images);
+		if( !is_array($images) ) {
+			$tmp = @unserialize($images);
+			if( $tmp != null ) {
+				$images = $tmp;
+			}
 		}
-		return self::asImage("@web/uploads/$image", $options);
+		if( !is_array($images) ) {
+			$images = [$images];
+		}
+		$ret = '';
+		foreach( $images as $image ) {
+			$ret .= self::asImage("@web/uploads/$image", $options);
+		}
+		return $ret;
 	}
 
 }
