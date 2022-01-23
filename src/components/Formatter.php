@@ -59,6 +59,9 @@ class Formatter extends \yii\i18n\Formatter
 				$images = $tmp;
 			}
 		}
+		if( empty($images) ) {
+			return '';
+		}
 		if( !is_array($images) ) {
 			$images = [$images];
 		}

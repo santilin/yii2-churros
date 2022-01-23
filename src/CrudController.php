@@ -347,7 +347,7 @@ class CrudController extends \yii\web\Controller
 			if (count($instances) == 0) {
 				unset($fileAttributes[$key]);
 				// Recupera el valor sobreescrito por el LoadAll del controller
-				$model->$key = $model->getOldAttribute($key);
+// 				$model->$key = $model->getOldAttribute($key);
 			} else {
 // 				try {
 // 					$attr_value = ($model->getOldAttribute($attr) != '' ? unserialize($model->getOldAttribute($attr)) : []);

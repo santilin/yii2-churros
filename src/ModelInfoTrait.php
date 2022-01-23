@@ -469,5 +469,30 @@ trait ModelInfoTrait
         }
     }
 
+	public function unlinkImages($images) 
+	{
+		if( !is_array($images) ) {
+			$tmp = @unserialize($images);
+			if( $tmp != null ) {
+				$images = $tmp;
+			}
+		}
+		if( empty($images) ) {
+			return true;
+		}
+		if( !is_array($images) ) {
+			$images = [$images];
+		}
+		foreach( $images as $image ) {
+			$oldfilename = Yii::getAlias('@runtime/uploads/') . $image;
+			if (file_exists($oldfilename) && !@unlink($oldfilename)) {
+				$model->addError($attr, "No se ha podido borrar el archivo $oldfilename" . posix_strerror($file->error));
+				return false;
+			}
+		}
+		return true;
+	}
+    
+    
 } // trait ModelInfoTrait
 
