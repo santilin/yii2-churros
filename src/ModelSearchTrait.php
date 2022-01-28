@@ -288,7 +288,7 @@ trait ModelSearchTrait
 					return parent::load([ $scope => $newparams], $formName);
 				}
 			}
-			return true;
+			return $ret;
 		}
 	}
 

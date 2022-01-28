@@ -20,7 +20,10 @@ class SaveModelException extends \yii\web\HttpException
 	public function __construct($model, $code = 0, \Exception $previous = null)
 	{
 		$this->model = $model;
-        parent::__construct(400, $model->t('churros', "Error saving the record {title}"), $code, $previous);
+        parent::__construct(400, $model->t('churros',
+			"Error saving the record {title}\n")
+				. print_r($model->getErrors(),true),
+			$code, $previous);
     }
 
     public function getErrors()
