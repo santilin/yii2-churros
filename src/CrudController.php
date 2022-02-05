@@ -126,8 +126,10 @@ class CrudController extends \yii\web\Controller
 				$model->setAttribute( $model->getRelatedFieldForModel($this->parent_model), $this->parent_model->getPrimaryKey());
 			}
 			if( $this->doSave($model) ) {
-				$this->showFlash('create', $model);
-				return $this->whereToGoNow('create', $model);
+				if( $this->afterSave('create', $model) ) {
+					$this->showFlash('create', $model);
+					return $this->whereToGoNow('create', $model);
+				}
 			}
 		}
 		return $this->render('create', [
@@ -168,8 +170,10 @@ class CrudController extends \yii\web\Controller
 				$model->$primary_key = null;
 			}
 			if( $this->doSave($model) ) {
-				$this->showFlash('create', $model);
-				return $this->whereTogoNow('duplicate', $model);
+				if( $this->afterSave('duplicate', $model) ) {
+					$this->showFlash('create', $model);
+					return $this->whereTogoNow('duplicate', $model);
+				}
 			}
 		}
 		return $this->render('saveAsNew', [
@@ -205,8 +209,10 @@ class CrudController extends \yii\web\Controller
 				$model->setAttribute( $model->getRelatedFieldForModel($this->parent_model), $this->parent_model->getPrimaryKey());
 			}
 			if( $this->doSave($model) ) {
-				$this->showFlash('update', $model);
-				return $this->whereTogoNow('update', $model);
+				if( $this->afterSave('update', $model) ) {
+					$this->showFlash('update', $model);
+					return $this->whereTogoNow('update', $model);
+				}
 			}
 		}
 		return $this->render('update', [
@@ -258,11 +264,13 @@ class CrudController extends \yii\web\Controller
 		}
 		try {
 			$model->deleteWithRelated();
+			if( $this->afterSave('delete', $model) ) {
+				$this->showFlash('delete', $model);
+				return $this->whereToGoNow('delete', $model);
+			}
 		} catch (\yii\db\IntegrityException $e ) {
 			throw new \santilin\churros\DeleteModelException($model, $e);
 		}
-		$this->showFlash('delete', $model);
-		return $this->whereToGoNow('delete', $model);
 	}
 
 	/**
@@ -719,26 +727,30 @@ class CrudController extends \yii\web\Controller
 		}
 		switch( $action ) {
 		case 'create':
-			Yii::$app->session->setFlash('success',
+			Yii::$app->session->addFlash('success',
 				strtr($model->t('churros', "{La} {title} <a href=\"{model_link}\">{record}</a> has been successfully created."),
 					['{model_link}' => $link_to_me]));
 			break;
 		case 'duplicate':
-			Yii::$app->session->setFlash('success',
+			Yii::$app->session->addFlash('success',
 				strtr($model->t('churros', "{La} {title} <a href=\"{model_link}\">{record}</a> has been successfully duplicated."),
 					['{model_link}' => $link_to_me]));
 			break;
 		case 'update':
-			Yii::$app->session->setFlash('success',
+			Yii::$app->session->addFlash('success',
 				strtr($model->t('churros', "{La} {title} <a href=\"{model_link}\">{record}</a> has been successfully updated."),
 					['{model_link}' => $link_to_me]));
 			break;
 		case 'delete':
-			Yii::$app->session->setFlash('success',
+			Yii::$app->session->addFlash('success',
 				$model->t('churros', "{La} {title} <strong>{record}</strong> has been successfully deleted."));
 			break;
 		}
 	}
 
+	protected function afterSave($action, $model)
+	{
+		return true;
+	}
 
 }

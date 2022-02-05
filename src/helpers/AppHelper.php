@@ -134,4 +134,12 @@ class AppHelper
 		return Yii::$app->user->identity && Yii::$app->user->identity->isAdmin;
 	}
 
+	static public function yiiparam($name, $default = null)
+	{
+		if ( isset(Yii::$app->params[$name]) )
+			return Yii::$app->params[$name];
+		else
+			return $default;
+	}
+
 }
