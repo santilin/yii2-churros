@@ -107,33 +107,31 @@ trait ModelInfoTrait
 	public function recordDesc($format=null, $max_len = 0)
 	{
 		$ret = '';
-		if( $format == null || $format == 'long' || $format == 'link' ) {
-			$format = self::getModelInfo('record_desc_format_long');
+		$_format = $format;
+		if( $format == null || $format == 'long' ) {
+			$_format = self::getModelInfo('record_desc_format_long');
 		} elseif( $format == 'short' ) {
-			$format = self::getModelInfo('record_desc_format_short');
+			$_format = self::getModelInfo('record_desc_format_short');
 		}
 		$values = $matches = [];
-		if( preg_match_all('/{([a-zA-Z0-9\._]+)(\%([^}])*)*}+/', $format, $matches) ) {
+		if( preg_match_all('/{([a-zA-Z0-9\._]+)(\%([^}])*)*}+/', $_format, $matches) ) {
 			foreach( $matches[0] as $n => $match ) {
 				$value = ArrayHelper::getValue($this, $matches[1][$n]);
+				if( is_object($value) && method_exists($value, 'recordDesc') ) {
+					$value = $value->recordDesc($format, $max_len);
+				}
 				$sprintf_part = $matches[2][$n];
 				if( $sprintf_part == '' ) {
 					$sprintf_part = "%s";
-				} else {
-					if( preg_match('/\.([0-9]+)/', $sprintf_part, $m ) ) {
-						$len = intval($m[1]);
-						if( strlen(strval($value)) > $len-3 ) {
-							$value = substr($value, 0, $len-3) .
-							'...';
-						}
-					}
+				} else if( preg_match('/\.([0-9]+)/', $sprintf_part, $m ) ) {
+					$max_len = intval($m[1]);
 				}
-				$format = str_replace($match, $sprintf_part, $format);
+				$_format = str_replace($match, $sprintf_part, $_format);
 				$values[] = $value;
 			}
-			$ret = sprintf($format, ...$values);
+			$ret = sprintf($_format, ...$values);
 		} else {
-			$ret = $format;
+			$ret = $_format;
 		}
 		if( $max_len == 0 ) {
 			return $ret;
@@ -148,7 +146,7 @@ trait ModelInfoTrait
 		return $ret;
 	}
 
-	public function linkTo($action, $prefix = '', $format = 'short')
+	public function linkTo($action, $prefix = '', $format = 'short', $max_len = 0)
 	{
 		$url = $prefix;
 		if ($url != '') {
@@ -161,7 +159,7 @@ trait ModelInfoTrait
 					$url);
 		} else {
 			$url .= "/$action";
-			return \yii\helpers\Html::a($this->recordDesc($format),
+			return \yii\helpers\Html::a($this->recordDesc($format, $max_len),
 					[$url, 'id' => $this->getPrimaryKey() ]);
 		}
 	}
@@ -469,7 +467,7 @@ trait ModelInfoTrait
         }
     }
 
-	public function unlinkImages($images) 
+	public function unlinkImages($images)
 	{
 		if( !is_array($images) ) {
 			$tmp = @unserialize($images);
@@ -492,7 +490,7 @@ trait ModelInfoTrait
 		}
 		return true;
 	}
-    
-    
+
+
 } // trait ModelInfoTrait
 
