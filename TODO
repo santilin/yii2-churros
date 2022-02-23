@@ -1,2 +1,4 @@
 - Borrar imagen cuando se reemplaza.
 - GridView: No aparecen botones primera y última página
+- Refactoring: addAllReportColumns: Pasar un array de columnas con nombre, tipo y visible.
+- GridView: Report : grupos: Mostrar encabezado, mostrar pie.

@@ -353,7 +353,7 @@ trait ReportsModelTrait
 			if( empty($tablename) ) {
 				$tablename = $modeltablename;
 			}
-			$title = $titles[$tablename];
+			$title = $titles[$tablename]??$tablename;
 			$dropdown_options[$title][$colname] = $col_attrs['label'] . " ($title)";
 		}
 		return $dropdown_options;
