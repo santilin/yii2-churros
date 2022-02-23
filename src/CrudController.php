@@ -270,7 +270,7 @@ class CrudController extends \yii\web\Controller
 			}
 		} catch (\yii\db\IntegrityException $e ) {
 			Yii::$app->session->addFlash('error',
-				$model->t('churros', "{La} {title} <strong>{record_short}</strong> can't be deleted because it has related data"));
+				$model->t('churros', "{La} {title} <strong>{record_long}</strong> can't be deleted because it has related data"));
 		}
 		return $this->whereToGoNow('delete', $model);
 	}
@@ -730,22 +730,22 @@ class CrudController extends \yii\web\Controller
 		switch( $action ) {
 		case 'create':
 			Yii::$app->session->addFlash('success',
-				strtr($model->t('churros', "{La} {title} <a href=\"{model_link}\">{record_short}</a> has been successfully created."),
+				strtr($model->t('churros', "{La} {title} <a href=\"{model_link}\">{record_long}</a> has been successfully created."),
 					['{model_link}' => $link_to_me]));
 			break;
 		case 'duplicate':
 			Yii::$app->session->addFlash('success',
-				strtr($model->t('churros', "{La} {title} <a href=\"{model_link}\">{record_short}</a> has been successfully duplicated."),
+				strtr($model->t('churros', "{La} {title} <a href=\"{model_link}\">{record_long}</a> has been successfully duplicated."),
 					['{model_link}' => $link_to_me]));
 			break;
 		case 'update':
 			Yii::$app->session->addFlash('success',
-				strtr($model->t('churros', "{La} {title} <a href=\"{model_link}\">{record_short}</a> has been successfully updated."),
+				strtr($model->t('churros', "{La} {title} <a href=\"{model_link}\">{record_long}</a> has been successfully updated."),
 					['{model_link}' => $link_to_me]));
 			break;
 		case 'delete':
 			Yii::$app->session->addFlash('success',
-				$model->t('churros', "{La} {title} <strong>{record_short}</strong> has been successfully deleted."));
+				$model->t('churros', "{La} {title} <strong>{record_long}</strong> has been successfully deleted."));
 			break;
 		}
 	}
