@@ -381,15 +381,12 @@ trait ModelInfoTrait
 	/**
 	 * Returns at least one field that can be used as a code for this model
 	 */
-	static public function getCodeDescFields() {
-		$desc_field = static::getModelInfo('desc_field');
-		$code_field = static::getModelInfo('code_field');
-		if ($code_field != '' && $desc_field != '' ) {
-			return [ $code_field, $desc_field ];
-		} else if( $code_field != '' ) {
-			return [ $code_field, '' ];
-		} else if( $desc_field != '' ) {
-			return [ $desc_field, '' ];
+	static public function findCodeField() 
+	{
+		$fields = explode(',',static::getModelInfo('code_field')) 
+			+ explode(',',static::getModelInfo('desc_field'));
+		if( count($fields) ) {
+			return array_pop($fields);
 		} else {
 			return [ $this->getPrimaryKey(), '' ];
 		}

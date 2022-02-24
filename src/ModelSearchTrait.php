@@ -97,29 +97,27 @@ trait ModelSearchTrait
 			$attribute = $column_def['attribute'];
 			if( strpos($attribute, '.') === FALSE ) {
 				$relation_name = $attribute;
-				$fldname = '';
+				$sort_fldname = '';
 			} else {
-				list($relation_name, $fldname) = self::splitFieldName($attribute);
+				list($relation_name, $sort_fldname) = self::splitFieldName($attribute);
 			}
 			if (isset(self::$relations[$relation_name]) ) {
 				$related_model_class = self::$relations[$relation_name]['modelClass'];
 				$table_alias = "as_$relation_name";
 				// Activequery removes duplicate joins
 				$provider->query->joinWith("$relation_name $table_alias");
-				if ($fldname == '' ) { /// @todo junction tables
-					list($code_field, $desc_field) = $related_model_class::getCodeDescFields();
-					if( $desc_field != '' && $code_field != '' ) {
-						$fldname = $code_field;
-					}
+				if ($sort_fldname == '' ) { /// @todo junction tables
+					$code_field = $related_model_class::findCodeField();
+					$sort_fldname = $code_field;
 				}
-				if (!isset($provider->sort->attributes[$attribute])) {
+				if( $sort_fldname != '' && !isset($provider->sort->attributes[$attribute])) {
 					$related_model_search_class = $related_model_class::getSearchClass();
 					if( class_exists($related_model_search_class) ) {
 						// Set orders from the related search model
 						$related_model = new $related_model_search_class;
 						$related_model_provider = $related_model->search([]);
-						if (isset( $related_model_provider->sort->attributes[$fldname]) ) {
-							$related_sort = $related_model_provider->sort->attributes[$fldname];
+						if (isset( $related_model_provider->sort->attributes[$sort_fldname]) ) {
+							$related_sort = $related_model_provider->sort->attributes[$sort_fldname];
 							$new_related_sort = [ 'label' => $related_sort['label']];
 							unset($related_sort['label']);
 							foreach( $related_sort as $asc_desc => $sort_def) {
@@ -244,13 +242,9 @@ trait ModelSearchTrait
 			$query->joinWith("$relation_name $table_alias");
 			$value = $this->toOpExpression($value, false );
 			if ($attribute == '' ) {
-				list($code_field, $desc_field) = $related_model_class::getCodeDescFields();
-				if( $desc_field != '' || $code_field != '' ) {
-					if( $code_field == '' ) {
-						$code_field = $desc_field;
-					}
-					$query->andFilterWhere([ $value['op'], "$table_alias.$code_field", $value['lft']
-					]);
+				$code_field = $related_model_class::findCodeField();
+				if( $code_field != '' ) {
+					$query->andFilterWhere([ $value['op'], "$table_alias.$code_field", $value['lft'] ]);
 					$filter_set = true;
 				} else {
 					throw new \Exception("table $related_model_class doesn't have a code field");
