@@ -381,9 +381,9 @@ trait ModelInfoTrait
 	/**
 	 * Returns at least one field that can be used as a code for this model
 	 */
-	static public function findCodeField() 
+	static public function findCodeField()
 	{
-		$fields = explode(',',static::getModelInfo('code_field')) 
+		$fields = explode(',',static::getModelInfo('code_field'))
 			+ explode(',',static::getModelInfo('desc_field'));
 		if( count($fields) ) {
 			return array_pop($fields);
@@ -391,6 +391,14 @@ trait ModelInfoTrait
 			return [ $this->getPrimaryKey(), '' ];
 		}
 	}
+
+	static public function findCodeAndDescFields()
+	{
+		$r0 = explode(',',static::getModelInfo('code_field'));
+		$r1 = explode(',',static::getModelInfo('desc_field'));
+		return array_merge($r0,$r1);
+	}
+
 
 	public function getFormattedValue($attr)
 	{
