@@ -29,6 +29,20 @@ class GridView extends BaseGridView
 	protected $recno;
 	protected $current_level = 0;
 
+
+	public function __construct($config = [])
+	{
+		if (empty($config['pager']) ) {
+			$config['pager'] = [
+				'firstPageLabel' => '<<',
+				'lastPageLabel' => '>>',
+				'nextPageLabel' => '>',
+				'prevPageLabel' => '<',
+			];
+		}
+		parent::__construct($config);
+	}
+
 	public function init()
 	{
 		$this->initGroups(); // must be done before initColumns

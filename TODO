@@ -1,7 +1,11 @@
 - Borrar imagen cuando se reemplaza.
 
+== TableListView
+* Quitar márgenes a pager.
+* Centrar verticalmente summary.
+* Añadir css como asset.
+
 == GridView ==
-- GridView: No aparecen botones primera y última página
 * Si ordenas, se pierde el filtro
 - GridView: Report : grupos: Mostrar encabezado, mostrar pie.
 - Grid: cuando se filtra, poner "Filtrando 1-1 de s"

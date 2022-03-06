@@ -26,6 +26,19 @@ class TableListView extends ListView
 	public $headerOptions = [ 'class' => 'tlv-header' ];
 	public $headerContent = null;
 
+	public function __construct($config = [])
+	{
+		if (empty($config['pager']) ) {
+			$config['pager'] = [
+				'firstPageLabel' => '<<',
+				'lastPageLabel' => '>>',
+				'nextPageLabel' => '>',
+				'prevPageLabel' => '<',
+			];
+		}
+		parent::__construct($config);
+	}
+
 	public function run()
 	{
  		$this->layout = "{init}{$this->layout}{end}";
