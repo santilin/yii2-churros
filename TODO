@@ -1,4 +1,7 @@
 - Borrar imagen cuando se reemplaza.
+- allSearchFields: 
+	- quitar relname de excluded y visible_fields
+	- unset visible_fields y excluded_fields que no tienen relaciones
 
 == GridView ==
 - GridView: No aparecen botones primera y última página
