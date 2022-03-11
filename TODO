@@ -1,4 +1,7 @@
+- Reescribir todo el tema de subida de ficheros.
 - Borrar imagen cuando se reemplaza.
+- valesAndLabels:  mezclar con handyFieldValues
+- implementar handyFieldValues
 
 == TableListView
 * Quitar márgenes a pager.
@@ -7,7 +10,7 @@
 
 == GridView ==
 * Si ordenas, se pierde el filtro
-- GridView: Report : grupos: Mostrar encabezado, mostrar pie.
+- GridView: Report : grupos: opciones para Mostrar encabezado, mostrar pie.
 - Grid: cuando se filtra, poner "Filtrando 1-1 de s"
 * Añadir un parámetro al Index que sea la vista o sea el gridfields
 * Poner los title_abbrev en los headers del grid
