@@ -1,7 +1,13 @@
 - Reescribir todo el tema de subida de ficheros.
 - Borrar imagen cuando se reemplaza.
+<<<<<<< HEAD
 - valesAndLabels:  mezclar con handyFieldValues
 - implementar handyFieldValues
+=======
+- allSearchFields: 
+	- quitar relname de excluded y visible_fields
+	- unset visible_fields y excluded_fields que no tienen relaciones
+>>>>>>> e67d88a6a8e76a1776fbb997d90153208596964c
 
 == TableListView
 * Quitar márgenes a pager.
