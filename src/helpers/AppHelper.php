@@ -23,6 +23,11 @@ class AppHelper
 		return substr($stack, -strlen($needle)) == $needle;
 	}
 
+	static public function startsWith($stack, $needle)
+	{
+		return substr($stack, 0, strlen($needle)) == $needle;
+	}
+
 	static public function getAppLocaleLanguage()
 	{
 		return str_replace("-", "_", Yii::$app->language);
