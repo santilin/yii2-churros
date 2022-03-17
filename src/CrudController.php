@@ -299,20 +299,42 @@ class CrudController extends \yii\web\Controller
 // 			'relationsProviders' => $this->getRelationsProviders($model),
 			'extraParams' => $this->extraParams('view', $model)
 		]);
-
+		$methods = [];
+		$margin_header = AppHelper::yiiparam('pdfMarginHeader', 15);
+		$margin_footer = AppHelper::yiiparam('pdfMarginFooter', 15);
+		$margin_top = AppHelper::yiiparam('pdfMarginTop', 40);
+		$margin_bottom = AppHelper::yiiparam('pdfMarginBottom', 40);
+		if( $this->findViewFile('_pdf_header') ) {
+			$header_content = $this->renderPartial('_pdf_header', ['model'=>$model]);
+			// h:{00232}
+			if( strncmp($header_content,'h:{',3) === 0 ) {
+				$margin_top = intval(substr($header_content,3,5));
+				$header_content = substr($header_content,9);
+			}
+			$methods['setHeader'] = $header_content;
+		} else {
+			$margin_top = $margin_header;
+			$methods['setHeader'] = date('Y-m-d H:i') . '|' . Yii::$app->name . '|{PAGENO}';
+		}
+		if( $this->findViewFile('_pdf_footer') ) {
+			$methods['setFooter'] = $this->renderPartial('_pdf_footer', ['model'=>$model]);
+		} else {
+			$margin_bottom = $margin_footer;
+		}
 		$pdf = new \kartik\mpdf\Pdf([
 			'mode' => \kartik\mpdf\Pdf::MODE_CORE,
 			'format' => \kartik\mpdf\Pdf::FORMAT_A4,
 			'orientation' => \kartik\mpdf\Pdf::ORIENT_PORTRAIT,
 			'destination' => \kartik\mpdf\Pdf::DEST_BROWSER,
+			'marginHeader' => $margin_header, // Margin from top of page
+			'marginFooter' => $margin_footer, // Margin from bottom of page
+			'marginTop' => $margin_top, // Margin from top of page to content
+			'marginBottom' => $margin_bottom, // $margin_footer,
 			'content' => $content,
 			'cssFile' => '@vendor/kartik-v/yii2-mpdf/src/assets/kv-mpdf-bootstrap.min.css',
 			'cssInline' => '.kv-heading-1{font-size:18px}',
 			'options' => ['title' => \Yii::$app->name],
-			'methods' => [
-				'SetHeader' => [\Yii::$app->name],
-				'SetFooter' => ['{PAGENO}'],
-			]
+			'methods' => $methods,
 		]);
 		return $pdf->render();
 	}
@@ -753,6 +775,30 @@ class CrudController extends \yii\web\Controller
 	protected function afterSave($action, $model)
 	{
 		return true;
+	}
+
+	protected function findViewFile($view)
+	{
+		if (strncmp($view, '@', 1) === 0) {
+			// e.g. "@app/views/main"
+			$file = Yii::getAlias($view);
+		} elseif (strncmp($view, '//', 2) === 0) {
+			// e.g. "//layouts/main"
+			$file = Yii::$app->getViewPath() . DIRECTORY_SEPARATOR . ltrim($view, '/');
+		} elseif (strncmp($view, '/', 1) === 0) {
+			// e.g. "/site/index"
+			$file = $this->module->getViewPath() . DIRECTORY_SEPARATOR . ltrim($view, '/');
+		} else {
+			$file = $this->module->getViewPath() . DIRECTORY_SEPARATOR . $this->id . DIRECTORY_SEPARATOR . $view;
+		}
+		if (pathinfo($file, PATHINFO_EXTENSION) === '') {
+			$file .= '.php';
+		}
+		if( !is_file($file) ) {
+			return null;
+		} else {
+			return $file;
+		}
 	}
 
 }
