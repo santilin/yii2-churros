@@ -438,7 +438,7 @@ trait ModelInfoTrait
      *      ['id1' => 3, 'id2' => 4]
      *   ])
      * @inheritdoc
-     * @return ActiveQueryInterface the newly created [[ActiveQueryInterface|ActiveQuery]] instance.
+     * @return The record found or null
      */
     public static function findByPk($pk)
     {
@@ -449,7 +449,7 @@ trait ModelInfoTrait
                 throw new InvalidParamException(get_called_class() . ' has no composite primary key named "' . implode(', ', $keys) . '".');
             }
             // hash condition
-            return $query->andWhere($pk);
+            return $query->andWhere($pk)->one();
         } elseif (ArrayHelper::isIndexed($pk, true)) {
             if (is_array($pk[0])) {
                 $condition = ['or'];
@@ -460,13 +460,13 @@ trait ModelInfoTrait
                     }
                     $condition[] = ['and', $compositePk];
                 }
-                return $query->andWhere($condition);
+                return $query->andWhere($condition)->one();
             }
         }
         // query by primary key
         $primaryKey = static::primaryKey();
         if (isset($primaryKey[0])) {
-            return $query->andWhere([$primaryKey[0] => $pk]);
+            return $query->andWhere([$primaryKey[0] => $pk])->one();
         } else {
             throw new InvalidConfigException(get_called_class() . ' must have a primary key.');
         }
