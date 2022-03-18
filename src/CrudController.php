@@ -332,8 +332,8 @@ class CrudController extends \yii\web\Controller
 			'marginBottom' => $margin_bottom, // $margin_footer,
 			'content' => $content,
 			'cssFile' => '@vendor/kartik-v/yii2-mpdf/src/assets/kv-mpdf-bootstrap.min.css',
-			'cssInline' => '.kv-heading-1{font-size:18px}',
-			'options' => ['title' => \Yii::$app->name],
+			'cssInline' => file_get_contents(Yii::getAlias('@app') . '/web/css/print.css'),
+			'options' => ['title' => $model->recordDesc()],
 			'methods' => $methods,
 		]);
 		return $pdf->render();
