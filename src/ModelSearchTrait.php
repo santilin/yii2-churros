@@ -91,7 +91,9 @@ trait ModelSearchTrait
     public function addColumnSortsToProvider($gridColumns, &$provider)
     {
 		foreach( $gridColumns as $attribute => $column_def ) {
-			if ( is_int($attribute) || array_key_exists($attribute, $this->attributes ) ) {
+			if ( is_int($attribute)
+				|| $attribute == '__actions__'
+				|| array_key_exists($attribute, $this->attributes ) ) {
 				continue;
 			}
 			$attribute = $column_def['attribute'];

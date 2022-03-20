@@ -21,7 +21,7 @@ class CrudController extends \yii\web\Controller
 	protected $parent_model = null;
 	protected $parent_controller = null;
 	protected $allowedActions = [];
-	protected $accessOnlyOwner = false;
+	public $accessOnlyOwner = false;
 
 	/**
 	 * An array of extra params to pass to the views
