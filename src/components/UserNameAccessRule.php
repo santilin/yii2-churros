@@ -18,6 +18,9 @@ class UserNameAccessRule extends AccessRule
         if ($user === false) {
             throw new InvalidConfigException('The user application component must be available to specify roles in AccessRule.');
         }
+        if( $user->getIdentity() === null ) {
+			return false;
+        }
 		return in_array($user->getIdentity()->username, $items);
 	}
 

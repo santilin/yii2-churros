@@ -112,6 +112,9 @@ trait ModelInfoTrait
 			$_format = self::getModelInfo('record_desc_format_long');
 		} elseif( $format == 'short' ) {
 			$_format = self::getModelInfo('record_desc_format_short');
+		} elseif( $format == 'code&desc' ) {
+			$fields = $this->findCodeAndDescFields();
+			$_format = '{' . implode('}, {',array_filter($fields)) . '}';
 		}
 		$values = $matches = [];
 		if( preg_match_all('/{([a-zA-Z0-9\._]+)(\%([^}])*)*}+/', $_format, $matches) ) {

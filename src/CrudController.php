@@ -302,8 +302,8 @@ class CrudController extends \yii\web\Controller
 		$methods = [];
 		$margin_header = AppHelper::yiiparam('pdfMarginHeader', 15);
 		$margin_footer = AppHelper::yiiparam('pdfMarginFooter', 15);
-		$margin_top = AppHelper::yiiparam('pdfMarginTop', 40);
-		$margin_bottom = AppHelper::yiiparam('pdfMarginBottom', 40);
+		$margin_top = AppHelper::yiiparam('pdfMarginTop', 20);
+		$margin_bottom = AppHelper::yiiparam('pdfMarginBottom', 20);
 		if( $this->findViewFile('_pdf_header') ) {
 			$header_content = $this->renderPartial('_pdf_header', ['model'=>$model]);
 			// h:{00232}
@@ -313,13 +313,11 @@ class CrudController extends \yii\web\Controller
 			}
 			$methods['setHeader'] = $header_content;
 		} else {
-			$margin_top = $margin_header;
-			$methods['setHeader'] = date('Y-m-d H:i') . '|' . Yii::$app->name . '|{PAGENO}';
+			$methods['setHeader'] = date('Y-m-d H:i') . '|'
+				. $model->getModelInfo('title') . '|' . Yii::$app->name . ' - {PAGENO}';
 		}
 		if( $this->findViewFile('_pdf_footer') ) {
 			$methods['setFooter'] = $this->renderPartial('_pdf_footer', ['model'=>$model]);
-		} else {
-			$margin_bottom = $margin_footer;
 		}
 		$pdf = new \kartik\mpdf\Pdf([
 			'mode' => \kartik\mpdf\Pdf::MODE_CORE,
