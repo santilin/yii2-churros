@@ -2,6 +2,7 @@
 
 namespace santilin\churros\components;
 
+use yii\base\InvalidConfigException;
 use yii\filters\AccessRule;
 
 class UserNameAccessRule extends AccessRule
@@ -15,10 +16,10 @@ class UserNameAccessRule extends AccessRule
             return true;
         }
 
-        if ($user === false) {
+        if ($user === false ) {
             throw new InvalidConfigException('The user application component must be available to specify roles in AccessRule.');
         }
-        if( $user->getIdentity() === null ) {
+        if( !$user->getIdentity() ) {
 			return false;
         }
 		return in_array($user->getIdentity()->username, $items);
