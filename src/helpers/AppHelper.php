@@ -11,6 +11,14 @@ use Yii;
 
 class AppHelper
 {
+	public const FIELD_CONFIG_2COLS = [
+		'horizontalCssClasses' => [
+			'label' => 'col-sm-12 text-left',
+			'offset' => 'col-sm-offset-1',
+			'wrapper' => 'col-sm-12',
+		]
+	];
+
 	static private $tabindex = 0;
 
     static public function empty($value)
