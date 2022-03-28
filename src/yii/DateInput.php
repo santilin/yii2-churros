@@ -11,7 +11,6 @@ use santilin\churros\helper\DateTimeHelper;
 
 class DateInput extends MaskedInput
 {
-
 	private $orig_id;
 
 	public function init()
