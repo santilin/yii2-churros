@@ -31,7 +31,11 @@ class DateInput extends MaskedInput
 					$dcm = \Yii::$app->getModule('datecontrol');
 					if( $dcm ) {
 						$timestamp = \DateTime::createFromFormat($dcm->getSaveFormat('date'), $value);
-					} else {
+					}
+					if( $timestamp == null ) {
+						$timestamp = \DateTime::createFromFormat($dcm->getSaveFormat('datetime'), $value);
+					}
+					if( $timestamp == null ) {
 						$timestamp = \DateTime::createFromFormat(DateTimeHelper::DATETIME_DATE_SQL_FORMAT, $value);
 					}
 					$value = $timestamp->format(self::parseFormat(\Yii::$app->formatter->dateFormat, 'date'));

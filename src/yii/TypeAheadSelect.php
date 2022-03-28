@@ -6,6 +6,9 @@ use yii\widgets\InputWidget;
 use dosamigos\typeahead\Bloodhound;
 use dosamigos\typeahead\TypeAhead;
 
+/**
+ * Uses TypeAhead inside this InputWidget
+ */
 class TypeAheadSelect extends InputWidget
 {
 

@@ -81,6 +81,7 @@ JS;
         $id = $this->options['id'];
         $options_of_input = $this->options;
         $options_of_input['id'] = "_search_box_$id";
+        unset($options_of_input['prompt']);
         if( !isset($options_of_input['autocomplete']) ) {
 			$options_of_input['autocomplete'] = "off";
 		}

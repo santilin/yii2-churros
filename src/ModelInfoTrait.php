@@ -107,14 +107,17 @@ trait ModelInfoTrait
 	public function recordDesc($format=null, $max_len = 0)
 	{
 		$ret = '';
-		$_format = $format;
-		if( $format == null || $format == 'long' ) {
-			$_format = self::getModelInfo('record_desc_format_long');
-		} elseif( $format == 'short' ) {
+		if( $format == null || $format == 'short' ) {
 			$_format = self::getModelInfo('record_desc_format_short');
+		} elseif( $format == 'long' ) {
+			$_format = self::getModelInfo('record_desc_format_long');
+		} elseif( $format == 'medium' ) {
+			$_format = self::getModelInfo('record_desc_format_medium');
 		} elseif( $format == 'code&desc' ) {
-			$fields = $this->findCodeAndDescFields();
+			$fields = static::findCodeAndDescFields();
 			$_format = '{' . implode('}, {',array_filter($fields)) . '}';
+		} else {
+			$_format = $format;
 		}
 		$values = $matches = [];
 		if( preg_match_all('/{([a-zA-Z0-9\._]+)(\%([^}])*)*}+/', $_format, $matches) ) {
@@ -126,8 +129,12 @@ trait ModelInfoTrait
 				$sprintf_part = $matches[2][$n];
 				if( $sprintf_part == '' ) {
 					$sprintf_part = "%s";
-				} else if( preg_match('/\.([0-9]+)/', $sprintf_part, $m ) ) {
-					$max_len = intval($m[1]);
+				} else if( $sprintf_part == '%T' ) {
+					$sprintf_part = '%s';
+					$value = Yii::$app->formatter->asDateTime($value);
+				} else if( $sprintf_part == '%D' ) {
+					$sprintf_part = '%s';
+					$value = Yii::$app->formatter->asDate($value);
 				}
 				$_format = str_replace($match, $sprintf_part, $_format);
 				$values[] = $value;
@@ -230,7 +237,7 @@ trait ModelInfoTrait
 //     }
     }
 
-	public function setDefaultValues()
+	public function setDefaultValues(bool $duplicating = false)
 	{
 	}
 
@@ -395,11 +402,19 @@ trait ModelInfoTrait
 		}
 	}
 
-	static public function findCodeAndDescFields()
+	static public function findCodeAndDescFields(string $relname = null): array
 	{
-		$r0 = explode(',',static::getModelInfo('code_field'));
-		$r1 = explode(',',static::getModelInfo('desc_field'));
-		return array_merge($r0,$r1);
+		if( $relname == null ) {
+			$r0 = explode(',',static::getModelInfo('code_field'));
+			$r1 = explode(',',static::getModelInfo('desc_field'));
+			return array_merge($r0,$r1);
+		} else if (isset(self::$relations[$relname])) {
+			$relmodelname = self::$relations[$relname]['modelClass'];
+			$relmodel = new $relmodelname;
+			return $relmodel->findCodeAndDescFields();
+		} else {
+			return [];
+		}
 	}
 
 
@@ -504,6 +519,35 @@ trait ModelInfoTrait
 		throw new \Exception("$field not supported in " . get_called_class() . "::handyFieldValues() ");
 	}
 
+
+	private $dynamicFields = [];
+	private $dynamicTitles = [];
+	private $dynamicRules = [];
+
+	public function addDynamicField(string $field)
+	{
+		$this->dynamicFields[$field] = null;
+	}
+
+	public function addDynamicRule(string $rule) {
+		$this->dynamicRules[] = $rule;
+	}
+
+	public function __get($name)
+	{
+		if (array_key_exists($name, $this->dynamicFields)) {
+			return $this->dynamicFields[$name];
+		}
+		return parent::__get($name);
+	}
+
+	public function __set($name, $value)
+	{
+		if (isset($this->dynamicFields[$name])) {
+			return $this->dynamicFields[$name] = $value;
+		}
+		return parent::__set($name, $value);
+	}
 
 } // trait ModelInfoTrait
 

@@ -11,16 +11,6 @@ use Yii;
 
 class AppHelper
 {
-	public const FIELD_CONFIG_2COLS = [
-		'horizontalCssClasses' => [
-			'label' => 'col-sm-12 text-left',
-			'offset' => 'col-sm-offset-1',
-			'wrapper' => 'col-sm-12',
-		]
-	];
-
-	static private $tabindex = 0;
-
     static public function empty($value)
     {
 		return empty($value);
@@ -113,17 +103,6 @@ class AppHelper
 		return $ret;
 	}
 
-	static public function ti($inc=1)
-	{
-		static::$tabindex += $inc;
-		return static::$tabindex;
-	}
-
-	static public function resetTabIndex($reset = 0)
-	{
-		static::$tabindex = $reset;
-	}
-
     static public function mb_ucfirst($str, $encoding = 'UTF-8')
     {
         return mb_strtoupper( mb_substr($str, 0, 1, $encoding), $encoding)
@@ -149,4 +128,23 @@ class AppHelper
 			return $default;
 	}
 
+
+	/**
+	* @param array      $array
+	* @param int|string $position
+	* @param mixed      $insert
+	*/
+	function array_insert(&$array, $position, $insert)
+	{
+		if (is_int($position)) {
+			array_splice($array, $position, 0, $insert);
+		} else {
+			$pos   = array_search($position, array_keys($array));
+			$array = array_merge(
+				array_slice($array, 0, $pos),
+				$insert,
+				array_slice($array, $pos)
+			);
+		}
+	}
 }
