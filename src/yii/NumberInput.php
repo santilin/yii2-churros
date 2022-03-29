@@ -17,6 +17,12 @@ class NumberInput extends MaskedInput
         parent::init();
         $this->orig_id = $this->options['id'];
         $this->options['id'] = $this->orig_id . "_number_disp";
+// https://github.com/RobinHerbots/Inputmask/blob/5.x/dist/jquery.inputmask.js
+        $this->clientOptions = array_merge([
+			"insertMode" => false,
+			'positionCaretOnClick' => 'select',
+			'positionCaretOnTab' => 'select'
+		], $this->clientOptions);
 	}
 
     protected function renderInputHtml($type)
@@ -38,6 +44,7 @@ class NumberInput extends MaskedInput
 			}
 			$name = $this->options['name'] = "{$name}_date_disp";
 			$this->addChange($this->options, $this->orig_id);
+			$this->options['clientOptions'] = $this->clientOptions;
             $ret .= Html::activeInput($type, $this->model, $this->attribute, $this->options);
         } else {
 			throw new \Exception("to check");
@@ -50,23 +57,23 @@ class NumberInput extends MaskedInput
      */
     public function registerClientScript()
     {
-		parent::registerClientScript();
-		$view = $this->getView();
+ 		parent::registerClientScript();
+ 		$view = $this->getView();
+// // https://stackoverflow.com/a/499158
+// function dateInputSetSelectionRange(input, selectionStart, selectionEnd) {
+//   if (input.setSelectionRange) {
+//     input.setSelectionRange(selectionStart, selectionEnd);
+//   }
+//   else if (input.createTextRange) {
+//     var range = input.createTextRange();
+//     range.collapse(true);
+//     range.moveEnd('character', selectionEnd);
+//     range.moveStart('character', selectionStart);
+//     range.select();
+//   }
+// }
+// //
 		$js = <<<EOF
-// https://stackoverflow.com/a/499158
-function dateInputSetSelectionRange(input, selectionStart, selectionEnd) {
-  if (input.setSelectionRange) {
-    input.setSelectionRange(selectionStart, selectionEnd);
-  }
-  else if (input.createTextRange) {
-    var range = input.createTextRange();
-    range.collapse(true);
-    range.moveEnd('character', selectionEnd);
-    range.moveStart('character', selectionStart);
-    range.select();
-  }
-}
-
 function numberInputChange(number_input, id)
 {
 	var number_js = number_input.value;
@@ -81,20 +88,6 @@ EOF;
 		if( !isset($options['onchange']) ) {
 			$options['onchange'] = "numberInputChange(this,'$id')";
 		}
-		if( !isset($options['onfocus']) ) {
-			$options['onfocus'] = "dateInputSetSelectionRange(this,0,0)";
-		}
     }
-
-    private static function parseFormat($format, $type)
-    {
-        if (strncmp($format, 'php:', 4) === 0) {
-            return substr($format, 4);
-        } elseif ($format != '') {
-            return FormatConverter::convertDateIcuToPhp($format, $type);
-        } else {
-            throw new InvalidConfigException("Error parsing '{$type}' format.");
-        }
-	}
 
 }

@@ -723,6 +723,7 @@ class CrudController extends \yii\web\Controller
 		return join($glue, $attrs);
 	}
 
+	// Ajax
 	public function actionAutocomplete(array $fields)
 	{
 		$ret = [];
@@ -737,6 +738,19 @@ class CrudController extends \yii\web\Controller
 			$ret[] = [ 'id' => $record->id, 'value' => $record->recordDesc('long') ];
 		}
 		echo json_encode($ret);
+	}
+
+	// Ajax
+	public function actionRawModel($id)
+	{
+		$model = $this->findModel($id);
+		if( $this->accessOnlyOwner ) {
+			if( !$model->IAmOwner() ) {
+				throw new \yii\web\ForbiddenHttpException(
+					$model->t('churros', "Accesd denied to {esta} {title} because you are not the author"));
+			}
+		}
+		return json_encode($model->getAttributes());
 	}
 
 	protected function showFlash($action, $model)

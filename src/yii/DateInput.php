@@ -18,6 +18,12 @@ class DateInput extends MaskedInput
         parent::init();
         $this->orig_id = $this->options['id'];
         $this->options['id'] = $this->orig_id . "_date_disp";
+        $this->clientOptions = array_merge([
+			"insertMode" => false,
+			'positionCaretOnClick' => 'select',
+			'positionCaretOnTab' => 'select'
+		], $this->clientOptions);
+
 	}
 
     protected function renderInputHtml($type)
