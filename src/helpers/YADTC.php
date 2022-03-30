@@ -74,7 +74,7 @@ class YADTC extends \DateTime
 				}
 			}
 		}
- 		throw new xception("No se reconoce el formato de la fecha '" . strval($sdate) . "'");
+ 		throw new \Exception("No se reconoce el formato de la fecha '" . strval($sdate) . "'");
 	}
 
 	/**
@@ -96,7 +96,7 @@ class YADTC extends \DateTime
 		} else if (!$onlymysql) {
 			return YADTC::fromString($date);
 		} else {
-			throw new xception("La fecha " . print_r($date, true) . " no tiene formato sql");
+			throw new \Exception("La fecha " . print_r($date, true) . " no tiene formato sql");
 		}
 	}
 
