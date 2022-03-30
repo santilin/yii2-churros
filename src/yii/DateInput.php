@@ -7,7 +7,7 @@ namespace santilin\churros\yii;
 use yii\helpers\Html;
 use yii\web\View;
 use yii\widgets\MaskedInput;
-use santilin\churros\helper\DateTimeHelper;
+use santilin\churros\helpers\DateTimeEx;
 
 class DateInput extends MaskedInput
 {
@@ -35,15 +35,18 @@ class DateInput extends MaskedInput
 				if( !empty($value) ) {
 					$dcm = \Yii::$app->getModule('datecontrol');
 					if( $dcm ) {
-						$timestamp = \DateTime::createFromFormat($dcm->getSaveFormat('date'), $value);
+						$date = DateTimeEx::createFromFormat($dcm->getSaveFormat('date'), $value);
 					}
-					if( $timestamp == null ) {
-						$timestamp = \DateTime::createFromFormat($dcm->getSaveFormat('datetime'), $value);
+					if( $date == null ) {
+						$date = DateTimeEx::createFromFormat($dcm->getSaveFormat('datetime'), $value);
 					}
-					if( $timestamp == null ) {
-						$timestamp = \DateTime::createFromFormat(DateTimeHelper::DATETIME_DATE_SQL_FORMAT, $value);
+					if( $date == null ) {
+						$date = DateTimeEx::createFromFormat(DateTimeEx::DATETIME_DATE_SQL_FORMAT, $value);
 					}
-					$value = $timestamp->format(self::parseFormat(\Yii::$app->formatter->dateFormat, 'date'));
+					if( $date == null ) {
+						throw new \Exception("$value: Invalid date format for DateInput.");
+					}
+					$value = $date->format(self::parseFormat(\Yii::$app->formatter->dateFormat, 'date'));
 				}
 				$this->options['value'] = $value;
 			}
