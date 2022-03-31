@@ -116,7 +116,6 @@ class CrudController extends \yii\web\Controller
 	public function actionCreate()
 	{
 		$model = $this->findModel();
-		$model->scenario = 'create';
 		if (isset($_POST['_form_relations']) ) {
 			$relations = explode(",", $_POST['_form_relations']);
 		} else {
@@ -156,7 +155,6 @@ class CrudController extends \yii\web\Controller
 		} else {
 			$model = $this->findModel($id);
 		}
-		$model->scenario = 'create';
 
 		if (isset($_POST['_form_relations']) ) {
 			$relations = explode(",", $_POST['_form_relations']);
@@ -194,7 +192,6 @@ class CrudController extends \yii\web\Controller
 	public function actionUpdate($id)
 	{
 		$model = $this->findModel($id);
-		$model->scenario = 'update';
 		if( $this->accessOnlyOwner ) {
 			if( !$model->IAmOwner() ) {
 				throw new \yii\web\ForbiddenHttpException(
