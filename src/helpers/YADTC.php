@@ -87,14 +87,14 @@ class YADTC extends \DateTime
 		if( $date == null ) {
 			return null;
 		}
-		$ret = YADTC::createFromFormat('Y-m-d H:i:s', $date);
+		$ret = self::createFromFormat('Y-m-d H:i:s', $date);
 		if( $ret === false ) {
-			$ret = YADTC::createFromFormat('!Y-m-d', $date);
+			$ret = self::createFromFormat('!Y-m-d', $date);
 		}
 		if ($ret!==false) {
 			return $ret;
 		} else if (!$onlymysql) {
-			return YADTC::fromString($date);
+			return self::fromString($date);
 		} else {
 			throw new \Exception("La fecha " . print_r($date, true) . " no tiene formato sql");
 		}

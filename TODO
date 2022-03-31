@@ -1,7 +1,11 @@
+- Quitar (no definido) al imprimir
 - Reescribir todo el tema de subida de ficheros.
 - Borrar imagen cuando se reemplaza.
 - allSearchFields:
 	- quitar relname de excluded y visible_fields
+- Configuración fecha: Fija, por usuario
+- Configuración idioma: Fijo, por usuario
+- Configuración moneda: Fija, por usuario?
 
 == TableListView
 * Quitar márgenes a pager.
