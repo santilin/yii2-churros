@@ -7,6 +7,18 @@
 - Configuración idioma: Fijo, por usuario
 - Configuración moneda: Fija, por usuario?
 
+- config/web.php
+	'administratorPermissionName' => 'admin',
+	'controllerMap' => [
+		'admin' => [
+			'class'  => \Da\User\Controller\AdminController::class,
+			'layout' => '/main',
+		],
+		'settings' => [
+			'class'  => \Da\User\Controller\SettingsController::class,
+			'layout' => '/main',
+		],
+
 == TableListView
 * Quitar márgenes a pager.
 * Centrar verticalmente summary.

@@ -33,7 +33,7 @@ function minutesToHours(minutes)
 	return (Math.round( 100*minutes/60 ) / 100);
 }
 JS;
-		$view->registerJs($common_js, \yii\web\View::POS_READY, 'DecimalHoursInput');
+		$view->registerJs($common_js, \yii\web\View::POS_END, 'DecimalHoursInput');
 		$id = $this->options['id'];
 		// https://stackoverflow.com/a/44209883
 		$js = <<<JS
@@ -49,16 +49,16 @@ $('#$id').keydown( function(e) {
 	}
 });
 $('#$id').change( function() {
-	var v = $(this).val().replace(',','.');
+	var v = $(this).val().replace(',','.').replace('/[^0-9]//');
 	var minutos = Math.round(parseFloat(v)*60);
 	$('#{$this->_hidden_id}').val(minutos);
 });
 $('#$id').focus(function (e) {
 	var that = $(this);
-	if (that.val() == 0 || isNaN(that.val()) || that.val() == 'NaN') {
+	if (that.val() == 0 || isNaN(that.val()) ) {
 		that.val('');
 	} else {
-		setTimeout(function(){that.select();},5);
+		setTimeout(function(){that.select();},50);
 	}
 	return false;
 });
