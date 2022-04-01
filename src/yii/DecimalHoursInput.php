@@ -1,7 +1,7 @@
 <?php
 namespace santilin\churros\yii;
 use yii\helpers\Html;
-class DecimalHoursInput extends \yii\bootstrap\InputWidget
+class DecimalHoursInput extends \yii\widgets\InputWidget
 {
 	protected $_hidden_id;
 	public $mask;
@@ -37,7 +37,7 @@ JS;
 		$id = $this->options['id'];
 		// https://stackoverflow.com/a/44209883
 		$js = <<<JS
-$('#$id').keydown( function(e) {
+$('#{$id}').keydown( function(e) {
 	if( e.keyCode == 190 ) {
 		// change . into , (spanish hack)
         var s = $(this).val();
@@ -53,14 +53,14 @@ $('#$id').change( function() {
 	var minutos = Math.round(parseFloat(v)*60);
 	$('#{$this->_hidden_id}').val(minutos);
 });
-$('#$id').focus(function (e) {
+$('#{$id}').focus(function (e) {
 	var that = $(this);
 	if (that.val() == 0 || isNaN(that.val()) ) {
 		that.val('');
 	} else {
 		setTimeout(function(){that.select();},50);
 	}
-	return false;
+	return true;
 });
 JS;
 		$view->registerJs($js);
