@@ -527,13 +527,13 @@ class CrudController extends \yii\web\Controller
 	{
 		$breadcrumbs = [];
 		if( isset($parent) ) {
-			$prefix = $this->getRoutePrefix() . $parent->controllerName();
+			$prefix = $this->getRoutePrefix() . $parent->controllerName(). '/';
 			$breadcrumbs[] = [
 				'label' => AppHelper::mb_ucfirst($parent->getModelInfo('title_plural')),
-				'url' => [ $prefix . '/index']
+				'url' => [ $prefix . 'index']
 			];
 			$keys = $parent->getPrimaryKey(true);
-			$keys[0] = $prefix . '/view';
+			$keys[0] = $prefix . 'view';
 			$breadcrumbs[] = [
 				'label' => $parent->recordDesc('short', 25),
 				'url' => $keys
@@ -547,7 +547,7 @@ class CrudController extends \yii\web\Controller
 				case 'update':
 					$breadcrumbs[] = [
 						'label' => $model->recordDesc('short', 25),
-						'url' => array_merge([ $prefix . $this->id. '/view'], (array)$model->getPrimaryKey())
+						'url' => array_merge([$this->controllerRoute() . '/view'], $model->getPrimaryKey(true))
 					];
 					break;
 				case 'index':
@@ -564,7 +564,7 @@ class CrudController extends \yii\web\Controller
 				case 'saveAsNew':
 					$breadcrumbs[] = [
 						'label' => $model->recordDesc('short', 20),
-						'url' => array_merge([ $prefix . $this->id . '/view'], (array)$model->getPrimaryKey())
+						'url' => array_merge([ $prefix . $this->id . '/view'], $model->getPrimaryKey(true))
 					];
 					break;
 				case 'view':

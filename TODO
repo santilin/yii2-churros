@@ -1,3 +1,6 @@
+- No estoy usando la última versión de 2amigos-usuario
+  - Añadir opción visible en profile en resources ... _menu.php: yiiparam('user_profile');
+
 - Quitar (no definido) al imprimir
 - Reescribir todo el tema de subida de ficheros.
 - Borrar imagen cuando se reemplaza.
@@ -6,18 +9,6 @@
 - Configuración fecha: Fija, por usuario
 - Configuración idioma: Fijo, por usuario
 - Configuración moneda: Fija, por usuario?
-
-- config/web.php
-	'administratorPermissionName' => 'admin',
-	'controllerMap' => [
-		'admin' => [
-			'class'  => \Da\User\Controller\AdminController::class,
-			'layout' => '/main',
-		],
-		'settings' => [
-			'class'  => \Da\User\Controller\SettingsController::class,
-			'layout' => '/main',
-		],
 
 == TableListView
 * Quitar márgenes a pager.
