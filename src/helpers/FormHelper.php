@@ -43,6 +43,18 @@ class FormHelper
 		]
 	];
 
+	public const FIELD_CONFIG_HALF_SIZE = [
+		'horizontalCssClasses' => [
+			'wrapper' => 'col-sm-3',
+		]
+	];
+	
+	public const FIELD_CONFIG_ONE_THIRD_SIZE = [
+		'horizontalCssClasses' => [
+			'wrapper' => 'col-sm-2',
+		]
+	];
+	
 	static private $tabindex = 0;
 
 	static public function ti($inc=1)
@@ -56,6 +68,16 @@ class FormHelper
 		static::$tabindex = $reset;
 	}
 
+	
+	static public function layoutViewFields($layout, $form_fields, $form_layout_rows)
+	{
+		$fields_contents = [];
+		foreach( $form_fields as $key => $fielddef ) {
+		
+		}
+	}
+	
+	
 	static public function layoutFields($layout, $form_fields, $form_layout_rows)
 	{
 		if( $layout == "2cols" && !count($form_layout_rows) ) {
