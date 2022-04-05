@@ -1,6 +1,7 @@
 <?php
 namespace santilin\churros;
 
+use yii;
 use yii\base\Application;
 use yii\base\BootstrapInterface;
 use yii\i18n\PhpMessageSource;
@@ -26,6 +27,7 @@ class Bootstrap implements BootstrapInterface
                 'sourceLanguage' => 'en-US',
             ];
         }
+        Yii::setAlias('@churros', __DIR__);
     }
 
 } // class Bootstrap
