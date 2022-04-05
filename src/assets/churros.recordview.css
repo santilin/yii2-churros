@@ -19,9 +19,12 @@
 }
 .detail-view .dr-label {
 	font-weight:normal;
+	color: darkblue;
 }
 .detail-view .form-fields {
-	margin-bottom: 6px;
+	margin: 0px 6px 15px 15px;
+/*	margin-bottom: 6px;
+	margin-left: 15px;*/
 }
 .detail-view .dr-field {
 	font-weight: bolder;

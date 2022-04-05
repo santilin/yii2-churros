@@ -55,7 +55,8 @@ class RecordView extends Widget
 {
     public $model;
     public $attributes;
-    public $template = '<label{captionOptions}>{label}</label><div{contentOptions}>{value}</div>';
+    public $fieldsTemplate = '<label{captionOptions}>{label}</label><div{contentOptions}>{value}</div>';
+    public $template = '{panel-title}{panel-buttons}{record}{buttons}';
     public $options = ['class' => 'detail-view'];
     public $formatter;
 
@@ -63,6 +64,9 @@ class RecordView extends Widget
      * @var string
      */
 	public $layout = 'horizontal';
+	
+	public $title = null;
+	public $buttons = [];
 
     /**
      * Initializes the detail view.
@@ -99,14 +103,42 @@ class RecordView extends Widget
         $view = $this->getView();
         RecordViewAsset::register($view);
 
-        $options = $this->options;
+        $title = $this->renderTitle();
+        $record = $this->renderRecord();
+        $buttons = $this->renderButtons();
+        return strtr( $this->template, 
+			[ '{title}' => $title, '{record}' => $record, '{buttons}' => $buttons ]
+		);
+	}
+        
+	public function renderTitle()
+	{
+		$ret = '';
+		if( $this->title != null ) {
+			$ret = <<<html
+<div class="panel panel-primary">
+<div class="panel-heading panel-primary">
+<div class="panel-title">{$this->title}</div>
+</div> </div>
+html;
+		}
+		return $ret;
+	}
+        
+	public function renderRecord()
+	{
 		return "<div" .
-			Html::renderTagAttributes($options)
+			Html::renderTagAttributes($this->options)
 			. '><div class="form-fields">'
  			. $this->layoutAttributes()
 			. '</div></div>';
     }
 
+    public function renderButtons()
+    {
+		return '';
+    }
+    
     /**
      * Renders a single attribute.
      * @param array $attribute the specification of the attribute to be rendered.
@@ -126,7 +158,7 @@ class RecordView extends Widget
 				$content_options);;
             $contentOptions = Html::renderTagAttributes($content_options);
 
-            return strtr($this->template, [
+            return strtr($this->fieldsTemplate, [
                 '{label}' => $attribute['label'],
                 '{value}' => $this->formatter->format($attribute['value'], $attribute['format']),
                 '{captionOptions}' => $captionOptions,
@@ -208,6 +240,8 @@ class RecordView extends Widget
 		if( !is_array($this->layout) ) {
 			switch( $this->layout ) {
 			case "2cols":
+				$caption_options = [ 'class' => 'dr-label col-sm-1' ];
+				$content_options = [ 'class' => 'dr-field col-sm-5 col-offset-1' ];
 				$layout_rows = [];
 				$row = [];
 				foreach( array_keys($this->attributes) as $key ) {
@@ -254,25 +288,15 @@ class RecordView extends Widget
 					break;
 				case 2:
 					$ret .= '<div class="row">';
-					$ret .= '<div class="col-sm-6">';
 					$ret .= $this->renderAttribute($lrow[0], $caption_options, $content_options, $index);
-					$ret .= "</div>";
-					$ret .= '<div class="col-sm-6">';
 					$ret .= $this->renderAttribute($lrow[1], $caption_options, $content_options, $index);
-					$ret .= "</div>";
 					$ret .= "</div>";
 					break;
 				case 3:
 					$ret .= '<div class="row">';
-					$ret .= '<div class="col-sm-4">';
 					$ret .= $this->renderAttribute($lrow[0], $caption_options, $content_options, $index);
-					$ret .= "</div>";
-					$ret .= '<div class="col-sm-4">';
 					$ret .= $this->renderAttribute($lrow[1], $caption_options, $content_options, $index);
-					$ret .= "</div>";
-					$ret .= '<div class="col-sm-4">';
 					$ret .= $this->renderAttribute($lrow[2], $caption_options, $content_options, $index);
-					$ret .= "</div>";
 					$ret .= "</div>";
 					break;
 				}
