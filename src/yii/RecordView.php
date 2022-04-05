@@ -56,15 +56,19 @@ class RecordView extends Widget
     public $model;
     public $attributes;
     public $fieldsTemplate = '<label{captionOptions}>{label}</label><div{contentOptions}>{value}</div>';
-    public $template = '{panel-title}{panel-buttons}{record}{buttons}';
-    public $options = ['class' => 'detail-view'];
+    public $headerTemplate = '<div class="panel panel-primary">
+<div class="panel-heading panel-primary">
+<div class="panel-title">{title}{buttons}</div></div>';
+    public $footerTemplate = '';
+    public $template = '{header}{record}{footer}';
+    public $options = ['class' => 'record-view'];
     public $formatter;
 
     /**
      * @var string
      */
 	public $layout = 'horizontal';
-	
+
 	public $title = null;
 	public $buttons = [];
 
@@ -106,39 +110,45 @@ class RecordView extends Widget
         $title = $this->renderTitle();
         $record = $this->renderRecord();
         $buttons = $this->renderButtons();
-        return strtr( $this->template, 
-			[ '{title}' => $title, '{record}' => $record, '{buttons}' => $buttons ]
-		);
+        $header = strtr( $this->headerTemplate,
+			[ '{record}' => $record, '{buttons}' => $buttons, '{title}' => $title ]);
+		$footer = strtr( $this->footerTemplate,
+			[ '{record}' => $record, '{buttons}' => $buttons, '{title}' => $title ]);
+        return Html::tag('div', strtr( $this->template,
+			[ '{header}' => $header, '{footer}' => $footer,
+				'{title}' => $title, '{record}' => $record,
+				'{buttons}' => $buttons ]), $this->options );
 	}
-        
+
 	public function renderTitle()
 	{
 		$ret = '';
 		if( $this->title != null ) {
-			$ret = <<<html
-<div class="panel panel-primary">
-<div class="panel-heading panel-primary">
-<div class="panel-title">{$this->title}</div>
-</div> </div>
-html;
+			$ret = $this->title;
 		}
 		return $ret;
 	}
-        
+
 	public function renderRecord()
 	{
-		return "<div" .
-			Html::renderTagAttributes($this->options)
-			. '><div class="form-fields">'
+		return '<div class="form-fields">'
  			. $this->layoutAttributes()
-			. '</div></div>';
+			. '</div>';
     }
 
     public function renderButtons()
     {
-		return '';
+		$ret = '';
+		if( count($this->buttons ) ) {
+			$ret .= "<div class=\"rv-btn-toolbar\">";
+			foreach( $this->buttons as $button ) {
+				$ret .= $button;
+			}
+			$ret .= "</div>";
+		}
+		return $ret;
     }
-    
+
     /**
      * Renders a single attribute.
      * @param array $attribute the specification of the attribute to be rendered.
@@ -148,13 +158,13 @@ html;
     protected function renderAttribute($attr_key, $caption_options, $content_options, $index)
     {
 		$attribute = $this->attributes[$attr_key];
-        if (is_string($this->template)) {
+        if (is_string($this->fieldsTemplate)) {
             $caption_options = array_merge(
-				ArrayHelper::getValue($attribute, 'captionOptions', [ 'class' => 'dr-label']),
+				ArrayHelper::getValue($attribute, 'captionOptions', [ 'class' => 'rv-label']),
 				$caption_options);;
             $captionOptions = Html::renderTagAttributes($caption_options);
             $content_options = array_merge(
-				ArrayHelper::getValue($attribute, 'contentOptions', [ 'class' => 'dr-field']),
+				ArrayHelper::getValue($attribute, 'contentOptions', [ 'class' => 'rv-field']),
 				$content_options);;
             $contentOptions = Html::renderTagAttributes($content_options);
 
@@ -240,8 +250,8 @@ html;
 		if( !is_array($this->layout) ) {
 			switch( $this->layout ) {
 			case "2cols":
-				$caption_options = [ 'class' => 'dr-label col-sm-1' ];
-				$content_options = [ 'class' => 'dr-field col-sm-5 col-offset-1' ];
+				$caption_options = [ 'class' => 'rv-label col-sm-1' ];
+				$content_options = [ 'class' => 'rv-field col-sm-5 col-offset-1' ];
 				$layout_rows = [];
 				$row = [];
 				foreach( array_keys($this->attributes) as $key ) {
@@ -262,15 +272,15 @@ html;
 				}
 				break;
 			case 'horizontal':
-				$caption_options = [ 'class' => 'dr-label col-sm-3' ];
-				$content_options = [ 'class' => 'dr-field col-sm-6 col-offset-3' ];
+				$caption_options = [ 'class' => 'rv-label col-sm-3' ];
+				$content_options = [ 'class' => 'rv-field col-sm-6 col-offset-3' ];
 				foreach( array_keys($this->attributes) as $key ) {
 					$layout_rows[] = [$key];
 				}
 				break;
 			case 'inline':
-				$caption_options = [ 'class' => 'dr-label' ];
-				$content_options = [ 'class' => 'dr-field' ];
+				$caption_options = [ 'class' => 'rv-label' ];
+				$content_options = [ 'class' => 'rv-field' ];
 				foreach( array_keys($this->attributes) as $key ) {
 					$layout_rows[] = [$key];
 				}

@@ -1,4 +1,4 @@
-.detail-view .dr-field, .detail-view .dr-label {
+.record_view .rv-field, .record_view .rv-label {
 	display: block;
 	padding: 6px 12px;
 	font-size: 14px;
@@ -17,15 +17,20 @@
 	transition: border-color ease-in-out .15s, box-shadow ease-in-out .15s;
 	transition: border-color ease-in-out .15s, box-shadow ease-in-out .15s, -webkit-box-shadow ease-in-out .15s;*/
 }
-.detail-view .dr-label {
+.record_view .rv-label {
 	font-weight:normal;
 	color: darkblue;
 }
-.detail-view .form-fields {
+.record_view .form-fields {
 	margin: 0px 6px 15px 15px;
 /*	margin-bottom: 6px;
 	margin-left: 15px;*/
 }
-.detail-view .dr-field {
+.record_view .rv-field {
 	font-weight: bolder;
+}
+
+.record_view .rv-btn-toolbar {
+	float:right;
+	margin-top: 0;
 }
