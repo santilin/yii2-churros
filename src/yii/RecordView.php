@@ -113,12 +113,19 @@ class RecordView extends Widget
      * @param int $index the zero-based index of the attribute in the [[attributes]] array
      * @return string the rendering result
      */
-    protected function renderAttribute($attr_key, $index)
+    protected function renderAttribute($attr_key, $caption_options, $content_options, $index)
     {
 		$attribute = $this->attributes[$attr_key];
         if (is_string($this->template)) {
-            $captionOptions = Html::renderTagAttributes(ArrayHelper::getValue($attribute, 'captionOptions', [ 'class' => 'control-label'] ));
-            $contentOptions = Html::renderTagAttributes(ArrayHelper::getValue($attribute, 'contentOptions', [ 'class' => 'form-control'] ));
+            $caption_options = array_merge(
+				ArrayHelper::getValue($attribute, 'captionOptions', [ 'class' => 'dr-label']),
+				$caption_options);;
+            $captionOptions = Html::renderTagAttributes($caption_options);
+            $content_options = array_merge(
+				ArrayHelper::getValue($attribute, 'contentOptions', [ 'class' => 'dr-field']),
+				$content_options);;
+            $contentOptions = Html::renderTagAttributes($content_options);
+
             return strtr($this->template, [
                 '{label}' => $attribute['label'],
                 '{value}' => $this->formatter->format($attribute['value'], $attribute['format']),
@@ -127,7 +134,7 @@ class RecordView extends Widget
             ]);
         }
 
-        return call_user_func($this->template, $attribute, $index, $this);
+        return call_user_func($this->template, $attribute, $caption_options, $content_options, $index, $this);
     }
 
     /**
@@ -197,6 +204,7 @@ class RecordView extends Widget
 	{
 		$ret = '';
 		$layout_rows = [];
+		$caption_options = $content_options = [];
 		if( !is_array($this->layout) ) {
 			switch( $this->layout ) {
 			case "2cols":
@@ -220,7 +228,15 @@ class RecordView extends Widget
 				}
 				break;
 			case 'horizontal':
+				$caption_options = [ 'class' => 'dr-label col-sm-3' ];
+				$content_options = [ 'class' => 'dr-field col-sm-6 col-offset-3' ];
+				foreach( array_keys($this->attributes) as $key ) {
+					$layout_rows[] = [$key];
+				}
+				break;
 			case 'inline':
+				$caption_options = [ 'class' => 'dr-label' ];
+				$content_options = [ 'class' => 'dr-field' ];
 				foreach( array_keys($this->attributes) as $key ) {
 					$layout_rows[] = [$key];
 				}
@@ -232,30 +248,30 @@ class RecordView extends Widget
 			foreach($layout_rows as $lrow ) {
 				switch(count($lrow)) {
 				case 1:
-					$ret .= '<div class="form-group">';
-					$ret .= $this->renderAttribute($lrow[0], $index);
+					$ret .= '<div class="row">';
+					$ret .= $this->renderAttribute($lrow[0], $caption_options, $content_options, $index);
 					$ret .= "</div>";
 					break;
 				case 2:
 					$ret .= '<div class="row">';
 					$ret .= '<div class="col-sm-6">';
-					$ret .= $this->renderAttribute($lrow[0], $index);
+					$ret .= $this->renderAttribute($lrow[0], $caption_options, $content_options, $index);
 					$ret .= "</div>";
 					$ret .= '<div class="col-sm-6">';
-					$ret .= $this->renderAttribute($lrow[1], $index);
+					$ret .= $this->renderAttribute($lrow[1], $caption_options, $content_options, $index);
 					$ret .= "</div>";
 					$ret .= "</div>";
 					break;
 				case 3:
 					$ret .= '<div class="row">';
 					$ret .= '<div class="col-sm-4">';
-					$ret .= $this->renderAttribute($lrow[0], $index);
+					$ret .= $this->renderAttribute($lrow[0], $caption_options, $content_options, $index);
 					$ret .= "</div>";
 					$ret .= '<div class="col-sm-4">';
-					$ret .= $this->renderAttribute($lrow[1], $index);
+					$ret .= $this->renderAttribute($lrow[1], $caption_options, $content_options, $index);
 					$ret .= "</div>";
 					$ret .= '<div class="col-sm-4">';
-					$ret .= $this->renderAttribute($lrow[2], $index);
+					$ret .= $this->renderAttribute($lrow[2], $caption_options, $content_options, $index);
 					$ret .= "</div>";
 					$ret .= "</div>";
 					break;
