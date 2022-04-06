@@ -20,36 +20,9 @@ use santilin\churros\yii\RecordViewAsset;
 
 
 /**
- * DetailView displays the detail of a single data [[model]].
+ * RecordView displays the detail of a single data [[model]].
  *
- * DetailView is best used for displaying a model in a regular format (e.g. each model attribute
- * is displayed as a row in a table.) The model can be either an instance of [[Model]]
- * or an associative array.
- *
- * DetailView uses the [[attributes]] property to determines which model attributes
- * should be displayed and how they should be formatted.
- *
- * A typical usage of DetailView is as follows:
- *
- * ```php
- * $ret .= DetailView::widget([
- *     'model' => $model,
- *     'attributes' => [
- *         'title',               // title attribute (in plain text)
- *         'description:html',    // description attribute in HTML
- *         [                      // the owner name of the model
- *             'label' => 'Owner',
- *             'value' => $model->owner->name,
- *         ],
- *         'created_at:datetime', // creation date formatted as datetime
- *     ],
- * ]);
- * ```
- *
- * For more details and usage information on DetailView, see the [guide article on data widgets](guide:output-data-widgets).
- *
- * @author Qiang Xue <qiang.xue@gmail.com>
- * @since 2.0
+ * @author Santilín <software@noviolento.es>
  */
 class RecordView extends Widget
 {
@@ -172,7 +145,15 @@ html;
             $captionOptions = Html::renderTagAttributes($caption_options);
             $content_options = array_merge(
 				ArrayHelper::getValue($attribute, 'contentOptions', [ 'class' => 'rv-field']),
-				$content_options);;
+				$content_options);
+			switch( $attribute['format'] ) {
+			case 'integer':
+			case 'currency':
+			case 'decimal':
+			case 'hours':
+				Html::addCssClass($content_options, 'text-right');
+				break;
+			}
             $contentOptions = Html::renderTagAttributes($content_options);
 
             return strtr($this->fieldsTemplate, [

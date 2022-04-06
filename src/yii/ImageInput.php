@@ -27,7 +27,7 @@ class ImageInput extends \kartik\file\FileInput
 			$this->controller_url .= $this->model->controllerName();
 		}
 		$this->pluginOptions = [
-			'language' => 'es',
+			'language' => substr(Yii::$app->language, 0, 2),
 			'showUpload' => false,
 			'showRemove' => true,
 			'initialPreviewShowDelete' => false,
