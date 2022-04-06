@@ -2,7 +2,7 @@
 
 namespace santilin\churros\components;
 
-use yii\helpers\Html;
+use yii\helpers\{Html,Url};
 
 /* https://www.yiiframework.com/doc/api/2.0/yii-i18n-formatter */
 class Formatter extends \yii\i18n\Formatter
@@ -67,7 +67,8 @@ class Formatter extends \yii\i18n\Formatter
 		}
 		$ret = '';
 		foreach( $images as $image ) {
-			$ret .= self::asImage("@web/uploads/$image", $options);
+			$ret .= Html::a(self::asImage("@web/uploads/$image", $options),
+			Url::to("@web/uploads/$image"));
 		}
 		return $ret;
 	}

@@ -27,8 +27,9 @@ class ImageInput extends \kartik\file\FileInput
 			$this->controller_url .= $this->model->controllerName();
 		}
 		$this->pluginOptions = [
+			'language' => 'es',
 			'showUpload' => false,
-			'showRemove' => false,
+			'showRemove' => true,
 			'initialPreviewShowDelete' => false,
 			// 'showDownload' => true, Tiene que estar definida la función de descargar
 			'fileActionSettings' => [
