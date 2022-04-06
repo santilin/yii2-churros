@@ -56,9 +56,8 @@ class RecordView extends Widget
     public $model;
     public $attributes;
     public $fieldsTemplate = '<label{captionOptions}>{label}</label><div{contentOptions}>{value}</div>';
-    public $headerTemplate = '<div class="panel panel-primary">
-<div class="panel-heading panel-primary">
-<div class="panel-title">{title}{buttons}</div></div>';
+    public $headerTemplate = '<div class="panel panel-primary"><ul><li>
+<div class="panel-heading panel-primary">{title}</div></li><li>{buttons}</li></div>';
     public $footerTemplate = '';
     public $template = '{header}{record}{footer}';
     public $options = ['class' => 'record-view'];
