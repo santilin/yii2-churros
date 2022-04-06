@@ -56,8 +56,18 @@ class RecordView extends Widget
     public $model;
     public $attributes;
     public $fieldsTemplate = '<label{captionOptions}>{label}</label><div{contentOptions}>{value}</div>';
-    public $headerTemplate = '<div class="panel panel-primary"><ul><li>
-<div class="panel-heading panel-primary">{title}</div></li><li>{buttons}</li></div>';
+    public $headerTemplate = <<<html
+<div class="panel panel-primary">
+	<div class="panel-heading panel-primary">
+		<div class="panel-title">
+		{title}
+		</div>
+		<div class="panel-toolbar">
+		{buttons}
+		</div>
+	</div>
+</div>
+html;
     public $footerTemplate = '';
     public $template = '{header}{record}{footer}';
     public $options = ['class' => 'record-view'];
@@ -130,7 +140,7 @@ class RecordView extends Widget
 
 	public function renderRecord()
 	{
-		return '<div class="form-fields">'
+		return '<div class="record-fields">'
  			. $this->layoutAttributes()
 			. '</div>';
     }
@@ -139,11 +149,9 @@ class RecordView extends Widget
     {
 		$ret = '';
 		if( count($this->buttons ) ) {
-			$ret .= "<div class=\"rv-btn-toolbar\">";
 			foreach( $this->buttons as $button ) {
 				$ret .= $button;
 			}
-			$ret .= "</div>";
 		}
 		return $ret;
     }
@@ -247,39 +255,30 @@ class RecordView extends Widget
 		$layout_rows = [];
 		$caption_options = $content_options = [];
 		if( !is_array($this->layout) ) {
+			$ncols = 1;
 			switch( $this->layout ) {
+			case "3cols":
+				$ncols++;
 			case "2cols":
-				$caption_options = [ 'class' => 'rv-label col-sm-1' ];
-				$content_options = [ 'class' => 'rv-field col-sm-5 col-offset-1' ];
+				$ncols++;
+			case "horizontal": // 1col
 				$layout_rows = [];
 				$row = [];
+				$nc = $ncols;
 				foreach( array_keys($this->attributes) as $key ) {
-					switch(count($row)) {
-					case 2:
+					if ($nc-- == 0 ) {
+						$nc = $ncols-1;
 						$layout_rows[] = $row;
-						$row = [];
-					case 0:
-						$row[0] = $key;
-						break;
-					case 1:
-						$row[1] = $key;
-						break;
+						$row = [$key];
+					} else {
+						$row[] = $key;
 					}
 				}
-				if( count($row) != 0 ) {
+				if ($nc != 0 ) {
 					$layout_rows[] = $row;
 				}
 				break;
-			case 'horizontal':
-				$caption_options = [ 'class' => 'rv-label col-sm-3' ];
-				$content_options = [ 'class' => 'rv-field col-sm-6 col-offset-3' ];
-				foreach( array_keys($this->attributes) as $key ) {
-					$layout_rows[] = [$key];
-				}
-				break;
 			case 'inline':
-				$caption_options = [ 'class' => 'rv-label' ];
-				$content_options = [ 'class' => 'rv-field' ];
 				foreach( array_keys($this->attributes) as $key ) {
 					$layout_rows[] = [$key];
 				}
@@ -287,28 +286,15 @@ class RecordView extends Widget
 			}
 		}
 		if( count($layout_rows) ) {
-			$index = 0;
+			$index = 0; // ??
 			foreach($layout_rows as $lrow ) {
-				switch(count($lrow)) {
-				case 1:
-					$ret .= '<div class="row">';
-					$ret .= $this->renderAttribute($lrow[0], $caption_options, $content_options, $index);
-					$ret .= "</div>";
-					break;
-				case 2:
-					$ret .= '<div class="row">';
-					$ret .= $this->renderAttribute($lrow[0], $caption_options, $content_options, $index);
-					$ret .= $this->renderAttribute($lrow[1], $caption_options, $content_options, $index);
-					$ret .= "</div>";
-					break;
-				case 3:
-					$ret .= '<div class="row">';
-					$ret .= $this->renderAttribute($lrow[0], $caption_options, $content_options, $index);
-					$ret .= $this->renderAttribute($lrow[1], $caption_options, $content_options, $index);
-					$ret .= $this->renderAttribute($lrow[2], $caption_options, $content_options, $index);
-					$ret .= "</div>";
-					break;
+				$c = count($lrow);
+				$ret .= "<div class=\"field-container cols-$c\">";
+				foreach( $lrow as $k => $row ) {
+					$lo = [ 'class' => "rv-label field-$row" ];
+					$ret .= $this->renderAttribute($row, $lo, [], $index);
 				}
+				$ret .= "</div>";
 			}
 		}
 		return $ret;
