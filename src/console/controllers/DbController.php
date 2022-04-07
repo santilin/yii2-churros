@@ -64,7 +64,6 @@ class DbController extends Controller
 
     /**
      * This method is invoked right before an action is to be executed (after all possible filters.)
-     * It checks the existence of the [[migrationPath]].
      * @param \yii\base\Action $action the action to be executed.
      * @return bool whether the action should continue to be executed.
      */

@@ -2,7 +2,7 @@
   - Añadir opción visible en profile en resources ... _menu.php: yiiparam('user_profile');
 
 - Quitar (no definido) al imprimir
-- Reescribir todo el tema de subida de ficheros.
+- Modelo de adjuntos.
 - allSearchFields:
 	- quitar relname de excluded y visible_fields
 - Configuración fecha: Fija, por usuario
