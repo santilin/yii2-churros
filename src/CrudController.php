@@ -22,11 +22,15 @@ class CrudController extends \yii\web\Controller
 	protected $parent_controller = null;
 	protected $allowedActions = [];
 	public $accessOnlyOwner = false;
+	const MSG_CREATED = "{La} {title} <a href=\"{model_link}\">{record_long}</a> has been successfully created.";
+	const MSG_UPDATED = "{La} {title} <a href=\"{model_link}\">{record_long}</a> has been successfully updated.";
+	const MSG_DELETED = "{La} {title} {record_long} has been successfully deleted.";
+	const MSG_DUPLICATED = "{La} {title} <a href=\"{model_link}\">{record_long}</a> has been successfully duplicated.";
 
 	/**
 	 * An array of extra params to pass to the views
 	 **/
-	public function extraParams($action, $model)
+	public function extraParams($action_id, $model)
 	{
 		return null;
 	}
@@ -490,7 +494,7 @@ class CrudController extends \yii\web\Controller
 
 	protected function whereToGoNow($from, $model)
 	{
-		$returnTo = Yii::$app->request->getBodyParam('returnTo');
+		$returnTo = Yii::$app->request->getBodyParam('__returnTo');
 		if( $returnTo ) {
 			return $this->redirect($returnTo);
 		}
@@ -523,7 +527,7 @@ class CrudController extends \yii\web\Controller
 		}
 	}
 
-	public function genBreadCrumbs($action, $model, $parent)
+	public function genBreadCrumbs($action_id, $model, $parent)
 	{
 		$breadcrumbs = [];
 		if( isset($parent) ) {
@@ -543,7 +547,7 @@ class CrudController extends \yii\web\Controller
 				'label' => AppHelper::mb_ucfirst($model->getModelInfo('title_plural')),
 				'url' => $this->controllerRoute() . '/index'
 			];
-			switch( $action ) {
+			switch( $action_id ) {
 				case 'update':
 					$breadcrumbs[] = [
 						'label' => $model->recordDesc('short', 25),
@@ -559,7 +563,7 @@ class CrudController extends \yii\web\Controller
 				'label' =>  $model->getModelInfo('title_plural'),
 				'url' => [ $this->id . '/index' ]
 			];
-			switch( $action ) {
+			switch( $action_id ) {
 				case 'update':
 				case 'saveAsNew':
 					$breadcrumbs[] = [
@@ -575,27 +579,27 @@ class CrudController extends \yii\web\Controller
 				case 'index':
 					break;
 				default:
-					throw new \Exception($action);
+					throw new \Exception($action_id);
 			}
 		}
 		return $breadcrumbs;
 	}
 
-	public function moduleRoute($action = null)
+	public function moduleRoute($action_id = null)
 	{
 		if( $this->parent_model ) {
 			$parent_route = $this->parent_controller
 				. '/' . $this->parent_model->getPrimaryKey()
 				. '/'. $this->id;
-			$action = (array) $action;
-			if ($action[0] != '' && $action[0] == '/' ) {
-				$action[0] = $parent_route . $action[0];
+			$action_id = (array) $action_id;
+			if ($action_id[0] != '' && $action_id[0] == '/' ) {
+				$action_id[0] = $parent_route . $action_id[0];
 			} else {
-				$action[0] = $parent_route . '/' . $action[0];
+				$action_id[0] = $parent_route . '/' . $action_id[0];
 			}
-			return Url::toRoute($action);
-		} else if( $action !== null) {
-			return Url::toRoute($action);
+			return Url::toRoute($action_id);
+		} else if( $action_id !== null) {
+			return Url::toRoute($action_id);
 		} else {
 			return Url::toRoute($this->id);
 		}
@@ -753,7 +757,23 @@ class CrudController extends \yii\web\Controller
 		return json_encode($model->getAttributes());
 	}
 
-	protected function showFlash($action, $model)
+	protected function getSuccessMessage(string $action_id): string
+	{
+		switch( $action_id ) {
+		case 'update':
+			return self::MSG_UPDATED;
+		case 'create':
+			return self::MSG_CREATED;
+		case 'delete':
+			return self::MSG_DELETED;
+		case 'duplicate':
+			return self::MSG_DUPLICATED;
+		default:
+			break;
+		}
+	}
+
+	protected function showFlash($action_id, $model)
 	{
 		$pk = $model->getPrimaryKey();
 		if( is_array($pk) ) {
@@ -761,30 +781,30 @@ class CrudController extends \yii\web\Controller
 		} else {
 			$link_to_me = $this->parentRoute('view') . "/$pk";
 		}
-		switch( $action ) {
-		case 'create':
-			Yii::$app->session->addFlash('success',
-				strtr($model->t('churros', "{La} {title} <a href=\"{model_link}\">{record_long}</a> has been successfully created."),
-					['{model_link}' => $link_to_me]));
-			break;
-		case 'duplicate':
-			Yii::$app->session->addFlash('success',
-				strtr($model->t('churros', "{La} {title} <a href=\"{model_link}\">{record_long}</a> has been successfully duplicated."),
-					['{model_link}' => $link_to_me]));
-			break;
+		switch( $action_id ) {
 		case 'update':
 			Yii::$app->session->addFlash('success',
-				strtr($model->t('churros', "{La} {title} <a href=\"{model_link}\">{record_long}</a> has been successfully updated."),
+				strtr($model->t('churros', $this->getSuccessMessage('update')),
+					['{model_link}' => $link_to_me]));
+			break;
+		case 'create':
+			Yii::$app->session->addFlash('success',
+				strtr($model->t('churros', $this->getSuccessMessage('create')),
 					['{model_link}' => $link_to_me]));
 			break;
 		case 'delete':
 			Yii::$app->session->addFlash('success',
-				$model->t('churros', "{La} {title} <strong>{record_long}</strong> has been successfully deleted."));
+				$model->t('churros', $this->getSuccessMessage('delete')));
+			break;
+		case 'duplicate':
+			Yii::$app->session->addFlash('success',
+				strtr($model->t('churros', $this->getSuccessMessage('duplicate')),
+					['{model_link}' => $link_to_me]));
 			break;
 		}
 	}
 
-	protected function afterSave($action, $model)
+	protected function afterSave($action_id, $model)
 	{
 		return true;
 	}

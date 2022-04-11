@@ -242,7 +242,6 @@ html;
 				$ncols++;
 			case "2cols":
 				$ncols++;
-			case "horizontal": // 1col
 				$layout_rows = [];
 				$row = [];
 				$nc = $ncols;
@@ -255,10 +254,11 @@ html;
 						$row[] = $key;
 					}
 				}
-				if ($nc != 0 ) {
+				if ($nc >= 0 ) {
 					$layout_rows[] = $row;
 				}
 				break;
+			case "horizontal": // 1col
 			case 'inline':
 				foreach( array_keys($this->attributes) as $key ) {
 					$layout_rows[] = [$key];

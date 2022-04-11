@@ -516,7 +516,7 @@ trait ModelInfoTrait
 
 	public function defaultHandyFieldValues($field, $format, $scope=null)
 	{
-		throw new \Exception("$field not supported in " . get_called_class() . "::handyFieldValues() ");
+		throw new \Exception("field '$field' not supported in " . get_called_class() . "::handyFieldValues() ");
 	}
 
 
