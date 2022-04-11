@@ -110,12 +110,57 @@ class AuthController extends Controller
 		foreach( $no_model_perms as $perm ) {
 			$this->stdout($perm->name . "\n");
 		}
+<<<<<<< HEAD
 		$roles = $this->authManager->getItems(Item::TYPE_ROLE);
 		$this->stdout("\n== ROLES == \n");
 		foreach( $roles as $role ) {
 			$this->stdout($role->name . "\n");
 		}
 
+=======
+		$users_ids = [];
+		$roles = $this->authManager->getItems(Item::TYPE_ROLE);
+		$this->stdout("\n== ROLES == \n");
+		foreach( $roles as $role ) {
+			$users_ids = array_merge($users_ids, $this->authManager->getUserIdsByRole($role->name));
+			$subroles = $this->authManager->getChildRoles($role->name);
+			if( count($subroles) ) {
+				$s_subroles = '';
+				foreach($subroles as $subrol) {
+					if( $subrol->name != $role->name ) {
+						$s_subroles .= $subrol->name . ", ";
+					}
+				}
+				if( $s_subroles ) {
+					$this->stdout($role->name.":roles:$s_subroles");
+				}
+			}
+			$role_perms = $this->authManager->getPermissionsByRole($role->name);
+			if( count($role_perms) ) {
+				$this->stdout($role->name.":perms:");
+				foreach($role_perms as $perm) {
+					$this->stdout($perm->name . ", ");
+				}
+				$this->stdout("\n");
+			} else if( empty($s_subroles) ) {
+				$this->stdout($role->name. "\n");
+			}
+		}
+
+		$this->stdout("\n== USERS' ASSIGNMENTS == \n");
+		$user_class = Yii::$app->user->identityClass;
+		$user = new $user_class;
+		$users = $user->find()->all();
+		foreach( $users as $user ) {
+			$this->stdout("user:{$user->id}:{$user->username}:");
+			$assignments = $this->authManager->getAssignments($user->id);
+			foreach( $assignments as $as ) {
+				$this->stdout($as->roleName . ", ");
+			}
+			$this->stdout("\n");
+		}
+		
+>>>>>>> master
 	}
 
 } // class
