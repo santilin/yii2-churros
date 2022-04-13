@@ -17,6 +17,7 @@ use yii\helpers\Html;
 use yii\helpers\Inflector;
 use yii\i18n\Formatter;
 use santilin\churros\yii\RecordViewAsset;
+use santilin\churros\helpers\AppHelper;
 
 
 /**
@@ -120,13 +121,13 @@ html;
 
     public function renderButtons()
     {
-		$ret = '';
+		$ret = '<div class="rv-btn-toolbar">';
 		if( count($this->buttons ) ) {
 			foreach( $this->buttons as $button ) {
 				$ret .= $button;
 			}
 		}
-		return $ret;
+		return $ret . '</div>';
     }
 
     /**
@@ -139,9 +140,9 @@ html;
     {
 		$attribute = $this->attributes[$attr_key];
         if (is_string($this->fieldsTemplate)) {
-            $caption_options = array_merge(
-				ArrayHelper::getValue($attribute, 'captionOptions', [ 'class' => 'rv-label']),
-				$caption_options);;
+             $caption_options = AppHelper::mergeAndConcat(['class'], $caption_options,
+				ArrayHelper::getValue($attribute, 'captionOptions', [ 'class' => 'rv-label'])
+			);
             $captionOptions = Html::renderTagAttributes($caption_options);
             $content_options = array_merge(
 				ArrayHelper::getValue($attribute, 'contentOptions', [ 'class' => 'rv-field']),
@@ -197,9 +198,8 @@ html;
                     'label' => isset($matches[5]) ? $matches[5] : null,
                 ];
             }
-
-            if (!is_array($attribute)) {
-                throw new InvalidConfigException('The attribute configuration must be an array.');
+			if (!is_array($attribute)) {
+                throw new InvalidConfigException('The attribute configuration must be an array or a closure.');
             }
 
             if (isset($attribute['visible']) && !$attribute['visible']) {

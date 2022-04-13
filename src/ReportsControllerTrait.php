@@ -27,7 +27,7 @@ trait ReportsControllerTrait
 		$report = $this->findModel($id);
 		$search_model_name = $report->model;
 		if( strpos($search_model_name, '\\') === FALSE ) {
-			$search_model_name= "app\models\search\\$search_model_name";
+			$search_model_name= "app\models\comp\\$search_model_name";
 		}
 		if( substr($search_model_name, -6) != "Search" ) {
 			$search_model_name .= "Search";
@@ -73,7 +73,7 @@ trait ReportsControllerTrait
 		$report = $this->findModel($id);
 		$search_model_name = $report->model;
 		if( strpos($search_model_name, '\\') === FALSE ) {
-			$search_model_name= "app\models\search\\$search_model_name";
+			$search_model_name= "app\models\comp\\$search_model_name";
 		}
 		if( substr($search_model_name, -6) != "Search" ) {
 			$search_model_name .= "Search";

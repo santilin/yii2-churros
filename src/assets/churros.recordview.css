@@ -18,10 +18,20 @@
 	flex:2;
 }
 
-.record-view .rv-btn-toolbar {
+.record-view .panel-toolber {
 	float:right;
 	margin-top: 0;
 }
+
+.record-view .rv-btn-toolbar {
+	padding-left: 10px;
+	margin-bottom: 5px;
+}
+.record-view .rv-btn-toolbar .btn {
+	margin-right: 5px;
+}
+	
+
 
 .record-view .panel-primary {
 	margin-bottom: 0px;

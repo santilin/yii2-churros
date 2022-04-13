@@ -9,6 +9,11 @@ use Faker\Factory as Faker;
 trait ModelInfoTrait
 {
 	use RelationTrait;
+	
+    static public function empty($value)
+    {
+		return empty($value);
+	}	
 
 	static public function bareTableName()
 	{
