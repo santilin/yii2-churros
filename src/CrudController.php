@@ -107,7 +107,6 @@ class CrudController extends \yii\web\Controller
 		return $this->render('view', [
 			'model' => $model,
 			'parent' => $this->parent_model,
-// 			'relationsProviders' => $this->getRelationsProviders($model),
 			'extraParams' => $this->extraParams('view', $model)
 		]);
 	}
@@ -494,7 +493,7 @@ class CrudController extends \yii\web\Controller
 
 	protected function whereToGoNow($from, $model)
 	{
-		$returnTo = Yii::$app->request->getBodyParam('__returnTo');
+		$returnTo = Yii::$app->request->getBodyParam('returnTo');
 		if( $returnTo ) {
 			return $this->redirect($returnTo);
 		}
