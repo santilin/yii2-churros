@@ -12,6 +12,7 @@ use yii\base\InvalidConfigException;
 use yii\db\Connection;
 use yii\rbac\{BaseManager,Item};
 use yii\console\Controller;
+use santilin\churros\helpers\AuthHelper;
 
 /**
  * Churros auth controller
@@ -64,17 +65,16 @@ class AuthController extends Controller
         return true;
     }
 
-
 	/**
 	 * Creates the permissions for a model
 	 */
 	public function actionCreateForModel($model_name)
 	{
-		AuthHelper::createModelPermissions($model_name, $this->auth);
+		AuthHelper::createModelPermissions($model_name, $this->authManager);
 	}
 
 	/**
-	 * Seeds the current schema with the specified file
+	 * Lists all permissions, optionally by type
 	 */
 	public function actionListAll($type = null)
 	{
@@ -110,14 +110,6 @@ class AuthController extends Controller
 		foreach( $no_model_perms as $perm ) {
 			$this->stdout($perm->name . "\n");
 		}
-<<<<<<< HEAD
-		$roles = $this->authManager->getItems(Item::TYPE_ROLE);
-		$this->stdout("\n== ROLES == \n");
-		foreach( $roles as $role ) {
-			$this->stdout($role->name . "\n");
-		}
-
-=======
 		$users_ids = [];
 		$roles = $this->authManager->getItems(Item::TYPE_ROLE);
 		$this->stdout("\n== ROLES == \n");
@@ -159,8 +151,6 @@ class AuthController extends Controller
 			}
 			$this->stdout("\n");
 		}
-		
->>>>>>> master
 	}
 
 } // class

@@ -44,6 +44,7 @@ class RecordView extends Widget
 html;
     public $footerTemplate = '';
     public $template = '{header}{record}{footer}';
+	public $asTableTemplate = '<tr><th{captionOptions}>{label}</th><td{contentOptions}>{value}</td></tr>';
     public $options = ['class' => 'record-view'];
     public $formatter;
 
@@ -103,6 +104,34 @@ html;
 				'{buttons}' => $buttons ]), $this->options );
 	}
 
+	public function renderAsTable()
+	{
+        $rows = [];
+        $i = 0;
+        foreach ($this->attributes as $attribute) {
+            $rows[] = $this->renderAttributeAsTable($attribute, $i++);
+        }
+
+        $options = $this->options;
+        $tag = ArrayHelper::remove($options, 'tag', 'table');
+        return Html::tag($tag, implode("\n", $rows), $options);
+	}
+	protected function renderAttributeAsTable($attribute, $index)
+    {
+        if (is_string($this->asTableTemplate)) {
+            $captionOptions = Html::renderTagAttributes(ArrayHelper::getValue($attribute, 'captionOptions', []));
+            $contentOptions = Html::renderTagAttributes(ArrayHelper::getValue($attribute, 'contentOptions', []));
+            return strtr($this->asTableTemplate, [
+                '{label}' => $attribute['label'],
+                '{value}' => $this->formatter->format($attribute['value'], $attribute['format']),
+                '{captionOptions}' => $captionOptions,
+                '{contentOptions}' => $contentOptions,
+            ]);
+        }
+
+        return call_user_func($this->asTableTemplate, $attribute, $index, $this);
+    }
+
 	public function renderTitle()
 	{
 		$ret = '';
@@ -114,9 +143,13 @@ html;
 
 	public function renderRecord()
 	{
-		return '<div class="record-fields">'
- 			. $this->layoutAttributes()
-			. '</div>';
+		if( $this->layout == 'table' ) {
+			return $this->renderAsTable();
+		} else {
+			return '<div class="record-fields">'
+				. $this->layoutAttributes()
+				. '</div>';
+		}
     }
 
     public function renderButtons()
