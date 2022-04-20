@@ -73,6 +73,12 @@ class AuthController extends Controller
 		AuthHelper::createModelPermissions($model_name, $this->authManager);
 	}
 
+	
+	public function actionRemoveAll()
+	{
+		$this->authManager->removeAll();
+	}
+	
 	/**
 	 * Lists all permissions, optionally by type
 	 */
@@ -124,18 +130,18 @@ class AuthController extends Controller
 					}
 				}
 				if( $s_subroles ) {
-					$this->stdout($role->name.":roles:$s_subroles");
+					$this->stdout("- ".$role->name.":roles:$s_subroles\n");
 				}
 			}
 			$role_perms = $this->authManager->getPermissionsByRole($role->name);
 			if( count($role_perms) ) {
-				$this->stdout($role->name.":perms:");
+				$this->stdout("- ".$role->name.":perms:");
 				foreach($role_perms as $perm) {
 					$this->stdout($perm->name . ", ");
 				}
 				$this->stdout("\n");
 			} else if( empty($s_subroles) ) {
-				$this->stdout($role->name. "\n");
+				$this->stdout("- ". $role->name. "\n");
 			}
 		}
 

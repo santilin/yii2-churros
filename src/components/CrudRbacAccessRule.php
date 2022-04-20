@@ -1,6 +1,7 @@
 <?php
 
 namespace santilin\churros\components;
+use santilin\churros\helpers\AppHelper;
 
 use yii\filters\AccessRule;
 use yii\base\InvalidConfigException;
@@ -35,21 +36,24 @@ class CrudRbacAccessRule extends AccessRule
 			case 'view':
 			case 'pdf':
 			case 'autocomplete':
-				$perm = ucfirst($action->controller->id) . "_View";
+				$perm = AppHelper::camelCase($action->controller->id) . ".view";
 				break;
 			case 'update':
-				$perm = ucfirst($action->controller->id) . "_Edit";
+				$perm = AppHelper::camelCase($action->controller->id) . ".edit";
 				break;
 			case 'delete':
 			case 'remove-image':
-				$perm = ucfirst($action->controller->id) . "_Dele";
+				$perm = AppHelper::camelCase($action->controller->id) . ".delete";
+				break;
+			case 'duplicate':
+				$perm = AppHelper::camelCase($action->controller->id) . ".create"
+					&& AppHelper::camelCase($action->controller->id) . ".view";
 				break;
 			case 'create':
-			case 'duplicate':
-				$perm = ucfirst($action->controller->id) . "_Crea";
+				$perm = AppHelper::camelCase($action->controller->id) . ".create";
 				break;
 			default:
-				$perm = ucfirst($action->controller->id) . "_" . ucfirst($action);
+				$perm = AppHelper::camelCase($action->controller->id) . "." . ucfirst($action);
 				break;
 		}
 		if( $user->can($perm) ) {
@@ -58,7 +62,7 @@ class CrudRbacAccessRule extends AccessRule
 			}
 			return true;
 		} else {
-			$perm .= "_Own";
+			$perm .= ".own";
 			if( $user->can($perm) ) {
 				if( $action->controller->hasProperty('accessOnlyOwner') ) {
 					$action->controller->accessOnlyOwner = true;

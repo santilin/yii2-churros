@@ -70,6 +70,14 @@ class AppHelper
 		return $classname;
 	}
 
+	
+	static public function lastWord($sentence, $sep = ' ')
+	{
+		$last_word_start = strrpos($sentence, $sep) + 1; // +1 so we don't include the space in our result
+		$last_word = substr($sentence, $last_word_start);
+		return $last_word;
+	}
+	
 	public static function camelCase($str, array $noStrip = [])
 	{
 		// non-alpha and non-numeric characters become spaces
