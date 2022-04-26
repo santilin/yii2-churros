@@ -106,6 +106,15 @@ class AuthHelper
 		$model = new $model_class;
 		$model_title = $model->t('app', " {title_plural}");
 
+		$role_name = "$module_name.all.menu";
+		$role_all = $auth->getItem($role_name);
+		if( !$role_all ) {
+			$role_all = $auth->createRole($role_name);
+			$role_all->description = "Acceso a todos los modelos del módulo $module_name";
+			$auth->add($role_all);
+			echo $role_all->name . ' => ' . $role_all->description . ": permiso creado\n";
+		}
+		
 		$perm_name = $module_name . '.' . $model_name . ".menu";
 		$permission = $auth->getItem($perm_name);
 		if( !$permission ) {
@@ -113,8 +122,12 @@ class AuthHelper
 			$permission->description = "Acceso al menú de $model_title del módulo $module_name";
 			$auth->add($permission);
 			echo $permission->name . ' => ' . $permission->description . ": permiso creado\n";
-			
 		}
+		if( !$auth->hasChild($role_all, $permission) ) {
+			$auth->addChild($role_all, $permission);
+		} else {
+			echo "Warning: permission {$permission->name} already exists in role {$role_all->name}\n";
+		}		
 	}
 	
 }
