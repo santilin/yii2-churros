@@ -12,7 +12,7 @@ use Yii;
 
 class AuthHelper
 {
-	static public function createModelPermissions($model_name, $auth = null)
+	static public function createModelPermissions($model_name, $model_class, $auth = null)
 	{
 		if( $auth == null ) {
 			$auth = \Yii::$app->authManager;
@@ -31,18 +31,17 @@ class AuthHelper
 			$auth->add($editora);
 		}
 		
-		$model = new $model_name;
-		$simple_model_name = AppHelper::lastWord($model_name, '\\');
+		$model = new $model_class;
 		$model_title = $model->t('app', " {title_plural}");
-		$model_editora = $auth->getItem($simple_model_name . '.editor');
+		$model_editora = $auth->getItem($model_name . '.editor');
 		if (!$model_editora) {
-			$model_editora = $auth->createRole($simple_model_name . '.editor');
+			$model_editora = $auth->createRole($model_name . '.editor');
 			$model_editora->description = "Editor de $model_title";
 			$auth->add($model_editora);
 		}
-		$model_visora = $auth->getItem($simple_model_name . '.visor');
+		$model_visora = $auth->getItem($model_name . '.visor');
 		if (!$model_visora) {
-			$model_visora = $auth->createRole($simple_model_name . '.visor');
+			$model_visora = $auth->createRole($model_name . '.visor');
 			$model_visora->description = "Visor de $model_title";
 			$auth->add($model_visora);
 		}
@@ -52,9 +51,9 @@ class AuthHelper
 					'edit' => 'Editar',
 					'delete' => 'Borrar',
 					'report' => 'Informes de' ] as $perm_name => $perm_desc) {
-			$permission = $auth->getItem($simple_model_name . ".$perm_name");
+			$permission = $auth->getItem($model_name . ".$perm_name");
 			if( !$permission ) {
-				$permission = $auth->createPermission($simple_model_name . ".$perm_name" );
+				$permission = $auth->createPermission($model_name . ".$perm_name" );
 				$permission->description = $perm_desc . $model_title;
 				$auth->add($permission);
 			}
@@ -64,38 +63,58 @@ class AuthHelper
 				if( !$auth->hasChild($visora, $permission) ) {
 					$auth->addChild($visora, $permission);
 				} else {
-					echo "Error: permission {$permission->name} already exists in role {$visora->name}\n";
+					echo "Warning: permission {$permission->name} already exists in role {$visora->name}\n";
 				}
 				if( !$auth->hasChild($model_visora, $permission) ) {
 					$auth->addChild($model_visora, $permission);
 				} else {
-					echo "Error: permission {$permission->name} already exists in role {$model_visora->name}\n";
+					echo "Warning: permission {$permission->name} already exists in role {$model_visora->name}\n";
 				}
 			}
 			if( !$auth->hasChild($model_editora, $permission) ) {
 				$auth->addChild($model_editora, $permission);
 			} else {
-				echo "Error: permission {$permission->name} already exists in role {$model_editora->name}\n";
+				echo "Warning: permission {$permission->name} already exists in role {$model_editora->name}\n";
 			}
 			if( !$auth->hasChild($editora, $permission) ) {
 				$auth->addChild($editora, $permission);
 			} else {
-				echo "Error: permission {$permission->name} already exists in role {$editora->name}\n";
+				echo "Warning: permission {$permission->name} already exists in role {$editora->name}\n";
 			}
 			echo $permission->name . ' => ' . $permission->description . ": permiso creado\n";
 			if( $perm_name == 'create' ) {
 				continue;
 			}
-			$permission_own = $auth->getItem($simple_model_name . ".{$perm_name}.own");
+			$permission_own = $auth->getItem($model_name . ".{$perm_name}.own");
 			if (!$permission_own ) {
-				$permission_own = $auth->createPermission($simple_model_name . ".{$perm_name}.own" );
+				$permission_own = $auth->createPermission($model_name . ".{$perm_name}.own" );
 				$permission_own->description = $perm_desc . $model->t('churros', " {title_plural} propi{-as}");
 				$auth->add($permission_own);
 				echo $permission_own->name . ' => ' . $permission_own->description . ": permiso creado\n";
 			} else {
-				echo "Error: permission {$permission_own->name} already exists in role {$editora->name}\n";
+				echo "Warning: permission {$permission_own->name} already exists in role {$editora->name}\n";
 			}
 		}
 	}
 
+	static public function createModuleModelPermissions($module_name, $model_name, $model_class, $auth = null)
+	{
+		if( $auth == null ) {
+			$auth = \Yii::$app->authManager;
+		}
+
+		$model = new $model_class;
+		$model_title = $model->t('app', " {title_plural}");
+
+		$perm_name = $module_name . '.' . $model_name . ".menu";
+		$permission = $auth->getItem($perm_name);
+		if( !$permission ) {
+			$permission = $auth->createPermission($perm_name);
+			$permission->description = "Acceso al menú de $model_title del módulo $module_name";
+			$auth->add($permission);
+			echo $permission->name . ' => ' . $permission->description . ": permiso creado\n";
+			
+		}
+	}
+	
 }

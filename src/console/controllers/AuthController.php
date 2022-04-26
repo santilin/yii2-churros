@@ -68,9 +68,17 @@ class AuthController extends Controller
 	/**
 	 * Creates the permissions for a model
 	 */
-	public function actionCreateForModel($model_name)
+	public function actionCreateModelPermissions($model_name, $model_class)
 	{
-		AuthHelper::createModelPermissions($model_name, $this->authManager);
+		AuthHelper::createModelPermissions($model_name, $model_class, $this->authManager);
+	}
+	
+	/**
+	 * Creates the menu access permissiones for a model
+	 */
+	public function actionCreateModuleModelPermissions($module_name, $model_name, $model_class)
+	{
+		AuthHelper::createModuleModelPermissions($module_name, $model_name, $model_class, $this->authManager);
 	}
 
 	
