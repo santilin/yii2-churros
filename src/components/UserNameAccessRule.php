@@ -10,14 +10,12 @@ class UserNameAccessRule extends AccessRule
 
     protected function matchRole($user)
 	{
+		if( parent::matchRole($user) ) {
+			return true;
+		}
         $items = empty($this->roles) ? [] : $this->roles;
-
         if (empty($items)) {
             return true;
-        }
-
-        if ($user === false ) {
-            throw new InvalidConfigException('The user application component must be available to specify roles in AccessRule.');
         }
         if( !$user->getIdentity() ) {
 			return false;
