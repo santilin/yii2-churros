@@ -53,25 +53,22 @@ class CrudRbacAccessRule extends AccessRule
 				$perm = AppHelper::camelCase($action->controller->id) . ".create";
 				break;
 			default:
-				$perm = AppHelper::camelCase($action->controller->id) . "." . ucfirst($action);
+				$perm = AppHelper::camelCase($action->controller->id) . "." . ucfirst($action->id);
 				break;
+		}
+		if( $user->can("$perm.own") ) {
+			if( $action->controller->hasProperty('accessOnlyOwner') ) {
+				$action->controller->accessOnlyOwner = true;
+			}
+			return true;
 		}
 		if( $user->can($perm) ) {
 			if( $action->controller->hasProperty('accessOnlyOwner') ) {
 				$action->controller->accessOnlyOwner = false;
 			}
 			return true;
-		} else {
-			$perm .= ".own";
-			if( $user->can($perm) ) {
-				if( $action->controller->hasProperty('accessOnlyOwner') ) {
-					$action->controller->accessOnlyOwner = true;
-				}
-				return true;
-			} else {
-				return false;
-			}
 		}
+		return false;
     }
 
 }
