@@ -70,14 +70,14 @@ class AppHelper
 		return $classname;
 	}
 
-	
+
 	static public function lastWord($sentence, $sep = ' ')
 	{
 		$last_word_start = strrpos($sentence, $sep) + 1; // +1 so we don't include the space in our result
 		$last_word = substr($sentence, $last_word_start);
 		return $last_word;
 	}
-	
+
 	public static function camelCase($str, array $noStrip = [])
 	{
 		// non-alpha and non-numeric characters become spaces
@@ -123,7 +123,7 @@ class AppHelper
         . mb_substr($str, 1, mb_strlen($str), $encoding);
     }
 
-    static public function isUserAdmin()
+    static public function userIsAdmin()
     {
 		return Yii::$app->user->identity && Yii::$app->user->identity->isAdmin;
 	}
@@ -155,7 +155,7 @@ class AppHelper
 			);
 		}
 	}
-	
+
     public static function mergeAndConcat(array $keys_to_concat, $a, $b)
     {
         $args = func_get_args();
@@ -186,6 +186,6 @@ class AppHelper
         }
         return $res;
     }
-	
-	
+
+
 }
