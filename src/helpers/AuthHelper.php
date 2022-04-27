@@ -30,7 +30,7 @@ class AuthHelper
 			$editora->description = "Editar todos los ficheros";
 			$auth->add($editora);
 		}
-		
+
 		$model = new $model_class;
 		$model_title = $model->t('app', " {title_plural}");
 		$model_editora = $auth->getItem($model_name . '.editor');
@@ -44,6 +44,18 @@ class AuthHelper
 			$model_visora = $auth->createRole($model_name . '.visor');
 			$model_visora->description = "Visor de $model_title";
 			$auth->add($model_visora);
+		}
+		$model_editora_own = $auth->getItem($model_name . '.editor.own');
+		if (!$model_editora_own) {
+			$model_editora_own = $auth->createRole($model_name . '.editor.own');
+			$model_editora_own->description = "Editor de sus $model_title";
+			$auth->add($model_editora_own);
+		}
+		$model_visora_own = $auth->getItem($model_name . '.visor.own');
+		if (!$model_visora_own) {
+			$model_visora_own = $auth->createRole($model_name . '.visor.own');
+			$model_visora_own->description = "Visor de sus $model_title";
+			$auth->add($model_visora_own);
 		}
 
 		foreach( [ 'create' => 'Crear',
@@ -82,17 +94,33 @@ class AuthHelper
 				echo "Warning: permission {$permission->name} already exists in role {$editora->name}\n";
 			}
 			echo $permission->name . ' => ' . $permission->description . ": permiso creado\n";
-			if( $perm_name == 'create' ) {
-				continue;
+			if( $perm_name != 'create' ) {
+				$permission_own = $auth->getItem($model_name . ".$perm_name.own");
+				if (!$permission_own ) {
+					$permission_own = $auth->createPermission($model_name . ".$perm_name.own" );
+					$permission_own->description = $perm_desc . $model->t('churros', " sus {title_plural}");
+					$auth->add($permission_own);
+					echo $permission_own->name . ' => ' . $permission_own->description . ": permiso creado\n";
+				} else {
+					echo "Warning: permission {$permission_own->name} already exists in role {$editora->name}\n";
+				}
 			}
-			$permission_own = $auth->getItem($model_name . ".{$perm_name}.own");
-			if (!$permission_own ) {
-				$permission_own = $auth->createPermission($model_name . ".{$perm_name}.own" );
-				$permission_own->description = $perm_desc . $model->t('churros', " {title_plural} propi{-as}");
-				$auth->add($permission_own);
-				echo $permission_own->name . ' => ' . $permission_own->description . ": permiso creado\n";
-			} else {
-				echo "Warning: permission {$permission_own->name} already exists in role {$editora->name}\n";
+			if( $add_to_editora ) {
+				if( $perm_name == 'create' ) {
+					$permission_own = $permission;
+				}
+				if( !$auth->hasChild($model_editora_own, $permission_own) ) {
+					$auth->addChild($model_editora_own, $permission_own);
+				} else {
+					echo "Warning: permission {$permission->name} already exists in role {$model_editora_own->name}\n";
+				}
+			}
+			if( $add_to_visora ) {
+				if( !$auth->hasChild($model_visora_own, $permission_own) ) {
+					$auth->addChild($model_visora_own, $permission_own);
+				} else {
+					echo "Warning: permission {$permission->name} already exists in role {$model_editora_own->name}\n";
+				}
 			}
 		}
 	}
@@ -106,7 +134,7 @@ class AuthHelper
 		$model = new $model_class;
 		$model_title = $model->t('app', " {title_plural}");
 
-		$role_name = "$module_name.all.menu";
+		$role_name = "module.$module_name.menu.all";
 		$role_all = $auth->getItem($role_name);
 		if( !$role_all ) {
 			$role_all = $auth->createRole($role_name);
@@ -114,8 +142,8 @@ class AuthHelper
 			$auth->add($role_all);
 			echo $role_all->name . ' => ' . $role_all->description . ": permiso creado\n";
 		}
-		
-		$perm_name = $module_name . '.' . $model_name . ".menu";
+
+		$perm_name = "module.$module_name.menu.$model_name";
 		$permission = $auth->getItem($perm_name);
 		if( !$permission ) {
 			$permission = $auth->createPermission($perm_name);
@@ -127,7 +155,7 @@ class AuthHelper
 			$auth->addChild($role_all, $permission);
 		} else {
 			echo "Warning: permission {$permission->name} already exists in role {$role_all->name}\n";
-		}		
+		}
 	}
-	
+
 }
