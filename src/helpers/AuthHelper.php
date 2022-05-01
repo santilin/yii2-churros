@@ -158,4 +158,24 @@ class AuthHelper
 		}
 	}
 
+	public function createPermission($perm_name, $perm_desc, $auth = null)
+	{
+		if( $auth == null ) {
+			$auth = \Yii::$app->authManager;
+		}
+		$permission = $auth->getItem($perm_name);
+		if( !$permission ) {
+			$permission = $auth->createPermission($perm_name);
+			$permission->description = $perm_desc;
+			$auth->add($permission);
+			echo $permission->name . ' => ' . $permission->description . ": permiso creado\n";
+		} else {
+			if( $permission->description != $perm_desc ) {
+				$permission->description = $perm_desc;
+				$permission->save();
+			}
+			echo $permission->name . ' => ' . $permission->description . ": permiso actualizado\n";
+		}
+	}
+	
 }

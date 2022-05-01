@@ -64,6 +64,11 @@ class AuthController extends Controller
         }
         return true;
     }
+    
+	public function actionRemoveAll()
+	{
+		$this->authManager->removeAll();
+	}
 
 	/**
 	 * Creates the permissions for a model
@@ -81,11 +86,15 @@ class AuthController extends Controller
 		AuthHelper::createModuleModelPermissions($module_name, $model_name, $model_class, $this->authManager);
 	}
 
-
-	public function actionRemoveAll()
+	/**
+	 * Creates the permissions for a module
+	 */
+	public function createModulePermissions($module_name)
 	{
-		$this->authManager->removeAll();
+		AuthHelper::createPermission("module.$module_name.menu", "Acceso al menu del módulo $module_name", $this->authManager);
 	}
+	
+
 
 	/**
 	 * Lists all permissions, optionally by type
@@ -167,5 +176,18 @@ class AuthController extends Controller
 		}
 	}
 
+	public function actionAssignPermToUser($perm_name, $user_id, $auth = null)
+	{
+		if( $auth == null ) {
+			$auth = \Yii::$app->authManager;
+		}
+		$permission = $auth->getItem($perm_name);
+		if( $permission == null ) {
+			return false;
+		}
+		$auth->assign($permission, $user_id);
+	}	
+	
+	
 } // class
 
