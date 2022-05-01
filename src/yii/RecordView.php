@@ -29,7 +29,7 @@ class RecordView extends Widget
 {
     public $model;
     public $attributes;
-    public $fieldsTemplate = '<label{captionOptions}>{label}</label><div{contentOptions}>{value}</div>';
+    public $fieldsTemplate = '<label{labelOptions}>{label}</label><div{contentOptions}>{value}</div>';
     public $headerTemplate = <<<html
 <div class="panel panel-primary">
 	<div class="panel-heading panel-primary">
@@ -44,7 +44,7 @@ class RecordView extends Widget
 html;
     public $footerTemplate = '';
     public $template = '{header}{record}{footer}';
-	public $asTableTemplate = '<tr><th{captionOptions}>{label}</th><td{contentOptions}>{value}</td></tr>';
+	public $asTableTemplate = '<tr><th{labelOptions}>{label}</th><td{contentOptions}>{value}</td></tr>';
     public $options = ['class' => 'record-view'];
     public $formatter;
 
@@ -119,12 +119,12 @@ html;
 	protected function renderAttributeAsTable($attribute, $index)
     {
         if (is_string($this->asTableTemplate)) {
-            $captionOptions = Html::renderTagAttributes(ArrayHelper::getValue($attribute, 'captionOptions', []));
+            $labelOptions = Html::renderTagAttributes(ArrayHelper::getValue($attribute, 'labelOptions', []));
             $contentOptions = Html::renderTagAttributes(ArrayHelper::getValue($attribute, 'contentOptions', []));
             return strtr($this->asTableTemplate, [
                 '{label}' => $attribute['label'],
                 '{value}' => $this->formatter->format($attribute['value'], $attribute['format']),
-                '{captionOptions}' => $captionOptions,
+                '{labelOptions}' => $labelOptions,
                 '{contentOptions}' => $contentOptions,
             ]);
         }
@@ -169,17 +169,18 @@ html;
      * @param int $index the zero-based index of the attribute in the [[attributes]] array
      * @return string the rendering result
      */
-    protected function renderAttribute($attr_key, $captionOptions, $contentOptions, $index)
+    protected function renderAttribute($attr_key, $labelOptions, $contentOptions, $index)
     {
 		$attribute = $this->attributes[$attr_key];
-        if (is_string($this->fieldsTemplate)) {
-             $captionOptions = AppHelper::mergeAndConcat(['class'], $captionOptions,
-				ArrayHelper::getValue($attribute, 'captionOptions', [ 'class' => 'rv-label'])
-			);
-            $captionOptions = Html::renderTagAttributes($captionOptions);
+		$template = $attribute['template']??$this->fieldsTemplate;
+        if (is_string($template)) {
+            $labelOptions = AppHelper::mergeAndConcat(['class'], 
+				$labelOptions,
+				$attribute['labelOptions']??[ 'class' => 'rv-label']);
+            $labelOptions = Html::renderTagAttributes($labelOptions);
             $contentOptions = array_merge(
-				ArrayHelper::getValue($attribute, 'contentOptions', [ 'class' => 'rv-field']),
-				$contentOptions);
+				$contentOptions,
+				$attribute['contentOptions']??[ 'class' => 'rv-field']);
 			switch( $attribute['format'] ) {
 			case 'integer':
 			case 'currency':
@@ -189,15 +190,15 @@ html;
 				break;
 			}
             $contentOptions = Html::renderTagAttributes($contentOptions);
-            return strtr($this->fieldsTemplate, [
+            return strtr($template, [
                 '{label}' => $attribute['label'],
                 '{value}' => $this->formatter->format($attribute['value'], $attribute['format']),
-                '{captionOptions}' => $captionOptions,
+                '{labelOptions}' => $labelOptions,
                 '{contentOptions}' => $contentOptions,
             ]);
         }
 
-        return call_user_func($this->template, $attribute, $captionOptions, $contentOptions, $index, $this);
+        return call_user_func($template, $attribute, $labelOptions, $contentOptions, $index, $this);
     }
 
     /**
@@ -266,7 +267,7 @@ html;
 	{
 		$ret = '';
 		$layout_rows = [];
-		$captionOptions = $contentOptions = [];
+		$labelOptions = $contentOptions = [];
 		if( !is_array($this->layout) ) {
 			$ncols = 1;
 			switch( $this->layout ) {
@@ -308,8 +309,9 @@ html;
 					$rowOptions = AppHelper::mergeAndConcat(['class'],
 						$rowOptions,
 						$this->attributes[$attribute]['rowOptions']??[]);
-					$lo = [ 'class' => "rv-label field-$attribute" ];
-					$row .= $this->renderAttribute($attribute, $lo, [], $index);
+					$lo = [ 'class' => "label-$attribute" ];
+					$fo = [ 'class' => "field-$attribute" ];
+					$row .= $this->renderAttribute($attribute, $lo, $fo, $index);
 				}
 				$ret .= '<div' . Html::renderTagAttributes($rowOptions) 
 					. ">$row</div>";

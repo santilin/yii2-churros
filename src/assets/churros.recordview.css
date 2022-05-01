@@ -11,11 +11,11 @@
 .record-view .rv-label {
 	font-weight:normal;
 	color: darkblue;
-	flex:1;
+	flex: 3 0 20%;
 }
 .record-view .rv-field {
 	font-weight: bolder;
-	flex:2;
+	flex: 3 0 80%;
 }
 .record-view .panel-toolber {
 	float:right;
@@ -32,14 +32,12 @@
 	margin-bottom: 0px;
 	border-bottom-radius: none;
 }
-
 .record-view .panel-heading {
 	padding: 4px 8px;
 	width: 100%;
 	display:flex;
 	align-items: center;
 }
-
 .record-view .panel-heading .panel-title {
 	font-weight: bolder;
 	font-size: larger;
@@ -59,10 +57,12 @@
 	display: flex;
 	flex-direction: row;
 }
-.record-view .rv-embedded {
+
+/*.record-view .rv-embedded {
 	width: 100%;
 	display: flex;
 }
+
 .record-view .rv-embedded > .rv-field {
 	padding: 0;
 }
@@ -75,14 +75,30 @@
 	font-weight: bold;
 	color:red;
 	font-size: large;
+}*/
+
+.record-view .rv-embedded-list {
+	flex-wrap: wrap;
+	flex-direction: column;
 }
 
-.record-view .embedded-list .panel-primary {
+.record-view .rv-embedded-list .rv-label {
+	flex: 3 0 50%;
+}
+.record-view .rv-embedded-list .rv-label + div {
+	flex: 3 0 50%;
+	border: 1px solid #ccc;
+	padding: 2px 0px;
+	margin: 0;
+	align-content: center;
+}
+
+.record-view .rv-embedded-list .panel-primary {
 	background-color: gray;
 	border-color: gray;
 }
 
-.record-view .embedded-form .panel-primary {
+.record-view .rv-embedded-form .panel-primary {
 	background-color: lightyellow;
 	border-color: lightyellow;
 	color: black;
