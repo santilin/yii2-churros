@@ -14,6 +14,7 @@ class ExpandableTextColumn extends DataColumn
      * @var
      */
     public $text_length = 30;
+    public $format = 'text';
 
     /**
      * {@inheritdoc}
@@ -23,17 +24,19 @@ class ExpandableTextColumn extends DataColumn
     protected function renderDataCellContent($model, $key, $index)
     {
 		$text = $model->{$this->attribute};
-		if (mb_strlen($text)<=$this->text_length) {
+		if( $this->format == 'html' ) {
+			$text = html_entity_decode(strip_tags($text));
+		}
+		if (strlen($text)<=$this->text_length) {
 			return $text;
 		} else {
 			/// @todo partir por el espacio más próximo
-			$truncated_text = trim(mb_substr($text, 0, $this->text_length));
-			return Html::a($truncated_text . "&hellip;",
+			$truncated_text = trim(substr($text, 0, $this->text_length));
+			return Html::a($truncated_text,
 				"#collapse$key$index{$this->attribute}",
 				[ 'class' => "fa fa-expand",  'data-toggle' =>'collapse', 'role'=>'button',
 				  'aria-expanded'=>'false', 'aria-controls'=>"collapse$key$index{$this->attribute}"]
-				);
-// 				. "<div class='collapse' id='collapse$key$index{$this->attribute}'><div class='card card-body'>".substr($text,$this->text_length). "</div></div>";
+				) . "<div class='collapse' id='collapse$key$index{$this->attribute}'><div class='card card-body'>".mb_substr($text,$this->text_length). "</div></div>";
 		}
     }
 

@@ -445,7 +445,7 @@ trait ModelInfoTrait
 		if( $blameable ) {
 			$created_by = $blameable->createdByAttribute;
 			$author = $this->$created_by;
-			return $author == Yii::$app->user->getIdentity()->id;
+			return $author != Yii::$app->user->id;
 		} else {
 			return false;
 		}

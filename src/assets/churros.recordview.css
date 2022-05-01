@@ -17,12 +17,10 @@
 	font-weight: bolder;
 	flex:2;
 }
-
 .record-view .panel-toolber {
 	float:right;
 	margin-top: 0;
 }
-
 .record-view .rv-btn-toolbar {
 	padding-left: 10px;
 	margin-bottom: 5px;
@@ -30,9 +28,6 @@
 .record-view .rv-btn-toolbar .btn {
 	margin-right: 5px;
 }
-	
-
-
 .record-view .panel-primary {
 	margin-bottom: 0px;
 	border-bottom-radius: none;
@@ -49,17 +44,14 @@
 	font-weight: bolder;
 	font-size: larger;
 }
-
-
 .record-view .panel-toolbar {
 	margin-left: auto;
 }
-
 .record-view .panel-toolbar a.btn {
 	margin-bottom: 0;
 }
 .record-view .record-fields {
-	margin: 0px 10px 0px 10px;
+	margin: 0;
 	display: flex;
 	flex-direction: column;
 }
@@ -67,3 +59,13 @@
 	display: flex;
 	flex-direction: row;
 }
+.record-view .rv-embedded {
+	width: 100%;
+	display: flex;
+	flex-flow: column;
+	padding: 0;
+}
+.record-view > .record-fields > .field-container > .rv-field.rv-embedded  {
+	background-color: #5bc0de;
+}
+
