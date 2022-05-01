@@ -176,7 +176,7 @@ class AppHelper
                 } elseif (is_array($v) && isset($res[$k]) && is_array($res[$k])) {
                     $res[$k] = static::merge($res[$k], $v);
                 } else {
-					if( in_array($k, $keys_to_concat) ) {
+					if( in_array($k, $keys_to_concat) && isset($res[$k])) {
 						$res[$k] .= " $v";
 					} else {
 						$res[$k] = $v;

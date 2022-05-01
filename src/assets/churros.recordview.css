@@ -62,10 +62,29 @@
 .record-view .rv-embedded {
 	width: 100%;
 	display: flex;
-	flex-flow: column;
+}
+.record-view .rv-embedded > .rv-field {
 	padding: 0;
 }
-.record-view > .record-fields > .field-container > .rv-field.rv-embedded  {
-	background-color: #5bc0de;
+.record-view .rv-embedded > .rv-field > .rv-label {
+	font-weight: bold;
+	font-size: larger;
+}
+
+.record-view .rv-embedded > .rv-field .rv-embedded > .rv-field > .rv-label {
+	font-weight: bold;
+	color:red;
+	font-size: large;
+}
+
+.record-view .embedded-list .panel-primary {
+	background-color: gray;
+	border-color: gray;
+}
+
+.record-view .embedded-form .panel-primary {
+	background-color: lightyellow;
+	border-color: lightyellow;
+	color: black;
 }
 
