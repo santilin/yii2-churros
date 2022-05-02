@@ -1,4 +1,4 @@
-- No estoy usando la última versión de 2amigos-usuario
+- 2amigos-usuario
   - Añadir opción visible en profile en resources ... _menu.php: yiiparam('user_profile');
 
 - Quitar (no definido) al imprimir

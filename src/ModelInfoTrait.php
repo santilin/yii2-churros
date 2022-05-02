@@ -90,13 +90,13 @@ trait ModelInfoTrait
 				case '{record_link}':
 					$placeholders[$match] = $this->recordDesc('link');
 					break;
-				case '{long}':
+				case '{record_long}':
 					$placeholders[$match] = $this->recordDesc('long');
 					break;
-				case '{medium}':
+				case '{record_medium}':
 					$placeholders[$match] = $this->recordDesc('medium');
 					break;
-				case '{short}':
+				case '{record_short}':
 					$placeholders[$match] = $this->recordDesc('short');
 					break;
 				}

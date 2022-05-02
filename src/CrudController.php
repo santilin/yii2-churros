@@ -299,7 +299,6 @@ class CrudController extends \yii\web\Controller
 		$content = $this->renderAjax('_pdf', [
 			'model' => $model,
 			'parent' => $this->parent_model,
-// 			'relationsProviders' => $this->getRelationsProviders($model),
 			'extraParams' => $this->extraParams('view', $model)
 		]);
 		$methods = [];
