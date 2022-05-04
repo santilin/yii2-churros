@@ -51,7 +51,7 @@ trait ReportsControllerTrait
 				'report' => $report,
 				'reportModel' => $search_model,
 				'params' => $params,
-				'extraParams' => $this->extraParams('report', $report)
+				'extraParams' => $this->changeParams($params, 'report', $report)
 			]);
 		} catch( \yii\base\InvalidArgumentException $e ) {
 			Yii::$app->session->setFlash('error',
@@ -93,7 +93,7 @@ trait ReportsControllerTrait
 				'report' => $report,
 				'reportModel' => $search_model,
 				'params' => $params,
-				'extraParams' => $this->extraParams('report', $report)
+				'extraParams' => $this->changeParams($params, 'report', $report)
 			]);
 		} catch( \yii\base\InvalidArgumentException $e ) {
 			Yii::$app->session->setFlash('error',

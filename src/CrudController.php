@@ -30,9 +30,9 @@ class CrudController extends \yii\web\Controller
 	/**
 	 * An array of extra params to pass to the views
 	 **/
-	public function extraParams($action_id, $model)
+	protected function changeActionParams($queryParams, $action_id, $model)
 	{
-		return null;
+		return $queryParams;
 	}
 
 	public function behaviors()
@@ -75,18 +75,16 @@ class CrudController extends \yii\web\Controller
 		*/
 	public function actionIndex()
 	{
-		$searchModel = $this->createSearchModel();
 		$params = Yii::$app->request->queryParams;
+		$searchModel = $this->createSearchModel();
 		if( $this->parent_model ) {
 			$params[$searchModel->formName()][$searchModel->getRelatedFieldForModel($this->parent_model)]
 				= $this->parent_model->getPrimaryKey();
 		}
-
 		return $this->render('index', [
 			'searchModel' => $searchModel,
 			'parent' => $this->parent_model,
-			'gridParams' => $params,
-			'extraParams' => $this->extraParams('index', $searchModel)
+			'gridParams' => $this->changeActionParams($params, 'index', $searchModel),
 		]);
 	}
 
@@ -104,10 +102,11 @@ class CrudController extends \yii\web\Controller
 					$model->t('churros', "You can't view {esta} {title} because you are not the author"));
 			}
 		}
+		$params = Yii::$app->request->queryParams;
 		return $this->render('view', [
 			'model' => $model,
 			'parent' => $this->parent_model,
-			'extraParams' => $this->extraParams('view', $model)
+			'extraParams' => $this->changeActionParams($params, 'view', $model)
 		]);
 	}
 
@@ -118,6 +117,7 @@ class CrudController extends \yii\web\Controller
 		*/
 	public function actionCreate()
 	{
+		$params = Yii::$app->request->queryParams;
 		$model = $this->findModel();
 		if (isset($_POST['_form_relations']) ) {
 			$relations = explode(",", $_POST['_form_relations']);
@@ -138,7 +138,7 @@ class CrudController extends \yii\web\Controller
 		return $this->render('create', [
 			'model' => $model,
 			'parent' => $this->parent_model,
-			'extraParams' => $this->extraParams('create', $model)
+			'extraParams' => $this->changeActionParams($params, 'create', $model)
 		]);
 	}
 
@@ -151,6 +151,7 @@ class CrudController extends \yii\web\Controller
 		*/
 	public function actionDuplicate($id)
 	{
+		$params = Yii::$app->request->queryParams;
 		if (Yii::$app->request->post('_asnew') != 0) {
 			$id = Yii::$app->request->post('_asnew');
 			$model = $this->findModel($id);
@@ -182,7 +183,7 @@ class CrudController extends \yii\web\Controller
 		return $this->render('saveAsNew', [
 			'model' => $model,
 			'parent' => $this->parent_model,
-			'extraParams' => $this->extraParams('duplicate', $model)
+			'extraParams' => $this->changeActionParams($params, 'duplicate', $model)
 		]);
 	}
 
@@ -194,6 +195,7 @@ class CrudController extends \yii\web\Controller
 	 */
 	public function actionUpdate($id)
 	{
+		$params = Yii::$app->request->queryParams;
 		$model = $this->findModel($id);
 		if( $this->accessOnlyOwner ) {
 			if( !$model->IAmOwner() ) {
@@ -221,7 +223,7 @@ class CrudController extends \yii\web\Controller
 		return $this->render('update', [
 			'model' => $model,
 			'parent' => $this->parent_model,
-			'extraParams' => $this->extraParams('update', $model)
+			'extraParams' => $this->changeActionParams($params,'update', $model)
 		]);
 	}
 
@@ -285,6 +287,7 @@ class CrudController extends \yii\web\Controller
 	 */
 	public function actionPdf($id)
 	{
+		$params = Yii::$app->request->queryParams;
 		$model = $this->findModel($id);
 		if( $this->accessOnlyOwner ) {
 			if( !$model->IAmOwner() ) {
@@ -299,7 +302,7 @@ class CrudController extends \yii\web\Controller
 		$content = $this->renderAjax('_pdf', [
 			'model' => $model,
 			'parent' => $this->parent_model,
-			'extraParams' => $this->extraParams('view', $model)
+			'extraParams' => $this->changeActionParams($params, 'view', $model)
 		]);
 		$methods = [];
 		$margin_header = AppHelper::yiiparam('pdfMarginHeader', 15);
