@@ -46,8 +46,11 @@ class CrudRbacAccessRule extends AccessRule
 				$perm = AppHelper::camelCase($action->controller->id) . ".delete";
 				break;
 			case 'duplicate':
-				$perm = AppHelper::camelCase($action->controller->id) . ".create"
-					&& AppHelper::camelCase($action->controller->id) . ".view";
+				if( $user->can(AppHelper::camelCase($action->controller->id) . ".create") ) {
+					$perm = AppHelper::camelCase($action->controller->id) . ".view";
+				} else {
+					return false;
+				}
 				break;
 			case 'create':
 				$perm = AppHelper::camelCase($action->controller->id) . ".create";
