@@ -20,6 +20,7 @@ trait ModelInfoTrait
 		return strtr( self::tableName(), [ '{' => '', '}' => '', '%' => '' ] );
 	}
 
+	/// @todo Move to some helper
 	public function maleWord($word) {
 		if( static::getModelInfo('female') === true ) {
 			return $word;
@@ -106,12 +107,6 @@ trait ModelInfoTrait
 		return strtr($translated, $placeholders);
 	}
 
-	public function linkToMe($base_route = '', $action = 'view')
-	{
-		$link = self::getModelInfo('controller_name') . "/$action/" . $this->getPrimaryKey();
-		return $base_route . $link;
-	}
-
 	public function recordDesc($format=null, $max_len = 0)
 	{
 		$ret = '';
@@ -164,6 +159,12 @@ trait ModelInfoTrait
 		return $ret;
 	}
 
+	public function linkToMe($base_route = '', $action = 'view')
+	{
+		$link = self::getModelInfo('controller_name') . "/$action/" . $this->getPrimaryKey();
+		return $base_route . $link;
+	}
+	
 	public function linkTo($action, $prefix = '', $format = 'short', $max_len = 0)
 	{
 		$url = $prefix;
@@ -249,11 +250,6 @@ trait ModelInfoTrait
 	{
 	}
 
-	// @todo put all these in a trait
-	public function setFakerValues($faker)
-	{
-	}
-
 	static public function createFromDefault($number = 1)
     {
 		$ret = [];
@@ -268,45 +264,6 @@ trait ModelInfoTrait
 			}
 		}
 		return $ret;
-    }
-
-    static public function createFromFaker($number = 1, $language = null)
-    {
-		if( $language == null ) {
-			$language = \app\helpers\AppHelper::getAppLocaleLanguage();
-		}
-		$faker = Faker::create($language);
-		$ret = [];
-		for( $count = 0; $count < $number; ++$count ) {
-			$modelname = get_called_class();
-			$model = new $modelname;
-			$model->setFakerValues($faker);
-			if( $number == 1 ) {
-				return $model;
-			} else {
-				$ret[] = $model;
-			}
-		}
-		return $ret;
-    }
-
-    static public function createFromFixture($fixture_file, $fixture_id)
-    {
-		$models = include($fixture_file);
-		if( isset($models[$fixture_id]) ) {
-			$ret = [];
-			for( $count = 0; $count < $number; ++$count ) {
-				$model = new self($models[$fixture_id]);
-				if( $number == 1 ) {
-					return $model;
-				} else {
-					$ret[] = $model;
-				}
-			}
-			return $ret;
-		} else {
-			throw new \app\helpers\ProgrammerException("No se encuentra un " . self::className() . "de id $fixture_id en el fichero $fixture_file");
-		}
     }
 
     static public function valuesAndLabels()
@@ -425,23 +382,6 @@ trait ModelInfoTrait
 		}
 	}
 
-
-	public function getFormattedValue($attr)
-	{
-		$method_name = "get" . ucwords(str_replace("_","",$attr)) . "Label";
-		if( method_exists($this, $method_name) ) {
-			return $this->$method_name();
-		}
-		return $this->$attr;
-	}
-
-	static public function addWithSep(& $source, $add, $sep = ', ')
-	{
-		if( !empty($add) ) {
-			$source = "$source$sep$add";
-		}
-	}
-
 	public function IAmOwner()
 	{
 		$blameable = $this->getBehavior('blameable');
@@ -483,7 +423,8 @@ trait ModelInfoTrait
 		throw new \Exception("field '$field' not supported in " . get_called_class() . "::handyFieldValues() ");
 	}
 
-
+/*
+	/// @todo move this to a new trait if necessary
 	private $dynamicFields = [];
 	private $dynamicTitles = [];
 	private $dynamicRules = [];
@@ -512,6 +453,53 @@ trait ModelInfoTrait
 		}
 		return parent::__set($name, $value);
 	}
+	
+	// @todo put all these in a trait
+	public function setFakerValues($faker)
+	{
+	}
 
+
+    static public function createFromFaker($number = 1, $language = null)
+    {
+		if( $language == null ) {
+			$language = \app\helpers\AppHelper::getAppLocaleLanguage();
+		}
+		$faker = Faker::create($language);
+		$ret = [];
+		for( $count = 0; $count < $number; ++$count ) {
+			$modelname = get_called_class();
+			$model = new $modelname;
+			$model->setFakerValues($faker);
+			if( $number == 1 ) {
+				return $model;
+			} else {
+				$ret[] = $model;
+			}
+		}
+		return $ret;
+    }
+
+    static public function createFromFixture($fixture_file, $fixture_id)
+    {
+		$models = include($fixture_file);
+		if( isset($models[$fixture_id]) ) {
+			$ret = [];
+			for( $count = 0; $count < $number; ++$count ) {
+				$model = new self($models[$fixture_id]);
+				if( $number == 1 ) {
+					return $model;
+				} else {
+					$ret[] = $model;
+				}
+			}
+			return $ret;
+		} else {
+			throw new \app\helpers\ProgrammerException("No se encuentra un " . self::className() . "de id $fixture_id en el fichero $fixture_file");
+		}
+    }
+	
+	
+*/
 } // trait ModelInfoTrait
 
