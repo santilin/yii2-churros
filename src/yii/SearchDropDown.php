@@ -27,25 +27,8 @@ class SearchDropDown extends \yii\widgets\InputWidget
     {
 		$view = $this->getView();
 		$name = $this->options['name'];
-		$next_tab = isset($this->options['next_tab'])?$this->options['next_tab']:'';
 		$id = $this->options['id'];
-		/// @todo next1: next non hidden input
 		$js = <<<JS
-$('#_search_box_$id').keydown( function(e) {
-	if( e.keyCode == 9 && e.shiftKey == false) {
-		var dropdown = $('#$id');
-		if( dropdown[0].selectedIndex > 0 ) {
-			console.log("Avanzando");
-			if( '$next_tab' != '' ) {
-				setTimeout( function() { $('#$next_tab').focus(); }, 10 );
-			} else {
-				var next1 = $(":input:not([type=hidden]):eq(" + ($(":input:not([type=hidden])").index(dropdown) + 1) + ")");
-				setTimeout( function() { console.log(next1); next1.focus(); }, 10 );
- 			}
-		}
-	}
-});
-
 $('#_search_box_$id').keyup( function(e) {
 	if( e.keyCode == 9 && e.shiftKey == false) {
 		return; // The tab key pressed that got the focus
@@ -89,6 +72,9 @@ JS;
         if( count($this->items)>1 ) {
 			$ret .= Html::input('text', null, null, $options_of_input );
 		}
+		// Avoid getting keyboard focus
+		unset($this->options['autofocus']);
+		$this->options['tabindex'] = '-1';
  		$ret .= Html::activeDropDownList($this->model, $this->attribute,
 				$this->items, $this->options);
 		return $ret;
