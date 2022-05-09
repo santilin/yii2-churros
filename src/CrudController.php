@@ -648,6 +648,13 @@ class CrudController extends \yii\web\Controller
 				$prefix = $this->getRoutePrefix() . $parent_route;
 				// https://stackoverflow.com/questions/7475437/find-first-character-that-is-different-between-two-strings
 				$pos_first_different = strspn($prefix ^ $myroute, "\0");
+				// and go back to the /
+				while( $pos_first_different >= 0 && $myroute[$pos_first_different] != '/' ) {
+					--$pos_first_different;
+				}
+				if( $pos_first_different > 0 ) {
+					++$pos_first_different;
+				}
 				$ret = $prefix . substr($myroute, $pos_first_different);
 			} else {
 				$ret = $myroute;
