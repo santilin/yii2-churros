@@ -94,7 +94,7 @@ class AuthController extends Controller
 			Yii::t('churros', 'Editor de sus {model}', ['model' => $model_title]), $msg, $auth);
 		if( $msg != '' ) echo "$msg\n";
 		$model_visora_own = AuthHelper::createOrUpdateRole(
-			$model_name . '.visora.own',
+			$model_name . '.visor.own',
 			Yii::t('churros', 'Visor de sus {model}', ['model' => $model_title]), $msg, $auth);
 		if( $msg != '' ) echo "$msg\n";
 
@@ -157,7 +157,7 @@ class AuthController extends Controller
 		$auth = $this->authManager;
 
 		$model = new $model_class;
-		$model_title = $model->t('app', " {title_plural}");
+		$model_title = $model->t('app', "{title_plural}");
 
 		$role_name = "module.$module_name.menu.all";
 		$role_all = AuthHelper::createOrUpdateRole($role_name,

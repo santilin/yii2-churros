@@ -174,7 +174,7 @@ html;
 		$attribute = $this->attributes[$attr_key];
 		$template = $attribute['template']??$this->fieldsTemplate;
         if (is_string($template)) {
-            $labelOptions = AppHelper::mergeAndConcat(['class'], 
+            $labelOptions = AppHelper::mergeAndConcat(['class'],
 				$labelOptions,
 				$attribute['labelOptions']??[ 'class' => 'rv-label']);
             $labelOptions = Html::renderTagAttributes($labelOptions);
@@ -278,7 +278,7 @@ html;
 				$layout_rows = [];
 				$row = [];
 				$nc = $ncols;
-				foreach( array_keys($this->attributes) as $key ) {
+				foreach( $this->attributes as $key => $attribute ) {
 					if ($nc-- == 0 ) {
 						$nc = $ncols-1;
 						$layout_rows[] = $row;
@@ -313,7 +313,7 @@ html;
 					$fo = [ 'class' => "field-$attribute" ];
 					$row .= $this->renderAttribute($attribute, $lo, $fo, $index);
 				}
-				$ret .= '<div' . Html::renderTagAttributes($rowOptions) 
+				$ret .= '<div' . Html::renderTagAttributes($rowOptions)
 					. ">$row</div>";
 			}
 		}
