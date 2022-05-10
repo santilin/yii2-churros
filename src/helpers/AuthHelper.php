@@ -25,12 +25,12 @@ class AuthHelper
 			$permission->description = $perm_desc;
 			$auth->add($permission);
 			$msg = $permission->name . ' => ' . $permission->description
-				. Yii::t('churros', ': permission created');
+				. ': ' . Yii::t('churros', 'permission created');
 		} else if( $permission->description != $perm_desc ) {
 			$permission->description = $perm_desc;
 			$auth->update($perm_name, $permission);
 			$msg = $permission->name . ' => ' . $permission->description
-				. Yii::t('churros', ': permission updated');
+				. ': ' . Yii::t('churros', 'permission updated');
 		}
 		return $permission;
 	}
@@ -47,12 +47,12 @@ class AuthHelper
 			$role->description = $role_desc;
 			$auth->add($role);
 			$msg = $role->name . ' => ' . $role->description
-				. Yii::t('churros', ': role created');
+				. ': ' . Yii::t('churros', 'role created');
 		} else if( $role->description != $role_desc ) {
 			$role->description = $role_desc;
 			$auth->update($role_name, $role);
 			$msg = $role->name . ' => ' . $role->description
-				. Yii::t('churros', ': role updated');
+				. ': ' . Yii::t('churros', 'role updated');
 		}
 		return $role;
 	}

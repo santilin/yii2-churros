@@ -73,36 +73,36 @@ class AuthController extends Controller
 		$auth = $this->authManager;
 		$msg = '';
 		$visora = AuthHelper::createOrUpdateRole('app.visor',
-			Yii::t('churros', 'Ver todos los ficheros'), $msg, $auth);
+			Yii::t('churros', 'View all files'), $msg, $auth);
 		if( $msg != '' ) echo "$msg\n";
 		$editora = AuthHelper::createOrUpdateRole('app.editor',
-			Yii::t('churros', 'Editar todos los ficheros'), $msg, $auth);
+			Yii::t('churros', 'Edit all files'), $msg, $auth);
 		if( $msg != '' ) echo "$msg\n";
 
 		$model = new $model_class;
 		$model_title = $model->t('app', "{title_plural}");
 		$model_editora = AuthHelper::createOrUpdateRole(
 			$model_name . '.editor',
-			Yii::t('churros', 'Editor de {model}', ['model' => $model_title]), $msg, $auth);
+			Yii::t('churros', '{model} editor', ['model' => $model_title]), $msg, $auth);
 		if( $msg != '' ) echo "$msg\n";
 		$model_visora = AuthHelper::createOrUpdateRole(
 			$model_name . '.visor',
-			Yii::t('churros', 'Visor de {model}', ['model' => $model_title]), $msg, $auth);
+			Yii::t('churros', '{model} visor', ['model' => $model_title]), $msg, $auth);
 		if( $msg != '' ) echo "$msg\n";
 		$model_editora_own = AuthHelper::createOrUpdateRole(
 			$model_name . '.editor.own',
-			Yii::t('churros', 'Editor de sus {model}', ['model' => $model_title]), $msg, $auth);
+			Yii::t('churros', 'Their own {model} editor', ['model' => $model_title]), $msg, $auth);
 		if( $msg != '' ) echo "$msg\n";
 		$model_visora_own = AuthHelper::createOrUpdateRole(
 			$model_name . '.visor.own',
-			Yii::t('churros', 'Visor de sus {model}', ['model' => $model_title]), $msg, $auth);
+			Yii::t('churros', 'Their own {model} viewer', ['model' => $model_title]), $msg, $auth);
 		if( $msg != '' ) echo "$msg\n";
 
-		foreach( [ 'create' => Yii::t('churros', 'Crear'),
-					'view' => Yii::t('churros', 'Ver'),
-					'edit' => Yii::t('churros', 'Editar'),
-					'delete' => Yii::t('churros', 'Borrar'),
-					'index' => Yii::t('churros', 'Listar')
+		foreach( [ 'create' => Yii::t('churros', 'Create'),
+					'view' => Yii::t('churros', 'View'),
+					'edit' => Yii::t('churros', 'Edit'),
+					'delete' => Yii::t('churros', 'Delete'),
+					'index' => Yii::t('churros', 'List')
 				  ] as $perm_name => $perm_desc) {
 			$permission = AuthHelper::createOrUpdatePermission(
 				$model_name . ".$perm_name",
@@ -137,7 +137,7 @@ class AuthController extends Controller
 			}
 			$permission_own = AuthHelper::createOrUpdatePermission(
 				$model_name . ".$perm_name.own",
-				$perm_desc .' ' . $model->t('churros', "sus propi{-as} {title_plural}"), $msg, $auth);
+				$perm_desc .' ' . $model->t('churros', 'their own {title_plural}'), $msg, $auth);
 			if ($msg != '' ) echo "$msg\n";;
 			if( !$auth->hasChild($model_editora_own, $permission_own) ) {
 				$auth->addChild($model_editora_own, $permission_own);
@@ -161,14 +161,13 @@ class AuthController extends Controller
 
 		$role_name = "module.$module_name.menu.all";
 		$role_all = AuthHelper::createOrUpdateRole($role_name,
-			Yii::t('churros', "Acceso a todos los modelos del módulo $module_name"),
-			$msg, $auth);
+			Yii::t('churros', 'Access to all models of module {module}', 'Acceso a todos los modelos del módulo {module}', [ '{module}' => $module_name ]), $msg, $auth);
 		if ($msg != '' ) echo "$msg\n";
 
 		$perm_name = "module.$module_name.menu.$model_name";
 		$permission = AuthHelper::createOrUpdatePermission($perm_name,
-			Yii::t('churros', "Acceso al menú de $model_title del módulo $module_name"),
-			$msg, $auth);
+			Yii::t('churros', 'Access to {model_title} menu for {module_name} module',
+				[ '{model_title}' => $model_title, '{module_name}' => $module_name ]), $msg, $auth);
 		if ($msg != '' ) echo "$msg\n";
 		if( !$auth->hasChild($role_all, $permission) ) {
 			$auth->addChild($role_all, $permission);
@@ -183,8 +182,8 @@ class AuthController extends Controller
 	{
 		$msg = null;
 		AuthHelper::createOrUpdatePermission("module.$module_name.menu",
-			Yii::t('churros', "Acceso al menu del módulo $module_name"),
-			$msg, $this->authManager);
+			Yii::t('churros', 'Access to \'{module}\' module menu', 
+			[ '{module}' => $module_name ]), $msg, $this->authManager);
 		if ($msg != '' ) echo "$msg\n";
 	}
 

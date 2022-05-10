@@ -11,12 +11,12 @@ class NifValidator extends Validator
 		if( !$validating_nif->verify() ) {
 			if( $model instanceof ModelInfoTrait ) {
 				$this->addError($model, $attribute,
-					$model->t('churros', "The {attribute} '{value}' is not valid", [ 'attribute' => $model->getAttributeLabel($attribute),
+					$model->t('churros', "The value '{value}' is not valid for {attribute}", [ 'attribute' => $model->getAttributeLabel($attribute),
 						'value' => $model->$attribute
 					]));
 			} else {
 				$this->addError($model, $attribute,
-					\Yii::t('churros', "The {attribute} '{value}' is not valid", [
+					\Yii::t('churros', "The value '{value}' is not valid for {attribute}", [
 						'attribute' => $attribute ,
 						'value' => $model->$attribute,
 					]));
