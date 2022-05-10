@@ -22,10 +22,10 @@ class CrudController extends \yii\web\Controller
 	protected $parent_controller = null;
 	protected $allowedActions = [];
 	public $accessOnlyOwner = false;
-	const MSG_CREATED = "{La} {title} <a href=\"{model_link}\">{record_long}</a> has been successfully created.";
-	const MSG_UPDATED = "{La} {title} <a href=\"{model_link}\">{record_long}</a> has been successfully updated.";
-	const MSG_DELETED = "{La} {title} {record_long} has been successfully deleted.";
-	const MSG_DUPLICATED = "{La} {title} <a href=\"{model_link}\">{record_long}</a> has been successfully duplicated.";
+	const MSG_CREATED = '{La} {title} <a href="{model_link}">{record_medium}</a> has been successfully created.';
+	const MSG_UPDATED = '{La} {title} <a href="{model_link}">{record_medium}</a> has been successfully updated.';
+	const MSG_DELETED = '{La} {title} <strong>{record_long}</strong> has been successfully deleted.';
+	const MSG_DUPLICATED = '{La} {title} <a href="{model_link}">{record_medium}</a> has been successfully duplicated.';
 
 	/**
 	 * An array of extra params to pass to the views
@@ -625,7 +625,8 @@ class CrudController extends \yii\web\Controller
 			$this->parent_model = $parent_model->findOne($parent_id);
 			if ($this->parent_model == null) {
 				throw new NotFoundHttpException($parent_model->t('churros',
-					"El registro madre {title} de id '$parent_id' no existe"));
+					"The parent record of {title} with '{id}' id does not exist", 
+					[ '{id}' => $parent_id]));
 			}
 		} else {
 			return null;

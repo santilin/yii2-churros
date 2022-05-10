@@ -1,18 +1,79 @@
+= Prioritario
 == CrudController
-* No mostrar botones sobre los que no tiene permisos.
-* Pasar en extraParams los CrudPerms a las vistas
-- 2amigos-usuario
-  - Añadir opción visible en profile en resources ... _menu.php: yiiparam('user_profile');
+* Comprobar traducciones model->t en ReportsControllerTrait
+* No funciona el enlace del mensaje "se ha guardado correctamente" de un detalle
+* Enviar a las vistas los permisos
+== Adjuntos y subir ficheros
+- Opciones
+	- tabla de adjuntos.
+	- behaviour
+	- behaviour con múltiple
+== Print y pdf
+* CrudController::pdf: Incluir css del módulo/modelo actual
+* Quitar (no definido) al imprimir
+* Hacer uso de los model.Agente.report
+== GridView ==
+* Añadir un parámetro al Index que sea la vista o sea el gridfields
+- Grid: cuando se filtra, poner "Filtrando 1-1 de s"
+* GridView: Ocultar filtro si no hay resultados
+** BreadCrumbs: Index: Añadir el orden o el filtro ("filtrado") ("ordenado por")
 
-- Quitar (no definido) al imprimir
-- Modelo de adjuntos.
-- allSearchFields:
-	- quitar relname de excluded y visible_fields
+= No prioritario
+== Models
+* Tres tipos campos calculados:
+- model_before_save
+- model_after_read & __set
+- form input change
+
+== Auth
+* actionAddCrudPermsToRoles --perms --roles --models
+* actionDelCrudPermsFromRoles --perms --roles --models
+* actionAddPermsToRole --perms rolename
+* actionDelPermsFromRole --perms rolename
+* actionAddRolesToUsers --roles --users
+* actionDelRolesFromUsers --roles --users
+
+== Reports
+* Añadir más funciones sobre los campos: año, mes, día, cuenta, media, máximo, mínimo, etc.
+
+
+== Administración de usuarios
+=== 2amigos-usuario
+  - Probar versión devel, ver si usa bootstrap4,
+  - Hacer un fork:
+	- Añadir opción visible en profile en resources ... _menu.php: yiiparam('user_profile');
+	- rediseñar las vistas
+
+== Web
+=== Configuración
+- ¿moneda por aplicación?
 - Configuración fecha: Fija, por usuario
 - Configuración idioma: Fijo, por usuario
+<<<<<<< HEAD
 
 
 == Anidar RercordViews con un static
+=======
+>>>>>>> 0d1cdb995f7004f4ef130a77faf3c10b2f302ecb
+
+=== css
+* css: width = maxlength en integers, floats y dates
+
+== Formularios
+=== Búsquedas
+- allSearchFields:
+	- quitar relname de excluded y visible_fields
+
+== Inactivatable date
+* Etiquetas según género del campo
+
+== Widgets
+* Añadir layout table a form y a recordview
+* Añadir headings a forms
+* Estudiar el $toggle_boton_mas
+
+== SearchDropDown
+* Si un searchdropdown está disabled o readonly no mostrar el campo de búsqueda
 
 == TableListView
 * Quitar márgenes a pager.
@@ -20,8 +81,27 @@
 * Añadir css como asset.
 
 == GridView ==
-* Si ordenas, se pierde el filtro
 - GridView: Report : grupos: opciones para Mostrar encabezado, mostrar pie.
+<<<<<<< HEAD
 - Grid: cuando se filtra, poner "Filtrando 1-1 de s"
 * Añadir un parámetro al Index que sea la vista o sea el gridfields
 * GridView: Ocultar filtro si no hay resultados
+=======
+
+== yii2
+* Max-length: Tomar lo que se ha definido en la base de datos o capturar la excepción.
+* Radio List: Ver cómo añadir el autofocus a cada item.
+* Sacarle más partido al returnTo con el ActionColumn
+
+== 3rd party
+* html-to-rtf y .editorconfig https://github.com/github-grabaz/html-rtf-converter/blob/master/.editorconfig
+https://github.com/pavlm/yii2-stats-widget Time Stats widget
+Modelos: Estudiar uuidbehavior, softdeletes y lock. Faltan los behaviors
+Formulario de settings: file:///home/santilin/devel/yii2base/yii2-docs/guide-input-tabular-input.html
+
+== Código
+* Recordar:
+//		Yii::$app->response->redirect(['/curso'])->send();
+//		Yii::$app->end();
+
+>>>>>>> 0d1cdb995f7004f4ef130a77faf3c10b2f302ecb

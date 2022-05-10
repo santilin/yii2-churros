@@ -174,8 +174,7 @@ trait ModelInfoTrait
 		$url .= $this->controllerName();
 		if( $this->getIsNewRecord() ) {
 			$url .= '/create';
-			return \yii\helpers\Html::a($this->t("New {title}"),
-					$url);
+			return \yii\helpers\Html::a($this->t("Create {title}"), $url);
 		} else {
 			$url .= "/$action";
 			return \yii\helpers\Html::a($this->recordDesc($format, $max_len),

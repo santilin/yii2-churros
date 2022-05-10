@@ -212,7 +212,7 @@ class GridGroup extends BaseObject
 			'class' => 'grid-group-foot-' . strval($this->level) . ' w1',
 			'colspan' => $colspan,
 		];
-		$ret = Html::tag('td', Yii::t('churros', "Totals ") . $content, $tdoptions );
+		$ret = Html::tag('td', Yii::t('churros', "Totals") . ' ' . $content, $tdoptions );
 		$nc = 0;
 		foreach( $this->grid->columns as $kc => $column ) {
 			if( $nc++ < $colspan ) {
