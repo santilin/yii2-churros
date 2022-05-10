@@ -34,7 +34,7 @@ trait ReportsControllerTrait
 		}
 		if( $report->model == '' || !class_exists($search_model_name) ) {
 			Yii::$app->session->setFlash('error',
-				$report->t('churros', "Informe <strong>{record}</strong>: no está definido el modelo $search_model_name"));
+				$report->t('churros', '{search_model_name}: model not found in report "{record}"', ['{search_model_name}' => $search_model_name]));
 			return $this->redirect(['view', 'id'=>$id]);
 		}
 		$search_model = new $search_model_name;
@@ -44,7 +44,7 @@ trait ReportsControllerTrait
 		$report->encodeValue();
 		if( $this->doSave($report) ) {
 			Yii::$app->session->setFlash('success',
-				$report->t('churros', "El informe <strong>{record}</strong> se ha guardado correctamente."));
+				$report->t('churros', 'The report "{record}" has been successfully saved'));
 		}
 		try {
 			return $this->render('report', [
@@ -55,7 +55,7 @@ trait ReportsControllerTrait
 			]);
 		} catch( \yii\base\InvalidArgumentException $e ) {
 			Yii::$app->session->setFlash('error',
-				$report->t('churros', "El informe <strong>{record}</strong> tiene errores en su definición"));
+				$report->t('churros', 'The report "{record}" has definition errors'));
 			throw $e;
 		}
 	}
@@ -79,8 +79,7 @@ trait ReportsControllerTrait
 			$search_model_name .= "Search";
 		}
 		if( $report->model == '' || !class_exists($search_model_name) ) {
-			Yii::$app->session->setFlash('error',
-				$report->t('churros', "Informe <strong>{record}</strong>: no está definido el modelo '$search_model_name'"));
+			$report->t('churros', '{search_model_name}: model not found in report "{record}"', ['{search_model_name}' => $search_model_name]));
 			return $this->redirect(['view', 'id'=>$id]);
 		}
 		$search_model = new $search_model_name;
@@ -97,7 +96,7 @@ trait ReportsControllerTrait
 			]);
 		} catch( \yii\base\InvalidArgumentException $e ) {
 			Yii::$app->session->setFlash('error',
-				$report->t('churros', "El informe <strong>{record}</strong> tiene errores en su definición"));
+				$report->t('churros', 'The report "{record}" has definition errors'));
 			throw $e;
 		}
 	}
