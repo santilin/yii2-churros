@@ -1,3 +1,6 @@
+== CrudController
+* No mostrar botones sobre los que no tiene permisos.
+* Pasar en extraParams los CrudPerms a las vistas
 - 2amigos-usuario
   - Añadir opción visible en profile en resources ... _menu.php: yiiparam('user_profile');
 
@@ -7,7 +10,9 @@
 	- quitar relname de excluded y visible_fields
 - Configuración fecha: Fija, por usuario
 - Configuración idioma: Fijo, por usuario
-- Configuración moneda: Fija, por usuario?
+
+
+== Anidar RercordViews con un static
 
 == TableListView
 * Quitar márgenes a pager.
@@ -19,5 +24,4 @@
 - GridView: Report : grupos: opciones para Mostrar encabezado, mostrar pie.
 - Grid: cuando se filtra, poner "Filtrando 1-1 de s"
 * Añadir un parámetro al Index que sea la vista o sea el gridfields
-* Poner los title_abbrev en los headers del grid
 * GridView: Ocultar filtro si no hay resultados
