@@ -130,6 +130,9 @@ class FormHelper
 		}
 	}
 
+	/**
+	 * fixes tabindex and layout of the form form_rows
+	 */
 	static public function fixLayoutFields(string $layout,
 		array $form_layout_rows, array &$input_opts, array &$fldcfg)
 	{

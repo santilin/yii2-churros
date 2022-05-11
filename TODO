@@ -1,23 +1,30 @@
 = Prioritario
-== CrudController
-* No funciona el enlace del mensaje "se ha guardado correctamente" de un detalle
-* Enviar a las vistas los permisos
 == Adjuntos y subir ficheros
 - Opciones
 	- tabla de adjuntos.
 	- behaviour
 	- behaviour con múltiple
+
 == Print y pdf
 * CrudController::pdf: Incluir css del módulo/modelo actual
 * Quitar (no definido) al imprimir
 * Hacer uso de los model.Agente.report
+
 == GridView ==
 * Añadir un parámetro al Index que sea la vista o sea el gridfields
 - Grid: cuando se filtra, poner "Filtrando 1-1 de s"
 * GridView: Ocultar filtro si no hay resultados
 ** BreadCrumbs: Index: Añadir el orden o el filtro ("filtrado") ("ordenado por")
+* 2 gridviews: https://www.yiiframework.com/doc/guide/2.0/en/output-data-widgets#multiple-gridviews
+
+= Sin clasificar
+* Pasar javascript churros a un asset: searchformjs y tecla enter.
+* Fork del gentelella
 
 = No prioritario
+== CrudController
+* No funciona el enlace del mensaje "se ha guardado correctamente" de un detalle
+* Enviar a las vistas los permisos
 == Models
 * Tres tipos campos calculados:
 - model_before_save
