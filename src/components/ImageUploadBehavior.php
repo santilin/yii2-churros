@@ -4,7 +4,7 @@
  * @link http://yiidreamteam.com/yii2/upload-behavior
  */
 
-namespace yiidreamteam\upload;
+namespace santilin\churros\components;
 
 use PHPThumb\GD;
 use yii\helpers\ArrayHelper;

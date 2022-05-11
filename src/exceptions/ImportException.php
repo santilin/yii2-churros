@@ -1,14 +1,14 @@
 <?php
 /**
- * @link 
- * @copyright 
- * @license 
+ * @link
+ * @copyright
+ * @license
  */
 
 namespace santilin\churros\components;
 
 /**
- * DataException represents an error in the user data
+ * ImportException represents an error in the user data
  *
  * @author santilin <software@noviolento.es>
  * @since 1.0
@@ -24,4 +24,4 @@ class ImportException extends \Exception
     }
 }
 
- 
+

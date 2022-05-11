@@ -4,7 +4,7 @@
  * @author Alexey Samoylov <alexey.samoylov@gmail.com>
  * @link http://yiidreamteam.com/yii2/upload-behavior
  */
-namespace santilin\churros;
+namespace santilin\churros\components;
 
 use Yii;
 use yii\base\InvalidCallException;
@@ -35,11 +35,6 @@ class FileUploadBehavior extends \yii\base\Behavior
     /** @var string Where to store images. */
     public $fileUrl = '/uploads/[[pk]].[[extension]]';
 
-    /**
-     * @var string Attribute used to link owner model with it's parent
-     * @deprecated Use attribute_xxx placeholder instead
-     */
-    public $parentRelationAttribute;
 
     /** @var \yii\web\UploadedFile */
     protected $file;
@@ -53,8 +48,8 @@ class FileUploadBehavior extends \yii\base\Behavior
             ActiveRecord::EVENT_BEFORE_VALIDATE => 'beforeValidate',
             ActiveRecord::EVENT_BEFORE_INSERT => 'beforeSave',
             ActiveRecord::EVENT_BEFORE_UPDATE => 'beforeSave',
-            ActiveRecord::EVENT_AFTER_INSERT => 'afterSave',
-            ActiveRecord::EVENT_AFTER_UPDATE => 'afterSave',
+            ActiveRecord::EVENT_AFTER_INSERT => 'afterInsert',
+            ActiveRecord::EVENT_AFTER_UPDATE => 'afterUpdate',
             ActiveRecord::EVENT_BEFORE_DELETE => 'beforeDelete',
         ];
     }
@@ -103,6 +98,8 @@ class FileUploadBehavior extends \yii\base\Behavior
             if (true !== $this->owner->isNewRecord && empty($this->owner->{$this->attribute})) {
                 $this->owner->{$this->attribute} = ArrayHelper::getValue($this->owner->oldAttributes, $this->attribute,
                     null);
+				$this->cleanFiles();
+				$this->owner->{$this->attribute} = null;
             }
         }
     }
@@ -174,8 +171,6 @@ class FileUploadBehavior extends \yii\base\Behavior
                     return lcfirst($pk);
                 case 'id_path':
                     return static::makeIdPath($this->owner->getPrimaryKey());
-                case 'parent_id':
-                    return $this->owner->{$this->parentRelationAttribute};
             }
             if (preg_match('|^attribute_(\w+)$|', $name, $am)) {
                 $attribute = $am[1];
@@ -208,9 +203,9 @@ class FileUploadBehavior extends \yii\base\Behavior
     }
 
     /**
-     * After save event.
+     * After insert event.
      */
-    public function afterSave()
+    public function afterInsert()
     {
         if ($this->file instanceof UploadedFile !== true) {
             return;
@@ -225,6 +220,26 @@ class FileUploadBehavior extends \yii\base\Behavior
         }
 
         $this->owner->trigger(static::EVENT_AFTER_FILE_SAVE);
+    }
+
+    /**
+     * After insert event.
+     */
+    public function afterUpdate()
+    {
+        if ($this->file instanceof UploadedFile === true) {
+			$path = $this->getUploadedFilePath($this->attribute);
+
+			FileHelper::createDirectory(pathinfo($path, PATHINFO_DIRNAME), 0775, true);
+
+			if (!$this->file->saveAs($path)) {
+				throw new FileUploadException($this->file->error, 'File saving error.');
+			}
+
+			$this->owner->trigger(static::EVENT_AFTER_FILE_SAVE);
+		} else {
+
+		}
     }
 
     /**
