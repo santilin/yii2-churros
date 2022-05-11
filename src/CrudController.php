@@ -9,8 +9,7 @@ use yii\web\NotFoundHttpException;
 use yii\web\UploadedFile;
 use yii\web\HttpException;
 use yii\base\ErrorException;
-use SaveModelException;
-use DataException;
+use santilin\churros\exceptions\{DataException,SaveModelException};
 use santilin\churros\helpers\AppHelper;
 
 /**
@@ -625,7 +624,7 @@ class CrudController extends \yii\web\Controller
 			$this->parent_model = $parent_model->findOne($parent_id);
 			if ($this->parent_model == null) {
 				throw new NotFoundHttpException($parent_model->t('churros',
-					"The parent record of {title} with '{id}' id does not exist", 
+					"The parent record of {title} with '{id}' id does not exist",
 					[ '{id}' => $parent_id]));
 			}
 		} else {

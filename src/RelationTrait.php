@@ -11,11 +11,11 @@ namespace santilin\churros;
 
 use Yii;
 use yii\db\ActiveQuery;
-use \yii\db\ActiveRecord;
-use \yii\db\Exception;
+use yii\db\ActiveRecord;
+use yii\db\Exception;
 use yii\db\IntegrityException;
-use \yii\helpers\Inflector;
-use \yii\helpers\StringHelper;
+use yii\helpers\Inflector;
+use yii\helpers\StringHelper;
 use yii\helpers\ArrayHelper;
 
 /*

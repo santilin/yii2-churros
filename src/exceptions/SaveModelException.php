@@ -5,7 +5,7 @@
  * @license
  */
 
-namespace santilin\churros;
+namespace santilin\churros\exceptions;
 use Yii;
 
 /**

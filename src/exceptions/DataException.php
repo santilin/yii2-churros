@@ -1,11 +1,11 @@
 <?php
 /**
- * @link 
- * @copyright 
- * @license 
+ * @link
+ * @copyright
+ * @license
  */
 
-namespace santilin\churros;
+namespace santilin\churros\exceptions;
 
 /**
  * DataException represents an error in the user data
