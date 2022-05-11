@@ -237,8 +237,6 @@ class FileUploadBehavior extends \yii\base\Behavior
 			}
 
 			$this->owner->trigger(static::EVENT_AFTER_FILE_SAVE);
-		} else {
-
 		}
     }
 
