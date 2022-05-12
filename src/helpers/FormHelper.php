@@ -8,14 +8,15 @@
 namespace santilin\churros\helpers;
 
 use Yii;
+use yii\helpers\Html;
 
 class FormHelper
 {
 	public const FIELD_CONFIG_1COL = [
 		'horizontalCssClasses' => [
-			'label' => 'col-sm-12 text-left',
+			'label' => 'col-sm-1 one-column-row',
 			'offset' => 'col-sm-offset-1',
-			'wrapper' => 'col-sm-12',
+			'wrapper' => 'col-sm-11',
 		]
 	];
 
@@ -94,8 +95,10 @@ class FormHelper
 			foreach($form_layout_rows as $lrow ) {
 				switch(count($lrow)) {
 				case 1:
+					echo '<div class="row">';
 					echo '<div class="col-sm-12">';
 					echo $form_fields[$lrow[0]];
+					echo "</div>";
 					echo "</div>";
 					break;
 				case 2:
@@ -139,7 +142,9 @@ class FormHelper
 		if( count($form_layout_rows ) ) {
 			foreach($form_layout_rows as $lrow) {
 				foreach($lrow as $f) {
-					$input_opts[$f]['tabindex'] = FormHelper::ti();
+					if( isset($input_opts[$f]['tabindex']) ) {
+						$input_opts[$f]['tabindex'] = FormHelper::ti();
+					}
 				}
 				switch(count($lrow)) {
 				case 1:
@@ -159,5 +164,14 @@ class FormHelper
 		}
 	}
 
+	static public function layoutInput(string $name, string $input, string $label, 
+		string $toolkit = 'bs3'): string
+	{
+		return Html::beginTag('div', ['class' => "form-group field-$name-cc"])
+			. Html::label($label, '', ['class' => 'control-label'])
+			. $input
+			. Html::endTag('div');
+	}
+	
 
 } // class
