@@ -35,6 +35,9 @@ class FileUploadBehavior extends \yii\base\Behavior
     /** @var string Where to store images. */
     public $fileUrl = '/uploads/[[pk]].[[extension]]';
 
+    /** @var string Where to store images. */
+    public $fileFieldValue = '[[pk]].[[extension]]';
+
 
     /** @var \yii\web\UploadedFile */
     protected $file;
@@ -91,14 +94,18 @@ class FileUploadBehavior extends \yii\base\Behavior
                 $behavior->cleanFiles();
             }
 
-            $this->owner->{$this->attribute} = implode('.',
-                array_filter([$this->file->baseName, $this->file->extension])
-            );
+//              $this->owner->{$this->attribute} = implode('.',
+//                  array_filter([$this->file->baseName, $this->file->extension]);
+
+			$this->owner->{$this->attribute} = $this->getUploadedFieldValue($this->attribute);
+
         } else {
             if (true !== $this->owner->isNewRecord && empty($this->owner->{$this->attribute})) {
                 $this->owner->{$this->attribute} = ArrayHelper::getValue($this->owner->oldAttributes, $this->attribute,
                     null);
-				$this->cleanFiles();
+				if( !empty($this->owner->{$this->attribute}) ) {
+					$this->cleanFiles();
+				}
 				$this->owner->{$this->attribute} = null;
             }
         }
@@ -281,4 +288,23 @@ class FileUploadBehavior extends \yii\base\Behavior
 
         return $behavior->resolvePath($behavior->fileUrl);
     }
+
+    /**
+     * Returns the value to be saved for the attribute.
+     *
+     * @param string $attribute
+     * @return string|null
+     * @author <santilin> software@noviolento.es
+     */
+    public function getUploadedFieldValue($attribute)
+    {
+        if (!$this->owner->{$attribute}) {
+            return null;
+        }
+
+        $behavior = static::getInstance($this->owner, $attribute);
+
+        return $behavior->resolvePath($behavior->fileFieldValue);
+    }
+
 }
