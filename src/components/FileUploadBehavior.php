@@ -100,13 +100,9 @@ class FileUploadBehavior extends \yii\base\Behavior
 			$this->owner->{$this->attribute} = $this->getUploadedFieldValue($this->attribute);
 
         } else {
-            if (true !== $this->owner->isNewRecord && empty($this->owner->{$this->attribute})) {
+            if (false === $this->owner->isNewRecord && empty($this->owner->{$this->attribute})) {
                 $this->owner->{$this->attribute} = ArrayHelper::getValue($this->owner->oldAttributes, $this->attribute,
                     null);
-				if( !empty($this->owner->{$this->attribute}) ) {
-					$this->cleanFiles();
-				}
-				$this->owner->{$this->attribute} = null;
             }
         }
     }
