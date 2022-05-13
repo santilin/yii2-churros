@@ -17,6 +17,7 @@ class ImageInput extends \kartik\file\FileInput
 	public $controller_url;
 	public $caption;
 	public $show_caption;
+	public $deleteCheck = false;
 
     /**
      * {@inheritdoc}
@@ -44,15 +45,28 @@ class ImageInput extends \kartik\file\FileInput
 			$images_uns = @unserialize($images);
 			if ($images_uns !== false ) {
 				foreach( $images_uns as $filename ) {
-					$this->pluginOptions['initialPreview'][] = Yii::getAlias('@web') . '/uploads/' . $filename;
+					$this->pluginOptions['initialPreview'][] = Yii::getAlias("@uploads/$filename");
 				}
 			} else {
-				$this->pluginOptions['initialPreview'][] = Yii::getAlias('@web') . '/uploads/' . $images;
+				$this->pluginOptions['initialPreview'][] = Yii::getAlias("@uploads/$images");
 			}
 		} else {
 		 	$this->model->setAttribute($this->attribute, null);
 		}
-		echo Html::tag('div', parent::run());
+		$parent_file_input = parent::run();
+		if( $this->deleteCheck !== false ) {
+			if( $this->deleteCheck == true ) {
+				$deleteCheckOptions = [ 'label' => 'Delete me' ];
+			} else {
+				$deleteCheckOptions = $this->deleteCheck;
+			}
+			$delete_check = Html::checkbox(Html::getInputName($this->model, $this->attribute),
+				false, $deleteCheckOptions);
+		} else {
+			$delete_check = '';
+		}
+		
+		echo Html::tag('div', $parent_file_input . $delete_check);
 	}
 
 }

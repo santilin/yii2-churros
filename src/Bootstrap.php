@@ -11,23 +11,24 @@ use yii\i18n\PhpMessageSource;
  */
 class Bootstrap implements BootstrapInterface
 {
-    /**
-     * Registers module translation messages.
-     *
-     * @param Application $app
-     *
-     * @throws InvalidConfigException
-     */
-    public function bootstrap($app)
-    {
-        if (!isset($app->get('i18n')->translations['churros*'])) {
-            $app->get('i18n')->translations['churros*'] = [
-                'class' => PhpMessageSource::class,
-                'basePath' => __DIR__ . '/messages',
-                'sourceLanguage' => 'en-US',
-            ];
-        }
-        Yii::setAlias('@churros', __DIR__);
-    }
+	/**
+	 * Registers module translation messages.
+	 *
+	 * @param Application $app
+	 *
+	 * @throws InvalidConfigException
+	 */
+	public function bootstrap($app)
+	{
+		if (!isset($app->get('i18n')->translations['churros*'])) {
+			$app->get('i18n')->translations['churros*'] = [
+				'class' => PhpMessageSource::class,
+				'basePath' => __DIR__ . '/messages',
+				'sourceLanguage' => 'en-US',
+			];
+		}
+		Yii::setAlias('@churros', __DIR__);
+		Yii::setAlias('@uploads', '@web/uploads');
+	}
 
 } // class Bootstrap

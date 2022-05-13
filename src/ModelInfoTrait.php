@@ -330,7 +330,7 @@ trait ModelInfoTrait
 				foreach( $uns_images as $filename => $titleandsize) {
 					if( $index-- == 0 ) {
 						return (object) [
-							'src' => "/uploads/$filename",
+							'src' => Yii::getAlias("@uploads/$filename"),
 							'title' => $titleandsize[0],
 							'size' => $titleandsize[1]
 						];
@@ -408,7 +408,7 @@ trait ModelInfoTrait
 			$images = [$images];
 		}
 		foreach( $images as $image ) {
-			$oldfilename = Yii::getAlias('@runtime/uploads/') . $image;
+			$oldfilename = Yii::getAlias("@uploads/$image");
 			if (file_exists($oldfilename) && !@unlink($oldfilename)) {
 				$model->addError($attr, "No se ha podido borrar el archivo $oldfilename" . posix_strerror($file->error));
 				return false;

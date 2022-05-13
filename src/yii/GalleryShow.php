@@ -39,7 +39,7 @@ class GalleryShow extends \kartik\file\FileInput
 				$uns_images = unserialize($images);
 				foreach( $uns_images as $filename => $titleandsize) {
 					$deleteUrl = Url::to(["{$this->controller_url}/remove-image", 'field' => $this->attribute, 'id' => $this->model->getPrimaryKey(), 'filename' => $filename ]);
-					$images_plugin_options['initialPreview'][] = "/uploads/" . $filename;
+					$images_plugin_options['initialPreview'][] = Yii::getAlias("@uploads/$filename");
 					$images_plugin_options['initialPreviewConfig'][] = [ 'caption' => $titleandsize[0], 'size' => $titleandsize[1], 'url' => $deleteUrl ];
 				}
 			}

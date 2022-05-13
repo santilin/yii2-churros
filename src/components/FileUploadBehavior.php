@@ -33,7 +33,7 @@ class FileUploadBehavior extends \yii\base\Behavior
     public $privateFilePath = '@app/runtime/uploads/';
 
     /** @var string Where to store images. */
-    public $publicFilePath = '/uploads/';
+    public $publicFilePath = '@uploads';
 
     /** @var string Name of file to store in the owner attribute. */
     public $fileAttrValue = '[[pk]].[[extension]]';
@@ -68,7 +68,7 @@ class FileUploadBehavior extends \yii\base\Behavior
         }
 
         $this->file = UploadedFile::getInstance($this->owner, $this->attribute);
-
+		$r = $_REQUEST;
         if (empty($this->file)) {
             $this->file = UploadedFile::getInstanceByName($this->attribute);
         }
