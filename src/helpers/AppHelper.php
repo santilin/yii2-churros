@@ -187,5 +187,14 @@ class AppHelper
         return $res;
     }
 
-
+    static public function fileExtension($url)
+    {
+		$url_parts = parse_url($url);
+		if( count($url_parts) != 1 ) {
+			if( isset($url_parts['path']) ) {
+				return pathinfo($url_parts['path'], PATHINFO_EXTENSION);
+			}
+		}
+		return null;
+	}
 }

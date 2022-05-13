@@ -94,10 +94,10 @@ class FileUploadBehavior extends \yii\base\Behavior
                 $behavior->cleanFiles();
             }
 
-//              $this->owner->{$this->attribute} = implode('.',
-//                  array_filter([$this->file->baseName, $this->file->extension]);
+              $this->owner->{$this->attribute} = implode('.',
+                  array_filter([$this->file->baseName, $this->file->extension]));
 
-			$this->owner->{$this->attribute} = $this->getUploadedFieldValue($this->attribute);
+// 			$this->owner->{$this->attribute} = $this->getUploadedFieldValue($this->attribute);
 
         } else {
             if (false === $this->owner->isNewRecord && empty($this->owner->{$this->attribute})) {
@@ -274,15 +274,10 @@ class FileUploadBehavior extends \yii\base\Behavior
      * @return string|null
      * @author <santilin> software@noviolento.es
      */
-    public function getUploadedFieldValue($attribute)
+    public function getUploadDestPath($attribute)
     {
-        if (!$this->owner->{$attribute}) {
-            return null;
-        }
-
         $behavior = static::getInstance($this->owner, $attribute);
-
-        return $behavior->resolvePath($behavior->fileAttrValue);
+        return $behavior->resolvePath($behavior->privateFilePath . $behavior->fileAttrValue);
     }
 
 }
