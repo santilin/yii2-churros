@@ -51,8 +51,8 @@ class FileUploadBehavior extends \yii\base\Behavior
             ActiveRecord::EVENT_BEFORE_VALIDATE => 'beforeValidate',
             ActiveRecord::EVENT_BEFORE_INSERT => 'beforeSave',
             ActiveRecord::EVENT_BEFORE_UPDATE => 'beforeSave',
-            ActiveRecord::EVENT_AFTER_INSERT => 'afterInsert',
-            ActiveRecord::EVENT_AFTER_UPDATE => 'afterUpdate',
+            ActiveRecord::EVENT_AFTER_INSERT => 'afterSave',
+            ActiveRecord::EVENT_AFTER_UPDATE => 'afterSave',
             ActiveRecord::EVENT_BEFORE_DELETE => 'beforeDelete',
         ];
     }
@@ -208,7 +208,7 @@ class FileUploadBehavior extends \yii\base\Behavior
     /**
      * After insert event.
      */
-    public function afterInsert()
+    public function afterSave()
     {
         if ($this->file instanceof UploadedFile !== true) {
             return;
@@ -223,24 +223,6 @@ class FileUploadBehavior extends \yii\base\Behavior
         }
 
         $this->owner->trigger(static::EVENT_AFTER_FILE_SAVE);
-    }
-
-    /**
-     * After insert event.
-     */
-    public function afterUpdate()
-    {
-        if ($this->file instanceof UploadedFile === true) {
-			$path = $this->getUploadedFilePath($this->attribute);
-
-			FileHelper::createDirectory(pathinfo($path, PATHINFO_DIRNAME), 0775, true);
-
-			if (!$this->file->saveAs($path)) {
-				throw new FileUploadException($this->file->error, 'File saving error.');
-			}
-
-			$this->owner->trigger(static::EVENT_AFTER_FILE_SAVE);
-		}
     }
 
     /**

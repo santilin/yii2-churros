@@ -248,7 +248,7 @@ class CrudController extends \yii\web\Controller
 				return $this->whereToGoNow('delete', $model);
 			}
 		} catch (\yii\db\IntegrityException $e ) {
-			$msg =
+			$msg = $e->getMessage();
 			Yii::$app->session->addFlash('error', $msg);
 			throw new DeleteModelException($model->t('churros', "{La} {title} <strong>{record_long}</strong> can't be deleted because it has related data"));
 		}
