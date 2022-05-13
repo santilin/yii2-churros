@@ -29,14 +29,14 @@ class FileUploadBehavior extends \yii\base\Behavior
     /** @var string Name of attribute which holds the attachment. */
     public $attribute = 'upload';
 
-    /** @var string Path template to use in storing files.5 */
-    public $filePath = '@webroot/uploads/[[pk]].[[extension]]';
+    /** @var string Path template to use in storing files. */
+    public $privateFilePath = '@app/runtime/uploads/';
 
     /** @var string Where to store images. */
-    public $fileUrl = '/uploads/[[pk]].[[extension]]';
+    public $publicFilePath = '/uploads/';
 
-    /** @var string Where to store images. */
-    public $fileFieldValue = '[[pk]].[[extension]]';
+    /** @var string Name of file to store in the owner attribute. */
+    public $fileAttrValue = '[[pk]].[[extension]]';
 
 
     /** @var \yii\web\UploadedFile */
@@ -134,7 +134,7 @@ class FileUploadBehavior extends \yii\base\Behavior
      */
     public function cleanFiles()
     {
-        $path = $this->resolvePath($this->filePath);
+        $path = $this->resolvePath($this->privateFilePath . $this->fileAttrValue);
         @unlink($path);
     }
 
@@ -261,7 +261,7 @@ class FileUploadBehavior extends \yii\base\Behavior
             return '';
         }
 
-        return $behavior->resolvePath($behavior->filePath);
+        return $behavior->resolvePath($behavior->privateFilePath . $behavior->fileAttrValue);
     }
 
     /**
@@ -286,7 +286,7 @@ class FileUploadBehavior extends \yii\base\Behavior
 
         $behavior = static::getInstance($this->owner, $attribute);
 
-        return $behavior->resolvePath($behavior->fileUrl);
+        return $behavior->resolvePath($behavior->publicFilePath . $behavior->fileAttrValue);
     }
 
     /**
@@ -304,7 +304,7 @@ class FileUploadBehavior extends \yii\base\Behavior
 
         $behavior = static::getInstance($this->owner, $attribute);
 
-        return $behavior->resolvePath($behavior->fileFieldValue);
+        return $behavior->resolvePath($behavior->fileAttrValue);
     }
 
 }
