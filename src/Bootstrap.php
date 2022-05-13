@@ -27,8 +27,11 @@ class Bootstrap implements BootstrapInterface
 				'sourceLanguage' => 'en-US',
 			];
 		}
+		
 		Yii::setAlias('@churros', __DIR__);
-		Yii::setAlias('@uploads', '@web/uploads');
+		if (Yii::$app instanceof \yii\web\Application) {
+			Yii::setAlias('@uploads', '@web/uploads');
+		}
 	}
 
 } // class Bootstrap

@@ -68,14 +68,14 @@ class FileUploadBehavior extends \yii\base\Behavior
         }
 
         $this->file = UploadedFile::getInstance($this->owner, $this->attribute);
-		$r = $_REQUEST;
         if (empty($this->file)) {
             $this->file = UploadedFile::getInstanceByName($this->attribute);
         }
 
         if ($this->file instanceof UploadedFile) {
             $this->owner->{$this->attribute} = $this->file;
-        }
+        } 
+        
     }
 
     /**
@@ -86,19 +86,16 @@ class FileUploadBehavior extends \yii\base\Behavior
     public function beforeSave()
     {
         if ($this->file instanceof UploadedFile) {
-
             if (true !== $this->owner->isNewRecord) {
                 /** @var ActiveRecord $oldModel */
                 $oldModel = $this->owner->findOne($this->owner->primaryKey);
                 $behavior = static::getInstance($oldModel, $this->attribute);
                 $behavior->cleanFiles();
             }
-
-              $this->owner->{$this->attribute} = implode('.',
+			$this->owner->{$this->attribute} = implode('.',
                   array_filter([$this->file->baseName, $this->file->extension]));
 
 // 			$this->owner->{$this->attribute} = $this->getUploadedFieldValue($this->attribute);
-
         } else {
             if (false === $this->owner->isNewRecord && empty($this->owner->{$this->attribute})) {
                 $this->owner->{$this->attribute} = ArrayHelper::getValue($this->owner->oldAttributes, $this->attribute,
@@ -211,6 +208,11 @@ class FileUploadBehavior extends \yii\base\Behavior
     public function afterSave()
     {
         if ($this->file instanceof UploadedFile !== true) {
+			if( $this->owner->{$this->attribute} === '1' ) {
+                $old_attrs = $this->owner->getOldAttributes();
+				$path = $this->getUploadedFilePath($old_attrs[$this->attribute]);
+				@unlink($path);
+			}
             return;
         }
 

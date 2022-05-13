@@ -54,9 +54,9 @@ class ImageInput extends \kartik\file\FileInput
 		 	$this->model->setAttribute($this->attribute, null);
 		}
 		$parent_file_input = parent::run();
-		if( $this->deleteCheck !== false ) {
+		if( $this->deleteCheck !== false && !empty($this->model->{$this->attribute}) ) {
 			if( $this->deleteCheck == true ) {
-				$deleteCheckOptions = [ 'label' => 'Delete me' ];
+				$deleteCheckOptions = [ 'label' => 'Delete me: ' . $this->model->{$this->attribute} ];
 			} else {
 				$deleteCheckOptions = $this->deleteCheck;
 			}
