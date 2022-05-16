@@ -42,6 +42,8 @@ class FileUploadBehavior extends \yii\base\Behavior
     /** @var \yii\web\UploadedFile */
     protected $file;
 
+    protected $oldPath;
+    
     /**
      * @inheritdoc
      */
@@ -85,6 +87,7 @@ class FileUploadBehavior extends \yii\base\Behavior
      */
     public function beforeSave()
     {
+		$this->oldPath = null;
         if ($this->file instanceof UploadedFile) {
             if (true !== $this->owner->isNewRecord) {
                 /** @var ActiveRecord $oldModel */
@@ -97,7 +100,11 @@ class FileUploadBehavior extends \yii\base\Behavior
 
 // 			$this->owner->{$this->attribute} = $this->getUploadedFieldValue($this->attribute);
         } else {
-            if (false === $this->owner->isNewRecord && empty($this->owner->{$this->attribute})) {
+			if( $this->owner->{$this->attribute} === '1' ) {
+				$oldvalue = ArrayHelper::getValue($this->owner->oldAttributes, $this->attribute, null);
+				$this->oldPath = $this->resolvePath($oldvalue);
+				$this->owner->{$this->attribute} = null;
+			} else if ( false === $this->owner->isNewRecord && empty($this->owner->{$this->attribute})) {
                 $this->owner->{$this->attribute} = ArrayHelper::getValue($this->owner->oldAttributes, $this->attribute,
                     null);
             }
@@ -208,9 +215,9 @@ class FileUploadBehavior extends \yii\base\Behavior
     public function afterSave()
     {
         if ($this->file instanceof UploadedFile !== true) {
-			if( $this->owner->{$this->attribute} === '1' ) {
-                $old_attrs = $this->owner->getOldAttributes();
-				$path = $this->getUploadedFilePath($old_attrs[$this->attribute]);
+			if( $this->oldPath !== null ) {
+				$this->owner->{$this->attribute} = $this->oldPath;
+				$path = $this->resolvePath($this->privateFilePath . $this->fileAttrValue);
 				@unlink($path);
 			}
             return;
