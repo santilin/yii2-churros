@@ -5,7 +5,7 @@
  * @license
  */
 
-namespace santilin\churros\components;
+namespace santilin\churros\exceptions;
 
 /**
  * ImportException represents an error in the user data
