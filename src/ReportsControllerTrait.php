@@ -79,7 +79,8 @@ trait ReportsControllerTrait
 			$search_model_name .= "Search";
 		}
 		if( $report->model == '' || !class_exists($search_model_name) ) {
-			$report->t('churros', '{search_model_name}: model not found in report "{record}"', ['{search_model_name}' => $search_model_name]));
+			Yii::$app->session->setFlash('error',
+				$report->t('churros', '{search_model_name}: model not found in report "{record}"', ['{search_model_name}' => $search_model_name]));
 			return $this->redirect(['view', 'id'=>$id]);
 		}
 		$search_model = new $search_model_name;
