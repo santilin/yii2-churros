@@ -24,6 +24,7 @@ class CrudController extends \yii\web\Controller
 	const MSG_UPDATED = '{La} {title} <a href="{model_link}">{record_medium}</a> has been successfully updated.';
 	const MSG_DELETED = '{La} {title} <strong>{record_long}</strong> has been successfully deleted.';
 	const MSG_DUPLICATED = '{La} {title} <a href="{model_link}">{record_medium}</a> has been successfully duplicated.';
+	const MSG_DEFAULT = 'The action on {la} {title} <a href="{model_link}">{record_medium}</a> has been successful.';
 
 	/**
 	 * An array of extra params to pass to the views
@@ -82,7 +83,7 @@ class CrudController extends \yii\web\Controller
 		return $this->render('index', [
 			'searchModel' => $searchModel,
 			'parent' => $this->parent_model,
-			'gridParams' => $this->changeActionParams($params, 'index', $searchModel),
+			'indexParams' => $this->changeActionParams($params, 'index', $searchModel),
 		]);
 	}
 
@@ -173,12 +174,12 @@ class CrudController extends \yii\web\Controller
 			}
 			if( $model->saveAll() ) {
 				if( $this->afterSave('duplicate', $model) ) {
-					$this->showFlash('create', $model);
+					$this->showFlash('duplicate', $model);
 					return $this->whereTogoNow('duplicate', $model);
 				}
 			}
 		}
-		return $this->render('saveAsNew', [
+		return $this->render('duplicate', [
 			'model' => $model,
 			'parent' => $this->parent_model,
 			'extraParams' => $this->changeActionParams($params, 'duplicate', $model)
@@ -407,7 +408,7 @@ class CrudController extends \yii\web\Controller
 			];
 			switch( $action_id ) {
 				case 'update':
-				case 'saveAsNew':
+				case 'duplicate':
 					$breadcrumbs[] = [
 						'label' => $model->recordDesc('short', 20),
 						'url' => array_merge([ $prefix . $this->id . '/view'], $model->getPrimaryKey(true))
@@ -476,7 +477,7 @@ class CrudController extends \yii\web\Controller
 
 	/**
 	 * @param Model $parent The parent model (for detail_grids)
-	 * @param Model $child The parent model (for detail_grids)
+	 * @param Model $child The child model (for detail_grids)
 	 */
 	public function controllerRoute($parent = null, $child= null)
 	{
@@ -632,24 +633,16 @@ class CrudController extends \yii\web\Controller
 			$link_to_me = $this->parentRoute('view') . "/$pk";
 		}
 		switch( $action_id ) {
-		case 'update':
-			Yii::$app->session->addFlash('success',
-				strtr($model->t('churros', $this->getSuccessMessage('update')),
-					['{model_link}' => $link_to_me]));
-			break;
-		case 'create':
-			Yii::$app->session->addFlash('success',
-				strtr($model->t('churros', $this->getSuccessMessage('create')),
-					['{model_link}' => $link_to_me]));
-			break;
 		case 'delete':
 			Yii::$app->session->addFlash('success',
 				$model->t('churros', $this->getSuccessMessage('delete')));
 			break;
-		case 'duplicate':
-			Yii::$app->session->addFlash('success',
-				strtr($model->t('churros', $this->getSuccessMessage('duplicate')),
-					['{model_link}' => $link_to_me]));
+		default:
+			if( ($msg = $this->getSuccessMessage($action_id)) != '' ) {
+				Yii::$app->session->addFlash('success',
+					strtr($model->t('churros', $msg),
+						['{model_link}' => $link_to_me]));
+			}
 			break;
 		}
 	}

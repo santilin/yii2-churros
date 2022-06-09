@@ -20,6 +20,11 @@
 = Sin clasificar
 * Pasar javascript churros a un asset: searchformjs y tecla enter.
 * Fork del gentelella
+* Investigar estos widgets:
+- https://www.yiiframework.com/extension/yii2-sortable-behavior
+- https://www.yiiframework.com/extension/yii2-poll-widget
+- https://github.com/jonmiles/bootstrap-treeview
+- https://www.yiiframework.com/extension/yii2-taggable-behavior
 
 = No prioritario
 == CrudController
