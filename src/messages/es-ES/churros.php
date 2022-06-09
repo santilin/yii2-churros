@@ -53,6 +53,7 @@ return [
 		=> '{La} {title} <strong>{record_long}</strong> se ha borrado correctamente.',
     '{La} {title} <a href="{model_link}">{record_medium}</a> has been successfully duplicated.'
 		=> '{La} {title} <a href="{model_link}">{record_medium}</a> se ha duplicado correctamente.',
+	'The action on {la} {title} <a href="{model_link}">{record_medium}</a> has been successful.' => 'La acción sobre {la} {title} <a href="{model_link}">{record_medium}</a> se ha realizado correctamente.',
 
     '{from-label} {from} can\'t be greater than {until-label} {until}' => '{from-label}: \'{from}\' no puede ser posterior a {until-label}: \'{until}\'',
 	"The parent record of {title} with '{id}' id does not exist" => "El registro madre {title} de id '{id}' no existe",
