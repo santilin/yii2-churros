@@ -641,7 +641,8 @@ class CrudController extends \yii\web\Controller
 			if( ($msg = $this->getSuccessMessage($action_id)) != '' ) {
 				Yii::$app->session->addFlash('success',
 					strtr($model->t('churros', $msg)),
-						['{model_link}' => $link_to_me]));
+						['{model_link}' => $link_to_me]);
+			}
 			break;
 		}
 	}
