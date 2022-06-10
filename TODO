@@ -1,4 +1,8 @@
 = Prioritario
+== Permisos
+* Crear Reports.view, etc.
+
+
 == CrudController
 * Comprobar traducciones model->t en ReportsControllerTrait
 * No funciona el enlace del mensaje "se ha guardado correctamente" de un detalle
