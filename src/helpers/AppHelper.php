@@ -11,6 +11,7 @@ use Yii;
 
 class AppHelper
 {
+	// For defaultValidator
     static public function empty($value)
     {
 		return empty($value);
