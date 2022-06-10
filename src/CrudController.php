@@ -6,11 +6,9 @@ use Yii;
 use yii\helpers\Url;
 use yii\filters\VerbFilter;
 use yii\web\NotFoundHttpException;
-use yii\web\UploadedFile;
 use yii\web\HttpException;
 use yii\base\ErrorException;
-use SaveModelException;
-use DataException;
+use santilin\churros\exceptions\{DeleteModelException,SaveModelException};
 use santilin\churros\helpers\AppHelper;
 
 /**
@@ -26,6 +24,7 @@ class CrudController extends \yii\web\Controller
 	const MSG_UPDATED = '{La} {title} <a href="{model_link}">{record_medium}</a> has been successfully updated.';
 	const MSG_DELETED = '{La} {title} <strong>{record_long}</strong> has been successfully deleted.';
 	const MSG_DUPLICATED = '{La} {title} <a href="{model_link}">{record_medium}</a> has been successfully duplicated.';
+	const MSG_DEFAULT = 'The action on {la} {title} <a href="{model_link}">{record_medium}</a> has been successful.';
 
 	/**
 	 * An array of extra params to pass to the views
@@ -84,7 +83,7 @@ class CrudController extends \yii\web\Controller
 		return $this->render('index', [
 			'searchModel' => $searchModel,
 			'parent' => $this->parent_model,
-			'gridParams' => $this->changeActionParams($params, 'index', $searchModel),
+			'indexParams' => $this->changeActionParams($params, 'index', $searchModel),
 		]);
 	}
 
@@ -128,7 +127,7 @@ class CrudController extends \yii\web\Controller
 			if( $this->parent_model) {
 				$model->setAttribute( $model->getRelatedFieldForModel($this->parent_model), $this->parent_model->getPrimaryKey());
 			}
-			if( $this->doSave($model) ) {
+			if( $model->saveAll() ) {
 				if( $this->afterSave('create', $model) ) {
 					$this->showFlash('create', $model);
 					return $this->whereToGoNow('create', $model);
@@ -173,14 +172,14 @@ class CrudController extends \yii\web\Controller
 			foreach ($model->primaryKey() as $primary_key) {
 				$model->$primary_key = null;
 			}
-			if( $this->doSave($model) ) {
+			if( $model->saveAll() ) {
 				if( $this->afterSave('duplicate', $model) ) {
-					$this->showFlash('create', $model);
+					$this->showFlash('duplicate', $model);
 					return $this->whereTogoNow('duplicate', $model);
 				}
 			}
 		}
-		return $this->render('saveAsNew', [
+		return $this->render('duplicate', [
 			'model' => $model,
 			'parent' => $this->parent_model,
 			'extraParams' => $this->changeActionParams($params, 'duplicate', $model)
@@ -213,7 +212,7 @@ class CrudController extends \yii\web\Controller
 			if( $this->parent_model) {
 				$model->setAttribute( $model->getRelatedFieldForModel($this->parent_model), $this->parent_model->getPrimaryKey());
 			}
-			if( $this->doSave($model) ) {
+			if( $model->saveAll() ) {
 				if( $this->afterSave('update', $model) ) {
 					$this->showFlash('update', $model);
 					return $this->whereTogoNow('update', $model);
@@ -225,30 +224,6 @@ class CrudController extends \yii\web\Controller
 			'parent' => $this->parent_model,
 			'extraParams' => $this->changeActionParams($params,'update', $model)
 		]);
-	}
-
-	protected function doSave($model)
-	{
-		$saved = false;
-		$fileAttributes = $this->addFileInstances($model);
-		if (count($fileAttributes) == 0) {
-			$saved = $model->saveAll();
-		} else {
-			$transaction = $model->getDb()->beginTransaction();
-			$saved = $model->validate();
-			if ($saved ) {
-				$saved = $this->saveFileInstances($model, $fileAttributes);
-			}
-			if ($saved) {
-				$saved = $model->saveAll(false); // Do not validate again
-			}
-			if ($saved) {
-				$transaction->commit();
-			} else {
-				$transaction->rollBack();
-			}
-		}
-		return $saved;
 	}
 
 	/**
@@ -274,8 +249,9 @@ class CrudController extends \yii\web\Controller
 				return $this->whereToGoNow('delete', $model);
 			}
 		} catch (\yii\db\IntegrityException $e ) {
-			Yii::$app->session->addFlash('error',
-				$model->t('churros', "{La} {title} <strong>{record_long}</strong> can't be deleted because it has related data"));
+			$msg = $e->getMessage();
+			Yii::$app->session->addFlash('error', $msg);
+			throw new DeleteModelException($model->t('churros', "{La} {title} <strong>{record_long}</strong> can't be deleted because it has related data"));
 		}
 		return $this->whereToGoNow('delete', $model);
 	}
@@ -340,140 +316,6 @@ class CrudController extends \yii\web\Controller
 			'methods' => $methods,
 		]);
 		return $pdf->render();
-	}
-
-	protected function getRelationsProviders($model) {
-		return [];
-	}
-
-	// Método para eliminar una imagen de una galería
-	public function actionRemoveImage($id, $field, $filename) {
-		$model = $this->findModel($id);
-		if ($model->$field == '') {
-			throw new DataException($model->className() . "->$field is empty when removing an image");
-		}
-		$images = unserialize($model->$field);
-		if (!is_array($images)) {
-			throw new DataException($model->className() . "->$field is not an array");
-		}
-		if (isset($images[$filename])) {
-			if ($this->unlinkImage($model, $filename)) {
-				unset($images[$filename]);
-				if( $images==[] ) {
-					$model->$field = null;
-				} else {
-					$model->$field = serialize($images);
-				}
-				if (!$model->save()) {
-					throw new SaveModelException($model);
-				}
-			} else {
-				throw new DataException("Unable to delete " . $model->className() . "->$field[$filename]");
-			}
-		}
-		return json_encode("Ok");
-	}
-
-	protected function addFileInstances($model)
-	{
-		$fileAttributes = $model->getFileAttributes();
-		foreach ($fileAttributes as $key => $multiple) {
-			$instances = UploadedFile::getInstances($model, $key);
-			if (count($instances) == 0) {
-				unset($fileAttributes[$key]);
-				// Recupera el valor sobreescrito por el LoadAll del controller
-// 				$model->$key = $model->getOldAttribute($key);
-			} else {
-// 				try {
-// 					$attr_value = ($model->getOldAttribute($attr) != '' ? unserialize($model->getOldAttribute($attr)) : []);
-// 				} catch( ErrorException $e) {
-// 					$attr_value = $model->getOldAttribute($attr);
-// // 					throw new ErrorException($e->getMessage() . "<br/>\n" . $model->getOldAttribute($attr));
-// 				}
-				foreach ($instances as $instance) {
-					if ($instance->error != 0) {
-						throw new HttpException(500, $this->fileUploadErrorMessage($model, $key, $file));
-					}
-				}
-				if( $multiple == true ) {
-					$model->$key = $instances;
-				} else {
-					$model->$key = $instances[0];
-				}
-			}
-		}
-		return $fileAttributes;
-	}
-
-	protected function saveFileInstances($model, $fileAttributes)
-	{
-		$saved = true;
-		foreach ($fileAttributes as $attr => $multiple) {
-			$model_attr = [];
-			$instances = UploadedFile::getInstances($model, $attr);
-			foreach ($instances as $file) {
-				$filename = $this->getFileInstanceKey($file, $model, $attr);
-				$saved = false;
-				$model_attr[] = $filename;
-				try {
-					$saved = $file->saveAs(Yii::getAlias('@runtime/uploads/') . $filename);
-					if (!$saved) {
-						$model->addError($attr, "No se ha podido guardar el archivo $filename: " . posix_strerror($file->error));
-					}
-				} catch (yii\base\ErrorException $e) {
-					$model->addError($attr, "No se ha podido guardar el archivo $filename: " . $e->getMessage());
-				}
-				if (!$saved) {
-					break;
-				}
-			}
-			$model->$attr = $multiple?serialize($model_attr):$model_attr[0];
-		}
-		return $saved;
-	}
-
-	private function getFileInstanceKey($uploadedfile, $model, $attr) {
-		$filename = basename(str_replace('\\', '/', $model->className())) . "_$attr" . "_" . basename($uploadedfile->tempName) . "." . $uploadedfile->getExtension();
-		return $filename;
-	}
-
-	private function unlinkImage($model, $filename) {
-		$oldfilename = Yii::getAlias('@runtime/uploads/') . $filename;
-		if (file_exists($oldfilename) && !@unlink($oldfilename)) {
-			$model->addError($attr, "No se ha podido borrar el archivo $oldfilename" . posix_strerror($file->error));
-			return false;
-		} else {
-			return true;
-		}
-	}
-
-	private function fileUploadErrorMessage($model, $attr, $file) {
-		$message = "Error uploading " . $model->className() . ".$attr: ";
-		switch ($file->error) {
-			case UPLOAD_ERR_OK:
-				return "";
-			case UPLOAD_ERR_INI_SIZE:
-				$message .= "The uploaded file exceeds the upload_max_filesize directive in php.ini.";
-				break;
-			case UPLOAD_ERR_FORM_SIZE:
-				$message .= "The uploaded file exceeds the MAX_FILE_SIZE directive that was specified in the HTML form.";
-				break;
-			case UPLOAD_ERR_PARTIAL:
-				$message .= "The uploaded file was only partially uploaded.";
-				break;
-			case UPLOAD_ERR_NO_FILE:
-				$message .= "No file was uploaded.";
-				break;
-			case UPLOAD_ERR_NO_TMP_DIR:
-				$message .= "Missing a temporary folder.";
-				break;
-			case UPLOAD_ERR_CANT_WRITE:
-				$message .= "Failed to write file to disk.";
-				break;
-			case UPLOAD_ERR_EXTENSION:
-				break;
-		}
-		return $message;
 	}
 
 	protected function formRelations()
@@ -566,7 +408,7 @@ class CrudController extends \yii\web\Controller
 			];
 			switch( $action_id ) {
 				case 'update':
-				case 'saveAsNew':
+				case 'duplicate':
 					$breadcrumbs[] = [
 						'label' => $model->recordDesc('short', 20),
 						'url' => array_merge([ $prefix . $this->id . '/view'], $model->getPrimaryKey(true))
@@ -625,7 +467,7 @@ class CrudController extends \yii\web\Controller
 			$this->parent_model = $parent_model->findOne($parent_id);
 			if ($this->parent_model == null) {
 				throw new NotFoundHttpException($parent_model->t('churros',
-					"The parent record of {title} with '{id}' id does not exist", 
+					"The parent record of {title} with '{id}' id does not exist",
 					[ '{id}' => $parent_id]));
 			}
 		} else {
@@ -635,7 +477,7 @@ class CrudController extends \yii\web\Controller
 
 	/**
 	 * @param Model $parent The parent model (for detail_grids)
-	 * @param Model $child The parent model (for detail_grids)
+	 * @param Model $child The child model (for detail_grids)
 	 */
 	public function controllerRoute($parent = null, $child= null)
 	{
@@ -791,24 +633,16 @@ class CrudController extends \yii\web\Controller
 			$link_to_me = $this->parentRoute('view') . "/$pk";
 		}
 		switch( $action_id ) {
-		case 'update':
-			Yii::$app->session->addFlash('success',
-				strtr($model->t('churros', $this->getSuccessMessage('update')),
-					['{model_link}' => $link_to_me]));
-			break;
-		case 'create':
-			Yii::$app->session->addFlash('success',
-				strtr($model->t('churros', $this->getSuccessMessage('create')),
-					['{model_link}' => $link_to_me]));
-			break;
 		case 'delete':
 			Yii::$app->session->addFlash('success',
 				$model->t('churros', $this->getSuccessMessage('delete')));
 			break;
-		case 'duplicate':
-			Yii::$app->session->addFlash('success',
-				strtr($model->t('churros', $this->getSuccessMessage('duplicate')),
-					['{model_link}' => $link_to_me]));
+		default:
+			if( ($msg = $this->getSuccessMessage($action_id)) != '' ) {
+				Yii::$app->session->addFlash('success',
+					strtr($model->t('churros', $msg),
+						['{model_link}' => $link_to_me]));
+			}
 			break;
 		}
 	}

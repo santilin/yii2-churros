@@ -7,23 +7,33 @@
 * Comprobar traducciones model->t en ReportsControllerTrait
 * No funciona el enlace del mensaje "se ha guardado correctamente" de un detalle
 * Enviar a las vistas los permisos
+
 == Adjuntos y subir ficheros
 - Opciones
 	- tabla de adjuntos.
 	- behaviour
 	- behaviour con múltiple
+
 == Print y pdf
 * CrudController::pdf: Incluir css del módulo/modelo actual
 * Quitar (no definido) al imprimir
 * Hacer uso de los model.Agente.report
+
 == GridView ==
 * Añadir un parámetro al Index que sea la vista o sea el gridfields
 - Grid: cuando se filtra, poner "Filtrando 1-1 de s"
 * GridView: Ocultar filtro si no hay resultados
 ** BreadCrumbs: Index: Añadir el orden o el filtro ("filtrado") ("ordenado por")
+* 2 gridviews: https://www.yiiframework.com/doc/guide/2.0/en/output-data-widgets#multiple-gridviews
 
+= Sin clasificar
+* Pasar javascript churros a un asset: searchformjs y tecla enter.
+* Fork del gentelella
 
 = No prioritario
+== CrudController
+* No funciona el enlace del mensaje "se ha guardado correctamente" de un detalle
+* Enviar a las vistas los permisos
 == Models
 * Tres tipos campos calculados:
 - model_before_save
@@ -44,7 +54,7 @@
 
 == Administración de usuarios
 === 2amigos-usuario
-  - Probar versión devel, ver si usa bootstrap4, 
+  - Probar versión devel, ver si usa bootstrap4,
   - Hacer un fork:
 	- Añadir opción visible en profile en resources ... _menu.php: yiiparam('user_profile');
 	- rediseñar las vistas
@@ -54,6 +64,12 @@
 - ¿moneda por aplicación?
 - Configuración fecha: Fija, por usuario
 - Configuración idioma: Fijo, por usuario
+<<<<<<< HEAD
+
+
+== Anidar RercordViews con un static
+=======
+>>>>>>> 0d1cdb995f7004f4ef130a77faf3c10b2f302ecb
 
 === css
 * css: width = maxlength en integers, floats y dates
@@ -65,7 +81,7 @@
 
 == Inactivatable date
 * Etiquetas según género del campo
-	
+
 == Widgets
 * Añadir layout table a form y a recordview
 * Añadir headings a forms
@@ -73,7 +89,7 @@
 
 == SearchDropDown
 * Si un searchdropdown está disabled o readonly no mostrar el campo de búsqueda
-	
+
 == TableListView
 * Quitar márgenes a pager.
 * Centrar verticalmente summary.
@@ -81,6 +97,11 @@
 
 == GridView ==
 - GridView: Report : grupos: opciones para Mostrar encabezado, mostrar pie.
+<<<<<<< HEAD
+- Grid: cuando se filtra, poner "Filtrando 1-1 de s"
+* Añadir un parámetro al Index que sea la vista o sea el gridfields
+* GridView: Ocultar filtro si no hay resultados
+=======
 
 == yii2
 * Max-length: Tomar lo que se ha definido en la base de datos o capturar la excepción.
@@ -98,3 +119,4 @@ Formulario de settings: file:///home/santilin/devel/yii2base/yii2-docs/guide-inp
 //		Yii::$app->response->redirect(['/curso'])->send();
 //		Yii::$app->end();
 
+>>>>>>> 0d1cdb995f7004f4ef130a77faf3c10b2f302ecb

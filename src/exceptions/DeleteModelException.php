@@ -5,11 +5,11 @@
  * @license
  */
 
-namespace santilin\churros;
+namespace santilin\churros\exceptions;
 use Yii;
 
 /**
- * ProgrammerException represents an exception caused by an error in the programmer's code
+ * DeleteModelException
  *
  * @author santilin <software@noviolento.es>
  * @since 1.0

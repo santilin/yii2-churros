@@ -3,7 +3,7 @@
 namespace santilin\churros\components;
 
 use santilin\churros\helpers\AppHelper;
-use santilin\churros\components\ImportException;
+use santilin\churros\exceptions\ImportException;
 
 /**
  * Esta es la clase base abstracta de las importaciones.
@@ -171,7 +171,7 @@ abstract class BaseImporter {
 						} else {
 							echo "Importado registro " . $r->recordDesc() . "\n";
 						}
-					} catch( \App\Exceptions\InternalException $e ) {
+					} catch( \yii\db\Exception $e ) {
 						$this->addError($e->getMessage());
 						$has_errors = true;
 					}

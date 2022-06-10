@@ -1,26 +1,26 @@
 <?php
 /**
- * @link 
- * @copyright 
- * @license 
+ * @link
+ * @copyright
+ * @license
  */
 
-namespace santilin\churros;
+namespace santilin\churros\exceptions;
 
 /**
- * DataException represents an error in the user data
+ * ImportException represents an error in the user data
  *
  * @author santilin <software@noviolento.es>
  * @since 1.0
  */
-class DataException extends \Exception
+class ImportException extends \Exception
 {
     /**
      * @return string the user-friendly name of this exception
      */
     public function getName()
     {
-        return 'Inconsistent data';
+        return 'Import error';
     }
 }
 

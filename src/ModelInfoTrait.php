@@ -164,7 +164,7 @@ trait ModelInfoTrait
 		$link = self::getModelInfo('controller_name') . "/$action/" . $this->getPrimaryKey();
 		return $base_route . $link;
 	}
-	
+
 	public function linkTo($action, $prefix = '', $format = 'short', $max_len = 0)
 	{
 		$url = $prefix;
@@ -308,7 +308,7 @@ trait ModelInfoTrait
 				return $field;
 			}
 		}
-		throw new \Exception( self::className() . " no está relacionado con " . $related_model->className() );
+		throw new \Exception( self::className() . ": not related to " . $related_model->className() );
     }
 
     public function getRelatedModelClass($relation_name)
@@ -317,7 +317,7 @@ trait ModelInfoTrait
 			$rel_info = $this->relations[$relation_name];
 			return $rel_info['model'];
 		} else {
-			throw new \Exception( self::className() . " no está relacionado con " . $related_model->className() );
+			throw new \Exception( self::className() . ": not related to " . $related_model->className() );
 		}
 	}
 
@@ -330,7 +330,7 @@ trait ModelInfoTrait
 				foreach( $uns_images as $filename => $titleandsize) {
 					if( $index-- == 0 ) {
 						return (object) [
-							'src' => "/uploads/$filename",
+							'src' => Yii::getAlias("@uploads/$filename"),
 							'title' => $titleandsize[0],
 							'size' => $titleandsize[1]
 						];
@@ -408,7 +408,7 @@ trait ModelInfoTrait
 			$images = [$images];
 		}
 		foreach( $images as $image ) {
-			$oldfilename = Yii::getAlias('@runtime/uploads/') . $image;
+			$oldfilename = Yii::getAlias("@uploads/$image");
 			if (file_exists($oldfilename) && !@unlink($oldfilename)) {
 				$model->addError($attr, "No se ha podido borrar el archivo $oldfilename" . posix_strerror($file->error));
 				return false;
@@ -452,7 +452,7 @@ trait ModelInfoTrait
 		}
 		return parent::__set($name, $value);
 	}
-	
+
 	// @todo put all these in a trait
 	public function setFakerValues($faker)
 	{
@@ -497,8 +497,8 @@ trait ModelInfoTrait
 			throw new \app\helpers\ProgrammerException("No se encuentra un " . self::className() . "de id $fixture_id en el fichero $fixture_file");
 		}
     }
-	
-	
+
+
 */
 } // trait ModelInfoTrait
 
