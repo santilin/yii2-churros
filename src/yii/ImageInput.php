@@ -13,20 +13,19 @@ use santilin\churros\helpers\AppHelper;
  */
 class ImageInput extends \kartik\file\FileInput
 {
+	const ATTR_URL_VERBATIM = 0;
+	const ATTR_URL_UPLOAD_BEHAVIOR = 1;
+	const ATTR_URL_SERIALIZED = 2;
 
-	public $controller_url;
 	public $caption;
-	public $show_caption;
 	public $deleteCheck = false;
+	public $attrUrlType = self::ATTR_URL_VERBATIM;
 
     /**
      * {@inheritdoc}
      */
     public function run()
     {
-		if( $this->controller_url == '' || substr($this->controller_url,-1,1) == '/') {
-			$this->controller_url .= $this->model->controllerName();
-		}
 		$this->pluginOptions = [
 			'language' => substr(Yii::$app->language, 0, 2),
 			'showUpload' => false,
@@ -40,18 +39,27 @@ class ImageInput extends \kartik\file\FileInput
 			'initialPreviewAsData' => true,
 			'overwriteInitial' => true
 		];
-		$images = Html::getAttributeValue($this->model, $this->attribute);
-		if( $images != '' && is_string($images))  {
-			$images_uns = @unserialize($images);
-			if ($images_uns !== false ) {
-				foreach( $images_uns as $filename ) {
+		$images = [];
+		switch( $this->attrUrlType ) {
+		case self::ATTR_URL_VERBATIM:
+			$this->pluginOptions['initialPreview'][] = Html::getAttributeValue($this->model, $this->attribute);
+			break;
+		case self::ATTR_URL_UPLOAD_BEHAVIOR:
+			$this->pluginOptions['initialPreview'][] =
+			$this->model->getUploadedFileUrl($this->attribute);
+			break;
+		case self::ATTR_URL_SERIALIZED:
+			$serialized = Html::getAttributeValue($this->model, $this->attribute);
+			if( $serialized != '' && is_string($serialized))  {
+				$images = @unserialize($serialized);
+				if ($images === false ) {
+					$images = [ $serialized ];
+				}
+				foreach( $images as $filename ) {
 					$this->pluginOptions['initialPreview'][] = Yii::getAlias("@uploads/$filename");
 				}
-			} else {
-				$this->pluginOptions['initialPreview'][] = Yii::getAlias("@uploads/$images");
 			}
-		} else {
-		 	$this->model->setAttribute($this->attribute, null);
+			break;
 		}
 		$parent_file_input = parent::run();
 		if( $this->deleteCheck !== false && !empty($this->model->{$this->attribute}) ) {
@@ -65,7 +73,7 @@ class ImageInput extends \kartik\file\FileInput
 		} else {
 			$delete_check = '';
 		}
-		
+
 		echo Html::tag('div', $parent_file_input . $delete_check);
 	}
 
