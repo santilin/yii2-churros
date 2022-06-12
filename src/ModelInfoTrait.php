@@ -422,6 +422,23 @@ trait ModelInfoTrait
 		throw new \Exception("field '$field' not supported in " . get_called_class() . "::handyFieldValues() ");
 	}
 
+	public function formatHandyFieldValues($values, $format)
+	{
+		if( $format == 'selectize' ) {
+			$ret = [];
+			foreach( $values as $k => $v ) {
+				$ret[] = [ 'value' => $k, 'text' => $v ];
+			}
+			return $ret;
+		} else if( $format == 'ids' ) {
+			return array_keys($values);
+		} else if( $format == 'values' ) {
+			return array_values($values);
+		} else {
+			return $values;
+		}
+	}
+
 /*
 	/// @todo move this to a new trait if necessary
 	private $dynamicFields = [];

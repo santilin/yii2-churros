@@ -153,11 +153,9 @@ class CrudController extends \yii\web\Controller
 		$params = Yii::$app->request->queryParams;
 		if (Yii::$app->request->post('_asnew') != 0) {
 			$id = Yii::$app->request->post('_asnew');
-			$model = $this->findModel($id);
-			$model->setDefaultValues(true); // duplicating
-		} else {
-			$model = $this->findModel($id);
 		}
+		$model = $this->findModel($id);
+		$model->setDefaultValues(true); // duplicating
 
 		if (isset($_POST['_form_relations']) ) {
 			$relations = explode(",", $_POST['_form_relations']);
@@ -342,7 +340,7 @@ class CrudController extends \yii\web\Controller
 			return $this->redirect($returnTo);
 		}
 		$referrer = Yii::$app->request->post("_form_referrer");
-		if ($from == 'create') {
+		if ($from == 'create' || $from == 'duplicate') {
 			$referrer = null;
 		}
 		if ( $referrer ) {
@@ -360,7 +358,7 @@ class CrudController extends \yii\web\Controller
 					$redirect = ["index"];
 				}
 			} else if ($from == 'duplicate') {
-				$redirect = ["index"];
+				$redirect = ['view', 'id' => $model->getPrimaryKey()];
 			} else if ($from == 'delete') {
 				$redirect = ["index"];
 			} else {

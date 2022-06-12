@@ -1,4 +1,13 @@
 = Prioritario
+
+
+== Permisos
+* Crear Reports.view, etc.
+
+
+== CrudController
+* Enviar a las vistas los permisos
+
 == Adjuntos y subir ficheros
 - Opciones
 	- tabla de adjuntos.
