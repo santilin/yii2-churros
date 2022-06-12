@@ -29,7 +29,7 @@ class BooleanColumn extends \yii\grid\DataColumn
      * @var bool whether to display empty values with the $onFalse contents.
      */
     public $treatEmptyAsFalse = true;
-    
+
         /**
      * {@inheritdoc}
      */
@@ -44,6 +44,9 @@ class BooleanColumn extends \yii\grid\DataColumn
 				$error = '';
 			}
 			$options = array_merge(['prompt' => Yii::t('churros', 'All')], $this->filterInputOptions);
+			if( $model->{$this->attribute} === '' ) {
+				$options['value'] = null; // Select 'All'
+			}
 			return Html::activeDropDownList($model, $this->attribute, [
 				1 => $this->grid->formatter->booleanFormat[1],
 				0 => $this->grid->formatter->booleanFormat[0],
@@ -71,6 +74,9 @@ class BooleanColumn extends \yii\grid\DataColumn
     public function getDataCellValue($model, $key, $index)
     {
         $value = parent::getDataCellValue($model, $key, $index);
+        if( is_bool($value) ) {
+            return $value ? $this->onTrue : $this->onFalse;
+		}
         if (!empty($value)) {
             return $value ? $this->onTrue : $this->onFalse;
         }

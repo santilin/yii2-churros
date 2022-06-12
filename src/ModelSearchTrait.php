@@ -149,6 +149,9 @@ trait ModelSearchTrait
 	public function transformGridFilterValues()
 	{
 		foreach( $this->attributes as $name => $value ) {
+			if(is_array($value) ) {
+				continue;
+			}
 			if( substr($value,0,2) == '{"' && substr($value,-2) == '"}' ) {
 				$value = json_decode($value, true);
 			}
@@ -185,7 +188,6 @@ trait ModelSearchTrait
 		}
 		// addColumnSortsToProvider adds the join tables with AS `as_xxxxxxx`
 		/// @todo add them as table1_table2_xxxxxx
-		$relfound = true;
 		$tablename = $this->tableName();
 		if( strpos($fldname, '.') !== FALSE ) {
 			$relmodel = $this->className();
@@ -199,7 +201,12 @@ trait ModelSearchTrait
 				}
 			}
 		}
-		$fldname = $tablename . "." . $fldname;
+		$fullfldname = $tablename . "." . $fldname;
+		$this->addFieldFilterToQuery($query, $fullfldname, $value, $fldname);
+	}
+
+	public function addFieldFilterToQuery(&$query, $fldname, $value)
+	{
 		if( is_array($value['lft']) ) {
  			$query->andWhere([ 'in', $fldname, $value['lft']]);
 		} else switch( $value['op'] ) {
@@ -300,8 +307,9 @@ trait ModelSearchTrait
 		}
 		unset($options['relation']);
 		$attr_class = str_replace('.','_',$attribute);
-		if( ($control_type = $type) == 'date' ) {
-			$control_type = 'string';
+		switch( $type ) {
+		default:
+			$control_type = 'text';
 		}
 		if ( (isset($options['hideme']) && $options['hideme'] == true)
 			|| (isset($options['visible']) && $options['visible'] == false) ) {
@@ -347,6 +355,7 @@ trait ModelSearchTrait
 			$ret .= <<<EOF
 	<div class="input-group col-sm-5">
 EOF;
+
 			$ret .= Html::input($control_type, "${scope}[_adv_][$attribute][lft]",
 			$value['lft'], [ 'class' => 'form-control' ]);
 			$ret .= <<<EOF
