@@ -12,6 +12,7 @@ use yii\helpers\Html;
 
 class FormHelper
 {
+	public const VIEWS_NVIEW_PARAM = '_v';
 	public const BS_FIELD_CONFIGS = [
 		'default' => [
 		],
@@ -258,6 +259,18 @@ class FormHelper
 			. Html::endTag('div');
 	}
 
+	public static function getViewFromRequest($views, $params)
+	{
+		if( ($_nv=intval($params[self::VIEWS_NVIEW_PARAM]??0)) > (count($views)-1) ) {
+			$_nv = 0;
+		}
+		foreach($views as $kv => $view ) {
+			if( $_nv-- == 0 ) {
+				return $kv;
+			}
+		}
+		return $views[0];
+	}
 
 	public static function getConfig(string $name, string $form_name, $default_value = null)
 	{
