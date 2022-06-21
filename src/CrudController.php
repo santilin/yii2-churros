@@ -76,8 +76,18 @@ class CrudController extends \yii\web\Controller
 	{
 		$params = Yii::$app->request->queryParams;
 		$searchModel = $this->createSearchModel();
+// 		$fname = $searchModel->formName();
+// 		if (!isset($params[$fname]) ) {
+// 			if(isset(Yii::$app->session[$fname]) && count(Yii::$app->session[$fname])>1 ) {
+// 				$params = Yii::$app->session[$fname];
+// 			} else {
+// 				unset(Yii::$app->session[$fname]);
+// 			}
+// 		} else {
+// 			Yii::$app->session[$fname] = $params[$fname];
+// 		}
 		if( $this->parent_model ) {
-			$params[$searchModel->formName()][$searchModel->getRelatedFieldForModel($this->parent_model)]
+			$params[$name][$searchModel->getRelatedFieldForModel($this->parent_model)]
 				= $this->parent_model->getPrimaryKey();
 		}
 		return $this->render('index', [
@@ -317,23 +327,6 @@ class CrudController extends \yii\web\Controller
 		return $pdf->render();
 	}
 
-	protected function formRelations()
-	{
-		return [];
-	}
-
-	public function parentRoute($action_if_no_parent = 'index')
-	{
-		if( $this->parent_model ) {
-			$parent_route = $this->getRoutePrefix()
-				. $this->parent_controller
-				. '/' . $this->parent_model->getPrimaryKey();
-		} else {
-			$parent_route = Url::toRoute($action_if_no_parent);
-		}
-		return $parent_route;
-	}
-
 	protected function whereToGoNow($from, $model)
 	{
 		$returnTo = Yii::$app->request->getBodyParam('returnTo');
@@ -427,6 +420,18 @@ class CrudController extends \yii\web\Controller
 		return $breadcrumbs;
 	}
 
+	public function parentRoute($action_if_no_parent = 'index')
+	{
+		if( $this->parent_model ) {
+			$parent_route = $this->getRoutePrefix()
+				. $this->parent_controller
+				. '/' . $this->parent_model->getPrimaryKey();
+		} else {
+			$parent_route = Url::toRoute($action_if_no_parent);
+		}
+		return $parent_route;
+	}
+
 	public function moduleRoute($action_id = null)
 	{
 		if( $this->parent_model ) {
@@ -478,7 +483,7 @@ class CrudController extends \yii\web\Controller
 	 * @param Model $parent The parent model (for detail_grids)
 	 * @param Model $child The child model (for detail_grids)
 	 */
-	public function controllerRoute($parent = null, $child= null)
+	public function controllerRoute($parent = null, $child= null): ?string
 	{
 		if( $child == null && ($parent == null || $parent == $this->parent_model)) { // for normal grids
 			$myroute = $this->getRoutePrefix() . $this->id;
@@ -512,7 +517,7 @@ class CrudController extends \yii\web\Controller
 		return $ret;
 	}
 
-	protected function getRoutePrefix($parent_model = null)
+	public function getRoutePrefix($parent_model = null)
 	{
 		if( $parent_model == null ) {
 			$parent_model = $this->parent_model;
@@ -674,5 +679,15 @@ class CrudController extends \yii\web\Controller
 			return $file;
 		}
 	}
+
+	public function addParamsToUrl($url, $params)
+    {
+        if ($params === null) {
+            $request = Yii::$app->getRequest();
+            $params = $request instanceof Request ? $request->getQueryParams() : [];
+        }
+        $params[0] = $url;
+        return Url::to($params);
+    }
 
 }

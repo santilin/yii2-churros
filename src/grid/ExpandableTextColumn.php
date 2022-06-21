@@ -13,7 +13,7 @@ class ExpandableTextColumn extends DataColumn
      * Maximun text length
      * @var
      */
-    public $text_length = 30;
+    public $length = 30;
     public $format = 'text';
 
     /**
@@ -27,16 +27,16 @@ class ExpandableTextColumn extends DataColumn
 		if( $this->format == 'html' ) {
 			$text = html_entity_decode(strip_tags($text));
 		}
-		if (strlen($text)<=$this->text_length) {
+		if( $this->length == 0 || strlen($text)<=$this->length) {
 			return $text;
 		} else {
 			/// @todo partir por el espacio más próximo
-			$truncated_text = trim(substr($text, 0, $this->text_length));
+			$truncated_text = trim(mb_substr($text, 0, $this->length));
 			return Html::a($truncated_text,
 				"#collapse$key$index{$this->attribute}",
 				[ 'class' => "fa fa-expand",  'data-toggle' =>'collapse', 'role'=>'button',
 				  'aria-expanded'=>'false', 'aria-controls'=>"collapse$key$index{$this->attribute}"]
-				) . "<div class='collapse' id='collapse$key$index{$this->attribute}'><div class='card card-body'>".mb_substr($text,$this->text_length). "</div></div>";
+				) . "<div class='collapse' id='collapse$key$index{$this->attribute}'><div class='card card-body' style='display:inline'>".mb_substr($text,$this->length). "</div></div>";
 		}
     }
 
