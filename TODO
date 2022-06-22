@@ -1,9 +1,9 @@
 = Prioritario
-
+= Creación dinámica de etiquetas:
+https://stackoverflow.com/questions/32731987/adding-new-list-options-refreshing-updated-list-dynamically
 
 == Permisos
 * Crear Reports.view, etc.
-
 
 == CrudController
 * Enviar a las vistas los permisos
@@ -20,7 +20,6 @@
 * Hacer uso de los model.Agente.report
 
 == GridView ==
-* Añadir un parámetro al Index que sea la vista o sea el gridfields
 - Grid: cuando se filtra, poner "Filtrando 1-1 de s"
 * GridView: Ocultar filtro si no hay resultados
 ** BreadCrumbs: Index: Añadir el orden o el filtro ("filtrado") ("ordenado por")
@@ -28,17 +27,14 @@
 
 = Sin clasificar
 * Pasar javascript churros a un asset: searchformjs y tecla enter.
-* Fork del gentelella
 * Investigar estos widgets:
 - https://www.yiiframework.com/extension/yii2-sortable-behavior
 - https://www.yiiframework.com/extension/yii2-poll-widget
 - https://github.com/jonmiles/bootstrap-treeview
-- https://www.yiiframework.com/extension/yii2-taggable-behavior
 
 = No prioritario
 == CrudController
 * No funciona el enlace del mensaje "se ha guardado correctamente" de un detalle
-* Enviar a las vistas los permisos
 == Models
 * Tres tipos campos calculados:
 - model_before_save
@@ -69,12 +65,7 @@
 - ¿moneda por aplicación?
 - Configuración fecha: Fija, por usuario
 - Configuración idioma: Fijo, por usuario
-<<<<<<< HEAD
-
-
 == Anidar RercordViews con un static
-=======
->>>>>>> 0d1cdb995f7004f4ef130a77faf3c10b2f302ecb
 
 === css
 * css: width = maxlength en integers, floats y dates
@@ -102,11 +93,6 @@
 
 == GridView ==
 - GridView: Report : grupos: opciones para Mostrar encabezado, mostrar pie.
-<<<<<<< HEAD
-- Grid: cuando se filtra, poner "Filtrando 1-1 de s"
-* Añadir un parámetro al Index que sea la vista o sea el gridfields
-* GridView: Ocultar filtro si no hay resultados
-=======
 
 == yii2
 * Max-length: Tomar lo que se ha definido en la base de datos o capturar la excepción.
@@ -119,9 +105,3 @@ https://github.com/pavlm/yii2-stats-widget Time Stats widget
 Modelos: Estudiar uuidbehavior, softdeletes y lock. Faltan los behaviors
 Formulario de settings: file:///home/santilin/devel/yii2base/yii2-docs/guide-input-tabular-input.html
 
-== Código
-* Recordar:
-//		Yii::$app->response->redirect(['/curso'])->send();
-//		Yii::$app->end();
-
->>>>>>> 0d1cdb995f7004f4ef130a77faf3c10b2f302ecb
