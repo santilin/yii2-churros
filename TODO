@@ -1,6 +1,5 @@
-= Prioritario
-= Creación dinámica de etiquetas:
-https://stackoverflow.com/questions/32731987/adding-new-list-options-refreshing-updated-list-dynamically
+= DotDotValidator
+* Validar en PHP
 
 == Permisos
 * Crear Reports.view, etc.
@@ -14,6 +13,8 @@ https://stackoverflow.com/questions/32731987/adding-new-list-options-refreshing-
 	- behaviour
 	- behaviour con múltiple
 
+= Creación dinámica de etiquetas:
+https://stackoverflow.com/questions/32731987/adding-new-list-options-refreshing-updated-list-dynamically
 == Print y pdf
 * CrudController::pdf: Incluir css del módulo/modelo actual
 * Quitar (no definido) al imprimir
