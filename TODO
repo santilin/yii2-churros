@@ -1,3 +1,6 @@
+= GridFilter
+* Cuando es un array (select múltiple, da error)
+
 = DotDotValidator
 * Validar en PHP
 

@@ -169,7 +169,11 @@ trait ModelSearchTrait
 	{
 		if( isset($value['op']) ) {
 			return $value;
-		} else if( is_string($value) && $value != '') {
+		}
+		if( is_array($value) ) {
+			$value = $value[0]; /// @todo @warning
+		}
+		if( is_string($value) && $value != '') {
 			if( substr($value,0,2) == '{"' && substr($value,-2) == '"}' ) {
 				return json_decode($value, true);
 			} else if( preg_match('/^(=|<>|<|<=|>|>=)(.*)$/', $value, $matches) ) {
