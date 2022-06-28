@@ -31,7 +31,21 @@ class AppHelper
 	{
 		return str_replace("-", "_", Yii::$app->language);
 	}
-
+	static public function incrStr($str, $inc = 1)
+	{
+		if( preg_match('/([0-9]+)[^0-9]*$/', $str, $matches) ) {
+			$value = $matches[1];
+			$vlen = strlen($value);
+			$newvalue = intval($value) + $inc;
+			$newvlen = strlen(strval($value));
+			if( $newvlen < $vlen ) {
+				$newvalue = substr($value,0,$vlen-$newvlen) . $newvalue;
+			}
+			return preg_replace('/([0-9]+)([^0-9]*)$/', "$newvalue$2", $str);
+		} else {
+			return $inc;
+		}
+	}	
 	/**
 	 * @params string $route if null, the model controller
 	 */
