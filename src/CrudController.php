@@ -235,12 +235,10 @@ class CrudController extends \yii\web\Controller
 	}
 
 	/**
-		* Deletes an existing model.
-		* If deletion is successful, the browser will be redirected to the 'index' page.
-		* @param integer $id
-		* @return mixed
-		* @todo delete uploaded files
-		*/
+	 * Deletes an existing model.
+	 * @param integer $id
+	 * @return mixed
+	*/
 	public function actionDelete($id)
 	{
 		$model = $this->findModel($id);
@@ -259,7 +257,6 @@ class CrudController extends \yii\web\Controller
 		} catch (\yii\db\IntegrityException $e ) {
 			$msg = $e->getMessage();
 			Yii::$app->session->addFlash('error', $msg);
-// 			$model->addError('', $msg);
 			throw new DeleteModelException($model, $e);
 		}
 		return $this->whereToGoNow('delete', $model);
@@ -330,6 +327,9 @@ class CrudController extends \yii\web\Controller
 	protected function whereToGoNow($from, $model)
 	{
 		$returnTo = Yii::$app->request->getBodyParam('returnTo');
+		if( !$returnTo ) {
+			$returnTo = Yii::$app->request->queryParams['returnTo']??null;
+		}
 		if( $returnTo ) {
 			return $this->redirect($returnTo);
 		}
