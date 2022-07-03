@@ -283,4 +283,39 @@ class FormHelper
 		}
 	}
 
+	static public function displayButtons($buttons)
+	{
+		$ret = [];
+		foreach( $buttons as $button ) {
+			if (!empty($button['nocreate']) ) {
+				continue;
+			}
+			if( !isset($button['htmlOptions']) ) {
+				$button['htmlOptions'] = [];
+			}
+			if( isset($button['htmlOptions']['autofocus']) ) {
+				$button['htmlOptions']['tabindex'] = static::ti();
+			}
+			switch( $button['type'] ) {
+			case 'a':
+				$ret[] = Html::a(
+					$button['title'],
+					$button['url']??'javascript:void(0);',
+					$button['htmlOptions']);
+					break;
+			case 'submit':
+				$ret[] = Html::submitButton(
+					$button['title'],
+					$button['htmlOptions']);
+					break;
+			case 'button':
+				$ret[] = Html::button(
+					$button['title'],
+					$button['htmlOptions']);
+					break;
+			}
+		}
+		return implode('', $ret);
+	}
+
 } // class

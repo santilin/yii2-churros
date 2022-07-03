@@ -76,16 +76,6 @@ class CrudController extends \yii\web\Controller
 	{
 		$params = Yii::$app->request->queryParams;
 		$searchModel = $this->createSearchModel();
-// 		$fname = $searchModel->formName();
-// 		if (!isset($params[$fname]) ) {
-// 			if(isset(Yii::$app->session[$fname]) && count(Yii::$app->session[$fname])>1 ) {
-// 				$params = Yii::$app->session[$fname];
-// 			} else {
-// 				unset(Yii::$app->session[$fname]);
-// 			}
-// 		} else {
-// 			Yii::$app->session[$fname] = $params[$fname];
-// 		}
 		if( $this->parent_model ) {
 			$params[$name][$searchModel->getRelatedFieldForModel($this->parent_model)]
 				= $this->parent_model->getPrimaryKey();
@@ -334,9 +324,6 @@ class CrudController extends \yii\web\Controller
 			return $this->redirect($returnTo);
 		}
 		$referrer = Yii::$app->request->post("_form_referrer");
-		if ($from == 'create' || $from == 'duplicate') {
-			$referrer = null;
-		}
 		if ( $referrer ) {
 			return $this->redirect($referrer);
 		}
