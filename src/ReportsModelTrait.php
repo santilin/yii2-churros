@@ -15,7 +15,7 @@ trait ReportsModelTrait
 	public $report_sorting = [];
 	public $only_totals = false;
 
-	public function getValue($var, $default)
+	public function getReportValue($var, $default)
 	{
 		$values = json_decode($this->value);
 		if( isset($values->$var) ) {
