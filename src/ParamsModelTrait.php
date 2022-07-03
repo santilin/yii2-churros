@@ -16,8 +16,7 @@ trait ParamsModelTrait
 			->where([ $model->_param_name_field=> $var])
 			->one();
 		if( $r ) {
-			$vf = $model->_param_name_value;
-			return $r->$vf;
+			return trim($r->{$model->_param_value_field});
 		} else {
 			return $default;
 		}
