@@ -8,7 +8,7 @@
 namespace santilin\churros\helpers;
 
 use Yii;
-use yii\helpers\Html;
+use yii\helpers\{Html};
 
 class FormHelper
 {
@@ -286,12 +286,18 @@ class FormHelper
 	static public function displayButtons($buttons)
 	{
 		$ret = [];
-		foreach( $buttons as $button ) {
+		foreach( $buttons as $name => $button ) {
+			if( $button === null) {
+				continue;
+			}
 			if (!empty($button['nocreate']) ) {
 				continue;
 			}
 			if( !isset($button['htmlOptions']) ) {
 				$button['htmlOptions'] = [];
+			}
+			if( !isset($button['htmlOptions']['name']) ) {
+				$button['htmlOptions']['name'] = $name;
 			}
 			if( isset($button['htmlOptions']['autofocus']) ) {
 				$button['htmlOptions']['tabindex'] = static::ti();
@@ -302,17 +308,21 @@ class FormHelper
 					$button['title'],
 					$button['url']??'javascript:void(0);',
 					$button['htmlOptions']);
-					break;
+				break;
 			case 'submit':
 				$ret[] = Html::submitButton(
 					$button['title'],
 					$button['htmlOptions']);
-					break;
+				break;
 			case 'button':
 				$ret[] = Html::button(
 					$button['title'],
 					$button['htmlOptions']);
-					break;
+				break;
+			case 'select':
+				$ret[] = Html::dropDownList( $name, $button['selections']??null,
+					$button['options'], $button['htmlOptions']);
+				break;
 			}
 		}
 		return implode('', $ret);
