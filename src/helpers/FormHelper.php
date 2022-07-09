@@ -325,7 +325,7 @@ class FormHelper
 				break;
 			}
 		}
-		return implode('', $ret);
+		return implode('&nbsp;', $ret);
 	}
 
 } // class
