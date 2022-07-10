@@ -16,8 +16,6 @@ use santilin\churros\helpers\AppHelper;
  */
 class CrudController extends \yii\web\Controller
 {
-	protected $parent_model = null;
-	protected $parent_controller = null;
 	protected $allowedActions = [];
 	public $accessOnlyOwner = false;
 	const MSG_CREATED = '{La} {title} <a href="{model_link}">{record_medium}</a> has been successfully created.';
@@ -29,7 +27,7 @@ class CrudController extends \yii\web\Controller
 	/**
 	 * An array of extra params to pass to the views
 	 **/
-	protected function changeActionParams($queryParams, $action_id, $model)
+	protected function changeActionParams(array $queryParams, string $action_id, $model)
 	{
 		return $queryParams;
 	}
@@ -53,7 +51,6 @@ class CrudController extends \yii\web\Controller
 		if (!parent::beforeAction($action)) {
 			return false;
 		}
-		$this->getParentFromRequest();
 		if (isset($this->junctionModel) && $this->junctionModel == true ) {
 			$id = $this->junctionIds();
 			if( $id ) {
@@ -69,20 +66,15 @@ class CrudController extends \yii\web\Controller
 	}
 
 	/**
-		* Lists all models.
-		* @return mixed
-		*/
+	 * Lists all models.
+	 * @return mixed
+	 */
 	public function actionIndex()
 	{
 		$params = Yii::$app->request->queryParams;
 		$searchModel = $this->createSearchModel();
-		if( $this->parent_model ) {
-			$params[$name][$searchModel->getRelatedFieldForModel($this->parent_model)]
-				= $this->parent_model->getPrimaryKey();
-		}
 		return $this->render('index', [
 			'searchModel' => $searchModel,
-			'parent' => $this->parent_model,
 			'indexParams' => $this->changeActionParams($params, 'index', $searchModel),
 		]);
 	}
@@ -104,7 +96,6 @@ class CrudController extends \yii\web\Controller
 		$params = Yii::$app->request->queryParams;
 		return $this->render('view', [
 			'model' => $model,
-			'parent' => $this->parent_model,
 			'extraParams' => $this->changeActionParams($params, 'view', $model)
 		]);
 	}
@@ -124,10 +115,7 @@ class CrudController extends \yii\web\Controller
 			$relations = [];
 		}
 		if ($model->loadAll(Yii::$app->request->post(), $relations) ) {
-			if( $this->parent_model) {
-				$model->setAttribute( $model->getRelatedFieldForModel($this->parent_model), $this->parent_model->getPrimaryKey());
-			}
-			if( $model->saveAll() ) {
+			if( $this->saveAll($model) ) {
 				if( $this->afterSave('create', $model) ) {
 					$this->showFlash('create', $model);
 					return $this->whereToGoNow('create', $model);
@@ -136,7 +124,6 @@ class CrudController extends \yii\web\Controller
 		}
 		return $this->render('create', [
 			'model' => $model,
-			'parent' => $this->parent_model,
 			'extraParams' => $this->changeActionParams($params, 'create', $model)
 		]);
 	}
@@ -163,14 +150,11 @@ class CrudController extends \yii\web\Controller
 			$relations = [];
 		}
 		if ($model->loadAll(Yii::$app->request->post(), $relations) ) {
-			if( $this->parent_model) {
-				$model->setAttribute( $model->getRelatedFieldForModel($this->parent_model), $this->parent_model->getPrimaryKey());
-			}
 			$model->setIsNewRecord(true);
 			foreach ($model->primaryKey() as $primary_key) {
 				$model->$primary_key = null;
 			}
-			if( $model->saveAll() ) {
+			if( $this->saveAll($model) ) {
 				if( $this->afterSave('duplicate', $model) ) {
 					$this->showFlash('duplicate', $model);
 					return $this->whereTogoNow('duplicate', $model);
@@ -179,7 +163,6 @@ class CrudController extends \yii\web\Controller
 		}
 		return $this->render('duplicate', [
 			'model' => $model,
-			'parent' => $this->parent_model,
 			'extraParams' => $this->changeActionParams($params, 'duplicate', $model)
 		]);
 	}
@@ -207,10 +190,7 @@ class CrudController extends \yii\web\Controller
 			$relations = [];
 		}
 		if ($model->loadAll(Yii::$app->request->post(), $relations) ) {
-			if( $this->parent_model) {
-				$model->setAttribute( $model->getRelatedFieldForModel($this->parent_model), $this->parent_model->getPrimaryKey());
-			}
-			if( $model->saveAll() ) {
+			if( $this->saveAll($model) ) {
 				if( $this->afterSave('update', $model) ) {
 					$this->showFlash('update', $model);
 					return $this->whereTogoNow('update', $model);
@@ -219,7 +199,6 @@ class CrudController extends \yii\web\Controller
 		}
 		return $this->render('update', [
 			'model' => $model,
-			'parent' => $this->parent_model,
 			'extraParams' => $this->changeActionParams($params,'update', $model)
 		]);
 	}
@@ -273,8 +252,7 @@ class CrudController extends \yii\web\Controller
 		// https://stackoverflow.com/a/54568044/8711400
 		$content = $this->renderAjax('_pdf', [
 			'model' => $model,
-			'parent' => $this->parent_model,
-			'extraParams' => $this->changeActionParams($params, 'view', $model)
+			'extraParams' => $this->changeActionParams($params, 'pdf', $model)
 		]);
 		$methods = [];
 		$margin_header = AppHelper::yiiparam('pdfMarginHeader', 15);
@@ -327,26 +305,28 @@ class CrudController extends \yii\web\Controller
 		if ( $referrer ) {
 			return $this->redirect($referrer);
 		}
-		if( $this->parent_model ) {
-			return $this->redirect( $this->parentRoute() );
-		} else {
-			if ($from == 'update') {
-				$redirect = ['view', 'id' => $model->getPrimaryKey()];
-			} else if ($from == 'create') {
-				if (Yii::$app->request->post('_and_create') == '1') {
-					$redirect = ['create'];
-				} else {
-					$redirect = ["index"];
-				}
-			} else if ($from == 'duplicate') {
-				$redirect = ['view', 'id' => $model->getPrimaryKey()];
-			} else if ($from == 'delete') {
-				$redirect = ["index"];
+		if ($from == 'update') {
+			$redirect = ['view', 'id' => $model->getPrimaryKey()];
+		} else if ($from == 'create') {
+			if (Yii::$app->request->post('_and_create') == '1') {
+				$redirect = ['create'];
 			} else {
-				throw new Exception("Where should I go now?");
+				$redirect = ["index"];
 			}
-			return $this->redirect($redirect);
+		} else if ($from == 'duplicate') {
+			$redirect = ['view', 'id' => $model->getPrimaryKey()];
+		} else if ($from == 'delete') {
+			$redirect = ["index"];
+		} else {
+			throw new Exception("Where should I go now?");
 		}
+		return $this->redirect($this->context->actionRoute($redirect));
+	}
+
+
+	protected function saveAll($model): bool
+	{
+		return $model->saveAll();
 	}
 
 	public function genBreadCrumbs($action_id, $model, $parent)
@@ -407,121 +387,20 @@ class CrudController extends \yii\web\Controller
 		return $breadcrumbs;
 	}
 
-	public function parentRoute($action_if_no_parent = 'index')
+	public function actionRoute($action_id = null)
 	{
-		if( $this->parent_model ) {
-			$parent_route = $this->getRoutePrefix()
-				. $this->parent_controller
-				. '/' . $this->parent_model->getPrimaryKey();
+		if( $action_id === null ) {
+			return $this->getRoutePrefix() . $this->id;
 		} else {
-			$parent_route = Url::toRoute($action_if_no_parent);
-		}
-		return $parent_route;
-	}
-
-	public function moduleRoute($action_id = null)
-	{
-		if( $this->parent_model ) {
-			$parent_route = $this->parent_controller
-				. '/' . $this->parent_model->getPrimaryKey()
-				. '/'. $this->id;
-			$action_id = (array) $action_id;
-			if ($action_id[0] != '' && $action_id[0] == '/' ) {
-				$action_id[0] = $parent_route . $action_id[0];
-			} else {
-				$action_id[0] = $parent_route . '/' . $action_id[0];
-			}
 			return Url::toRoute($action_id);
-		} else if( $action_id !== null) {
-			return Url::toRoute($action_id);
-		} else {
-			return Url::toRoute($this->id);
 		}
 	}
 
-	public function getParentModel()
+	public function getRoutePrefix()
 	{
-		return $this->parent_model;
-	}
-
-	protected function getParentFromRequest()
-	{
-		if( $this->parent_model != null ) {
-			return $this->parent_model;
-		}
-		$parent_id = intval(Yii::$app->request->get('parent_id', 0));
-		if( $parent_id !== 0 ) {
-			$this->parent_controller = Yii::$app->request->get('parent_controller');
-			assert($this->parent_controller != '');
-			$parent_model_name = 'app\\models\\'. AppHelper::camelCase($this->parent_controller);
-			$parent_model = new $parent_model_name;
-			$this->parent_model = $parent_model->findOne($parent_id);
-			if ($this->parent_model == null) {
-				throw new NotFoundHttpException($parent_model->t('churros',
-					"The parent record of {title} with '{id}' id does not exist",
-					[ '{id}' => $parent_id]));
-			}
-		} else {
-			return null;
-		}
-	}
-
-	/**
-	 * @param Model $parent The parent model (for detail_grids)
-	 * @param Model $child The child model (for detail_grids)
-	 */
-	public function controllerRoute($parent = null, $child= null): ?string
-	{
-		if( $child == null && ($parent == null || $parent == $this->parent_model)) { // for normal grids
-			$myroute = $this->getRoutePrefix() . $this->id;
-			if( $this->parent_model ) {
-				// myroute = /admin/model/11/update
-				// prefix = /admin/parent/22/
-				// result = /admin/parent/22/model/11/update
-				$parent_route = $this->parent_controller. '/' . $this->parent_model->getPrimaryKey() . '/';
-				$prefix = $this->getRoutePrefix() . $parent_route;
-				// https://stackoverflow.com/questions/7475437/find-first-character-that-is-different-between-two-strings
-				$pos_first_different = strspn($prefix ^ $myroute, "\0");
-				// and go back to the /
-				while( $pos_first_different >= 0 && $myroute[$pos_first_different] != '/' ) {
-					--$pos_first_different;
-				}
-				if( $pos_first_different > 0 ) {
-					++$pos_first_different;
-				}
-				$ret = $prefix . substr($myroute, $pos_first_different);
-			} else {
-				$ret = $myroute;
-			}
-		} else if( $child ) { // for detail_grids
-			$ret = $this->getRoutePrefix($parent);
-			$ret .= $parent->controllerName() . '/'
-				. $parent->getPrimaryKey() . '/';
-			$ret .= $child->controllerName();
-		} else {
-			return null;
-		}
-		return $ret;
-	}
-
-	public function getRoutePrefix($parent_model = null)
-	{
-		if( $parent_model == null ) {
-			$parent_model = $this->parent_model;
-			$parent_controller = $this->parent_controller;
-		} else {
-			$parent_controller = $parent_model->controllerName();
-		}
 		$route = $this->id;
 		$route_pos = false;
 		$request_url = '/' . Yii::$app->request->getPathInfo();
-		if( $parent_model ) {
-			$parent_route = $parent_controller . '/' . $parent_model->getPrimaryKey();
-			$route_pos = strpos($request_url, $parent_route . "/" . $route);
-			if( $route_pos === false ) {
-				$route_pos = strpos($request_url, $parent_route . $route);
-			}
-		}
 		if( $route_pos === false ) {
 			$route_pos = strpos($request_url, $route);
 		}
@@ -619,9 +498,9 @@ class CrudController extends \yii\web\Controller
 	{
 		$pk = $model->getPrimaryKey();
 		if( is_array($pk) ) {
-			$link_to_me = Url::to(array_merge([$this->parentRoute('view')], $pk));
+			$link_to_me = Url::to(array_merge([$this->context->actionRoute('view')], $pk));
 		} else {
-			$link_to_me = $this->parentRoute('view') . "/$pk";
+			$link_to_me = $this->context->actionRoute('view') . "/$pk";
 		}
 		switch( $action_id ) {
 		case 'delete':
