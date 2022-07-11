@@ -323,16 +323,26 @@ class CrudController extends \yii\web\Controller
 		return $this->redirect($this->context->actionRoute($redirect));
 	}
 
-
-	protected function saveAll($model): bool
+	public function controllerRoute(): string
 	{
-		return $model->saveAll();
+        return $this->getRoutePrefix() . $this->id;
 	}
 
-	public function genBreadCrumbs($action_id, $model, $parent)
+	public function addParamsToUrl($url, $params)
+    {
+        if ($params === null) {
+            $request = Yii::$app->getRequest();
+            $params = $request instanceof Request ? $request->getQueryParams() : [];
+        }
+        $params[0] = $url;
+        return Url::to($params);
+    }
+
+	
+	public function genBreadCrumbs($action_id, $model, $parent = null)
 	{
 		$breadcrumbs = [];
-		if( isset($parent) ) {
+		if( $parent ) {
 			$prefix = $this->getRoutePrefix() . $parent->controllerName(). '/';
 			$breadcrumbs[] = [
 				'label' => AppHelper::mb_ucfirst($parent->getModelInfo('title_plural')),
@@ -546,14 +556,10 @@ class CrudController extends \yii\web\Controller
 		}
 	}
 
-	public function addParamsToUrl($url, $params)
-    {
-        if ($params === null) {
-            $request = Yii::$app->getRequest();
-            $params = $request instanceof Request ? $request->getQueryParams() : [];
-        }
-        $params[0] = $url;
-        return Url::to($params);
-    }
-
+	protected function saveAll($model): bool
+	{
+		return $model->saveAll();
+	}
+    
+    
 }
