@@ -320,7 +320,7 @@ class CrudController extends \yii\web\Controller
 		} else {
 			throw new Exception("Where should I go now?");
 		}
-		return $this->redirect($this->context->actionRoute($redirect));
+		return $this->redirect($this->actionRoute($redirect));
 	}
 
 	public function controllerRoute(): string
@@ -508,9 +508,9 @@ class CrudController extends \yii\web\Controller
 	{
 		$pk = $model->getPrimaryKey();
 		if( is_array($pk) ) {
-			$link_to_me = Url::to(array_merge([$this->context->actionRoute('view')], $pk));
+			$link_to_me = Url::to(array_merge([$this->actionRoute('view')], $pk));
 		} else {
-			$link_to_me = $this->context->actionRoute('view') . "/$pk";
+			$link_to_me = $this->actionRoute('view') . "/$pk";
 		}
 		switch( $action_id ) {
 		case 'delete':
