@@ -48,7 +48,18 @@ class CrudController extends \yii\web\Controller
 
 	public function beforeAction($action)
 	{
-		if (!parent::beforeAction($action)) {
+        if( $this->request->getMethod() === 'POST' && count($_POST) == 0 && count($_FILES) == 0 ) {
+            if( isset($_SERVER['CONTENT_TYPE']) && substr($_SERVER['CONTENT_TYPE'], 0, 19) == 'multipart/form-data' ) {
+                if( isset($_SERVER['CONTENT_LENGTH']) ) {
+                    if( intval($_SERVER['CONTENT_LENGTH'])>0 ) { 
+                        Yii::$app->session->addFlash('error', strtr(Yii::t('churros', 'PHP discarded POST data because of request exceeding either post_max_size={post_size} or upload_max_filesize={upload_size}'), ['{post_size}' => ini_get('post_max_size'), '{upload_size}' => ini_get('upload_max_filesize')]));    
+                        $this->redirect(Yii::$app->request->referrer ?: Yii::$app->homeUrl);                   
+                        return false;
+                    }
+                }
+            }
+        }
+        if (!parent::beforeAction($action)) {
 			return false;
 		}
 		if (isset($this->junctionModel) && $this->junctionModel == true ) {
