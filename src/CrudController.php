@@ -323,11 +323,6 @@ class CrudController extends \yii\web\Controller
 		return $this->redirect($this->actionRoute($redirect));
 	}
 
-	public function controllerRoute(): string
-	{
-        return $this->getRoutePrefix() . $this->id;
-	}
-
 	public function addParamsToUrl($url, $params)
     {
         if ($params === null) {
@@ -338,7 +333,7 @@ class CrudController extends \yii\web\Controller
         return Url::to($params);
     }
 
-	
+
 	public function genBreadCrumbs($action_id, $model, $parent = null)
 	{
 		$breadcrumbs = [];
@@ -357,13 +352,13 @@ class CrudController extends \yii\web\Controller
 			// child
 			$breadcrumbs[] = [
 				'label' => AppHelper::mb_ucfirst($model->getModelInfo('title_plural')),
-				'url' => $this->controllerRoute() . '/index'
+				'url' => $this->actionRoute('index')
 			];
 			switch( $action_id ) {
 				case 'update':
 					$breadcrumbs[] = [
 						'label' => $model->recordDesc('short', 25),
-						'url' => array_merge([$this->controllerRoute() . '/view'], $model->getPrimaryKey(true))
+						'url' => array_merge([$this->actionRoute('view')], $model->getPrimaryKey(true))
 					];
 					break;
 				case 'index':
@@ -560,6 +555,6 @@ class CrudController extends \yii\web\Controller
 	{
 		return $model->saveAll();
 	}
-    
-    
+
+
 }
