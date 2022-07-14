@@ -46,27 +46,6 @@ class AppHelper
 			return $inc;
 		}
 	}	
-	/**
-	 * @params string $route if null, the model controller
-	 */
-	static public function joinModels($glue, $models, $controller)
-	{
-		if( $models == null || count($models)==0 ) {
-			return "";
-		}
-		$attrs = [];
-		$route = null;
-		foreach((array)$models as $model) {
-			if( $route == null ) {
-				$route = $controller->controllerRoute($model);
-			}
-			if( $model != null ) {
-				$url = $route . strval($model->getPrimaryKey());
-				$attrs[] = "<a href='$url'>" .  $model->recordDesc() . "</a>";
-			}
-		}
-		return join($glue, $attrs);
-	}
 
 	/**
 	* Strip the namespace from the class to get the actual class name
