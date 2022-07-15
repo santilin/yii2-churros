@@ -279,10 +279,10 @@ trait ModelSearchTrait
 		} else {
 			// filter form outside grid
 			// join search form params
-			$scope = ($formName === null) ? $this->formName() : $formName;
 			$ret = parent::load($params, $formName);
 			if( $ret ) {
 				$newparams = [];
+                $scope = ($formName === null) ? $this->formName() : $formName;
 				if( isset($params[$scope]['_adv_']) ) {
 					foreach( $params[$scope]['_adv_'] as $name => $values) {
 						if( isset($values['lft'])  && $values['lft']!=='' && $values['lft']!==null ) {
