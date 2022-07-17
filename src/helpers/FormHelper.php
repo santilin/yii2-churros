@@ -117,62 +117,64 @@ class FormHelper
 
 	static public function layoutFields($layout, $form_fields, $form_layout_rows)
 	{
+		$ret = '';
 		if ($layout == "horizontal" || $layout == "inline" ) {
 			foreach( $form_fields as $name => $code ) {
-				echo $form_fields[$name]. "\n";
+				$ret .= $form_fields[$name]. "\n";
 			}
 		} else if( count($form_layout_rows) ) {
 			foreach($form_layout_rows as $lrow ) {
 				switch(count($lrow)) {
 				case 1:
-					echo '<div class="row">';
-					echo '<div class="col-sm-12">';
-					echo $form_fields[$lrow[0]];
-					echo "</div>";
-					echo "</div>";
+					$ret .= '<div class="row">';
+					$ret .= '<div class="col-sm-12">';
+					$ret .= $form_fields[$lrow[0]];
+					$ret .= '</div>';
+					$ret .= '</div>';
 					break;
 				case 2:
-					echo '<div class="row">';
-					echo '<div class="col-sm-6">';
-					echo $form_fields[$lrow[0]];
-					echo "</div>";
-					echo '<div class="col-sm-6">';
-					echo $form_fields[$lrow[1]];
-					echo "</div>";
-					echo "</div>";
+					$ret .= '<div class="row">';
+					$ret .= '<div class="col-sm-6">';
+					$ret .= $form_fields[$lrow[0]];
+					$ret .= '</div>';
+					$ret .= '<div class="col-sm-6">';
+					$ret .= $form_fields[$lrow[1]];
+					$ret .= '</div>';
+					$ret .= '</div>';
 					break;
 				case 3:
-					echo '<div class="row">';
-					echo '<div class="col-sm-4">';
-					echo $form_fields[$lrow[0]];
-					echo "</div>";
-					echo '<div class="col-sm-4">';
-					echo $form_fields[$lrow[1]];
-					echo "</div>";
-					echo '<div class="col-sm-4">';
-					echo $form_fields[$lrow[2]];
-					echo "</div>";
-					echo "</div>";
+					$ret .= '<div class="row">';
+					$ret .= '<div class="col-sm-4">';
+					$ret .= $form_fields[$lrow[0]];
+					$ret .= '</div>';
+					$ret .= '<div class="col-sm-4">';
+					$ret .= $form_fields[$lrow[1]];
+					$ret .= '</div>';
+					$ret .= '<div class="col-sm-4">';
+					$ret .= $form_fields[$lrow[2]];
+					$ret .= '</div>';
+					$ret .= '</div>';
 					break;
 				case 4:
-					echo '<div class="row">';
-					echo '<div class="col-sm-3">';
-					echo $form_fields[$lrow[0]];
-					echo "</div>";
-					echo '<div class="col-sm-3">';
-					echo $form_fields[$lrow[1]];
-					echo "</div>";
-					echo '<div class="col-sm-3">';
-					echo $form_fields[$lrow[2]];
-					echo "</div>";
-					echo '<div class="col-sm-3">';
-					echo $form_fields[$lrow[3]];
-					echo "</div>";
-					echo "</div>";
+					$ret .= '<div class="row">';
+					$ret .= '<div class="col-sm-3">';
+					$ret .= $form_fields[$lrow[0]];
+					$ret .= '</div>';
+					$ret .= '<div class="col-sm-3">';
+					$ret .= $form_fields[$lrow[1]];
+					$ret .= '</div>';
+					$ret .= '<div class="col-sm-3">';
+					$ret .= $form_fields[$lrow[2]];
+					$ret .= '</div>';
+					$ret .= '<div class="col-sm-3">';
+					$ret .= $form_fields[$lrow[3]];
+					$ret .= '</div>';
+					$ret .= '</div>';
 					break;
 				}
 			}
 		}
+		return $ret;
 	}
 
 	/**
