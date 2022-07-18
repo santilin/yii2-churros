@@ -17,6 +17,44 @@ class FormHelper
 		'default' => [
 		],
 		'1col' => [
+			'1col' => [
+				'horizontalCssClasses' => [
+					'label' => 'col-sm-1 one-column-row',
+					'offset' => 'col-sm-offset-1',
+					'wrapper' => 'col-sm-11',
+				]
+			],
+			'2cols' => [
+				'horizontalCssClasses' => [
+					'label' => 'col-sm-3',
+					'offset' => 'col-sm-offset-1',
+					'wrapper' => 'col-sm-9',
+				]
+			],
+			'3cols' => [
+				'horizontalCssClasses' => [
+					'label' => 'col-sm-3',
+					'offset' => 'col-sm-offset-1',
+					'wrapper' => 'col-sm-9',
+				]
+			],
+			'4cols' => [
+				'horizontalCssClasses' => [
+					'label' => 'col-sm-3',
+					'offset' => 'col-sm-offset-1',
+					'wrapper' => 'col-sm-9',
+				]
+			],
+			'1/3' => [
+				'horizontalCssClasses' => [
+					'wrapper' => 'col-sm-2',
+				]
+			],
+			'1/2' => [
+				'horizontalCssClasses' => [
+					'wrapper' => 'col-sm-3',
+				]
+			]
 		],
 		'2cols' => [
 			'1col' => [
@@ -99,6 +137,44 @@ class FormHelper
 			]
 		],
 		'4cols' => [
+			'1col' => [
+				'horizontalCssClasses' => [
+					'label' => 'col-sm-1 one-column-row',
+					'offset' => 'col-sm-offset-1',
+					'wrapper' => 'col-sm-11',
+				]
+			],
+			'2cols' => [
+				'horizontalCssClasses' => [
+					'label' => 'col-sm-3',
+					'offset' => 'col-sm-offset-1',
+					'wrapper' => 'col-sm-9',
+				]
+			],
+			'3cols' => [
+				'horizontalCssClasses' => [
+					'label' => 'col-sm-3',
+					'offset' => 'col-sm-offset-1',
+					'wrapper' => 'col-sm-9',
+				]
+			],
+			'4cols' => [
+				'horizontalCssClasses' => [
+					'label' => 'col-sm-3',
+					'offset' => 'col-sm-offset-1',
+					'wrapper' => 'col-sm-9',
+				]
+			],
+			'1/3' => [
+				'horizontalCssClasses' => [
+					'wrapper' => 'col-sm-2',
+				]
+			],
+			'1/2' => [
+				'horizontalCssClasses' => [
+					'wrapper' => 'col-sm-3',
+				]
+			]
 		]
 	];
 
@@ -186,6 +262,12 @@ class FormHelper
 		if( !count($form_layout_rows ) ) {
 			$row = [];
 			switch( $layout ) {
+			case 'horizontal':
+			case '1col':
+				foreach( array_keys($input_opts) as $key ) {
+					$form_layout_rows[] = [ $key ];
+				}
+				break;
 			case "2cols":
 				foreach( array_keys($input_opts) as $key ) {
 					switch(count($row)) {
@@ -215,6 +297,27 @@ class FormHelper
 						break;
 					case 2:
 						$row[2] = $key;
+						break;
+					}
+				}
+				break;
+			case "4cols":
+				foreach( array_keys($input_opts) as $key ) {
+					switch(count($row)) {
+					case 4:
+						$form_layout_rows[] = $row;
+						$row = [];
+					case 0:
+						$row[0] = $key;
+						break;
+					case 1:
+						$row[1] = $key;
+						break;
+					case 2:
+						$row[2] = $key;
+						break;
+					case 3:
+						$row[3] = $key;
 						break;
 					}
 				}
