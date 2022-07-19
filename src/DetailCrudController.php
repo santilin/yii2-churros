@@ -35,7 +35,7 @@ class DetailCrudController extends CrudController
 	public function actionIndex()
 	{
 		$params = Yii::$app->request->queryParams;
-		$searchModel = $this->createSearchModel();
+		$searchModel = $this->findModel(null,null,'search');
 		if( $this->master_model ) {
 			$params[$name][$searchModel->getRelatedFieldForModel($this->master_model)]
 				= $this->master_model->getPrimaryKey();

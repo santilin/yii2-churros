@@ -10,7 +10,7 @@ class UpDownControllerTrait
 	{
 		$params = Yii::$app->request->queryParams;
 		$model = $this->findModel($id);
-		$searchModel = $this->createSearchModel();
+		$searchModel = $this->findModel(null,null,'search');
 		if( isset($params['order_field']) ) {
 			$order_field = $params['order_field'];
 			$save_order = $model->$order_field;
@@ -49,7 +49,7 @@ class UpDownControllerTrait
 	{
 		$params = Yii::$app->request->queryParams;
 		$model = $this->findModel($id);
-		$searchModel = $this->createSearchModel();
+		$searchModel = $this->findModel(null,null,'search');
 		if( isset($params['order_field']) ) {
 			$order_field = $params['order_field'];
 			$save_order = $model->$order_field;
@@ -86,7 +86,7 @@ class UpDownControllerTrait
 	public function actionSparse($start, $inc)
 	{
 		$params = Yii::$app->request->queryParams;
-		$searchModel = $this->createSearchModel();
+		$searchModel = $this->findModel(null,null,'search');
 		if( isset($params['order_field']) ) {
 			$order_field = $params['order_field'];
 			$dp = $searchModel->search($params);
