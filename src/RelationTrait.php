@@ -68,23 +68,32 @@ trait RelationTrait
 			$formName = $this->formName();
 		}
         if ($this->load($post, $formName)) {
-            $relations_in_model = $this->getRelationData($relations_in_form);
-			// Look for arrays of relations data in the POST
-            foreach ($post as $post_variable => $post_data) {
-                if (is_array($post_data)) {
-                    if ($post_variable == $formName) { // Main model
-						// Look for embedded relations data in the main form
-                        foreach ($post_data as $rel_name => $relAttributes) {
-                            if (is_array($relAttributes) && array_key_exists($rel_name, $relations_in_model) ) {
-                                $this->loadToRelation($relations_in_model[$rel_name], $rel_name, $relAttributes);
-                            }
-                        }
-                    } else { // HasMany or Many2Many outside of formName
-                        $rel_name = &$post_variable;
-                        if (!array_key_exists($rel_name, $relations_in_model)) {
-                            continue;
-                        }
-                        $this->loadToRelation($relations_in_model[$rel_name], $rel_name, $post_data);
+            $relations_in_model = static::$relations;
+            foreach($relations_in_model as $rel_name => $model_relation ) {
+				if( count($relations_in_form) && !in_array($rel_name, $relations_in_form) ) {
+					continue;
+				}
+				if( $model_relation['type'] == 'HasOne' ) {
+					// Look for embedded relations data in the main form
+					$post_data = null;
+					if( isset($post[$formName][$rel_name]) && is_array($post[$formName][$rel_name]) ) {
+						$post_data = $post[$formName][$rel_name];
+					} else if( isset($post[$formName][$model_relation['model']]) && is_array($post[$formName][$model_relation['model']]) ) {
+						$post_data = $post[$formName][$model_relation['model']];
+					}
+					if( $post_data ) {
+						$rel_model = new $model_relation['modelClass'];
+						$rel_model->setAttributes( $post_data );
+						$this->populateRelation($rel_name, $rel_model);
+					}
+				} else {
+                    // HasMany or Many2Many outside of formName
+					$post_data = (isset($post[$rel_name]) && is_array($post[$rel_name]))
+						? $post[$rel_name]
+						: (isset($post[$model_relation['model']]) && is_array($post[$model_relation['model']]))
+							? $post[$model_relation['model']] : null;
+					if( $post_data ) {
+                        $this->loadToRelation($rel_name, $post_data);
                     }
                 }
             }
@@ -100,11 +109,12 @@ trait RelationTrait
      * @param $v form values
      * @return bool
      */
-    private function loadToRelation($relation, $rel_name, $v)
+    private function loadToRelation($rel_name, $v)
     {
         /* @var $this ActiveRecord */
         /* @var $relObj ActiveRecord */
         /* @var $relModelClass ActiveRecord */
+        $relation = $this->getRelationData($rel_name);
 		$relModelClass = $relation['modelClass'];
         $relPKAttr = $relModelClass::primaryKey();
 
@@ -593,60 +603,25 @@ trait RelationTrait
     public function getRelationData($relations)
     {
         $stack = [];
-        if (is_array($relations)) {
-            foreach ($relations as $name) {
-                /* @var $rel ActiveQuery */
-                $rel = $this->getRelation($name);
-                $stack[$name]['name'] = $name;
-                $stack[$name]['method'] = 'get' . ucfirst($name);
-                $stack[$name]['ismultiple'] = $rel->multiple;
-                $stack[$name]['modelClass'] = $rel->modelClass;
-                $stack[$name]['link'] = $rel->link;
-                $stack[$name]['via'] = $rel->via;
-            }
+        $is_array = is_array($relations);
+        if( !$is_array ) {
+			$relations = [ $relations ];
 		}
-/*
-		https://github.com/yiisoft/yii2/issues/1282
-
-        } else {
-            $ARMethods = get_class_methods('\yii\db\ActiveRecord');
-            $modelMethods = get_class_methods('\yii\base\Model');
-            $reflection = new \ReflectionClass($this);
-            /* @var $method \ReflectionMethod
-            foreach ($reflection->getMethods() as $method) {
-                if (in_array($method->name, $ARMethods) || in_array($method->name, $modelMethods)) {
-                    continue;
-                }
-                if ($method->name === 'getRelationData') {
-                    continue;
-                }
-                if ($method->name === 'getAttributesWithRelated') {
-                    continue;
-                }
-                if (strpos($method->name, 'get') !== 0) {
-                    continue;
-                }
-                if($method->getNumberOfParameters() > 0) {
-                    continue;
-                }
-                try {
-                    $rel = call_user_func(array($this, $method->name));
-                    if ($rel instanceof ActiveQuery) {
-                        $name = lcfirst(preg_replace('/^get/', '', $method->name));
-                        $stack[$name]['name'] = lcfirst(preg_replace('/^get/', '', $method->name));
-                        $stack[$name]['method'] = $method->name;
-                        $stack[$name]['ismultiple'] = $rel->multiple;
-                        $stack[$name]['modelClass'] = $rel->modelClass;
-                        $stack[$name]['link'] = $rel->link;
-                        $stack[$name]['via'] = $rel->via;
-                    }
-                } catch (\Exception $exc) {
-                    //if method name can't be called,
-                }
-            }
-        }
-        */
-        return $stack;
+		foreach ($relations as $name) {
+			/* @var $rel ActiveQuery */
+			$rel = $this->getRelation($name);
+			$stack[$name]['name'] = $name;
+			$stack[$name]['method'] = 'get' . ucfirst($name);
+			$stack[$name]['ismultiple'] = $rel->multiple;
+			$stack[$name]['modelClass'] = $rel->modelClass;
+			$stack[$name]['link'] = $rel->link;
+			$stack[$name]['via'] = $rel->via;
+		}
+		if( !$is_array) {
+			return $stack[$name];
+		} else {
+			return $stack;
+		}
     }
 
     /**

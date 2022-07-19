@@ -350,7 +350,9 @@ trait ModelSearchTrait
 		if( is_array($dropdown_values) || is_array($value['lft']) ) {
 			$ret .= "<div class='control-form col-sm-5'>";
 			$ret .= Html::dropDownList("${scope}[_adv_][$attribute][lft]",
-			$value['lft'], $dropdown_values, [ 'class' => 'form-control col-sm-4']);
+				$value['lft'],
+				$dropdown_values,
+				[ 'prompt' => 'Cualquiera', 'class' => 'form-control col-sm-4']);
 			$ret .= "</div>";
 		} else {
 			$ret .= <<<EOF
