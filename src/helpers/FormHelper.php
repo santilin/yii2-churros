@@ -141,29 +141,31 @@ class FormHelper
 				'horizontalCssClasses' => [
 					'label' => 'col-sm-1 one-column-row',
 					'offset' => 'col-sm-offset-1',
-					'wrapper' => 'col-sm-11',
+					'wrapper' => 'col-sm-6',
 				]
 			],
 			'2cols' => [
 				'horizontalCssClasses' => [
-					'label' => 'col-sm-3',
+					'label' => 'col-sm-2',
 					'offset' => 'col-sm-offset-1',
-					'wrapper' => 'col-sm-9',
+					'wrapper' => 'col-sm-7',
 				]
 			],
 			'3cols' => [
 				'horizontalCssClasses' => [
-					'label' => 'col-sm-3',
 					'offset' => 'col-sm-offset-1',
-					'wrapper' => 'col-sm-9',
+					'wrapper' => 'col-sm-8',
 				]
 			],
 			'4cols' => [
 				'horizontalCssClasses' => [
-					'label' => 'col-sm-3',
-					'offset' => 'col-sm-offset-1',
-					'wrapper' => 'col-sm-9',
-				]
+					'label' => 'control-label',
+					'error' => 'col_sm_12',
+					'hint' => 'col_sm_12',
+					'wrapper' => '',
+				],
+				'options' => [ 'class' => 'control-group col-sm-2' ],
+
 			],
 			'1/3' => [
 				'horizontalCssClasses' => [
@@ -233,18 +235,10 @@ class FormHelper
 					break;
 				case 4:
 					$ret .= '<div class="row">';
-					$ret .= '<div class="col-sm-3">';
 					$ret .= $form_fields[$lrow[0]];
-					$ret .= '</div>';
-					$ret .= '<div class="col-sm-3">';
 					$ret .= $form_fields[$lrow[1]];
-					$ret .= '</div>';
-					$ret .= '<div class="col-sm-3">';
 					$ret .= $form_fields[$lrow[2]];
-					$ret .= '</div>';
-					$ret .= '<div class="col-sm-3">';
 					$ret .= $form_fields[$lrow[3]];
-					$ret .= '</div>';
 					$ret .= '</div>';
 					break;
 				}
