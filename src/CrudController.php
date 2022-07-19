@@ -83,7 +83,7 @@ class CrudController extends \yii\web\Controller
 	public function actionIndex()
 	{
 		$params = Yii::$app->request->queryParams;
-		$searchModel = $this->createSearchModel();
+		$searchModel = $this->findModel(null, null, 'search');
 		return $this->render('index', [
 			'searchModel' => $searchModel,
 			'indexParams' => $this->changeActionParams($params, 'index', $searchModel),
@@ -98,12 +98,6 @@ class CrudController extends \yii\web\Controller
 	public function actionView($id)
 	{
 		$model = $this->findModel($id);
-		if( $this->accessOnlyOwner ) {
-			if( !$model->IAmOwner() ) {
-				throw new \yii\web\ForbiddenHttpException(
-					$model->t('churros', "You can't view {esta} {title} because you are not the author"));
-			}
-		}
 		$params = Yii::$app->request->queryParams;
 		return $this->render('view', [
 			'model' => $model,
@@ -119,7 +113,7 @@ class CrudController extends \yii\web\Controller
 	public function actionCreate()
 	{
 		$params = Yii::$app->request->queryParams;
-		$model = $this->findModel();
+		$model = $this->findModel(null);
 		if (isset($_POST['_form_relations']) ) {
 			$relations = explode(",", $_POST['_form_relations']);
 		} else {
@@ -188,12 +182,6 @@ class CrudController extends \yii\web\Controller
 	{
 		$params = Yii::$app->request->queryParams;
 		$model = $this->findModel($id);
-		if( $this->accessOnlyOwner ) {
-			if( !$model->IAmOwner() ) {
-				throw new \yii\web\ForbiddenHttpException(
-					$model->t('churros', "You can't update {esta} {title} because you are not the author"));
-			}
-		}
 
 		if (isset($_POST['_form_relations']) ) {
 			$relations = explode(",", $_POST['_form_relations']);
@@ -222,12 +210,6 @@ class CrudController extends \yii\web\Controller
 	public function actionDelete($id)
 	{
 		$model = $this->findModel($id);
-		if( $this->accessOnlyOwner ) {
-			if( !$model->IAmOwner() ) {
-				throw new \yii\web\ForbiddenHttpException(
-					$model->t('churros', "You can't delete {esta} {title} because you are not the author"));
-			}
-		}
 		try {
 			$model->deleteWithRelated();
 			if( $this->afterSave('delete', $model) ) {
@@ -251,12 +233,6 @@ class CrudController extends \yii\web\Controller
 	{
 		$params = Yii::$app->request->queryParams;
 		$model = $this->findModel($id);
-		if( $this->accessOnlyOwner ) {
-			if( !$model->IAmOwner() ) {
-				throw new \yii\web\ForbiddenHttpException(
-					$model->t('churros', "You can't print to pdf {esta} {title} because you are not the author"));
-			}
-		}
 		if( YII_DEBUG ) {
             Yii::$app->getModule('debug')->instance->allowedIPs = [];
         }
@@ -470,7 +446,7 @@ class CrudController extends \yii\web\Controller
 		$ret = [];
 		static $clientIdGetParamName = 'query';
 		$value = $_GET[$clientIdGetParamName];
-		$searchModel = $this->createSearchModel();
+		$searchModel = $this->findModel(null, null, 'search');
 		$query = $searchModel->find();
 		foreach( (array)$fields as $field ) {
 			$query->orWhere( [ "like", $field, $value  ] );
@@ -485,13 +461,9 @@ class CrudController extends \yii\web\Controller
 	public function actionRawModel($id)
 	{
 		$model = $this->findModel($id);
-		if( $this->accessOnlyOwner ) {
-			if( !$model->IAmOwner() ) {
-				throw new \yii\web\ForbiddenHttpException(
-					$model->t('churros', "Accesd denied to {esta} {title} because you are not the author"));
-			}
-		}
-		return json_encode($model->getAttributes());
+		if( $model ) {
+            return json_encode($model->getAttributes());
+        } /// @todo else
 	}
 
 	protected function getSuccessMessage(string $action_id): string
