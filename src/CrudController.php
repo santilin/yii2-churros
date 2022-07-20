@@ -321,60 +321,31 @@ class CrudController extends \yii\web\Controller
     }
 
 
-	public function genBreadCrumbs($action_id, $model, $parent = null)
+	public function genBreadCrumbs($action_id, $model)
 	{
 		$breadcrumbs = [];
-		if( $parent ) {
-			$prefix = $this->getRoutePrefix() . $parent->controllerName(). '/';
-			$breadcrumbs[] = [
-				'label' => AppHelper::mb_ucfirst($parent->getModelInfo('title_plural')),
-				'url' => [ $prefix . 'index']
-			];
-			$keys = $parent->getPrimaryKey(true);
-			$keys[0] = $prefix . 'view';
-			$breadcrumbs[] = [
-				'label' => $parent->recordDesc('short', 25),
-				'url' => $keys
-			];
-			// child
-			$breadcrumbs[] = [
-				'label' => AppHelper::mb_ucfirst($model->getModelInfo('title_plural')),
-				'url' => $this->actionRoute('index')
-			];
-			switch( $action_id ) {
-				case 'update':
-					$breadcrumbs[] = [
-						'label' => $model->recordDesc('short', 25),
-						'url' => array_merge([$this->actionRoute('view')], $model->getPrimaryKey(true))
-					];
-					break;
-				case 'index':
-					break;
-			}
-		} else {
-			$prefix = $this->getRoutePrefix();
-			$breadcrumbs[] = [
-				'label' =>  $model->getModelInfo('title_plural'),
-				'url' => [ $this->id . '/index' ]
-			];
-			switch( $action_id ) {
-				case 'update':
-				case 'duplicate':
-					$breadcrumbs[] = [
-						'label' => $model->recordDesc('short', 20),
-						'url' => array_merge([ $prefix . $this->id . '/view'], $model->getPrimaryKey(true))
-					];
-					break;
-				case 'view':
-					$breadcrumbs[] = $model->recordDesc('short', 20);
-					break;
-				case 'create':
-					break;
-				case 'index':
-					break;
-				default:
-					throw new \Exception($action_id);
-			}
+		$prefix = $this->getRoutePrefix();
+		$breadcrumbs[] = [
+			'label' =>  $model->getModelInfo('title_plural'),
+			'url' => [ $this->id . '/index' ]
+		];
+		switch( $action_id ) {
+			case 'update':
+			case 'duplicate':
+				$breadcrumbs[] = [
+					'label' => $model->recordDesc('short', 20),
+					'url' => array_merge([ $prefix . $this->id . '/view'], $model->getPrimaryKey(true))
+				];
+				break;
+			case 'view':
+				$breadcrumbs[] = $model->recordDesc('short', 20);
+				break;
+			case 'create':
+				break;
+			case 'index':
+				break;
+			default:
+				throw new \Exception($action_id);
 		}
 		return $breadcrumbs;
 	}
@@ -386,6 +357,11 @@ class CrudController extends \yii\web\Controller
 		} else {
 			return Url::toRoute($action_id);
 		}
+	}
+
+	public function masterRoute($master)
+	{
+		return $this->id . '/' . $master->id;
 	}
 
 	public function getRoutePrefix()

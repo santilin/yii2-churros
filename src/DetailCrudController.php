@@ -127,7 +127,7 @@ class DetailCrudController extends CrudController
 		}
 		$parent_id = intval(Yii::$app->request->get('parent_id', 0));
 		if( $parent_id !== 0 ) {
-			$this->master_controller = Yii::$app->request->get('master_controller');
+			$this->master_controller = Yii::$app->request->get('parent_controller');
 			assert($this->master_controller != '');
 			$master_model_name = 'app\\models\\'. AppHelper::camelCase($this->master_controller);
 			$master_model = new $master_model_name;
@@ -140,6 +140,65 @@ class DetailCrudController extends CrudController
 		} else {
 			return null;
 		}
+	}
+
+	public function genBreadCrumbs($action_id, $model)
+	{
+		$breadcrumbs = [];
+		if( $this->master_model) {
+			$parent = $this->master_model;
+			$prefix = $this->getRoutePrefix() . $parent->controllerName(). '/';
+			$breadcrumbs[] = [
+				'label' => AppHelper::mb_ucfirst($parent->getModelInfo('title_plural')),
+				'url' => [ $prefix . 'index']
+			];
+			$keys = $parent->getPrimaryKey(true);
+			$keys[0] = $prefix . 'view';
+			$breadcrumbs[] = [
+				'label' => $parent->recordDesc('short', 25),
+				'url' => $keys
+			];
+			// child
+			$breadcrumbs[] = [
+				'label' => AppHelper::mb_ucfirst($model->getModelInfo('title_plural')),
+				'url' => $this->actionRoute('index')
+			];
+			switch( $action_id ) {
+				case 'update':
+					$breadcrumbs[] = [
+						'label' => $model->recordDesc('short', 25),
+						'url' => array_merge([$this->actionRoute('view')], $model->getPrimaryKey(true))
+					];
+					break;
+				case 'index':
+					break;
+			}
+		} else {
+			$prefix = $this->getRoutePrefix();
+			$breadcrumbs[] = [
+				'label' =>  $model->getModelInfo('title_plural'),
+				'url' => [ $this->id . '/index' ]
+			];
+			switch( $action_id ) {
+				case 'update':
+				case 'duplicate':
+					$breadcrumbs[] = [
+						'label' => $model->recordDesc('short', 20),
+						'url' => array_merge([ $prefix . $this->id . '/view'], $model->getPrimaryKey(true))
+					];
+					break;
+				case 'view':
+					$breadcrumbs[] = $model->recordDesc('short', 20);
+					break;
+				case 'create':
+					break;
+				case 'index':
+					break;
+				default:
+					throw new \Exception($action_id);
+			}
+		}
+		return $breadcrumbs;
 	}
 
 }
