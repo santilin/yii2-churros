@@ -23,6 +23,12 @@ function churros_validate_dot_dot_input($form, attribute, messages, mask, dot, o
 function churros_validate_dot_dot(value, mask, dot, options)
 {
 	const groups = churros_extract_dot_groups(mask, dot);
+	var regexp_dot;
+	if( dot == '.' ) {
+		regexp_dot = '\\.';
+	} else {
+		regexp_dot = dot;
+	}
 	if( groups.length == 0 ) {
 		return true;
 	}
@@ -31,7 +37,7 @@ function churros_validate_dot_dot(value, mask, dot, options)
 		if( i==0 ) {
 			reg_exps.push("[0-9]{1," + groups[i] + "}");
 		} else {
-			reg_exps.push("\\.[0-9]{0," + groups[i] + "}");
+			reg_exps.push(regexp_dot + "[0-9]{0," + groups[i] + "}");
 		}
 	}
 	let re_str = '';
@@ -46,11 +52,11 @@ function churros_validate_dot_dot(value, mask, dot, options)
 	console.log(re_str);
 	var rgx = new RegExp("^(" + re_str + ")$");
 	if( value.match(rgx) ) {
-		var parts = value.split('.');
+		var parts = value.split(dot);
 		let ret = '';
 		for( i=0; i<parts.length; ++i ) {
 			if( i!=0 ) {
-				ret += ".";
+				ret += dot;
 			}
 			ret += parts[i].padStart(groups[i], '0')
 		}
