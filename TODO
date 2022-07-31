@@ -2,7 +2,8 @@
 Tabler:
 composer require --prefer-dist synamen/yii2-tabler-theme "~1.0"
 
-
+= Optimizacion sqlite3
+https://stackoverflow.com/questions/1711631/improve-insert-per-second-performance-of-sqlite
 
 
 = GridFilter
