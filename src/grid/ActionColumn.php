@@ -8,64 +8,26 @@
 namespace santilin\churros\grid;
 
 use Yii;
-use yii\helpers\Html;
-
-class ActionColumn extends \yii\grid\ActionColumn
+class ActionColumn extends \kartik\grid\ActionColumn
 {
     public $template = '{view}&nbsp;{update}&nbsp;{delete}&nbsp;{duplicate}';
+    public $duplicateOptions = [];
     /**
      * Initializes the default button rendering callbacks.
      */
     protected function initDefaultButtons()
     {
-        $this->initDefaultButton('view', 'eye-open');
-        $this->initDefaultButton('update', 'pencil');
-        $this->initDefaultButton('delete', 'trash', [
-            'data-confirm' => Yii::t('yii', 'Are you sure you want to delete this item?'),
-            'data-method' => 'post',
-        ]);
-        $this->initDefaultButton('duplicate', 'copy');
+        $notBs3 = !$this->grid->isBs(3);
+        $this->setDefaultButton('view', Yii::t('kvgrid', 'View'), $notBs3 ? 'eye' : 'eye-open');
+        $this->setDefaultButton('update', Yii::t('kvgrid', 'Update'), $notBs3 ? 'pencil' : 'pencil');
+        $this->setDefaultButton('delete', Yii::t('kvgrid', 'Delete'), $notBs3 ? 'trash' : 'trash');
+        $this->setDefaultButton('duplicate', Yii::t('kvgrid', 'Duplicate'), $notBs3 ? 'copy' : 'trash');
     }
 
-    /**
-     * Initializes the default button rendering callback for single button.
-     * @param string $name Button name as it's written in template
-     * @param string $iconName The part of Bootstrap glyphicon class that makes it unique
-     * @param array $additionalOptions Array of additional options
-     * @since 2.0.11
-     */
-    protected function initDefaultButton($name, $iconName, $additionalOptions = [])
-    {
-        if (!isset($this->buttons[$name]) && strpos($this->template, '{' . $name . '}') !== false) {
-            $this->buttons[$name] = function ($url, $model, $key) use ($name, $iconName, $additionalOptions) {
-                switch ($name) {
-                    case 'view':
-                        $title = Yii::t('yii', 'View');
-                        break;
-                    case 'update':
-                        $title = Yii::t('yii', 'Update');
-                        break;
-                    case 'delete':
-                        $title = Yii::t('yii', 'Delete');
-                        break;
-                    case 'duplicate':
-                        $title = Yii::t('yii', 'Duplicate');
-                        break;
-                    default:
-                        $title = ucfirst($name);
-                }
-                $options = array_merge([
-                    'title' => $title,
-                    'aria-label' => $title,
-                    'data-pjax' => '0',
-                ], $additionalOptions, $this->buttonOptions);
-                $icon = isset($this->icons[$iconName])
-                    ? $this->icons[$iconName]
-                    : Html::tag('span', '', ['class' => "fa fa-$iconName"]);
-                return Html::a($icon, $url, $options);
-            };
-        }
-    }
-
+    protected function renderDataCellContent($model, $key, $index)
+	{
+		$content = parent::renderDataCellContent($model, $key, $index);
+		return str_replace('fas fa-', 'fa fa-', $content);
+	}
 
 }
