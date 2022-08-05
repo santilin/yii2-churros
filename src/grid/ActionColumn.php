@@ -17,17 +17,9 @@ class ActionColumn extends \kartik\grid\ActionColumn
      */
     protected function initDefaultButtons()
     {
+		parent::initDefaultButtons();
         $notBs3 = !$this->grid->isBs(3);
-        $this->setDefaultButton('view', Yii::t('kvgrid', 'View'), $notBs3 ? 'eye' : 'eye-open');
-        $this->setDefaultButton('update', Yii::t('kvgrid', 'Update'), $notBs3 ? 'pencil' : 'pencil');
-        $this->setDefaultButton('delete', Yii::t('kvgrid', 'Delete'), $notBs3 ? 'trash' : 'trash');
         $this->setDefaultButton('duplicate', Yii::t('kvgrid', 'Duplicate'), $notBs3 ? 'copy' : 'trash');
     }
-
-    protected function renderDataCellContent($model, $key, $index)
-	{
-		$content = parent::renderDataCellContent($model, $key, $index);
-		return str_replace('fas fa-', 'fa fa-', $content);
-	}
 
 }
