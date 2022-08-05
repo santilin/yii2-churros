@@ -588,4 +588,26 @@ class FormHelper
 		return implode('&nbsp;', $ret);
 	}
 
+	static public function offsetClassBs3($fields_layout)
+	{
+		switch( $fields_layout) {
+			case '1col':
+				return 'col-md-offset-2';
+			case '2cols':
+			default:
+				return 'col-md-offset-1';
+		}
+	}
+
+	static public function offsetClassBs4($fields_layout)
+	{
+		switch( $fields_layout) {
+			case '1col':
+				return 'offset-sm-2';
+			case '2cols':
+			default:
+				return 'offset-sm-1';
+		}
+	}
+
 } // class
