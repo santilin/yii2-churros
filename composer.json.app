@@ -15,9 +15,9 @@
 	"minimum-stability": "dev",
 	"require": {
 		"php": ">=7.0",
-	        "yiisoft/yii2": "~2.0.14",
-	        "yiisoft/yii2-bootstrap4": "~2.0.0",
-	        "kartik-v/yii2-widgets": "@dev",
+		"yiisoft/yii2": "~2.0.14",
+		"yiisoft/yii2-bootstrap4": "~2.0.0",
+		"kartik-v/yii2-widgets": "@dev",
 		"kartik-v/yii2-grid": "@dev",
 		"kartik-v/yii2-widget-datepicker": "@dev",
 		"kartik-v/yii2-widget-datetimepicker": "@dev",
