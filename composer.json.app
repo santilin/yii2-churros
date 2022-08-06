@@ -25,6 +25,7 @@
 		"kartik-v/yii2-date-range": "@dev",
 		"kartik-v/yii2-widget-fileinput": "@dev",
 		"kartik-v/yii2-mpdf": "dev-master",
+		"kartik-v/yii2-bootstrap4-dropdown": "@dev",
 		"santilin/yii2-sqlite3-full-support": "@dev",
 		"santilin/yii2-churros": "dev-develop",
 		"2amigos/yii2-usuario": "dev-master",
@@ -36,7 +37,9 @@
 		"yiisoft/yii2-jui": "^2.0@dev",
 		"globalcitizen/php-iban": "dev-master",
 		"aki/yii2-bot-telegram": "*",
-		"symfony/mailer": "5.4.x-dev"
+		"symfony/mailer": "5.4.x-dev",
+		"synamen/yii2-tabler-theme": "~1.0",
+		"rmrevin/yii2-fontawesome": "~3.0"
 	},
 	"require-dev": {
 		"yiisoft/yii2-debug": "^2.1.0",
@@ -49,7 +52,6 @@
         "codeception/module-yii2": "^1.0.0",
         "codeception/module-asserts": "^1.0.0",
 		"justinrainbow/json-schema": "5.x-dev",
-		"yiister/yii2-gentelella": "@dev",
 		"codeception/module-webdriver": "2.0.x-dev"
 	},
 	"config": {
@@ -115,7 +117,7 @@
 		},
 		{
 			"type": "vcs",
-			"url": "git@github.com:santilin/yii2-selectize-widget"
+			"url": "git@github.com:santilin/yii2-usuario"
 		},
 		{
 			"type": "vcs",

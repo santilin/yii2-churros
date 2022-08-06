@@ -57,12 +57,37 @@ class AuthHelper
 		return $role;
 	}
 
-    static public function addToRole($role, array $perm_names, string &$msg, $auth = null)
+
+	public function actionAssignPermToRole($perm_name, $role_name, $auth = null)
+	{
+		if( $auth == null ) {
+			$auth = \Yii::$app->authManager;
+		}
+		$permission = $auth->getItem($perm_name);
+		if( $permission == null ) {
+			return false;
+		}
+		$role = $auth->getRole($role_name);
+		if( !$role ) {
+			throw new \Exception( "$role_name: role not found" );
+		}
+		$auth->addChild($role, $permission);
+	}
+
+    static public function addToRole($role_name, array $perm_names, string &$msg = null, $auth = null)
     {
 		if( $auth == null ) {
 			$auth = \Yii::$app->authManager;
 		}
 		$msgs = [];
+		if( is_string($role_name) ) {
+			$role = $auth->getRole($role_name);
+		} else {
+			$role = $role_name;
+		}
+		if( !$role ) {
+			throw new \Exception( "$role_name: role not found" );
+		}
 		foreach( $perm_names as $perm_name ) {
 			$perm = $auth->getItem($perm_name);
 			if( !$perm ) {

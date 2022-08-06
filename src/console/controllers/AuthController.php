@@ -279,7 +279,7 @@ class AuthController extends Controller
 		$auth->assign($permission, $user_id);
 	}
 
-	public function assignPermToRole($perm_name, $role_name, $auth = null)
+	public function actionAssignPermToRole($perm_name, $role_name, $auth = null)
 	{
 		if( $auth == null ) {
 			$auth = \Yii::$app->authManager;
