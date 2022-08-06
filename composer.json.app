@@ -39,7 +39,7 @@
 		"symfony/mailer": "5.4.x-dev"
 	},
 	"require-dev": {
-		"yiisoft/yii2-debug": "^2.1.0",
+		"yiisoft/yii2-debug": "~2.1.0",
 		"yiisoft/yii2-faker": "~2.0.0",
         "codeception/codeception": "^4.0",
         "codeception/verify": "~0.5.0 || ~1.1.0",
@@ -65,7 +65,8 @@
 			"yiisoft/yii2-composer": true
 		},
         "preferred-install": {
-            "santilin/*": "source"
+            "santilin/*": "source",
+            "2amigos/yii2-usuario": "source"
 		}
 	},
 	"scripts": {
@@ -115,7 +116,7 @@
 		},
 		{
 			"type": "vcs",
-			"url": "git@github.com:santilin/yii2-selectize-widget"
+			"url": "git@github.com:santilin/yii2-usuario"
 		},
 		{
 			"type": "vcs",

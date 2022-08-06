@@ -56,7 +56,7 @@ class DetailCrudController extends CrudController
 	}
 
 
-	protected function saveAll($model): bool
+	protected function saveAll(string $context, $model, bool $in_trans = false): bool
 	{
 		if( $this->master_model) {
 			$model->setAttribute( $model->getRelatedFieldForModel($this->master_model), $this->master_model->getPrimaryKey());

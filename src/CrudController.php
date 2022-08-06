@@ -120,7 +120,7 @@ class CrudController extends \yii\web\Controller
 			$relations = [];
 		}
 		if ($model->loadAll(Yii::$app->request->post(), $relations) ) {
-			if( $this->saveAll($model) ) {
+			if( $this->saveAll('create', $model) ) {
 				if( $this->afterSave('create', $model) ) {
 					$this->showFlash('create', $model);
 					return $this->whereToGoNow('create', $model);
@@ -159,7 +159,7 @@ class CrudController extends \yii\web\Controller
 			foreach ($model->primaryKey() as $primary_key) {
 				$model->$primary_key = null;
 			}
-			if( $this->saveAll($model) ) {
+			if( $this->saveAll('duplicate', $model) ) {
 				if( $this->afterSave('duplicate', $model) ) {
 					$this->showFlash('duplicate', $model);
 					return $this->whereTogoNow('duplicate', $model);
@@ -189,7 +189,7 @@ class CrudController extends \yii\web\Controller
 			$relations = [];
 		}
 		if ($model->loadAll(Yii::$app->request->post(), $relations) ) {
-			if( $this->saveAll($model) ) {
+			if( $this->saveAll('update', $model) ) {
 				if( $this->afterSave('update', $model) ) {
 					$this->showFlash('update', $model);
 					return $this->whereTogoNow('update', $model);
@@ -510,9 +510,9 @@ class CrudController extends \yii\web\Controller
 		}
 	}
 
-	protected function saveAll($model): bool
+	protected function saveAll(string $context, $model, bool $in_trans = false): bool
 	{
-		return $model->saveAll();
+		return $model->saveAll(true, $in_trans);
 	}
 
 

@@ -74,4 +74,26 @@ class Formatter extends \yii\i18n\Formatter
 		return $ret;
 	}
 
+	public function asTokenized($value, $sep = ',')
+	{
+		if( is_string($value) ) {
+			$l = strlen($value);
+			if( $l > 2 ) {
+				if( $value[$l-1] == $sep ) {
+					if( $value[0] == $sep ) {
+						return substr($value, 1, $l-2);
+					}
+				} else if( $value[0] == $sep ) {
+					return substr($value,1);
+				} else {
+					return $value;
+				}
+			} else {
+				return $value;
+			}
+		} else {
+			throw new \Exception("Please, implement asTokenized for arrays");
+		}
+	}
+
 }

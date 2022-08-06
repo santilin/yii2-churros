@@ -198,11 +198,11 @@ trait RelationTrait
      * @return bool
      * @throws Exception
      */
-    public function saveAll($runValidation = true)
+    public function saveAll(bool $runValidation = true, bool $in_trans = false)
     {
-        /* @var $this ActiveRecord */
-        $db = $this->getDb();
-        $trans = $db->beginTransaction();
+        if( !$in_trans ) {
+			$trans = $this->getDb()->beginTransaction();
+		}
  		$isNewRecord = $this->isNewRecord;
         try {
             if ($this->save($runValidation)) {
@@ -224,18 +224,24 @@ trait RelationTrait
 					}
 				}
                 if ($error) {
-                    $trans->rollback();
+					if( !$in_trans ) {
+						$trans->rollback();
+					}
                     $this->isNewRecord = $isNewRecord;
                     return false;
                 } else {
-					$trans->commit();
+					if( !$in_trans ) {
+						$trans->commit();
+					}
 					return true;
 				}
             } else {
                 return false;
             }
         } catch (\Exception $exc) {
-            $trans->rollBack();
+			if( !$in_trans ) {
+				$trans->rollBack();
+			}
             $this->isNewRecord = $isNewRecord;
             throw $exc;
         }
