@@ -45,7 +45,7 @@ class AppHelper
 		} else {
 			return $inc;
 		}
-	}	
+	}
 
 	/**
 	* Strip the namespace from the class to get the actual class name
@@ -191,4 +191,25 @@ class AppHelper
 		}
 		return null;
 	}
+
+
+	static public function mergePermissions($perms1, $perms2): string
+	{
+		if( empty($perms1) ) {
+			return $perms2;
+		} else if (empty($perms2) ) {
+			return $perms1;
+		}
+		$a1 = explode('', $perms1);
+		$a2 = explode('', $perms2);
+		return explode('',array_interset($a1,$a2));
+	}
+
+	static public function hasPermission(string $perms, string $perm): bool
+	{
+		return empty($perms) || strpos($perms, $perm) !== false;
+	}
+
+
+
 }

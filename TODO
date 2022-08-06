@@ -55,24 +55,15 @@ https://stackoverflow.com/questions/32731987/adding-new-list-options-refreshing-
 - model_after_read & __set
 - form input change
 
-== Auth
-* actionAddCrudPermsToRoles --perms --roles --models
-* actionDelCrudPermsFromRoles --perms --roles --models
-* actionAddPermsToRole --perms rolename
-* actionDelPermsFromRole --perms rolename
-* actionAddRolesToUsers --roles --users
-* actionDelRolesFromUsers --roles --users
-
 == Reports
 * Añadir más funciones sobre los campos: año, mes, día, cuenta, media, máximo, mínimo, etc.
 
 
 == Administración de usuarios
 === 2amigos-usuario
-  - Probar versión devel, ver si usa bootstrap4,
-  - Hacer un fork:
 	- Añadir opción visible en profile en resources ... _menu.php: yiiparam('user_profile');
-	- rediseñar las vistas
+	- Actualizar a bootstrap4
+	- Arreglar vistas en bootstrap3
 
 == Web
 === Configuración
