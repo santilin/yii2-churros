@@ -161,7 +161,7 @@ class AuthController extends Controller
 
 		$role_name = "module.$module_name.menu.all";
 		$role_all = AuthHelper::createOrUpdateRole($role_name,
-			Yii::t('churros', 'Access to all models of module {module}', 'Acceso a todos los modelos del módulo {module}', [ '{module}' => $module_name ]), $msg, $auth);
+			Yii::t('churros', 'Access to all models of module {module}', [ '{module}' => $module_name ]), $msg, $auth);
 		if ($msg != '' ) echo "$msg\n";
 
 		$perm_name = "module.$module_name.menu.$model_name";
@@ -178,12 +178,12 @@ class AuthController extends Controller
 	/**
 	 * Creates the permissions for a module
 	 */
-	public function createModulePermissions($module_name)
+	public function createModulePermissions($module_id, $module_title = null)
 	{
 		$msg = null;
-		AuthHelper::createOrUpdatePermission("module.$module_name.menu",
-			Yii::t('churros', 'Access to \'{module}\' module menu', 
-			[ '{module}' => $module_name ]), $msg, $this->authManager);
+		AuthHelper::createOrUpdatePermission("module.$module_id.menu",
+			Yii::t('churros', 'Access to \'{module}\' module menu',
+			[ '{module}' => $module_title?:$module_id ]), $msg, $this->authManager);
 		if ($msg != '' ) echo "$msg\n";
 	}
 
@@ -277,6 +277,22 @@ class AuthController extends Controller
 			return false;
 		}
 		$auth->assign($permission, $user_id);
+	}
+
+	public function actionAssignPermToRole($perm_name, $role_name, $auth = null)
+	{
+		if( $auth == null ) {
+			$auth = \Yii::$app->authManager;
+		}
+		$permission = $auth->getItem($perm_name);
+		if( $permission == null ) {
+			return false;
+		}
+		$role = $auth->getRole($role_name);
+		if( !$role ) {
+			throw new \Exception( "$role_name: role not found" );
+		}
+		$auth->addChild($role, $permission);
 	}
 
 	public function actionRemoveAll()

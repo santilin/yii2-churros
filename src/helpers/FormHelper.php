@@ -13,171 +13,332 @@ use yii\helpers\{Html};
 class FormHelper
 {
 	public const VIEWS_NVIEW_PARAM = '_v';
-	public const BS_FIELD_CONFIGS = [
-		'default' => [
-		],
-		'1col' => [
+	public const WIDGET_CONFIGS = [
+		'bs3' => [
+			'default' => [
+			],
 			'1col' => [
-				'horizontalCssClasses' => [
-					'label' => 'col-sm-1 one-column-row',
-					'offset' => 'col-sm-offset-1',
-					'wrapper' => 'col-sm-11',
-				]
-			],
-			'2cols' => [
-				'horizontalCssClasses' => [
-					'label' => 'col-sm-3',
-					'offset' => 'col-sm-offset-1',
-					'wrapper' => 'col-sm-9',
-				]
-			],
-			'3cols' => [
-				'horizontalCssClasses' => [
-					'label' => 'col-sm-3',
-					'offset' => 'col-sm-offset-1',
-					'wrapper' => 'col-sm-9',
-				]
-			],
-			'4cols' => [
-				'horizontalCssClasses' => [
-					'label' => 'col-sm-3',
-					'offset' => 'col-sm-offset-1',
-					'wrapper' => 'col-sm-9',
-				]
-			],
-			'1/3' => [
-				'horizontalCssClasses' => [
-					'wrapper' => 'col-sm-2',
-				]
-			],
-			'1/2' => [
-				'horizontalCssClasses' => [
-					'wrapper' => 'col-sm-3',
-				]
-			]
-		],
-		'2cols' => [
-			'1col' => [
-				'horizontalCssClasses' => [
-					'label' => 'col-sm-1 one-column-row',
-					'offset' => 'col-sm-offset-1',
-					'wrapper' => 'col-sm-11',
-				]
-			],
-			'2cols' => [
-				'horizontalCssClasses' => [
-					'label' => 'col-sm-3',
-					'offset' => 'col-sm-offset-1',
-					'wrapper' => 'col-sm-9',
-				]
-			],
-			'3cols' => [
-				'horizontalCssClasses' => [
-					'label' => 'col-sm-3',
-					'offset' => 'col-sm-offset-1',
-					'wrapper' => 'col-sm-9',
-				]
-			],
-			'4cols' => [
-				'horizontalCssClasses' => [
-					'label' => 'col-sm-3',
-					'offset' => 'col-sm-offset-1',
-					'wrapper' => 'col-sm-9',
-				]
-			],
-			'1/3' => [
-				'horizontalCssClasses' => [
-					'wrapper' => 'col-sm-2',
-				]
-			],
-			'1/2' => [
-				'horizontalCssClasses' => [
-					'wrapper' => 'col-sm-3',
-				]
-			]
-		],
-		'3cols' => [
-			'1col' => [
-				'horizontalCssClasses' => [
-					'label' => 'col-sm-1 one-column-row',
-					'offset' => 'col-sm-offset-1',
-					'wrapper' => 'col-sm-11',
-				]
-			],
-			'2cols' => [
-				'horizontalCssClasses' => [
-					'label' => 'col-sm-3',
-					'offset' => 'col-sm-offset-1',
-					'wrapper' => 'col-sm-9',
-				]
-			],
-			'3cols' => [
-				'horizontalCssClasses' => [
-					'label' => 'col-sm-3',
-					'offset' => 'col-sm-offset-1',
-					'wrapper' => 'col-sm-9',
-				]
-			],
-			'4cols' => [
-				'horizontalCssClasses' => [
-					'label' => 'col-sm-3',
-					'offset' => 'col-sm-offset-1',
-					'wrapper' => 'col-sm-9',
-				]
-			],
-			'1/3' => [
-				'horizontalCssClasses' => [
-					'wrapper' => 'col-sm-2',
-				]
-			],
-			'1/2' => [
-				'horizontalCssClasses' => [
-					'wrapper' => 'col-sm-3',
-				]
-			]
-		],
-		'4cols' => [
-			'1col' => [
-				'horizontalCssClasses' => [
-					'label' => 'col-sm-1 one-column-row',
-					'offset' => 'col-sm-offset-1',
-					'wrapper' => 'col-sm-6',
-				]
-			],
-			'2cols' => [
-				'horizontalCssClasses' => [
-					'label' => 'col-sm-2',
-					'offset' => 'col-sm-offset-1',
-					'wrapper' => 'col-sm-7',
-				]
-			],
-			'3cols' => [
-				'horizontalCssClasses' => [
-					'offset' => 'col-sm-offset-1',
-					'wrapper' => 'col-sm-8',
-				]
-			],
-			'4cols' => [
-				'horizontalCssClasses' => [
-					'label' => 'control-label',
-					'error' => 'col_sm_12',
-					'hint' => 'col_sm_12',
-					'wrapper' => '',
+				'1col' => [
+					'horizontalCssClasses' => [
+						'label' => 'col-sm-1 one-column-row',
+						'offset' => 'col-sm-offset-1',
+						'wrapper' => 'col-sm-11',
+					]
 				],
-				'options' => [ 'class' => 'control-group col-sm-2' ],
-
-			],
-			'1/3' => [
-				'horizontalCssClasses' => [
-					'wrapper' => 'col-sm-2',
+				'2cols' => [
+					'horizontalCssClasses' => [
+						'label' => 'col-sm-3',
+						'offset' => 'col-sm-offset-1',
+						'wrapper' => 'col-sm-9',
+					]
+				],
+				'3cols' => [
+					'horizontalCssClasses' => [
+						'label' => 'col-sm-3',
+						'offset' => 'col-sm-offset-1',
+						'wrapper' => 'col-sm-9',
+					]
+				],
+				'4cols' => [
+					'horizontalCssClasses' => [
+						'label' => 'col-sm-3',
+						'offset' => 'col-sm-offset-1',
+						'wrapper' => 'col-sm-9',
+					]
+				],
+				'1/3' => [
+					'horizontalCssClasses' => [
+						'wrapper' => 'col-sm-2',
+					]
+				],
+				'1/2' => [
+					'horizontalCssClasses' => [
+						'wrapper' => 'col-sm-3',
+					]
 				]
 			],
-			'1/2' => [
-				'horizontalCssClasses' => [
-					'wrapper' => 'col-sm-3',
+			'2cols' => [
+				'1col' => [
+					'horizontalCssClasses' => [
+						'label' => 'col-sm-1 one-column-row',
+						'offset' => 'col-sm-offset-1',
+						'wrapper' => 'col-sm-11',
+					]
+				],
+				'2cols' => [
+					'horizontalCssClasses' => [
+						'label' => 'col-sm-3',
+						'offset' => 'col-sm-offset-1',
+						'wrapper' => 'col-sm-9',
+					]
+				],
+				'3cols' => [
+					'horizontalCssClasses' => [
+						'label' => 'col-sm-3',
+						'offset' => 'col-sm-offset-1',
+						'wrapper' => 'col-sm-9',
+					]
+				],
+				'4cols' => [
+					'horizontalCssClasses' => [
+						'label' => 'col-sm-3',
+						'offset' => 'col-sm-offset-1',
+						'wrapper' => 'col-sm-9',
+					]
+				],
+				'1/3' => [
+					'horizontalCssClasses' => [
+						'wrapper' => 'col-sm-2',
+					]
+				],
+				'1/2' => [
+					'horizontalCssClasses' => [
+						'wrapper' => 'col-sm-3',
+					]
+				]
+			],
+			'3cols' => [
+				'1col' => [
+					'horizontalCssClasses' => [
+						'label' => 'col-sm-1 one-column-row',
+						'offset' => 'col-sm-offset-1',
+						'wrapper' => 'col-sm-11',
+					]
+				],
+				'2cols' => [
+					'horizontalCssClasses' => [
+						'label' => 'col-sm-3',
+						'offset' => 'col-sm-offset-1',
+						'wrapper' => 'col-sm-9',
+					]
+				],
+				'3cols' => [
+					'horizontalCssClasses' => [
+						'label' => 'col-sm-3',
+						'offset' => 'col-sm-offset-1',
+						'wrapper' => 'col-sm-9',
+					]
+				],
+				'4cols' => [
+					'horizontalCssClasses' => [
+						'label' => 'col-sm-3',
+						'offset' => 'col-sm-offset-1',
+						'wrapper' => 'col-sm-9',
+					]
+				],
+				'1/3' => [
+					'horizontalCssClasses' => [
+						'wrapper' => 'col-sm-2',
+					]
+				],
+				'1/2' => [
+					'horizontalCssClasses' => [
+						'wrapper' => 'col-sm-3',
+					]
+				]
+			],
+			'4cols' => [
+				'1col' => [
+					'horizontalCssClasses' => [
+						'label' => 'col-sm-1 one-column-row',
+						'offset' => 'col-sm-offset-1',
+						'wrapper' => 'col-sm-6',
+					]
+				],
+				'2cols' => [
+					'horizontalCssClasses' => [
+						'label' => 'col-sm-2',
+						'offset' => 'col-sm-offset-1',
+						'wrapper' => 'col-sm-7',
+					]
+				],
+				'3cols' => [
+					'horizontalCssClasses' => [
+						'offset' => 'col-sm-offset-1',
+						'wrapper' => 'col-sm-8',
+					]
+				],
+				'4cols' => [
+					'horizontalCssClasses' => [
+						'label' => 'control-label',
+						'error' => 'col_sm_12',
+						'hint' => 'col_sm_12',
+						'wrapper' => '',
+					],
+					'options' => [ 'class' => 'control-group col-sm-2' ],
+
+				],
+				'1/3' => [
+					'horizontalCssClasses' => [
+						'wrapper' => 'col-sm-2',
+					]
+				],
+				'1/2' => [
+					'horizontalCssClasses' => [
+						'wrapper' => 'col-sm-3',
+					]
 				]
 			]
-		]
+		],
+		'bs4' => [
+			'1col' => [
+				'1col' => [
+				],
+				'2cols' => [
+					'horizontalCssClasses' => [
+						'label' => 'col-sm-3',
+						'offset' => 'col-sm-offset-1',
+						'wrapper' => 'col-sm-9',
+					]
+				],
+				'3cols' => [
+					'horizontalCssClasses' => [
+						'label' => 'col-sm-3',
+						'offset' => 'col-sm-offset-1',
+						'wrapper' => 'col-sm-9',
+					]
+				],
+				'4cols' => [
+					'horizontalCssClasses' => [
+						'label' => 'col-sm-3',
+						'offset' => 'col-sm-offset-1',
+						'wrapper' => 'col-sm-9',
+					]
+				],
+				'1/3' => [
+					'horizontalCssClasses' => [
+						'wrapper' => 'col-sm-2',
+					]
+				],
+				'1/2' => [
+					'horizontalCssClasses' => [
+						'wrapper' => 'col-sm-3',
+					]
+				]
+			],
+			'2cols' => [
+				'1col' => [
+					'horizontalCssClasses' => [
+						'label' => 'col-sm-1 one-column-row',
+						'offset' => 'col-sm-offset-1',
+						'wrapper' => 'col-sm-11',
+					]
+				],
+				'2cols' => [
+					'horizontalCssClasses' => [
+						'label' => 'col-sm-3',
+						'offset' => 'col-sm-offset-1',
+						'wrapper' => 'col-sm-9',
+					]
+				],
+				'3cols' => [
+					'horizontalCssClasses' => [
+						'label' => 'col-sm-3',
+						'offset' => 'col-sm-offset-1',
+						'wrapper' => 'col-sm-9',
+					]
+				],
+				'4cols' => [
+					'horizontalCssClasses' => [
+						'label' => 'col-sm-3',
+						'offset' => 'col-sm-offset-1',
+						'wrapper' => 'col-sm-9',
+					]
+				],
+				'1/3' => [
+					'horizontalCssClasses' => [
+						'wrapper' => 'col-sm-2',
+					]
+				],
+				'1/2' => [
+					'horizontalCssClasses' => [
+						'wrapper' => 'col-sm-3',
+					]
+				]
+			],
+			'3cols' => [
+				'1col' => [
+					'horizontalCssClasses' => [
+						'label' => 'col-sm-1 one-column-row',
+						'offset' => 'col-sm-offset-1',
+						'wrapper' => 'col-sm-11',
+					]
+				],
+				'2cols' => [
+					'horizontalCssClasses' => [
+						'label' => 'col-sm-3',
+						'offset' => 'col-sm-offset-1',
+						'wrapper' => 'col-sm-9',
+					]
+				],
+				'3cols' => [
+					'horizontalCssClasses' => [
+						'label' => 'col-sm-3',
+						'offset' => 'col-sm-offset-1',
+						'wrapper' => 'col-sm-9',
+					]
+				],
+				'4cols' => [
+					'horizontalCssClasses' => [
+						'label' => 'col-sm-3',
+						'offset' => 'col-sm-offset-1',
+						'wrapper' => 'col-sm-9',
+					]
+				],
+				'1/3' => [
+					'horizontalCssClasses' => [
+						'wrapper' => 'col-sm-2',
+					]
+				],
+				'1/2' => [
+					'horizontalCssClasses' => [
+						'wrapper' => 'col-sm-3',
+					]
+				]
+			],
+			'4cols' => [
+				'1col' => [
+					'horizontalCssClasses' => [
+						'label' => 'col-sm-1 one-column-row',
+						'offset' => 'col-sm-offset-1',
+						'wrapper' => 'col-sm-6',
+					]
+				],
+				'2cols' => [
+					'horizontalCssClasses' => [
+						'label' => 'col-sm-2',
+						'offset' => 'col-sm-offset-1',
+						'wrapper' => 'col-sm-7',
+					]
+				],
+				'3cols' => [
+					'horizontalCssClasses' => [
+						'offset' => 'col-sm-offset-1',
+						'wrapper' => 'col-sm-8',
+					]
+				],
+				'4cols' => [
+					'horizontalCssClasses' => [
+						'label' => 'control-label',
+						'error' => 'col_sm_12',
+						'hint' => 'col_sm_12',
+						'wrapper' => '',
+					],
+					'options' => [ 'class' => 'control-group col-sm-2' ],
+
+				],
+				'1/3' => [
+					'horizontalCssClasses' => [
+						'wrapper' => 'col-sm-2',
+					]
+				],
+				'1/2' => [
+					'horizontalCssClasses' => [
+						'wrapper' => 'col-sm-3',
+					]
+				]
+			]
+		],
 	];
 
 	static private $tabindex = 0;
@@ -251,7 +412,7 @@ class FormHelper
 	 * fixes tabindex and layout of the form form_rows
 	 */
 	static public function fixLayoutFields(string $layout,
-		array &$form_layout_rows, array &$input_opts, array &$fldcfg)
+		array &$form_layout_rows, array &$input_opts, array &$fldcfg, string $widgets_ver = 'bs4')
 	{
 		if( !count($form_layout_rows ) ) {
 			$row = [];
@@ -328,21 +489,21 @@ class FormHelper
 				}
 				switch(count($lrow)) {
 				case 1:
-					$fldcfg[$lrow[0]] = FormHelper::BS_FIELD_CONFIGS[$layout]['1col'];
+					$fldcfg[$lrow[0]] = FormHelper::WIDGET_CONFIGS[$widgets_ver][$layout]['1col'];
 					break;
 				case 2:
 					$fldcfg[$lrow[0]] =
-					$fldcfg[$lrow[1]] = FormHelper::BS_FIELD_CONFIGS[$layout]['2cols'];
+					$fldcfg[$lrow[1]] = FormHelper::WIDGET_CONFIGS[$widgets_ver][$layout]['2cols'];
 					break;
 				case 3:
 					$fldcfg[$lrow[0]] =
 					$fldcfg[$lrow[1]] =
-					$fldcfg[$lrow[2]] = FormHelper::BS_FIELD_CONFIGS[$layout]['3cols'];
+					$fldcfg[$lrow[2]] = FormHelper::WIDGET_CONFIGS[$widgets_ver][$layout]['3cols'];
 					break;
 				case 4:
 					$fldcfg[$lrow[0]] =
 					$fldcfg[$lrow[1]] =
-					$fldcfg[$lrow[2]] = FormHelper::BS_FIELD_CONFIGS[$layout]['4cols'];
+					$fldcfg[$lrow[2]] = FormHelper::WIDGET_CONFIGS[$widgets_ver][$layout]['4cols'];
 					break;
 				}
 			}
@@ -425,6 +586,28 @@ class FormHelper
 			}
 		}
 		return implode('&nbsp;', $ret);
+	}
+
+	static public function offsetClassBs3($fields_layout)
+	{
+		switch( $fields_layout) {
+			case '1col':
+				return 'col-md-offset-2';
+			case '2cols':
+			default:
+				return 'col-md-offset-1';
+		}
+	}
+
+	static public function offsetClassBs4($fields_layout)
+	{
+		switch( $fields_layout) {
+			case '1col':
+				return 'offset-sm-2';
+			case '2cols':
+			default:
+				return 'offset-sm-1';
+		}
 	}
 
 } // class
