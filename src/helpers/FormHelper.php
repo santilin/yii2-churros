@@ -532,6 +532,19 @@ class FormHelper
 		return $views[0];
 	}
 
+	public static function getViewTitleFromRequest($views, $params)
+	{
+		if( ($_nv=intval($params[self::VIEWS_NVIEW_PARAM]??0)) > (count($views)-1) ) {
+			$_nv = 0;
+		}
+		foreach($views as $kv => $view ) {
+			if( $_nv-- == 0 ) {
+				return $view;
+			}
+		}
+		return $views[0];
+	}
+
 	public static function getConfig(string $name, string $form_name, $default_value = null)
 	{
 		if( isset($_SESSION['formconfig'][$form_name][$name]) ) {
