@@ -55,6 +55,9 @@ return [
 		=> '{La} {title} <a href="{model_link}">{record_medium}</a> se ha duplicado correctamente.',
 	'The action on {la} {title} <a href="{model_link}">{record_medium}</a> has been successful.' => 'La acción sobre {la} {title} <a href="{model_link}">{record_medium}</a> se ha realizado correctamente.',
 
+	'Duplicating {title}: {record_short}' => 'Duplicando {title}: {record_short}',
+	'Updating {title}: {record_short}' => 'Editando {title}: {record_short}',
+	'Creating {title}' => 'Creando {title}',
     '{from-label} {from} can\'t be greater than {until-label} {until}' => '{from-label}: \'{from}\' no puede ser posterior a {until-label}: \'{until}\'',
 	"The master record of {title} with '{id}' id does not exist" => "El registro maestro {title} de id '{id}' no existe",
     'You can\'t delete {esta} {title} because you are not the author' => 'No puedes borrar {esta} {title} porque no l{-a} has creado tú',

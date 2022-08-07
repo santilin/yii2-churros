@@ -7,13 +7,6 @@ composer require --prefer-dist synamen/yii2-tabler-theme "~1.0"
 = Optimizacion sqlite3
 https://stackoverflow.com/questions/1711631/improve-insert-per-second-performance-of-sqlite
 
-
-= GridFilter
-* Cuando es un array (select múltiple, da error)
-
-= DotDotValidator
-* Validar en PHP
-
 == Permisos
 * Crear Reports.view, etc.
 

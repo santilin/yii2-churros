@@ -331,9 +331,14 @@ class CrudController extends \yii\web\Controller
 		];
 		switch( $action_id ) {
 			case 'update':
+				$breadcrumbs[] = [
+					'label' => $model->t('churros', 'Updating {title}: {record_short}'),
+// 					'url' => array_merge([ $prefix . $this->id . '/view'], $model->getPrimaryKey(true))
+				];
+				break;
 			case 'duplicate':
 				$breadcrumbs[] = [
-					'label' => $model->recordDesc('short', 20),
+					'label' => Yii::t('churros', 'Duplicating ') . $model->recordDesc('short', 20),
 					'url' => array_merge([ $prefix . $this->id . '/view'], $model->getPrimaryKey(true))
 				];
 				break;
@@ -341,6 +346,7 @@ class CrudController extends \yii\web\Controller
 				$breadcrumbs[] = $model->recordDesc('short', 20);
 				break;
 			case 'create':
+				$breadcrumbs[] = $model->t('churros', 'Creating {title}');
 				break;
 			case 'index':
 				break;

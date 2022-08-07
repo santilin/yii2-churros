@@ -32,7 +32,7 @@ class ActionColumn extends \kartik\grid\ActionColumn
 			$this->setDefaultButton('delete', Yii::t('kvgrid', 'Delete'), $notBs3 ? 'trash-alt' : 'trash');
 		}
         if( strpos($this->crudPerms,'d') !== false ) {
-			$this->setDefaultButton('duplicate', Yii::t('kvgrid', 'Duplicate'), $notBs3 ? 'copy' : 'trash');
+			$this->setDefaultButton('duplicate', Yii::t('kvgrid', 'Duplicate'), $notBs3 ? 'copy' : 'copy');
 		}
     }
 
