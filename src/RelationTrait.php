@@ -89,9 +89,13 @@ trait RelationTrait
 				} else {
                     // HasMany or Many2Many outside of formName
 					$post_data = (isset($post[$rel_name]) && is_array($post[$rel_name]))
-						? $post[$rel_name]
-						: (isset($post[$model_relation['model']]) && is_array($post[$model_relation['model']]))
-							? $post[$model_relation['model']] : null;
+						? $post[$rel_name] : null;
+					if( $post_data === null ) {
+						$post_data = (isset($post[$formName][$rel_name]) && is_array($post[$formName][$rel_name])) ? $post[$formName][$rel_name] : null ;
+					}
+					if( $post_data === null ) {
+						$post_data = (isset($post[$model_relation['model']]) && is_array($post[$model_relation['model']])) ? $post[$model_relation['model']] : null ;
+					}
 					if( $post_data ) {
                         $this->loadToRelation($rel_name, $post_data);
                     }

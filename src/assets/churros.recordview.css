@@ -53,6 +53,7 @@
 	width: 100%;
 	display:flex;
 	align-items: center;
+	color: lightgray;
 	background-color: #2A3F54;
 	border-color: #2A3F54;
 }
