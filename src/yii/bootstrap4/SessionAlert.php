@@ -32,6 +32,9 @@ class SessionAlert extends \yii\base\Widget
      * - key: the name of the session flash variable
      * - value: the bootstrap alert type (i.e. danger, success, info, warning)
      */
+    public $closeButton = [];
+    public $htmlOptions= [];
+
     public $alertTypes = [
         'error'   => 'alert-danger',
         'danger'  => 'alert-danger',
@@ -58,7 +61,7 @@ class SessionAlert extends \yii\base\Widget
                 echo \yii\bootstrap4\Alert::widget([
                     'body' => $message,
                     'closeButton' => $this->closeButton,
-                    'options' => array_merge($this->options, [
+                    'options' => array_merge($this->htmlOptions, [
                         'id' => $this->getId() . '-' . $type . '-' . $i,
                         'class' => $this->alertTypes[$type] . $appendClass,
                     ]),

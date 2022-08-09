@@ -205,9 +205,12 @@ class AppHelper
 		return explode('',array_interset($a1,$a2));
 	}
 
-	static public function hasPermission(string $perms, string $perm): bool
+	static public function hasPermission($perms, string $perm): bool
 	{
-		return empty($perms) || strpos($perms, $perm) !== false;
+		if( $perms === false ) {
+			return false;
+		}
+		return $perms === '' || strpos($perms, $perm) !== false;
 	}
 
 
