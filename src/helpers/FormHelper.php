@@ -362,6 +362,14 @@ class FormHelper
 				$ret .= $form_fields[$name]. "\n";
 			}
 		} else if( count($form_layout_rows) ) {
+			// Check if some fields have been removed after setting the layout
+			foreach($form_layout_rows as $lrowkey => $lrow ) {
+				foreach( $lrow as $ffkey => $ff ) {
+					if( $form_fields[$ff] === false ) {
+						unset( $form_layout_rows[$lrowkey][$ffkey] );
+					}
+				}
+			}
 			foreach($form_layout_rows as $lrow ) {
 				switch(count($lrow)) {
 				case 1:
