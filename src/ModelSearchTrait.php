@@ -50,8 +50,10 @@ trait ModelSearchTrait
 			try {
 				return parent::__get($name);
 			} catch( \yii\base\UnknownPropertyException $e) {
-				if( strpos('.', $name) !== FALSE ) {
-					return ArrayHelper::getValue($this, $name);
+				if( strpos($name, '.') !== FALSE ) {
+					/// @todo findrelatedvalue
+					return null;
+ 					return ArrayHelper::getValue($this, $name);
 				} else {
 					throw $e;
 				}
