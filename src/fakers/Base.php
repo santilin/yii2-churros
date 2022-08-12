@@ -1,6 +1,6 @@
 <?php namespace santilin\churros\fakers;
 
-class Base extends \Faker\Provider\Base 
+class Base extends \Faker\Provider\Base
 {
     public function shortString($max_nchars)
     {
@@ -35,7 +35,7 @@ class Base extends \Faker\Provider\Base
 			return $this->decimalUnsigned($max_digits);
 		}
     }
-    
+
     public function integerUnsignedOrNull($max_digits = 16)
     {
 		$n = $this->integerUnsigned($max_digits);
@@ -79,9 +79,9 @@ class Base extends \Faker\Provider\Base
 	public function decimalUnsigned($max_digits = 16, $decimals = 0)
     {
 		assert($decimals < $max_digits);
-		$max_digits = $this->generator->numberBetween(2, $max_digits);
-		$ret = "";
-		for( $i=1; $i<$max_digits; ++$i) {
+		$max_digits = $this->generator->numberBetween(3, $max_digits);
+		$ret = $this->randomDigitNotNull();
+		for( $i=0; $i<$max_digits; ++$i) {
 			if( $i == $max_digits - $decimals && $decimals > 0 ) {
 				$ret .= ".";
 			}
@@ -149,11 +149,11 @@ class Base extends \Faker\Provider\Base
         imagedestroy($image);
         return $contents;
 	}
-	
+
 	public function hours()
 	{
 		return str_pad($this->generator->numberBetween(0,23), 2, '0', STR_PAD_LEFT)
 		. ':' . str_pad($this->generator->numberBetween(0,59), 2, '0', STR_PAD_LEFT);
 	}
- 
+
 }

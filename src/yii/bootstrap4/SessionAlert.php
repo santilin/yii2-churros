@@ -26,15 +26,19 @@ use Yii;
 
 class SessionAlert extends \yii\base\Widget
 {
+    public $htmlOptions= [];
+    /**
+     * @var array the options for rendering the close button tag.
+     * Array will be passed to [[yii\bootstrap\Alert::closeButton]].
+     */
+    public $closeButton = [];
+
     /**
      * @var array the alert types configuration for the flash messages.
      * This array is setup as $key => $value, where:
      * - key: the name of the session flash variable
      * - value: the bootstrap alert type (i.e. danger, success, info, warning)
      */
-    public $closeButton = [];
-    public $htmlOptions= [];
-
     public $alertTypes = [
         'error'   => 'alert-danger',
         'danger'  => 'alert-danger',
