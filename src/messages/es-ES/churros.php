@@ -38,7 +38,13 @@ return [
 	"Access to '{module}' module menu" => 'Acceso al menu del módulo {module}',
 	'their own {title_plural}' => 'sus propi{-as} {title_plural}',
 
-    'All' => 'Todo',
+	'All' => 'Todo',
+    'Show all' => 'Mostrar todo',
+    'Paginate' => 'Paginar',
+    'Summarize' => 'Sólo totales',
+    'Show only summary' => 'Mostrar solo los totales',
+    'Show first page data' => 'Paginar los resultados',
+    'Show all data' => 'Mostrar todos los resultados',
     'Error saving the record {title}' => 'Error guardando el registro {title}',
     'From \'{from}\' or until \'{until}\' dates are in invalid date format' => 'Las fechas desde: \'{from}\' o hasta: \'{until}\' no tienen un formato válido',
 

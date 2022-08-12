@@ -6,9 +6,13 @@
 namespace santilin\churros\grid;
 
 use Yii;
-use yii\helpers\Html;
+use yii\helpers\{ArrayHelper,Html,Url	};
 use kartik\grid\GridView as BaseGridView;
 use santilin\churros\grid\GridGroup;
+use yii\helpers\Json;
+use yii\web\JsExpression;
+use kartik\grid\GridToggleDataAsset;
+
 
 class GridView extends BaseGridView
 {
@@ -17,7 +21,7 @@ class GridView extends BaseGridView
 	 */
 	public $groups = [];
 	public $totalsRow = false;
-	public $onlyTotals = false;
+	public $onlySummary = false;
 
 	protected $summaryColumns = [];
 	protected $summaryValues = [];
@@ -34,6 +38,11 @@ class GridView extends BaseGridView
 				'lastPageLabel' => '>>',
 				'nextPageLabel' => '>',
 				'prevPageLabel' => '<',
+			];
+		}
+		if( empty($config['toolbar'])) {
+			$config['toolbar'] = [
+				'{toggleData}',
 			];
 		}
 		parent::__construct($config);
@@ -55,8 +64,130 @@ class GridView extends BaseGridView
 		$this->initSummaryColumns();
 		$this->resetGroupsSummaries();
 		$this->initSorting();
+		/**
+		* @var Request $request
+		*/
+		$request = $this->_module->get('request', false);
+		if ($request === null || !($request instanceof Request)) {
+			$request = Yii::$app->request;
+		}
+		$this->onlySummary = $request->getQueryParam($this->_toggleDataKey, $config['onlySummary']??false===true?'onlySummary':'all') === 'summary';
+		if ($this->onlySummary) {
+			$this->dataProvider->pagination = false;
+		}
+		$this->_toggleButtonId = $this->options['id'].'-togdata-'.($this->onlySummary?'summary':($this->_isShowAll ? 'all' : 'page'));
 	}
 
+
+    /**
+     * Initialize toggle data button options.
+     *
+     * @throws Exception
+     */
+    protected function initToggleData()
+    {
+        if (!$this->toggleData) {
+            return;
+        }
+        $notBs3 = !$this->isBs(3);
+        $defBtnCss = 'btn '.$this->getDefaultBtnCss();
+        $defaultOptions = [
+            'maxCount' => 10000,
+            'minCount' => 0,
+            'confirmMsg' => Yii::t(
+                'churros',
+                'There are {totalCount} records. Are you sure you want to display them all?',
+                ['totalCount' => number_format($this->dataProvider->getTotalCount())]
+            ),
+            'all' => [
+                'icon' => $notBs3 ? 'fas fa-expand' : 'glyphicon glyphicon-fullscreen',
+                'label' => Yii::t('churros', 'Show all'),
+                'class' => $defBtnCss,
+                'title' => Yii::t('churros', 'Show all data'),
+            ],
+            'page' => [
+                'icon' => $notBs3 ? 'fas fa-rectangle-history' : 'glyphicon glyphicon-th-list',
+                'label' => Yii::t('churros', 'Paginate'),
+                'class' => $defBtnCss,
+                'title' => Yii::t('churros', 'Show first page data'),
+            ],
+            'summary' => [
+                'icon' => $notBs3 ? 'fas fa-sum' : 'glyphicon glyphicon-plus-sign',
+                'label' => Yii::t('churros', 'Summarize'),
+                'class' => $defBtnCss,
+                'title' => Yii::t('churros', 'Show only summary'),
+            ],
+        ];
+        $this->toggleDataOptions = array_replace_recursive($defaultOptions, $this->toggleDataOptions);
+        $tag = $this->onlySummary ? 'all': ($this->_isShowAll ? 'page' :'summary');
+        $options = $this->toggleDataOptions[$tag];
+        $this->toggleDataOptions[$tag]['id'] = $this->_toggleButtonId;
+        $icon = ArrayHelper::remove($this->toggleDataOptions[$tag], 'icon', '');
+        $label = !isset($options['label']) ? $defaultOptions[$tag]['label'] : $options['label'];
+        if (!empty($icon)) {
+            $label = "<i class='{$icon}'></i> ".$label;
+        }
+        $this->toggleDataOptions[$tag]['label'] = $label;
+        if (!isset($this->toggleDataOptions[$tag]['title'])) {
+            $this->toggleDataOptions[$tag]['title'] = $defaultOptions[$tag]['title'];
+        }
+        $this->toggleDataOptions[$tag]['data-pjax'] = $this->pjax ? 'true' : false;
+    }
+
+    /**
+     * Renders the toggle data button.
+     *
+     * @return string
+     * @throws Exception
+     */
+    public function renderToggleData()
+    {
+        if (!$this->toggleData) {
+            return '';
+        }
+        $maxCount = ArrayHelper::getValue($this->toggleDataOptions, 'maxCount', false);
+        if ($maxCount !== true && (!$maxCount || (int)$maxCount <= $this->dataProvider->getTotalCount())) {
+            return '';
+        }
+        $tag = $this->onlySummary ? 'all': ($this->_isShowAll ? 'page' :'summary');
+        $options = $this->toggleDataOptions[$tag];
+        $label = ArrayHelper::remove($options, 'label', '');
+        $url = Url::current([$this->_toggleDataKey => $tag]);
+        static::initCss($this->toggleDataContainer, 'btn-group');
+
+        return Html::tag('div', Html::a($label, $url, $options), $this->toggleDataContainer);
+    }
+
+    /**
+     * Generate toggle data client validation script.
+     */
+    protected function genToggleDataScript()
+    {
+        $this->_toggleScript = '';
+        if (!$this->toggleData) {
+            return;
+        }
+        $minCount = ArrayHelper::getValue($this->toggleDataOptions, 'minCount', 0);
+        if (!$minCount || $minCount >= $this->dataProvider->getTotalCount()) {
+            return;
+        }
+        $view = $this->getView();
+        $opts = Json::encode(
+            [
+                'id' => $this->_toggleButtonId,
+                'pjax' => $this->pjax ? 1 : 0,
+                'mode' => $this->onlySummary ? 'all': ($this->_isShowAll ? 'page' :'summary'),
+                'msg' => ArrayHelper::getValue($this->toggleDataOptions, 'confirmMsg', ''),
+                'lib' => new JsExpression(
+                    ArrayHelper::getValue($this->krajeeDialogSettings, 'libName', 'krajeeDialog')
+                ),
+            ]
+        );
+        $this->_toggleOptionsVar = 'kvTogOpts_'.hash('crc32', $opts);
+        $view->registerJs("{$this->_toggleOptionsVar}={$opts};");
+        GridToggleDataAsset::register($view);
+        $this->_toggleScript = "kvToggleData({$this->_toggleOptionsVar});";
+    }
 	/**
 	 * Creates the constant array of summary columns to be used by the
 	 * summary functions of each group
@@ -117,7 +248,7 @@ class GridView extends BaseGridView
             $group->level = $level++;
             $this->groups[$kg] = $group;
             // Hide the group column
-            if( $group->column /*&& !$this->onlyTotals*/ ) {
+            if( $group->column /*&& !$this->onlySummary*/ ) {
   				$this->columns[str_replace('.', '_', $kg)]['visible'] = false;
 			}
         }
@@ -156,7 +287,7 @@ class GridView extends BaseGridView
 	public function renderTableRow($model, $key, $index)
     {
 		$ret = parent::renderTableRow($model, $key, $index);
-		if( !$this->onlyTotals ) {
+		if( !$this->onlySummary ) {
 			return $ret;
 		} else {
 			return null;
@@ -217,7 +348,7 @@ class GridView extends BaseGridView
 			if( $updated_groups[$kg] || $first_header_shown ) {
 				$first_header_shown = true;
 				if( $group->header ) {
-					if( ($this->onlyTotals && $group->level < count($this->groups))
+					if( ($this->onlySummary && $group->level < count($this->groups))
 						|| $group->level <= count($this->groups) ) {
 						$ret .= Html::tag('tr',
 							$group->getHeaderContent($model, $key, $index, $tdoptions));
