@@ -16,10 +16,6 @@ class GridView extends BaseGridView
 	 * The groups headers and footers definitions
 	 */
 	public $groups = [];
-	/**
-	 * The column to group
-	 */
-	public $column = null;
 	public $totalsRow = false;
 	public $onlyTotals = false;
 
