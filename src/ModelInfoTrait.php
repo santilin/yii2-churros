@@ -249,6 +249,13 @@ trait ModelInfoTrait
 	{
 	}
 
+	public function saveOrFail(bool $runValidations = true)
+	{
+		if( !$this->save($runValidations) ) {
+			throw new \Exception("Save " . static::getModelInfo('title') . ': ' . print_r($this->getErrors(), true) );
+		}
+	}
+
 	static public function createFromDefault($number = 1)
     {
 		$ret = [];
