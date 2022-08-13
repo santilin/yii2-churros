@@ -178,6 +178,46 @@ class FormHelper
 						'wrapper' => 'col-sm-3',
 					]
 				]
+			],
+			'short' => [
+				'1col' => [
+					'horizontalCssClasses' => [
+						'label' => 'col-sm-3',
+						'wrapper' => 'col-sm-1',
+					]
+				],
+				'2cols' => [
+					'horizontalCssClasses' => [
+						'label' => 'col-sm-3',
+						'wrapper' => 'col-sm-3',
+					]
+				],
+				'3cols' => [
+					'horizontalCssClasses' => [
+						'offset' => 'col-sm-offset-1',
+						'wrapper' => 'col-sm-1',
+					]
+				],
+				'4cols' => [
+					'horizontalCssClasses' => [
+						'label' => 'control-label',
+						'error' => 'col_sm_12',
+						'hint' => 'col_sm_12',
+						'wrapper' => 'col-sm-1',
+					],
+					'options' => [ 'class' => 'control-group col-sm-2' ],
+
+				],
+				'1/3' => [
+					'horizontalCssClasses' => [
+						'wrapper' => 'col-sm-2',
+					]
+				],
+				'1/2' => [
+					'horizontalCssClasses' => [
+						'wrapper' => 'col-sm-3',
+					]
+				]
 			]
 		],
 		'bs4' => [
@@ -497,26 +537,37 @@ class FormHelper
 				if( isset($input_opts[$f]['tabindex']) ) {
 					$input_opts[$f]['tabindex'] = FormHelper::ti();
 				}
-				switch(count($lrow)) {
-				case 1:
-					$fldcfg[$lrow[0]] = FormHelper::WIDGET_CONFIGS[$widgets_ver][$layout]['1col'];
-					break;
-				case 2:
-					$fldcfg[$lrow[0]] =
-					$fldcfg[$lrow[1]] = FormHelper::WIDGET_CONFIGS[$widgets_ver][$layout]['2cols'];
-					break;
-				case 3:
-					$fldcfg[$lrow[0]] =
-					$fldcfg[$lrow[1]] =
-					$fldcfg[$lrow[2]] = FormHelper::WIDGET_CONFIGS[$widgets_ver][$layout]['3cols'];
-					break;
-				case 4:
-					$fldcfg[$lrow[0]] =
-					$fldcfg[$lrow[1]] =
-					$fldcfg[$lrow[2]] = FormHelper::WIDGET_CONFIGS[$widgets_ver][$layout]['4cols'];
-					break;
-				}
 			}
+			switch(count($lrow)) {
+			case 1:
+				FormHelper::setFldCfg($fldcfg, $lrow[0], $widgets_ver, $layout, '1col');
+				break;
+			case 2:
+				FormHelper::setFldCfg($fldcfg, $lrow[0], $widgets_ver, $layout, '2cols');
+				FormHelper::setFldCfg($fldcfg, $lrow[1], $widgets_ver, $layout, '2cols');
+				break;
+			case 3:
+				FormHelper::setFldCfg($fldcfg, $lrow[0], $widgets_ver, $layout, '3cols');
+				FormHelper::setFldCfg($fldcfg, $lrow[1], $widgets_ver, $layout, '3cols');
+				FormHelper::setFldCfg($fldcfg, $lrow[2], $widgets_ver, $layout, '3cols');
+				break;
+			case 4:
+				FormHelper::setFldCfg($fldcfg, $lrow[0], $widgets_ver, $layout, '4cols');
+				FormHelper::setFldCfg($fldcfg, $lrow[1], $widgets_ver, $layout, '4cols');
+				FormHelper::setFldCfg($fldcfg, $lrow[2], $widgets_ver, $layout, '4cols');
+				FormHelper::setFldCfg($fldcfg, $lrow[3], $widgets_ver, $layout, '4cols');
+				break;
+			}
+		}
+	}
+
+	static public function setFldCfg(&$fldcfg, $field, $widgets_ver, $layout, $cols)
+	{
+		if( $fldcfg[$field]['layout']??null !== null ) {
+			$l = $fldcfg[$field]['layout'];
+			$fldcfg[$field] = FormHelper::WIDGET_CONFIGS[$widgets_ver][$l][$cols];
+		} else {
+			$fldcfg[$field] = FormHelper::WIDGET_CONFIGS[$widgets_ver][$layout][$cols];
 		}
 	}
 
@@ -574,12 +625,7 @@ class FormHelper
 		case 'bs3':
 			switch( $fields_layout) {
 			case '1col':
-				$classes = 'col-md-offset-3 col-sm-10';
-				break;
-			case '2cols':
-			default:
-				$classes = 'col-md-offset-1 col-sm-10';
-			}
+				$classes = 'col-md-offset-3 col-sm-9';
 			$ret = <<<html
 <div class="row"><div class="col-sm-12">
 	<div class="form-group buttons"><div class="$classes">
@@ -589,6 +635,21 @@ html;
 	</div></div><!--buttons form-group-->
 </div></div>
 html;
+				break;
+			case '2cols':
+				$classes = 'col-md-offset-3 col-sm-9';
+			$ret = <<<html
+<div class="row"><div class="col-sm-6">
+	<div class="form-group buttons"><div class="$classes">
+html;
+			$ret .= static::displayButtons($buttons);
+			$ret .= <<<html
+	</div></div><!--buttons form-group-->
+</div></div>
+html;
+			default:
+				$classes = 'col-md-offset-1 col-sm-11';
+			}
 			break;
 		}
 		return $ret;

@@ -1,6 +1,6 @@
 The default currency code for the formatter is not defined.
 Una cantidad monetaria demasiado grande.
-
+Comprobar inputoptions y fldcfg de inactivatable
 
 = Yii2-usuario
 - Customize views form bootstrap4
