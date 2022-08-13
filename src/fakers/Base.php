@@ -81,7 +81,7 @@ class Base extends \Faker\Provider\Base
 		assert($decimals < $max_digits);
 		$max_digits = $this->generator->numberBetween(3, $max_digits);
 		$ret = $this->randomDigitNotNull();
-		for( $i=0; $i<$max_digits; ++$i) {
+		for( $i=1; $i<$max_digits; ++$i) {
 			if( $i == $max_digits - $decimals && $decimals > 0 ) {
 				$ret .= ".";
 			}

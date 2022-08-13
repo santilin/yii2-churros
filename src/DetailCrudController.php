@@ -76,9 +76,9 @@ class DetailCrudController extends CrudController
 			} else {
 				$action_id[0] = $parent_route . '/' . $action_id[0];
 			}
-			return Url::toRoute($action_id);
+			return Url::toRoute($action_id??'');
 		} else {
-			return Url::toRoute($action_id);
+			return Url::toRoute($action_id??'');
 		}
 	}
 
