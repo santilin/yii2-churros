@@ -357,7 +357,9 @@ class FormHelper
 	static public function layoutFields($layout, $form_fields, $form_layout_rows)
 	{
 		$ret = '';
-		if ($layout == "horizontal" || $layout == "inline" ) {
+		if ($layout == "horizontal" )
+			die("Horizontal layout");
+		if ( $layout == '1col' || $layout == "inline" ) {
 			foreach( $form_fields as $name => $code ) {
 				$ret .= $form_fields[$name]. "\n";
 			}
@@ -564,6 +566,35 @@ class FormHelper
 		}
 	}
 
+	static public function layoutButtons($buttons, string $fields_layout, string $widgets_ver = 'bs4')
+	{
+		switch ($widgets_ver) {
+		case 'bs4':
+			break;
+		case 'bs3':
+			switch( $fields_layout) {
+			case '1col':
+				$classes = 'col-md-offset-3 col-sm-10';
+				break;
+			case '2cols':
+			default:
+				$classes = 'col-md-offset-1 col-sm-10';
+			}
+			$ret = <<<html
+<div class="row"><div class="col-sm-12">
+	<div class="form-group buttons"><div class="$classes">
+html;
+			$ret .= static::displayButtons($buttons);
+			$ret .= <<<html
+	</div></div><!--buttons form-group-->
+</div></div>
+html;
+			break;
+		}
+		return $ret;
+	}
+
+
 	static public function displayButtons($buttons)
 	{
 		$ret = [];
@@ -607,28 +638,6 @@ class FormHelper
 			}
 		}
 		return implode('&nbsp;', $ret);
-	}
-
-	static public function offsetClassBs3($fields_layout)
-	{
-		switch( $fields_layout) {
-			case '1col':
-				return 'col-md-offset-2';
-			case '2cols':
-			default:
-				return 'col-md-offset-1';
-		}
-	}
-
-	static public function offsetClassBs4($fields_layout)
-	{
-		switch( $fields_layout) {
-			case '1col':
-				return 'offset-sm-2';
-			case '2cols':
-			default:
-				return 'offset-sm-1';
-		}
 	}
 
 } // class
