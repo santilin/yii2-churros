@@ -1,21 +1,18 @@
-The default currency code for the formatter is not defined.
-Una cantidad monetaria demasiado grande.
-Comprobar inputoptions y fldcfg de inactivatable
 
-= Yii2-usuario
-- Customize views form bootstrap4
-= Temas admin
-Tabler:
-composer require --prefer-dist synamen/yii2-tabler-theme "~1.0"
+definir formfield layout medium largeo
+
+The default currency code for the formatter is not defined: web.php
 
 = Optimizacion sqlite3
 https://stackoverflow.com/questions/1711631/improve-insert-per-second-performance-of-sqlite
 
-== Permisos
+= Permisos
 * Crear Reports.view, etc.
 
-== CrudController
+= CrudController
 * Enviar a las vistas los permisos
+* WhereToGoNow en update cuando da error el backend, se queda ya en el update para siempre.
+Después de duplicar, se queda otra vez en duplicar.
 
 == Adjuntos y subir ficheros
 - Opciones
@@ -25,6 +22,7 @@ https://stackoverflow.com/questions/1711631/improve-insert-per-second-performanc
 
 = Creación dinámica de etiquetas:
 https://stackoverflow.com/questions/32731987/adding-new-list-options-refreshing-updated-list-dynamically
+
 == Print y pdf
 * CrudController::pdf: Incluir css del módulo/modelo actual
 * Quitar (no definido) al imprimir
@@ -36,16 +34,10 @@ https://stackoverflow.com/questions/32731987/adding-new-list-options-refreshing-
 ** BreadCrumbs: Index: Añadir el orden o el filtro ("filtrado") ("ordenado por")
 * 2 gridviews: https://www.yiiframework.com/doc/guide/2.0/en/output-data-widgets#multiple-gridviews
 
-= Sin clasificar
-* Pasar javascript churros a un asset: searchformjs y tecla enter.
-* Investigar estos widgets:
-- https://www.yiiframework.com/extension/yii2-sortable-behavior
-- https://www.yiiframework.com/extension/yii2-poll-widget
-- https://github.com/jonmiles/bootstrap-treeview
+= Formularios
+Añadir el símbolo del euro al input de los forms.
 
 = No prioritario
-== CrudController
-* No funciona el enlace del mensaje "se ha guardado correctamente" de un detalle
 == Models
 * Tres tipos campos calculados:
 - model_before_save
@@ -61,13 +53,15 @@ https://stackoverflow.com/questions/32731987/adding-new-list-options-refreshing-
 	- Añadir opción visible en profile en resources ... _menu.php: yiiparam('user_profile');
 	- Actualizar a bootstrap4
 	- Arreglar vistas en bootstrap3
+	- Customize views form bootstrap4
+	- usuarios: grid: etiquetas salen en inglés.
+
 
 == Web
 === Configuración
-- ¿moneda por aplicación?
 - Configuración fecha: Fija, por usuario
 - Configuración idioma: Fijo, por usuario
-== Anidar RercordViews con un static
+== Anidar RercordViews con un static<
 
 === css
 * css: width = maxlength en integers, floats y dates
@@ -99,11 +93,14 @@ https://stackoverflow.com/questions/32731987/adding-new-list-options-refreshing-
 == yii2
 * Max-length: Tomar lo que se ha definido en la base de datos o capturar la excepción.
 * Radio List: Ver cómo añadir el autofocus a cada item.
-* Sacarle más partido al returnTo con el ActionColumn
 
 == 3rd party
 * html-to-rtf y .editorconfig https://github.com/github-grabaz/html-rtf-converter/blob/master/.editorconfig
 https://github.com/pavlm/yii2-stats-widget Time Stats widget
 Modelos: Estudiar uuidbehavior, softdeletes y lock. Faltan los behaviors
 Formulario de settings: file:///home/santilin/devel/yii2base/yii2-docs/guide-input-tabular-input.html
+* Investigar estos widgets:
+- https://www.yiiframework.com/extension/yii2-sortable-behavior
+- https://www.yiiframework.com/extension/yii2-poll-widget
+- https://github.com/jonmiles/bootstrap-treeview
 

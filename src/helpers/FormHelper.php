@@ -183,19 +183,19 @@ class FormHelper
 				'1col' => [
 					'horizontalCssClasses' => [
 						'label' => 'col-sm-3',
-						'wrapper' => 'col-sm-1',
+						'wrapper' => 'col-sm-2',
 					]
 				],
 				'2cols' => [
 					'horizontalCssClasses' => [
 						'label' => 'col-sm-3',
-						'wrapper' => 'col-sm-3',
+						'wrapper' => 'col-sm-4',
 					]
 				],
 				'3cols' => [
 					'horizontalCssClasses' => [
 						'offset' => 'col-sm-offset-1',
-						'wrapper' => 'col-sm-1',
+						'wrapper' => 'col-sm-3',
 					]
 				],
 				'4cols' => [
@@ -621,29 +621,41 @@ class FormHelper
 	{
 		switch ($widgets_ver) {
 		case 'bs4':
+			case '1col':
+			default:
+				$classes = 'offset-md-2 col-sm-10';
+				$ret = <<<html
+<div class="row"><div class="col-sm-12">
+	<div class="form-group buttons"><div class="$classes">
+html;
+				$ret .= static::displayButtons($buttons);
+				$ret .= <<<html
+	</div></div><!--buttons form-group-->
+</div></div>
+html;
 			break;
 		case 'bs3':
 			switch( $fields_layout) {
 			case '1col':
 				$classes = 'col-md-offset-3 col-sm-9';
-			$ret = <<<html
+				$ret = <<<html
 <div class="row"><div class="col-sm-12">
 	<div class="form-group buttons"><div class="$classes">
 html;
-			$ret .= static::displayButtons($buttons);
-			$ret .= <<<html
+				$ret .= static::displayButtons($buttons);
+				$ret .= <<<html
 	</div></div><!--buttons form-group-->
 </div></div>
 html;
 				break;
 			case '2cols':
 				$classes = 'col-md-offset-3 col-sm-9';
-			$ret = <<<html
+				$ret = <<<html
 <div class="row"><div class="col-sm-6">
 	<div class="form-group buttons"><div class="$classes">
 html;
-			$ret .= static::displayButtons($buttons);
-			$ret .= <<<html
+				$ret .= static::displayButtons($buttons);
+				$ret .= <<<html
 	</div></div><!--buttons form-group-->
 </div></div>
 html;
