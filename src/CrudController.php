@@ -43,7 +43,7 @@ class CrudController extends \yii\web\Controller
 			],
 		];
 		// Auth behaviors must be set on descendants of this controller
-		return $ret;
+		return array_merge($ret, parent::behaviors());
 	}
 
 	public function beforeAction($action)
@@ -84,9 +84,13 @@ class CrudController extends \yii\web\Controller
 	{
 		$params = Yii::$app->request->queryParams;
 		$searchModel = $this->findModel(null, null, 'search');
+		if( $this->accessOnlyOwner ) {
+			$params['accessOnlyOwner'] = $this->accessOnlyOwner;
+		}
+		$params = $this->changeActionParams($params, 'index', $searchModel);
 		return $this->render('index', [
 			'searchModel' => $searchModel,
-			'indexParams' => $this->changeActionParams($params, 'index', $searchModel),
+			'indexParams' => $params,
 		]);
 	}
 

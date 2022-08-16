@@ -72,7 +72,10 @@ trait ModelInfoTrait
 		$matches = [];
 		if( preg_match_all('/({[a-zA-Z0-9\._]+})+/', $message, $matches) ) {
 			foreach( $matches[1] as $match ) {
-				switch( $match ) {
+				if( substr($match,0,3) == '{r.' ) {
+					$fld = substr($match, 3, -1);
+					$placeholders[$match] = ArrayHelper::getValue($this,$fld,'');
+				} else switch( $match ) {
 				case '{title}':
 					$placeholders[$match] = lcfirst(static::getModelInfo('title'));
 					break;

@@ -33,9 +33,11 @@ class CrudRbacAccessRule extends AccessRule
 		$actions = array_merge($this->actions??[], ['index','create','update','delete','view','pdf','duplicate','autocomplete','remove-image']);
 		switch( $action->id ) {
 			case 'index':
+			case 'autocomplete':
+				$perm = AppHelper::camelCase($action->controller->id) . ".index";
+				break;
 			case 'view':
 			case 'pdf':
-			case 'autocomplete':
 				$perm = AppHelper::camelCase($action->controller->id) . ".view";
 				break;
 			case 'update':
