@@ -200,10 +200,8 @@ class FormHelper
 				],
 				'4cols' => [
 					'horizontalCssClasses' => [
-						'label' => 'control-label',
-						'error' => 'col_sm_12',
-						'hint' => 'col_sm_12',
-						'wrapper' => 'col-sm-1',
+						'label' => 'col-sm-3',
+						'wrapper' => '',
 					],
 					'options' => [ 'class' => 'control-group col-sm-2' ],
 
@@ -649,6 +647,7 @@ html;
 html;
 				break;
 			case '2cols':
+			default:
 				$classes = 'col-md-offset-3 col-sm-9';
 				$ret = <<<html
 <div class="row"><div class="col-sm-6">
@@ -659,8 +658,6 @@ html;
 	</div></div><!--buttons form-group-->
 </div></div>
 html;
-			default:
-				$classes = 'col-md-offset-1 col-sm-11';
 			}
 			break;
 		}
