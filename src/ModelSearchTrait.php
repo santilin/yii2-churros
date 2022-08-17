@@ -337,7 +337,7 @@ trait ModelSearchTrait
 		$ret .= "<div$main_div>";
 		$ret .= "<div class='form-group'>";
 		$ret .= "<div class='control-label col-sm-2'>";
-		$ret .= Html::activeLabel($this, $attribute, $options) . $relation;
+		$ret .= Html::activeLabel($this, $attribute, $options['labelOptions']) . $relation;
 		if ($type == 'date' ) {
 			$ret .= "<br>Formato yyyy-mm-dd";
 		}
@@ -352,17 +352,16 @@ trait ModelSearchTrait
 		if( is_array($dropdown_values) || is_array($value['lft']) ) {
 			$ret .= "<div class='control-form col-sm-5'>";
 			$ret .= Html::dropDownList("${scope}[_adv_][$attribute][lft]",
-				$value['lft'],
-				$dropdown_values,
-				[ 'prompt' => 'Cualquiera', 'class' => 'form-control col-sm-4']);
+				$value['lft'], $dropdown_values,
+				array_merge($options['htmlOptions'], [ 'prompt' => Yii::t('churros', 'Cualquiera')]));
 			$ret .= "</div>";
 		} else {
 			$ret .= <<<EOF
 	<div class="input-group col-sm-5">
 EOF;
 
-			$ret .= Html::input($control_type, "${scope}[_adv_][$attribute][lft]",
-			$value['lft'], [ 'class' => 'form-control' ]);
+			$ret .= Html::input($control_type, "${scope}[_adv_][$attribute][lft]", $value['lft'],
+				array_merge($options['htmlOptions'], [ 'class' => 'form-control' ]));
 			$ret .= <<<EOF
 	<span class="input-group-addon">
         <a class="search-adv-field" data-input-name="${scope}[_adv_][$attribute][lft]" data-field="${scope}.$attribute" href="javascript:void(0)"><i class="fa fa-search"></i></a>
@@ -384,11 +383,12 @@ EOF;
 		if( is_array($dropdown_values) ) {
 			$ret .= "<div class='control-form col-sm-5'>";
 			$ret .= Html::dropDownList("${scope}[_adv_][$attribute][rgt]",
-			$value['rgt'], $dropdown_values, [ 'class' => 'form-control col-sm-4']);
+				$value['rgt'], $dropdown_values,
+				array_merge($options['htmlOptions'], [ 'prompt' => Yii::t('churros', 'Cualquiera')]));
 		} else {
 			$ret .= '<div class="input-group col-sm-5">';
-			$ret .= Html::input($control_type, "${scope}[_adv_][$attribute][rgt]",
-				$value['rgt'], [ 'class' => 'form-control']);
+			$ret .= Html::input($control_type, "${scope}[_adv_][$attribute][rgt]", $value['rgt'],
+				array_merge($options['htmlOptions'], [ 'class' => 'form-control' ]));
 			$ret .= <<<EOF
 	<span class="input-group-addon">
         <a class="search-adv-field" data-input-name="${scope}[_adv_][$attribute][rgt]" href="javascript:void(0)"><i class="fa fa-search"></i></a>
