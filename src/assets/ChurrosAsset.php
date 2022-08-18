@@ -14,6 +14,7 @@ class ChurrosAsset extends AssetBundle
 		'churros.validation.js'
     ];
     public $css = [
+		'churros.radioimages.css',
 		'churros.recordview.css'
     ];
 }
