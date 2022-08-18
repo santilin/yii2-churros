@@ -34,15 +34,9 @@ class RadioImagesInput extends \yii\widgets\InputWidget
 		$n = 0;
 		foreach( $this->items as $value => $item ) {
 			$radio = '<li>' . Html::activeRadio($this->model, $this->attribute, [
-				'uncheck' => false, 'label' => false, 'id' => "{$id}-{$n}", "checked" => '', 'value' => $value,
+				'uncheck' => false, 'label' => false, 'id' => "{$id}-{$n}", 'value' => $value,
 			]);
-			if( empty($this->images[$value]) ) {
-				$radio .= Html::tag('label', $item,
-					[ 'for' => "{$id}-{$n}" ]);
-			} else {
-				$radio .= Html::tag('label', Html::img('@web/img/'.$this->images[$value],
-					[ 'for' => "{$id}-{$n}" ]));
-			}
+ 			$radio .= Html::tag('label', Html::img("@web/img/" . $this->images[$value]), [ 'for' => "{$id}-{$n}" ]);
 			$radio .= '</li>';
 			++$n;
 			$radios[] = $radio;
