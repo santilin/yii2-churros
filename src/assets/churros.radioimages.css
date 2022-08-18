@@ -1,6 +1,7 @@
 /* https://stackoverflow.com/questions/17541614/use-images-instead-of-radio-buttons */
 .radio-images ul {
 	list-style-type: none;
+	padding-left:0px !important;
 }
 .radio-images li {
 	display: inline-block;
