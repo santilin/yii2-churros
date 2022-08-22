@@ -83,12 +83,12 @@ class AuthHelper
 			if( !$auth->hasChild($role, $perm) ) {
 				$auth->addChild($role, $perm);
 				if( $perm->type == Item::TYPE_ROLE ) {
-					$msgs[] = "role $perm_name added to role {$role->name}";
+					$msgs[] = "$perm_name: role added to role {$role->name}";
 				} else {
-					$msgs[] = "permission $perm_name added to role {$role->name}";
+					$msgs[] = "$perm_name: permission added to role {$role->name}";
 				}
 			} else {
-				$msgs[] = "permission $perm_name already assigned to role {$role->name}";
+				$msgs[] = "$perm_name: permission already assigned to role {$role->name}";
 			}
 		}
 		$msg = join("\n", $msgs);
@@ -154,9 +154,9 @@ class AuthHelper
 				}
 			} else {
 				if( $perm->type == Item::TYPE_ROLE ) {
-					$msgs[] = "role $perm_name already assigned to user $user_name";
+					$msgs[] = "$perm_name: role already assigned to user $user_name";
 				} else {
-					$msgs[] = "permission $perm_name already assigned to role $user_name";
+					$msgs[] = "$perm_name: permission already assigned to role $user_name";
 				}
 			}
 		}

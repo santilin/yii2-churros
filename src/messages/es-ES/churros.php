@@ -36,6 +36,7 @@ return [
 	'Access to all models of module {module}' => 'Acceso a todos los modelos del módulo {module}',
 	'Access to {model_title} menu for {module_name} module' => 'Acceso al menú de {model_title} del módulo {module_name}',
 	"Access to '{module}' module menu" => 'Acceso al menu del módulo {module}',
+	"Access to '{module}' module site" => 'Acceso al sitio del módulo {module}',
 	'their own {title_plural}' => 'sus propi{-as} {title_plural}',
 
 	'All' => 'Todo',

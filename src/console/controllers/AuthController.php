@@ -152,26 +152,24 @@ class AuthController extends Controller
 		}
 	}
 
-	public function createModuleModelPermissions($module_name, $model_name, $model_class)
+	public function createModuleModelPermissions($module_id, $model_name, $model_class)
 	{
 		$auth = $this->authManager;
 
 		$model = new $model_class;
 		$model_title = $model->t('app', "{title_plural}");
 
-		$role_name = "module.$module_name.menu.all";
-		$role_all = AuthHelper::createOrUpdateRole($role_name,
-			Yii::t('churros', 'Access to all models of module {module}', [ '{module}' => $module_name ]), $msg, $auth);
-		if ($msg != '' ) echo "$msg\n";
+		$role_all_name = "module.$module_id.menu.all";
+		$role_all = $this->authManager->getRole($role_all_name);
 
-		$perm_name = "module.$module_name.menu.$model_name";
+		$perm_name = "module.$module_id.menu.$model_name";
 		$permission = AuthHelper::createOrUpdatePermission($perm_name,
 			Yii::t('churros', 'Access to {model_title} menu for {module_name} module',
-				[ '{model_title}' => $model_title, '{module_name}' => $module_name ]), $msg, $auth);
+				[ '{model_title}' => $model_title, '{module_name}' => $module_id ]), $msg, $auth);
 		if ($msg != '' ) echo "$msg\n";
 		if( !$auth->hasChild($role_all, $permission) ) {
 			$auth->addChild($role_all, $permission);
-			echo "permission {$permission->name} added to role {$role_all->name}\n";
+			echo "{$permission->name}: permission added to role {$role_all->name}\n";
 		}
 	}
 
@@ -183,6 +181,17 @@ class AuthController extends Controller
 		$msg = null;
 		AuthHelper::createOrUpdatePermission("module.$module_id.menu",
 			Yii::t('churros', 'Access to \'{module}\' module menu',
+			[ '{module}' => $module_title?:$module_id ]), $msg, $this->authManager);
+		if ($msg != '' ) echo "$msg\n";
+		$role_all_name = "module.$module_id.menu.all";
+		$role_all = $this->authManager->getRole($role_all_name);
+		if( !$role_all ) {
+			$role_all = AuthHelper::createOrUpdateRole($role_all_name,
+				Yii::t('churros', 'Access to all models of module {module}', [ '{module}' => $module_id ]), $msg);
+			if ($msg != '' ) echo "$msg\n";
+		}
+		AuthHelper::createOrUpdatePermission("module.$module_id.site.index",
+			Yii::t('churros', 'Access to \'{module}\' module site',
 			[ '{module}' => $module_title?:$module_id ]), $msg, $this->authManager);
 		if ($msg != '' ) echo "$msg\n";
 	}
