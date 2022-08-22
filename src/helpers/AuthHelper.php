@@ -31,6 +31,8 @@ class AuthHelper
 			$auth->update($perm_name, $permission);
 			$msg = $permission->name . ' => ' . $permission->description
 				. ': ' . Yii::t('churros', 'permission updated');
+		} else {
+			$msg = "{$permission->name}, {$permission->description}: " . Yii::t('churros', 'permission already exists');
 		}
 		return $permission;
 	}
@@ -53,25 +55,10 @@ class AuthHelper
 			$auth->update($role_name, $role);
 			$msg = $role->name . ' => ' . $role->description
 				. ': ' . Yii::t('churros', 'role updated');
+		} else {
+			$msg = "{$role->name}, {$role->description}: " . Yii::t('churros', 'role already exists');
 		}
 		return $role;
-	}
-
-
-	public function actionAssignPermToRole($perm_name, $role_name, $auth = null)
-	{
-		if( $auth == null ) {
-			$auth = \Yii::$app->authManager;
-		}
-		$permission = $auth->getItem($perm_name);
-		if( $permission == null ) {
-			return false;
-		}
-		$role = $auth->getRole($role_name);
-		if( !$role ) {
-			throw new \Exception( "$role_name: role not found" );
-		}
-		$auth->addChild($role, $permission);
 	}
 
     static public function addToRole($role_name, array $perm_names, string &$msg = null, $auth = null)
@@ -100,6 +87,8 @@ class AuthHelper
 				} else {
 					$msgs[] = "permission $perm_name added to role {$role->name}";
 				}
+			} else {
+				$msgs[] = "permission $perm_name already assigned to role {$role->name}";
 			}
 		}
 		$msg = join("\n", $msgs);
@@ -159,12 +148,17 @@ class AuthHelper
 			if( !$auth->getAssignment($perm_name, $user_id) ) {
 				$auth->assign($perm, $user_id);
 				if( $perm->type == Item::TYPE_ROLE ) {
-					$msgs[] = "role $perm_name added to user $user_name";
+					$msgs[] = "role $perm_name assigned to user $user_name";
 				} else {
-					$msgs[] = "permission $perm_name added to role $user_name";
+					$msgs[] = "permission $perm_name assinged to role $user_name";
+				}
+			} else {
+				if( $perm->type == Item::TYPE_ROLE ) {
+					$msgs[] = "role $perm_name already assigned to user $user_name";
+				} else {
+					$msgs[] = "permission $perm_name already assigned to role $user_name";
 				}
 			}
-			if ($msg ) $msgs[] = $msg;
 		}
 		$msg = join("\n", $msgs);
     }
