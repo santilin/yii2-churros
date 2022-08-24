@@ -46,16 +46,6 @@ class FormHelper
 						'wrapper' => 'col-sm-9',
 					]
 				],
-				'1/3' => [
-					'horizontalCssClasses' => [
-						'wrapper' => 'col-sm-2',
-					]
-				],
-				'1/2' => [
-					'horizontalCssClasses' => [
-						'wrapper' => 'col-sm-3',
-					]
-				]
 			],
 			'2cols' => [
 				'1col' => [
@@ -86,16 +76,6 @@ class FormHelper
 						'wrapper' => 'col-sm-9',
 					]
 				],
-				'1/3' => [
-					'horizontalCssClasses' => [
-						'wrapper' => 'col-sm-2',
-					]
-				],
-				'1/2' => [
-					'horizontalCssClasses' => [
-						'wrapper' => 'col-sm-3',
-					]
-				]
 			],
 			'3cols' => [
 				'1col' => [
@@ -126,16 +106,153 @@ class FormHelper
 						'wrapper' => 'col-sm-9',
 					]
 				],
-				'1/3' => [
+			],
+			'4cols' => [
+				'1col' => [
 					'horizontalCssClasses' => [
+						'label' => 'col-sm-1 one-column-row',
+						'offset' => 'col-sm-offset-1',
+						'wrapper' => 'col-sm-6',
+					]
+				],
+				'2cols' => [
+					'horizontalCssClasses' => [
+						'label' => 'col-sm-2',
+						'offset' => 'col-sm-offset-1',
+						'wrapper' => 'col-sm-7',
+					]
+				],
+				'3cols' => [
+					'horizontalCssClasses' => [
+						'offset' => 'col-sm-offset-1',
+						'wrapper' => 'col-sm-8',
+					]
+				],
+				'4cols' => [
+					'horizontalCssClasses' => [
+						'label' => 'control-label',
+						'error' => 'col_sm_12',
+						'hint' => 'col_sm_12',
+						'wrapper' => '',
+					],
+					'options' => [ 'class' => 'control-group col-sm-2' ],
+
+				],
+			],
+			'short' => [
+				'1col' => [
+					'horizontalCssClasses' => [
+						'label' => 'col-sm-3',
 						'wrapper' => 'col-sm-2',
 					]
 				],
-				'1/2' => [
+				'2cols' => [
 					'horizontalCssClasses' => [
+						'label' => 'col-sm-3',
+						'wrapper' => 'col-sm-4',
+					]
+				],
+				'3cols' => [
+					'horizontalCssClasses' => [
+						'offset' => 'col-sm-offset-1',
 						'wrapper' => 'col-sm-3',
 					]
-				]
+				],
+				'4cols' => [
+					'horizontalCssClasses' => [
+						'label' => 'col-sm-3',
+						'wrapper' => '',
+					],
+					'options' => [ 'class' => 'control-group col-sm-2' ],
+
+				],
+			],
+		],
+		'bs4' => [
+			'1col' => [
+				'1col' => [
+				],
+				'2cols' => [
+					'horizontalCssClasses' => [
+						'label' => 'col-sm-3',
+						'offset' => 'col-sm-offset-1',
+						'wrapper' => 'col-sm-9',
+					]
+				],
+				'3cols' => [
+					'horizontalCssClasses' => [
+						'label' => 'col-sm-3',
+						'offset' => 'col-sm-offset-1',
+						'wrapper' => 'col-sm-9',
+					]
+				],
+				'4cols' => [
+					'horizontalCssClasses' => [
+						'label' => 'col-sm-3',
+						'offset' => 'col-sm-offset-1',
+						'wrapper' => 'col-sm-9',
+					]
+				],
+			],
+			'2cols' => [
+				'1col' => [
+					'horizontalCssClasses' => [
+						'label' => 'col-sm-1 one-column-row',
+						'offset' => 'col-sm-offset-1',
+						'wrapper' => 'col-sm-11',
+					]
+				],
+				'2cols' => [
+					'horizontalCssClasses' => [
+						'label' => 'col-sm-3',
+						'offset' => 'col-sm-offset-1',
+						'wrapper' => 'col-sm-9',
+					]
+				],
+				'3cols' => [
+					'horizontalCssClasses' => [
+						'label' => 'col-sm-3',
+						'offset' => 'col-sm-offset-1',
+						'wrapper' => 'col-sm-9',
+					]
+				],
+				'4cols' => [
+					'horizontalCssClasses' => [
+						'label' => 'col-sm-3',
+						'offset' => 'col-sm-offset-1',
+						'wrapper' => 'col-sm-9',
+					]
+				],
+			],
+			'3cols' => [
+				'1col' => [
+					'horizontalCssClasses' => [
+						'label' => 'col-sm-1 one-column-row',
+						'offset' => 'col-sm-offset-1',
+						'wrapper' => 'col-sm-11',
+					]
+				],
+				'2cols' => [
+					'horizontalCssClasses' => [
+						'label' => 'col-sm-3',
+						'offset' => 'col-sm-offset-1',
+						'wrapper' => 'col-sm-9',
+					]
+				],
+				'3cols' => [
+					'horizontalCssClasses' => [
+						'label' => 'col-sm-3',
+						'offset' => 'col-sm-offset-1',
+						'wrapper' => 'col-sm-9',
+					]
+				],
+				'4cols' => [
+					'horizontalCssClasses' => [
+						'label' => 'col-sm-3',
+						'offset' => 'col-sm-offset-1',
+						'wrapper' => 'col-sm-9',
+					]
+				],
 			],
 			'4cols' => [
 				'1col' => [
@@ -182,19 +299,19 @@ class FormHelper
 			'short' => [
 				'1col' => [
 					'horizontalCssClasses' => [
-						'label' => 'col-sm-3',
-						'wrapper' => 'col-sm-2',
+						'label' => 'col-sm-1',
+						'wrapper' => 'col-sm-1',
 					]
 				],
 				'2cols' => [
 					'horizontalCssClasses' => [
 						'label' => 'col-sm-3',
-						'wrapper' => 'col-sm-4',
+						'wrapper' => 'col-sm-3',
 					]
 				],
 				'3cols' => [
 					'horizontalCssClasses' => [
-						'offset' => 'col-sm-offset-1',
+						'offset' => 'offset-sm-1',
 						'wrapper' => 'col-sm-3',
 					]
 				],
@@ -203,179 +320,8 @@ class FormHelper
 						'label' => 'col-sm-3',
 						'wrapper' => '',
 					],
-					'options' => [ 'class' => 'control-group col-sm-2' ],
-
 				],
-				'1/3' => [
-					'horizontalCssClasses' => [
-						'wrapper' => 'col-sm-2',
-					]
-				],
-				'1/2' => [
-					'horizontalCssClasses' => [
-						'wrapper' => 'col-sm-3',
-					]
-				]
-			]
-		],
-		'bs4' => [
-			'1col' => [
-				'1col' => [
-				],
-				'2cols' => [
-					'horizontalCssClasses' => [
-						'label' => 'col-sm-3',
-						'offset' => 'col-sm-offset-1',
-						'wrapper' => 'col-sm-9',
-					]
-				],
-				'3cols' => [
-					'horizontalCssClasses' => [
-						'label' => 'col-sm-3',
-						'offset' => 'col-sm-offset-1',
-						'wrapper' => 'col-sm-9',
-					]
-				],
-				'4cols' => [
-					'horizontalCssClasses' => [
-						'label' => 'col-sm-3',
-						'offset' => 'col-sm-offset-1',
-						'wrapper' => 'col-sm-9',
-					]
-				],
-				'1/3' => [
-					'horizontalCssClasses' => [
-						'wrapper' => 'col-sm-2',
-					]
-				],
-				'1/2' => [
-					'horizontalCssClasses' => [
-						'wrapper' => 'col-sm-3',
-					]
-				]
 			],
-			'2cols' => [
-				'1col' => [
-					'horizontalCssClasses' => [
-						'label' => 'col-sm-1 one-column-row',
-						'offset' => 'col-sm-offset-1',
-						'wrapper' => 'col-sm-11',
-					]
-				],
-				'2cols' => [
-					'horizontalCssClasses' => [
-						'label' => 'col-sm-3',
-						'offset' => 'col-sm-offset-1',
-						'wrapper' => 'col-sm-9',
-					]
-				],
-				'3cols' => [
-					'horizontalCssClasses' => [
-						'label' => 'col-sm-3',
-						'offset' => 'col-sm-offset-1',
-						'wrapper' => 'col-sm-9',
-					]
-				],
-				'4cols' => [
-					'horizontalCssClasses' => [
-						'label' => 'col-sm-3',
-						'offset' => 'col-sm-offset-1',
-						'wrapper' => 'col-sm-9',
-					]
-				],
-				'1/3' => [
-					'horizontalCssClasses' => [
-						'wrapper' => 'col-sm-2',
-					]
-				],
-				'1/2' => [
-					'horizontalCssClasses' => [
-						'wrapper' => 'col-sm-3',
-					]
-				]
-			],
-			'3cols' => [
-				'1col' => [
-					'horizontalCssClasses' => [
-						'label' => 'col-sm-1 one-column-row',
-						'offset' => 'col-sm-offset-1',
-						'wrapper' => 'col-sm-11',
-					]
-				],
-				'2cols' => [
-					'horizontalCssClasses' => [
-						'label' => 'col-sm-3',
-						'offset' => 'col-sm-offset-1',
-						'wrapper' => 'col-sm-9',
-					]
-				],
-				'3cols' => [
-					'horizontalCssClasses' => [
-						'label' => 'col-sm-3',
-						'offset' => 'col-sm-offset-1',
-						'wrapper' => 'col-sm-9',
-					]
-				],
-				'4cols' => [
-					'horizontalCssClasses' => [
-						'label' => 'col-sm-3',
-						'offset' => 'col-sm-offset-1',
-						'wrapper' => 'col-sm-9',
-					]
-				],
-				'1/3' => [
-					'horizontalCssClasses' => [
-						'wrapper' => 'col-sm-2',
-					]
-				],
-				'1/2' => [
-					'horizontalCssClasses' => [
-						'wrapper' => 'col-sm-3',
-					]
-				]
-			],
-			'4cols' => [
-				'1col' => [
-					'horizontalCssClasses' => [
-						'label' => 'col-sm-1 one-column-row',
-						'offset' => 'col-sm-offset-1',
-						'wrapper' => 'col-sm-6',
-					]
-				],
-				'2cols' => [
-					'horizontalCssClasses' => [
-						'label' => 'col-sm-2',
-						'offset' => 'col-sm-offset-1',
-						'wrapper' => 'col-sm-7',
-					]
-				],
-				'3cols' => [
-					'horizontalCssClasses' => [
-						'offset' => 'col-sm-offset-1',
-						'wrapper' => 'col-sm-8',
-					]
-				],
-				'4cols' => [
-					'horizontalCssClasses' => [
-						'label' => 'control-label',
-						'error' => 'col_sm_12',
-						'hint' => 'col_sm_12',
-						'wrapper' => '',
-					],
-					'options' => [ 'class' => 'control-group col-sm-2' ],
-
-				],
-				'1/3' => [
-					'horizontalCssClasses' => [
-						'wrapper' => 'col-sm-2',
-					]
-				],
-				'1/2' => [
-					'horizontalCssClasses' => [
-						'wrapper' => 'col-sm-3',
-					]
-				]
-			]
 		],
 	];
 
