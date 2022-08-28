@@ -15,6 +15,13 @@ class AuthHelper
 {
 	static public $lastMessage = '';
 
+	static public function echoLastMessage($eol = "\n")
+	{
+		if( static::$lastMessage != '' ) {
+			echo static::$lastMessage . $eol;
+		}
+	}
+
 	static public function createOrUpdatePermission($perm_name, $perm_desc, $auth = null)
 	{
 		if( $auth == null ) {
@@ -85,12 +92,12 @@ class AuthHelper
 			if( !$auth->hasChild($role, $perm) ) {
 				$auth->addChild($role, $perm);
 				if( $perm->type == Item::TYPE_ROLE ) {
-					$msgs = "$perm_name: role added to role {$role->name}";
+					$msgs[] = "$perm_name: role added to role {$role->name}";
 				} else {
-					$msgs = "$perm_name: permission added to role {$role->name}";
+					$msgs[] = "$perm_name: permission added to role {$role->name}";
 				}
 			} else {
-				$msgs = "$perm_name: permission already assigned to role {$role->name}";
+				$msgs[] = "$perm_name: permission already assigned to role {$role->name}";
 			}
 		}
 		static::$lastMessage = join("\n", $msgs);
