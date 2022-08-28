@@ -439,9 +439,9 @@ EOF;
 				if( !isset($joins[$tablename]) ) {
 					$joins[$tablename] = $relation['join'];
 				}
-				$left_model = new $relation['modelClass'];
+				$left_model = $relation['modelClass']::instance();
 			} else {
-				throw new \Exception($relation_name . ": relation not found in model " . $left_model->className() . " with relations " . join(',', array_keys($left_model::$relations)));
+				throw new \Exception($relation_name . ": relation not found in model " . $left_model::className() . " with relations " . join(',', array_keys($left_model::$relations)));
 			}
 		}
 		$alias .= "_$attribute";

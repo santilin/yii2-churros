@@ -382,10 +382,10 @@ trait ModelInfoTrait
 			$r0 = explode(',',static::getModelInfo('code_field'));
 			$r1 = explode(',',static::getModelInfo('desc_field'));
 			return array_merge($r0,$r1);
-		} else if (isset(self::$relations[$relname])) {
-			$relmodelname = self::$relations[$relname]['modelClass'];
-			$relmodel = new $relmodelname;
-			return $relmodel->findCodeAndDescFields();
+		} else if (isset(static::$relations[$relname])) {
+			$relmodelname = static::$relations[$relname]['modelClass'];
+			$relmodel = $relmodelname::instance();
+			return $relmodel::findCodeAndDescFields();
 		} else {
 			return [];
 		}

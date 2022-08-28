@@ -13,55 +13,57 @@ use yii\rbac\Item;
 
 class AuthHelper
 {
-	static public function createOrUpdatePermission($perm_name, $perm_desc, & $msg, $auth = null)
+	static public $lastMessage = '';
+
+	static public function createOrUpdatePermission($perm_name, $perm_desc, $auth = null)
 	{
 		if( $auth == null ) {
 			$auth = \Yii::$app->authManager;
 		}
-		$msg = '';
+		static::$lastMessage = '';
 		$permission = $auth->getPermission($perm_name);
 		if( !$permission ) {
 			$permission = $auth->createPermission($perm_name);
 			$permission->description = $perm_desc;
 			$auth->add($permission);
-			$msg = $permission->name . ' => ' . $permission->description
+			static::$lastMessage = $permission->name . ' => ' . $permission->description
 				. ': ' . Yii::t('churros', 'permission created');
 		} else if( $permission->description != $perm_desc ) {
 			$permission->description = $perm_desc;
 			$auth->update($perm_name, $permission);
-			$msg = $permission->name . ' => ' . $permission->description
+			static::$lastMessage = $permission->name . ' => ' . $permission->description
 				. ': ' . Yii::t('churros', 'permission updated');
 		} else {
-			$msg = "{$permission->name}, {$permission->description}: " . Yii::t('churros', 'permission already exists');
+			static::$lastMessage = "{$permission->name}, {$permission->description}: " . Yii::t('churros', 'permission already exists');
 		}
 		return $permission;
 	}
 
-	static public function createOrUpdateRole($role_name, $role_desc, &$msg, $auth = null)
+	static public function createOrUpdateRole($role_name, $role_desc, $auth = null)
 	{
 		if( $auth == null ) {
 			$auth = \Yii::$app->authManager;
 		}
-		$msg = '';
+		static::$lastMessage = '';
 		$role = $auth->getRole($role_name);
 		if( !$role ) {
 			$role = $auth->createRole($role_name);
 			$role->description = $role_desc;
 			$auth->add($role);
-			$msg = $role->name . ' => ' . $role->description
+			static::$lastMessage = $role->name . ' => ' . $role->description
 				. ': ' . Yii::t('churros', 'role created');
 		} else if( $role->description != $role_desc ) {
 			$role->description = $role_desc;
 			$auth->update($role_name, $role);
-			$msg = $role->name . ' => ' . $role->description
+			static::$lastMessage = $role->name . ' => ' . $role->description
 				. ': ' . Yii::t('churros', 'role updated');
 		} else {
-			$msg = "{$role->name}, {$role->description}: " . Yii::t('churros', 'role already exists');
+			static::$lastMessage = "{$role->name}, {$role->description}: " . Yii::t('churros', 'role already exists');
 		}
 		return $role;
 	}
 
-    static public function addToRole($role_name, array $perm_names, string &$msg = null, $auth = null)
+    static public function addToRole($role_name, array $perm_names, $auth = null)
     {
 		if( $auth == null ) {
 			$auth = \Yii::$app->authManager;
@@ -83,19 +85,19 @@ class AuthHelper
 			if( !$auth->hasChild($role, $perm) ) {
 				$auth->addChild($role, $perm);
 				if( $perm->type == Item::TYPE_ROLE ) {
-					$msgs[] = "$perm_name: role added to role {$role->name}";
+					$msgs = "$perm_name: role added to role {$role->name}";
 				} else {
-					$msgs[] = "$perm_name: permission added to role {$role->name}";
+					$msgs = "$perm_name: permission added to role {$role->name}";
 				}
 			} else {
-				$msgs[] = "$perm_name: permission already assigned to role {$role->name}";
+				$msgs = "$perm_name: permission already assigned to role {$role->name}";
 			}
 		}
-		$msg = join("\n", $msgs);
+		static::$lastMessage = join("\n", $msgs);
 		return $role;
     }
 
-    static public function createPermissions(array $perms, string &$msg, $auth = null)
+    static public function createPermissions(array $perms, string $auth = null)
     {
 		if( $auth == null ) {
 			$auth = \Yii::$app->authManager;
@@ -103,13 +105,13 @@ class AuthHelper
 		$msgs = [];
 		foreach( $perms as $perm_name => $perm_desc ) {
 			$perm = AuthHelper::createOrUpdatePermission($perm_name,
-				$perm_desc, $msg, $auth);
-			if( $msg ) $msgs[] = $msg;
+				$perm_desc, static::$lastMessage, $auth);
+			if( static::$lastMessage ) $msgs = static::$lastMessage;
 		}
-		$msg = join("\n", $msgs);
+		static::$lastMessage = join("\n", $msgs);
     }
 
-    static public function createRoles(array $roles, string &$msg, $auth = null)
+    static public function createRoles(array $roles, string $auth = null)
     {
 		if( $auth == null ) {
 			$auth = \Yii::$app->authManager;
@@ -117,13 +119,13 @@ class AuthHelper
 		$msgs = [];
 		foreach( $roles as $role_name => $role_desc ) {
 			$role = AuthHelper::createOrUpdateRole($role_name,
-				$role_desc, $msg, $auth);
-			if( $msg ) $msgs[] = $msg;
+				$role_desc, static::$lastMessage, $auth);
+			if( static::$lastMessage ) $msgs = static::$lastMessage;
 		}
-		$msg = join("\n", $msgs);
+		static::$lastMessage = join("\n", $msgs);
     }
 
-    static public function assignToUser($user_id_or_name, array $perms, string &$msg, $auth = null)
+    static public function assignToUser($user_id_or_name, array $perms, string $auth = null)
     {
 		if( $auth == null ) {
 			$auth = \Yii::$app->authManager;
@@ -148,19 +150,19 @@ class AuthHelper
 			if( !$auth->getAssignment($perm_name, $user_id) ) {
 				$auth->assign($perm, $user_id);
 				if( $perm->type == Item::TYPE_ROLE ) {
-					$msgs[] = "role $perm_name assigned to user $user_name";
+					$msgs = "role $perm_name assigned to user $user_name";
 				} else {
-					$msgs[] = "permission $perm_name assinged to role $user_name";
+					$msgs = "permission $perm_name assinged to role $user_name";
 				}
 			} else {
 				if( $perm->type == Item::TYPE_ROLE ) {
-					$msgs[] = "$perm_name: role already assigned to user $user_name";
+					$msgs = "$perm_name: role already assigned to user $user_name";
 				} else {
-					$msgs[] = "$perm_name: permission already assigned to role $user_name";
+					$msgs = "$perm_name: permission already assigned to role $user_name";
 				}
 			}
 		}
-		$msg = join("\n", $msgs);
+		static::$lastMessage = join("\n", $msgs);
     }
 
 } // class AuthHelper

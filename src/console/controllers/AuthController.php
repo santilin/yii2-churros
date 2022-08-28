@@ -79,7 +79,7 @@ class AuthController extends Controller
 			Yii::t('churros', 'Edit all files'), $msg, $auth);
 		if( $msg != '' ) echo "$msg\n";
 
-		$model = new $model_class;
+		$model = $model_class::instance();
 		$model_title = $model->t('app', "{title_plural}");
 		$model_editora = AuthHelper::createOrUpdateRole(
 			$model_name . '.editor',
@@ -156,7 +156,7 @@ class AuthController extends Controller
 	{
 		$auth = $this->authManager;
 
-		$model = new $model_class;
+		$model = $model_class::instance();
 		$model_title = $model->t('app', "{title_plural}");
 
 		$role_all_name = "module.$module_id.menu.all";
