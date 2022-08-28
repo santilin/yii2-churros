@@ -157,15 +157,15 @@ class AuthHelper
 			if( !$auth->getAssignment($perm_name, $user_id) ) {
 				$auth->assign($perm, $user_id);
 				if( $perm->type == Item::TYPE_ROLE ) {
-					$msgs = "role $perm_name assigned to user $user_name";
+					$msgs[] = "role $perm_name assigned to user $user_name";
 				} else {
-					$msgs = "permission $perm_name assinged to role $user_name";
+					$msgs[] = "permission $perm_name assinged to role $user_name";
 				}
 			} else {
 				if( $perm->type == Item::TYPE_ROLE ) {
-					$msgs = "$perm_name: role already assigned to user $user_name";
+					$msgs[] = "$perm_name: role already assigned to user $user_name";
 				} else {
-					$msgs = "$perm_name: permission already assigned to role $user_name";
+					$msgs[] = "$perm_name: permission already assigned to role $user_name";
 				}
 			}
 		}
