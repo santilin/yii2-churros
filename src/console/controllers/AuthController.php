@@ -241,7 +241,7 @@ class AuthController extends Controller
 		$roles = $this->authManager->getItems(Item::TYPE_ROLE);
 		$this->stdout("\n== ROLES == \n");
 		foreach( $roles as $role ) {
-			$users_ids = array_merge($users_ids, $auth->getUserIdsByRole($role->name));
+			$users_ids = array_merge($users_ids, $this->authManager->getUserIdsByRole($role->name));
 			$subroles = $this->authManager->getChildRoles($role->name);
 			if( count($subroles) ) {
 				$s_subroles = '';
