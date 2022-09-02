@@ -66,12 +66,20 @@ trait ReportsModelTrait
 		if( substr($searchScope, -6) != "Search" ) {
 			$searchScope .= "Search";
 		}
-		if( isset($data[$searchScope]['_adv_']) ) {
-			$svalues = $data[$searchScope]['_adv_'];
-			foreach($svalues as $key => $value ) {
-				if( $value['lft'] != '' || $value['rgt'] != ''
-					|| $value['op'] != 'LIKE' ) {
-					$this->report_filters[$key] = $value;
+		$this->report_filters = [];
+		if( isset($data[$searchScope]) ) {
+			$svalues = $data[$searchScope];
+			// The HTML form sends the data trasposed
+			foreach( $svalues['attribute'] as $value) {
+				if( empty($value) ) {
+					continue; // The column has not been specified
+				}
+				if( $svalues['lft']!=='' || $svalues['rgt'] != '' || $svalues['op'] != 'LIKE' ) {
+					$this->report_filters[$value] = [
+						'lft' => $svalues['lft'],
+						'rgt' => $svalues['rgt'],
+						'op' => $svalues['op']
+					];
 				}
 			}
 		}
@@ -190,7 +198,11 @@ trait ReportsModelTrait
 		$provider->sort->defaultOrder = [ 'default' => SORT_ASC ];
 
 		foreach( $this->report_filters as $colname => $value ) {
- 			$model->filterWhere($query, $colname, $value);
+			if( isset($columns[$colname]) ) {
+				$model->filterWhere($query, $columns[$colname]['attribute'], $value);
+			} else {
+				$model->filterWhere($query, $colname, $value);
+			}
 		}
 		$this->addSelectToQuery($model, $columns,
 			array_keys($this->report_filters), $query);
@@ -358,5 +370,7 @@ trait ReportsModelTrait
 		}
 		return $dropdown_options;
 	}
+
+
 
 }

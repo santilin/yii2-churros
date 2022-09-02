@@ -192,19 +192,23 @@ trait ModelSearchTrait
 		// addColumnSortsToProvider adds the join tables with AS `as_xxxxxxx`
 		/// @todo add them as table1_table2_xxxxxx
 		$tablename = $this->tableName();
+		$fullfldname = null;
 		if( strpos($fldname, '.') !== FALSE ) {
-			$relmodel = $this->className();
+			$relmodel = $this->instance();
 			while( strpos($fldname, '.') !== FALSE ) {
 				list($relation, $fldname) = self::splitFieldName($fldname, false /*no reverse*/);
 				if( isset($relmodel::$relations[$relation]) ) {
 					$tablename = $relmodel::$relations[$relation]['relatedTablename'];
 					$relmodel = $relmodel::$relations[$relation]['modelClass'];
 				} else {
-					throw new \Exception("$relation: relation not found in model $relmodel");
+					$fullfldname = $fldname;
+					break;
 				}
 			}
 		}
-		$fullfldname = $tablename . "." . $fldname;
+		if( $fullfldname !== null ) {
+			$fullfldname = $tablename . "." . $fldname;
+		}
 		$this->addFieldFilterToQuery($query, $fullfldname, $value, $fldname);
 	}
 
@@ -302,7 +306,7 @@ trait ModelSearchTrait
 	 * Returns Html code to add an advanced search field to a search form
 	 */
 	public function createSearchField($attribute, $type = 'string', $options = [],
-		$dropdown_values = null )
+		$attribute_values = null )
 	{
 		$relation = '';
 		if( ($dotpos = strrpos($attribute, '.')) !== FALSE ) {
@@ -349,10 +353,10 @@ trait ModelSearchTrait
 			'id' => "drop-$attr_class", 'class' => 'search-dropdown form-control col-sm-2'] );
 		$ret .= "</div>";
 
-		if( is_array($dropdown_values) || is_array($value['lft']) ) {
+		if( is_array($attribute_values) || is_array($value['lft']) ) {
 			$ret .= "<div class='control-form col-sm-5'>";
 			$ret .= Html::dropDownList("${scope}[_adv_][$attribute][lft]",
-				$value['lft'], $dropdown_values,
+				$value['lft'], $attribute_values,
 				array_merge($options['htmlOptions']??[], [ 'prompt' => Yii::t('churros', 'Cualquiera')]));
 			$ret .= "</div>";
 		} else {
@@ -380,10 +384,10 @@ y:
 </div>
 EOF;
 
-		if( is_array($dropdown_values) ) {
+		if( is_array($attribute_values) ) {
 			$ret .= "<div class='control-form col-sm-5'>";
 			$ret .= Html::dropDownList("${scope}[_adv_][$attribute][rgt]",
-				$value['rgt'], $dropdown_values,
+				$value['rgt'], $attribute_values,
 				array_merge($options['htmlOptions']??[], [ 'prompt' => Yii::t('churros', 'Cualquiera')]));
 		} else {
 			$ret .= '<div class="input-group col-sm-5">';
@@ -402,6 +406,95 @@ EOF;
 		$ret .= "</div>";
 		return $ret;
 	}
+
+	public function createReportFilterField(array $dropdown_columns, string $attribute, string $type = 'string',
+		array $options = [], $attribute_values = null)
+	{
+		$relation = '';
+		if( ($dotpos = strrpos($attribute, '.')) !== FALSE ) {
+			$relation = "&nbsp;(" . substr($attribute, 0, $dotpos) . ")";
+		}
+		unset($options['relation']);
+		$attr_class = str_replace('.','_',$attribute);
+		switch( $type ) {
+		default:
+			$control_type = 'text';
+		}
+		$ret = '';
+		$scope = $this->formName();
+		if ($this->hasAttribute($attribute) || isset($this->related_properties[$attribute]) ) {
+			$value = $this->$attribute;
+		} else {
+			$value = null;
+		}
+		$value = $this->toOpExpression($value, false);
+		if( !in_array($value['op'], ModelSearchTrait::$extra_operators) ) {
+			$extra_visible = "display:none";
+		} else {
+			$extra_visible = '';
+		}
+		$ret .= "<td>";
+		$ret .= Html::dropDownList("{$scope}[attribute][]", $attribute,
+		$dropdown_columns, [
+			'class' => 'form-control',
+			'prompt' => [
+				'text' => 'Selecciona una columna', 'options' => ['value' => 'none', 'class' => 'prompt', 'label' => 'Seleccion un campo']
+			]
+		]);
+		$ret .= "</td>";
+
+		$ret .= "<td class='control-form'>";
+		$ret .= Html::dropDownList("${scope}[op][]",
+			$value['op'], ModelSearchTrait::$operators, [
+			'id' => "drop-$attr_class", 'class' => 'search-dropdown form-control',
+			] );
+		$ret .= "</td>";
+
+		if( is_array($attribute_values) || is_array($value['lft']) ) {
+			$ret .= "<td class='control-form'>";
+			$ret .= Html::dropDownList("${scope}[lft][]",
+				$value['lft'], $attribute_values,
+				array_merge($options['htmlOptions']??[], [ 'prompt' => Yii::t('churros', 'Cualquiera')]));
+			$ret .= "</td>";
+		} else {
+			$ret .= <<<EOF
+	<td class="input-group">
+EOF;
+			$ret .= Html::input($control_type, "${scope}[lft][]", $value['lft'],
+				array_merge($options['htmlOptions']??[], [ 'class' => 'form-control' ]));
+			$ret .= <<<EOF
+	<span class="input-group-addon">
+        <a class="search-adv-field" data-input-name="${scope}[lft][]" data-field="${scope}.$attribute" href="javascript:void(0)"><i class="fa fa-search"></i></a>
+    </span>
+    </td>
+EOF;
+		}
+		$ret .= <<<EOF
+	<td style="$extra_visible" id="second-field-drop-$attr_class">
+y:
+EOF;
+
+		if( is_array($attribute_values) ) {
+			$ret .= "<span class='control-form'>";
+			$ret .= Html::dropDownList("${scope}[rgt][]",
+				$value['rgt'], $attribute_values,
+				array_merge($options['htmlOptions']??[], [ 'prompt' => Yii::t('churros', 'Cualquiera')]));
+			$ret .= '</span>';
+		} else {
+			$ret .= '<span class="input-group">';
+			$ret .= Html::input($control_type, "${scope}[rgt][]", $value['rgt'],
+				array_merge($options['htmlOptions']??[], [ 'class' => 'form-control' ]));
+			$ret .= <<<EOF
+	</span>
+	<span class="input-group-addon">
+        <a class="search-adv-field" data-input-name="${scope}[rgt][]" href="javascript:void(0)"><i class="fa fa-search"></i></a>
+    </span>
+EOF;
+		}
+		$ret .= "</td>";
+		return $ret;
+	}
+
 
 	static public function splitFieldName($fieldname, $reverse = true)
 	{

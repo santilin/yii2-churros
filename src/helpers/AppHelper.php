@@ -214,5 +214,20 @@ class AppHelper
 	}
 
 
+	static public function dumpHtml($var, $title = null)
+	{
+		if( $title ) {
+			echo "<h1>$title</h1>";
+		}
+        echo "\n<pre>";
+        print_r($var);
+        echo "</pre><br/>";
+    }
+
+    static public function dump($var)
+	{
+        print_r($var);
+        echo "\n";
+    }
 
 }
