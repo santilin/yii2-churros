@@ -23,7 +23,7 @@
 		"kartik-v/yii2-widget-datetimepicker": "@dev",
 		"kartik-v/yii2-datecontrol": "dev-master",
 		"kartik-v/yii2-date-range": "@dev",
-		"kartik-v/yii2-widget-fileinput": "dev-master",
+		"kartik-v/yii2-widget-fileinput": "@dev",
 		"kartik-v/yii2-mpdf": "dev-master",
 		"kartik-v/yii2-bootstrap4-dropdown": "@dev",
 		"santilin/yii2-sqlite3-full-support": "@dev",
@@ -43,7 +43,7 @@
 		"horat1us/yii2-uuid-behavior":"^1.0"
 	},
 	"require-dev": {
-		"yiisoft/yii2-debug": "^2.1.0",
+		"yiisoft/yii2-debug": "~2.1.0",
 		"yiisoft/yii2-faker": "~2.0.0",
         "codeception/codeception": "^4.0",
         "codeception/verify": "~0.5.0 || ~1.1.0",
@@ -53,7 +53,8 @@
         "codeception/module-yii2": "^1.0.0",
         "codeception/module-asserts": "^1.0.0",
 		"justinrainbow/json-schema": "5.x-dev",
-		"codeception/module-webdriver": "2.0.x-dev"
+		"codeception/module-webdriver": "2.0.x-dev",
+		"codeception/module-db": "2.x-dev"
 	},
 	"config": {
 		"check-platform": false,
@@ -68,8 +69,8 @@
 			"yiisoft/yii2-composer": true
 		},
         "preferred-install": {
-            "2amigos/yii2-usuario": "source",
-            "santilin/*": "source"
+            "santilin/*": "source",
+            "2amigos/yii2-usuario": "source"
 		}
 	},
 	"scripts": {

@@ -149,7 +149,7 @@ class FormHelper
 				'2cols' => [
 					'horizontalCssClasses' => [
 						'label' => 'col-sm-3',
-						'wrapper' => 'col-sm-4',
+						'wrapper' => 'col-sm-3',
 					]
 				],
 				'3cols' => [
@@ -164,7 +164,6 @@ class FormHelper
 						'wrapper' => '',
 					],
 					'options' => [ 'class' => 'control-group col-sm-2' ],
-
 				],
 			],
 		],
@@ -478,7 +477,7 @@ class FormHelper
 		}
 		foreach($form_layout_rows as $lrow) {
 			foreach($lrow as $f) {
-				if( isset($input_opts[$f]['tabindex']) ) {
+				if( intval($input_opts[$f]['tabindex']??-1) !== -1 ) {
 					$input_opts[$f]['tabindex'] = FormHelper::ti();
 				}
 			}
@@ -503,6 +502,10 @@ class FormHelper
 				break;
 			}
 		}
+		foreach($fldcfg as $k => $v) {
+			unset($fldcfg[$k]['layout']);
+		}
+
 	}
 
 	static public function setFldCfg(&$fldcfg, $field, $widgets_ver, $layout, $cols)
