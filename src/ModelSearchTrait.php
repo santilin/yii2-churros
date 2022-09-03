@@ -206,7 +206,7 @@ trait ModelSearchTrait
 				}
 			}
 		}
-		if( $fullfldname !== null ) {
+		if( $fullfldname === null ) {
 			$fullfldname = $tablename . "." . $fldname;
 		}
 		$this->addFieldFilterToQuery($query, $fullfldname, $value, $fldname);
@@ -367,9 +367,6 @@ EOF;
 			$ret .= Html::input($control_type, "${scope}[_adv_][$attribute][lft]", $value['lft'],
 				array_merge($options['htmlOptions']??[], [ 'class' => 'form-control' ]));
 			$ret .= <<<EOF
-	<span class="input-group-addon">
-        <a class="search-adv-field" data-input-name="${scope}[_adv_][$attribute][lft]" data-field="${scope}.$attribute" href="javascript:void(0)"><i class="fa fa-search"></i></a>
-    </span>
     </div>
 EOF;
 		}
@@ -394,9 +391,6 @@ EOF;
 			$ret .= Html::input($control_type, "${scope}[_adv_][$attribute][rgt]", $value['rgt'],
 				array_merge($options['htmlOptions']??[], [ 'class' => 'form-control' ]));
 			$ret .= <<<EOF
-	<span class="input-group-addon">
-        <a class="search-adv-field" data-input-name="${scope}[_adv_][$attribute][rgt]" href="javascript:void(0)"><i class="fa fa-search"></i></a>
-    </span>
 EOF;
 		}
 		$ret .= "</div>";
@@ -407,14 +401,9 @@ EOF;
 		return $ret;
 	}
 
-	public function createReportFilterField(array $dropdown_columns, string $attribute, string $type = 'string',
-		array $options = [], $attribute_values = null)
+	public function createReportFilterField(array $dropdown_columns, string $attribute,
+		array $value, string $type = 'string', array $options = [], $attribute_values = null)
 	{
-		$relation = '';
-		if( ($dotpos = strrpos($attribute, '.')) !== FALSE ) {
-			$relation = "&nbsp;(" . substr($attribute, 0, $dotpos) . ")";
-		}
-		unset($options['relation']);
 		$attr_class = str_replace('.','_',$attribute);
 		switch( $type ) {
 		default:
@@ -422,12 +411,6 @@ EOF;
 		}
 		$ret = '';
 		$scope = $this->formName();
-		if ($this->hasAttribute($attribute) || isset($this->related_properties[$attribute]) ) {
-			$value = $this->$attribute;
-		} else {
-			$value = null;
-		}
-		$value = $this->toOpExpression($value, false);
 		if( !in_array($value['op'], ModelSearchTrait::$extra_operators) ) {
 			$extra_visible = "display:none";
 		} else {
@@ -438,7 +421,7 @@ EOF;
 		$dropdown_columns, [
 			'class' => 'form-control',
 			'prompt' => [
-				'text' => 'Selecciona una columna', 'options' => ['value' => 'none', 'class' => 'prompt', 'label' => 'Seleccion un campo']
+				'text' => 'Selecciona una columna', 'options' => ['value' => '', 'class' => 'prompt', 'label' => 'Seleccion un campo']
 			]
 		]);
 		$ret .= "</td>";
@@ -463,9 +446,6 @@ EOF;
 			$ret .= Html::input($control_type, "${scope}[lft][]", $value['lft'],
 				array_merge($options['htmlOptions']??[], [ 'class' => 'form-control' ]));
 			$ret .= <<<EOF
-	<span class="input-group-addon">
-        <a class="search-adv-field" data-input-name="${scope}[lft][]" data-field="${scope}.$attribute" href="javascript:void(0)"><i class="fa fa-search"></i></a>
-    </span>
     </td>
 EOF;
 		}
@@ -486,9 +466,6 @@ EOF;
 				array_merge($options['htmlOptions']??[], [ 'class' => 'form-control' ]));
 			$ret .= <<<EOF
 	</span>
-	<span class="input-group-addon">
-        <a class="search-adv-field" data-input-name="${scope}[rgt][]" href="javascript:void(0)"><i class="fa fa-search"></i></a>
-    </span>
 EOF;
 		}
 		$ret .= "</td>";

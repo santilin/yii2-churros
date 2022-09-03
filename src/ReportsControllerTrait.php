@@ -9,18 +9,6 @@ use yii\web\Response;
 trait ReportsControllerTrait
 {
 	/**
-	 * Displays index page.
-	 *
-	 * @return string
-	 */
-	public function actionIndex()
-	{
-		$params = [];
-		$ret = $this->render('index', $params);
-		return $ret;
-	}
-
-	/**
 	 * @param integer $id The id of the report to update
 	 */
 	public function actionUpdate($id)
@@ -43,9 +31,10 @@ trait ReportsControllerTrait
 		$report->decodeValue();
 		$report->load($params);
 		$report->encodeValue();
-		if( $this->doSave($report) ) {
-			Yii::$app->session->setFlash('success',
-				$report->t('churros', 'The report "{record}" has been successfully saved'));
+		if( $this->saveAll('update', $report) ) {
+			if( $this->afterSave('update', $report) ) {
+				$this->showFlash('update', $report);
+			}
 		}
 		try {
 			return $this->render('report', [
@@ -72,6 +61,7 @@ trait ReportsControllerTrait
 			return $this->actionUpdate($id);
 		}
 		$report = $this->findModel($id);
+
 		$search_model_name = $report->model;
 		if( strpos($search_model_name, '\\') === FALSE ) {
 			$search_model_name= "app\models\comp\\$search_model_name";

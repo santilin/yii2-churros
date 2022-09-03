@@ -66,8 +66,8 @@ trait ReportsModelTrait
 		if( substr($searchScope, -6) != "Search" ) {
 			$searchScope .= "Search";
 		}
-		$this->report_filters = [];
 		if( isset($data[$searchScope]) ) {
+			$this->report_filters = [];
 			$svalues = $data[$searchScope];
 			// The HTML form sends the data trasposed
 			foreach( $svalues['attribute'] as $value) {
@@ -76,9 +76,9 @@ trait ReportsModelTrait
 				}
 				if( $svalues['lft']!=='' || $svalues['rgt'] != '' || $svalues['op'] != 'LIKE' ) {
 					$this->report_filters[$value] = [
-						'lft' => $svalues['lft'],
-						'rgt' => $svalues['rgt'],
-						'op' => $svalues['op']
+						'lft' => $svalues['lft'][0],
+						'rgt' => $svalues['rgt'][0],
+						'op' => $svalues['op'][0]
 					];
 				}
 			}
