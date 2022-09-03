@@ -411,6 +411,9 @@ EOF;
 		}
 		$ret = '';
 		$scope = $this->formName();
+		if( empty($value) ) {
+			$value = [ 'op' => 'LIKE', 'lft' => '', 'rgt' => '' ];
+		}
 		if( !in_array($value['op'], ModelSearchTrait::$extra_operators) ) {
 			$extra_visible = "display:none";
 		} else {
