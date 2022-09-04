@@ -8,6 +8,35 @@ use yii\web\Response;
 
 trait ReportsControllerTrait
 {
+
+	/**
+	 * Creates a new model.
+	 * If creation is successful, the browser will be redirected to the 'view' page.
+	 * @return mixed
+	 */
+	public function actionCreate()
+	{
+		$params = Yii::$app->request->queryParams;
+		$model = $this->findModel(null);
+		if (isset($_POST['_form_relations']) ) {
+			$relations = explode(",", $_POST['_form_relations']);
+		} else {
+			$relations = [];
+		}
+		if ($model->loadAll(Yii::$app->request->post(), $relations) ) {
+			if( $this->saveAll('create', $model) ) {
+				if( $this->afterSave('create', $model) ) {
+					$this->showFlash('create', $model);
+					return $this->whereToGoNow('create', $model);
+				}
+			}
+		}
+		return $this->render('create', [
+			'model' => $model,
+			'extraParams' => $this->changeActionParams($params, 'create', $model)
+		]);
+	}
+
 	/**
 	 * @param integer $id The id of the report to update
 	 */
