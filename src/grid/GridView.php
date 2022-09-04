@@ -247,10 +247,10 @@ class GridView extends BaseGridView
             }
             $group->level = $level++;
             $this->groups[$kg] = $group;
-            // Hide the group column
-            if( $group->column /*&& !$this->onlySummary*/ ) {
-  				$this->columns[str_replace('.', '_', $kg)]['visible'] = false;
-			}
+//             // Hide the group column
+//             if( $group->column /*&& !$this->onlySummary*/ ) {
+//   				$this->columns[str_replace('.', '_', $kg)]['visible'] = false;
+// 			}
         }
 	}
 

@@ -195,7 +195,7 @@ trait ReportsModelTrait
 			$sort[$sort_column] = $sorting_column['asc'];
 		}
 		$provider->sort->attributes = [ 'default' =>  [ 'asc' => $sort ]];
-		$provider->sort->defaultOrder = [ 'default' => SORT_ASC ];
+		$provider->sort->defaultOrder = null;
 
 		foreach( $this->report_filters as $colname => $value ) {
 			if( isset($columns[$colname]) ) {
@@ -344,8 +344,9 @@ trait ReportsModelTrait
 					$groups[$colname] = [
 						'column' => $repl_colname,
 						'format' => $rc['label'] . ': {group_value}',
-						'header' => true,
-						'footer' => true
+						'visible' => $column['show_column']??true,
+						'header' => $column['show_header']??true,
+						'footer' => $column['show_footer']??true,
 					];
 				}
 			}

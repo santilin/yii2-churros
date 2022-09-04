@@ -17,7 +17,8 @@ trait ReportsControllerTrait
 	public function actionCreate()
 	{
 		$params = Yii::$app->request->queryParams;
-		$model = $this->findModel(null);
+		$model_name = '\\app\\models\\comp\\' . $this->_model_name . '_reportForm';
+		$model = new $model_name;
 		if (isset($_POST['_form_relations']) ) {
 			$relations = explode(",", $_POST['_form_relations']);
 		} else {
