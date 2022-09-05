@@ -57,7 +57,7 @@ trait ReportsModelTrait
 					continue; // The column has not been specified
 				}
 				$this->report_sorting[$value] = [
-					'asc' => $data['report_sorting']['asc'][$key],
+					'asc' => $data['report_sorting']['asc'][$key]??SORT_ASC,
 					'group' => $data['report_sorting']['group'][$key]??true,
 					'show_column' => $data['report_sorting']['show_column'][$key]??false,
 					'show_header' => $data['report_sorting']['show_header'][$key]??true,
@@ -91,8 +91,8 @@ trait ReportsModelTrait
 
 	public function encodeValue()
 	{
-		$value = unserialize($this->value);
-		if( $value === false ) {
+		$value = json_decode($this->value, false);
+		if( $value === null ) {
 			$value = new \stdClass;
 		}
 		$value->report_columns = [];
@@ -110,12 +110,12 @@ trait ReportsModelTrait
 			$value->report_sorting[] = [ $colname => $coldef ];
 		}
 		$value->only_totals = $this->only_totals;
-		$this->value = serialize($value);
+		$this->value = json_encode($value);
 	}
 
 	public function decodeValue()
 	{
-		$value = unserialize($this->value);
+		$value = json_decode($this->value, true);
 		$this->report_columns = [];
 		if( isset($value->report_columns) ) {
 			foreach( $value->report_columns as $colname => $coldef ) {
