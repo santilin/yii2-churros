@@ -17,7 +17,7 @@ trait ReportsModelTrait
 
 	public function getReportValue($var, $default)
 	{
-		$values = json_decode($this->value);
+		$values = unserialize($this->value);
 		if( isset($values->$var) ) {
 			return $values->$var;
 		} else {
@@ -57,8 +57,11 @@ trait ReportsModelTrait
 					continue; // The column has not been specified
 				}
 				$this->report_sorting[$value] = [
-					'asc' => isset($data['report_sorting']['asc'][$key])?$data['report_sorting']['asc'][$key] : SORT_ASC,
-					'group' => isset($data['report_sorting']['group'][$key]) ? $data['report_sorting']['group'][$key] : false,
+					'asc' => $data['report_sorting']['asc'][$key],
+					'group' => $data['report_sorting']['group'][$key]??true,
+					'show_column' => $data['report_sorting']['show_column'][$key]??false,
+					'show_header' => $data['report_sorting']['show_header'][$key]??true,
+					'show_footer' => $data['report_sorting']['show_footer'][$key]??true,
 				];
 			}
 		}
@@ -70,15 +73,15 @@ trait ReportsModelTrait
 			$this->report_filters = [];
 			$svalues = $data[$searchScope];
 			// The HTML form sends the data trasposed
-			foreach( $svalues['attribute'] as $value) {
+			foreach( $svalues['attribute'] as $key => $value) {
 				if( empty($value) ) {
 					continue; // The column has not been specified
 				}
 				if( $svalues['lft']!=='' || $svalues['rgt'] != '' || $svalues['op'] != 'LIKE' ) {
 					$this->report_filters[$value] = [
-						'lft' => $svalues['lft'][0],
-						'rgt' => $svalues['rgt'][0],
-						'op' => $svalues['op'][0]
+						'lft' => $svalues['lft'][$key],
+						'rgt' => $svalues['rgt'][$key],
+						'op' => $svalues['op'][$key]
 					];
 				}
 			}
@@ -88,29 +91,45 @@ trait ReportsModelTrait
 
 	public function encodeValue()
 	{
-		$value = json_decode($this->value);
-		if( $value === null ) {
+		$value = unserialize($this->value);
+		if( $value === false ) {
 			$value = new \stdClass;
 		}
-		$value->report_columns = $this->report_columns;
-		$value->report_filters = $this->report_filters;
+		$value->report_columns = [];
+		foreach( $this->report_columns as $colname => $coldef ) {
+			$value->report_columns[] = [ $colname => $coldef ];
+		}
+		$value->report_filters = $this->report_filters??[];
 		foreach($value->report_filters as $key => $v ) {
-			if( is_array($v) && isset($v['left']) && $v['left'] === '' ) {
+			if( is_array($v) && isset($v['lft']) && $v['lft'] === '' ) {
 				unset($value->report_filters[$key]);
 			}
 		}
-		$value->report_sorting = $this->report_sorting;
+		$value->report_sorting = [];
+		foreach( $this->report_sorting as $colname => $coldef ) {
+			$value->report_sorting[] = [ $colname => $coldef ];
+		}
 		$value->only_totals = $this->only_totals;
-		$this->value = json_encode($value);
+		$this->value = serialize($value);
 	}
 
 	public function decodeValue()
 	{
-		$value = json_decode($this->value, true); // objects as arrays
-		$this->report_columns = isset($value['report_columns']) ? $value['report_columns'] : [];
-		$this->report_filters = isset($value['report_filters']) ? $value['report_filters'] : [];
-		$this->report_sorting = isset($value['report_sorting']) ? $value['report_sorting'] : [];
-		$this->only_totals = isset($value['only_totals']) ? $value['only_totals'] : false;
+		$value = unserialize($this->value);
+		$this->report_columns = [];
+		if( isset($value->report_columns) ) {
+			foreach( $value->report_columns as $colname => $coldef ) {
+				$this->report_columns[$colname] = $coldef;
+			}
+		}
+		$this->report_filters = isset($value->report_filters) ? $value->report_filters : [];
+		$this->report_sorting = [];
+		if( isset($value->report_sorting) ) {
+			foreach( $value->report_sorting as $colname => $coldef ) {
+				$this->report_sorting[$colname] = $coldef;
+			}
+		}
+		$this->only_totals = isset($value->only_totals) ? $value->only_totals : false;
 	}
 
 	/**
