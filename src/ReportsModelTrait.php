@@ -42,10 +42,11 @@ trait ReportsModelTrait
 				if( empty($value) ) {
 					continue; // The column has not been specified
 				}
-				$this->report_columns[$value] = [
+				$this->report_columns[] = [
+					'attribute' => $value,
 					'summary' => $data['report_columns']['summary'][$key],
 					'label' => $data['report_columns']['label'][$key],
-					'width' => $data['report_columns']['width'][$key]
+					'format' => $data['report_columns']['format'][$key]??'raw'
 				];
 			}
 		}
@@ -56,7 +57,8 @@ trait ReportsModelTrait
 				if( empty($value) ) {
 					continue; // The column has not been specified
 				}
-				$this->report_sorting[$value] = [
+				$this->report_sorting[] = [
+					'attribute' => $value,
 					'asc' => $data['report_sorting']['asc'][$key]??SORT_ASC,
 					'group' => $data['report_sorting']['group'][$key]??true,
 					'show_column' => $data['report_sorting']['show_column'][$key]??false,
@@ -78,7 +80,8 @@ trait ReportsModelTrait
 					continue; // The column has not been specified
 				}
 				if( $svalues['lft']!=='' || $svalues['rgt'] != '' || $svalues['op'] != 'LIKE' ) {
-					$this->report_filters[$value] = [
+					$this->report_filters[] = [
+						'attribute' => $value,
 						'lft' => $svalues['lft'][$key],
 						'rgt' => $svalues['rgt'][$key],
 						'op' => $svalues['op'][$key]
@@ -96,18 +99,21 @@ trait ReportsModelTrait
 			$value = new \stdClass;
 		}
 		$value->report_columns = [];
-		foreach( $this->report_columns as $colname => $coldef ) {
-			$value->report_columns[] = [ $colname => $coldef ];
+		foreach( $this->report_columns as $coldef ) {
+			$value->report_columns += [$coldef];
 		}
-		$value->report_filters = $this->report_filters??[];
+		$value->report_filters = [];
+		foreach( $this->report_filters as $filterdef ) {
+			$value->report_filters += [$filterdef];
+		}
 		foreach($value->report_filters as $key => $v ) {
 			if( is_array($v) && isset($v['lft']) && $v['lft'] === '' ) {
 				unset($value->report_filters[$key]);
 			}
 		}
 		$value->report_sorting = [];
-		foreach( $this->report_sorting as $colname => $coldef ) {
-			$value->report_sorting[] = [ $colname => $coldef ];
+		foreach( $this->report_sorting as $sortdef ) {
+			$value->report_sorting += [$sortdef];
 		}
 		$value->only_totals = $this->only_totals;
 		$this->value = json_encode($value);
@@ -119,14 +125,19 @@ trait ReportsModelTrait
 		$this->report_columns = [];
 		if( $value && $value['report_columns'] ) {
 			foreach( $value['report_columns'] as $coldef ) {
-				$this->report_columns += $coldef;
+				$this->report_columns += [$coldef];
 			}
 		}
-		$this->report_filters = $value['report_filters']??[];
+		$this->report_filters = [];
+		if( $value && $value['report_filters'] ) {
+			foreach( $value['report_filters'] as $filterdef ) {
+				$this->report_filters += [$filterdef];
+			}
+		}
 		$this->report_sorting = [];
 		if( $value && $value['report_sorting'] ) {
-			foreach( $value['report_sorting'] as $coldef ) {
-				$this->report_sorting += $coldef;
+			foreach( $value['report_sorting'] as $sortdef ) {
+				$this->report_sorting += [$sortdef];
 			}
 		}
 		$this->only_totals = $value['only_totals']??false;

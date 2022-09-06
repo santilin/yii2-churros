@@ -18,15 +18,20 @@ trait ModelSearchTrait
 	protected $related_properties = [];
 	private $dynamic_rules = [];
 	static public $operators = [
-			'=' => '=',
-			'===' => 'Exactamente', // Distinguish = (in grid filter) from === in search form
-			'<>' => '<>',
-			'LIKE' => 'Contiene', 'NOT LIKE' => 'No contiene',
-			'>' => '>', '<' => '<',
-			'>=' => '>=', '<=' => '<=',
-			'BETWEEN' => 'entre', 'NOT BETWEEN' => 'no entre' ];
+		'=' => '=',
+		'===' => 'Exactamente igual', // Distinguish = (in grid filter) from === in search form
+		'<>' => '<>',
+		'START' => 'Comienza por', 'NOT START' => 'No comienza por',
+		'LIKE' => 'Contiene', 'NOT LIKE' => 'No contiene',
+		'>' => '>', '<' => '<',
+		'>=' => '>=', '<=' => '<=',
+		'BETWEEN' => 'entre dos valores', 'NOT BETWEEN' => 'no entre dos valores',
+		'SELECT' => 'Un valor de la lista',
+		'MSELECT' => 'Varios valores de la lista',
+	];
 	static public $extra_operators = [
-			'BETWEEN', 'NOT BETWEEN' ];
+		'BETWEEN', 'NOT BETWEEN'
+	];
 
 	/*
 	 * Called when setting a filter in search()
@@ -228,13 +233,17 @@ trait ModelSearchTrait
 			case "<":
 			case "NOT LIKE":
 			case "LIKE":
-				$query->andWhere([ $value['op'], $fldname,
-					$value['lft'] ]);
-					break;
+				$query->andWhere([ $value['op'], $fldname, $value['lft'] ]);
+				break;
+			case "START":
+				$query->andWhere([ 'LIKE', $fldname, $value['lft'] . '%', false]);
+				break;
+			case "NOT START":
+				$query->andWhere([ 'NOT LIKE', $fldname, $value['lft'] . '%', false]);
+				break;
 			case "BETWEEN":
 			case "NOT BETWEEN":
-				$query->andWhere([ $value['op'], $fldname,
-					$value['lft'], $value['rgt'] ]);
+				$query->andWhere([ $value['op'], $fldname, $value['lft'], $value['rgt'] ]);
 				break;
 		}
 	}
@@ -431,7 +440,7 @@ EOF;
 
 		$ret .= "<td class='control-form'>";
 		$ret .= Html::dropDownList("${scope}[op][]",
-			$value['op'], ModelSearchTrait::$operators, [
+			$value['op'], self::$operators, [
 			'id' => "drop-$attr_class", 'class' => 'search-dropdown form-control',
 			] );
 		$ret .= "</td>";
