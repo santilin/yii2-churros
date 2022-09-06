@@ -117,13 +117,17 @@ trait ReportsModelTrait
 	{
 		$value = json_decode($this->value, true);
 		$this->report_columns = [];
-		foreach( $value['report_columns'] as $coldef ) {
-			$this->report_columns += $coldef;
+		if( $value && $value['report_columns'] ) {
+			foreach( $value['report_columns'] as $coldef ) {
+				$this->report_columns += $coldef;
+			}
 		}
 		$this->report_filters = $value['report_filters']??[];
 		$this->report_sorting = [];
-		foreach( $value['report_sorting'] as $coldef ) {
-			$this->report_sorting += $coldef;
+		if( $value && $value['report_sorting'] ) {
+			foreach( $value['report_sorting'] as $coldef ) {
+				$this->report_sorting += $coldef;
+			}
 		}
 		$this->only_totals = $value['only_totals']??false;
 	}
@@ -134,6 +138,7 @@ trait ReportsModelTrait
 	public function fixColumnDefinitions($model, $allColumns)
 	{
 		$columns = [];
+		$tablename = str_replace(['{','}','%'], '', $model->tableName());
 		foreach( $allColumns as $colname => $grid_column ) {
 			$column = [];
 			if( isset($grid_column['hAlign']) ) {
@@ -142,7 +147,6 @@ trait ReportsModelTrait
 			if( isset($grid_column['format']) ) {
 				$column['format'] = $grid_column['format'];
 			}
-
 			if( preg_match('/^(sum|avg|max|min):(.*)$/i', $colname, $matches) ) {
 				$column['attribute'] = $matches[2];
 				$column['columnSummaryFunc'] = $matches[1];
@@ -154,7 +158,7 @@ trait ReportsModelTrait
 			// If the tablename of the column is this model, remove it
 			if( ($dotpos=strpos($ta, '.')) !== FALSE ) {
 				$t = substr($ta, 0, $dotpos);
-				if( $t == str_replace(['{','}','%'], '', $model->tableName() ) ) {
+				if( $t == $tablename ) {
 					$a = substr($ta, $dotpos+1);
 					$column['attribute'] = $a;
 				}
@@ -181,7 +185,7 @@ trait ReportsModelTrait
 	 * Creates the data provider for the grid.
 	 * Sets the query, select, joins, orderBy, groupBy and filters
 	 */
-	public function dataProviderForReport($model, $columns)
+	public function dataProviderForReport($model, &$columns)
     {
         $query = new Query(); // Do not use $model->find(), as we want a query, not active records
 
@@ -193,7 +197,7 @@ trait ReportsModelTrait
 			],
 		]);
 
-		$sort = [];
+		$orderby = [];
 		foreach( $this->report_sorting as $colname => $sorting_column ) {
 			if( !isset($columns[$colname]) ) {
 				Yii::$app->session->addFlash("error", "Report '" . $this->name . "': column '$colname' not found in sorting");
@@ -210,11 +214,11 @@ trait ReportsModelTrait
 			} else {
 				throw new \Exception($attribute . ": attribute not found");
 			}
-			$sort_column = $tablename .'.' . $attribute;
-			$sort[$sort_column] = $sorting_column['asc'];
+			$orderby[] = $tablename .'.' . $attribute
+				. ($sorting_column['asc']??SORT_ASC==SORT_ASC?' ASC':' DESC');
 		}
-		$provider->sort->attributes = [ 'default' =>  [ 'asc' => $sort ]];
-		$provider->sort->defaultOrder = null;
+		$provider->query->orderBy( implode(',', $orderby) );
+		$provider->sort = false;
 
 		foreach( $this->report_filters as $colname => $value ) {
 			if( isset($columns[$colname]) ) {
@@ -223,28 +227,29 @@ trait ReportsModelTrait
 				$model->filterWhere($query, $colname, $value);
 			}
 		}
-		$this->addSelectToQuery($model, $columns,
-			array_keys($this->report_filters), $query);
+		$this->addSelectToQuery($model, $columns, array_keys($this->report_filters), $query);
 		return $provider;
 	}
 
 	/**
 	 * Adds related select and joins to dataproviders for reports
 	 */
-	public function addSelectToQuery($model, $columns, $filters, &$query)
+	public function addSelectToQuery($model, &$columns, $filters, &$query)
 	{
 		$joins = [];
 		$groups = [];
 		$selects = [];
-		foreach( $columns as $column_def ) {
+		foreach( $columns as $kc => $column_def ) {
+			$had_dot = false;
 			$attribute = $column_def['attribute'];
 			if ( is_int($attribute) || array_key_exists($attribute, $model->attributes ) ) {
 				$tablename = str_replace(['{','}','%'], '', $model->tableName() );
 				$alias = $attribute;
 			} else if( ($dotpos = strpos($attribute, '.')) !== FALSE ) {
+				$had_dot = true;
 				list($tablename, $attribute, $alias) = $model->addRelatedField($attribute, $joins);
 			} else {
-				throw new \Exception($attribute);
+				throw new \Exception($attribute . ': attribute not found in addSelectToQuery');
 			}
 			if( !empty($column_def['columnSummaryFunc']) ) {
 				$agg = $column_def['columnSummaryFunc'];
@@ -273,8 +278,12 @@ trait ReportsModelTrait
 					break;
 				}
 				$select_field = $f_agg."(". $tablename . "." . $attribute . ") AS $alias";
+				$columns[$kc]['attribute'] = str_replace('.','_',$select_field);
 			} else {
 				$select_field = $tablename . "." . $attribute;
+				if( $had_dot ) {
+					$columns[$kc]['attribute'] = str_replace('.','_',$select_field);
+				}
 				if( $alias != $attribute )
 					$select_field .= " AS $alias";
 			}
@@ -286,54 +295,6 @@ trait ReportsModelTrait
 		}
 		$query->groupBy($groups);
     }
-
-	/**
-	 * Extracts the kartik columns for this report
-	 */
-// 	public function gridColumns($allColumns)
-// 	{
-// 		$columns = [];
-// 		foreach( $this->report_columns as $colname => $col_attrs ) {
-// 			if( !isset($allColumns[$colname]) ) {
-// 				Yii::$app->session->addFlash("error", "Report '" . $this->name . "': column '$colname' not found");
-// 				continue;
-// 			}
-// 			$new_column = $allColumns[$colname];
-// 			if( isset($col_attrs['summary']) && $col_attrs['summary'] != '' )  {
-// 				$new_column['pageSummary'] = true;
-// 				$new_column['pageSummaryFunc'] = $this->report_columns[$colname]['summary'];
-// 			}
-// 			if( !empty($new_column['aggregate']) ) {
-// 				$colname = $new_column['aggregate'] . "_" . $new_column['attribute'];
-// 			}
-// 			unset($new_column['aggregate'], $new_column['summary']);
-// 			$new_column['attribute'] = str_replace('.','_',$colname);
-// 			$columns[$new_column['attribute']] = $new_column;
-// 		}
-// 		$groups = [];
-// 		foreach( $this->report_sorting as $colname => $sorting ) {
-// 			if( isset($sorting['group']) && $sorting['group'] == true ) {
-// 				$repl_colname = str_replace('.','_',$colname);
-// 				if( !isset($columns[$repl_colname]) ) {
-// 					if( !isset($allColumns[$colname]) ) {
-// 						Yii::$app->session->addFlash("error", "Report '" . $this->name . "': group column '$colname' not found");
-// 					} else {
-// 						$groups[$repl_colname] = $allColumns[$colname];
-// 						$groups[$repl_colname]['attribute'] = $repl_colname;
-// 						$groups[$repl_colname]['visible'] = false;
-// 						unset($groups[$repl_colname]['aggregate'], $groups[$repl_colname]['summary']);
-// 					}
-// 				}
-// //  				$columns[$repl_colname]['group'] = true;
-// 			}
-// 		}
-// 		if( count($groups) ) {
-// 			return $groups + $columns;
-// 		} else {
-// 			return $columns;
-// 		}
-// 	}
-
 
 	/**
 	 * Gets only the columns used in this report
@@ -354,7 +315,7 @@ trait ReportsModelTrait
 			} else {
 				$columns[$colname] = $allColumns[$colname];
 			}
-			if( !empty($columns[$colname]['summary']) ) {
+			if( isset($columns[$colname]['summary']) ) {
 				$columns[$colname]['pageSummary'] = true;
 				$columns[$colname]['pageSummaryFunc'] = $columns[$colname]['summary'];
 				unset($columns[$colname]['summary']);
@@ -373,7 +334,7 @@ trait ReportsModelTrait
 	}
 
 
-	public function reportGroups($report_columns)
+	public function reportGroups(&$report_columns)
 	{
 		$groups = [];
 		foreach( $this->report_sorting as $colname => $column ) {
@@ -382,12 +343,14 @@ trait ReportsModelTrait
 					$rc = $report_columns[$colname];
 					$repl_colname = str_replace('.','_',$colname);
 					$groups[$colname] = [
-						'column' => $repl_colname,
+						'column' => $rc['attribute'],
 						'format' => $rc['label'] . ': {group_value}',
-						'visible' => $column['show_column']??true,
 						'header' => $column['show_header']??true,
 						'footer' => $column['show_footer']??true,
 					];
+					if( empty($column['show_column']) ) {
+						$report_columns[$colname]['visible'] = false;
+					}
 				}
 			}
 		}

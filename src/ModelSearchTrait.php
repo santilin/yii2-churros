@@ -401,7 +401,7 @@ EOF;
 		return $ret;
 	}
 
-	public function createReportFilterField(array $dropdown_columns, string $attribute,
+	public function createReportFilterField(array $dropdown_columns, ?string $attribute,
 		array $value, string $type = 'string', array $options = [], $attribute_values = null)
 	{
 		$attr_class = str_replace('.','_',$attribute);

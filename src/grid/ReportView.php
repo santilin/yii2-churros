@@ -87,8 +87,8 @@ class ReportView extends BaseGridView
 	protected function initSummaryColumns()
 	{
 		foreach( $this->columns as $kc => $column ) {
-			if( !empty($column->pageSummary) ) {
-				$kc = $column->attribute?:$kc;
+			if( $column->pageSummaryFunc != '' ) {
+				$kc = str_replace('.', '_', $column->attribute?:$kc);
 				$this->summaryColumns[$kc] = $column->pageSummaryFunc;
 				switch( $column->pageSummaryFunc) {
 					case 'f_sum':
@@ -140,10 +140,6 @@ class ReportView extends BaseGridView
             }
             $group->level = $level++;
             $this->groups[$kg] = $group;
-//             // Hide the group column
-//             if( $group->column /*&& !$this->onlySummary*/ ) {
-//   				$this->columns[str_replace('.', '_', $kg)]['visible'] = false;
-// 			}
         }
 	}
 
@@ -152,28 +148,12 @@ class ReportView extends BaseGridView
 	 */
 	protected function initSorting()
 	{
-		$s = $this->dataProvider->getSort();
-		$s->enableMultiSort = true;
-		$def_order = $this->dataProvider->getSort()->getAttributeOrders(false);
-		$new_def_order = [];
-		$nc = 0;
-		$def_order_columns = array_keys($def_order);
-		foreach( $this->groups as $key => $group ) {
-			if( isset($def_order_columns[$nc]) && $def_order_columns[$nc] == $group->column) {
-				$new_def_order[$group->column] = $def_order[$group->column];
-				$def_order[$group->column] = null;
-			} else {
-				$new_def_order = [ $group->column => SORT_ASC ];
-			}
-			++$nc;
-		}
-		foreach( $def_order as $key => $value ) {
-			if( $value === null ) {
-				unset($def_order[$key]);
-			}
-		}
-		$new_def_order += $def_order;
-		$s->setAttributeOrders($new_def_order);
+// 		$new_orderby = [];
+// 		$nc = 0;
+// 		foreach( $this->groups as $key => $group ) {
+// 			$new_orderby = $group->column;
+// 		}
+// 		$this->dataProvider->query->orderBy
 	}
 
 	// override
@@ -277,7 +257,7 @@ class ReportView extends BaseGridView
 		}
 		$colspan = 0;
 		foreach( $this->columns as $kc => $column ) {
-			if( !isset($summary_columns[$column->attribute]) ) {
+			if( !isset($summary_columns[str_replace('.','_',$column->attribute??$kc)]) ) {
 				$colspan++;
 			} else {
 				break;
@@ -289,16 +269,16 @@ class ReportView extends BaseGridView
 				'class' => 'grid-group-total w1', 'colspan' => 42] );
 			$ret .= '</tr><tr>';
 		} else {
-			$ret .= Html::tag('td',Yii::t('churros', "Report totals") . ' ',
+			$ret = Html::tag('td',Yii::t('churros', "Report totals") . ' ',
 				[ 'class' => 'grid-group-total w1', 'colspan' => $colspan ] );
 		}
 		$nc = 0;
 		$tdoptions = [ 'class' => 'w1' ];
-		foreach( $this->columns as $column ) {
-			$kc = $column->attribute;
+		foreach( $this->columns as $kc => $column ) {
 			if( $nc++ < $colspan ) {
 				continue;
 			}
+			$kc = str_replace('.','_',$column->attribute??$kc);
 			if( isset($summary_columns[$kc]) ) {
 				$value = 0.0;
 				if( $summary_columns[$kc] == 'f_avg' ) {
@@ -309,32 +289,13 @@ class ReportView extends BaseGridView
 					$value = $this->summaryValues[$kc];
 				}
 				$ret .= Html::tag('td', $this->formatter->format(
-						$value, $column->format),
-						self::fetchColumnOptions($column, $tdoptions));
+						$value, $column->format), $tdoptions);
 			} else {
 				$ret .= Html::tag('td', '', $tdoptions);
 			}
 		}
 		return $ret;
 	}
-
-	// copied from kartik data column
-	static public function fetchColumnOptions($column, $options)
-    {
-        if ($column->hidden === true) {
-            Html::addCssClass($options, 'hidden');
-        }
-        if( $column->hAlign != '' ) {
-            Html::addCssClass($options, "kv-align-{$column->hAlign}");
-        }
-        if ($column->noWrap) {
-            Html::addCssClass($options, GridView::NOWRAP);
-        }
-        if( $column->vAlign != '' ) {
-            Html::addCssClass($options, "kv-align-{$column->vAlign}");
-        }
-        return $options;
-    }
 
 	public function updateReportSummaries($model)
 	{
