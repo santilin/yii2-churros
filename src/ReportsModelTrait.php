@@ -187,8 +187,11 @@ trait ReportsModelTrait
 
         $provider = new ActiveDataProvider([
             'query' => $query->from($model->tableName()),
-            'pagination' => false,
-        ]);
+            'pagination' => [
+				'pagesize' => $_GET['per-page']??10,
+				'page' => $_GET['page']??0,
+			],
+		]);
 
 		$sort = [];
 		foreach( $this->report_sorting as $colname => $sorting_column ) {

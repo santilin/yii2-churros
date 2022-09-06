@@ -11,6 +11,7 @@ use yii\grid\GridView as BaseGridView;
 use santilin\churros\grid\GridGroup;
 use yii\helpers\Json;
 use yii\web\JsExpression;
+use yii\data\Pagination;
 
 class ReportView extends BaseGridView
 {
@@ -25,7 +26,7 @@ class ReportView extends BaseGridView
 	 * The groups headers and footers definitions
 	 */
 	public $groups = [];
-	public $totalsRow = false;
+	public $totalsRow = true;
 	public $bsVersion = '3.x';
 	public $onlySummary = false;
 
@@ -34,6 +35,8 @@ class ReportView extends BaseGridView
 	protected $previousModel = null;
 	protected $recno;
 	protected $current_level = 0;
+    public $layout = "{summary}\n{pager}\n{items}";
+    public $output = 'Screen';
 
 
 	public function __construct($config = [])
@@ -48,6 +51,9 @@ class ReportView extends BaseGridView
 				'nextPageLabel' => '>',
 				'prevPageLabel' => '<',
 			];
+		}
+		if( !$this->output == 'Screen' ) {
+			$config['dataProvider']->pagination = false;
 		}
 		parent::__construct($config);
 	}
@@ -181,18 +187,6 @@ class ReportView extends BaseGridView
 		}
     }
 
-	// override
-	public function getPageSummaryRow()
-	{
-		$p = $this->dataProvider->getPagination();
-		if( $p && $p->getPageCount() > 1 ) {
-			return '<td colspan="42">No muestro totales porque no se están mostrando todos los registros.</tr>';
-		} else {
-			return parent::getPageSummaryRow();
-		}
-	}
-
-
 	protected function groupHeader($model, $key, $index, $grid)
 	{
 		if( $this->previousModel === null ) {
@@ -277,23 +271,31 @@ class ReportView extends BaseGridView
 		if( count($summary_columns) == 0 ) {
 			return '';
 		}
+		$p = $this->dataProvider->getPagination();
+		if( $p && $p->getPageCount() > 1 ) {
+			return '<td colspan="42">No muestro totales porque no se están mostrando todos los registros.</tr>';
+		}
 		$colspan = 0;
 		foreach( $this->columns as $kc => $column ) {
-			if( !isset($summary_columns[$kc]) ) {
+			if( !isset($summary_columns[$column->attribute]) ) {
 				$colspan++;
 			} else {
 				break;
 			}
 		}
-		$ret = '';
-		if( $colspan!=0) {
-			$ret = Html::tag('td',Yii::t('churros', "Report totals") . ' ',
-				[ 'class' => 'grid-group-total w1',
-				  'colspan' => $colspan ] );
+		if( $colspan==0) {
+			$ret = '<td colspan="42"></tr><tr>';
+			$ret .= Html::tag('td', Yii::t('churros', "Report totals") . ' ', [
+				'class' => 'grid-group-total w1', 'colspan' => 42] );
+			$ret .= '</tr><tr>';
+		} else {
+			$ret .= Html::tag('td',Yii::t('churros', "Report totals") . ' ',
+				[ 'class' => 'grid-group-total w1', 'colspan' => $colspan ] );
 		}
 		$nc = 0;
 		$tdoptions = [ 'class' => 'w1' ];
-		foreach( $this->columns as $kc => $column ) {
+		foreach( $this->columns as $column ) {
+			$kc = $column->attribute;
 			if( $nc++ < $colspan ) {
 				continue;
 			}
