@@ -341,11 +341,11 @@ class ReportView extends BaseGridView
 		if( $colspan==0) {
 			$ret = '<td colspan="42"></tr><tr>';
 			$ret .= Html::tag('td', Yii::t('churros', "Report totals") . ' ', [
-				'class' => 'grid-group-total w1', 'colspan' => 42] );
+				'class' => 'reportview-group-total w1', 'colspan' => 42] );
 			$ret .= '</tr><tr>';
 		} else {
 			$ret = Html::tag('td',Yii::t('churros', "Report totals") . ' ',
-				[ 'class' => 'grid-group-total w1', 'colspan' => $colspan ] );
+				[ 'class' => 'reportview-group-total w1', 'colspan' => $colspan ] );
 		}
 		$nc = 0;
 		$tdoptions = [ 'class' => 'w1' ];

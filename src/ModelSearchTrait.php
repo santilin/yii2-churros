@@ -433,7 +433,8 @@ EOF;
 		$dropdown_columns, [
 			'class' => 'form-control',
 			'prompt' => [
-				'text' => 'Selecciona una columna', 'options' => ['value' => '', 'class' => 'prompt', 'label' => 'Seleccion un campo']
+				'text' => 'Elige una columna', 'options' => ['value' => '', 'class' => 'prompt',
+					'label' => 'Elige una columna']
 			]
 		]);
 		$ret .= "</td>";

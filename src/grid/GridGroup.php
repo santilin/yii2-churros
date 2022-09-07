@@ -123,7 +123,7 @@ class GridGroup extends BaseObject
 					]);
 					break;
 			}
-			Html::addCssClass($tdoptions, 'grid-group-head-' . strval($this->level) . ' w1');
+			Html::addCssClass($tdoptions, 'reportview-group-head-' . strval($this->level) . ' w1');
 			return Html::tag('td', $content, $tdoptions);
 		}
 	}
@@ -148,11 +148,11 @@ class GridGroup extends BaseObject
 				$value = $this->summaryValues[$this->level][$kc];
 				if( $this->level == count($this->grid->groups) ) {
 					$tdoptions = [
-						'class' => 'grid-detail w1',
+						'class' => 'reportview-detail w1',
 					];
 				} else {
 					$tdoptions = [
-						'class' => 'grid-group-foot-' . strval($this->level-1) . ' w1',
+						'class' => 'reportview-group-foot-' . strval($this->level-1) . ' w1',
 					];
 				}
 			}
@@ -192,7 +192,7 @@ class GridGroup extends BaseObject
 		if( $fc === true /*'summary'*/ ) {
 			$ret .= $this->getSummaryContent($summary_columns, $content);
 		} else {
-			Html::addCssClass($tdoptions, 'grid-group-foot-total-' . strval($this->level) . ' grid-group-foot-' . strval($this->level) . ' w1');
+			Html::addCssClass($tdoptions, 'reportview-group-foot-total-' . strval($this->level) . ' reportview-group-foot-' . strval($this->level) . ' w1');
 			$ret = Html::tag('td', $content, $tdoptions);
 		}
 		return $ret;
@@ -211,7 +211,7 @@ class GridGroup extends BaseObject
 			}
 		}
 		$tdoptions = [
-			'class' => 'grid-group-foot-' . strval($this->level) . ' w1',
+			'class' => 'reportview-group-foot-' . strval($this->level) . ' w1',
 			'colspan' => $colspan,
 		];
 		$ret = Html::tag('td', Yii::t('churros', "Totals") . ' ' . $content, $tdoptions );
@@ -222,7 +222,7 @@ class GridGroup extends BaseObject
 				continue;
 			}
 			if( isset($summary_columns[$kc]) ) {
-				$tdoptions = [ 'class' => 'grid-group-foot-' . strval($this->level) . ' w1' ];
+				$tdoptions = [ 'class' => 'reportview-group-foot-' . strval($this->level) . ' w1' ];
 				$ret .= Html::tag('td',
 					$this->grid->formatter->format(
 						$this->summaryValues[$this->level][$kc], $column->format), $tdoptions);

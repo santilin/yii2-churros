@@ -114,28 +114,53 @@ trait ReportsModelTrait
 		$this->only_totals = $value['only_totals']??false;
 	}
 
+	protected function findColumn($attribute)
+	{
+		foreach( $this->report_columns as $rk => $coldef ) {
+			if( $coldef['attribute'] == $attribute ) {
+				return $coldef;
+			}
+		}
+	}
+
 	/**
-	 * Transforms kartik grid columns into report columns
+	 * Transforms grid columns into report columns
 	 */
 	public function fixColumnDefinitions($model, $allColumns)
 	{
 		$columns = [];
 		$tablename = str_replace(['{','}','%'], '', $model->tableName());
-		foreach( $allColumns as $colname => $grid_column ) {
-			$column = [];
-			if( isset($grid_column['hAlign']) ) {
-				$column['hAlign'] = $grid_column['hAlign'];
+		foreach( $allColumns as $colname => $column ) {
+// 			if( null != ($repcol = $this->findColumn($colname)) ) {
+// 				$column = ArrayHelper::merge($column, $repcol);
+// 			}
+			if( !isset($column['contentOptions']) ) {
+				$column['contentOptions'] = [];
 			}
-			if( isset($grid_column['format']) ) {
-				$column['format'] = $grid_column['format'];
+			if( !isset($column['headerOptions']) ) {
+				$column['headerOptions'] = [];
 			}
+			if( !isset($column['footerOptions']) ) {
+				$column['footerOptions'] = [];
+			}
+			$classes = explode(' ', $column['options']['class']??'');
+			if( isset($column['format']) ) {
+				$classes[] = 'reportview-' . $column['format'];
+			}
+			$column['contentOptions']['class'] = $column['headerOptions']['class']
+				= $column['footerOptions']['class'] = trim(implode(' ', $classes));
 			if( preg_match('/^(sum|avg|max|min):(.*)$/i', $colname, $matches) ) {
-				$column['attribute'] = $matches[2];
+				if( empty($column['attribute']) ) {
+					$column['attribute'] = $matches[2];
+				}
 				$column['columnSummaryFunc'] = $matches[1];
 			} else {
-				$column['columnSummaryFunc'] = '';
-				$column['attribute'] = $colname;
+				if( empty($column['attribute']) ) {
+					$column['attribute'] = $colname;
+				}
+				$column['columnSummaryFunc'] = $column['summary']??'';
 			}
+			unset($column['summary']);
 			$ta = $column['attribute'];
 			// If the tablename of the column is this model, remove it
 			if( ($dotpos=strpos($ta, '.')) !== FALSE ) {
@@ -145,15 +170,9 @@ trait ReportsModelTrait
 					$column['attribute'] = $a;
 				}
 			}
-			if( isset($grid_column['value']) ) {
-				$column['value'] = $grid_column['value'];
-			}
-			if( isset($this->report_columns[$colname]) ) {
-				$column = ArrayHelper::merge($column, $this->report_columns[$colname]);
-			}
 			if( empty($column['label']) ) {
-				if( isset( $grid_column['label'] ) ) {
-					$column['label'] = $grid_column['label'];
+				if( isset( $report_column['label'] ) ) {
+					$column['label'] = $report_column['label'];
 				} else {
 					$column['label'] = $model->getAttributeLabel($column['attribute']);
 				}
