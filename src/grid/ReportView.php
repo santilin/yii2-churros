@@ -72,8 +72,7 @@ class ReportView extends BaseGridView
 		}
 		$this->recno = 0;
 		$this->initSummaryColumns();
-		$this->resetGroupsSummaries();
-		$this->initSorting();
+		$this->resetGroupSummaryColumns();
 		if ($this->onlySummary) {
 			$this->dataProvider->pagination = false;
 		}
@@ -134,9 +133,9 @@ class ReportView extends BaseGridView
 	 */
 	protected function initSummaryColumns()
 	{
-		foreach( $this->columns as $kc => $column ) {
+		foreach( $this->columns as $column ) {
 			if( $column->pageSummaryFunc != '' ) {
-				$kc = str_replace('.', '_', $column->attribute?:$kc);
+				$kc = $column->attribute;
 				$this->summaryColumns[$kc] = $column->pageSummaryFunc;
 				switch( $column->pageSummaryFunc) {
 					case 'f_sum':
@@ -162,7 +161,48 @@ class ReportView extends BaseGridView
 		}
 	}
 
-	protected function resetGroupsSummaries()
+	public function updateSummaryColumns($model)
+	{
+		// same in GridGroup::updateSummaries
+		foreach( $this->summaryColumns as $kc => $summary) {
+			switch( $summary ) {
+			case 'f_sum':
+				$this->summaryValues[$kc] += $model[$kc];
+				break;
+			case 'f_count':
+				$this->summaryValues[$kc] ++;
+				break;
+			case 'f_avg':
+				$this->summaryValues[$kc][0] += $model[$kc];
+				$this->summaryValues[$kc][1] ++;
+				break;
+			case 'f_max':
+				if( $this->summaryValues[$kc] == null ) {
+					$this->summaryValues[$kc] = $model[$kc];
+				} else if( $this->summaryValues[$kc] < $model[$kc] ) {
+					$this->summaryValues[$kc] = $model[$kc];
+				}
+				break;
+			case 'f_min':
+				if( $this->summaryValues[$kc] == null ) {
+					$this->summaryValues[$kc] = $model[$kc];
+				} else if( $this->summaryValues[$kc] > $model[$kc] ) {
+					$this->summaryValues[$kc] = $model[$kc];
+				}
+				break;
+			case 'f_concat':
+				$this->summaryValues[$kc][] = $model[$kc];
+				break;
+			case 'f_distinct_concat':
+				if (!in_array($model[$kc], $this->summaryValues[$kc])) {
+					$this->summaryValues[$kc][] = $model[$kc];
+				}
+				break;
+			}
+		}
+	}
+
+	protected function resetGroupSummaryColumns()
 	{
 		foreach( $this->groups as $kg => $group )  {
 			$group->resetSummaries($this->summaryColumns, 0, count($this->groups));
@@ -187,29 +227,16 @@ class ReportView extends BaseGridView
                 continue;
             }
             $group->level = $level++;
+            $group->footer = true;
             $this->groups[$kg] = $group;
         }
-	}
-
-	/**
-	 * Appends the groups orders to the default or current orders
-	 */
-	protected function initSorting()
-	{
-// 		$new_orderby = [];
-// 		$nc = 0;
-// 		foreach( $this->groups as $key => $group ) {
-// 			$new_orderby = $group->column;
-// 		}
-// 		$this->dataProvider->query->orderBy
 	}
 
 	// override
 	public function renderTableRow($model, $key, $index)
     {
-		$ret = parent::renderTableRow($model, $key, $index);
-		if( !$this->onlySummary ) {
-			return $ret;
+		if( ($this->onlySummary && count($this->groups) == 0) || !$this->onlySummary ) {
+			return parent::renderTableRow($model, $key, $index);
 		} else {
 			return null;
 		}
@@ -247,7 +274,7 @@ class ReportView extends BaseGridView
 				break;
 			}
 		}
-		$this->updateReportSummaries($model);
+		$this->updateSummaryColumns($model);
 		$updated_groups = [];
 		foreach( $this->groups as $kg => $group ) {
 			$updated_groups[$kg] = $group->updateGroup($model, $key, $index);
@@ -322,11 +349,11 @@ class ReportView extends BaseGridView
 		}
 		$nc = 0;
 		$tdoptions = [ 'class' => 'w1' ];
-		foreach( $this->columns as $kc => $column ) {
+		foreach( $this->columns as $column ) {
 			if( $nc++ < $colspan ) {
 				continue;
 			}
-			$kc = str_replace('.','_',$column->attribute??$kc);
+			$kc = $column->attribute;
 			if( isset($summary_columns[$kc]) ) {
 				$value = 0.0;
 				if( $summary_columns[$kc] == 'f_avg' ) {
@@ -343,48 +370,6 @@ class ReportView extends BaseGridView
 			}
 		}
 		return $ret;
-	}
-
-	public function updateReportSummaries($model)
-	{
-		// same in GridGroup::updateSummaries
-		foreach( $this->summaryColumns as $key => $summary) {
-			$kc = $key;
-			switch( $summary ) {
-			case 'f_sum':
-				$this->summaryValues[$key] += $model[$kc];
-				break;
-			case 'f_count':
-				$this->summaryValues[$key] ++;
-				break;
-			case 'f_avg':
-				$this->summaryValues[$key][0] += $model[$kc];
-				$this->summaryValues[$key][1] ++;
-				break;
-			case 'f_max':
-				if( $this->summaryValues[$key] == null ) {
-					$this->summaryValues[$key] = $model[$kc];
-				} else if( $this->summaryValues[$key] < $model[$kc] ) {
-					$this->summaryValues[$key] = $model[$kc];
-				}
-				break;
-			case 'f_min':
-				if( $this->summaryValues[$key] == null ) {
-					$this->summaryValues[$key] = $model[$kc];
-				} else if( $this->summaryValues[$key] > $model[$kc] ) {
-					$this->summaryValues[$key] = $model[$kc];
-				}
-				break;
-			case 'f_concat':
-				$this->summaryValues[$key][] = $model[$kc];
-				break;
-			case 'f_distinct_concat':
-				if (!in_array($model[$key], $this->summaryValues[$kc])) {
-					$this->summaryValues[$key][] = $model[$kc];
-				}
-				break;
-			}
-		}
 	}
 
 }

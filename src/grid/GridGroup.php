@@ -101,7 +101,7 @@ class GridGroup extends BaseObject
 
 	public function getHeaderContent($model, $key, $index, $tdoptions)
 	{
-		if( $this->grid->onlySummary && $this->level == count($this->grid->groups) ) {
+		if( $this->grid->onlySummary && $this->level < count($this->grid->groups) ) {
 			return '';
 		}
 		$hc = isset($this->header['content']) ? $this->header['content'] : $this->header;
@@ -201,11 +201,13 @@ class GridGroup extends BaseObject
 	public function getSummaryContent($summary_columns, $content)
 	{
 		$colspan = 0;
-		foreach( $this->grid->columns as $kc => $column ) {
-			if( !isset($summary_columns[$kc]) ) {
-				$colspan++;
-			} else {
-				break;
+		foreach( $this->grid->columns as $column ) {
+			if( $column->visible ) {
+				if( !isset($summary_columns[$column->attribute]) ) {
+					$colspan++;
+				} else {
+					break;
+				}
 			}
 		}
 		$tdoptions = [
@@ -214,7 +216,8 @@ class GridGroup extends BaseObject
 		];
 		$ret = Html::tag('td', Yii::t('churros', "Totals") . ' ' . $content, $tdoptions );
 		$nc = 0;
-		foreach( $this->grid->columns as $kc => $column ) {
+		foreach( $this->grid->columns as $column ) {
+			$kc = $column->attribute;
 			if( $nc++ < $colspan ) {
 				continue;
 			}
@@ -222,8 +225,7 @@ class GridGroup extends BaseObject
 				$tdoptions = [ 'class' => 'grid-group-foot-' . strval($this->level) . ' w1' ];
 				$ret .= Html::tag('td',
 					$this->grid->formatter->format(
-						$this->summaryValues[$this->level][$kc], $column->format),
-						GridView::fetchColumnOptions($column, $tdoptions));
+						$this->summaryValues[$this->level][$kc], $column->format), $tdoptions);
 			} else {
 				$tdoptions = [ "class" => "w1" ];
 				$ret .= Html::tag('td', '', $tdoptions);

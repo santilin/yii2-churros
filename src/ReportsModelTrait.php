@@ -84,7 +84,7 @@ trait ReportsModelTrait
 						'attribute' => $value,
 						'lft' => $svalues['lft'][$key],
 						'rgt' => $svalues['rgt'][$key],
-						'op' => $svalues['op'][$key]
+						'op' => $svalues['op'][$key]??'LIKE'
 					];
 				}
 			}
@@ -98,23 +98,9 @@ trait ReportsModelTrait
 		if( $value === null ) {
 			$value = new \stdClass;
 		}
-		$value->report_columns = [];
-		foreach( $this->report_columns as $coldef ) {
-			$value->report_columns += [$coldef];
-		}
-		$value->report_filters = [];
-		foreach( $this->report_filters as $filterdef ) {
-			$value->report_filters += [$filterdef];
-		}
-		foreach($value->report_filters as $key => $v ) {
-			if( is_array($v) && isset($v['lft']) && $v['lft'] === '' ) {
-				unset($value->report_filters[$key]);
-			}
-		}
-		$value->report_sorting = [];
-		foreach( $this->report_sorting as $sortdef ) {
-			$value->report_sorting += [$sortdef];
-		}
+		$value->report_columns = $this->report_columns;
+		$value->report_filters = $this->report_filters;
+		$value->report_sorting = $this->report_sorting;
 		$value->only_totals = $this->only_totals;
 		$this->value = json_encode($value);
 	}
@@ -122,24 +108,9 @@ trait ReportsModelTrait
 	public function decodeValue()
 	{
 		$value = json_decode($this->value, true);
-		$this->report_columns = [];
-		if( $value && $value['report_columns'] ) {
-			foreach( $value['report_columns'] as $coldef ) {
-				$this->report_columns += [$coldef];
-			}
-		}
-		$this->report_filters = [];
-		if( $value && $value['report_filters'] ) {
-			foreach( $value['report_filters'] as $filterdef ) {
-				$this->report_filters += [$filterdef];
-			}
-		}
-		$this->report_sorting = [];
-		if( $value && $value['report_sorting'] ) {
-			foreach( $value['report_sorting'] as $sortdef ) {
-				$this->report_sorting += [$sortdef];
-			}
-		}
+		$this->report_columns = $value['report_columns']??[];
+		$this->report_filters = $value['report_filters']??[];
+		$this->report_sorting = $value['report_sorting']??[];
 		$this->only_totals = $value['only_totals']??false;
 	}
 
@@ -193,7 +164,7 @@ trait ReportsModelTrait
 	}
 
 	/**
-	 * Creates the data provider for the grid.
+	 * Creates the data provider for the report grid.
 	 * Sets the query, select, joins, orderBy, groupBy and filters
 	 */
 	public function dataProviderForReport($model, &$columns)
@@ -209,7 +180,8 @@ trait ReportsModelTrait
 		]);
 
 		$orderby = [];
-		foreach( $this->report_sorting as $colname => $sorting_column ) {
+		foreach( $this->report_sorting as $sorting_def ) {
+			$colname = $sorting_def['attribute'];
 			if( !isset($columns[$colname]) ) {
 				Yii::$app->session->addFlash("error", "Report '" . $this->name . "': column '$colname' not found in sorting");
 				continue;
@@ -226,16 +198,18 @@ trait ReportsModelTrait
 				throw new \Exception($attribute . ": attribute not found");
 			}
 			$orderby[] = $tablename .'.' . $attribute
-				. ($sorting_column['asc']??SORT_ASC==SORT_ASC?' ASC':' DESC');
+				. ($sorting_def['asc']??SORT_ASC==SORT_ASC?' ASC':' DESC');
 		}
 		$provider->query->orderBy( implode(',', $orderby) );
 		$provider->sort = false;
 
-		foreach( $this->report_filters as $colname => $value ) {
+		foreach( $this->report_filters as $filter_def ) {
+			$colname = $filter_def['attribute'];
+			unset($filter_def['attribute']);
 			if( isset($columns[$colname]) ) {
-				$model->filterWhere($query, $columns[$colname]['attribute'], $value);
+				$model->filterWhere($query, $columns[$colname]['attribute'], $filter_def);
 			} else {
-				$model->filterWhere($query, $colname, $value);
+				$model->filterWhere($query, $colname, $filter_def);
 			}
 		}
 		$this->addSelectToQuery($model, $columns, array_keys($this->report_filters), $query);
@@ -313,7 +287,8 @@ trait ReportsModelTrait
 	public function reportColumns($allColumns)
 	{
 		$columns = [];
-		foreach( $this->report_columns as $colname => $column ) {
+		foreach( $this->report_columns as $column ) {
+			$colname = $column['attribute'];
 			if( !isset($allColumns[$colname]) ) {
 				$point_parts = explode('.',$colname);
 				$last_part = array_pop($point_parts);
@@ -326,13 +301,18 @@ trait ReportsModelTrait
 			} else {
 				$columns[$colname] = $allColumns[$colname];
 			}
-			if( isset($columns[$colname]['summary']) ) {
+			if( isset($column['summary']) ) {
+				$columns[$colname]['pageSummary'] = true;
+				$columns[$colname]['pageSummaryFunc'] = $column['summary'];
+			} else if( isset($columns[$colname]['summary']) ) {
+				// la definición del campo ya tiene un summary
 				$columns[$colname]['pageSummary'] = true;
 				$columns[$colname]['pageSummaryFunc'] = $columns[$colname]['summary'];
 				unset($columns[$colname]['summary']);
 			}
 		}
-		foreach( $this->report_sorting as $colname => $sorting ) {
+		foreach( $this->report_sorting as $sorting_def ) {
+			$colname = $sorting_def['attribute'];
 			if( !isset($columns[$colname]) ) {
 				if( isset($allColumns[$colname]) ) {
 					$columns[$colname] = $allColumns[$colname];
@@ -348,11 +328,11 @@ trait ReportsModelTrait
 	public function reportGroups(&$report_columns)
 	{
 		$groups = [];
-		foreach( $this->report_sorting as $colname => $column ) {
-			if( isset($column['group']) && $column['group'] == true ) {
+		foreach( $this->report_sorting as $column ) {
+			if( !empty($column['group']) ) {
+				$colname = $column['attribute'];
 				if( isset($report_columns[$colname]) ) {
 					$rc = $report_columns[$colname];
-					$repl_colname = str_replace('.','_',$colname);
 					$groups[$colname] = [
 						'column' => $rc['attribute'],
 						'format' => $rc['label'] . ': {group_value}',
