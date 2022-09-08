@@ -207,19 +207,22 @@ trait ReportsModelTrait
 			}
 			$column_def = $columns[$colname];
 			$attribute = $column_def['attribute'];
-			if ( is_int($attribute) || array_key_exists($attribute, $model->attributes ) ) {
-				$tablename = $model->tableName();
+			$tablename = $model->tableName();
+			if( isset($column_def['calc']) ) {
+				$orderby[] = new yii\db\Expression(strtr($attribute, [ '{tablename}' => $tablename ]));
+			} else if ( is_int($attribute) || array_key_exists($attribute, $model->attributes ) ) {
+				$orderby[] = $tablename .'.'.$attribute
+					. ($sorting_def['asc']??SORT_ASC==SORT_ASC?' ASC':' DESC');
 			} else if( ($dotpos = strpos($attribute, '.')) !== FALSE ) {
 				$joins = [];
 				list($tablename, $attribute, $alias) = $model->addRelatedField($attribute, $joins);
-				$sort_column = $tablename .'.' . $attribute;
+				$orderby[] = $tablename .'.'.$attribute
+					. ($sorting_def['asc']??SORT_ASC==SORT_ASC?' ASC':' DESC');
 			} else {
 				throw new \Exception($attribute . ": attribute not found");
 			}
-			$orderby[] = $tablename .'.' . $attribute
-				. ($sorting_def['asc']??SORT_ASC==SORT_ASC?' ASC':' DESC');
 		}
-		$provider->query->orderBy( implode(',', $orderby) );
+		$provider->query->orderBy( $orderby );
 		$provider->sort = false;
 
 		foreach( $this->report_filters as $filter_def ) {
@@ -244,17 +247,23 @@ trait ReportsModelTrait
 		$groups = [];
 		$selects = [];
 		foreach( $columns as $kc => $column_def ) {
-			$had_dot = false;
+			$calc = !empty($column_def['calc']);
+			if( $calc ) {
+				unset($columns[$kc]['calc']);
+			}
+			if( !isset($column_def['attribute']) ) {
+				Yii::$app->session->addFlash("error", "Report '" . $this->name . "': column '$kc' has no attribute");
+				continue;
+			}
 			$attribute = $column_def['attribute'];
 			$tablename = str_replace(['{','}','%'], '', $model->tableName() );
 			$alias = null;
-			if( substr($kc,0,6) === '.calc.' ) {
-				$alias = str_replace('.','_',substr($kc,6));
+			if( $calc) {
+				$alias = str_replace('.','_',$kc);
 				$select_field = new yii\db\Expression(strtr($attribute, [ '{tablename}' => $tablename ]));
 			} else if ( is_int($attribute) || array_key_exists($attribute, $model->attributes ) ) {
 				$select_field = $tablename.'.'.$attribute;
 			} else if( ($dotpos = strpos($attribute, '.')) !== FALSE ) {
-				$had_dot = true;
 				list($tablename, $attribute, $alias) = $model->addRelatedField($attribute, $joins);
 				$select_field = $tablename.'.'.$attribute;
 			}
