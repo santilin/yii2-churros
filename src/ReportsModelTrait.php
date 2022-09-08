@@ -198,6 +198,7 @@ trait ReportsModelTrait
 			],
 		]);
 
+		$tablename = $model->tableName();
 		$orderby = [];
 		foreach( $this->report_sorting as $sorting_def ) {
 			$colname = $sorting_def['attribute'];
@@ -207,7 +208,6 @@ trait ReportsModelTrait
 			}
 			$column_def = $columns[$colname];
 			$attribute = $column_def['attribute'];
-			$tablename = $model->tableName();
 			if( isset($column_def['calc']) ) {
 				$orderby[] = new yii\db\Expression(strtr($attribute, [ '{tablename}' => $tablename ]));
 			} else if ( is_int($attribute) || array_key_exists($attribute, $model->attributes ) ) {
@@ -227,8 +227,13 @@ trait ReportsModelTrait
 
 		foreach( $this->report_filters as $filter_def ) {
 			$colname = $filter_def['attribute'];
+			$column_def = $columns[$colname];
 			unset($filter_def['attribute']);
-			if( isset($columns[$colname]) ) {
+			if( isset($column_def['calc']) ) {
+				$model->filterWhere($query,
+					new \yii\db\Expression(strtr($columns[$colname]['attribute'], [ '{tablename}' => $tablename ])),
+					$filter_def);
+			} else if( isset($columns[$colname]) ) {
 				$model->filterWhere($query, $columns[$colname]['attribute'], $filter_def);
 			} else {
 				$model->filterWhere($query, $colname, $filter_def);
@@ -385,13 +390,19 @@ trait ReportsModelTrait
 	{
  		$dropdown_options = [];
 		$modeltablename = str_replace(['{','}','%'], '', $model->tableName());
-		foreach( $columns as $colname => $col_attrs ) {
+		foreach( $columns as $colname => $colattrs ) {
 			list($tablename, $fieldname) = ModelSearchTrait::splitFieldName($colname);
 			if( empty($tablename) ) {
 				$tablename = $modeltablename;
 			}
-			$title = $titles[$tablename]??$tablename;
-			$dropdown_options[$title][$colname] = $col_attrs['label'] . " ($title)";
+			$group = $titles[$tablename]??$tablename;
+			$attr = $colattrs['attribute']??null;
+			if( substr($colname, -11) == '.desc_short' ) {
+				$title = 'descripción corta';
+			} else {
+				$title = $group;
+			}
+			$dropdown_options[$group][$colname] = $colattrs['label'] . " ($title)";
 		}
 		return $dropdown_options;
 	}

@@ -187,13 +187,19 @@ trait ModelSearchTrait
 		return [ 'op' => $strict ? '=' : 'LIKE', 'lft' => $value, 'rgt' => '' ];
 	}
 
-
-	public function filterWhere(&$query, $fldname, $value)
+	public function filterWhere(&$query, $fldname, array $value)
 	{
 		$value = $this->toOpExpression($value, false );
 		if( $value['lft'] == null ) {
 			return;
 		}
+
+		if( $fldname instanceof \yii\db\Expression ) {
+			$this->addFieldFilterToQuery($query, $fldname, $value);
+			return;
+		}
+
+
 		// addColumnSortsToProvider adds the join tables with AS `as_xxxxxxx`
 		/// @todo add them as table1_table2_xxxxxx
 		$tablename = $this->tableName();
@@ -214,10 +220,10 @@ trait ModelSearchTrait
 		if( $fullfldname === null ) {
 			$fullfldname = $tablename . "." . $fldname;
 		}
-		$this->addFieldFilterToQuery($query, $fullfldname, $value, $fldname);
+		$this->addFieldFilterToQuery($query, $fullfldname, $value);
 	}
 
-	public function addFieldFilterToQuery(&$query, $fldname, $value)
+	public function addFieldFilterToQuery(&$query, $fldname, array $value)
 	{
 		if( is_array($value['lft']) ) {
  			$query->andWhere([ 'in', $fldname, $value['lft']]);
