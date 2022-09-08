@@ -246,52 +246,54 @@ trait ReportsModelTrait
 		foreach( $columns as $kc => $column_def ) {
 			$had_dot = false;
 			$attribute = $column_def['attribute'];
-			if ( is_int($attribute) || array_key_exists($attribute, $model->attributes ) ) {
-				$tablename = str_replace(['{','}','%'], '', $model->tableName() );
-				$alias = $attribute;
+			$tablename = str_replace(['{','}','%'], '', $model->tableName() );
+			$alias = null;
+			if( substr($kc,0,6) === '.calc.' ) {
+				$alias = str_replace('.','_',substr($kc,6));
+				$select_field = new yii\db\Expression(strtr($attribute, [ '{tablename}' => $tablename ]));
+			} else if ( is_int($attribute) || array_key_exists($attribute, $model->attributes ) ) {
+				$select_field = $tablename.'.'.$attribute;
 			} else if( ($dotpos = strpos($attribute, '.')) !== FALSE ) {
 				$had_dot = true;
 				list($tablename, $attribute, $alias) = $model->addRelatedField($attribute, $joins);
-			} else {
-				throw new \Exception($attribute . ': attribute not found in addSelectToQuery');
+				$select_field = $tablename.'.'.$attribute;
 			}
-			if( !empty($column_def['columnSummaryFunc']) ) {
-				$agg = $column_def['columnSummaryFunc'];
-				$pks = $model->primaryKey();
-				foreach( $pks as $pk ) {
-					$groupby = $model->tableName() . ".$pk";
-					if( !isset($groups[$groupby]) ) {
-						$groups[$groupby] = $groupby;
-					}
-				}
-				switch($agg) {
-				case ReportView::F_COUNT:
-					$f_agg = 'COUNT';
-					break;
-				case ReportView::F_SUM:
-					$f_agg = 'SUM';
-					break;
-				case ReportView::F_MAX;
-					$f_agg = 'MAX';
-					break;
-				case ReportView::F_MIN;
-					$f_agg = 'MIN';
-					break;
-				case ReportView::F_AVG;
-					$f_agg = 'AVERAGE';
-					break;
-				}
-				$select_field = $f_agg."(". $tablename . "." . $attribute . ") AS $alias";
-				$columns[$kc]['attribute'] = str_replace('.','_',$select_field);
-			} else {
-				$select_field = $tablename . "." . $attribute;
-				if( $had_dot ) {
-					$columns[$kc]['attribute'] = str_replace('.','_',$select_field);
-				}
-				if( $alias != $attribute )
-					$select_field .= " AS $alias";
+			if( $alias != null ) {
+ 				$columns[$kc]['attribute'] = $alias;
 			}
-			$selects[] = $select_field;
+// 			if( !empty($column_def['columnSummaryFunc']) ) {
+// 				$agg = $column_def['columnSummaryFunc'];
+// 				$pks = $model->primaryKey();
+// 				foreach( $pks as $pk ) {
+// 					$groupby = $model->tableName() . ".$pk";
+// 					if( !isset($groups[$groupby]) ) {
+// 						$groups[$groupby] = $groupby;
+// 					}
+// 				}
+// 				switch($agg) {
+// 				case ReportView::F_COUNT:
+// 					$f_agg = 'COUNT';
+// 					break;
+// 				case ReportView::F_SUM:
+// 					$f_agg = 'SUM';
+// 					break;
+// 				case ReportView::F_MAX;
+// 					$f_agg = 'MAX';
+// 					break;
+// 				case ReportView::F_MIN;
+// 					$f_agg = 'MIN';
+// 					break;
+// 				case ReportView::F_AVG;
+// 					$f_agg = 'AVERAGE';
+// 					break;
+// 				}
+// 				$select_field = $f_agg."($select_field)";
+// 			}
+			if( $alias ) {
+				$selects[$alias] = $select_field;
+			} else {
+				$selects[] = $select_field;
+			}
 		}
 		$query->select($selects);
 		foreach( $joins as $jk => $jv ) {
