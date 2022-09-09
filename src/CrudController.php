@@ -83,7 +83,7 @@ class CrudController extends \yii\web\Controller
 		return $this->render('index', [
 			'searchModel' => $searchModel,
 			'parent' => $this->parent_model,
-			'indexParams' => $this->changeActionParams($params, 'index', $searchModel),
+			'gridParams' => $this->changeActionParams($params, 'index', $searchModel),
 		]);
 	}
 
