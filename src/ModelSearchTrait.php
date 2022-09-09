@@ -187,7 +187,7 @@ trait ModelSearchTrait
 		return [ 'op' => $strict ? '=' : 'LIKE', 'lft' => $value, 'rgt' => '' ];
 	}
 
-	public function filterWhere(&$query, $fldname, array $value)
+	public function filterWhere(&$query, $fldname, ?array $value)
 	{
 		$value = $this->toOpExpression($value, false );
 		if( $value['lft'] == null ) {

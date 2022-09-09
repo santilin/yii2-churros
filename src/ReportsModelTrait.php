@@ -398,7 +398,9 @@ trait ReportsModelTrait
 			$group = $titles[$tablename]??$tablename;
 			$attr = $colattrs['attribute']??null;
 			if( substr($colname, -11) == '.desc_short' ) {
-				$title = 'descripción corta';
+				$title = 'descripción';
+			} else if( substr($colname, -10) == '.desc_long' ) {
+				$title = 'descripción larga';
 			} else {
 				$title = $group;
 			}

@@ -22,6 +22,7 @@ trait ReportsControllerTrait
 		$params = Yii::$app->request->queryParams;
 		$model_name = '\\app\\models\\comp\\' . $this->_model_name . '_reportForm';
 		$model = new $model_name;
+		$model->setDefaultValues();
 		if (isset($_POST['_form_relations']) ) {
 			$relations = explode(",", $_POST['_form_relations']);
 		} else {
