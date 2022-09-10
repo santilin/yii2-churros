@@ -316,11 +316,14 @@ class ReportView extends BaseGridView
 		if( $this->totalsRow ) {
 			$ret .= Html::tag('tr',
 				$this->getFooterSummary($this->summaryColumns, $tdoptions),
-				[ 'class' => 'report-grand-total']);
+				[ 'class' => 'reportview-grand-total']);
 		}
 		return $ret;
 	}
 
+	/*
+	 * Grand total
+	 */
 	public function getFooterSummary($summary_columns, $tdoptions)
 	{
 		if( count($summary_columns) == 0 ) {
@@ -332,28 +335,33 @@ class ReportView extends BaseGridView
 		}
 		$colspan = 0;
 		foreach( $this->columns as $kc => $column ) {
-			if( !isset($summary_columns[str_replace('.','_',$column->attribute??$kc)]) ) {
+			if( !isset($summary_columns[$column->attribute]) ) {
 				$colspan++;
 			} else {
 				break;
 			}
 		}
 		if( $colspan==0) {
-			$ret = '<td colspan="42"></tr><tr>';
+			$ret = '</tr><tr>';
 			$ret .= Html::tag('td', Yii::t('churros', "Report totals") . ' ', [
-				'class' => 'reportview-group-total w1', 'colspan' => 42] );
+				'class' => 'reportview-total-label', 'colspan' => 42] );
 			$ret .= '</tr><tr>';
 		} else {
 			$ret = Html::tag('td',Yii::t('churros', "Report totals") . ' ',
-				[ 'class' => 'reportview-group-total w1', 'colspan' => $colspan ] );
+				[ 'class' => 'reportview-total-label', 'colspan' => $colspan ] );
 		}
 		$nc = 0;
-		$tdoptions = [ 'class' => 'w1' ];
 		foreach( $this->columns as $column ) {
 			if( $nc++ < $colspan ) {
 				continue;
 			}
 			$kc = $column->attribute;
+			$classes = [
+				'w1'
+			];
+			if( ($column->format?:'raw') != 'raw' ) {
+				$classes[] = "reportview-{$column->format}";
+			}
 			if( isset($summary_columns[$kc]) ) {
 				$value = 0.0;
 				if( $summary_columns[$kc] == 'f_avg' ) {
@@ -364,9 +372,9 @@ class ReportView extends BaseGridView
 					$value = $this->summaryValues[$kc];
 				}
 				$ret .= Html::tag('td', $this->formatter->format(
-						$value, $column->format), $tdoptions);
+						$value, $column->format), [ 'class' => join(' ', $classes) ]);
 			} else {
-				$ret .= Html::tag('td', '', $tdoptions);
+				$ret .= Html::tag('td', '', [ 'class' => join(' ', $classes) ]);
 			}
 		}
 		return $ret;

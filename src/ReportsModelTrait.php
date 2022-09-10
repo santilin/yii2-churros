@@ -222,7 +222,7 @@ trait ReportsModelTrait
 				throw new \Exception($attribute . ": attribute not found");
 			}
 		}
-		$provider->query->orderBy( $orderby );
+		$provider->query->orderBy( join(',',$orderby) );
 		$provider->sort = false;
 
 		foreach( $this->report_filters as $filter_def ) {

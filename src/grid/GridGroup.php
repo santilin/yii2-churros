@@ -211,7 +211,7 @@ class GridGroup extends BaseObject
 			}
 		}
 		$tdoptions = [
-			'class' => 'reportview-group-foot-' . strval($this->level) . ' w1',
+			'class' => 'reportview-group-total-label reportview-group-foot-' . strval($this->level) . ' w1',
 			'colspan' => $colspan,
 		];
 		$ret = Html::tag('td', Yii::t('churros', "Totals") . ' ' . $content, $tdoptions );
@@ -221,14 +221,20 @@ class GridGroup extends BaseObject
 			if( $nc++ < $colspan ) {
 				continue;
 			}
+			$classes = [
+				'w1'
+			];
+			if( ($column->format?:'raw') != 'raw' ) {
+				$classes[] = "reportview-{$column->format}";
+			}
 			if( isset($summary_columns[$kc]) ) {
-				$tdoptions = [ 'class' => 'reportview-group-foot-' . strval($this->level) . ' w1' ];
+				$classes[] = 'reportview-group-foot-' . strval($this->level);
 				$ret .= Html::tag('td',
 					$this->grid->formatter->format(
-						$this->summaryValues[$this->level][$kc], $column->format), $tdoptions);
+						$this->summaryValues[$this->level][$kc], $column->format),
+						[ 'class' => join(' ', $classes) ]);
 			} else {
-				$tdoptions = [ "class" => "w1" ];
-				$ret .= Html::tag('td', '', $tdoptions);
+				$ret .= Html::tag('td', '', [ 'class' => join(' ', $classes) ]);
 			}
 		}
 		return $ret;
