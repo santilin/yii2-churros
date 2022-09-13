@@ -299,7 +299,7 @@ class GridView extends BaseGridView
 	{
 		$p = $this->dataProvider->getPagination();
 		if( $p && $p->getPageCount() > 1 ) {
-			return '<td colspan="42">No muestro totales porque no se están mostrando todos los registros.</tr>';
+			return '<td colspan="42">' . Yii::t('churros', 'Not showing totals because not all the rows have been shown'). '</tr>';
 		} else {
 			return parent::getPageSummaryRow();
 		}
