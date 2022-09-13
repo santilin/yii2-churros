@@ -23,16 +23,16 @@ class ActionColumn extends \kartik\grid\ActionColumn
 			$this->crudPerms = 'CRUDd';
 		}
         if( strpos($this->crudPerms,'R') !== false ) {
-			$this->setDefaultButton('view', Yii::t('kvgrid', 'View'), $notBs3 ? 'eye' : 'eye-open');
+			$this->setDefaultButton('view', Yii::t('churros', 'View'), $notBs3 ? 'eye' : 'eye-open');
 		}
         if( strpos($this->crudPerms,'U') !== false ) {
-			$this->setDefaultButton('update', Yii::t('kvgrid', 'Update'), $notBs3 ? 'pencil-alt' : 'pencil');
+			$this->setDefaultButton('update', Yii::t('churros', 'Update'), $notBs3 ? 'pencil-alt' : 'pencil');
 		}
         if( strpos($this->crudPerms,'D') !== false ) {
-			$this->setDefaultButton('delete', Yii::t('kvgrid', 'Delete'), $notBs3 ? 'trash-alt' : 'trash');
+			$this->setDefaultButton('delete', Yii::t('churros', 'Delete'), $notBs3 ? 'trash-alt' : 'trash');
 		}
         if( strpos($this->crudPerms,'d') !== false ) {
-			$this->setDefaultButton('duplicate', Yii::t('kvgrid', 'Duplicate'), $notBs3 ? 'copy' : 'duplicate');
+			$this->setDefaultButton('duplicate', Yii::t('churros', 'Duplicate'), $notBs3 ? 'copy' : 'duplicate');
 		}
     }
 

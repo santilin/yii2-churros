@@ -32,6 +32,7 @@ return [
 	'Edit' => 'Editar',
 	'Delete' => 'Borrar',
 	'List' => 'Listar',
+	'Duplicate' => 'Duplicar',
 	'Accesd denied to {esta} {title} because you are not the author' => 'Acceso denegado a {esta} {title} porque no eres el autor/a',
 	'Access to all models of module {module}' => 'Acceso a todos los modelos del módulo {module}',
 	'Access to {model_title} menu for {module_name} module' => 'Acceso al menú de {model_title} del módulo {module_name}',
