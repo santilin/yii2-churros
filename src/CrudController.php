@@ -68,6 +68,9 @@ class CrudController extends \yii\web\Controller
 	{
 		$params = Yii::$app->request->queryParams;
 		$searchModel = $this->findModel(null, null, 'search');
+		if( $this->accessOnlyOwner ) {
+			$params['accessOnlyOwner'] = $this->accessOnlyOwner;
+		}
 		$params = $this->changeActionParams($params, 'index', $searchModel);
 		return $this->render('index', [
 			'searchModel' => $searchModel,
