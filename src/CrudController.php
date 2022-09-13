@@ -39,7 +39,6 @@ class CrudController extends \yii\web\Controller
 			'class' => VerbFilter::className(),
 			'actions' => [
 				'delete' => ['post'],
-				'logout' => ['post'],
 			],
 		];
 		// Auth behaviors must be set on descendants of this controller
@@ -48,32 +47,17 @@ class CrudController extends \yii\web\Controller
 
 	public function beforeAction($action)
 	{
-        if( $this->request->getMethod() === 'POST' && count($_POST) == 0 && count($_FILES) == 0 ) {
-            if( isset($_SERVER['CONTENT_TYPE']) && substr($_SERVER['CONTENT_TYPE'], 0, 19) == 'multipart/form-data' ) {
-                if( isset($_SERVER['CONTENT_LENGTH']) ) {
-                    if( intval($_SERVER['CONTENT_LENGTH'])>0 ) {
-                        Yii::$app->session->addFlash('error', strtr(Yii::t('churros', 'PHP discarded POST data because of request exceeding either post_max_size={post_size} or upload_max_filesize={upload_size}'), ['{post_size}' => ini_get('post_max_size'), '{upload_size}' => ini_get('upload_max_filesize')]));
-                        $this->redirect(Yii::$app->request->referrer ?: Yii::$app->homeUrl);
-                        return false;
-                    }
-                }
-            }
-        }
-        if (!parent::beforeAction($action)) {
-			return false;
-		}
-		if (isset($this->junctionModel) && $this->junctionModel == true ) {
-			$id = $this->junctionIds();
-			if( $id ) {
-				// hack, take care
-				$response = call_user_func_array([$this, $action->actionMethod], ['id' => $id]);
-				if (!$response instanceof \yii\web\Response) {
-					Yii::$app->response->data = $response;
+        if( count($_POST) == 0 && count($_FILES) == 0 && isset($_SERVER['CONTENT_TYPE'])
+			&& substr($_SERVER['CONTENT_TYPE'], 0, 19) == 'multipart/form-data' ) {
+			if( $this->request->getMethod() === 'POST' && isset($_SERVER['CONTENT_LENGTH']) ) {
+				if( intval($_SERVER['CONTENT_LENGTH'])>0 ) {
+					Yii::$app->session->addFlash('error', strtr(Yii::t('churros', 'PHP discarded POST data because of request exceeding either post_max_size={post_size} or upload_max_filesize={upload_size}'), ['{post_size}' => ini_get('post_max_size'), '{upload_size}' => ini_get('upload_max_filesize')]));
+					$this->redirect(Yii::$app->request->referrer ?: Yii::$app->homeUrl);
+					return false;
 				}
-				return false;
 			}
-		}
-		return true;
+        }
+        return parent::beforeAction($action);
 	}
 
 	/**
@@ -84,9 +68,6 @@ class CrudController extends \yii\web\Controller
 	{
 		$params = Yii::$app->request->queryParams;
 		$searchModel = $this->findModel(null, null, 'search');
-		if( $this->accessOnlyOwner ) {
-			$params['accessOnlyOwner'] = $this->accessOnlyOwner;
-		}
 		$params = $this->changeActionParams($params, 'index', $searchModel);
 		return $this->render('index', [
 			'searchModel' => $searchModel,
@@ -374,56 +355,18 @@ class CrudController extends \yii\web\Controller
 		return $this->id . '/' . $master->id;
 	}
 
-	public function getRoutePrefix()
+	public function getRoutePrefix($route = null)
 	{
-		$route = $this->id;
-		$route_pos = false;
-		$request_url = '/' . Yii::$app->request->getPathInfo();
-		if( $route_pos === false ) {
-			$route_pos = strpos($request_url, $route);
+		if( $route === null ) {
+			$route = $this->id;
 		}
+		$request_url = '/' . Yii::$app->request->getPathInfo();
+		$route_pos = strpos($request_url, $route);
 		$prefix = substr($request_url, 0, $route_pos);
 		if( substr($prefix, -1) != '/' ) {
 			$prefix .= '/';
 		}
 		return $prefix;
-	}
-
-	public function joinMany2ManyModels($glue, $models)
-	{
-		if( $models == null || count($models)==0 ) {
-			return "";
-		}
-		$attrs = [];
-		$route = null;
-		foreach((array)$models as $model) {
-			if( $route == null ) {
-				$route = $this->getRoutePrefix() . $model->controllerName() . '/';
-			}
-			if( $model != null ) {
-				$url = $route . strval($model->getPrimaryKey());
-				$attrs[] = "<a href='$url'>" .  $model->recordDesc() . "</a>";
-			}
-		}
-		return join($glue, $attrs);
-	}
-
-	public function joinHasManyModels($glue, $parent, $models)
-	{
-		if( $models == null || count($models)==0 ) {
-			return "";
-		}
-		$keys = $parent->getPrimaryKey(true);
-		$keys[0] = 'view';
-		$parent_route = Url::toRoute($keys);
-		$attrs = [];
-		foreach((array)$models as $model) {
-			if( $model != null ) {
-				$url = $parent_route . '/'.  $model->controllerName() . '/' . strval($model->getPrimaryKey());
-				$attrs[] = "<a href='$url'>" .  $model->recordDesc() . "</a>";
-			}
-		}
-		return join($glue, $attrs);
 	}
 
 	// Ajax
@@ -525,5 +468,41 @@ class CrudController extends \yii\web\Controller
 		return $model->saveAll(true, $in_trans);
 	}
 
+	public function joinMany2ManyModels($glue, $models)
+	{
+		if( $models == null || count($models)==0 ) {
+			return "";
+		}
+		$attrs = [];
+		$route = null;
+		foreach((array)$models as $model) {
+			if( $route == null ) {
+				$route = $this->getRoutePrefix() . $model->controllerName() . '/';
+			}
+			if( $model != null ) {
+				$url = $route . strval($model->getPrimaryKey());
+				$attrs[] = "<a href='$url'>" .  $model->recordDesc() . "</a>";
+			}
+		}
+		return join($glue, $attrs);
+	}
+
+	public function joinHasManyModels($glue, $parent, $models)
+	{
+		if( $models == null || count($models)==0 ) {
+			return "";
+		}
+		$keys = $parent->getPrimaryKey(true);
+		$keys[0] = 'view';
+		$parent_route = Url::toRoute($keys);
+		$attrs = [];
+		foreach((array)$models as $model) {
+			if( $model != null ) {
+				$url = $parent_route . '/'.  $model->controllerName() . '/' . strval($model->getPrimaryKey());
+				$attrs[] = "<a href='$url'>" .  $model->recordDesc() . "</a>";
+			}
+		}
+		return join($glue, $attrs);
+	}
 
 }

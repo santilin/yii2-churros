@@ -312,9 +312,19 @@ trait ModelInfoTrait
     public function getRelatedFieldForModel($related_model)
     {
 		foreach( self::$relations as $relname => $rel_info ) {
-			if( $rel_info['modelClass'] == $related_model->className() ) {
+			$cn = $related_model->className();
+			if( $rel_info['modelClass'] == $cn ) {
 				$related_field = $rel_info['left'];
-				list($table, $field) = ModelSearchTrait::splitFieldName($related_field);
+				list($table, $field) = static::splitFieldName($related_field);
+				return $field;
+			}
+		}
+		// If it's a derived class like *Form, *Search, look up its parent
+		foreach( self::$relations as $relname => $rel_info ) {
+			$cn = get_parent_class($related_model);
+			if( $rel_info['modelClass'] == $cn ) {
+				$related_field = $rel_info['left'];
+				list($table, $field) = static::splitFieldName($related_field);
 				return $field;
 			}
 		}
@@ -524,8 +534,23 @@ trait ModelInfoTrait
 			throw new \app\helpers\ProgrammerException("No se encuentra un " . self::className() . "de id $fixture_id en el fichero $fixture_file");
 		}
     }
-
-
 */
+
+	static public function splitFieldName($fieldname, $reverse = true)
+	{
+		if( $reverse ) {
+			$dotpos = strrpos($fieldname, '.');
+		} else {
+			$dotpos = strpos($fieldname, '.');
+		}
+		if( $dotpos !== FALSE ) {
+			$fldname = substr($fieldname, $dotpos + 1);
+			$tablename = substr($fieldname, 0, $dotpos);
+			return [ $tablename, $fldname ];
+		} else {
+			return [ "", $fieldname ];
+		}
+	}
+
 } // trait ModelInfoTrait
 

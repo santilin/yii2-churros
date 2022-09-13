@@ -25,9 +25,8 @@ trait ModelSearchTrait
 		'LIKE' => 'Contiene', 'NOT LIKE' => 'No contiene',
 		'>' => '>', '<' => '<',
 		'>=' => '>=', '<=' => '<=',
+		'SELECT' => 'Valor(es) de la lista',
 		'BETWEEN' => 'entre dos valores', 'NOT BETWEEN' => 'no entre dos valores',
-		'SELECT' => 'Un valor de la lista',
-		'MSELECT' => 'Varios valores de la lista',
 	];
 	static public $extra_operators = [
 		'BETWEEN', 'NOT BETWEEN'
@@ -108,7 +107,7 @@ trait ModelSearchTrait
 				$relation_name = $attribute;
 				$sort_fldname = '';
 			} else {
-				list($relation_name, $sort_fldname) = self::splitFieldName($attribute);
+				list($relation_name, $sort_fldname) = ModelInfoTrait::splitFieldName($attribute);
 			}
 			if (isset(self::$relations[$relation_name]) ) {
 				$related_model_class = self::$relations[$relation_name]['modelClass'];
@@ -187,7 +186,7 @@ trait ModelSearchTrait
 		return [ 'op' => $strict ? '=' : 'LIKE', 'lft' => $value, 'rgt' => '' ];
 	}
 
-	public function filterWhere(&$query, $fldname, ?array $value)
+	public function filterWhere(&$query, $fldname, $value)
 	{
 		$value = $this->toOpExpression($value, false );
 		if( $value['lft'] == null ) {
@@ -207,7 +206,7 @@ trait ModelSearchTrait
 		if( strpos($fldname, '.') !== FALSE ) {
 			$relmodel = $this->instance();
 			while( strpos($fldname, '.') !== FALSE ) {
-				list($relation, $fldname) = self::splitFieldName($fldname, false /*no reverse*/);
+				list($relation, $fldname) = ModelInfoTrait::splitFieldName($fldname, false /*no reverse*/);
 				if( isset($relmodel::$relations[$relation]) ) {
 					$tablename = $relmodel::$relations[$relation]['relatedTablename'];
 					$relmodel = $relmodel::$relations[$relation]['modelClass'];
@@ -263,7 +262,7 @@ trait ModelSearchTrait
 			$relation_name = $name;
 			$attribute = '';
 		} else {
-			list($relation_name, $attribute) = self::splitFieldName($name);
+			list($relation_name, $attribute) = ModelInfoTrait::splitFieldName($name);
 		}
 		if (isset(self::$relations[$relation_name]) ) {
 			$related_model_class = self::$relations[$relation_name]['modelClass'];
@@ -492,50 +491,4 @@ EOF;
 	}
 
 
-	static public function splitFieldName($fieldname, $reverse = true)
-	{
-		if( $reverse ) {
-			$dotpos = strrpos($fieldname, '.');
-		} else {
-			$dotpos = strpos($fieldname, '.');
-		}
-		if( $dotpos !== FALSE ) {
-			$fldname = substr($fieldname, $dotpos + 1);
-			$tablename = substr($fieldname, 0, $dotpos);
-			return [ $tablename, $fldname ];
-		} else {
-			return [ "", $fieldname ];
-		}
-	}
-
-	public function addRelatedField($attribute, &$joins)
-	{
-		$left_model = $this;
-		$tablename = $alias = '';
-		while( ($dotpos = strpos($attribute, '.')) !== FALSE ) {
-			$relation_name = substr($attribute, 0, $dotpos);
-			if( !empty($alias) ) { $alias .= "_"; }
-			$alias .= $relation_name;
-			$attribute = substr($attribute, $dotpos + 1);
-			if( $relation_name == str_replace(['{','}','%'],'',$this->tableName() ) ) {
-				$tablename = $relation_name;
-				continue;
-			}
-			if( isset($left_model::$relations[$relation_name]) ) {
-				$relation = $left_model::$relations[$relation_name];
-				$tablename = $relation['relatedTablename'];
-				// @todo if more than one, ¿add with an alias x1, x2...?
-				if( !isset($joins[$tablename]) ) {
-					$joins[$tablename] = $relation['join'];
-				}
-				$left_model = $relation['modelClass']::instance();
-			} else {
-				throw new \Exception($relation_name . ": relation not found in model " . $left_model::className() . " with relations " . join(',', array_keys($left_model::$relations)));
-			}
-		}
-		$alias .= "_$attribute";
-		return [ $tablename, $attribute, $alias ];
-	}
-
-
-}
+} // class

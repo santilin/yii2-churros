@@ -215,7 +215,7 @@ trait ReportsModelTrait
 					. ($sorting_def['asc']??SORT_ASC==SORT_ASC?' ASC':' DESC');
 			} else if( ($dotpos = strpos($attribute, '.')) !== FALSE ) {
 				$joins = [];
-				list($tablename, $attribute, $alias) = $model->addRelatedField($attribute, $joins);
+				list($tablename, $attribute, $alias) = static::addRelatedField($model, $attribute, $joins);
 				$orderby[] = $tablename .'.'.$attribute
 					. ($sorting_def['asc']??SORT_ASC==SORT_ASC?' ASC':' DESC');
 			} else {
@@ -242,6 +242,36 @@ trait ReportsModelTrait
 		$this->addSelectToQuery($model, $columns, array_keys($this->report_filters), $query);
 		return $provider;
 	}
+
+
+	static protected function addRelatedField($left_model, $attribute, &$joins)
+	{
+		$tablename = $alias = '';
+		while( ($dotpos = strpos($attribute, '.')) !== FALSE ) {
+			$relation_name = substr($attribute, 0, $dotpos);
+			if( !empty($alias) ) { $alias .= "_"; }
+			$alias .= $relation_name;
+			$attribute = substr($attribute, $dotpos + 1);
+			if( $relation_name == str_replace(['{','}','%'],'',$left_model->tableName() ) ) {
+				$tablename = $relation_name;
+				continue;
+			}
+			if( isset($left_model::$relations[$relation_name]) ) {
+				$relation = $left_model::$relations[$relation_name];
+				$tablename = $relation['relatedTablename'];
+				// @todo if more than one, ¿add with an alias x1, x2...?
+				if( !isset($joins[$tablename]) ) {
+					$joins[$tablename] = $relation['join'];
+				}
+				$left_model = $relation['modelClass']::instance();
+			} else {
+				throw new \Exception($relation_name . ": relation not found in model " . $left_model::className() . " with relations " . join(',', array_keys($left_model::$relations)));
+			}
+		}
+		$alias .= "_$attribute";
+		return [ $tablename, $attribute, $alias ];
+	}
+
 
 	/**
 	 * Adds related select and joins to dataproviders for reports
@@ -391,7 +421,7 @@ trait ReportsModelTrait
  		$dropdown_options = [];
 		$modeltablename = str_replace(['{','}','%'], '', $model->tableName());
 		foreach( $columns as $colname => $colattrs ) {
-			list($tablename, $fieldname) = ModelSearchTrait::splitFieldName($colname);
+			list($tablename, $fieldname) = ModelInfoTrait::splitFieldName($colname);
 			if( empty($tablename) ) {
 				$tablename = $modeltablename;
 			}
