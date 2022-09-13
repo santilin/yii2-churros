@@ -86,4 +86,6 @@ return [
 		=> 'El informe "{record}" se ha guardado correctamente.',
 	'The report "{record}" has definition errors'
 		=> 'El informe "{record}" tiene errores en su definición.',
+	'Not showing totals because not all the rows have been shown' =>
+		'No se muestran los totales porque no se están mostrando todos los registros',
 ];

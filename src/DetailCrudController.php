@@ -127,7 +127,7 @@ class DetailCrudController extends CrudController
 				return $parent_route;
 			}
 		} else {
-			return Url::toRoute($action_id??'');
+			return parent::actionRoute($action_id, $model);
 		}
 	}
 
@@ -137,6 +137,9 @@ class DetailCrudController extends CrudController
 	 */
 	public function controllerRoute($master = null, $child = null): ?string
 	{
+		if( $master == null ) {
+			$master = $this->master_model;
+		}
 		$master_route = $master->getModelInfo('controller_name');
 		$ret = $this->getRoutePrefix($master_route);
 		$ret .= $master->controllerName() . '/'
