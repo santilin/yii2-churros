@@ -46,6 +46,38 @@ class DetailCrudController extends CrudController
 		]);
 	}
 
+	/**
+		* Creates a new model.
+		* If creation is successful, the browser will be redirected to the 'view' page.
+		* @return mixed
+		*/
+	public function actionCreate()
+	{
+		$params = Yii::$app->request->queryParams;
+		$model = $this->findModel(null);
+		if( $this->master_model ) {
+			$model->setAttribute( $model->getRelatedFieldForModel($this->master_model), $this->master_model->getPrimaryKey());
+		}
+		if (isset($_POST['_form_relations']) ) {
+			$relations = explode(",", $_POST['_form_relations']);
+		} else {
+			$relations = [];
+		}
+		if ($model->loadAll(Yii::$app->request->post(), $relations) ) {
+			if( $this->saveAll('create', $model) ) {
+				if( $this->afterSave('create', $model) ) {
+					$this->showFlash('create', $model);
+					return $this->whereToGoNow('create', $model);
+				}
+			}
+		}
+		return $this->render('create', [
+			'model' => $model,
+			'extraParams' => $this->changeActionParams($params, 'create', $model)
+		]);
+	}
+
+
 	public function indexDetails($master, $params, $query = null)
 	{
 		$detail = $this->findModel(null,null,'search');
@@ -72,7 +104,7 @@ class DetailCrudController extends CrudController
 
 	protected function saveAll(string $context, $model, bool $in_trans = false): bool
 	{
-		if( $this->master_model) {
+		if( $this->master_model && $model->getIsNewRecord() ) {
 			$model->setAttribute( $model->getRelatedFieldForModel($this->master_model), $this->master_model->getPrimaryKey());
 		}
 		return $model->saveAll();
@@ -193,5 +225,11 @@ class DetailCrudController extends CrudController
 		}
 		return $breadcrumbs;
 	}
+
+	public function getMasterModel()
+	{
+		return $this->master_model;
+	}
+
 
 }

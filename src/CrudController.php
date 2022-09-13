@@ -505,4 +505,10 @@ class CrudController extends \yii\web\Controller
 		return join($glue, $attrs);
 	}
 
+
+	public function getMasterModel()
+	{
+		return null;
+	}
+
 }
