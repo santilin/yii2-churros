@@ -7,6 +7,7 @@
 
 namespace santilin\churros\grid;
 
+
 use Yii;
 class ActionColumn extends \kartik\grid\ActionColumn
 {
@@ -18,6 +19,7 @@ class ActionColumn extends \kartik\grid\ActionColumn
      */
     protected function initDefaultButtons()
     {
+		$this->hAlign = 'left';
         $notBs3 = !$this->grid->isBs(3);
         if( $this->crudPerms == '' ) {
 			$this->crudPerms = 'CRUDd';

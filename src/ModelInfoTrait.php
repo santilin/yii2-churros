@@ -72,8 +72,8 @@ trait ModelInfoTrait
 		$matches = [];
 		if( preg_match_all('/({[a-zA-Z0-9\._]+})+/', $message, $matches) ) {
 			foreach( $matches[1] as $match ) {
-				if( substr($match,0,3) == '{r.' ) {
-					$fld = substr($match, 3, -1);
+				if( substr($match,0,7) == '{model.' ) {
+					$fld = substr($match, 7, -1);
 					$placeholders[$match] = ArrayHelper::getValue($this,$fld,'');
 				} else switch( $match ) {
 				case '{title}':

@@ -293,7 +293,7 @@ class CrudController extends \yii\web\Controller
 		} else if ($from == 'delete') {
 			$redirect = ["index"];
 		} else {
-			throw new Exception("Where should I go now?");
+			throw new \Exception("Where should I go now?");
 		}
 		return $this->redirect($this->actionRoute($redirect));
 	}
