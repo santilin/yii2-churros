@@ -31,27 +31,20 @@ class AppHelper
 	{
 		return str_replace("-", "_", Yii::$app->language);
 	}
-
-	/**
-	 * @params string $route if null, the model controller
-	 */
-	static public function joinModels($glue, $models, $controller)
+	static public function incrStr($str, $inc = 1)
 	{
-		if( $models == null || count($models)==0 ) {
-			return "";
-		}
-		$attrs = [];
-		$route = null;
-		foreach((array)$models as $model) {
-			if( $route == null ) {
-				$route = $controller->controllerRoute($model);
+		if( preg_match('/([0-9]+)[^0-9]*$/', $str, $matches) ) {
+			$value = $matches[1];
+			$vlen = strlen($value);
+			$newvalue = intval($value) + $inc;
+			$newvlen = strlen(strval($value));
+			if( $newvlen < $vlen ) {
+				$newvalue = substr($value,0,$vlen-$newvlen) . $newvalue;
 			}
-			if( $model != null ) {
-				$url = $route . strval($model->getPrimaryKey());
-				$attrs[] = "<a href='$url'>" .  $model->recordDesc() . "</a>";
-			}
+			return preg_replace('/([0-9]+)([^0-9]*)$/', "$newvalue$2", $str);
+		} else {
+			return $inc;
 		}
-		return join($glue, $attrs);
 	}
 
 	/**
@@ -198,4 +191,43 @@ class AppHelper
 		}
 		return null;
 	}
+
+
+	static public function mergePermissions($perms1, $perms2): string
+	{
+		if( empty($perms1) ) {
+			return $perms2;
+		} else if (empty($perms2) ) {
+			return $perms1;
+		}
+		$a1 = explode('', $perms1);
+		$a2 = explode('', $perms2);
+		return explode('',array_interset($a1,$a2));
+	}
+
+	static public function hasPermission($perms, string $perm): bool
+	{
+		if( $perms === false ) {
+			return false;
+		}
+		return $perms === '' || strpos($perms, $perm) !== false;
+	}
+
+
+	static public function dumpHtml($var, $title = null)
+	{
+		if( $title ) {
+			echo "<h1>$title</h1>";
+		}
+        echo "\n<pre>";
+        print_r($var);
+        echo "</pre><br/>";
+    }
+
+    static public function dump($var)
+	{
+        print_r($var);
+        echo "\n";
+    }
+
 }

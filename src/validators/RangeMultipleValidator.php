@@ -63,7 +63,7 @@ class RangeMultipleValidator extends Validator
             throw new InvalidConfigException('The "range" property must be set.');
         }
         if ($this->message === null) {
-            $this->message = Yii::t('yii', '{attribute} is invalid.');
+            $this->message = Yii::t('yii', '{value} in {attribute} is invalid.');
         }
     }
 
@@ -75,7 +75,7 @@ class RangeMultipleValidator extends Validator
         $in = false;
 
         if( is_string($value) ) {
-			$value = explode($this->delimiter, $value);
+			$value = array_filter(explode($this->delimiter, $value));
 		}
         if( ( $value instanceof \Traversable || is_array($value))
             && ArrayHelper::isSubset($value, $this->range, $this->strict)
@@ -86,7 +86,6 @@ class RangeMultipleValidator extends Validator
         if (!$in && ArrayHelper::isIn($value, $this->range, $this->strict)) {
             $in = true;
         }
-
         return $this->not !== $in ? null : [$this->message, []];
     }
 

@@ -72,7 +72,10 @@ trait ModelInfoTrait
 		$matches = [];
 		if( preg_match_all('/({[a-zA-Z0-9\._]+})+/', $message, $matches) ) {
 			foreach( $matches[1] as $match ) {
-				switch( $match ) {
+				if( substr($match,0,7) == '{model.' ) {
+					$fld = substr($match, 7, -1);
+					$placeholders[$match] = ArrayHelper::getValue($this,$fld,'');
+				} else switch( $match ) {
 				case '{title}':
 					$placeholders[$match] = lcfirst(static::getModelInfo('title'));
 					break;
@@ -249,6 +252,13 @@ trait ModelInfoTrait
 	{
 	}
 
+	public function saveOrFail(bool $runValidations = true)
+	{
+		if( !$this->save($runValidations) ) {
+			throw new \Exception("Save " . static::getModelInfo('title') . ': ' . print_r($this->getErrors(), true) );
+		}
+	}
+
 	static public function createFromDefault($number = 1)
     {
 		$ret = [];
@@ -302,9 +312,19 @@ trait ModelInfoTrait
     public function getRelatedFieldForModel($related_model)
     {
 		foreach( self::$relations as $relname => $rel_info ) {
-			if( $rel_info['modelClass'] == $related_model->className() ) {
+			$cn = $related_model->className();
+			if( $rel_info['modelClass'] == $cn ) {
 				$related_field = $rel_info['left'];
-				list($table, $field) = ModelSearchTrait::splitFieldName($related_field);
+				list($table, $field) = static::splitFieldName($related_field);
+				return $field;
+			}
+		}
+		// If it's a derived class like *Form, *Search, look up its parent
+		foreach( self::$relations as $relname => $rel_info ) {
+			$cn = get_parent_class($related_model);
+			if( $rel_info['modelClass'] == $cn ) {
+				$related_field = $rel_info['left'];
+				list($table, $field) = static::splitFieldName($related_field);
 				return $field;
 			}
 		}
@@ -372,10 +392,10 @@ trait ModelInfoTrait
 			$r0 = explode(',',static::getModelInfo('code_field'));
 			$r1 = explode(',',static::getModelInfo('desc_field'));
 			return array_merge($r0,$r1);
-		} else if (isset(self::$relations[$relname])) {
-			$relmodelname = self::$relations[$relname]['modelClass'];
-			$relmodel = new $relmodelname;
-			return $relmodel->findCodeAndDescFields();
+		} else if (isset(static::$relations[$relname])) {
+			$relmodelname = static::$relations[$relname]['modelClass'];
+			$relmodel = $relmodelname::instance();
+			return $relmodel::findCodeAndDescFields();
 		} else {
 			return [];
 		}
@@ -514,8 +534,23 @@ trait ModelInfoTrait
 			throw new \app\helpers\ProgrammerException("No se encuentra un " . self::className() . "de id $fixture_id en el fichero $fixture_file");
 		}
     }
-
-
 */
+
+	static public function splitFieldName($fieldname, $reverse = true)
+	{
+		if( $reverse ) {
+			$dotpos = strrpos($fieldname, '.');
+		} else {
+			$dotpos = strpos($fieldname, '.');
+		}
+		if( $dotpos !== FALSE ) {
+			$fldname = substr($fieldname, $dotpos + 1);
+			$tablename = substr($fieldname, 0, $dotpos);
+			return [ $tablename, $fldname ];
+		} else {
+			return [ "", $fieldname ];
+		}
+	}
+
 } // trait ModelInfoTrait
 

@@ -1,12 +1,21 @@
-= Prioritario
+No traduce los parámetros en AuthController mensajes
+	Acceso al sitio del módulo {module}: permission already exists
+No funciona filtro en grid de HasOne
 
+definir formfield layout medium large
 
-== Permisos
+The default currency code for the formatter is not defined: web.php
+
+= Optimizacion sqlite3
+https://stackoverflow.com/questions/1711631/improve-insert-per-second-performance-of-sqlite
+
+= Permisos
 * Crear Reports.view, etc.
 
-
-== CrudController
+= CrudController
 * Enviar a las vistas los permisos
+* WhereToGoNow en update cuando da error el backend, se queda ya en el update para siempre.
+Después de duplicar, se queda otra vez en duplicar.
 
 == Adjuntos y subir ficheros
 - Opciones
@@ -14,44 +23,29 @@
 	- behaviour
 	- behaviour con múltiple
 
+= Creación dinámica de etiquetas:
+https://stackoverflow.com/questions/32731987/adding-new-list-options-refreshing-updated-list-dynamically
+
 == Print y pdf
 * CrudController::pdf: Incluir css del módulo/modelo actual
 * Quitar (no definido) al imprimir
 * Hacer uso de los model.Agente.report
 
 == GridView ==
-* Añadir un parámetro al Index que sea la vista o sea el gridfields
 - Grid: cuando se filtra, poner "Filtrando 1-1 de s"
 * GridView: Ocultar filtro si no hay resultados
 ** BreadCrumbs: Index: Añadir el orden o el filtro ("filtrado") ("ordenado por")
 * 2 gridviews: https://www.yiiframework.com/doc/guide/2.0/en/output-data-widgets#multiple-gridviews
 
-= Sin clasificar
-* Pasar javascript churros a un asset: searchformjs y tecla enter.
-* Fork del gentelella
-* Investigar estos widgets:
-- https://www.yiiframework.com/extension/yii2-sortable-behavior
-- https://www.yiiframework.com/extension/yii2-poll-widget
-- https://github.com/jonmiles/bootstrap-treeview
-- https://www.yiiframework.com/extension/yii2-taggable-behavior
+= Formularios
+Añadir el símbolo del euro al input de los forms.
 
 = No prioritario
-== CrudController
-* No funciona el enlace del mensaje "se ha guardado correctamente" de un detalle
-* Enviar a las vistas los permisos
 == Models
 * Tres tipos campos calculados:
 - model_before_save
 - model_after_read & __set
 - form input change
-
-== Auth
-* actionAddCrudPermsToRoles --perms --roles --models
-* actionDelCrudPermsFromRoles --perms --roles --models
-* actionAddPermsToRole --perms rolename
-* actionDelPermsFromRole --perms rolename
-* actionAddRolesToUsers --roles --users
-* actionDelRolesFromUsers --roles --users
 
 == Reports
 * Añadir más funciones sobre los campos: año, mes, día, cuenta, media, máximo, mínimo, etc.
@@ -59,22 +53,18 @@
 
 == Administración de usuarios
 === 2amigos-usuario
-  - Probar versión devel, ver si usa bootstrap4,
-  - Hacer un fork:
 	- Añadir opción visible en profile en resources ... _menu.php: yiiparam('user_profile');
-	- rediseñar las vistas
+	- Actualizar a bootstrap4
+	- Arreglar vistas en bootstrap3
+	- Customize views form bootstrap4
+	- usuarios: grid: etiquetas salen en inglés.
+
 
 == Web
 === Configuración
-- ¿moneda por aplicación?
 - Configuración fecha: Fija, por usuario
 - Configuración idioma: Fijo, por usuario
-<<<<<<< HEAD
-
-
-== Anidar RercordViews con un static
-=======
->>>>>>> 0d1cdb995f7004f4ef130a77faf3c10b2f302ecb
+== Anidar RercordViews con un static<
 
 === css
 * css: width = maxlength en integers, floats y dates
@@ -102,26 +92,18 @@
 
 == GridView ==
 - GridView: Report : grupos: opciones para Mostrar encabezado, mostrar pie.
-<<<<<<< HEAD
-- Grid: cuando se filtra, poner "Filtrando 1-1 de s"
-* Añadir un parámetro al Index que sea la vista o sea el gridfields
-* GridView: Ocultar filtro si no hay resultados
-=======
 
 == yii2
 * Max-length: Tomar lo que se ha definido en la base de datos o capturar la excepción.
 * Radio List: Ver cómo añadir el autofocus a cada item.
-* Sacarle más partido al returnTo con el ActionColumn
 
 == 3rd party
 * html-to-rtf y .editorconfig https://github.com/github-grabaz/html-rtf-converter/blob/master/.editorconfig
 https://github.com/pavlm/yii2-stats-widget Time Stats widget
 Modelos: Estudiar uuidbehavior, softdeletes y lock. Faltan los behaviors
 Formulario de settings: file:///home/santilin/devel/yii2base/yii2-docs/guide-input-tabular-input.html
+* Investigar estos widgets:
+- https://www.yiiframework.com/extension/yii2-sortable-behavior
+- https://www.yiiframework.com/extension/yii2-poll-widget
+- https://github.com/jonmiles/bootstrap-treeview
 
-== Código
-* Recordar:
-//		Yii::$app->response->redirect(['/curso'])->send();
-//		Yii::$app->end();
-
->>>>>>> 0d1cdb995f7004f4ef130a77faf3c10b2f302ecb

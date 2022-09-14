@@ -32,13 +32,21 @@ return [
 	'Edit' => 'Editar',
 	'Delete' => 'Borrar',
 	'List' => 'Listar',
+	'Duplicate' => 'Duplicar',
 	'Accesd denied to {esta} {title} because you are not the author' => 'Acceso denegado a {esta} {title} porque no eres el autor/a',
 	'Access to all models of module {module}' => 'Acceso a todos los modelos del módulo {module}',
 	'Access to {model_title} menu for {module_name} module' => 'Acceso al menú de {model_title} del módulo {module_name}',
 	"Access to '{module}' module menu" => 'Acceso al menu del módulo {module}',
+	"Access to '{module}' module site" => 'Acceso al sitio del módulo {module}',
 	'their own {title_plural}' => 'sus propi{-as} {title_plural}',
 
-    'All' => 'Todo',
+	'All' => 'Todo',
+    'Show all' => 'Mostrar todo',
+    'Paginate' => 'Paginar',
+    'Summarize' => 'Sólo totales',
+    'Show only summary' => 'Mostrar solo los totales',
+    'Show first page data' => 'Paginar los resultados',
+    'Show all data' => 'Mostrar todos los resultados',
     'Error saving the record {title}' => 'Error guardando el registro {title}',
     'From \'{from}\' or until \'{until}\' dates are in invalid date format' => 'Las fechas desde: \'{from}\' o hasta: \'{until}\' no tienen un formato válido',
 
@@ -55,10 +63,13 @@ return [
 		=> '{La} {title} <a href="{model_link}">{record_medium}</a> se ha duplicado correctamente.',
 	'The action on {la} {title} <a href="{model_link}">{record_medium}</a> has been successful.' => 'La acción sobre {la} {title} <a href="{model_link}">{record_medium}</a> se ha realizado correctamente.',
 
+	'Duplicating {title}: {record_short}' => 'Duplicando {title}: {record_short}',
+	'Updating {title}: {record_short}' => 'Editando {title}: {record_short}',
+	'Creating {title}' => 'Creando {title}',
     '{from-label} {from} can\'t be greater than {until-label} {until}' => '{from-label}: \'{from}\' no puede ser posterior a {until-label}: \'{until}\'',
-	"The parent record of {title} with '{id}' id does not exist" => "El registro madre {title} de id '{id}' no existe",
+	"The master record of {title} with '{id}' id does not exist" => "El registro maestro {title} de id '{id}' no existe",
     'You can\'t delete {esta} {title} because you are not the author' => 'No puedes borrar {esta} {title} porque no l{-a} has creado tú',
-    "You can't print to pdf {esta} {title} because you are not the author" => 'No puedes imprimir a pdf {esta} {title} porque no l{-a} has creado tú',
+    "You can\'t print to pdf {esta} {title} because you are not the author" => 'No puedes imprimir a pdf {esta} {title} porque no l{-a} has creado tú',
     'You can\'t update {esta} {title} because you are not the author' => 'No puedes modificar {esta} {title} porque no l{-a} has creado tú',
     'You can\'t view {esta} {title} because you are not the author' => 'No puedes ver {esta} {title} porque no l{-a} has creado tú',
     'Error deleting {la} {title} {record_medium}' => 'Error borrando {la} {title} {record_medium}',
@@ -76,4 +87,6 @@ return [
 		=> 'El informe "{record}" se ha guardado correctamente.',
 	'The report "{record}" has definition errors'
 		=> 'El informe "{record}" tiene errores en su definición.',
+	'Not showing totals because not all the rows have been shown' =>
+		'No se muestran los totales porque no se están mostrando todos los registros',
 ];

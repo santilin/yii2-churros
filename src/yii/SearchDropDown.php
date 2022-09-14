@@ -28,7 +28,8 @@ class SearchDropDown extends \yii\widgets\InputWidget
 		$view = $this->getView();
 		$name = $this->options['name'];
 		$id = $this->options['id'];
-		$js = <<<JS
+		if( !($this->options['readonly']??false) ) {
+			$js = <<<JS
 $('#_search_box_$id').keyup( function(e) {
 	if( e.keyCode == 9 && e.shiftKey == false) {
 		return; // The tab key pressed that got the focus
@@ -55,7 +56,8 @@ $('#_search_box_$id').keyup( function(e) {
 	});
 });
 JS;
-		$view->registerJs($js);
+			$view->registerJs($js);
+		}
 	}
 
     public function run()
@@ -63,20 +65,30 @@ JS;
         $this->registerClientScript();
         $id = $this->options['id'];
         $options_of_input = $this->options;
-        $options_of_input['id'] = "_search_box_$id";
-        unset($options_of_input['prompt']);
-        if( !isset($options_of_input['autocomplete']) ) {
-			$options_of_input['autocomplete'] = "off";
+		$options_of_input['id'] = "_search_box_$id";
+		if( $this->options['readonly']??false ) { // es readonly
+			$ret = Html::activeHiddenInput($this->model, $this->attribute);
+			$v = $this->model->{$this->attribute};
+			$options_of_input['value'] = $this->items[$v];
+			$options_of_input['name'] = 'sb_' . Html::getInputName($this->model, $this->attribute);
+			unset($options_of_input['autofocus']);
+			$options_of_input['tabindex'] = -1;
+			$ret .= Html::activeInput('text', $this->model, $this->attribute, $options_of_input );
+        } else {
+			unset($options_of_input['prompt']);
+			if( !isset($options_of_input['autocomplete']) ) {
+				$options_of_input['autocomplete'] = "off";
+			}
+			$ret = '';
+			if( count($this->items)>1 ) {
+				$ret .= Html::input('text', null, null, $options_of_input );
+			}
+			// Avoid getting keyboard focus
+			unset($this->options['autofocus']);
+			$this->options['tabindex'] = '-1';
+			$ret .= Html::activeDropDownList($this->model, $this->attribute,
+					$this->items, $this->options);
 		}
-        $ret = '';
-        if( count($this->items)>1 ) {
-			$ret .= Html::input('text', null, null, $options_of_input );
-		}
-		// Avoid getting keyboard focus
-		unset($this->options['autofocus']);
-		$this->options['tabindex'] = '-1';
- 		$ret .= Html::activeDropDownList($this->model, $this->attribute,
-				$this->items, $this->options);
 		return $ret;
     }
 }

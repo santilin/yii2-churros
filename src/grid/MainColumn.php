@@ -2,7 +2,7 @@
 
 namespace santilin\churros\grid;
 
-use kartik\grid\DataColumn;
+use yii\grid\DataColumn;
 use yii\helpers\Html;
 use yii\helpers\Url;
 use santilin\churros\helpers\AppHelper;

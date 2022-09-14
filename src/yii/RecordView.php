@@ -17,7 +17,7 @@ use yii\helpers\Html;
 use yii\helpers\Inflector;
 use yii\i18n\Formatter;
 use santilin\churros\yii\RecordViewAsset;
-use santilin\churros\helpers\AppHelper;
+use santilin\churros\helpers\{AppHelper,FormHelper};
 
 
 /**
@@ -155,11 +155,7 @@ html;
     public function renderButtons()
     {
 		$ret = '<div class="rv-btn-toolbar">';
-		if( count($this->buttons ) ) {
-			foreach( $this->buttons as $button ) {
-				$ret .= $button;
-			}
-		}
+		return FormHelper::displayButtons($this->buttons);
 		return $ret . '</div>';
     }
 

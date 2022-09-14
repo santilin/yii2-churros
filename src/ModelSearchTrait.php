@@ -18,15 +18,19 @@ trait ModelSearchTrait
 	protected $related_properties = [];
 	private $dynamic_rules = [];
 	static public $operators = [
-			'=' => '=',
-			'===' => 'Exactamente', // Distinguish = (in grid filter) from === in search form
-			'<>' => '<>',
-			'LIKE' => 'Contiene', 'NOT LIKE' => 'No contiene',
-			'>' => '>', '<' => '<',
-			'>=' => '>=', '<=' => '<=',
-			'BETWEEN' => 'entre', 'NOT BETWEEN' => 'no entre' ];
+		'=' => '=',
+		'===' => 'Exactamente igual', // Distinguish = (in grid filter) from === in search form
+		'<>' => '<>',
+		'START' => 'Comienza por', 'NOT START' => 'No comienza por',
+		'LIKE' => 'Contiene', 'NOT LIKE' => 'No contiene',
+		'>' => '>', '<' => '<',
+		'>=' => '>=', '<=' => '<=',
+		'SELECT' => 'Valor(es) de la lista',
+		'BETWEEN' => 'entre dos valores', 'NOT BETWEEN' => 'no entre dos valores',
+	];
 	static public $extra_operators = [
-			'BETWEEN', 'NOT BETWEEN' ];
+		'BETWEEN', 'NOT BETWEEN'
+	];
 
 	/*
 	 * Called when setting a filter in search()
@@ -50,8 +54,10 @@ trait ModelSearchTrait
 			try {
 				return parent::__get($name);
 			} catch( \yii\base\UnknownPropertyException $e) {
-				if( strpos('.', $name) !== FALSE ) {
-					return ArrayHelper::getValue($this, $name);
+				if( strpos($name, '.') !== FALSE ) {
+					/// @todo findrelatedvalue
+					return null;
+ 					return ArrayHelper::getValue($this, $name);
 				} else {
 					throw $e;
 				}
@@ -101,7 +107,7 @@ trait ModelSearchTrait
 				$relation_name = $attribute;
 				$sort_fldname = '';
 			} else {
-				list($relation_name, $sort_fldname) = self::splitFieldName($attribute);
+				list($relation_name, $sort_fldname) = ModelInfoTrait::splitFieldName($attribute);
 			}
 			if (isset(self::$relations[$relation_name]) ) {
 				$related_model_class = self::$relations[$relation_name]['modelClass'];
@@ -149,6 +155,9 @@ trait ModelSearchTrait
 	public function transformGridFilterValues()
 	{
 		foreach( $this->attributes as $name => $value ) {
+			if(is_array($value) ) {
+				continue;
+			}
 			if( substr($value,0,2) == '{"' && substr($value,-2) == '"}' ) {
 				$value = json_decode($value, true);
 			}
@@ -166,7 +175,8 @@ trait ModelSearchTrait
 	{
 		if( isset($value['op']) ) {
 			return $value;
-		} else if( is_string($value) && $value != '') {
+		}
+		if( is_string($value) && $value != '') {
 			if( substr($value,0,2) == '{"' && substr($value,-2) == '"}' ) {
 				return json_decode($value, true);
 			} else if( preg_match('/^(=|<>|<|<=|>|>=)(.*)$/', $value, $matches) ) {
@@ -176,30 +186,44 @@ trait ModelSearchTrait
 		return [ 'op' => $strict ? '=' : 'LIKE', 'lft' => $value, 'rgt' => '' ];
 	}
 
-
 	public function filterWhere(&$query, $fldname, $value)
 	{
 		$value = $this->toOpExpression($value, false );
 		if( $value['lft'] == null ) {
 			return;
 		}
+
+		if( $fldname instanceof \yii\db\Expression ) {
+			$this->addFieldFilterToQuery($query, $fldname, $value);
+			return;
+		}
+
+
 		// addColumnSortsToProvider adds the join tables with AS `as_xxxxxxx`
 		/// @todo add them as table1_table2_xxxxxx
-		$relfound = true;
 		$tablename = $this->tableName();
+		$fullfldname = null;
 		if( strpos($fldname, '.') !== FALSE ) {
-			$relmodel = $this->className();
+			$relmodel = $this->instance();
 			while( strpos($fldname, '.') !== FALSE ) {
-				list($relation, $fldname) = self::splitFieldName($fldname, false /*no reverse*/);
+				list($relation, $fldname) = ModelInfoTrait::splitFieldName($fldname, false /*no reverse*/);
 				if( isset($relmodel::$relations[$relation]) ) {
 					$tablename = $relmodel::$relations[$relation]['relatedTablename'];
 					$relmodel = $relmodel::$relations[$relation]['modelClass'];
 				} else {
-					throw new \Exception("$relation: relation not found in model $relmodel");
+					$fullfldname = $fldname;
+					break;
 				}
 			}
 		}
-		$fldname = $tablename . "." . $fldname;
+		if( $fullfldname === null ) {
+			$fullfldname = $tablename . "." . $fldname;
+		}
+		$this->addFieldFilterToQuery($query, $fullfldname, $value);
+	}
+
+	public function addFieldFilterToQuery(&$query, $fldname, array $value)
+	{
 		if( is_array($value['lft']) ) {
  			$query->andWhere([ 'in', $fldname, $value['lft']]);
 		} else switch( $value['op'] ) {
@@ -214,13 +238,17 @@ trait ModelSearchTrait
 			case "<":
 			case "NOT LIKE":
 			case "LIKE":
-				$query->andWhere([ $value['op'], $fldname,
-					$value['lft'] ]);
-					break;
+				$query->andWhere([ $value['op'], $fldname, $value['lft'] ]);
+				break;
+			case "START":
+				$query->andWhere([ 'LIKE', $fldname, $value['lft'] . '%', false]);
+				break;
+			case "NOT START":
+				$query->andWhere([ 'NOT LIKE', $fldname, $value['lft'] . '%', false]);
+				break;
 			case "BETWEEN":
 			case "NOT BETWEEN":
-				$query->andWhere([ $value['op'], $fldname,
-					$value['lft'], $value['rgt'] ]);
+				$query->andWhere([ $value['op'], $fldname, $value['lft'], $value['rgt'] ]);
 				break;
 		}
 	}
@@ -234,7 +262,7 @@ trait ModelSearchTrait
 			$relation_name = $name;
 			$attribute = '';
 		} else {
-			list($relation_name, $attribute) = self::splitFieldName($name);
+			list($relation_name, $attribute) = ModelInfoTrait::splitFieldName($name);
 		}
 		if (isset(self::$relations[$relation_name]) ) {
 			$related_model_class = self::$relations[$relation_name]['modelClass'];
@@ -271,10 +299,10 @@ trait ModelSearchTrait
 		} else {
 			// filter form outside grid
 			// join search form params
-			$scope = ($formName === null) ? $this->formName() : $formName;
 			$ret = parent::load($params, $formName);
 			if( $ret ) {
 				$newparams = [];
+                $scope = ($formName === null) ? $this->formName() : $formName;
 				if( isset($params[$scope]['_adv_']) ) {
 					foreach( $params[$scope]['_adv_'] as $name => $values) {
 						if( isset($values['lft'])  && $values['lft']!=='' && $values['lft']!==null ) {
@@ -292,7 +320,7 @@ trait ModelSearchTrait
 	 * Returns Html code to add an advanced search field to a search form
 	 */
 	public function createSearchField($attribute, $type = 'string', $options = [],
-		$dropdown_values = null )
+		$attribute_values = null )
 	{
 		$relation = '';
 		if( ($dotpos = strrpos($attribute, '.')) !== FALSE ) {
@@ -300,8 +328,9 @@ trait ModelSearchTrait
 		}
 		unset($options['relation']);
 		$attr_class = str_replace('.','_',$attribute);
-		if( ($control_type = $type) == 'date' ) {
-			$control_type = 'string';
+		switch( $type ) {
+		default:
+			$control_type = 'text';
 		}
 		if ( (isset($options['hideme']) && $options['hideme'] == true)
 			|| (isset($options['visible']) && $options['visible'] == false) ) {
@@ -326,7 +355,7 @@ trait ModelSearchTrait
 		$ret .= "<div$main_div>";
 		$ret .= "<div class='form-group'>";
 		$ret .= "<div class='control-label col-sm-2'>";
-		$ret .= Html::activeLabel($this, $attribute, $options) . $relation;
+		$ret .= Html::activeLabel($this, $attribute, $options['labelOptions']??[]) . $relation;
 		if ($type == 'date' ) {
 			$ret .= "<br>Formato yyyy-mm-dd";
 		}
@@ -338,21 +367,20 @@ trait ModelSearchTrait
 			'id' => "drop-$attr_class", 'class' => 'search-dropdown form-control col-sm-2'] );
 		$ret .= "</div>";
 
-		if( is_array($dropdown_values) ) {
+		if( is_array($attribute_values) || is_array($value['lft']) ) {
 			$ret .= "<div class='control-form col-sm-5'>";
 			$ret .= Html::dropDownList("${scope}[_adv_][$attribute][lft]",
-			$value['lft'], $dropdown_values, [ 'class' => 'form-control col-sm-4']);
+				$value['lft'], $attribute_values,
+				array_merge($options['htmlOptions']??[], [ 'prompt' => Yii::t('churros', 'Cualquiera')]));
 			$ret .= "</div>";
 		} else {
 			$ret .= <<<EOF
 	<div class="input-group col-sm-5">
 EOF;
-			$ret .= Html::input($control_type, "${scope}[_adv_][$attribute][lft]",
-			$value['lft'], [ 'class' => 'form-control' ]);
+
+			$ret .= Html::input($control_type, "${scope}[_adv_][$attribute][lft]", $value['lft'],
+				array_merge($options['htmlOptions']??[], [ 'class' => 'form-control' ]));
 			$ret .= <<<EOF
-	<span class="input-group-addon">
-        <a class="search-adv-field" data-input-name="${scope}[_adv_][$attribute][lft]" data-field="${scope}.$attribute" href="javascript:void(0)"><i class="fa fa-search"></i></a>
-    </span>
     </div>
 EOF;
 		}
@@ -367,18 +395,16 @@ y:
 </div>
 EOF;
 
-		if( is_array($dropdown_values) ) {
+		if( is_array($attribute_values) ) {
 			$ret .= "<div class='control-form col-sm-5'>";
 			$ret .= Html::dropDownList("${scope}[_adv_][$attribute][rgt]",
-			$value['rgt'], $dropdown_values, [ 'class' => 'form-control col-sm-4']);
+				$value['rgt'], $attribute_values,
+				array_merge($options['htmlOptions']??[], [ 'prompt' => Yii::t('churros', 'Cualquiera')]));
 		} else {
 			$ret .= '<div class="input-group col-sm-5">';
-			$ret .= Html::input($control_type, "${scope}[_adv_][$attribute][rgt]",
-				$value['rgt'], [ 'class' => 'form-control']);
+			$ret .= Html::input($control_type, "${scope}[_adv_][$attribute][rgt]", $value['rgt'],
+				array_merge($options['htmlOptions']??[], [ 'class' => 'form-control' ]));
 			$ret .= <<<EOF
-	<span class="input-group-addon">
-        <a class="search-adv-field" data-input-name="${scope}[_adv_][$attribute][rgt]" href="javascript:void(0)"><i class="fa fa-search"></i></a>
-    </span>
 EOF;
 		}
 		$ret .= "</div>";
@@ -389,69 +415,80 @@ EOF;
 		return $ret;
 	}
 
-	static public $searchFormJS = <<<JS
-$('.search-dropdown').change(function() {
-	let value= $(this).val();
-	console.log('#second-field-' + this.id);
-	console.log($('#second-field-' + this.id).html());
-	if( value == 'BETWEEN' || value == 'NOT BETWEEN' ) {
-		$('#second-field-' + this.id).show(200);
-	} else {
-		$('#second-field-' + this.id).hide(200);
-	}
-});
-
-$('.search-adv-field').click(function() {
-	console.log($(this).data('input-name'));
-
-});
-
-JS;
-
-	static public function splitFieldName($fieldname, $reverse = true)
+	public function createReportFilterField(array $dropdown_columns, ?string $attribute,
+		array $value, string $type = 'string', array $options = [], $attribute_values = null)
 	{
-		if( $reverse ) {
-			$dotpos = strrpos($fieldname, '.');
-		} else {
-			$dotpos = strpos($fieldname, '.');
+		$attr_class = str_replace('.','_',$attribute);
+		switch( $type ) {
+		default:
+			$control_type = 'text';
 		}
-		if( $dotpos !== FALSE ) {
-			$fldname = substr($fieldname, $dotpos + 1);
-			$tablename = substr($fieldname, 0, $dotpos);
-			return [ $tablename, $fldname ];
-		} else {
-			return [ "", $fieldname ];
+		$ret = '';
+		$scope = $this->formName();
+		if( empty($value) ) {
+			$value = [ 'op' => 'LIKE', 'lft' => '', 'rgt' => '' ];
 		}
+		if( !in_array($value['op'], ModelSearchTrait::$extra_operators) ) {
+			$extra_visible = "display:none";
+		} else {
+			$extra_visible = '';
+		}
+		$ret .= "<td>";
+		$ret .= Html::dropDownList("{$scope}[attribute][]", $attribute,
+		$dropdown_columns, [
+			'class' => 'form-control',
+			'prompt' => [
+				'text' => 'Elige una columna', 'options' => ['value' => '', 'class' => 'prompt',
+					'label' => 'Elige una columna']
+			]
+		]);
+		$ret .= "</td>";
+
+		$ret .= "<td class='control-form'>";
+		$ret .= Html::dropDownList("${scope}[op][]",
+			$value['op'], self::$operators, [
+			'id' => "drop-$attr_class", 'class' => 'search-dropdown form-control',
+			] );
+		$ret .= "</td>";
+
+		if( is_array($attribute_values) || is_array($value['lft']) ) {
+			$ret .= "<td class='control-form'>";
+			$ret .= Html::dropDownList("${scope}[lft][]",
+				$value['lft'], $attribute_values,
+				array_merge($options['htmlOptions']??[], [ 'prompt' => Yii::t('churros', 'Cualquiera')]));
+			$ret .= "</td>";
+		} else {
+			$ret .= <<<EOF
+	<td class="input-group">
+EOF;
+			$ret .= Html::input($control_type, "${scope}[lft][]", $value['lft'],
+				array_merge($options['htmlOptions']??[], [ 'class' => 'form-control' ]));
+			$ret .= <<<EOF
+    </td>
+EOF;
+		}
+		$ret .= <<<EOF
+	<td style="$extra_visible" id="second-field-drop-$attr_class">
+y:
+EOF;
+
+		if( is_array($attribute_values) ) {
+			$ret .= "<span class='control-form'>";
+			$ret .= Html::dropDownList("${scope}[rgt][]",
+				$value['rgt'], $attribute_values,
+				array_merge($options['htmlOptions']??[], [ 'prompt' => Yii::t('churros', 'Cualquiera')]));
+			$ret .= '</span>';
+		} else {
+			$ret .= '<span class="input-group">';
+			$ret .= Html::input($control_type, "${scope}[rgt][]", $value['rgt'],
+				array_merge($options['htmlOptions']??[], [ 'class' => 'form-control' ]));
+			$ret .= <<<EOF
+	</span>
+EOF;
+		}
+		$ret .= "</td>";
+		return $ret;
 	}
 
-	public function addRelatedField($attribute, &$joins)
-	{
-		$left_model = $this;
-		$tablename = $alias = '';
-		while( ($dotpos = strpos($attribute, '.')) !== FALSE ) {
-			$relation_name = substr($attribute, 0, $dotpos);
-			if( !empty($alias) ) { $alias .= "_"; }
-			$alias .= $relation_name;
-			$attribute = substr($attribute, $dotpos + 1);
-			if( $relation_name == str_replace(['{','}','%'],'',$this->tableName() ) ) {
-				$tablename = $relation_name;
-				continue;
-			}
-			if( isset($left_model::$relations[$relation_name]) ) {
-				$relation = $left_model::$relations[$relation_name];
-				$tablename = $relation['relatedTablename'];
-				// @todo if more than one, ¿add with an alias x1, x2...?
-				if( !isset($joins[$tablename]) ) {
-					$joins[$tablename] = $relation['join'];
-				}
-				$left_model = new $relation['modelClass'];
-			} else {
-				throw new \Exception($relation_name . ": relation not found in model " . $left_model->className() . " with relations " . join(',', array_keys($left_model::$relations)));
-			}
-		}
-		$alias .= "_$attribute";
-		return [ $tablename, $attribute, $alias ];
-	}
 
-
-}
+} // class

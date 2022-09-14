@@ -16,8 +16,6 @@ use santilin\churros\helpers\AppHelper;
  */
 class CrudController extends \yii\web\Controller
 {
-	protected $parent_model = null;
-	protected $parent_controller = null;
 	protected $allowedActions = [];
 	public $accessOnlyOwner = false;
 	const MSG_CREATED = '{La} {title} <a href="{model_link}">{record_medium}</a> has been successfully created.';
@@ -29,7 +27,7 @@ class CrudController extends \yii\web\Controller
 	/**
 	 * An array of extra params to pass to the views
 	 **/
-	protected function changeActionParams($queryParams, $action_id, $model)
+	protected function changeActionParams(array $queryParams, string $action_id, $model)
 	{
 		return $queryParams;
 	}
@@ -41,49 +39,42 @@ class CrudController extends \yii\web\Controller
 			'class' => VerbFilter::className(),
 			'actions' => [
 				'delete' => ['post'],
-				'logout' => ['post'],
 			],
 		];
 		// Auth behaviors must be set on descendants of this controller
-		return $ret;
+		return array_merge($ret, parent::behaviors());
 	}
 
 	public function beforeAction($action)
 	{
-		if (!parent::beforeAction($action)) {
-			return false;
-		}
-		$this->getParentFromRequest();
-		if (isset($this->junctionModel) && $this->junctionModel == true ) {
-			$id = $this->junctionIds();
-			if( $id ) {
-				// hack, take care
-				$response = call_user_func_array([$this, $action->actionMethod], ['id' => $id]);
-				if (!$response instanceof \yii\web\Response) {
-					Yii::$app->response->data = $response;
+        if( count($_POST) == 0 && count($_FILES) == 0 && isset($_SERVER['CONTENT_TYPE'])
+			&& substr($_SERVER['CONTENT_TYPE'], 0, 19) == 'multipart/form-data' ) {
+			if( $this->request->getMethod() === 'POST' && isset($_SERVER['CONTENT_LENGTH']) ) {
+				if( intval($_SERVER['CONTENT_LENGTH'])>0 ) {
+					Yii::$app->session->addFlash('error', strtr(Yii::t('churros', 'PHP discarded POST data because of request exceeding either post_max_size={post_size} or upload_max_filesize={upload_size}'), ['{post_size}' => ini_get('post_max_size'), '{upload_size}' => ini_get('upload_max_filesize')]));
+					$this->redirect(Yii::$app->request->referrer ?: Yii::$app->homeUrl);
+					return false;
 				}
-				return false;
 			}
-		}
-		return true;
+        }
+        return parent::beforeAction($action);
 	}
 
 	/**
-		* Lists all models.
-		* @return mixed
-		*/
+	 * Lists all models.
+	 * @return mixed
+	 */
 	public function actionIndex()
 	{
 		$params = Yii::$app->request->queryParams;
-		$searchModel = $this->createSearchModel();
-		if( $this->parent_model ) {
-			$params[$searchModel->formName()][$searchModel->getRelatedFieldForModel($this->parent_model)]
-				= $this->parent_model->getPrimaryKey();
+		$searchModel = $this->findModel(null, null, 'search');
+		if( $this->accessOnlyOwner ) {
+			$params['accessOnlyOwner'] = $this->accessOnlyOwner;
 		}
+		$params = $this->changeActionParams($params, 'index', $searchModel);
 		return $this->render('index', [
 			'searchModel' => $searchModel,
-			'parent' => $this->parent_model,
-			'gridParams' => $this->changeActionParams($params, 'index', $searchModel),
+			'indexParams' => $params,
 		]);
 	}
 
@@ -95,16 +86,9 @@ class CrudController extends \yii\web\Controller
 	public function actionView($id)
 	{
 		$model = $this->findModel($id);
-		if( $this->accessOnlyOwner ) {
-			if( !$model->IAmOwner() ) {
-				throw new \yii\web\ForbiddenHttpException(
-					$model->t('churros', "You can't view {esta} {title} because you are not the author"));
-			}
-		}
 		$params = Yii::$app->request->queryParams;
 		return $this->render('view', [
 			'model' => $model,
-			'parent' => $this->parent_model,
 			'extraParams' => $this->changeActionParams($params, 'view', $model)
 		]);
 	}
@@ -117,17 +101,14 @@ class CrudController extends \yii\web\Controller
 	public function actionCreate()
 	{
 		$params = Yii::$app->request->queryParams;
-		$model = $this->findModel();
+		$model = $this->findModel(null);
 		if (isset($_POST['_form_relations']) ) {
 			$relations = explode(",", $_POST['_form_relations']);
 		} else {
 			$relations = [];
 		}
 		if ($model->loadAll(Yii::$app->request->post(), $relations) ) {
-			if( $this->parent_model) {
-				$model->setAttribute( $model->getRelatedFieldForModel($this->parent_model), $this->parent_model->getPrimaryKey());
-			}
-			if( $model->saveAll() ) {
+			if( $this->saveAll('create', $model) ) {
 				if( $this->afterSave('create', $model) ) {
 					$this->showFlash('create', $model);
 					return $this->whereToGoNow('create', $model);
@@ -136,7 +117,6 @@ class CrudController extends \yii\web\Controller
 		}
 		return $this->render('create', [
 			'model' => $model,
-			'parent' => $this->parent_model,
 			'extraParams' => $this->changeActionParams($params, 'create', $model)
 		]);
 	}
@@ -163,14 +143,11 @@ class CrudController extends \yii\web\Controller
 			$relations = [];
 		}
 		if ($model->loadAll(Yii::$app->request->post(), $relations) ) {
-			if( $this->parent_model) {
-				$model->setAttribute( $model->getRelatedFieldForModel($this->parent_model), $this->parent_model->getPrimaryKey());
-			}
 			$model->setIsNewRecord(true);
 			foreach ($model->primaryKey() as $primary_key) {
 				$model->$primary_key = null;
 			}
-			if( $model->saveAll() ) {
+			if( $this->saveAll('duplicate', $model) ) {
 				if( $this->afterSave('duplicate', $model) ) {
 					$this->showFlash('duplicate', $model);
 					return $this->whereTogoNow('duplicate', $model);
@@ -179,7 +156,6 @@ class CrudController extends \yii\web\Controller
 		}
 		return $this->render('duplicate', [
 			'model' => $model,
-			'parent' => $this->parent_model,
 			'extraParams' => $this->changeActionParams($params, 'duplicate', $model)
 		]);
 	}
@@ -194,12 +170,6 @@ class CrudController extends \yii\web\Controller
 	{
 		$params = Yii::$app->request->queryParams;
 		$model = $this->findModel($id);
-		if( $this->accessOnlyOwner ) {
-			if( !$model->IAmOwner() ) {
-				throw new \yii\web\ForbiddenHttpException(
-					$model->t('churros', "You can't update {esta} {title} because you are not the author"));
-			}
-		}
 
 		if (isset($_POST['_form_relations']) ) {
 			$relations = explode(",", $_POST['_form_relations']);
@@ -207,10 +177,7 @@ class CrudController extends \yii\web\Controller
 			$relations = [];
 		}
 		if ($model->loadAll(Yii::$app->request->post(), $relations) ) {
-			if( $this->parent_model) {
-				$model->setAttribute( $model->getRelatedFieldForModel($this->parent_model), $this->parent_model->getPrimaryKey());
-			}
-			if( $model->saveAll() ) {
+			if( $this->saveAll('update', $model) ) {
 				if( $this->afterSave('update', $model) ) {
 					$this->showFlash('update', $model);
 					return $this->whereTogoNow('update', $model);
@@ -219,27 +186,18 @@ class CrudController extends \yii\web\Controller
 		}
 		return $this->render('update', [
 			'model' => $model,
-			'parent' => $this->parent_model,
 			'extraParams' => $this->changeActionParams($params,'update', $model)
 		]);
 	}
 
 	/**
-		* Deletes an existing model.
-		* If deletion is successful, the browser will be redirected to the 'index' page.
-		* @param integer $id
-		* @return mixed
-		* @todo delete uploaded files
-		*/
+	 * Deletes an existing model.
+	 * @param integer $id
+	 * @return mixed
+	*/
 	public function actionDelete($id)
 	{
 		$model = $this->findModel($id);
-		if( $this->accessOnlyOwner ) {
-			if( !$model->IAmOwner() ) {
-				throw new \yii\web\ForbiddenHttpException(
-					$model->t('churros', "You can't delete {esta} {title} because you are not the author"));
-			}
-		}
 		try {
 			$model->deleteWithRelated();
 			if( $this->afterSave('delete', $model) ) {
@@ -249,7 +207,7 @@ class CrudController extends \yii\web\Controller
 		} catch (\yii\db\IntegrityException $e ) {
 			$msg = $e->getMessage();
 			Yii::$app->session->addFlash('error', $msg);
-			throw new DeleteModelException($model->t('churros', "{La} {title} <strong>{record_long}</strong> can't be deleted because it has related data"));
+			throw new DeleteModelException($model, $e);
 		}
 		return $this->whereToGoNow('delete', $model);
 	}
@@ -263,20 +221,13 @@ class CrudController extends \yii\web\Controller
 	{
 		$params = Yii::$app->request->queryParams;
 		$model = $this->findModel($id);
-		if( $this->accessOnlyOwner ) {
-			if( !$model->IAmOwner() ) {
-				throw new \yii\web\ForbiddenHttpException(
-					$model->t('churros', "You can't print to pdf {esta} {title} because you are not the author"));
-			}
-		}
 		if( YII_DEBUG ) {
             Yii::$app->getModule('debug')->instance->allowedIPs = [];
         }
 		// https://stackoverflow.com/a/54568044/8711400
 		$content = $this->renderAjax('_pdf', [
 			'model' => $model,
-			'parent' => $this->parent_model,
-			'extraParams' => $this->changeActionParams($params, 'view', $model)
+			'extraParams' => $this->changeActionParams($params, 'pdf', $model)
 		]);
 		$methods = [];
 		$margin_header = AppHelper::yiiparam('pdfMarginHeader', 15);
@@ -316,264 +267,109 @@ class CrudController extends \yii\web\Controller
 		return $pdf->render();
 	}
 
-	protected function formRelations()
-	{
-		return [];
-	}
-
-	public function parentRoute($action_if_no_parent = 'index')
-	{
-		if( $this->parent_model ) {
-			$parent_route = $this->getRoutePrefix()
-				. $this->parent_controller
-				. '/' . $this->parent_model->getPrimaryKey();
-		} else {
-			$parent_route = Url::toRoute($action_if_no_parent);
-		}
-		return $parent_route;
-	}
-
 	protected function whereToGoNow($from, $model)
 	{
 		$returnTo = Yii::$app->request->getBodyParam('returnTo');
+		if( !$returnTo ) {
+			$returnTo = Yii::$app->request->queryParams['returnTo']??null;
+		}
 		if( $returnTo ) {
 			return $this->redirect($returnTo);
 		}
 		$referrer = Yii::$app->request->post("_form_referrer");
-		if ($from == 'create' || $from == 'duplicate') {
-			$referrer = null;
-		}
 		if ( $referrer ) {
 			return $this->redirect($referrer);
 		}
-		if( $this->parent_model ) {
-			return $this->redirect( $this->parentRoute() );
-		} else {
-			if ($from == 'update') {
-				$redirect = ['view', 'id' => $model->getPrimaryKey()];
-			} else if ($from == 'create') {
-				if (Yii::$app->request->post('_and_create') == '1') {
-					$redirect = ['create'];
-				} else {
-					$redirect = ["index"];
-				}
-			} else if ($from == 'duplicate') {
-				$redirect = ['view', 'id' => $model->getPrimaryKey()];
-			} else if ($from == 'delete') {
-				$redirect = ["index"];
+		if ($from == 'update') {
+			$redirect = ['view', 'id' => $model->getPrimaryKey()];
+		} else if ($from == 'create') {
+			if (Yii::$app->request->post('_and_create') == '1') {
+				$redirect = ['create'];
 			} else {
-				throw new Exception("Where should I go now?");
+				$redirect = ["index"];
 			}
-			return $this->redirect($redirect);
+		} else if ($from == 'duplicate') {
+			$redirect = ['view', 'id' => $model->getPrimaryKey()];
+		} else if ($from == 'delete') {
+			$redirect = ["index"];
+		} else {
+			throw new \Exception("Where should I go now?");
 		}
+		return $this->redirect($this->actionRoute($redirect));
 	}
 
-	public function genBreadCrumbs($action_id, $model, $parent)
+	public function addParamsToUrl($url, $params)
+    {
+        if ($params === null) {
+            $request = Yii::$app->getRequest();
+            $params = $request instanceof Request ? $request->getQueryParams() : [];
+        }
+        $params[0] = $url;
+        return Url::to($params);
+    }
+
+
+	public function genBreadCrumbs($action_id, $model)
 	{
 		$breadcrumbs = [];
-		if( isset($parent) ) {
-			$prefix = $this->getRoutePrefix() . $parent->controllerName(). '/';
-			$breadcrumbs[] = [
-				'label' => AppHelper::mb_ucfirst($parent->getModelInfo('title_plural')),
-				'url' => [ $prefix . 'index']
-			];
-			$keys = $parent->getPrimaryKey(true);
-			$keys[0] = $prefix . 'view';
-			$breadcrumbs[] = [
-				'label' => $parent->recordDesc('short', 25),
-				'url' => $keys
-			];
-			// child
-			$breadcrumbs[] = [
-				'label' => AppHelper::mb_ucfirst($model->getModelInfo('title_plural')),
-				'url' => $this->controllerRoute() . '/index'
-			];
-			switch( $action_id ) {
-				case 'update':
-					$breadcrumbs[] = [
-						'label' => $model->recordDesc('short', 25),
-						'url' => array_merge([$this->controllerRoute() . '/view'], $model->getPrimaryKey(true))
-					];
-					break;
-				case 'index':
-					break;
-			}
-		} else {
-			$prefix = $this->getRoutePrefix();
-			$breadcrumbs[] = [
-				'label' =>  $model->getModelInfo('title_plural'),
-				'url' => [ $this->id . '/index' ]
-			];
-			switch( $action_id ) {
-				case 'update':
-				case 'duplicate':
-					$breadcrumbs[] = [
-						'label' => $model->recordDesc('short', 20),
-						'url' => array_merge([ $prefix . $this->id . '/view'], $model->getPrimaryKey(true))
-					];
-					break;
-				case 'view':
-					$breadcrumbs[] = $model->recordDesc('short', 20);
-					break;
-				case 'create':
-					break;
-				case 'index':
-					break;
-				default:
-					throw new \Exception($action_id);
-			}
+		$prefix = $this->getRoutePrefix();
+		$breadcrumbs[] = [
+			'label' =>  $model->getModelInfo('title_plural'),
+			'url' => [ $this->id . '/index' ]
+		];
+		switch( $action_id ) {
+			case 'update':
+				$breadcrumbs[] = [
+					'label' => $model->t('churros', 'Updating {title}: {record_short}'),
+// 					'url' => array_merge([ $prefix . $this->id . '/view'], $model->getPrimaryKey(true))
+				];
+				break;
+			case 'duplicate':
+				$breadcrumbs[] = [
+					'label' => Yii::t('churros', 'Duplicating ') . $model->recordDesc('short', 20),
+					'url' => array_merge([ $prefix . $this->id . '/view'], $model->getPrimaryKey(true))
+				];
+				break;
+			case 'view':
+				$breadcrumbs[] = $model->recordDesc('short', 20);
+				break;
+			case 'create':
+				$breadcrumbs[] = $model->t('churros', 'Creating {title}');
+				break;
+			case 'index':
+				break;
+			default:
+				throw new \Exception($action_id);
 		}
 		return $breadcrumbs;
 	}
 
-	public function moduleRoute($action_id = null)
+	public function actionRoute($action_id = null)
 	{
-		if( $this->parent_model ) {
-			$parent_route = $this->parent_controller
-				. '/' . $this->parent_model->getPrimaryKey()
-				. '/'. $this->id;
-			$action_id = (array) $action_id;
-			if ($action_id[0] != '' && $action_id[0] == '/' ) {
-				$action_id[0] = $parent_route . $action_id[0];
-			} else {
-				$action_id[0] = $parent_route . '/' . $action_id[0];
-			}
+		if( $action_id === null ) {
+			return $this->getRoutePrefix() . $this->id;
+		} else {
 			return Url::toRoute($action_id);
-		} else if( $action_id !== null) {
-			return Url::toRoute($action_id);
-		} else {
-			return Url::toRoute($this->id);
 		}
 	}
 
-	public function getParentModel()
+	public function masterRoute($master)
 	{
-		return $this->parent_model;
+		return $this->id . '/' . $master->id;
 	}
 
-	protected function getParentFromRequest()
+	public function getRoutePrefix($route = null)
 	{
-		if( $this->parent_model != null ) {
-			return $this->parent_model;
+		if( $route === null ) {
+			$route = $this->id;
 		}
-		$parent_id = intval(Yii::$app->request->get('parent_id', 0));
-		if( $parent_id !== 0 ) {
-			$this->parent_controller = Yii::$app->request->get('parent_controller');
-			assert($this->parent_controller != '');
-			$parent_model_name = 'app\\models\\'. AppHelper::camelCase($this->parent_controller);
-			$parent_model = new $parent_model_name;
-			$this->parent_model = $parent_model->findOne($parent_id);
-			if ($this->parent_model == null) {
-				throw new NotFoundHttpException($parent_model->t('churros',
-					"The parent record of {title} with '{id}' id does not exist",
-					[ '{id}' => $parent_id]));
-			}
-		} else {
-			return null;
-		}
-	}
-
-	/**
-	 * @param Model $parent The parent model (for detail_grids)
-	 * @param Model $child The child model (for detail_grids)
-	 */
-	public function controllerRoute($parent = null, $child= null)
-	{
-		if( $child == null && ($parent == null || $parent == $this->parent_model)) { // for normal grids
-			$myroute = $this->getRoutePrefix() . $this->id;
-			if( $this->parent_model ) {
-				// myroute = /admin/model/11/update
-				// prefix = /admin/parent/22/
-				// result = /admin/parent/22/model/11/update
-				$parent_route = $this->parent_controller. '/' . $this->parent_model->getPrimaryKey() . '/';
-				$prefix = $this->getRoutePrefix() . $parent_route;
-				// https://stackoverflow.com/questions/7475437/find-first-character-that-is-different-between-two-strings
-				$pos_first_different = strspn($prefix ^ $myroute, "\0");
-				// and go back to the /
-				while( $pos_first_different >= 0 && $myroute[$pos_first_different] != '/' ) {
-					--$pos_first_different;
-				}
-				if( $pos_first_different > 0 ) {
-					++$pos_first_different;
-				}
-				$ret = $prefix . substr($myroute, $pos_first_different);
-			} else {
-				$ret = $myroute;
-			}
-		} else if( $child ) { // for detail_grids
-			$ret = $this->getRoutePrefix($parent);
-			$ret .= $parent->controllerName() . '/'
-				. $parent->getPrimaryKey() . '/';
-			$ret .= $child->controllerName();
-		} else {
-			return null;
-		}
-		return $ret;
-	}
-
-	protected function getRoutePrefix($parent_model = null)
-	{
-		if( $parent_model == null ) {
-			$parent_model = $this->parent_model;
-			$parent_controller = $this->parent_controller;
-		} else {
-			$parent_controller = $parent_model->controllerName();
-		}
-		$route = $this->id;
-		$route_pos = false;
 		$request_url = '/' . Yii::$app->request->getPathInfo();
-		if( $parent_model ) {
-			$parent_route = $parent_controller . '/' . $parent_model->getPrimaryKey();
-			$route_pos = strpos($request_url, $parent_route . "/" . $route);
-			if( $route_pos === false ) {
-				$route_pos = strpos($request_url, $parent_route . $route);
-			}
-		}
-		if( $route_pos === false ) {
-			$route_pos = strpos($request_url, $route);
-		}
+		$route_pos = strpos($request_url, $route);
 		$prefix = substr($request_url, 0, $route_pos);
 		if( substr($prefix, -1) != '/' ) {
 			$prefix .= '/';
 		}
 		return $prefix;
-	}
-
-	public function joinMany2ManyModels($glue, $models)
-	{
-		if( $models == null || count($models)==0 ) {
-			return "";
-		}
-		$attrs = [];
-		$route = null;
-		foreach((array)$models as $model) {
-			if( $route == null ) {
-				$route = $this->getRoutePrefix() . $model->controllerName() . '/';
-			}
-			if( $model != null ) {
-				$url = $route . strval($model->getPrimaryKey());
-				$attrs[] = "<a href='$url'>" .  $model->recordDesc() . "</a>";
-			}
-		}
-		return join($glue, $attrs);
-	}
-
-	public function joinHasManyModels($glue, $parent, $models)
-	{
-		if( $models == null || count($models)==0 ) {
-			return "";
-		}
-		$keys = $parent->getPrimaryKey(true);
-		$keys[0] = 'view';
-		$parent_route = Url::toRoute($keys);
-		$attrs = [];
-		foreach((array)$models as $model) {
-			if( $model != null ) {
-				$url = $parent_route . '/'.  $model->controllerName() . '/' . strval($model->getPrimaryKey());
-				$attrs[] = "<a href='$url'>" .  $model->recordDesc() . "</a>";
-			}
-		}
-		return join($glue, $attrs);
 	}
 
 	// Ajax
@@ -582,7 +378,7 @@ class CrudController extends \yii\web\Controller
 		$ret = [];
 		static $clientIdGetParamName = 'query';
 		$value = $_GET[$clientIdGetParamName];
-		$searchModel = $this->createSearchModel();
+		$searchModel = $this->findModel(null, null, 'search');
 		$query = $searchModel->find();
 		foreach( (array)$fields as $field ) {
 			$query->orWhere( [ "like", $field, $value  ] );
@@ -597,13 +393,9 @@ class CrudController extends \yii\web\Controller
 	public function actionRawModel($id)
 	{
 		$model = $this->findModel($id);
-		if( $this->accessOnlyOwner ) {
-			if( !$model->IAmOwner() ) {
-				throw new \yii\web\ForbiddenHttpException(
-					$model->t('churros', "Accesd denied to {esta} {title} because you are not the author"));
-			}
-		}
-		return json_encode($model->getAttributes());
+		if( $model ) {
+            return json_encode($model->getAttributes());
+        } /// @todo else
 	}
 
 	protected function getSuccessMessage(string $action_id): string
@@ -626,9 +418,9 @@ class CrudController extends \yii\web\Controller
 	{
 		$pk = $model->getPrimaryKey();
 		if( is_array($pk) ) {
-			$link_to_me = Url::to(array_merge([$this->parentRoute('view')], $pk));
+			$link_to_me = Url::to(array_merge([$this->actionRoute('view')], $pk));
 		} else {
-			$link_to_me = $this->parentRoute('view') . "/$pk";
+			$link_to_me = $this->actionRoute('view') . "/$pk";
 		}
 		switch( $action_id ) {
 		case 'delete':
@@ -672,6 +464,54 @@ class CrudController extends \yii\web\Controller
 		} else {
 			return $file;
 		}
+	}
+
+	protected function saveAll(string $context, $model, bool $in_trans = false): bool
+	{
+		return $model->saveAll(true, $in_trans);
+	}
+
+	public function joinMany2ManyModels($glue, $models)
+	{
+		if( $models == null || count($models)==0 ) {
+			return "";
+		}
+		$attrs = [];
+		$route = null;
+		foreach((array)$models as $model) {
+			if( $route == null ) {
+				$route = $this->getRoutePrefix() . $model->controllerName() . '/';
+			}
+			if( $model != null ) {
+				$url = $route . strval($model->getPrimaryKey());
+				$attrs[] = "<a href='$url'>" .  $model->recordDesc() . "</a>";
+			}
+		}
+		return join($glue, $attrs);
+	}
+
+	public function joinHasManyModels($glue, $parent, $models)
+	{
+		if( $models == null || count($models)==0 ) {
+			return "";
+		}
+		$keys = $parent->getPrimaryKey(true);
+		$keys[0] = 'view';
+		$parent_route = Url::toRoute($keys);
+		$attrs = [];
+		foreach((array)$models as $model) {
+			if( $model != null ) {
+				$url = $parent_route . '/'.  $model->controllerName() . '/' . strval($model->getPrimaryKey());
+				$attrs[] = "<a href='$url'>" .  $model->recordDesc() . "</a>";
+			}
+		}
+		return join($glue, $attrs);
+	}
+
+
+	public function getMasterModel()
+	{
+		return null;
 	}
 
 }

@@ -101,7 +101,7 @@ class GridGroup extends BaseObject
 
 	public function getHeaderContent($model, $key, $index, $tdoptions)
 	{
-		if( $this->grid->onlyTotals && $this->level == count($this->grid->groups) ) {
+		if( $this->grid->onlySummary && $this->level < count($this->grid->groups) ) {
 			return '';
 		}
 		$hc = isset($this->header['content']) ? $this->header['content'] : $this->header;
@@ -123,14 +123,14 @@ class GridGroup extends BaseObject
 					]);
 					break;
 			}
-			Html::addCssClass($tdoptions, 'grid-group-head-' . strval($this->level) . ' w1');
+			Html::addCssClass($tdoptions, 'reportview-group-head-' . strval($this->level) . ' w1');
 			return Html::tag('td', $content, $tdoptions);
 		}
 	}
 
 	public function getFooterContent($summary_columns, $model, $key, $index, $tdoptions)
 	{
-		if( $this->grid->onlyTotals && $this->level > count($this->grid->groups) ) {
+		if( $this->grid->onlySummary && $this->level > count($this->grid->groups) ) {
 			return $this->getOnlyTotalsContent($summary_columns, $model, $key, $index, $tdoptions);
 		} else {
 			return $this->getStandardFooterContent($summary_columns, $model, $key, $index, $tdoptions);
@@ -148,11 +148,11 @@ class GridGroup extends BaseObject
 				$value = $this->summaryValues[$this->level][$kc];
 				if( $this->level == count($this->grid->groups) ) {
 					$tdoptions = [
-						'class' => 'grid-detail w1',
+						'class' => 'reportview-detail w1',
 					];
 				} else {
 					$tdoptions = [
-						'class' => 'grid-group-foot-' . strval($this->level-1) . ' w1',
+						'class' => 'reportview-group-foot-' . strval($this->level-1) . ' w1',
 					];
 				}
 			}
@@ -192,7 +192,7 @@ class GridGroup extends BaseObject
 		if( $fc === true /*'summary'*/ ) {
 			$ret .= $this->getSummaryContent($summary_columns, $content);
 		} else {
-			Html::addCssClass($tdoptions, 'grid-group-foot-total-' . strval($this->level) . ' grid-group-foot-' . strval($this->level) . ' w1');
+			Html::addCssClass($tdoptions, 'reportview-group-foot-total-' . strval($this->level) . ' reportview-group-foot-' . strval($this->level) . ' w1');
 			$ret = Html::tag('td', $content, $tdoptions);
 		}
 		return $ret;
@@ -201,32 +201,40 @@ class GridGroup extends BaseObject
 	public function getSummaryContent($summary_columns, $content)
 	{
 		$colspan = 0;
-		foreach( $this->grid->columns as $kc => $column ) {
-			if( !isset($summary_columns[$kc]) ) {
-				$colspan++;
-			} else {
-				break;
+		foreach( $this->grid->columns as $column ) {
+			if( $column->visible ) {
+				if( !isset($summary_columns[$column->attribute]) ) {
+					$colspan++;
+				} else {
+					break;
+				}
 			}
 		}
 		$tdoptions = [
-			'class' => 'grid-group-foot-' . strval($this->level) . ' w1',
+			'class' => 'reportview-group-total-label reportview-group-foot-' . strval($this->level) . ' w1',
 			'colspan' => $colspan,
 		];
 		$ret = Html::tag('td', Yii::t('churros', "Totals") . ' ' . $content, $tdoptions );
 		$nc = 0;
-		foreach( $this->grid->columns as $kc => $column ) {
+		foreach( $this->grid->columns as $column ) {
+			$kc = $column->attribute;
 			if( $nc++ < $colspan ) {
 				continue;
 			}
+			$classes = [
+				'w1'
+			];
+			if( ($column->format?:'raw') != 'raw' ) {
+				$classes[] = "reportview-{$column->format}";
+			}
 			if( isset($summary_columns[$kc]) ) {
-				$tdoptions = [ 'class' => 'grid-group-foot-' . strval($this->level) . ' w1' ];
+				$classes[] = 'reportview-group-foot-' . strval($this->level);
 				$ret .= Html::tag('td',
 					$this->grid->formatter->format(
 						$this->summaryValues[$this->level][$kc], $column->format),
-						GridView::fetchColumnOptions($column, $tdoptions));
+						[ 'class' => join(' ', $classes) ]);
 			} else {
-				$tdoptions = [ "class" => "w1" ];
-				$ret .= Html::tag('td', '', $tdoptions);
+				$ret .= Html::tag('td', '', [ 'class' => join(' ', $classes) ]);
 			}
 		}
 		return $ret;
