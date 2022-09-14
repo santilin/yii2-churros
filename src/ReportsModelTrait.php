@@ -219,7 +219,8 @@ trait ReportsModelTrait
 				$orderby[] = $tablename .'.'.$attribute
 					. ($sorting_def['asc']??SORT_ASC==SORT_ASC?' ASC':' DESC');
 			} else {
-				throw new \Exception($attribute . ": attribute not found");
+				Yii::$app->session->addFlash("error", "Report '" . $this->name . "': order '$attribute' not found");
+				continue;
 			}
 		}
 		$provider->query->orderBy( join(',',$orderby) );
