@@ -108,7 +108,7 @@ class GridGroup extends BaseObject
 		if( $hc instanceOf \Closure ) {
 			return call_user_func($hc, $model, $key, $index, $this);
 		} else {
-			$format = isset($this->header_format) ? $this->header_format : isset($this->format) ? $this->format : 'raw';
+			$format = isset($this->header_format) ? $this->header_format : (isset($this->format) ? $this->format : 'raw');
 			switch($format) {
 				case 'string':
 				case 'integer':
