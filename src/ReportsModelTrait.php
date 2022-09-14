@@ -398,9 +398,9 @@ trait ReportsModelTrait
 	public function reportGroups(&$report_columns)
 	{
 		$groups = [];
-		foreach( $this->report_sorting as $column ) {
+		foreach( $this->report_sorting as $kc => $column ) {
 			if( !empty($column['group']) ) {
-				$colname = $column['attribute'];
+				$colname = $column['attribute']??$kc;
 				if( isset($report_columns[$colname]) ) {
 					$rc = $report_columns[$colname];
 					$groups[$colname] = [
