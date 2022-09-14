@@ -299,7 +299,7 @@ trait ReportsModelTrait
 			} else if ( is_int($attribute) || array_key_exists($attribute, $model->attributes ) ) {
 				$select_field = $tablename.'.'.$attribute;
 			} else if( ($dotpos = strpos($attribute, '.')) !== FALSE ) {
-				list($tablename, $attribute, $alias) = $model->addRelatedField($attribute, $joins);
+				list($tablename, $attribute, $alias) = static::addRelatedField($model, $attribute, $joins);
 				$select_field = $tablename.'.'.$attribute;
 			}
 			if( $alias != null ) {
