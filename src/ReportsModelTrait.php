@@ -200,8 +200,8 @@ trait ReportsModelTrait
 
 		$tablename = $model->tableName();
 		$orderby = [];
-		foreach( $this->report_sorting as $sorting_def ) {
-			$colname = $sorting_def['attribute'];
+		foreach( $this->report_sorting as $kc => $sorting_def ) {
+			$colname = $sorting_def['attribute']??$kc;
 			if( !isset($columns[$colname]) ) {
 				Yii::$app->session->addFlash("error", "Report '" . $this->name . "': column '$colname' not found in sorting");
 				continue;
@@ -226,8 +226,12 @@ trait ReportsModelTrait
 		$provider->query->orderBy( join(',',$orderby) );
 		$provider->sort = false;
 
-		foreach( $this->report_filters as $filter_def ) {
-			$colname = $filter_def['attribute'];
+		foreach( $this->report_filters as $kc => $filter_def ) {
+			$colname = $filter_def['attribute']??$kc;
+			if( !isset($columns[$colname]) ) {
+				Yii::$app->session->addFlash("error", "Report '" . $this->name . "': column '$attribute' of filter not found");
+				continue;
+			}
 			$column_def = $columns[$colname];
 			unset($filter_def['attribute']);
 			if( isset($column_def['calc']) ) {
@@ -353,8 +357,8 @@ trait ReportsModelTrait
 	public function reportColumns($allColumns)
 	{
 		$columns = [];
-		foreach( $this->report_columns as $column ) {
-			$colname = $column['attribute'];
+		foreach( $this->report_columns as $kc => $column ) {
+			$colname = $column['attribute']??$kc;
 			if( !isset($allColumns[$colname]) ) {
 				$point_parts = explode('.',$colname);
 				$last_part = array_pop($point_parts);
@@ -377,8 +381,8 @@ trait ReportsModelTrait
 				unset($columns[$colname]['summary']);
 			}
 		}
-		foreach( $this->report_sorting as $sorting_def ) {
-			$colname = $sorting_def['attribute'];
+		foreach( $this->report_sorting as $kc => $sorting_def ) {
+			$colname = $sorting_def['attribute']??$kc;
 			if( !isset($columns[$colname]) ) {
 				if( isset($allColumns[$colname]) ) {
 					$columns[$colname] = $allColumns[$colname];
