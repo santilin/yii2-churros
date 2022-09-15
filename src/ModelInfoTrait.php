@@ -1,10 +1,9 @@
 <?php namespace santilin\churros;
 
 use Yii;
-use santilin\churros\helpers\AppHelper;
+use yii\helpers\ArrayHelper;
+use santilin\churros\helpers\{YADTC,AppHelper};
 use santilin\churros\ModelSearchTrait;
-use \yii\helpers\ArrayHelper;
-use Faker\Factory as Faker;
 
 trait ModelInfoTrait
 {
@@ -551,6 +550,12 @@ trait ModelInfoTrait
 			return [ "", $fieldname ];
 		}
 	}
+
+	public function asDate($fldname): ?YADTC
+	{
+		return YADTC::fromSql( $this->$fldname );
+	}
+
 
 } // trait ModelInfoTrait
 
