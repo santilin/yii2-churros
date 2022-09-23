@@ -1,5 +1,3 @@
-No traduce los parámetros en AuthController mensajes
-	Acceso al sitio del módulo {module}: permission already exists
 No funciona filtro en grid de HasOne
 
 definir formfield layout medium large
@@ -10,6 +8,8 @@ The default currency code for the formatter is not defined: web.php
 https://stackoverflow.com/questions/1711631/improve-insert-per-second-performance-of-sqlite
 
 = Permisos
+* No traduce los parámetros en AuthController mensajes
+	Acceso al sitio del módulo {module}: permission already exists
 * Crear Reports.view, etc.
 
 = CrudController

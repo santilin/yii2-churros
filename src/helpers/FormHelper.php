@@ -568,6 +568,7 @@ class FormHelper
 	{
 		switch ($widgets_ver) {
 		case 'bs4':
+			switch($fields_layout) {
 			case '1col':
 			default:
 				$classes = 'offset-md-2 col-sm-10';
@@ -580,7 +581,8 @@ html;
 	</div></div><!--buttons form-group-->
 </div></div>
 html;
-			break;
+				break;
+			}
 		case 'bs3':
 			switch( $fields_layout) {
 			case '1col':

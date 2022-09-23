@@ -186,7 +186,7 @@ trait ReportsModelTrait
 	 * Creates the data provider for the report grid.
 	 * Sets the query, select, joins, orderBy, groupBy and filters
 	 */
-	public function dataProviderForReport($model, &$columns)
+	public function dataProviderForReport($model, &$columns, $all_columns)
     {
         $query = new Query(); // Do not use $model->find(), as we want a query, not active records
 
@@ -206,7 +206,7 @@ trait ReportsModelTrait
 				Yii::$app->session->addFlash("error", "Report '" . $this->name . "': column '$colname' not found in sorting");
 				continue;
 			}
-			$column_def = $columns[$colname];
+			$column_def = $all_columns[$colname];
 			$attribute = $column_def['attribute'];
 			if( isset($column_def['calc']) ) {
 				$orderby[] = new yii\db\Expression(strtr($attribute, [ '{tablename}' => $tablename ]));
@@ -227,12 +227,12 @@ trait ReportsModelTrait
 		$provider->sort = false;
 
 		foreach( $this->report_filters as $kc => $filter_def ) {
-			$colname = $filter_def['attribute']??$kc;
-			if( !isset($columns[$colname]) ) {
-				Yii::$app->session->addFlash("error", "Report '" . $this->name . "': column '$attribute' of filter not found");
+			$colname = $filter_def['attribute'];
+			if( !isset($all_columns[$colname]) ) {
+				Yii::$app->session->addFlash("error", "Report '" . $this->name . "': column '$colname' of filter not found");
 				continue;
 			}
-			$column_def = $columns[$colname];
+			$column_def = $all_columns[$colname];
 			unset($filter_def['attribute']);
 			if( isset($column_def['calc']) ) {
 				$model->filterWhere($query,

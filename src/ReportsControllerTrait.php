@@ -146,7 +146,7 @@ trait ReportsControllerTrait
 	font-size: 8pt; color: #000000; font-weight: bold; font-style: italic;">
 	<tr>
 		<td width="20%"><img height='48px' src='/img/logo_icono.jpg'/></td>
-		<td width="" style="text-align: center;">{$report->title}</td>
+		<td width="" style="text-align: center;">{$report->getReportTitle()}</td>
 		<td width="20%" align="right">{DATE j-m-Y} - {PAGENO}/{nbpg}</td>
 	</tr>
 </table>
