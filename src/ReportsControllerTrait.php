@@ -183,7 +183,8 @@ EOF;
 		$pdf = new \kartik\mpdf\Pdf([
 			'mode' => \kartik\mpdf\Pdf::MODE_CORE,
 			'format' => \kartik\mpdf\Pdf::FORMAT_A4,
-			'orientation' => \kartik\mpdf\Pdf::ORIENT_PORTRAIT,
+			'orientation' => $report->landscape
+				? \kartik\mpdf\Pdf::ORIENT_LANDSCAPE : \kartik\mpdf\Pdf::ORIENT_PORTRAIT,
 			'destination' => \kartik\mpdf\Pdf::DEST_STRING,
 			'marginHeader' => $margin_header, // Margin from top of page
 			'marginFooter' => $margin_footer, // Margin from bottom of page

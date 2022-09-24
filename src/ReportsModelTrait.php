@@ -14,6 +14,7 @@ trait ReportsModelTrait
 	public $report_filters = [];
 	public $report_sorting = [];
 	public $only_totals = false;
+	public $landscape = true;
 
 	public function getReportValue($var, $default)
 	{
@@ -31,9 +32,11 @@ trait ReportsModelTrait
 	public function load($data, $formName = null)
 	{
 		$scope = $formName === null ? $this->formName() : $formName;
-		$ret = parent::load($data, $scope);
 		if( isset($data[$scope]['only_totals'] ) ) {
 			$this->only_totals = boolval($data[$scope]['only_totals']);
+		}
+		if( isset($data[$scope]['landscape'] ) ) {
+			$this->landscape = boolval($data[$scope]['landscape']);
 		}
 		if( isset($data['report_columns']) ) {
 			// The HTML form sends the data trasposed
@@ -89,7 +92,7 @@ trait ReportsModelTrait
 				}
 			}
 		}
-		return $ret;
+		return true;
 	}
 
 	public function encodeValue()
@@ -102,6 +105,7 @@ trait ReportsModelTrait
 		$value->report_filters = $this->report_filters;
 		$value->report_sorting = $this->report_sorting;
 		$value->only_totals = $this->only_totals;
+		$value->landscape= $this->landscape;
 		$this->value = json_encode($value);
 	}
 
@@ -112,6 +116,7 @@ trait ReportsModelTrait
 		$this->report_filters = $value['report_filters']??[];
 		$this->report_sorting = $value['report_sorting']??[];
 		$this->only_totals = $value['only_totals']??false;
+		$this->landscape= $value['landscape']??true;
 	}
 
 	protected function findColumn($attribute)
