@@ -184,7 +184,7 @@ EOF;
 			'mode' => \kartik\mpdf\Pdf::MODE_CORE,
 			'format' => \kartik\mpdf\Pdf::FORMAT_A4,
 			'orientation' => \kartik\mpdf\Pdf::ORIENT_PORTRAIT,
-			'destination' => \kartik\mpdf\Pdf::DEST_DOWNLOAD,
+			'destination' => \kartik\mpdf\Pdf::DEST_STRING,
 			'marginHeader' => $margin_header, // Margin from top of page
 			'marginFooter' => $margin_footer, // Margin from bottom of page
 			'marginTop' => $margin_top, // Margin from top of page to content
@@ -195,8 +195,13 @@ EOF;
 			'options' => ['title' => $report->recordDesc()],
 			'methods' => $methods,
 		]);
- 		$pdf->filename = "/home/santilin/devel/tmp/pdf.pdf";
-		return $pdf->render();
+		$s = $pdf->render();
+		header('Cache-Control: public');
+		header('Content-Type: application/pdf');
+		header('Content-Transfer-Encoding: binary');
+		header('Content-Length: '.strlen($s));
+		header('Content-Disposition: attachment; filename=' . $report->getReportTitle() . '.pdf');
+		echo $s;
 	}
 
 } // class SiteController

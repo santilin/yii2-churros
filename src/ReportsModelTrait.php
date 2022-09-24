@@ -236,10 +236,10 @@ trait ReportsModelTrait
 			unset($filter_def['attribute']);
 			if( isset($column_def['calc']) ) {
 				$model->filterWhere($query,
-					new \yii\db\Expression(strtr($columns[$colname]['attribute'], [ '{tablename}' => $tablename ])),
+					new \yii\db\Expression(strtr($all_columns[$colname]['attribute'], [ '{tablename}' => $tablename ])),
 					$filter_def);
-			} else if( isset($columns[$colname]) ) {
-				$model->filterWhere($query, $columns[$colname]['attribute'], $filter_def);
+			} else if( isset($all_columns[$colname]) ) {
+				$model->filterWhere($query, $all_columns[$colname]['attribute'], $filter_def);
 			} else {
 				$model->filterWhere($query, $colname, $filter_def);
 			}
