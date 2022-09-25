@@ -14,7 +14,7 @@ trait ReportsModelTrait
 	public $report_filters = [];
 	public $report_sorting = [];
 	public $only_totals = false;
-	public $landscape = true;
+	public $landscape = false;
 
 	public function getReportValue($var, $default)
 	{
