@@ -116,7 +116,7 @@ trait ReportsModelTrait
 		$this->report_filters = $value['report_filters']??[];
 		$this->report_sorting = $value['report_sorting']??[];
 		$this->only_totals = $value['only_totals']??false;
-		$this->landscape= $value['landscape']??true;
+		$this->landscape= $value['landscape']??false;
 	}
 
 	protected function findColumn($attribute)
