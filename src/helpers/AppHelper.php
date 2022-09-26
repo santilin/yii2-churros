@@ -119,7 +119,7 @@ class AppHelper
 
     static public function userIsAdmin()
     {
-		return Yii::$app->user->identity && Yii::$app->user->identity->isAdmin;
+		return Yii::$app->user && Yii::$app->user->identity && Yii::$app->user->identity->isAdmin;
 	}
 
 	static public function yiiparam($name, $default = null)
