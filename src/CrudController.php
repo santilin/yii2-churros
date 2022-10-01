@@ -422,7 +422,9 @@ class CrudController extends \yii\web\Controller
 		} else {
 			$link_to_me = $this->actionRoute('view') . "/$pk";
 		}
-		switch( $action_id ) {
+		if( $model->hasErrors() ) {
+			Yii::$app->session->addFlash('error', $model->getOneError() );
+		} else switch( $action_id ) {
 		case 'delete':
 			Yii::$app->session->addFlash('success',
 				$model->t('churros', $this->getSuccessMessage('delete')));
