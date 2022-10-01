@@ -8,10 +8,9 @@ trait EmailSenderModelTrait
 {
 	public function doSendEmail(string $view_name, ?string $from, $to, string $subject, $body, array $options = []): bool
 	{
+		$from = Yii::$app->params['adminEmail'];
 		if( YII_ENV_DEV ) {
-			$from = $to = Yii::$app->params['testEmail']??'z@zzzzz.es';
-		} else if( empty($from) ) {
-			$from = Yii::$app->params['adminEmail'];
+			$to = Yii::$app->params['develEmailTo'];
 		}
 		$to = array($to);
 		if( is_array($body) ) {
