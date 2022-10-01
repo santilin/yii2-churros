@@ -28,17 +28,17 @@ trait EmailSenderModelTrait
 				->setHtmlBody($body);
 			$sent = $composed->send();
 		} catch ( \Swift_TransportException $e ) {
-			if( YII_ENV_DEV ) {
-				throw $e;
-			}
+			$sent_message = $e->getMessage();
 		} catch( \Swift_RfcComplianceException $e ) {
-			if( YII_ENV_DEV ) {
-				throw $e;
-			}
+			$sent_message = $e->getMessage();
 		}
 		if( !$sent ) {
-			$this->addError($view_name, Yii::t('churros', 'Unable to send email to {email}',
-				['{email}' => is_array($to)?array_first($to) . '...':$to]));
+			$error_message = Yii::t('churros', 'Unable to send email to {email}',
+				['{email}' => is_array($to)?array_pop($to) . '...':$to]);
+			if( YII_ENV_DEV ) {
+				$error_message = $sent_message . '<br/>' . $error_message;
+			}
+			$this->addError($view_name, $error_message);
 			return false;
 		}
 		return true;
