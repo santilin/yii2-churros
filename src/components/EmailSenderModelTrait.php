@@ -6,9 +6,24 @@ use Yii;
 
 trait EmailSenderModelTrait
 {
+	public function composeAndSendEmail(string $view_name, string $subject, $context): bool
+	{
+		$body = '';
+// 		if( $context->findViewFile('//views/emails/_global_header') ) {
+// 			$body = $context->renderPartial('//views/emails/_global_header');
+// 		}
+		$body .= $context->renderPartial($view_name, [ 'model' => $this ]);
+// 		if( $context->findViewFile('//views/emails/_global_footer') ) {
+// 			$body .= $context->renderPartial('//views/emails/_global_footer');
+// 		}
+		return $this->doSendEmail($view_name, null, $this->email, $subject, $body);
+	}
+
 	public function doSendEmail(string $view_name, ?string $from, $to, string $subject, $body, array $options = []): bool
 	{
-		$from = Yii::$app->params['adminEmail'];
+		if( $from == null ) {
+			$from = Yii::$app->params['adminEmail'];
+		}
 		if( YII_ENV_DEV ) {
 			$to = Yii::$app->params['develEmailTo'];
 		}
