@@ -6,21 +6,15 @@ use Yii;
 
 trait EmailSenderModelTrait
 {
-	public function composeAndSendEmail(string $view_name, string $subject, $context): bool
+	public function sendModelEmail(string $view_name, ?string $from, $to, string $subject,
+		array $params = []): bool
 	{
-		$body = '';
-// 		if( $context->findViewFile('//views/emails/_global_header') ) {
-// 			$body = $context->renderPartial('//views/emails/_global_header');
-// 		}
-		$body .= $context->renderPartial($view_name, [ 'model' => $this ]);
-// 		if( $context->findViewFile('//views/emails/_global_footer') ) {
-// 			$body .= $context->renderPartial('//views/emails/_global_footer');
-// 		}
-		return $this->doSendEmail($view_name, null, $this->email, $subject, $body);
-	}
-
-	public function doSendEmail(string $view_name, ?string $from, $to, string $subject, $body, array $options = []): bool
-	{
+		Yii::$app->mailer->on(\yii\mail\BaseMailer::EVENT_AFTER_SEND, function(\yii\mail\MailEvent $event) {
+			if( !$event->isSuccessful  ) {
+				// @todo sa
+			}
+		});
+		$params['model'] = $this;
 		if( $from == null ) {
 			$from = Yii::$app->params['adminEmail'];
 		}
@@ -28,18 +22,14 @@ trait EmailSenderModelTrait
 			$to = Yii::$app->params['develEmailTo'];
 		}
 		$to = array($to);
-		if( is_array($body) ) {
-			$body = '<p>'.implode("</p>\n<p>", $body)."</p>\n";
-		}
 		$sent = false;
 		$sent_message = '';
 		try {
-			$composed = Yii::$app->mailer->compose()
+			$composed = Yii::$app->mailer
+				->compose( [ 'html' => $view_name, 'text' => "text/$view_name" ], $params)
 				->setFrom($from)
 				->setTo($to)
-				->setSubject($subject)
-				->setTextBody(strip_tags($body))
-				->setHtmlBody($body);
+				->setSubject($subject);
 			$sent = $composed->send();
 		} catch ( \Swift_TransportException $e ) {
 			$sent_message = $e->getMessage();
@@ -47,8 +37,11 @@ trait EmailSenderModelTrait
 			$sent_message = $e->getMessage();
 		}
 		if( !$sent ) {
-			$error_message = Yii::t('churros', 'Unable to send email to {email}',
-				['{email}' => is_array($to)?array_pop($to) . '...':$to]);
+			if( count($to) > 1 ) {
+				$error_message = Yii::t('churros', 'Unable to send email to {email} and other {ndest} recipients', ['email' => array_pop($to), 'nemails' => count($to)]);
+			} else {
+				$error_message = Yii::t('churros', 'Unable to send email to {email}', ['email' => array_pop($to) ]);
+			}
 			if( YII_ENV_DEV ) {
 				$error_message = $sent_message . '<br/>' . $error_message;
 			}
