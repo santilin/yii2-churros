@@ -9,11 +9,12 @@ trait EmailSenderModelTrait
 	public function sendModelEmail(string $view_name, ?string $from, $to, string $subject,
 		array $params = []): bool
 	{
-		Yii::$app->mailer->on(\yii\mail\BaseMailer::EVENT_AFTER_SEND, function(\yii\mail\MailEvent $event) {
-			if( !$event->isSuccessful  ) {
-				// @todo sa
-			}
-		});
+		Yii::$app->mailer->on(\yii\mail\BaseMailer::EVENT_AFTER_SEND,
+			function(\yii\mail\MailEvent $event) {
+				if( !$event->isSuccessful  ) {
+					Yii::$app->mailer->saveMessage($event->message);
+				}
+			});
 		$params['model'] = $this;
 		if( $from == null ) {
 			$from = Yii::$app->params['adminEmail'];

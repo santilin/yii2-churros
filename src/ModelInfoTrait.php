@@ -1,6 +1,7 @@
 <?php namespace santilin\churros;
 
 use Yii;
+use yii\db\ActiveRecord;
 use yii\helpers\ArrayHelper;
 use santilin\churros\helpers\{YADTC,AppHelper};
 use santilin\churros\ModelSearchTrait;
@@ -360,6 +361,19 @@ trait ModelInfoTrait
 		}
 		return (object)[ 'src' => '', 'title' => '', 'size' => 0 ];
 	}
+
+	public function addErrorsFrom(ActiveRecord $model, $key = null)
+	{
+		if( $key === null ) {
+			$key = strtr(static::tableName(), '{%}', '');
+		}
+		foreach( $model->getErrors() as $k => $error ) {
+			foreach( $error as $err_msg ) {
+				$this->addError(  $key . "_$k", $err_msg);
+			}
+		}
+	}
+
 
 	public function getOneError()
 	{
