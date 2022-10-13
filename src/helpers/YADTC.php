@@ -11,7 +11,7 @@ class YADTC extends \DateTime
     static public function createFromFormat($format, $time, \DateTimeZone $timezone = null)
     {
         $ext_dt = new static();
-        $parent_dt = parent::createFromFormat($format, $time);
+        $parent_dt = parent::createFromFormat($format, $time, $timezone);
 
         if (!$parent_dt) {
             return false;
@@ -509,119 +509,6 @@ class YADTC extends \DateTime
 		return $ret;
 	}
 
-	const PERIODO_PUNTUAL = 0;
-    const PERIODO_MENSUAL = 1;
-    const PERIODO_BIMESTRAL = 2;
-    const PERIODO_TRIMESTRAL = 3;
-    const PERIODO_SEMESTRAL = 6;
-    const PERIODO_ANUAL = 12;
-
-    static public function periodoFromString($periodo)
-	{
-        if( is_int($periodo) ) {
-            return $periodo;
-        }
-        switch( strtolower($periodo)) {
-        case 'mensual':
-        case 'mes':
-            return self::PERIODO_MENSUAL;
-        case 'anual':
-        case 'año':
-            return self::PERIODO_ANUAL;
-        case 'trimestral':
-        case 'trimestre':
-            return self::PERIODO_TRIMESTRAL;
-        case 'semestral':
-        case 'semestre':
-            return self::PERIODO_SEMESTRAL;
-        case 'bimestral':
-        case 'bimensual':
-            return self::PERIODO_BIMESTRAL;
-        default:
-            return self::PERIODO_PUNTUAL;
-        }
-	}
-
-	static public function compruebaPeriodo($periodo, $f_ini, $f_fin)
-	{
-		$f_ini->resetTime();
-		$f_fin->resetTime();
-		$fin_periodo = clone $f_ini;
-		$speriodo = self::periodoFromString($periodo);
-		switch( $speriodo ) {
-			case self::PERIODO_PUNTUAL:
-				return 0;
-			case self::PERIODO_ANUAL:
-				$fin_periodo->modify('+ 1 year');
-				break;
-			case self::PERIODO_MENSUAL:
-				$fin_periodo->modify('+ 1 month');
-				break;
-			case self::PERIODO_SEMESTRAL:
-				$fin_periodo->modify('+ 6 months');
-				break;
-			case self::PERIODO_TRIMESTRAL:
-				$fin_periodo->modify('+ 3 months');
-				break;
-			case self::PERIODO_BIMESTRAL:
-				$fin_periodo->modify('+ 2 months');
-				break;
-		}
-		if( $f_ini->day() == 1 &&
-			($speriodo == self::PERIODO_MENSUAL) ) { // ost017547
-            $fin_periodo->modify('-1 day');
-        }
-		if( $fin_periodo->lt($f_fin) ) {
-			return 1;
-		} else if( $fin_periodo->gt($f_fin) ) {
-			return -1;
-		} else {
-			return 0;
-		}
-    }
-
-    /**
-     * Para el Ministerio, las diferencias de fechas son de día del mes al mismo día del mes siguiente,
-       y luego se cuenta el número de días
-	 */
-    static public function diffSegunMinisterio($f1, $f2)
-    {
-		if ($f1 > $f2 ) {
-			$ftmp = $f1;
-			$f1 = $f2;
-			$f2 = $ftmp;
-		}
-		$a = $f2->year() - $f1->year();
-		if( $a > 0 ) {
-			$m = 12 * ($a-1) + (12 - $f1->month()) + $f2->month();
-		} else {
-			$m = $f2->month() - $f1->month();
-		}
-		$d = $f2->day() - $f1->day();
-		if ($d < 0) {
-			$ldom = $f1->lastDayOfMonth();
-			$d = $ldom - $f1->day() + $f2->day() - 1;
-			--$m;
-		} else {
-			$d++;
-		}
-		return [$m, $d];
-    }
-
-
-	/**
-	 * creación matriz de fechas de la semana en cuestión
-	 */
-	static public function semana($fecha)
-	{
-		$f1 = new \DateTime("Monday this week $fecha");
-		$f2 = new \DateTime("Sunday this week $fecha");
-		$f2->modify('+1 days');  //se agrega un día más para que se incluya en el rango
-		$intervalo = new \DateInterval('P1D'); //de día en día
-		$rangofechas = new \DatePeriod($f1, $intervalo, $f2);
-		$f2->modify('-1 days');  //se vuelve a la fecha del domingo de esa semana
-		return [$f1, $f2, $rangofechas];
-	}
 
 	static public function selectMonths($nyears = 2, $year_ini = null)
 	{
@@ -665,14 +552,6 @@ class YADTC extends \DateTime
 		return $ret;
 	}
 
-
-	static public function fromCepaimForm($date)
-	{
-		if( $date instanceof YADTC || $date instanceof \DateTime) {
-			return $date;
-		}
-		return YADTC::fromString($date, '!y-m-d');
-	}
 
 } // class YADTC
 
