@@ -439,6 +439,41 @@ class CrudController extends \yii\web\Controller
 		}
 	}
 
+	protected function showWarningFlash($action_id, $model)
+	{
+		$pk = $model->getPrimaryKey();
+		if( is_array($pk) ) {
+			$link_to_me = Url::to(array_merge([$this->actionRoute('view')], $pk));
+		} else {
+			$link_to_me = $this->actionRoute('view') . "/$pk";
+		}
+		switch( $action_id ) {
+		case 'delete':
+			Yii::$app->session->addFlash('success',
+				$model->t('churros', $this->getSuccessMessage('delete')));
+			break;
+		default:
+			if( ($msg = $this->getSuccessMessage($action_id)) != '' ) {
+				Yii::$app->session->addFlash('success',
+					strtr($model->t('churros', $msg),
+						['{model_link}' => $link_to_me]));
+			}
+			break;
+		}
+		if( $model->hasErrors() ) {
+			Yii::$app->session->addFlash('error', $model->getOneError() );
+		}
+	}
+
+	protected function showErrorsFlash($model)
+	{
+		foreach($model->getErrors() as $k => $errors ) {
+			foreach($errors as $error_msg ) {
+				Yii::$app->session->addFlash('error', $error_msg );
+			}
+		}
+	}
+
 	protected function afterSave($action_id, $model)
 	{
 		return true;

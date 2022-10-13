@@ -91,5 +91,6 @@ return [
 		'No se muestran los totales porque no se están mostrando todos los registros',
 
 	'Unable to send email to {email}' => 'No se ha podido enviar el email a {email}',
+	'Unable to send email to {email} and other {ndest} recipients' => 'No se ha podido enviar el email a {email} y a otros {ndest} destinatarios',
 
 ];
