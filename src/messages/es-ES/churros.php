@@ -93,4 +93,7 @@ return [
 	'Unable to send email to {email}' => 'No se ha podido enviar el email a {email}',
 	'Unable to send email to {email} and other {ndest} recipients' => 'No se ha podido enviar el email a {email} y a otros {ndest} destinatarios',
 
+	'Showing <b>{begin, number}-{end, number}</b> of <b>{totalCount, number}</b> {totalCount, plural, one{item} other{items}}.' => 'Mostrando <b>{begin, number}-{end, number}</b> de <b>{totalCount, number}</b> {totalCount, plural, one{item} other{items}}.',
+	'Total <b>{count, number}</b> {count, plural, one{item} other{items}}.' => 'Total <b>{count, number}</b> {count, plural, one{item} other{items}}.'
+
 ];

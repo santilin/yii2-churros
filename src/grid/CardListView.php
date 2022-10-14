@@ -5,6 +5,7 @@
  * @license http://www.yiiframework.com/license/
  */
 namespace santilin\churros\grid;
+use yii;
 use yii\helpers\ArrayHelper;
 use yii\widgets\ListView;
 use yii\helpers\Html;
@@ -20,6 +21,8 @@ class CardListView extends ListView
 	public $itemOptions = [ 'class' => 'card' ];
 	public $layout = "{summarypager}\n{items}";
 	public $cardsPerRow = 4;
+	public $labelSingular = 'item';
+	public $labelPlural = 'items';
 
 	public function __construct($config = [])
 	{
@@ -44,6 +47,15 @@ class CardListView extends ListView
 		case 4:
 			Html::addCssClass($this->itemOptions, 'w-25');
 			break;
+		}
+		if( empty($this->summary) ) {
+			if ($this->dataProvider->getPagination() !== false) {
+                $this->summary = Yii::t('churros', 'Showing <b>{begin, number}-{end, number}</b> of <b>{totalCount, number}</b> {totalCount, plural, one{item} other{items}}.');
+			} else {
+                $this->summary = Yii::t('churros', 'Total <b>{count, number}</b> {count, plural, one{item} other{items}}.');
+			}
+			$this->summary = strtr($this->summary, ['{item}' => '{'.$this->labelSingular.'}',
+				'{items}' => '{'.$this->labelPlural.'}' ]);
 		}
 	}
 
