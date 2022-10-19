@@ -308,6 +308,23 @@ class AuthController extends Controller
 		$auth->addChild($role, $permission);
 	}
 
+
+	public function actionRemovePermFromRole($perm_name, $role_name, $auth = null)
+	{
+		if( $auth == null ) {
+			$auth = \Yii::$app->authManager;
+		}
+		$child = $auth->getItem($perm_name);
+		if( $child == null ) {
+			return;
+		}
+		$parent = $auth->getItem($role_name);
+		if( $parent == null ) {
+			return;
+		}
+		$auth->removeChild($parent, $child);
+	}
+
 	public function actionRemoveAll()
 	{
 		$this->authManager->removeAll();
