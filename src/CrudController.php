@@ -109,7 +109,7 @@ class CrudController extends \yii\web\Controller
 		}
 		if ($model->loadAll(Yii::$app->request->post(), $relations) ) {
 			if( $this->saveAll('create', $model) ) {
-				if( $this->afterSave('create', $model) ) {
+				if( $this->afterSave('create', $model, $params) ) {
 					$this->showFlash('create', $model);
 					return $this->whereToGoNow('create', $model);
 				}
@@ -178,7 +178,7 @@ class CrudController extends \yii\web\Controller
 		}
 		if ($model->loadAll(Yii::$app->request->post(), $relations) ) {
 			if( $this->saveAll('update', $model) ) {
-				if( $this->afterSave('update', $model) ) {
+				if( $this->afterSave('update', $model, $params) ) {
 					$this->showFlash('update', $model);
 					return $this->whereTogoNow('update', $model);
 				}
@@ -200,7 +200,7 @@ class CrudController extends \yii\web\Controller
 		$model = $this->findModel($id);
 		try {
 			$model->deleteWithRelated();
-			if( $this->afterSave('delete', $model) ) {
+			if( $this->afterSave('delete', $model, $params) ) {
 				$this->showFlash('delete', $model);
 				return $this->whereToGoNow('delete', $model);
 			}
@@ -474,7 +474,7 @@ class CrudController extends \yii\web\Controller
 		}
 	}
 
-	protected function afterSave($action_id, $model)
+	protected function afterSave(string $action_id, $model, array $params): bool
 	{
 		return true;
 	}

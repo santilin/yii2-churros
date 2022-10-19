@@ -139,18 +139,20 @@ class AuthController extends Controller
 // 			} else {
 // 				echo "Warning: permission {$permission->name} already exists in role {$editora->name}\n";
 			}
-			$permission_own = AuthHelper::createOrUpdatePermission(
-				$model_name . ".$perm_name.own",
-				$perm_desc .' ' . $model->t('churros', 'their own {title_plural}'), $auth);
-			AuthHelper::echoLastMessage();
-			if( !$auth->hasChild($model_editora_own, $permission_own) ) {
-				$auth->addChild($model_editora_own, $permission_own);
-				echo "permission {$permission_own->name} added to role {$model_editora_own->name}\n";
-			}
-			if( $add_to_visora ) {
-				if( !$auth->hasChild($model_visora_own, $permission_own) ) {
+			if( $perm_name != 'create' ) {
+				$permission_own = AuthHelper::createOrUpdatePermission(
+					$model_name . ".$perm_name.own",
+					$perm_desc .' ' . $model->t('churros', 'their own {title_plural}'), $auth);
+				AuthHelper::echoLastMessage();
+				if( !$auth->hasChild($model_editora_own, $permission_own) ) {
+					$auth->addChild($model_editora_own, $permission_own);
 					echo "permission {$permission_own->name} added to role {$model_editora_own->name}\n";
-					$auth->addChild($model_visora_own, $permission_own);
+				}
+				if( $add_to_visora ) {
+					if( !$auth->hasChild($model_visora_own, $permission_own) ) {
+						echo "permission {$permission_own->name} added to role {$model_editora_own->name}\n";
+						$auth->addChild($model_visora_own, $permission_own);
+					}
 				}
 			}
 		}

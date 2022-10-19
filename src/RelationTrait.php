@@ -113,7 +113,7 @@ trait RelationTrait
      * @param $v form values
      * @return bool
      */
-    private function loadToRelation($rel_name, $v)
+    public function loadToRelation($rel_name, $v)
     {
         /* @var $this ActiveRecord */
         /* @var $relObj ActiveRecord */
@@ -207,37 +207,20 @@ trait RelationTrait
         if( !$in_trans ) {
 			$trans = $this->getDb()->beginTransaction();
 		}
- 		$isNewRecord = $this->isNewRecord;
+		$isNewRecord = $this->isNewRecord;
         try {
             if ($this->save($runValidation)) {
-                $error = false;
-				foreach ($this->relatedRecords as $rel_name => $records) {
-					/* @var $records ActiveRecord | ActiveRecord[] */
-					if( $records instanceof \yii\db\ActiveRecord && !$records->getIsNewRecord() ) {
-						continue;
-					} else if ( $records instanceof \yii\db\ActiveRecord ) {
-						$records = (array)$records;
+				if( $this->saveRelated($in_trans) ) {
+					if( !$in_trans ) {
+						$trans->commit();
 					}
-					if (count($records)>0) {
-						$justUpdateIds = !$records[0] instanceof \yii\db\BaseActiveRecord;
-						if( $justUpdateIds ) {
-							$error = $this->updateIds($isNewRecord, $rel_name, $records);
-						} else {
-							$error = $this->updateRecords($isNewRecord, $rel_name, $records);
-						}
-					}
-				}
-                if ($error) {
+					return true;
+				} else {
 					if( !$in_trans ) {
 						$trans->rollback();
 					}
                     $this->isNewRecord = $isNewRecord;
                     return false;
-                } else {
-					if( !$in_trans ) {
-						$trans->commit();
-					}
-					return true;
 				}
             } else {
                 return false;
@@ -251,13 +234,36 @@ trait RelationTrait
         }
     }
 
+    public function saveRelated(bool $in_trans ): bool
+    {
+		$success = true;
+ 		$isNewRecord = $this->isNewRecord;
+		foreach ($this->relatedRecords as $rel_name => $records) {
+			/* @var $records ActiveRecord | ActiveRecord[] */
+			if( $records instanceof \yii\db\ActiveRecord && !$records->getIsNewRecord() ) {
+				continue;
+			} else if ( $records instanceof \yii\db\ActiveRecord ) {
+				$records = (array)$records;
+			}
+			if (count($records)>0) {
+				$justUpdateIds = !$records[0] instanceof \yii\db\BaseActiveRecord;
+				if( $justUpdateIds ) {
+					$success = $this->updateIds($isNewRecord, $rel_name, $records);
+				} else {
+					$success = $this->updateRecords($isNewRecord, $rel_name, $records);
+				}
+			}
+		}
+		return $success;
+    }
+
     private function updateIds($isNewRecord, $rel_name, $records)
     {
 		$relation = $this->getRelation($rel_name);
         $isSoftDelete = isset($this->_rt_softdelete);
 		$dontDeletePk = [];
 		$notDeletedFK = [];
-		$error = false;
+		$success = true;
 		if ($relation->multiple) {
 			$links = array_keys($relation->link);
 			$relModelClass = $relation->modelClass;
@@ -301,7 +307,7 @@ trait RelationTrait
 						}
 					} catch (IntegrityException $exc) {
 						$this->addError($rel_name, "Data can't be deleted because it's still used by another data.");
-						$error = true;
+						$success = false;
 					}
 				} else {
 					// Has Many
@@ -315,7 +321,7 @@ trait RelationTrait
 							}
 						} catch (IntegrityException $exc) {
 							$this->addError($rel_name, "Data can't be deleted because it's still used by another data.");
-							$error = true;
+							$success = false;
 						}
 					}
 				}
@@ -349,7 +355,7 @@ trait RelationTrait
 							$this->addError($rel_name, "$relModelWords #$index : $errorMsg");
 						}
 					}
-					$error = true;
+					$success = false;
 				}
 			}
 		} else {
@@ -368,12 +374,12 @@ trait RelationTrait
 // 				$error = true;
 // 			}
 		}
-		return $error;
+		return $success;
     }
 
     private function updateRecords($isNewRecord, $rel_name, $records)
     {
-		$error = false;
+		$success = true;
 		$relation = $this->getRelation($rel_name);
         $isSoftDelete = isset($this->_rt_softdelete);
 		$link = $relation->link;
@@ -392,7 +398,7 @@ trait RelationTrait
 								$this->addError($rel_name, "$relModelWords #$index : $errorMsg");
 							}
 						}
-						$error = true;
+						$success = false;
 					} else {
 					$rel_name = $rel_name . Inflector::camel2words(StringHelper::basename($AQ->primaryModel::className()));
 						$records[$index] = new $rel_name;
@@ -401,7 +407,7 @@ trait RelationTrait
 				}
 			}
 		}
-		if( !$error ) {
+		if( $success ) {
 			$dontDeletePk = [];
 			$notDeletedFK = [];
 			if ($relation->multiple) {
@@ -448,7 +454,7 @@ trait RelationTrait
 							}
 						} catch (IntegrityException $exc) {
 							$this->addError($rel_name, "Data can't be deleted because it's still used by another data.");
-							$error = true;
+							$success = false;
 						}
 					} else {
 						// Has Many
@@ -462,7 +468,7 @@ trait RelationTrait
 								}
 							} catch (IntegrityException $exc) {
 								$this->addError($rel_name, "Data can't be deleted because it's still used by another data.");
-								$error = true;
+								$success = false;
 							}
 						}
 					}
@@ -479,7 +485,7 @@ trait RelationTrait
 								$this->addError($rel_name, "$relModelWords #$index : $errorMsg");
 							}
 						}
-						$error = true;
+						$success = false;
 					}
 				}
 			} else {
@@ -495,7 +501,7 @@ trait RelationTrait
 							$this->addError($rel_name, "$recordsWords : $errorMsg");
 						}
 					}
-					$error = true;
+					$success = false;
 				}
 			}
 		}
