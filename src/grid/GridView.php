@@ -64,9 +64,6 @@ class GridView extends BaseGridView
 		$this->initSummaryColumns();
 		$this->resetGroupsSummaries();
 		$this->initSorting();
-		/**
-		* @var Request $request
-		*/
 		$request = $this->_module->get('request', false);
 		if ($request === null || !($request instanceof Request)) {
 			$request = Yii::$app->request;
@@ -89,6 +86,10 @@ class GridView extends BaseGridView
         if (!$this->toggleData) {
             return;
         }
+        if( !$this->showPageSummary ) {
+			return parent::initToggleData();
+        }
+
         $notBs3 = !$this->isBs(3);
         $defBtnCss = 'btn '.$this->getDefaultBtnCss();
         $defaultOptions = [
@@ -145,6 +146,9 @@ class GridView extends BaseGridView
         if (!$this->toggleData) {
             return '';
         }
+        if( !$this->showPageSummary ) {
+			return parent::renderToggleData();
+        }
         $maxCount = ArrayHelper::getValue($this->toggleDataOptions, 'maxCount', false);
         if ($maxCount !== true && (!$maxCount || (int)$maxCount <= $this->dataProvider->getTotalCount())) {
             return '';
@@ -166,6 +170,9 @@ class GridView extends BaseGridView
         $this->_toggleScript = '';
         if (!$this->toggleData) {
             return;
+        }
+        if( !$this->showPageSummary ) {
+			return parent::genToggleDataScript();
         }
         $minCount = ArrayHelper::getValue($this->toggleDataOptions, 'minCount', 0);
         if (!$minCount || $minCount >= $this->dataProvider->getTotalCount()) {
