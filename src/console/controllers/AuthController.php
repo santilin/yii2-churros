@@ -171,7 +171,7 @@ class AuthController extends Controller
 		$perm_name = "module.$module_id.menu.$model_name";
 		$permission = AuthHelper::createOrUpdatePermission($perm_name,
 			Yii::t('churros', 'Access to {model_title} menu for {module_name} module',
-				[ '{model_title}' => $model_title, '{module_name}' => $module_id ]), $auth);
+				[ 'model_title' => $model_title, 'module_name' => $module_id ]), $auth);
 		AuthHelper::echoLastMessage();
 		if( !$auth->hasChild($role_all, $permission) ) {
 			$auth->addChild($role_all, $permission);
@@ -187,18 +187,18 @@ class AuthController extends Controller
 		$auth = $this->authManager;
 		AuthHelper::createOrUpdatePermission("module.$module_id.menu",
 			Yii::t('churros', 'Access to \'{module}\' module menu',
-			[ '{module}' => $module_title?:$module_id ]), $auth);
+			[ 'module' => $module_title?:$module_id ]), $auth);
 		AuthHelper::echoLastMessage();
 		$role_all_name = "module.$module_id.menu.all";
 		$role_all = $this->authManager->getRole($role_all_name);
 		if( !$role_all ) {
 			$role_all = AuthHelper::createOrUpdateRole($role_all_name,
-				Yii::t('churros', 'Access to all models of module {module}', [ '{module}' => $module_id ]), $auth);
+				Yii::t('churros', 'Access to all models of module {module}', [ 'module' => $module_id ]), $auth);
 			AuthHelper::echoLastMessage();
 		}
 		AuthHelper::createOrUpdatePermission("module.$module_id.site.index",
 			Yii::t('churros', 'Access to \'{module}\' module site',
-			[ '{module}' => $module_title?:$module_id ]), $auth);
+			[ 'module' => $module_title?:$module_id ]), $auth);
 		AuthHelper::echoLastMessage();
 	}
 
