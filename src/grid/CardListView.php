@@ -23,6 +23,7 @@ class CardListView extends ListView
 	public $cardsPerRow = 4;
 	public $labelSingular = 'item';
 	public $labelPlural = 'items';
+	public $cardFields = [];
 
 	public function __construct($config = [])
 	{
