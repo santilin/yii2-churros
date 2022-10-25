@@ -319,22 +319,22 @@ class CrudController extends \yii\web\Controller
 		];
 		switch( $action_id ) {
 			case 'update':
-				$breadcrumbs[] = [
+				$breadcrumbs['action'] = [
 					'label' => $model->t('churros', 'Updating {title}: {record_short}'),
 // 					'url' => array_merge([ $prefix . $this->id . '/view'], $model->getPrimaryKey(true))
 				];
 				break;
 			case 'duplicate':
-				$breadcrumbs[] = [
+				$breadcrumbs['action'] = [
 					'label' => Yii::t('churros', 'Duplicating ') . $model->recordDesc('short', 20),
 					'url' => array_merge([ $prefix . $this->id . '/view'], $model->getPrimaryKey(true))
 				];
 				break;
 			case 'view':
-				$breadcrumbs[] = $model->recordDesc('short', 20);
+				$breadcrumbs['action'] = $model->recordDesc('short', 20);
 				break;
 			case 'create':
-				$breadcrumbs[] = $model->t('churros', 'Creating {title}');
+				$breadcrumbs['action'] = $model->t('churros', 'Creating {title}');
 				break;
 			case 'index':
 				break;

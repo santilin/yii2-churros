@@ -527,7 +527,7 @@ class FormHelper
 			. Html::endTag('div');
 	}
 
-	public static function getViewFromRequest($views, $params)
+	static public function getViewFromRequest($views, $params)
 	{
 		$_nv=$params[self::VIEWS_NVIEW_PARAM]??0;
 		if( is_numeric($_nv) ) {
@@ -547,14 +547,21 @@ class FormHelper
 		return array_keys($views)[0];
 	}
 
-	public static function getViewTitleFromRequest($views, $params)
+	static public function getViewTitleFromRequest($views, $params)
 	{
-		if( ($_nv=intval($params[self::VIEWS_NVIEW_PARAM]??0)) > (count($views)-1) ) {
-			$_nv = 0;
-		}
-		foreach($views as $kv => $view ) {
-			if( $_nv-- == 0 ) {
-				return $view;
+		$_nv=$params[self::VIEWS_NVIEW_PARAM]??0;
+		if( is_numeric($_nv) ) {
+			if ($_nv > (count($views)-1) ) {
+				$_nv = 0;
+			}
+			foreach($views as $kv => $view ) {
+				if( $_nv-- == 0 ) {
+					return $view;
+				}
+			}
+		} else {
+			if( isset($views[$_nv])	) {
+				return $views[$_nv];
 			}
 		}
 		return $views[0];

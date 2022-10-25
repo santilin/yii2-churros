@@ -230,4 +230,24 @@ class AppHelper
         echo "\n";
     }
 
+	const SPANISH_MALE_WORDS = [
+		"-a" => "o",
+		"-as" => "os",
+		"as" => "os",
+		"la" => "el",
+		"La" => "El",
+		"las" => "los",
+		"Las" => "Los",
+		"una" => "un",
+		"Una" => "Un",
+		"esta" => "este",
+		"Esta" => "Este",
+		"estas" => "estos",
+		"Estas" => "Estos",
+		"otra" => "otro",
+		"Otra" => "Otra",
+		"otras" => "otras",
+		"Otras" => "Otras",
+	];
+
 }
