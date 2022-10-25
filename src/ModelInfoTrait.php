@@ -422,7 +422,7 @@ trait ModelInfoTrait
 		throw new \Exception("field '$field' not supported in " . get_called_class() . "::handyFieldValues() ");
 	}
 
-	public function formatHandyFieldValues($values, $format)
+	public function formatHandyFieldValues($field, $values, $format)
 	{
 		if( $format == 'selectize' ) {
 			$ret = [];
@@ -434,6 +434,8 @@ trait ModelInfoTrait
 			return array_keys($values);
 		} else if( $format == 'values' ) {
 			return array_values($values);
+		} else if( $format == 'value' ) {
+			return $values[$this->$field]??null;
 		} else {
 			return $values;
 		}

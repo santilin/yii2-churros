@@ -200,7 +200,7 @@ class CrudController extends \yii\web\Controller
 		$model = $this->findModel($id);
 		try {
 			$model->deleteWithRelated();
-			if( $this->afterSave('delete', $model, $params) ) {
+			if( $this->afterSave('delete', $model, []) ) {
 				$this->showFlash('delete', $model);
 				return $this->whereToGoNow('delete', $model);
 			}
