@@ -288,6 +288,7 @@ html;
 				}
 				break;
 			case "horizontal": // 1col
+			case "1col":
 			case 'inline':
 				foreach( array_keys($this->attributes) as $key ) {
 					$layout_rows[] = [$key];
