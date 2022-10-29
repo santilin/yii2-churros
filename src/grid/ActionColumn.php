@@ -13,7 +13,7 @@ class ActionColumn extends \kartik\grid\ActionColumn
 {
     public $template = '{view}&nbsp;{update}&nbsp;{delete}&nbsp;{duplicate}';
     public $duplicateOptions = [];
-    public $crudPerms = 'CRUDd';
+    public $crudPerms = null;
     /**
      * Initializes the default button rendering callbacks.
      */
@@ -21,8 +21,8 @@ class ActionColumn extends \kartik\grid\ActionColumn
     {
 		$this->hAlign = 'left';
         $notBs3 = !$this->grid->isBs(3);
-        if( $this->crudPerms == '' ) {
-			$this->crudPerms = 'CRUDd';
+        if( $this->crudPerms === null ) {
+			$this->crudPerms = 'CRUD2';
 		}
         if( strpos($this->crudPerms,'R') !== false ) {
 			$this->setDefaultButton('view', Yii::t('churros', 'View'), $notBs3 ? 'eye' : 'eye-open');
@@ -33,7 +33,7 @@ class ActionColumn extends \kartik\grid\ActionColumn
         if( strpos($this->crudPerms,'D') !== false ) {
 			$this->setDefaultButton('delete', Yii::t('churros', 'Delete'), $notBs3 ? 'trash-alt' : 'trash');
 		}
-        if( strpos($this->crudPerms,'d') !== false ) {
+        if( strpos($this->crudPerms,'2') !== false ) {
 			$this->setDefaultButton('duplicate', Yii::t('churros', 'Duplicate'), $notBs3 ? 'copy' : 'duplicate');
 		}
     }
