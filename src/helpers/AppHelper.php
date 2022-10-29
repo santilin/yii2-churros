@@ -231,8 +231,8 @@ class AppHelper
     }
 
 	const SPANISH_MALE_WORDS = [
-		"-a" => "o",
-		"-as" => "os",
+		"a" => "o",
+		"as" => "os",
 		"as" => "os",
 		"la" => "el",
 		"La" => "El",

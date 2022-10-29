@@ -31,8 +31,8 @@ trait ModelInfoTrait
 		$female = $this->getModelInfo('female');
 		if( preg_match_all('/({([a-zA-Z0-9\._]+)})+/', $message, $matches) ) {
 			foreach( $matches[2] as $match ) {
-				if( substr($match,0,7) == '{model.' ) {
-					$fld = substr($match, 7, -1);
+				if( substr($match,0,6) == 'model.' ) {
+					$fld = substr($match, 6);
 					$placeholders[$match] = ArrayHelper::getValue($this,$fld,'');
 				} else switch( $match ) {
 				case 'title':
