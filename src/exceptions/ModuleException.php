@@ -9,7 +9,7 @@ class ModuleException extends \yii\base\UserException
 
 	public function __construct($message)
 	{
-		$this->module = Yii::$app->controller->module->id;
+		$this->module = Yii::$app->module;
 		parent::__construct($message);
 	}
 }
