@@ -32,17 +32,12 @@ class GridView extends BaseGridView
 
 	public function __construct($config = [])
 	{
-		if (empty($config['pager']) ) {
+		if ($config['pager']??false !== false ) {
 			$config['pager'] = [
 				'firstPageLabel' => '<<',
 				'lastPageLabel' => '>>',
 				'nextPageLabel' => '>',
 				'prevPageLabel' => '<',
-			];
-		}
-		if( empty($config['toolbar'])) {
-			$config['toolbar'] = [
-				'{toggleData}',
 			];
 		}
 		parent::__construct($config);

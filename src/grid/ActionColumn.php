@@ -13,6 +13,7 @@ class ActionColumn extends \kartik\grid\ActionColumn
 {
     public $template = '{view}&nbsp;{update}&nbsp;{delete}&nbsp;{duplicate}';
     public $duplicateOptions = [];
+    public $customButtons = [];
     public $crudPerms = null;
     /**
      * Initializes the default button rendering callbacks.
@@ -25,17 +26,42 @@ class ActionColumn extends \kartik\grid\ActionColumn
 			$this->crudPerms = 'CRUD2';
 		}
         if( strpos($this->crudPerms,'R') !== false ) {
-			$this->setDefaultButton('view', Yii::t('churros', 'View'), $notBs3 ? 'eye' : 'eye-open');
+			if( isset($this->customButtons['view']) ) {
+				$this->buttons['view'] = $this->customButtons['view'];
+				unset( $this->customButtons['view'] );
+			} else {
+				$this->setDefaultButton('view', Yii::t('churros', 'View'), $notBs3 ? 'eye' : 'eye-open');
+			}
 		}
         if( strpos($this->crudPerms,'U') !== false ) {
-			$this->setDefaultButton('update', Yii::t('churros', 'Update'), $notBs3 ? 'pencil-alt' : 'pencil');
+			if( isset($this->customButtons['update']) ) {
+				$this->buttons['update'] = $this->customButtons['update'];
+				unset( $this->customButtons['update'] );
+			} else {
+				$this->setDefaultButton('update', Yii::t('churros', 'Update'), $notBs3 ? 'pencil-alt' : 'pencil');
+			}
 		}
         if( strpos($this->crudPerms,'D') !== false ) {
-			$this->setDefaultButton('delete', Yii::t('churros', 'Delete'), $notBs3 ? 'trash-alt' : 'trash');
+			if( isset($this->customButtons['delete']) ) {
+				$this->buttons['delete'] = $this->customButtons['delete'];
+				unset( $this->customButtons['delete'] );
+			} else {
+				$this->setDefaultButton('delete', Yii::t('churros', 'Delete'), $notBs3 ? 'trash-alt' : 'trash');
+			}
 		}
         if( strpos($this->crudPerms,'2') !== false ) {
-			$this->setDefaultButton('duplicate', Yii::t('churros', 'Duplicate'), $notBs3 ? 'copy' : 'duplicate');
+			if( isset($this->customButtons['duplicate']) ) {
+				$this->buttons['duplicate'] = $this->customButtons['duplicate'];
+				unset( $this->customButtons['duplicate'] );
+			} else {
+				$this->setDefaultButton('duplicate', Yii::t('churros', 'Duplicate'), $notBs3 ? 'copy' : 'duplicate');
+			}
 		}
+		foreach( $this->customButtons as $index => $button ) {
+			$this->template .= '&nbsp;{' . $index. '}';
+			$this->buttons[$index] = $button;
+		}
+		$this->customButtons = []; // https://github.com/kartik-v/yii2-grid/issues/1047
     }
 
 }
