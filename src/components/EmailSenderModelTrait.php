@@ -51,5 +51,10 @@ trait EmailSenderModelTrait
 		return true;
 	}
 
+	public function composeAndSendEmail(string $view_name, string $subject, array $email_params): bool
+	{
+		return $this->sendModelEmail($view_name, null, $this->email, $subject, $email_params);
+	}
+
 } // trait
 
