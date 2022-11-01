@@ -461,7 +461,7 @@ class CrudController extends \yii\web\Controller
 			break;
 		}
 		if( $model->hasErrors() ) {
-			Yii::$app->session->addFlash('error', $model->getOneError() );
+			Yii::$app->session->addFlash('warning', $model->getOneError() );
 		}
 	}
 
