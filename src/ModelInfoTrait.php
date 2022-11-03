@@ -332,11 +332,11 @@ trait ModelInfoTrait
 	public function addErrorsFrom(ActiveRecord $model, $key = null)
 	{
 		if( $key === null ) {
-			$key = strtr(static::tableName(), '{%}', '');
+			$key = strtr(static::tableName(), '{%}', '   ') . '_';
 		}
 		foreach( $model->getErrors() as $k => $error ) {
 			foreach( $error as $err_msg ) {
-				$this->addError(  $key . "_$k", $err_msg);
+				$this->addError(  $key . $k, $err_msg);
 			}
 		}
 	}
@@ -440,83 +440,6 @@ trait ModelInfoTrait
 			return $values;
 		}
 	}
-
-/*
-	/// @todo move this to a new trait if necessary
-	private $dynamicFields = [];
-	private $dynamicTitles = [];
-	private $dynamicRules = [];
-
-	public function addDynamicField(string $field)
-	{
-		$this->dynamicFields[$field] = null;
-	}
-
-	public function addDynamicRule(string $rule) {
-		$this->dynamicRules[] = $rule;
-	}
-
-	public function __get($name)
-	{
-		if (array_key_exists($name, $this->dynamicFields)) {
-			return $this->dynamicFields[$name];
-		}
-		return parent::__get($name);
-	}
-
-	public function __set($name, $value)
-	{
-		if (isset($this->dynamicFields[$name])) {
-			return $this->dynamicFields[$name] = $value;
-		}
-		return parent::__set($name, $value);
-	}
-
-	// @todo put all these in a trait
-	public function setFakerValues($faker)
-	{
-	}
-
-
-    static public function createFromFaker($number = 1, $language = null)
-    {
-		if( $language == null ) {
-			$language = \app\helpers\AppHelper::getAppLocaleLanguage();
-		}
-		$faker = Faker::create($language);
-		$ret = [];
-		for( $count = 0; $count < $number; ++$count ) {
-			$modelname = get_called_class();
-			$model = new $modelname;
-			$model->setFakerValues($faker);
-			if( $number == 1 ) {
-				return $model;
-			} else {
-				$ret[] = $model;
-			}
-		}
-		return $ret;
-    }
-
-    static public function createFromFixture($fixture_file, $fixture_id)
-    {
-		$models = include($fixture_file);
-		if( isset($models[$fixture_id]) ) {
-			$ret = [];
-			for( $count = 0; $count < $number; ++$count ) {
-				$model = new self($models[$fixture_id]);
-				if( $number == 1 ) {
-					return $model;
-				} else {
-					$ret[] = $model;
-				}
-			}
-			return $ret;
-		} else {
-			throw new \app\helpers\ProgrammerException("No se encuentra un " . self::className() . "de id $fixture_id en el fichero $fixture_file");
-		}
-    }
-*/
 
 	static public function splitFieldName($fieldname, $reverse = true)
 	{

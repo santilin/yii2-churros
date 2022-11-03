@@ -268,16 +268,15 @@ class YADTC extends \DateTime
 	}
 	public function formatCepaimForm()
 	{
-		return self::format('d/m/y');
+		return $this->format('d/m/y');
 	}
-
 	public function formatSQLDate()
 	{
-		return self::format('Y-m-d');
+		return $this->format('Y-m-d');
 	}
 	public function formatSQLDateTime()
 	{
-		return self::format('Y-m-d H:i:s');
+		return $this->format('Y-m-d H:i:s');
 	}
 
 	static public function onlyDateStr($date)
