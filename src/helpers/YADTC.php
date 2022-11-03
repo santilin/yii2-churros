@@ -187,7 +187,7 @@ class YADTC extends \DateTime
 	{
 		return $this->format('Y-m-d');
 	}
-	public function lastDayOfMonth($month = null, $year = null)
+	public function lastDayOfMonth($month = null, $year = null): int
 	{
 		if( $month == null ) {
 			$month = $this->month();
@@ -197,49 +197,56 @@ class YADTC extends \DateTime
 		}
 		return ($month== 2 ? ($year % 4 ? 28 : ($year % 100 ? 29 : ($year % 400 ? 28 : 29))) : (($month - 1) % 7 % 2 ? 30 : 31));
 	}
-	public function eq($other)
+	public function isLeap($year = null): bool
+	{
+		if( $year === null ) {
+				$year = $this->year();
+		}
+		return ((($year % 4) == 0) && ((($year % 100) != 0) || (($year %400) == 0)));
+	}
+	public function eq($other): bool
 	{
 		if( !$other instanceof \DateTime && !$other instanceof YADTC) {
 			$other = static::fromString($other);
 		}
 		return $this->getTimestamp() == $other->getTimestamp();
 	}
-	public function neq($other)
+	public function neq($other): bool
 	{
 		if( !$other instanceof \DateTime && !$other instanceof YADTC) {
 			$other = static::fromString($other);
 		}
 		return $this->getTimestamp() != $other->getTimestamp();
 	}
-	public function lt($other)
+	public function lt($other): bool
 	{
 		if( !$other instanceof \DateTime && !$other instanceof YADTC) {
 			$other = static::fromString($other);
 		}
 		return $this->getTimestamp() < $other->getTimestamp();
 	}
-	public function lte($other)
+	public function lte($other): bool
 	{
 		if( !$other instanceof \DateTime && !$other instanceof YADTC) {
 			$other = static::fromString($other);
 		}
 		return $this->getTimestamp() <= $other->getTimestamp();
 	}
-	public function gt($other)
+	public function gt($other): bool
 	{
 		if( !$other instanceof \DateTime && !$other instanceof YADTC) {
 			$other = static::fromString($other);
 		}
 		return $this->getTimestamp() > $other->getTimestamp();
 	}
-	public function gte($other)
+	public function gte($other): bool
 	{
 		if( !$other instanceof \DateTime && !$other instanceof YADTC) {
 			$other = static::fromString($other);
 		}
 		return $this->getTimestamp() >= $other->getTimestamp();
 	}
-	public function betweenOnlyDates($d1, $d2)
+	public function betweenOnlyDates($d1, $d2): bool
 	{
 		$d = clone $this;
 		$d->setTime(0,0);
@@ -250,7 +257,7 @@ class YADTC extends \DateTime
 		return $d->getTimestamp() >= $cd1->getTimeStamp()
 			&& $d->getTimestamp() <= $cd2->getTimeStamp();
 	}
-	public function between($d1, $d2)
+	public function between($d1, $d2): bool
 	{
 		return $this->getTimestamp() >= $d1->getTimeStamp()
 			&& $this->getTimestamp() <= $d2->getTimeStamp();
@@ -266,20 +273,20 @@ class YADTC extends \DateTime
 		}
 		return parent::diff($other, $absolute);
 	}
-	public function formatCepaimForm()
+	public function formatCepaimForm(): string
 	{
 		return $this->format('d/m/y');
 	}
-	public function formatSQLDate()
+	public function formatSQLDate(): string
 	{
 		return $this->format('Y-m-d');
 	}
-	public function formatSQLDateTime()
+	public function formatSQLDateTime(): string
 	{
 		return $this->format('Y-m-d H:i:s');
 	}
 
-	static public function onlyDateStr($date)
+	static public function onlyDateStr($date): string
 	{
         return substr(strval($date),0,10);
 	}
