@@ -313,7 +313,7 @@ class CrudController extends \yii\web\Controller
 	{
 		$breadcrumbs = [];
 		$prefix = $this->getRoutePrefix();
-		$breadcrumbs[] = [
+		$breadcrumbs['index'] = [
 			'label' =>  $model->getModelInfo('title_plural'),
 			'url' => [ $this->id . '/index' ]
 		];
@@ -414,52 +414,52 @@ class CrudController extends \yii\web\Controller
 		}
 	}
 
-	protected function showFlash($action_id, $model)
+	protected function showFlash($action_id, $model, $success_message = null)
 	{
-		$pk = $model->getPrimaryKey();
-		if( is_array($pk) ) {
-			$link_to_me = Url::to(array_merge([$this->actionRoute('view')], $pk));
-		} else {
-			$link_to_me = $this->actionRoute('view') . "/$pk";
-		}
 		if( $model->hasErrors() ) {
 			Yii::$app->session->addFlash('error', $model->getOneError() );
-		} else switch( $action_id ) {
-		case 'delete':
-			Yii::$app->session->addFlash('success',
-				$model->t('churros', $this->getSuccessMessage('delete')));
-			break;
-		default:
-			if( ($msg = $this->getSuccessMessage($action_id)) != '' ) {
-				Yii::$app->session->addFlash('success',
-					strtr($model->t('churros', $msg),
-						['{model_link}' => $link_to_me]));
+		} else {
+			if( !$success_message ) {
+				$success_message = $this->getSuccessMessage($action_id);
 			}
-			break;
+			if( !$success_message ) {
+				$success_message  = $this->getSuccessMessage('update');
+			}
+			if( strpos( $warning_message, '{model_link}') !== FALSE ) {
+				$pk = $model->getPrimaryKey();
+				if( is_array($pk) ) {
+					$link_to_me = Url::to(array_merge([$this->actionRoute('view')], $pk));
+				} else {
+					$link_to_me = $this->actionRoute('view') . "/$pk";
+				}
+			} else {
+				$link_to_me = '';
+			}
+			Yii::$app->session->addFlash('success',
+				strtr($model->t('churros', $success_message ), ['{model_link}' => $link_to_me]));
 		}
 	}
 
-	protected function showWarningFlash($action_id, $model)
+	protected function showWarningFlash($action_id, $model, $warning_message = null)
 	{
-		$pk = $model->getPrimaryKey();
-		if( is_array($pk) ) {
-			$link_to_me = Url::to(array_merge([$this->actionRoute('view')], $pk));
-		} else {
-			$link_to_me = $this->actionRoute('view') . "/$pk";
+		if( !$warning_message ) {
+			$warning_message = $this->getSuccessMessage($action_id);
 		}
-		switch( $action_id ) {
-		case 'delete':
-			Yii::$app->session->addFlash('success',
-				$model->t('churros', $this->getSuccessMessage('delete')));
-			break;
-		default:
-			if( ($msg = $this->getSuccessMessage($action_id)) != '' ) {
-				Yii::$app->session->addFlash('success',
-					strtr($model->t('churros', $msg),
-						['{model_link}' => $link_to_me]));
+		if( !$warning_message ) {
+			$warning_message = $this->getSuccessMessage('update');
+		}
+		if( strpos( $warning_message, '{model_link}') !== FALSE ) {
+			$pk = $model->getPrimaryKey();
+			if( is_array($pk) ) {
+				$link_to_me = Url::to(array_merge([$this->actionRoute('view')], $pk));
+			} else {
+				$link_to_me = $this->actionRoute('view') . "/$pk";
 			}
-			break;
+		} else {
+			$link_to_me = '';
 		}
+		Yii::$app->session->addFlash('success',
+			strtr($model->t('churros', $warning_message), ['{model_link}' => $link_to_me]));
 		if( $model->hasErrors() ) {
 			Yii::$app->session->addFlash('warning', $model->getOneError() );
 		}
