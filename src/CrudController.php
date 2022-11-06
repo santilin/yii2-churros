@@ -425,7 +425,7 @@ class CrudController extends \yii\web\Controller
 			if( !$success_message ) {
 				$success_message  = $this->getSuccessMessage('update');
 			}
-			if( strpos( $warning_message, '{model_link}') !== FALSE ) {
+			if( strpos( $success_message, '{model_link}') !== FALSE ) {
 				$pk = $model->getPrimaryKey();
 				if( is_array($pk) ) {
 					$link_to_me = Url::to(array_merge([$this->actionRoute('view')], $pk));
