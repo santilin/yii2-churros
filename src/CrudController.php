@@ -290,7 +290,7 @@ class CrudController extends \yii\web\Controller
 			}
 		} else if ($from == 'duplicate') {
 			$redirect = ['view', 'id' => $model->getPrimaryKey()];
-		} else if ($from == 'delete') {
+		} else if ($from == 'delete' || $from == 'not_deleted') {
 			$redirect = ["index"];
 		} else {
 			throw new \Exception("Where should I go now?");
