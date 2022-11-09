@@ -11,6 +11,50 @@ use Yii;
 
 class AppHelper
 {
+	static public function checkWritableDir($path, $perm = 0755, $eol = "\n")
+	{
+		echo "Checking if $path is writable...$eol";
+		if (!is_dir($path) ) {
+			if( @mkdir($path, $perm) ) {
+				echo "$path: created$eol";
+			} else {
+				$error = error_get_last();
+				echo "$path: " . $error['message'] . $eol;
+			}
+		} else {
+			if (!is_writable($path) ) {
+				@chmod($dir, $perm);
+			}
+        }
+		if (!is_writable($path) ) {
+			echo $path . ": not writable by www-data user$eol";
+		} else {
+			echo $path . ": Ok$eol";
+		}
+	}
+
+	static public function checkIsLink($target, $link, $eol = "\n")
+	{
+		echo "Checking if $link is a link to $target...$eol";
+		if( !file_exists($target) ) {
+			echo "$target: target of $link symlink not found$eol";
+			return;
+		}
+		if( !file_exists($link) ) {
+			@symlink($target, $link);
+			if( !is_link($link) ) {
+				$error = error_get_last();
+				echo $link . ": " . $error['message'] . " creating symlink to $target$eol";
+			}
+		}
+		if( !is_link($link) ) {
+			echo $link . ": is not a symlink$eol";
+		} else {
+			echo $link . ": Ok$eol";
+		}
+	}
+
+
 	// For defaultValidator
     static public function empty($value)
     {
