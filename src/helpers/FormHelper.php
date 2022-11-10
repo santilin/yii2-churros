@@ -298,13 +298,13 @@ class FormHelper
 			'short' => [
 				'1col' => [
 					'horizontalCssClasses' => [
-						'label' => 'col-sm-1',
-						'wrapper' => 'col-sm-1',
+						'label' => 'col-sm-2',
+						'wrapper' => 'col-sm-2',
 					]
 				],
 				'2cols' => [
 					'horizontalCssClasses' => [
-						'label' => 'col-sm-3',
+						'label' => 'col-sm-2',
 						'wrapper' => 'col-sm-3',
 					]
 				],
