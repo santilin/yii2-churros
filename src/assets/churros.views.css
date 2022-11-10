@@ -1,0 +1,182 @@
+.clv-w-25 {
+	width: 25% !important;
+	max-width: 25% !important;
+}
+
+.clv-w-50 {
+	width: 50% !important;
+	max-width: 50% !important;
+}
+
+.record-view .rv-field, .record-view .rv-label {
+	display: block;
+	padding: 6px 12px;
+	font-size: 14px;
+	line-height: 1.43;
+	background-color: #fff;
+	background-image: none;
+	border: 1px solid #ccc;
+	margin: 0;
+}
+.record-view .record-fields {
+	margin: 0;
+	display: flex;
+	flex-direction: column;
+}
+.record-view .record-fields .field-container {
+	flex-wrap: wrap;
+	display: flex;
+	flex-direction: row;
+}
+
+.record-view .rv-label {
+	font-weight:normal;
+	color: darkblue;
+	flex: 3 0 20%;
+}
+.record-view .rv-field {
+	font-weight: bolder;
+	flex: 3 0 80%;
+}
+.record-view .cols-2 .rv-label {
+	font-weight:normal;
+	color: darkblue;
+	flex: 3 0 15%;
+}
+.record-view .rv-field {
+	font-weight: bolder;
+	flex: 3 0 35%;
+}
+
+.record-view .panel-toolbar {
+	float:right;
+	margin-top: 0;
+}
+.record-view .panel-primary {
+	margin-bottom: 0px;
+	border-bottom-radius: none;
+	background-color: #2A3F54;
+	border-color: #2A3F54;
+}
+.record-view .panel-primary > .panel-heading {
+	padding: 4px 8px;
+	width: 100%;
+	display:flex;
+	align-items: center;
+	color: lightgray;
+	background-color: #2A3F54;
+	border-color: #2A3F54;
+}
+.record-view .panel-heading .panel-title {
+	font-weight: bolder;
+	font-size: larger;
+}
+.record-view .panel-toolbar {
+	margin-left: auto;
+}
+.record-view .panel-toolbar a.btn {
+	margin-bottom: 0;
+}
+.record-view .rv-btn-toolbar {
+	padding-left: 10px;
+	margin-bottom: 5px;
+}
+.record-view .rv-btn-toolbar .btn {
+	margin-right: 5px;
+}
+
+.record-view .rv-embedded-list {
+	border: 1px solid #ccc;
+	padding: 6px 12px;
+	flex: 3 0 100%;
+	display: flex;
+	flex-direction: row;
+	flex-wrap: wrap;
+}
+.record-view .rv-embedded-list label.rv-label {
+	flex: 3 0 50%;
+}
+.record-view .rv-embedded-list .actions {
+	border: 1px solid #ccc;
+	flex: 3 0 50%;
+}
+.record-view .rv-embedded-list > .rv-field > .rv-label + div + div {
+	flex: 3 0 100%;
+}
+
+.record-view .rv-embedded-list .panel-primary {
+	background-color: gray;
+	border-color: gray;
+}
+
+.record-view .rv-embedded-form > .rv-field {
+	flex: 3 0 100%;
+	display: flex;
+	flex-direction: row;
+	flex-wrap: wrap;
+}
+.record-view .rv-embedded-form > .rv-field .rv-label {
+	flex: 3 0 40%;
+}
+.record-view .rv-embedded-form > .rv-field .rv-field {
+	border: 1px solid #ccc;
+	flex: 3 0 60%;
+}
+
+.record-view .rv-embedded-grid .rv-field {
+	background-color: #d3ffff;
+	flex: 3 0 100%;
+	display: flex;
+	flex-direction: row;
+	flex-wrap: wrap;
+}
+
+.record-view .rv-embedded-grid .rv-field {
+	padding: 0;
+}
+
+.record-view .rv-embedded-grid .rv-field > div {
+	width: 100%;
+}
+.record-view .rv-embedded-grid .rv-field > div .pagination {
+	margin:0;
+	padding:0;
+}
+.record-view .rv-embedded-grid .rv-field > div .kv-grid-container {
+/* 	margin-left: -12px; */
+	margin-right: 0px;
+	margin-bottom: 0px;
+	margin-right: 0px;
+	padding:0;
+}
+
+
+.record-view .rv-embedded-grid > .rv-field > .rv-label {
+	flex: 3 0 50%;
+}
+.record-view .rv-embedded-grid > .rv-field > .rv-label + div {
+	border: 1px solid #ccc;
+	flex: 3 0 50%;
+}
+.record-view .rv-embedded-grid > .rv-field > .rv-label + div + div {
+	flex: 3 0 100%;
+}
+
+.record-view .rv-embedded-grid .embedded-grid-header {
+	padding: 0px 10px;
+	display:flex;
+	flex-direction: row;
+	align-items: center;
+}
+.record-view .rv-embedded-grid .embedded-grid-header > div.title {
+	font-size: 1.2em;
+}
+
+.record-view .rv-embedded-grid .embedded-grid-header > div {
+	flex:1;
+}
+
+.record-view .rv-embedded-grid .embedded-grid-header > div.summary {
+	text-align: right;
+}
+
