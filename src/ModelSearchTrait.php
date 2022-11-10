@@ -34,11 +34,12 @@ trait ModelSearchTrait
 
 	/*
 	 * Called when setting a filter in search()
+	 * If the attribute is a related model field, set $this->related_properties and not $this->properties
 	 */
     public function setAttributes($values, $safeOnly = true)
     {
 		foreach( $values as $attribute => $value ) {
-			if (!array_key_exists($attribute, $this->attributes) && !is_array($value) ) {
+			if (!array_key_exists($attribute, $this->attributes) ) {
 				$this->related_properties[$attribute] = $value;
 				unset($values[$attribute]);
 			}
@@ -264,23 +265,22 @@ trait ModelSearchTrait
 		} else {
 			list($relation_name, $attribute) = ModelInfoTrait::splitFieldName($name);
 		}
-		if (isset(self::$relations[$relation_name]) ) {
-			$related_model_class = self::$relations[$relation_name]['modelClass'];
+		$relation = self::$relations[$relation_name]??null;
+		if( $relation ) {
+			$related_model_class = $relation['modelClass'];
 			$filter_set = false;
 			$table_alias = "as_$relation_name";
 			// Activequery removes duplicate joins (added also in addSort)
 			$query->joinWith("$relation_name $table_alias");
 			$value = $this->toOpExpression($value, false );
 			if ($attribute == '' ) {
-				$code_field = $related_model_class::findCodeField();
-				if( $code_field != '' ) {
-					$query->andFilterWhere([ $value['op'], "$table_alias.$code_field", $value['lft'] ]);
-					$filter_set = true;
+				if( isset($relation['other']) ) {
+					list($right_table, $right_fld ) = ModelInfoTrait::splitFieldName($relation['other']);
 				} else {
-					throw new \Exception("table $related_model_class doesn't have a code field");
+					list($right_table, $right_fld ) = ModelInfoTrait::splitFieldName($relation['right']);
 				}
-			}
-			if (!$filter_set) {
+				$query->andFilterWhere([ 'IN', "$table_alias.$right_fld", $value['lft'] ]);
+			} else {
 				$query->andFilterWhere([$value['op'], "$table_alias.$attribute", $value['lft'] ]);
 			}
 		} else {
