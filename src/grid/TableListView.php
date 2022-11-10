@@ -8,6 +8,8 @@ namespace santilin\churros\grid;
 use yii\helpers\ArrayHelper;
 use yii\widgets\ListView;
 use yii\helpers\Html;
+use santilin\churros\yii\ViewsAsset;
+
 
 
 /**
@@ -41,6 +43,9 @@ class TableListView extends ListView
 
 	public function run()
 	{
+		$view = $this->getView();
+        ViewsAsset::register($view);
+
  		$this->layout = "{init}{$this->layout}{end}";
 		return parent::run();
 	}

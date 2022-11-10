@@ -9,6 +9,7 @@ use yii;
 use yii\helpers\ArrayHelper;
 use yii\widgets\ListView;
 use yii\helpers\Html;
+use santilin\churros\yii\ViewsAsset;
 
 
 /**
@@ -39,13 +40,13 @@ class CardListView extends ListView
 		case 0:
 		case 1:
 		case 2:
-			Html::addCssClass($this->itemOptions, 'w-50');
+			Html::addCssClass($this->itemOptions, 'clv-w-50');
 			break;
 		case 3:
 			Html::addCssStyle($this->itemOptions, 'width:33%');
 			break;
 		case 4:
-			Html::addCssClass($this->itemOptions, 'w-25');
+			Html::addCssClass($this->itemOptions, 'clv-w-25');
 			break;
 		}
 		if( empty($this->summary) ) {
@@ -57,6 +58,14 @@ class CardListView extends ListView
 			$this->summary = strtr($this->summary, ['{item}' => '{'.$this->labelSingular.'}',
 				'{items}' => '{'.$this->labelPlural.'}' ]);
 		}
+	}
+
+	public function run()
+	{
+		$view = $this->getView();
+        ViewsAsset::register($view);
+
+		return parent::run();
 	}
 
     /**
