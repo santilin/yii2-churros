@@ -22,6 +22,7 @@ trait ModelInfoTrait
 
 	public function t($category, $message, $params = [], $language = null )
 	{
+		$translated = Yii::t($category, $message, $params, $language);
 		if( ($language == null || $language == 'es') ) {
 			$male_words = AppHelper::SPANISH_MALE_WORDS;
 		} else {
@@ -29,52 +30,52 @@ trait ModelInfoTrait
 		}
 		$matches = $placeholders = [];
 		$female = $this->getModelInfo('female');
-		if( preg_match_all('/({([a-zA-Z0-9\._]+)})+/', $message, $matches) ) {
+		if( preg_match_all('/({([a-zA-Z0-9\._]+)})+/', $translated, $matches) ) {
 			foreach( $matches[2] as $match ) {
+				$bracket_match = '{'.$match.'}';
 				if( substr($match,0,6) == 'model.' ) {
 					$fld = substr($match, 6);
 					$placeholders[$match] = ArrayHelper::getValue($this,$fld,'');
 				} else switch( $match ) {
 				case 'title':
-					$placeholders[$match] = lcfirst(static::getModelInfo('title'));
+					$placeholders[$bracket_match] = lcfirst(static::getModelInfo('title'));
 					break;
 				case 'title_plural':
-					$placeholders[$match] = lcfirst(static::getModelInfo('title_plural'));
+					$placeholders[$bracket_match] = lcfirst(static::getModelInfo('title_plural'));
 					break;
 				case 'Title':
-					$placeholders[$match] = ucfirst(static::getModelInfo('title'));
+					$placeholders[$bracket_match] = ucfirst(static::getModelInfo('title'));
 					break;
 				case 'Title_plural':
-					$placeholders[$match] = ucfirst(static::getModelInfo('title_plural'));
+					$placeholders[$bracket_match] = ucfirst(static::getModelInfo('title_plural'));
 					break;
 				case 'record':
-					$placeholders[$match] = $this->recordDesc();
+					$placeholders[$bracket_match] = $this->recordDesc();
 					break;
 				case 'record_link':
-					$placeholders[$match] = $this->recordDesc('link');
+					$placeholders[$bracket_match] = $this->recordDesc('link');
 					break;
 				case 'record_long':
-					$placeholders[$match] = $this->recordDesc('long');
+					$placeholders[$bracket_match] = $this->recordDesc('long');
 					break;
 				case 'record_medium':
-					$placeholders[$match] = $this->recordDesc('medium');
+					$placeholders[$bracket_match] = $this->recordDesc('medium');
 					break;
 				case 'record_short':
-					$placeholders[$match] = $this->recordDesc('short');
+					$placeholders[$bracket_match] = $this->recordDesc('short');
 					break;
 				default:
 					if( isset($male_words[$match]) ) {
 						if( $female )  {
-							$placeholders[$match] = $match;
+							$placeholders[$bracket_match] = $match;
 						} else {
-							$placeholders[$match] = $male_words[$match];
+							$placeholders[$bracket_match] = $male_words[$match];
 						}
 					}
 				}
 			}
 		}
-		$placeholders = array_merge($placeholders, $params);
-		return Yii:: t($category, $message, $placeholders, $language);
+		return strtr($translated, $placeholders);
 	}
 
 	public function recordDesc($format=null, $max_len = 0)

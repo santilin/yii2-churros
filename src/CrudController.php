@@ -17,7 +17,8 @@ use santilin\churros\helpers\AppHelper;
 class CrudController extends \yii\web\Controller
 {
 	protected $allowedActions = [];
-	public $accessOnlyOwner = false;
+	public $onlyMine = false;
+
 	const MSG_CREATED = '{La} {title} <a href="{model_link}">{record_medium}</a> has been successfully created.';
 	const MSG_UPDATED = '{La} {title} <a href="{model_link}">{record_medium}</a> has been successfully updated.';
 	const MSG_DELETED = '{La} {title} <strong>{record_long}</strong> has been successfully deleted.';
@@ -68,8 +69,8 @@ class CrudController extends \yii\web\Controller
 	{
 		$params = Yii::$app->request->queryParams;
 		$searchModel = $this->findModel(null, null, 'search');
-		if( $this->accessOnlyOwner ) {
-			$params['accessOnlyOwner'] = $this->accessOnlyOwner;
+		if( $this->onlyMine ) {
+			$params['onlyMine'] = $this->onlyMine;
 		}
 		$params = $this->changeActionParams($params, 'index', $searchModel);
 		return $this->render('index', [
