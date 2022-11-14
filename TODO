@@ -1,4 +1,5 @@
-No funciona filtro en grid de HasOne
+
+Hay acceso a trivel.test/user/2
 
 definir formfield layout medium large
 
@@ -8,8 +9,7 @@ The default currency code for the formatter is not defined: web.php
 https://stackoverflow.com/questions/1711631/improve-insert-per-second-performance-of-sqlite
 
 = Permisos
-* No traduce los parámetros en AuthController mensajes
-	Acceso al sitio del módulo {module}: permission already exists
+* Quitar .own
 * Crear Reports.view, etc.
 
 = CrudController
