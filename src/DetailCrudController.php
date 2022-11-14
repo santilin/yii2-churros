@@ -65,7 +65,7 @@ class DetailCrudController extends CrudController
 		}
 		if ($model->loadAll(Yii::$app->request->post(), $relations) ) {
 			if( $this->saveAll('create', $model) ) {
-				if( $this->afterSave('create', $model) ) {
+				if( $this->afterSave('create', $model, $params) ) {
 					$this->showFlash('create', $model);
 					return $this->whereToGoNow('create', $model);
 				}

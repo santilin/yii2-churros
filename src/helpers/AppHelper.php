@@ -237,16 +237,20 @@ class AppHelper
 	}
 
 
-	static public function mergePermissions($perms1, $perms2): string
+	static public function mergePermissions(string $perms1, string $perms2): string
 	{
 		if( empty($perms1) ) {
 			return $perms2;
 		} else if (empty($perms2) ) {
 			return $perms1;
 		}
-		$a1 = explode('', $perms1);
-		$a2 = explode('', $perms2);
-		return explode('',array_interset($a1,$a2));
+		$ret = '';
+		for( $i=0; $i<strlen($perms1); ++$i ) {
+			if( str_contains($perms2, $perms1[$i]) ) {
+				$ret .= $perms1[$i];
+			}
+		}
+		return $ret;
 	}
 
 	static public function hasPermission($perms, string $perm): bool
