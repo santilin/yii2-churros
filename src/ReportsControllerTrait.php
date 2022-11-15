@@ -30,7 +30,7 @@ trait ReportsControllerTrait
 		}
 		if ($model->loadAll(Yii::$app->request->post(), $relations) ) {
 			if( $this->saveAll('create', $model) ) {
-				if( $this->afterSave('create', $model) ) {
+				if( $this->afterSave('create', $model, $params) ) {
 					$this->showFlash('create', $model);
 					return $this->whereToGoNow('create', $model);
 				}
@@ -66,7 +66,7 @@ trait ReportsControllerTrait
 		$report->load($params);
 		$report->encodeValue();
 		if( $this->saveAll('update', $report) ) {
-			if( $this->afterSave('update', $report) ) {
+			if( $this->afterSave('update', $report, $params) ) {
 				$this->showFlash('update', $report);
 			}
 		}
