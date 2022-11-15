@@ -65,6 +65,31 @@ class AuthController extends Controller
         return true;
     }
 
+
+	/**
+	 * Creates the permissions for a model inside a module
+	 */
+	public function createReportsPermissions($module_id)
+	{
+		$auth = $this->authManager;
+		$visora = AuthHelper::createOrUpdateRole("$module_id.Reports.visor",
+			Yii::t('churros', "View all $module_id reports"), $auth);
+		AuthHelper::echoLastMessage();
+		$editora = AuthHelper::createOrUpdateRole("$module_id.Reports.editor",
+			Yii::t('churros', "Edit all $module_id reports"), $auth);
+		AuthHelper::echoLastMessage();
+		foreach( [ 'index' => 'Index' ] as $perm_name => $perm_desc ) {
+			$permission = AuthHelper::createOrUpdatePermission(
+				$module_id . ".Reports.$perm_name",
+				$perm_desc . ' Reports', $auth);
+				AuthHelper::echoLastMessage();
+			if( !$auth->hasChild($visora, $permission) ) {
+				$auth->addChild($visora, $permission);
+				echo "permission '$perm_name' added to role '{$visora->name}'\n";
+			}
+		}
+	}
+
 	/**
 	 * Creates the permissions for a model inside a module
 	 */
@@ -119,26 +144,26 @@ class AuthController extends Controller
 			if( $add_to_visora ) {
 				if( !$auth->hasChild($visora, $permission) ) {
 					$auth->addChild($visora, $permission);
-					echo "permission {$permission->name} added to role {$visora->name}\n";
+					echo "permission '{$permission->name}' added to role '{$visora->name}'\n";
 // 				} else {
 // 					echo "Warning: permission {$permission->name} already exists in role {$visora->name}\n";
 				}
 				if( !$auth->hasChild($model_visora, $permission) ) {
 					$auth->addChild($model_visora, $permission);
-					echo "permission {$permission->name} added to role {$model_visora->name}\n";
+					echo "permission '{$permission->name}' added to role '{$model_visora->name}'\n";
 // 				} else {
 // 					echo "Warning: permission {$permission->name} already exists in role {$model_visora->name}\n";
 				}
 			}
 			if( !$auth->hasChild($model_editora, $permission) ) {
 				$auth->addChild($model_editora, $permission);
-				echo "permission {$permission->name} added to role {$model_editora->name}\n";
+				echo "permission '{$permission->name}' added to role '{$model_editora->name}'\n";
 // 			} else {
 // 				echo "Warning: permission {$permission->name} already exists in role {$model_editora->name}\n";
 			}
 			if( !$auth->hasChild($editora, $permission) ) {
 				$auth->addChild($editora, $permission);
-				echo "permission {$permission->name} added to role {$editora->name}\n";
+				echo "permission '{$permission->name}' added to role '{$editora->name}'\n";
 // 			} else {
 // 				echo "Warning: permission {$permission->name} already exists in role {$editora->name}\n";
 			}
@@ -149,12 +174,12 @@ class AuthController extends Controller
 				AuthHelper::echoLastMessage();
 				if( !$auth->hasChild($model_editora_own, $permission_own) ) {
 					$auth->addChild($model_editora_own, $permission_own);
-					echo "permission {$permission_own->name} added to role {$model_editora_own->name}\n";
+					echo "permission '{$permission_own->name}' added to role '{$model_editora_own->name}'\n";
 				}
 				if( $add_to_visora ) {
 					if( !$auth->hasChild($model_visora_own, $permission_own) ) {
 						$auth->addChild($model_visora_own, $permission_own);
-						echo "permission {$permission_own->name} added to role {$model_editora_own->name}\n";
+						echo "permission '{$permission_own->name}' added to role '{$model_editora_own->name}'\n";
 					}
 				}
 			}
@@ -162,11 +187,11 @@ class AuthController extends Controller
 				$permission_menu = $auth->getPermission($model_perm_name . ".$perm_name");
 				if( !$auth->hasChild($model_editora_own, $permission_menu ) ) {
 					$auth->addChild($model_editora_own, $permission_menu);
-					echo "permission {$permission_menu->name} added to role {$model_editora_own->name}\n";
+					echo "permission '{$permission_menu->name}' added to role '{$model_editora_own->name}'\n";
 				}
 				if( !$auth->hasChild($model_visora_own, $permission_menu) ) {
 					$auth->addChild($model_visora_own, $permission_menu);
-					echo "permission {$permission_menu->name} added to role {$model_editora_own->name}\n";
+					echo "permission '{$permission_menu->name}' added to role '{$model_editora_own->name}'\n";
 				}
 			}
 		}
@@ -190,7 +215,15 @@ class AuthController extends Controller
 			AuthHelper::echoLastMessage();
 		}
 		AuthHelper::createOrUpdatePermission("$module_id.site.index",
-			Yii::t('churros', 'Access to \'{module}\' module site',
+			Yii::t('churros', 'Access to \'{module}\' site index',
+			[ 'module' => $module_title?:$module_id ]), $auth);
+		AuthHelper::echoLastMessage();
+		AuthHelper::createOrUpdatePermission("$module_id.site.about",
+			Yii::t('churros', 'Access to \'{module}\' site about',
+			[ 'module' => $module_title?:$module_id ]), $auth);
+		AuthHelper::echoLastMessage();
+		AuthHelper::createOrUpdatePermission("$module_id.reports",
+			Yii::t('churros', 'Access to \'{module}\' reports',
 			[ 'module' => $module_title?:$module_id ]), $auth);
 		AuthHelper::echoLastMessage();
 	}
