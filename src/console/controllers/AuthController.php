@@ -208,12 +208,9 @@ class AuthController extends Controller
 			[ 'module' => $module_title?:$module_id ]), $auth);
 		AuthHelper::echoLastMessage();
 		$role_all_name = "$module_id.all.menu";
-		$role_all = $this->authManager->getRole($role_all_name);
-		if( !$role_all ) {
-			$role_all = AuthHelper::createOrUpdateRole($role_all_name,
-				Yii::t('churros', 'Access to all models of module {module}', [ 'module' => $module_id ]), $auth);
-			AuthHelper::echoLastMessage();
-		}
+		$role_all = AuthHelper::createOrUpdateRole($role_all_name,
+			Yii::t('churros', 'Access to all models of module {module}', [ 'module' => $module_id ]), $auth);
+		AuthHelper::echoLastMessage();
 		AuthHelper::createOrUpdatePermission("$module_id.site.index",
 			Yii::t('churros', 'Access to \'{module}\' site index',
 			[ 'module' => $module_title?:$module_id ]), $auth);
