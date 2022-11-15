@@ -67,12 +67,9 @@ class CrudRbacAccessRule extends AccessRule
 // 			}
 // 			return true;
 // 		}
-// 		if( $user->can($perm) ) {
-// 			if( $action->controller->hasProperty('accessOnlyOwner') ) {
-// 				$action->controller->accessOnlyOwner = false;
-// 			}
-// 			return true;
-// 		}
+		if( $user->can($perm) ) {
+			return true;
+		}
 		return false;
     }
 
