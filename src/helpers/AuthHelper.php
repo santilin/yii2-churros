@@ -112,8 +112,8 @@ class AuthHelper
 		$msgs = [];
 		foreach( $perms as $perm_name => $perm_desc ) {
 			$perm = AuthHelper::createOrUpdatePermission($perm_name,
-				$perm_desc, static::$lastMessage, $auth);
-			if( static::$lastMessage ) $msgs = static::$lastMessage;
+				$perm_desc, $auth);
+			if( static::$lastMessage ) $msgs[] = static::$lastMessage;
 		}
 		static::$lastMessage = join("\n", $msgs);
     }
@@ -127,7 +127,7 @@ class AuthHelper
 		foreach( $roles as $role_name => $role_desc ) {
 			$role = AuthHelper::createOrUpdateRole($role_name,
 				$role_desc, static::$lastMessage, $auth);
-			if( static::$lastMessage ) $msgs = static::$lastMessage;
+			if( static::$lastMessage ) $msgs[] = static::$lastMessage;
 		}
 		static::$lastMessage = join("\n", $msgs);
     }
@@ -171,6 +171,37 @@ class AuthHelper
 		}
 		static::$lastMessage = join("\n", $msgs);
     }
+
+    static public function removePermFromRole($perm_name, $role_name, $auth = null)
+    {
+		if( $auth == null ) {
+			$auth = \Yii::$app->authManager;
+		}
+		$child = $auth->getItem($perm_name);
+		if( $child == null ) {
+			return;
+		}
+		$parent = $auth->getItem($role_name);
+		if( $parent == null ) {
+			return;
+		}
+		$auth->removeChild($parent, $child);
+	}
+
+	static public function removeRoles($role_names, $auth = null)
+    {
+		if( $auth == null ) {
+			$auth = \Yii::$app->authManager;
+		}
+		$role_names = array($role_names);
+		foreach( $role_names as $role_name ) {
+			$parent = $auth->getItem($role_name);
+			if( $parent == null ) {
+				return;
+			}
+			$auth->remove($parent);
+		}
+	}
 
 } // class AuthHelper
 

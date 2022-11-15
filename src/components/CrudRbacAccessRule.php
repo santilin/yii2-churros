@@ -8,21 +8,22 @@ use yii\base\InvalidConfigException;
 
 class CrudRbacAccessRule extends AccessRule
 {
+	public $module = null;
 
-    public function allows($action, $user, $request)
-    {
-        if ($this->matchCrudAction($action, $user)
-            && $this->matchRole($user)
-            && $this->matchIP($request->getUserIP())
-            && $this->matchVerb($request->getMethod())
-            && $this->matchController($action->controller)
-            && $this->matchCustom($action)
-        ) {
-            return $this->allow ? true : false;
-        }
+	public function allows($action, $user, $request)
+	{
+		if ($this->matchCrudAction($action, $user)
+			&& $this->matchRole($user)
+			&& $this->matchIP($request->getUserIP())
+			&& $this->matchVerb($request->getMethod())
+			&& $this->matchController($action->controller)
+			&& $this->matchCustom($action)
+		) {
+			return $this->allow ? true : false;
+		}
 
 		return null;
-    }
+	}
 
     protected function matchCrudAction($action, $user)
     {
@@ -60,13 +61,23 @@ class CrudRbacAccessRule extends AccessRule
 				$perm = AppHelper::camelCase($action->controller->id) . "." . ucfirst($action->id);
 				break;
 		}
-// 		if( $user->can("$perm.own") ) {
-// 			$c = $user->can("$perm.own");
-// 			if( $action->controller->hasProperty('accessOnlyOwner') ) {
-// 				$action->controller->accessOnlyOwner = true;
-// 			}
-// 			return true;
-// 		}
+		if( $this->module ) {
+			if( $user->can($this->module . ".$perm.own" ) ) {
+				if( $action->controller->hasProperty('OnlyMine') ) {
+					$action->controller->OnlyMine = true;
+				}
+				return true;
+			}
+			if( $user->can($this->module . ".$perm" ) ) {
+				return true;
+			}
+		}
+		if( $user->can("$perm.own" ) ) {
+			if( $action->controller->hasProperty('OnlyMine') ) {
+				$action->controller->OnlyMine = true;
+			}
+			return true;
+		}
 		if( $user->can($perm) ) {
 			return true;
 		}
