@@ -167,9 +167,9 @@ class AuthController extends Controller
 // 			} else {
 // 				echo "Warning: permission {$permission->name} already exists in role {$editora->name}\n";
 			}
-			if( $perm_name != 'create' && $perm_name != 'menu' ) {
-				$permission_own = AuthHelper::createOrUpdatePermission(
-					$model_perm_name . ".$perm_name.own",
+			if( $perm_name != 'menu' ) {
+				$own_perm_name = "$model_perm_name.$perm_name" . ($perm_name == 'create'?'':'.own');
+				$permission_own = AuthHelper::createOrUpdatePermission( $own_perm_name,
 					$perm_desc .' ' . $model->t('churros', 'their own {title_plural}'), $auth);
 				AuthHelper::echoLastMessage();
 				if( !$auth->hasChild($model_editora_own, $permission_own) ) {
