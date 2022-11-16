@@ -32,6 +32,9 @@ trait ReportsModelTrait
 	public function load($data, $formName = null)
 	{
 		$scope = $formName === null ? $this->formName() : $formName;
+		if( !parent::load($data, $formName) ) {
+			return false;
+		}
 		if( isset($data[$scope]['only_totals'] ) ) {
 			$this->only_totals = boolval($data[$scope]['only_totals']);
 		}
@@ -448,7 +451,5 @@ trait ReportsModelTrait
 		}
 		return $dropdown_options;
 	}
-
-
 
 }

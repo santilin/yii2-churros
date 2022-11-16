@@ -48,6 +48,11 @@ trait ReportsControllerTrait
 	public function actionUpdate($id)
 	{
 		$report = $this->findModel($id);
+		if( !$report->checkAccessByRole('roles') ) {
+			Yii::$app->session->setFlash('error',
+				$report->t('churros', "{model.title}: you have not access to this report"));
+			return $this->redirect(['index']);
+		}
 		$search_model_name = $report->model;
 		if( strpos($search_model_name, '\\') === FALSE ) {
 			$search_model_name= "app\models\comp\\$search_model_name";
@@ -95,7 +100,11 @@ trait ReportsControllerTrait
 			return $this->actionUpdate($id);
 		}
 		$report = $this->findModel($id);
-
+		if( !$report->checkAccessByRole('roles') ) {
+			Yii::$app->session->setFlash('error',
+				$report->t('churros', "{model.title}: you have not access to this report"));
+			return $this->redirect(['index']);
+		}
 		$search_model_name = $report->model;
 		if( strpos($search_model_name, '\\') === FALSE ) {
 			$search_model_name= "app\models\comp\\$search_model_name";
@@ -137,7 +146,6 @@ trait ReportsControllerTrait
 			throw $e;
 		}
 	}
-
 
 	protected function sendPdf($report, $content)
 	{

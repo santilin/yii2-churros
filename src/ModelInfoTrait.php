@@ -35,7 +35,7 @@ trait ModelInfoTrait
 				$bracket_match = '{'.$match.'}';
 				if( substr($match,0,6) == 'model.' ) {
 					$fld = substr($match, 6);
-					$placeholders[$match] = ArrayHelper::getValue($this,$fld,'');
+					$placeholders[$bracket_match] = ArrayHelper::getValue($this,$fld,'');
 				} else switch( $match ) {
 				case 'title':
 					$placeholders[$bracket_match] = lcfirst(static::getModelInfo('title'));
@@ -392,6 +392,20 @@ trait ModelInfoTrait
 		} else {
 			return false;
 		}
+	}
+
+	public function checkAccessByRole(string $fldname): bool
+	{
+		if( trim($this->$fldname) == '' || AppHelper::userIsAdmin() ) {
+			return true;
+		}
+		$perms = explode(',:;|',$this->$fldname);
+		foreach($perms as $perm)  {
+			if( \Yii::$app->user->can($perm) ) {
+				return true;
+			}
+		}
+		return false;
 	}
 
 	public function unlinkImages($images)
