@@ -3,13 +3,10 @@ Hay acceso a trivel.test/user/2
 
 definir formfield layout medium large
 
-The default currency code for the formatter is not defined: web.php
-
 = Optimizacion sqlite3
 https://stackoverflow.com/questions/1711631/improve-insert-per-second-performance-of-sqlite
 
 = Permisos
-* Quitar .own
 * Crear Reports.view, etc.
 
 = CrudController
@@ -50,7 +47,6 @@ Añadir el símbolo del euro al input de los forms.
 == Reports
 * Añadir más funciones sobre los campos: año, mes, día, cuenta, media, máximo, mínimo, etc.
 
-
 == Administración de usuarios
 === 2amigos-usuario
 	- Añadir opción visible en profile en resources ... _menu.php: yiiparam('user_profile');
@@ -58,7 +54,6 @@ Añadir el símbolo del euro al input de los forms.
 	- Arreglar vistas en bootstrap3
 	- Customize views form bootstrap4
 	- usuarios: grid: etiquetas salen en inglés.
-
 
 == Web
 === Configuración

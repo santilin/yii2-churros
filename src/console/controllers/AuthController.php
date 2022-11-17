@@ -183,8 +183,17 @@ class AuthController extends Controller
 					}
 				}
 			}
+
 			if( $perm_name == 'menu' ) {
-				$permission_menu = $auth->getPermission($model_perm_name . ".$perm_name");
+				$permission_menu = $auth->getPermission($model_perm_name . ".menu");
+				if( !$auth->hasChild($model_editora, $permission_menu ) ) {
+					$auth->addChild($model_editora, $permission_menu);
+					echo "permission '{$permission_menu->name}' added to role '{$model_editora->name}'\n";
+				}
+				if( !$auth->hasChild($model_visora, $permission_menu) ) {
+					$auth->addChild($model_visora, $permission_menu);
+					echo "permission '{$permission_menu->name}' added to role '{$model_editora->name}'\n";
+				}
 				if( !$auth->hasChild($model_editora_own, $permission_menu ) ) {
 					$auth->addChild($model_editora_own, $permission_menu);
 					echo "permission '{$permission_menu->name}' added to role '{$model_editora_own->name}'\n";
@@ -203,7 +212,7 @@ class AuthController extends Controller
 	public function createModulePermissions($module_id, $module_title = null)
 	{
 		$auth = $this->authManager;
-		AuthHelper::createOrUpdatePermission("module.$module_id.menu",
+		AuthHelper::createOrUpdatePermission("$module_id.menu",
 			Yii::t('churros', 'Access to \'{module}\' module menu',
 			[ 'module' => $module_title?:$module_id ]), $auth);
 		AuthHelper::echoLastMessage();
