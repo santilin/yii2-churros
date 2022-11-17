@@ -98,6 +98,7 @@ Añadir el símbolo del euro al input de los forms.
 * Radio List: Ver cómo añadir el autofocus a cada item.
 
 == 3rd party
+* https://github.com/manuvarkey/kanboard-plugin-telegram
 * html-to-rtf y .editorconfig https://github.com/github-grabaz/html-rtf-converter/blob/master/.editorconfig
 https://github.com/pavlm/yii2-stats-widget Time Stats widget
 Modelos: Estudiar uuidbehavior, softdeletes y lock. Faltan los behaviors

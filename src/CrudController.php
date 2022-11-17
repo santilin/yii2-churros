@@ -509,7 +509,7 @@ class CrudController extends \yii\web\Controller
 		return $model->saveAll(true, $in_trans);
 	}
 
-	public function joinMany2ManyModels($glue, $models)
+	public function joinMany2ManyModels(string $glue, array $models, bool $make_links = false): string
 	{
 		if( $models == null || count($models)==0 ) {
 			return "";
@@ -520,7 +520,7 @@ class CrudController extends \yii\web\Controller
 			if( $route == null ) {
 				$route = $this->getRoutePrefix() . $model->controllerName() . '/';
 			}
-			if( $model != null ) {
+			if( $model != null && $make_links ) {
 				$url = $route . strval($model->getPrimaryKey());
 				$attrs[] = "<a href='$url'>" .  $model->recordDesc() . "</a>";
 			}
