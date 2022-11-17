@@ -520,9 +520,13 @@ class CrudController extends \yii\web\Controller
 			if( $route == null ) {
 				$route = $this->getRoutePrefix() . $model->controllerName() . '/';
 			}
-			if( $model != null && $make_links ) {
-				$url = $route . strval($model->getPrimaryKey());
-				$attrs[] = "<a href='$url'>" .  $model->recordDesc() . "</a>";
+			if( $model != null ) {
+				if( $make_links ) {
+					$url = $route . strval($model->getPrimaryKey());
+					$attrs[] = "<a href='$url'>" .  $model->recordDesc() . "</a>";
+				} else {
+					$attrs[] = $model->recordDesc();
+				}
 			}
 		}
 		return join($glue, $attrs);
