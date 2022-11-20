@@ -198,19 +198,23 @@ class CrudController extends \yii\web\Controller
 	*/
 	public function actionDelete($id)
 	{
-		$model = $this->findModel($id);
 		try {
+			$model = $this->findModel($id);
 			$model->deleteWithRelated();
 			if( $this->afterSave('delete', $model, []) ) {
-				$this->showFlash('delete', $model);
+// 				$this->showFlash('delete', $model);
 				return $this->whereToGoNow('delete', $model);
 			}
 		} catch (\yii\db\IntegrityException $e ) {
 			$msg = $e->getMessage();
 			Yii::$app->session->addFlash('error', $msg);
-			throw new DeleteModelException($model, $e);
+// 			throw new DeleteModelException($model, $e);
+		} catch( \yii\web\ForbiddenHttpException $e ) {
+			$msg = $e->getMessage();
+			Yii::$app->session->addFlash('error', $msg);
+			return $this->whereToGoNow('delete', null);
 		}
-		return $this->whereToGoNow('delete', $model);
+ 		return $this->whereToGoNow('delete', $model);
 	}
 
 	/**
