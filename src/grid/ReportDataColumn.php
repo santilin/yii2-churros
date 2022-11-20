@@ -14,6 +14,8 @@ class ReportDataColumn extends DataColumn
 	public $vAlign;
 	public $hidden;
 	public $noWrap;
+	public $filterType;
+	public $filterWidgetOptions;
 }
 
 

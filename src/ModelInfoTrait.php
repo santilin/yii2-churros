@@ -477,6 +477,10 @@ trait ModelInfoTrait
 		return YADTC::fromSql( $this->$fldname );
 	}
 
+	static public function byPrimaryKey($pk)
+	{
+		return static::findByCondition($pk);
+	}
 
 } // trait ModelInfoTrait
 
