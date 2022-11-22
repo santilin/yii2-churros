@@ -93,8 +93,10 @@ return [
 	'Unable to send email to {email}' => 'No se ha podido enviar el email a {email}',
 	'Unable to send email to {email} and other {ndest} recipients' => 'No se ha podido enviar el email a {email} y a otros {ndest} destinatarios',
 
+	'{model.title}: you have not access to this report' => '{model.title}: no tienes acceso a este informe',
+    'Showing <b>{begin, number}-{end, number}</b> of <b>{totalCount, number}</b> {totalCount, plural, one{{item}} other{{items}}}.' => 'Mostrando <b>{begin, number}-{end, number}</b> de <b>{totalCount, number}</b> {totalCount, plural, one{{item}} other{{items}}}.',
+	'Showing <b>{begin, number}-{end, number}</b> of <b>{totalCount, number}</b>' => 'Mostrando <b>{begin, number}-{end, number}</b> de <b>{totalCount, number}</b>',
 	'Showing <b>{begin, number}-{end, number}</b> of <b>{totalCount, number}</b> {totalCount, plural, one{item} other{items}}.' => 'Mostrando <b>{begin, number}-{end, number}</b> de <b>{totalCount, number}</b> {totalCount, plural, one{item} other{items}}.',
 	'Total <b>{count, number}</b> {count, plural, one{item} other{items}}.' => 'Total <b>{count, number}</b> {count, plural, one{item} other{items}}.',
-	'{model.title}: you have not access to this report' => '{model.title}: no tienes acceso a este informe'
 
 ];

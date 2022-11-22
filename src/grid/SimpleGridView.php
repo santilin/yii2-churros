@@ -28,10 +28,12 @@ class SimpleGridView extends \yii\grid\GridView
 	 */
 	public $groups = [];
 	public $totalsRow = true;
-	public $bsVersion = '3.x';
 	public $onlySummary = false;
-	public $itemLabelSingle = '';
-	public $itemLabelPlural = '';
+	public $itemLabelSingle = null;
+	public $itemLabelPlural = null;
+	public $itemLabelFew = null;
+	public $itemLabelMany = null;
+	public $itemLabelAccusative = null;
 
 	protected $summaryColumns = [];
 	protected $summaryValues = [];

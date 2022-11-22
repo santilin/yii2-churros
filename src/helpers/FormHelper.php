@@ -644,7 +644,7 @@ html;
 	}
 
 
-	static public function displayButtons($buttons)
+	static public function displayButtons(array $buttons, string $sep = '&nbsp;'): string
 	{
 		$ret = [];
 		foreach( $buttons as $name => $button ) {
@@ -663,21 +663,26 @@ html;
 			if( isset($button['htmlOptions']['autofocus']) ) {
 				$button['htmlOptions']['tabindex'] = static::ti();
 			}
+			$title = $button['title'];
+			$icon = $button['icon']??null;
+			if( $icon ) {
+				$title = "<i class=\"$icon\" aria-hidden=\"true\"></i> $title";
+			}
 			switch( $button['type'] ) {
 			case 'a':
 				$ret[] = Html::a(
-					$button['title'],
+					$title,
 					$button['url']??'javascript:void(0);',
 					$button['htmlOptions']);
 				break;
 			case 'submit':
 				$ret[] = Html::submitButton(
-					$button['title'],
+					$title,
 					$button['htmlOptions']);
 				break;
 			case 'button':
 				$ret[] = Html::button(
-					$button['title'],
+					$title,
 					$button['htmlOptions']);
 				break;
 			case 'select':
@@ -686,7 +691,7 @@ html;
 				break;
 			}
 		}
-		return implode('&nbsp;', $ret);
+		return implode($sep, $ret);
 	}
 
 
