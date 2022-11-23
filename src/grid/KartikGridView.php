@@ -473,7 +473,7 @@ class KartikGridView extends BaseGridView
                 try {
 					$cells[] = $column->renderFilterCell();
 				} catch( \Exception $e ) {
-					throw new \Exception($column->attribute . ": " . $e->getMessage());
+					throw new \Exception(get_class($this->filterModel).'.'.$column->attribute . ": " . $e->getMessage());
 				}
             }
             return Html::tag('tr', implode('', $cells), $this->filterRowOptions);
