@@ -31,9 +31,11 @@ class YADTC extends \DateTime
 		if( $datetime === null || $datetime instanceof \DateTime || $datetime instanceof YADTC ) {
 			return $datetime;
 		}
-		if( is_object($datetime) && isset($datetime->date) && isset($datetime->timezone) ) {
-			$datetime = new YADTC($datetime->date, new \DateTimeZone($datetime->timezone));
-			return $datetime;
+		if( ($datetime instanceof \DateTime) ) {
+			$f = new Fecha();
+			$f->setTimestamp( $datetime->getTimestamp() );
+			$f->setTimezone( $datetime->getTimezone() );
+			return $f;
 		}
 		if( is_string($datetime) && $datetime == '' ) {
 			return null;
@@ -56,7 +58,7 @@ class YADTC extends \DateTime
 			'^([0-9]{1,2})/[0-9]{1,2}/[0-9]{2} [0-9]{2}:[0-9]{2}:[0-9]{2}$' => '!d/m/y H:i:s', // form
 			'^([0-9]{4})/[0-9]{2}/[0-9]{2} [0-9]{2}:[0-9]{2}$' => 'Y/m/d H:i',
 			'^([0-9]{4})-[0-9]{2}-[0-9]{2} [0-9]{2}:[0-9]{2}$' => 'Y-m-d H:i',
-			'^([0-9]{1,2})/[0-9]{1,2}/[0-9]{2} [0-9]{2}:[0-9]{2}$' => '!d/m/y H:i', // 			'^([0-9]{4})/[0-9]{2}/[0-9]{2}$' => '!Y/m/d', // tests
+			'^([0-9]{1,2})/[0-9]{1,2}/[0-9]{2} [0-9]{2}:[0-9]{2}$' => '!d/m/y H:i', // '^([0-9]{4})/[0-9]{2}/[0-9]{2}$' => '!Y/m/d', // tests
 			'^([0-9]{4})-[0-9]{2}-[0-9]{2}$' => '!Y-m-d', // tests
 			'^([0-9]{4})/[0-9]{2}/[0-9]{2}$' => '!Y/m/d', // tests
 			'^([0-9]{1,2})/[0-9]{2}/[0-9]{4}$' => '!d/m/Y', // tests
