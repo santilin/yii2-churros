@@ -19,6 +19,7 @@ class CrudController extends \yii\web\Controller
 	protected $allowedActions = [];
 	public $onlyMine = false;
 
+	const MSG_NO_ACTION = 'The action on {La} {title} <a href="{model_link}">{record_medium}</a> has been successful.';
 	const MSG_CREATED = '{La} {title} <a href="{model_link}">{record_medium}</a> has been successfully created.';
 	const MSG_UPDATED = '{La} {title} <a href="{model_link}">{record_medium}</a> has been successfully updated.';
 	const MSG_DELETED = '{La} {title} <strong>{record_long}</strong> has been successfully deleted.';
@@ -415,7 +416,7 @@ class CrudController extends \yii\web\Controller
 		case 'duplicate':
 			return self::MSG_DUPLICATED;
 		default:
-			break;
+			return self::MSG_NO_ACTION;
 		}
 	}
 
@@ -426,9 +427,6 @@ class CrudController extends \yii\web\Controller
 		} else {
 			if( !$success_message ) {
 				$success_message = $this->getSuccessMessage($action_id);
-			}
-			if( !$success_message ) {
-				$success_message  = $this->getSuccessMessage('update');
 			}
 			if( strpos( $success_message, '{model_link}') !== FALSE ) {
 				$pk = $model->getPrimaryKey();
