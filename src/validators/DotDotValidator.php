@@ -79,34 +79,6 @@ class DotDotValidator extends Validator
 		}
     }
 
-//     public function clientValidateAttribute($model, $attribute, $view)
-//     {
-//         $options = $this->getClientOptions($model, $attribute);
-//
-// 		ChurrosAsset::register($view);
-//         return "value = churros_validate_dot_dot_input(\$form, attribute, messages, '{$this->mask}', '{$this->dot}', "
-// 			. json_encode($options, JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE) . ');';
-//     }
-//
-//     /**
-//      * {@inheritdoc}
-//      */
-//     public function getClientOptions($model, $attribute)
-//     {
-//         $options = [
-//             'dot' => $this->dot,
-//             'message' => $this->formatMessage($this->message, [
-//                 'attribute' => $model->getAttributeLabel($attribute),
-//             ]),
-//         ];
-//         if ($this->skipOnEmpty) {
-//             $options['skipOnEmpty'] = 1;
-//         }
-// 		$options['allowArray'] = 1;
-//
-//         return $options;
-//     }
-
 	protected function maskToGroups()
 	{
 		$parts = explode($this->dot, $this->mask);

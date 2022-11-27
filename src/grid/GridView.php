@@ -7,6 +7,7 @@ namespace santilin\churros\grid;
 use yii;
 use yii\helpers\{ArrayHelper,Html};
 use santilin\churros\helpers\FormHelper;
+use santilin\churros\yii\ViewsAsset;
 
 class GridView extends SimpleGridView
 {
@@ -14,6 +15,13 @@ class GridView extends SimpleGridView
 	public $selectViewsOptions = [];
 	public $toolbarButtons = [];
 	public $toolbarButtonsOptions = [];
+
+	public function run()
+	{
+		$view = $this->getView();
+        ViewsAsset::register($view);
+        return parent::run();
+	}
 
     /**
      * Renders a section of the specified name.

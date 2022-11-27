@@ -180,3 +180,18 @@
 	text-align: right;
 }
 
+.grid-view .grid-header {
+	display: flex;
+	align-items: center;
+	justify-content: space-between;
+}
+
+.grid-view.isbs4 .grid-header {
+	display:flex;
+}
+.grid-view.isbs4 .grid-header > .summary {
+	flex: 1;
+}
+.grid-view.isbs4 .grid-header > .pagination {
+	flex: 1;
+}

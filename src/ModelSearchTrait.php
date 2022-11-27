@@ -115,6 +115,7 @@ trait ModelSearchTrait
 				$table_alias = "as_$relation_name";
 				// Activequery removes duplicate joins
 				$provider->query->joinWith("$relation_name $table_alias");
+				$provider->query->distinct(); // Evitar duplicidades debido a las relaciones hasmany
 				if ($sort_fldname == '' ) { /// @todo junction tables
 					$code_field = $related_model_class::findCodeField();
 					$sort_fldname = $code_field;
