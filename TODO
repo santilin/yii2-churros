@@ -1,4 +1,5 @@
-
+https://phpstan.org/user-guide/getting-started
+yii2usuario: alert falla cuando se redirige de bs4 a bs3 porque no espera un array aquí: /home/santilin/devel/yii2base/vendor/2amigos/yii2-usuario/src/User/resources/views/shared/_alert.php
 Hay acceso a trivel.test/user/2
 
 definir formfield layout medium large
