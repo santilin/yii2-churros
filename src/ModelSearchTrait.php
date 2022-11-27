@@ -39,6 +39,9 @@ trait ModelSearchTrait
     public function setAttributes($values, $safeOnly = true)
     {
 		foreach( $values as $attribute => $value ) {
+ 			if( $attribute == '_adv_' ) {
+				continue;
+			}
 			if (!array_key_exists($attribute, $this->attributes) ) {
 				$this->related_properties[$attribute] = $value;
 				unset($values[$attribute]);
@@ -173,7 +176,7 @@ trait ModelSearchTrait
 		}
 	}
 
-	protected function toOpExpression($value, $strict)
+	public function toOpExpression($value, $strict)
 	{
 		if( isset($value['op']) ) {
 			return $value;
@@ -306,7 +309,7 @@ trait ModelSearchTrait
                 $scope = ($formName === null) ? $this->formName() : $formName;
 				if( isset($params[$scope]['_adv_']) ) {
 					foreach( $params[$scope]['_adv_'] as $name => $values) {
-						if( isset($values['lft'])  && $values['lft']!=='' && $values['lft']!==null ) {
+						if( isset($values['lft']) && $values['lft']!=='' && $values['lft']!==null ) {
 							$newparams[$name] = $this->makeSearchParam($values);
 						}
 					}

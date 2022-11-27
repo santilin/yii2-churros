@@ -9,7 +9,7 @@ use yii;
 use yii\helpers\ArrayHelper;
 use yii\widgets\ListView;
 use yii\helpers\Html;
-use santilin\churros\yii\ViewsAsset;
+use santilin\churros\yii\ChurrosAsset;
 
 
 /**
@@ -63,7 +63,7 @@ class CardListView extends ListView
 	public function run()
 	{
 		$view = $this->getView();
-        ViewsAsset::register($view);
+        ChurrosAsset::register($view);
 
 		return parent::run();
 	}

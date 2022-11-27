@@ -1,6 +1,6 @@
 <?php
 
-namespace santilin\churros\components;
+namespace santilin\churros\yii;
 
 use Yii;
 use yii\helpers\ArrayHelper;

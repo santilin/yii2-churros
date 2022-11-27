@@ -16,7 +16,7 @@ use yii\helpers\ArrayHelper;
 use yii\helpers\Html;
 use yii\helpers\Inflector;
 use yii\i18n\Formatter;
-use santilin\churros\yii\ViewsAsset;
+use santilin\churros\yii\ChurrosAsset;
 use santilin\churros\helpers\{AppHelper,FormHelper};
 
 
@@ -89,7 +89,7 @@ html;
     public function run()
     {
         $view = $this->getView();
-        ViewsAsset::register($view);
+        ChurrosAsset::register($view);
 
         $title = $this->renderTitle();
         $record = $this->renderRecord();

@@ -15,7 +15,7 @@ use yii\web\AssetBundle;
  * @author Santilin <software@noviolento.es>
  * @since 2.0
  */
-class ViewsAsset extends AssetBundle
+class ChurrosAsset extends AssetBundle
 {
     public $sourcePath = '@churros/assets';
     public $css = [

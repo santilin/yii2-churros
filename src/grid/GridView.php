@@ -7,7 +7,7 @@ namespace santilin\churros\grid;
 use yii;
 use yii\helpers\{ArrayHelper,Html};
 use santilin\churros\helpers\FormHelper;
-use santilin\churros\yii\ViewsAsset;
+use santilin\churros\yii\ChurrosAsset;
 
 class GridView extends SimpleGridView
 {
@@ -19,7 +19,7 @@ class GridView extends SimpleGridView
 	public function run()
 	{
 		$view = $this->getView();
-        ViewsAsset::register($view);
+        ChurrosAsset::register($view);
         return parent::run();
 	}
 
