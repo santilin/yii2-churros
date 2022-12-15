@@ -16,6 +16,15 @@ class GridView extends SimpleGridView
 	public $toolbarButtons = [];
 	public $toolbarButtonsOptions = [];
 
+
+    public function init()
+    {
+        if ($this->emptyText === null) {
+            $this->emptyText = Yii::t('churros', 'No {items} found.');
+        }
+        parent::init();
+	}
+
 	public function run()
 	{
 		$view = $this->getView();
@@ -35,7 +44,10 @@ class GridView extends SimpleGridView
             case '{summary}':
                 return $this->renderSummary();
             case '{items}':
+				$empty_text_save = $this->emptyText;
+				$this->emptyText = false;
                 return $this->renderItems();
+				$this->emptyText = $empty_text_save;
             case '{pager}':
                 return $this->renderPager();
             case '{sorter}':
@@ -82,70 +94,76 @@ class GridView extends SimpleGridView
 			$selectViewsContent = null;
 		}
         $count = $this->dataProvider->getCount();
-        if ($count <= 0) {
-            return $selectViewsContent;
-        }
 		$summaryOptions = $this->summaryOptions;
-        $tag = ArrayHelper::remove($summaryOptions, 'tag', 'div');
-        $configItems = [
-            'item' => $this->itemLabelSingle,
-            'items' => $this->itemLabelPlural,
-            'items-few' => $this->itemLabelFew,
-            'items-many' => $this->itemLabelMany,
-            'items-acc' => $this->itemLabelAccusative,
-        ];
-        $pagination = $this->dataProvider->getPagination();
-        if ($pagination !== false) {
-            $totalCount = $this->dataProvider->getTotalCount();
-            $begin = $pagination->getPage() * $pagination->pageSize + 1;
-            $end = $begin + $count - 1;
-            if ($begin > $end) {
-                $begin = $end;
-            }
-            $page = $pagination->getPage() + 1;
-            $pageCount = $pagination->pageCount;
-            $configSummary = [
-                'begin' => $begin,
-                'end' => $end,
-                'count' => $count,
-                'totalCount' => $totalCount,
-                'page' => $page,
-                'pageCount' => $pageCount,
-            ];
-            if (($summaryContent = $this->summary) === null) {
-				if( $selectViewsContent ) {
-					return Html::tag($tag, Yii::t('churros',
-						'Showing <b>{begin, number}-{end, number}</b> of <b>{totalCount, number}</b>',
-						$configSummary + $configItems
-					) . $selectViewsContent, $summaryOptions);
-				} else {
-					return Html::tag($tag, Yii::t('churros',
-						'Showing <b>{begin, number}-{end, number}</b> of <b>{totalCount, number}</b> {totalCount, plural, one{{item}} other{{items}}}.',
-						$configSummary + $configItems
-					) , $summaryOptions);
-
-				}
-            }
+		$configItems = [
+			'item' => $this->itemLabelSingle,
+			'items' => $this->itemLabelPlural,
+			'items-few' => $this->itemLabelFew,
+			'items-many' => $this->itemLabelMany,
+			'items-acc' => $this->itemLabelAccusative,
+		];
+        if ($count == 0) {
+			$ret = $selectViewsContent;
+			if( $this->emptyText !== false ) {
+				$ret .= Html::tag('div',
+					Yii::t('churros', $this->emptyText, $configItems),
+					$summaryOptions);
+			}
+			return $ret;
         } else {
-            $begin = $page = $pageCount = 1;
-            $end = $totalCount = $count;
-            $configSummary = [
-                'begin' => $begin,
-                'end' => $end,
-                'count' => $count,
-                'totalCount' => $totalCount,
-                'page' => $page,
-                'pageCount' => $pageCount,
-            ];
-            if (($summaryContent = $this->summary) === null) {
-                return $selectViewsContent . Html::tag($tag,
-                    Yii::t('churros', 'Total <b>{count, number}</b> {count, plural, one{{item}} other{{items}}}.',
-                        $configSummary + $configItems
-                    ), $summaryOptions);
-            }
-        }
+			$tag = ArrayHelper::remove($summaryOptions, 'tag', 'div');
+			$pagination = $this->dataProvider->getPagination();
+			if ($pagination !== false) {
+				$totalCount = $this->dataProvider->getTotalCount();
+				$begin = $pagination->getPage() * $pagination->pageSize + 1;
+				$end = $begin + $count - 1;
+				if ($begin > $end) {
+					$begin = $end;
+				}
+				$page = $pagination->getPage() + 1;
+				$pageCount = $pagination->pageCount;
+				$configSummary = [
+					'begin' => $begin,
+					'end' => $end,
+					'count' => $count,
+					'totalCount' => $totalCount,
+					'page' => $page,
+					'pageCount' => $pageCount,
+				];
+				if (($summaryContent = $this->summary) === null) {
+					if( $selectViewsContent ) {
+						return Html::tag($tag, Yii::t('churros',
+							'Showing <b>{begin, number}-{end, number}</b> of <b>{totalCount, number}</b>',
+							$configSummary + $configItems
+						) . $selectViewsContent, $summaryOptions);
+					} else {
+						return Html::tag($tag, Yii::t('churros',
+							'Showing <b>{begin, number}-{end, number}</b> of <b>{totalCount, number}</b> {totalCount, plural, one{{item}} other{{items}}}.',
+							$configSummary + $configItems
+						) , $summaryOptions);
 
-        return $selectViewsContent . Yii::$app->getI18n()->format($summaryContent, $configSummary, Yii::$app->language);
+					}
+				}
+			} else {
+				$begin = $page = $pageCount = 1;
+				$end = $totalCount = $count;
+				$configSummary = [
+					'begin' => $begin,
+					'end' => $end,
+					'count' => $count,
+					'totalCount' => $totalCount,
+					'page' => $page,
+					'pageCount' => $pageCount,
+				];
+				if (($summaryContent = $this->summary) === null) {
+					return $selectViewsContent . Html::tag($tag,
+						Yii::t('churros', 'Total <b>{count, number}</b> {count, plural, one{{item}} other{{items}}}.',
+							$configSummary + $configItems
+						), $summaryOptions);
+				}
+			}
+			return $selectViewsContent . Yii::$app->getI18n()->format($summaryContent, $configSummary, Yii::$app->language);
+		}
     }
 
 

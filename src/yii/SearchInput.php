@@ -24,16 +24,9 @@ class SearchInput extends \yii\bootstrap4\InputWidget
 		default:
 			$control_type = 'text';
 		}
-		if ( (isset($searchOptions['hideme']) && $searchOptions['hideme'] == true)
-			|| (isset($searchOptions['visible']) && $searchOptions['visible'] == false) ) {
-			$main_div = ' class="row collapse hideme"';
-		} else {
-			$main_div = '';
-		}
-		unset($searchOptions['hideme']);
 		$ret = '';
 		$scope = $this->model->formName();
-		if ($this->model->hasAttribute($attribute) || isset($this->model->related_properties[$attribute]) ) {
+		if( $this->model->hasAttribute($attribute) ) {
 			$value = $this->model->$attribute;
 		} else {
 			$value = null;
@@ -44,11 +37,9 @@ class SearchInput extends \yii\bootstrap4\InputWidget
 		} else {
 			$extra_visible = '';
 		}
-// 		$ret .= "<div$main_div>";
 		$ret .= "<div class='row form-inline'>";
-
 		$ret .= "<div class='control-form'>";
-		$ret .= Html::dropDownList("${scope}[_adv_][$attribute][op]",
+		$ret .= Html::dropDownList("${scope}[$attribute][op]",
 			$value['op'], ModelSearchTrait::$operators, [
 			'id' => "drop-op-$attr_class", 'class' => 'search-dropdown',
 			'Prompt' => 'Operador']);
@@ -56,7 +47,7 @@ class SearchInput extends \yii\bootstrap4\InputWidget
 
 		if( is_array($dropdown_values) || is_array($value['lft']) ) {
 			$ret .= "<div class='control-form'>";
-			$ret .= Html::dropDownList("${scope}[_adv_][$attribute][lft]",
+			$ret .= Html::dropDownList("${scope}[$attribute][lft]",
 				$value['lft'], $dropdown_values,
 				array_merge($searchOptions['htmlOptions']??[], [ 'prompt' => Yii::t('churros', 'Cualquiera')]));
 			$ret .= "</div>";
@@ -65,7 +56,7 @@ class SearchInput extends \yii\bootstrap4\InputWidget
 	<div class="input-group col-sm-5">
 EOF;
 
-			$ret .= Html::input($control_type, "${scope}[_adv_][$attribute][lft]", $value['lft'],
+			$ret .= Html::input($control_type, "${scope}[$attribute][lft]", $value['lft'],
 				array_merge($searchOptions['htmlOptions']??[], [ 'class' => 'form-control' ]));
 			$ret .= <<<EOF
     </div>
@@ -84,12 +75,12 @@ EOF;
 
 		if( is_array($dropdown_values) ) {
 			$ret .= "<div class='control-form col-sm-5'>";
-			$ret .= Html::dropDownList("${scope}[_adv_][$attribute][rgt]",
+			$ret .= Html::dropDownList("${scope}[$attribute][rgt]",
 				$value['rgt'], $dropdown_values,
 				array_merge($searchOptions['htmlOptions']??[], [ 'prompt' => Yii::t('churros', 'Cualquiera')]));
 		} else {
 			$ret .= '<div class="input-group col-sm-5">';
-			$ret .= Html::input($control_type, "${scope}[_adv_][$attribute][rgt]", $value['rgt'],
+			$ret .= Html::input($control_type, "${scope}[$attribute][rgt]", $value['rgt'],
 				array_merge($searchOptions['htmlOptions']??[], [ 'class' => 'form-control' ]));
 			$ret .= <<<EOF
 EOF;
