@@ -176,7 +176,7 @@ trait ModelSearchTrait
 		}
 	}
 
-	public function toOpExpression($value, $strict)
+	static public function toOpExpression($value, $strict)
 	{
 		if( isset($value['op']) ) {
 			return $value;
@@ -193,7 +193,7 @@ trait ModelSearchTrait
 
 	public function filterWhere(&$query, $fldname, $value)
 	{
-		$value = $this->toOpExpression($value, false );
+		$value = static::toOpExpression($value, false );
 		if( $value['lft'] == null ) {
 			return;
 		}
@@ -276,7 +276,7 @@ trait ModelSearchTrait
 			$table_alias = "as_$relation_name";
 			// Activequery removes duplicate joins (added also in addSort)
 			$query->joinWith("$relation_name $table_alias");
-			$value = $this->toOpExpression($value, false );
+			$value = static::toOpExpression($value, false );
 			if ($attribute == '' ) {
 				if( isset($relation['other']) ) {
 					list($right_table, $right_fld ) = ModelInfoTrait::splitFieldName($relation['other']);
@@ -313,7 +313,7 @@ trait ModelSearchTrait
 							$newparams[$name] = $this->makeSearchParam($values);
 						}
 					}
-					return parent::load([ $scope => $newparams], $formName);
+					return parent::load([ $scope => $newparams], $scope);
 				}
 			}
 			return $ret;
@@ -350,7 +350,7 @@ trait ModelSearchTrait
 		} else {
 			$value = null;
 		}
-		$value = $this->toOpExpression($value, false);
+		$value = static::toOpExpression($value, false);
 		if( !in_array($value['op'], ModelSearchTrait::$extra_operators) ) {
 			$extra_visible = "display:none";
 		} else {

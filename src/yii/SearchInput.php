@@ -38,7 +38,7 @@ class SearchInput extends \yii\bootstrap4\InputWidget
 		} else {
 			$value = null;
 		}
-		$value = $this->model->toOpExpression($value, false);
+		$value = ModelSearchTrait::toOpExpression($value, false);
 		if( !in_array($value['op'], ModelSearchTrait::$extra_operators) ) {
 			$extra_visible = "display:none";
 		} else {
