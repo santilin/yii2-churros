@@ -69,7 +69,7 @@ class CrudController extends \yii\web\Controller
 	public function actionIndex()
 	{
 		$params = Yii::$app->request->queryParams;
-		$searchModel = $this->findModel(null, null, 'search');
+		$searchModel = $this->findSearchModel();
 		if( $this->onlyMine ) {
 			$params['onlyMine'] = $this->onlyMine;
 		}
@@ -384,7 +384,7 @@ class CrudController extends \yii\web\Controller
 		$ret = [];
 		static $clientIdGetParamName = 'query';
 		$value = $_GET[$clientIdGetParamName];
-		$searchModel = $this->findModel(null, null, 'search');
+		$searchModel = $this->findSearchModel();
 		$query = $searchModel->find();
 		foreach( (array)$fields as $field ) {
 			$query->orWhere( [ "like", $field, $value  ] );
