@@ -44,6 +44,7 @@ return [
     'Show all' => 'Mostrar todo',
     'Paginate' => 'Paginar',
     'Summarize' => 'Sólo totales',
+    'No {items} found.' => 'No se han encontrado {items}.',
     'Show only summary' => 'Mostrar solo los totales',
     'Show first page data' => 'Paginar los resultados',
     'Show all data' => 'Mostrar todos los resultados',

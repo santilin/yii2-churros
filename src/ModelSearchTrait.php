@@ -31,7 +31,6 @@ trait ModelSearchTrait
 		'BETWEEN', 'NOT BETWEEN'
 	];
 
-
 	/**
 	 * Adds related sorts and filters to dataproviders for grids
 	*/
@@ -97,19 +96,19 @@ trait ModelSearchTrait
     public function load($data, $formName = null)
     {
         $scope = $formName === null ? $this->formName() : $formName;
-        if ($scope === '' && !empty($data)) {
-            $this->setAttributes($data);
-            return true;
-        } elseif (isset($data[$scope])) {
+        if (isset($data[$scope])) {
 			foreach( $data[$scope] as $name => &$value ) {
 				if( is_array($value) ) {
 					$value = json_encode($value);
 				}
+				if ($this->hasAttribute($name) || property_exists($this,$name) ) {
+					$this->$name = $value;
+				} else if( array_key_exists($name, $this->related_properties) ) {
+					$this->related_properties[$name] = $value;
+				}
 			}
-            $this->setAttributes($data[$scope]);
             return true;
         }
-
         return false;
     }
 
@@ -153,33 +152,7 @@ trait ModelSearchTrait
 		if( $value['lft'] == null ) {
 			return;
 		}
-
-		if( $fldname instanceof \yii\db\Expression ) {
-			$this->addFieldFilterToQuery($query, $fldname, $value);
-			return;
-		}
-
-
-		// addColumnSortsToProvider adds the join tables with AS `as_xxxxxxx`
-		/// @todo add them as table1_table2_xxxxxx
-		$tablename = $this->tableName();
-		$fullfldname = null;
-		if( strpos($fldname, '.') !== FALSE ) {
-			$relmodel = $this->instance();
-			while( strpos($fldname, '.') !== FALSE ) {
-				list($relation, $fldname) = ModelInfoTrait::splitFieldName($fldname, false /*no reverse*/);
-				if( isset($relmodel::$relations[$relation]) ) {
-					$tablename = $relmodel::$relations[$relation]['relatedTablename'];
-					$relmodel = $relmodel::$relations[$relation]['modelClass'];
-				} else {
-					$fullfldname = $fldname;
-					break;
-				}
-			}
-		}
-		if( $fullfldname === null ) {
-			$fullfldname = $tablename . "." . $fldname;
-		}
+		$fullfldname = $this->tableName() . "." . $fldname;
 		$this->addFieldFilterToQuery($query, $fullfldname, $value);
 	}
 
@@ -244,7 +217,7 @@ trait ModelSearchTrait
 				$query->andFilterWhere([$value['op'], "$table_alias.$attribute", $value['lft'] ]);
 			}
 		} else {
-			throw new InvalidArgumentException($relation_name . ": relation not found in model " . self::class . '::$relations');
+			throw new InvalidArgumentException($relation_name . ": relation not found in model " . self::class . ' (SearchModel::filterWhereRelated)');
 		}
 	}
 

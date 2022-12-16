@@ -147,16 +147,6 @@ trait ModelSearchTrait
 		}
     }
 
-    // Advanced search with operators
-	protected function makeSearchParam($values)
-	{
-		if( is_array($values) ) {
-			return json_encode($values);
-		} else {
-			return $values;
-		}
-	}
-
 	public function transformGridFilterValues()
 	{
 		foreach( $this->attributes as $name => $value ) {
