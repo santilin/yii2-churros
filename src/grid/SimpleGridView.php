@@ -46,9 +46,6 @@ class SimpleGridView extends \yii\grid\GridView
 
 	public function __construct($config = [])
 	{
-		if( empty($this->dataColumnClass ) ) {
-			$this->dataColumnClass = ReportDataColumn::class;
-		}
 		if (empty($config['pager']) ) {
 			$config['pager'] = [
 				'firstPageLabel' => '<<',
@@ -59,6 +56,10 @@ class SimpleGridView extends \yii\grid\GridView
 		}
 		if( !$this->output == 'Screen' ) {
 			$config['dataProvider']->pagination = false;
+		}
+		// Eliminar propiedades de kartik data column
+		foreach( $config['columns'] as &$column ) {
+			unset($column['filterType'],$column['filterWidgetOptions']);
 		}
 		parent::__construct($config);
 	}

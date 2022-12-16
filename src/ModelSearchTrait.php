@@ -31,6 +31,17 @@ trait ModelSearchTrait
 		'BETWEEN', 'NOT BETWEEN'
 	];
 
+	public function __get($name)
+	{
+		// GridView::renderFilter: needs activeAttribute when related property
+		if( property_exists($this, 'related_properties') ) {
+			if( array_key_exists($name, $this->related_properties) ) {
+				return $this->related_properties[$name];
+			}
+		}
+		return parent::__get($name);
+	}
+
 	/**
 	 * Adds related sorts and filters to dataproviders for grids
 	*/
