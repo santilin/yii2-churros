@@ -25,10 +25,8 @@ trait ModelSearchTrait
 		'>' => '>', '<' => '<',
 		'>=' => '>=', '<=' => '<=',
 		'SELECT' => 'Valor(es) de la lista',
-		'BETWEEN' => 'entre dos valores', 'NOT BETWEEN' => 'no entre dos valores',
-	];
-	static public $extra_operators = [
-		'BETWEEN', 'NOT BETWEEN'
+		'BETWEEN' => 'entre dos valores',
+		'NOT BETWEEN' => 'no entre dos valores',
 	];
 
 	public function __get($name)
@@ -132,11 +130,11 @@ trait ModelSearchTrait
 			if( substr($value,0,2) == '{"' && substr($value,-2) == '"}' ) {
 				$value = json_decode($value, true);
 			}
-			if( isset($value['lft']) ) {
+			if( isset($value['v']) ) {
 				if( in_array($value['op'], ['=','<','>','<=','>=','<>'] ) ) {
-					$this->$name = $value['op'] . $value['lft'];
+					$this->$name = $value['op'] . $value['v'];
 				} else if( $value['op'] == 'LIKE' ) {
-					$this->$name = $value['lft'];
+					$this->$name = $value['v'];
 				}
 			}
 		}
@@ -151,16 +149,16 @@ trait ModelSearchTrait
 			if( substr($value,0,2) == '{"' && substr($value,-2) == '"}' ) {
 				return json_decode($value, true);
 			} else if( preg_match('/^(=|<>|<|<=|>|>=)(.*)$/', $value, $matches) ) {
-				return [ 'lft' => $matches[2], 'op' => $matches[1], 'rgt' => null ];
+				return [ 'v' => $matches[2], 'op' => $matches[1] ];
 			}
 		}
-		return [ 'op' => $strict ? '=' : 'LIKE', 'lft' => $value, 'rgt' => '' ];
+		return [ 'op' => $strict ? '=' : 'LIKE', 'v' => $value ];
 	}
 
 	public function filterWhere(&$query, $fldname, $value)
 	{
 		$value = static::toOpExpression($value, false );
-		if( $value['lft'] == null ) {
+		if( $value['v'] == null ) {
 			return;
 		}
 		$fullfldname = $this->tableName() . "." . $fldname;
@@ -169,12 +167,12 @@ trait ModelSearchTrait
 
 	public function addFieldFilterToQuery(&$query, $fldname, array $value)
 	{
-		if( is_array($value['lft']) ) {
- 			$query->andWhere([ 'in', $fldname, $value['lft']]);
+		if( is_array($value['v']) ) {
+ 			$query->andWhere([ 'in', $fldname, $value['v']]);
 		} else switch( $value['op'] ) {
 			case "===":
 			case "=":
-				$query->andWhere([$fldname => $value['lft']]);
+				$query->andWhere([$fldname => $value['v']]);
 				break;
 			case "<>":
 			case ">=":
@@ -183,17 +181,17 @@ trait ModelSearchTrait
 			case "<":
 			case "NOT LIKE":
 			case "LIKE":
-				$query->andWhere([ $value['op'], $fldname, $value['lft'] ]);
+				$query->andWhere([ $value['op'], $fldname, $value['v'] ]);
 				break;
 			case "START":
-				$query->andWhere([ 'LIKE', $fldname, $value['lft'] . '%', false]);
+				$query->andWhere([ 'LIKE', $fldname, $value['v'] . '%', false]);
 				break;
 			case "NOT START":
-				$query->andWhere([ 'NOT LIKE', $fldname, $value['lft'] . '%', false]);
+				$query->andWhere([ 'NOT LIKE', $fldname, $value['v'] . '%', false]);
 				break;
 			case "BETWEEN":
 			case "NOT BETWEEN":
-				$query->andWhere([ $value['op'], $fldname, $value['lft'], $value['rgt'] ]);
+				$query->andWhere([ $value['op'], $fldname, explode(',',$value['v']) ]);
 				break;
 		}
 	}
@@ -223,9 +221,9 @@ trait ModelSearchTrait
 				} else {
 					list($right_table, $right_fld ) = ModelInfoTrait::splitFieldName($relation['right']);
 				}
-				$query->andFilterWhere([ 'IN', "$table_alias.$right_fld", $value['lft'] ]);
+				$query->andFilterWhere([ 'IN', "$table_alias.$right_fld", $value['v'] ]);
 			} else {
-				$query->andFilterWhere([$value['op'], "$table_alias.$attribute", $value['lft'] ]);
+				$query->andFilterWhere([$value['op'], "$table_alias.$attribute", $value['v'] ]);
 			}
 		} else {
 			throw new InvalidArgumentException($relation_name . ": relation not found in model " . self::class . ' (SearchModel::filterWhereRelated)');

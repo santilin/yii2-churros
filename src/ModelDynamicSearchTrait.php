@@ -26,10 +26,8 @@ trait ModelSearchTrait
 		'>' => '>', '<' => '<',
 		'>=' => '>=', '<=' => '<=',
 		'SELECT' => 'Valor(es) de la lista',
-		'BETWEEN' => 'entre dos valores', 'NOT BETWEEN' => 'no entre dos valores',
-	];
-	static public $extra_operators = [
-		'BETWEEN', 'NOT BETWEEN'
+		'BETWEEN' => 'entre dos valores',
+		'NOT BETWEEN' => 'no entre dos valores',
 	];
 
 	/*
@@ -341,11 +339,6 @@ trait ModelSearchTrait
 			$value = null;
 		}
 		$value = static::toOpExpression($value, false);
-		if( !in_array($value['op'], ModelSearchTrait::$extra_operators) ) {
-			$extra_visible = "display:none";
-		} else {
-			$extra_visible = '';
-		}
 		$ret .= "<div$main_div>";
 		$ret .= "<div class='form-group'>";
 		$ret .= "<div class='control-label col-sm-2'>";
