@@ -60,7 +60,7 @@ Añadir el símbolo del euro al input de los forms.
 === Configuración
 - Configuración fecha: Fija, por usuario
 - Configuración idioma: Fijo, por usuario
-== Anidar RercordViews con un static<
+== Anidar RercordViews con un static
 
 === css
 * css: width = maxlength en integers, floats y dates

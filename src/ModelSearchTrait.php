@@ -173,12 +173,11 @@ trait ModelSearchTrait
 		$this->addFieldFilterToQuery($query, $fullfldname, $value);
 	}
 
-	public function addFieldFilterToQuery(&$query, $fldname, array $value)
+	public function addFieldFilterToQuery(&$query, string $fldname, array $value)
 	{
 		if( is_array($value['v']) ) {
  			$query->andWhere([ 'in', $fldname, $value['v']]);
 		} else switch( $value['op'] ) {
-			case "===":
 			case "=":
 				$query->andWhere([$fldname => $value['v']]);
 				break;
@@ -249,5 +248,64 @@ trait ModelSearchTrait
 			throw new InvalidArgumentException($relation_name . ": relation not found in model " . self::class . ' (SearchModel::filterWhereRelated)');
 		}
 	}
+
+
+	protected function filterGlobal(&$query, array $attributes, string $value)
+	{
+		if( $value === null || $value === '' ) {
+			return;
+		}
+		foreach( $attributes as $name ) {
+			if( $name == 'globalSearch' ) {
+				continue;
+			}
+			if( strpos($name, '.') === FALSE) {
+				$relation = self::$relations[$name]??null;
+				if( !$relation ) {
+					$fullfldname = $this->tableName() . "." . $name;
+					$query->orWhere( [ 'LIKE', $fullfldname, $value ] );
+					continue;
+				} else {
+					$relation_name = $name;
+					$attribute = '';
+				}
+			} else {
+				list($relation_name, $attribute) = ModelInfoTrait::splitFieldName($name);
+				$relation = self::$relations[$relation_name]??null;
+			}
+			if( $relation ) {
+				// Hay tres tipos de campos relacionados:
+				// 1. El nombre de la relación (attribute = '' )
+				// 2. Relación y campo: Productora.nombre
+				// 3. La clave foranea: productura_id
+				$table_alias = "as_$relation_name";
+				// Activequery removes duplicate joins (added also in addSort)
+				$query->joinWith("$relation_name $table_alias");
+				$modelClass = $relation['modelClass'];
+				$model = $modelClass::instance();
+				$search_flds = [];
+				if ($attribute == $model->primaryKey()[0] ) {
+					if( isset($relation['other']) ) {
+						list($right_table, $right_fld ) = ModelInfoTrait::splitFieldName($relation['other']);
+					} else {
+						list($right_table, $right_fld ) = ModelInfoTrait::splitFieldName($relation['right']);
+					}
+					$query->orWhere([ 'IN', "$table_alias.$right_fld", $value ]);
+				} else if( $attribute == '' ) {
+					$search_flds = $model->findCodeAndDescFields();
+					$rel_conds = [ 'OR' ];
+					foreach( $search_flds as $search_fld ) {
+						$rel_conds[] = [ 'LIKE', "$table_alias.$search_fld", $value ];
+					}
+					$query->orWhere( $rel_conds );
+				} else {
+					$query->orWhere(['LIKE', "$table_alias.$attribute", $value ]);
+				}
+			} else {
+				throw new InvalidArgumentException($relation_name . ": relation not found in model " . self::class . ' (SearchModel::filterWhereRelated)');
+			}
+		}
+	}
+
 
 } // class
