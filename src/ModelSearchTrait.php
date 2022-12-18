@@ -217,19 +217,33 @@ trait ModelSearchTrait
 		}
 		$relation = self::$relations[$relation_name]??null;
 		if( $relation ) {
+			// Hay tres tipos de campos relacionados:
+			// 1. El nombre de la relación (attribute = '' )
+			// 2. Relación y campo: Productora.nombre
+			// 3. La clave foranea: productura_id
 			$table_alias = "as_$relation_name";
 			// Activequery removes duplicate joins (added also in addSort)
 			$query->joinWith("$relation_name $table_alias");
 			$value = static::toOpExpression($value, false );
-			if ($attribute == '' ) {
+			$modelClass = $relation['modelClass'];
+			$model = $modelClass::instance();
+			$search_flds = [];
+			if ($attribute == $model->primaryKey()[0] ) {
 				if( isset($relation['other']) ) {
 					list($right_table, $right_fld ) = ModelInfoTrait::splitFieldName($relation['other']);
 				} else {
 					list($right_table, $right_fld ) = ModelInfoTrait::splitFieldName($relation['right']);
 				}
-				$query->andFilterWhere([ 'IN', "$table_alias.$right_fld", $value['v'] ]);
+				$query->andWhere([$value['op'], "$table_alias.$right_fld", $value['v'] ]);
+			} else if( $attribute == '' ) {
+				$search_flds = $model->findCodeAndDescFields();
+				$rel_conds = [ 'OR' ];
+				foreach( $search_flds as $search_fld ) {
+					$rel_conds[] = [$value['op'], "$table_alias.$search_fld", $value['v'] ];
+				}
+				$query->andWhere( $rel_conds );
 			} else {
-				$query->andFilterWhere([$value['op'], "$table_alias.$attribute", $value['v'] ]);
+				$query->andWhere([$value['op'], "$table_alias.$attribute", $value['v'] ]);
 			}
 		} else {
 			throw new InvalidArgumentException($relation_name . ": relation not found in model " . self::class . ' (SearchModel::filterWhereRelated)');

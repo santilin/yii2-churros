@@ -243,23 +243,6 @@ trait ModelInfoTrait
 		return $ret;
     }
 
-    static public function valuesAndLabels()
-    {
-		$model = new static;
-		$code_field = $model->getModelInfo('code_field');
-		$desc_field = $model->getModelInfo('desc_field');
-		$id_field = "ID"; /// @todo $model->getPrimaryKey();
-		if( $code_field && $desc_field ) {
-			return ArrayHelper::map($model->find()->select([$id_field, "CONCAT({{" . $code_field . "}}, '.- ', {{" . $desc_field . "}}) AS DESCRIPTION"])->asArray()->all(), $id_field, 'DESCRIPTION');
-		} else if( $code_field ) {
-			return ArrayHelper::map($model->find()->select([$id_field, $code_field])->asArray()->all(), $id_field, $code_field);
-		} else if( $desc_field ) {
-			return ArrayHelper::map($model->find()->select([$id_field, $desc_field])->asArray()->all(), $id_field, $code_field);
-		} else {
-			return [];
-		}
-    }
-
     public function controllerName($prefix = '')
     {
 		$c = self::getModelInfo('controller_name');
@@ -481,6 +464,7 @@ trait ModelInfoTrait
 	{
 		return static::findByCondition($pk);
 	}
+
 
 } // trait ModelInfoTrait
 

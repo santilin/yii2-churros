@@ -57,6 +57,9 @@ class SimpleGridView extends \yii\grid\GridView
 		if( !$this->output == 'Screen' ) {
 			$config['dataProvider']->pagination = false;
 		}
+		if( empty($config['dataColumnClass']) ) {
+			$config['dataColumnClass'] = \santilin\churros\grid\DataColumn::class;
+		}
 		// Eliminar propiedades de kartik data column
 		foreach( $config['columns'] as &$column ) {
 			unset($column['filterType'],$column['filterWidgetOptions']);
