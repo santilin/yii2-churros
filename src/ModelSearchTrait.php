@@ -18,12 +18,13 @@ trait ModelSearchTrait
 {
 	static public $operators = [
 		'=' => '=',
-		'===' => 'Exactamente igual', // Distinguish = (in grid filter) from === in search form
 		'<>' => '<>',
 		'START' => 'Comienza por', 'NOT START' => 'No comienza por',
 		'LIKE' => 'Contiene', 'NOT LIKE' => 'No contiene',
-		'>' => '>', '<' => '<',
-		'>=' => '>=', '<=' => '<=',
+		'<=' => '<=',
+		'>=' => '>=',
+		'>' => '>',
+		'<' => '<',
 		'SELECT' => 'Valor(es) de la lista',
 		'BETWEEN' => 'entre dos valores',
 		'NOT BETWEEN' => 'no entre dos valores',
@@ -39,6 +40,16 @@ trait ModelSearchTrait
 		}
 		return parent::__get($name);
 	}
+
+	public function __set($name, $value)
+	{
+		if ($this->hasAttribute($name) || property_exists($this,$name) ) {
+			$this->$name = $value;
+		} else if( array_key_exists($name, $this->related_properties) ) {
+			$this->related_properties[$name] = $value;
+		}
+	}
+
 
 	/**
 	 * Adds related sorts and filters to dataproviders for grids
@@ -65,7 +76,7 @@ trait ModelSearchTrait
 				$provider->query->joinWith("$relation_name $table_alias");
 				$provider->query->distinct(); // Evitar duplicidades debido a las relaciones hasmany
 				if ($sort_fldname == '' ) { /// @todo junction tables
-					$code_field = $related_model_class::findCodeField();
+					$code_field = $related_model_class::instance()->findCodeField();
 					$sort_fldname = $code_field;
 				}
 				if( $sort_fldname != '' && !isset($provider->sort->attributes[$attribute])) {
@@ -110,31 +121,28 @@ trait ModelSearchTrait
 				if( is_array($value) ) {
 					$value = json_encode($value);
 				}
-				if ($this->hasAttribute($name) || property_exists($this,$name) ) {
-					$this->$name = $value;
-				} else if( array_key_exists($name, $this->related_properties) ) {
-					$this->related_properties[$name] = $value;
-				}
+				$this->$name = $value;
 			}
             return true;
         }
         return false;
     }
 
+	/*
+	 * Intenta poner un valor legible en el filtro del gridview
+	 */
 	public function transformGridFilterValues()
 	{
-		foreach( $this->attributes as $name => $value ) {
-			if(is_array($value) ) {
-				continue;
-			}
+		foreach( array_merge($this->normal_attrs, array_keys($this->related_properties)) as $attr ) {
+			$value = $this->$attr;
 			if( substr($value,0,2) == '{"' && substr($value,-2) == '"}' ) {
 				$value = json_decode($value, true);
 			}
 			if( isset($value['v']) ) {
 				if( in_array($value['op'], ['=','<','>','<=','>=','<>'] ) ) {
-					$this->$name = $value['op'] . $value['v'];
+					$this->$attr = $value['op'] . $value['v'];
 				} else if( $value['op'] == 'LIKE' ) {
-					$this->$name = $value['v'];
+					$this->$attr = $value['v'];
 				}
 			}
 		}
@@ -148,7 +156,7 @@ trait ModelSearchTrait
 		if( is_string($value) && $value != '') {
 			if( substr($value,0,2) == '{"' && substr($value,-2) == '"}' ) {
 				return json_decode($value, true);
-			} else if( preg_match('/^(=|<>|<|<=|>|>=)(.*)$/', $value, $matches) ) {
+			} else if( preg_match('/^(=|<>|<=|>=|>|<)(.*)$/', $value, $matches) ) {
 				return [ 'v' => $matches[2], 'op' => $matches[1] ];
 			}
 		}
@@ -209,8 +217,6 @@ trait ModelSearchTrait
 		}
 		$relation = self::$relations[$relation_name]??null;
 		if( $relation ) {
-			$related_model_class = $relation['modelClass'];
-			$filter_set = false;
 			$table_alias = "as_$relation_name";
 			// Activequery removes duplicate joins (added also in addSort)
 			$query->joinWith("$relation_name $table_alias");
