@@ -11,13 +11,14 @@ trait EmailSenderModelTrait
 	{
 		$sent = false;
 		$sent_message = '';
-// 		Yii::$app->mailer->on(\yii\mail\BaseMailer::EVENT_AFTER_SEND,
-// 			function(\yii\mail\MailEvent $event) use (&$sent) {
-// 				$sent = $event->isSuccessful;
-// // 				if( !$event->isSuccessful  ) {
-// // 					Yii::$app->mailer->saveMessage($event->message);
-// // 				}
-// 			});
+		Yii::$app->mailer->on(\yii\mail\BaseMailer::EVENT_AFTER_SEND,
+			function(\yii\mail\MailEvent $event) use (&$sent) {
+				$sent = $event->isSuccessful;
+				if( !$event->isSuccessful  ) {
+					Yii::$app->mailer->saveMessage($event->message);
+				}
+			}
+		);
 		$params['model'] = $this;
 		if( $from == null ) {
 			$from = AppHelper::yiiparam('adminEmail');

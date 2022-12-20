@@ -148,17 +148,14 @@ class CrudController extends \yii\web\Controller
 		}
 		if ($model->loadAll(Yii::$app->request->post(), $relations) ) {
 			$model->setIsNewRecord(true);
-			foreach ($model->primaryKey() as $primary_key) {
-				$model->$primary_key = null;
-			}
+			$model->resetPrimaryKeys();
 			if( $model->saveAll(true) ) {
 				if( !$model->hasErrors() ) {
 					$this->showFlash('duplicate', $model);
 				} else {
 					$this->showWarningFlash('duplicate', $model);
 				}
-					return $this->whereTogoNow('duplicate', $model);
-				}
+				return $this->whereTogoNow('duplicate', $model);
 			}
 		}
 		return $this->render('duplicate', [
@@ -190,8 +187,7 @@ class CrudController extends \yii\web\Controller
 				} else {
 					$this->showWarningFlash('update', $model);
 				}
-					return $this->whereTogoNow('update', $model);
-				}
+				return $this->whereTogoNow('update', $model);
 			}
 		}
 		return $this->render('update', [
