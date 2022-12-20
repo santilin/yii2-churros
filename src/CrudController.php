@@ -110,11 +110,13 @@ class CrudController extends \yii\web\Controller
 			$relations = [];
 		}
 		if ($model->loadAll(Yii::$app->request->post(), $relations) ) {
-			if( $this->saveAll('create', $model) ) {
-				if( $this->afterSave('create', $model, $params) ) {
+			if( $model->saveAll(true) ) {
+				if( !$model->hasErrors() ) {
 					$this->showFlash('create', $model);
-					return $this->whereToGoNow('create', $model);
+				} else {
+					$this->showWarningFlash('create', $model);
 				}
+				return $this->whereToGoNow('create', $model);
 			}
 		}
 		return $this->render('create', [
@@ -149,9 +151,12 @@ class CrudController extends \yii\web\Controller
 			foreach ($model->primaryKey() as $primary_key) {
 				$model->$primary_key = null;
 			}
-			if( $this->saveAll('duplicate', $model) ) {
-				if( $this->afterSave('duplicate', $model) ) {
+			if( $model->saveAll(true) ) {
+				if( !$model->hasErrors() ) {
 					$this->showFlash('duplicate', $model);
+				} else {
+					$this->showWarningFlash('duplicate', $model);
+				}
 					return $this->whereTogoNow('duplicate', $model);
 				}
 			}
@@ -179,9 +184,12 @@ class CrudController extends \yii\web\Controller
 			$relations = [];
 		}
 		if ($model->loadAll(Yii::$app->request->post(), $relations) ) {
-			if( $this->saveAll('update', $model) ) {
-				if( $this->afterSave('update', $model, $params) ) {
+			if( $model->saveAll(true) ) {
+				if( !$model->hasErrors() ) {
 					$this->showFlash('update', $model);
+				} else {
+					$this->showWarningFlash('update', $model);
+				}
 					return $this->whereTogoNow('update', $model);
 				}
 			}
@@ -202,14 +210,9 @@ class CrudController extends \yii\web\Controller
 		try {
 			$model = $this->findModel($id);
 			$model->deleteWithRelated();
-			if( $this->afterSave('delete', $model, []) ) {
-// 				$this->showFlash('delete', $model);
-				return $this->whereToGoNow('delete', $model);
-			}
 		} catch (\yii\db\IntegrityException $e ) {
 			$msg = $e->getMessage();
 			Yii::$app->session->addFlash('error', $msg);
-// 			throw new DeleteModelException($model, $e);
 		} catch( \yii\web\ForbiddenHttpException $e ) {
 			$msg = $e->getMessage();
 			Yii::$app->session->addFlash('error', $msg);
@@ -477,11 +480,6 @@ class CrudController extends \yii\web\Controller
 		}
 	}
 
-	protected function afterSave(string $action_id, $model, array $params): bool
-	{
-		return true;
-	}
-
 	protected function findViewFile($view)
 	{
 		if (strncmp($view, '@', 1) === 0) {
@@ -504,11 +502,6 @@ class CrudController extends \yii\web\Controller
 		} else {
 			return $file;
 		}
-	}
-
-	protected function saveAll(string $context, $model, bool $in_trans = false): bool
-	{
-		return $model->saveAll(true, $in_trans);
 	}
 
 	public function joinMany2ManyModels(string $glue, array $models, bool $make_links = false): string
