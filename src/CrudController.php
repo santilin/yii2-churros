@@ -87,8 +87,8 @@ class CrudController extends \yii\web\Controller
 		*/
 	public function actionView($id)
 	{
-		$model = $this->findModel($id);
 		$params = Yii::$app->request->queryParams;
+		$model = $this->findModel($id, null, 'view', $params);
 		return $this->render('view', [
 			'model' => $model,
 			'extraParams' => $this->changeActionParams($params, 'view', $model)
@@ -103,7 +103,7 @@ class CrudController extends \yii\web\Controller
 	public function actionCreate()
 	{
 		$params = Yii::$app->request->queryParams;
-		$model = $this->findModel(null);
+		$model = $this->findModel(null, null, 'create', $params);
 		if (isset($_POST['_form_relations']) ) {
 			$relations = explode(",", $_POST['_form_relations']);
 		} else {
@@ -138,7 +138,7 @@ class CrudController extends \yii\web\Controller
 		if (Yii::$app->request->post('_asnew') != 0) {
 			$id = Yii::$app->request->post('_asnew');
 		}
-		$model = $this->findModel($id);
+		$model = $this->findModel($id, null, 'duplicate', $params);
 		$model->setDefaultValues(true); // duplicating
 
 		if (isset($_POST['_form_relations']) ) {
@@ -173,7 +173,7 @@ class CrudController extends \yii\web\Controller
 	public function actionUpdate($id)
 	{
 		$params = Yii::$app->request->queryParams;
-		$model = $this->findModel($id);
+		$model = $this->findModel($id, null, 'update', $params);
 
 		if (isset($_POST['_form_relations']) ) {
 			$relations = explode(",", $_POST['_form_relations']);
@@ -192,7 +192,7 @@ class CrudController extends \yii\web\Controller
 		}
 		return $this->render('update', [
 			'model' => $model,
-			'extraParams' => $this->changeActionParams($params,'update', $model)
+			'extraParams' => $this->changeActionParams($params, 'update', $model)
 		]);
 	}
 
@@ -204,7 +204,7 @@ class CrudController extends \yii\web\Controller
 	public function actionDelete($id)
 	{
 		try {
-			$model = $this->findModel($id);
+			$model = $this->findModel($id, null, 'delete');
 			$model->deleteWithRelated();
 		} catch (\yii\db\IntegrityException $e ) {
 			$msg = $e->getMessage();
@@ -226,7 +226,7 @@ class CrudController extends \yii\web\Controller
 	public function actionPdf($id)
 	{
 		$params = Yii::$app->request->queryParams;
-		$model = $this->findModel($id);
+		$model = $this->findModel($id, null, 'view', $params);
 		if( YII_DEBUG ) {
             Yii::$app->getModule('debug')->instance->allowedIPs = [];
         }
@@ -398,7 +398,7 @@ class CrudController extends \yii\web\Controller
 	// Ajax
 	public function actionRawModel($id)
 	{
-		$model = $this->findModel($id);
+		$model = $this->findModel($id, null, 'view');
 		if( $model ) {
             return json_encode($model->getAttributes());
         } /// @todo else
