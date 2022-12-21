@@ -214,6 +214,7 @@ class CrudController extends \yii\web\Controller
 			Yii::$app->session->addFlash('error', $msg);
 			return $this->whereToGoNow('delete', null);
 		}
+		$this->showFlash('delete', $model);
  		return $this->whereToGoNow('delete', $model);
 	}
 
