@@ -50,6 +50,12 @@ trait ModelSearchTrait
 		}
 	}
 
+	public function addScopes( $scopes, &$provider )
+	{
+		foreach( array($scopes) as $scope ) {
+			$provider->query->$scope();
+		}
+	}
 
 	/**
 	 * Adds related sorts and filters to dataproviders for grids

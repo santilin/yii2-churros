@@ -536,15 +536,15 @@ class FormHelper
 			}
 			foreach($views as $kv => $view ) {
 				if( $_nv-- == 0 ) {
-					return $kv;
+					return [$kv, $view];
 				}
 			}
 		} else {
 			if( isset($views[$_nv])	) {
-				return $_nv;
+				return [ $_nv, $views[$_nv]];
 			}
 		}
-		return array_keys($views)[0];
+		return reset($views);
 	}
 
 	static public function getViewTitleFromRequest($views, $params)
