@@ -648,7 +648,7 @@ html;
 	{
 		$ret = [];
 		foreach( $buttons as $name => $button ) {
-			if( $button === null) {
+			if( empty($button) ) {
 				continue;
 			}
 			if (!empty($button['nocreate']) ) {
