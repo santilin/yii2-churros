@@ -52,7 +52,7 @@ trait ModelSearchTrait
 
 	public function addScopes( $scopes, &$provider )
 	{
-		foreach( array($scopes) as $scope ) {
+		foreach( $scopes as $scope ) {
 			$provider->query->$scope();
 		}
 	}

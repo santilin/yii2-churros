@@ -89,7 +89,7 @@ class GridView extends SimpleGridView
         if( count($this->selectViews) ) {
 			$selectViewsOptions = $this->selectViewsOptions;
 			$tag = ArrayHelper::remove($selectViewsOptions, 'tag', 'span');
-			$selectViewsContent = Html::tag($tag, $this->renderSelectViews(), $selectViewsOptions);
+			$selectViewsContent = ' ' . Html::tag($tag, $this->renderSelectViews(), $selectViewsOptions);
 		} else {
 			$selectViewsContent = null;
 		}
