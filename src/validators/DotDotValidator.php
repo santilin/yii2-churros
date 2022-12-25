@@ -6,7 +6,6 @@ use Yii;
 use yii\validators\Validator;
 use yii\base\InvalidConfigException;
 use yii\helpers\ArrayHelper;
-use santilin\churros\assets\ChurrosAsset;
 
 /**
  * RangeValidator validates that the attribute value is among a list of values.
