@@ -365,6 +365,7 @@ trait ModelInfoTrait
 		}
 	}
 
+	// No se usa
 	public function IAmOwner()
 	{
 		$blameable = $this->getBehavior('blameable');
