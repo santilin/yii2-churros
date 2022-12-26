@@ -19,10 +19,9 @@ use santilin\churros\ChurrosAsset;
 class CardListView extends ListView
 {
 	public $options = [ 'class' => 'cardlistview'];
-	public $itemsOptions = [ 'class' => 'card-deck' ];
-	public $itemOptions = [ 'class' => 'card' ];
+	public $itemsOptions = [ 'class' => 'row row-cols-1 row-cols-md-3' ];
+	public $itemOptions = [ 'class' => 'col mb-4 card' ];
 	public $layout = "{summarypager}\n{items}";
-	public $cardsPerRow = 4;
 	public $labelSingular = 'item';
 	public $labelPlural = 'items';
 
@@ -37,19 +36,6 @@ class CardListView extends ListView
 			];
 		}
 		parent::__construct($config);
-		switch( $this->cardsPerRow ) {
-		case 0:
-		case 1:
-		case 2:
-			Html::addCssClass($this->itemOptions, 'clv-w-50');
-			break;
-		case 3:
-			Html::addCssStyle($this->itemOptions, 'width:33%');
-			break;
-		case 4:
-			Html::addCssClass($this->itemOptions, 'clv-w-25');
-			break;
-		}
 		if( empty($this->summary) ) {
 			if ($this->dataProvider->getPagination() !== false) {
                 $this->summary = Yii::t('churros', 'Showing <b>{begin, number}-{end, number}</b> of <b>{totalCount, number}</b> {totalCount, plural, one{item} other{items}}.');

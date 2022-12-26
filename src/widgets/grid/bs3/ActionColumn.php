@@ -5,7 +5,7 @@
  * @license http://www.yiiframework.com/license/
  */
 
-namespace santilin\churros\widgets\grid;
+namespace santilin\churros\widgets\grid\bs3;
 
 use Yii;
 use yii\helpers\Html;
@@ -33,7 +33,8 @@ class ActionColumn extends \yii\grid\ActionColumn
 				$this->buttons['view'] = $this->customButtons['view'];
 				unset( $this->customButtons['view'] );
 			} else {
-				$this->initDefaultButton('view', 'eye', [ 'title' => Yii::t('churros', 'View')]);
+				$this->initDefaultButton('view', 'eye-open',
+					[ 'class' => 'action-button', 'title' => Yii::t('churros', 'View')]);
 			}
 		}
         if( strpos($this->crudPerms,'U') !== false ) {
@@ -41,7 +42,8 @@ class ActionColumn extends \yii\grid\ActionColumn
 				$this->buttons['update'] = $this->customButtons['update'];
 				unset( $this->customButtons['update'] );
 			} else {
-				$this->initDefaultButton('update', 'pencil-alt', [ 'title' => Yii::t('churros', 'Update')]);
+				$this->initDefaultButton('update', 'pencil',
+					[ 'title' => Yii::t('churros', 'Update')]);
 			}
 		}
         if( strpos($this->crudPerms,'D') !== false ) {
@@ -49,7 +51,7 @@ class ActionColumn extends \yii\grid\ActionColumn
 				$this->buttons['delete'] = $this->customButtons['delete'];
 				unset( $this->customButtons['delete'] );
 			} else {
-				$this->initDefaultButton('delete', 'trash-alt',
+				$this->initDefaultButton('delete', 'trash',
 				array_merge([ 'title' => Yii::t('churros', 'Delete')], $this->deleteOptions));
 			}
 		}
@@ -68,7 +70,14 @@ class ActionColumn extends \yii\grid\ActionColumn
 		$this->customButtons = []; // https://github.com/kartik-v/yii2-grid/issues/1047
     }
 
-	protected function initDefaultButton($name, $iconName, $additionalOptions = [])
+        /**
+     * Initializes the default button rendering callback for single button.
+     * @param string $name Button name as it's written in template
+     * @param string $iconName The part of Bootstrap glyphicon class that makes it unique
+     * @param array $additionalOptions Array of additional options
+     * @since 2.0.11
+     */
+    protected function initDefaultButton($name, $iconName, $additionalOptions = [])
     {
         if (!isset($this->buttons[$name]) && strpos($this->template, '{' . $name . '}') !== false) {
             $this->buttons[$name] = function ($url, $model, $key) use ($name, $iconName, $additionalOptions) {
@@ -93,9 +102,12 @@ class ActionColumn extends \yii\grid\ActionColumn
                     'aria-label' => $title,
                     'data-pjax' => '0',
                 ], $this->buttonOptions, $additionalOptions );
-                $icon = Html::tag('span', '', ['class' => "fa fa-$iconName"]);
+                $icon = isset($this->icons[$iconName])
+                    ? $this->icons[$iconName]
+                    : Html::tag('span', '', ['class' => "glyphicon glyphicon-$iconName"]);
                 return Html::a($icon, $url, $options);
             };
         }
     }
+
 }
