@@ -261,6 +261,7 @@ trait ModelSearchTrait
 		if( $value === null || $value === '' ) {
 			return;
 		}
+		$or_conds = [ 'OR' ];
 		foreach( $attributes as $name ) {
 			if( $name == 'globalSearch' ) {
 				continue;
@@ -303,13 +304,16 @@ trait ModelSearchTrait
 					foreach( $search_flds as $search_fld ) {
 						$rel_conds[] = [ 'LIKE', "$table_alias.$search_fld", $value ];
 					}
-					$query->orWhere( $rel_conds );
+					$or_conds[] = $rel_conds;
 				} else {
-					$query->orWhere(['LIKE', "$table_alias.$attribute", $value ]);
+					$or_conds[] = ['LIKE', "$table_alias.$attribute", $value ];
 				}
 			} else {
 				throw new InvalidArgumentException($relation_name . ": relation not found in model " . self::class . ' (SearchModel::filterWhereRelated)');
 			}
+		}
+		if( count( $or_conds ) > 1 ) {
+			$query->andWhere($or_conds);
 		}
 	}
 

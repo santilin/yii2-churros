@@ -1,3 +1,6 @@
+Quitar grid-group-head-xxxx de site.css?
+
+
 https://phpstan.org/user-guide/getting-started
 yii2usuario: alert falla cuando se redirige de bs4 a bs3 porque no espera un array aquí: /home/santilin/devel/yii2base/vendor/2amigos/yii2-usuario/src/User/resources/views/shared/_alert.php
 Hay acceso a trivel.test/user/2
@@ -30,7 +33,8 @@ https://stackoverflow.com/questions/32731987/adding-new-list-options-refreshing-
 * Hacer uso de los model.Agente.report
 
 == GridView ==
-- Grid: cuando se filtra, poner "Filtrando 1-1 de s"
+* selectViews no funciona con pjax porque es un dropdown. Añadirlo dentro de un FORM
+* Grid: cuando se filtra, poner "Filtrando 1-1 de s"
 * GridView: Ocultar filtro si no hay resultados
 ** BreadCrumbs: Index: Añadir el orden o el filtro ("filtrado") ("ordenado por")
 * 2 gridviews: https://www.yiiframework.com/doc/guide/2.0/en/output-data-widgets#multiple-gridviews
