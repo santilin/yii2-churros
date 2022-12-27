@@ -52,8 +52,11 @@ class ActionColumn extends \yii\grid\ActionColumn
 				unset( $this->customButtons['delete'] );
 			} else {
 				$this->initDefaultButton('delete', 'trash',
-				array_merge([ 'title' => Yii::t('churros', 'Delete')], $this->deleteOptions));
-			}
+					array_merge([
+						'title' => Yii::t('churros', 'Delete'),
+						'data-confirm' => Yii::t('yii', 'Are you sure you want to delete this item?'),
+						'data-method' => 'post'
+					], $this->deleteOptions));			}
 		}
         if( strpos($this->crudPerms,'2') !== false ) {
 			if( isset($this->customButtons['duplicate']) ) {
