@@ -119,6 +119,8 @@ function dateInputParseSpanishDate(datestr)
 		} else {
 			return d;
 		}
+	} else {
+		return false;
 	}
 }
 

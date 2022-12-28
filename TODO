@@ -1,5 +1,4 @@
-Quitar grid-group-head-xxxx de site.css?
-
+DateInput: Si se borra la fecha, no se cambia el valor del input oculto.
 
 https://phpstan.org/user-guide/getting-started
 yii2usuario: alert falla cuando se redirige de bs4 a bs3 porque no espera un array aquí: /home/santilin/devel/yii2base/vendor/2amigos/yii2-usuario/src/User/resources/views/shared/_alert.php
@@ -33,6 +32,7 @@ https://stackoverflow.com/questions/32731987/adding-new-list-options-refreshing-
 * Hacer uso de los model.Agente.report
 
 == GridView ==
+* ¿Quitar grid-group-head-xxxx de site.css?
 * selectViews no funciona con pjax porque es un dropdown. Añadirlo dentro de un FORM
 * Grid: cuando se filtra, poner "Filtrando 1-1 de s"
 * GridView: Ocultar filtro si no hay resultados
