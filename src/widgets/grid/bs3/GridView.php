@@ -8,7 +8,7 @@ namespace santilin\churros\widgets\grid\bs3;
 use Yii;
 use yii\helpers\{ArrayHelper,Html,Url	};
 use kartik\grid\GridView as BaseGridView;
-use santilin\churros\grid\GridGroup;
+use santilin\churros\widgets\grid\GridGroup;
 use yii\helpers\Json;
 use yii\web\JsExpression;
 use kartik\grid\GridToggleDataAsset;
