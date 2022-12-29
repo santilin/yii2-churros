@@ -44,9 +44,9 @@ class DateInput extends MaskedInput
 						$date = DateTimeEx::createFromFormat(DateTimeEx::DATETIME_DATE_SQL_FORMAT, $value);
 					}
 					if( $date == null ) {
-						throw new \Exception("$value: Invalid date format for DateInput.");
+					} else {
+						$value = $date->format(self::parseFormat(\Yii::$app->formatter->dateFormat, 'date'));
 					}
-					$value = $date->format(self::parseFormat(\Yii::$app->formatter->dateFormat, 'date'));
 				}
 				$this->options['value'] = $value;
 			}
@@ -91,26 +91,34 @@ function dateInputSetSelectionRange(input, selectionStart, selectionEnd) {
   }
 }
 
+// https://stackoverflow.com/questions/60759006/is-there-a-way-to-prevent-the-date-object-in-js-from-overflowing-days-months
 function dateInputParseSpanishDate(datestr)
 {
 	var datestr_parts = datestr.split('/');
 	if( datestr_parts.length == 3 ) {
 		var year = parseInt(datestr_parts[2]);
-		if( isNaN(year) || year == 0 ) {
+		var month = parseInt(datestr_parts[1]);
+		var day = parseInt(datestr_parts[0]);
+		if( isNaN(year) ) {
+			year = 0;
+		}
+		if( isNaN(month) ) {
+			month == 0;
+		}
+		if( isNaN(day) ) {
+			day = 0;
+		}
+		if( year == 0 && month == 0 && day == 0 ) {
+			return null;
+		}
+		if( year == 0 ) {
 			year = new Date().getFullYear();
 		} else if (year<100) {
 			year += 2000;
 		}
-		var month = parseInt(datestr_parts[1]);
-		if( isNaN(month) || month == 0 ) {
+		if( month == 0 ) {
 			month = new Date().getMonth() + 1;
 		} else if (month > 12 ) {
-			return false;
-		}
-		var day = parseInt(datestr_parts[0]);
-		if( isNaN(day) ) {
-			day = 0;
-		} else if (day > 31) {
 			return false;
 		}
 		var d = new Date(year, month-1, day);
@@ -120,7 +128,7 @@ function dateInputParseSpanishDate(datestr)
 			return d;
 		}
 	} else {
-		return false;
+		return null;
 	}
 }
 
@@ -158,19 +166,21 @@ function dateToSQLFormat(date)
 function dateInputChange(date_input, id)
 {
 	var date_js = dateInputParseSpanishDate(date_input.value);
-	if (date_js == false ) {
-		old_value = date_input.value;
-		date_input.value = "00/00/0000";
+	debugger;
+	if( date_js === null ) { // empty
+		$('#' + id ).val( '' );
+	 } else if (date_js == false ) { // wrong
+		old_color = date_input.style.color;
+		date_input.style.color = "#ff0000";
+		$('#' + id ).val( date_input.value );
 		setTimeout(function() {
-			date_input.value = old_value;
+			date_input.stye.color = old_color;
 			date_input.focus();
 		}, 1000);
+		return false;
 	} else {
-		console.log(date_js);
 		date_input.value = dateToSpanishFormat( date_js );
-		console.log(date_input.value);
 		$('#' + id ).val( dateToSQLFormat( date_js ) );
-		console.log($('#' + id).val());
 	}
 }
 EOF;

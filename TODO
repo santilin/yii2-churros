@@ -1,4 +1,9 @@
-DateInput: Si se borra la fecha, no se cambia el valor del input oculto.
+DateInput: Mensaje de error: La fecha no es correcta.
+TabIndex de alumnas erróneo.
+Valor por defecto de Alumna_Form.provincia: A Corua
+Formulario de alumnas: cancelar, no vuelve.
+DateInput => SpanishDateInput. Definir campo date_es
+
 
 https://phpstan.org/user-guide/getting-started
 yii2usuario: alert falla cuando se redirige de bs4 a bs3 porque no espera un array aquí: /home/santilin/devel/yii2base/vendor/2amigos/yii2-usuario/src/User/resources/views/shared/_alert.php
