@@ -9,21 +9,46 @@ use yii\web\View;
 use yii\widgets\MaskedInput;
 use santilin\churros\helpers\DateTimeEx;
 
-class DateInput extends MaskedInput
+class QuickDateInput extends MaskedInput
 {
 	private $orig_id;
+	public $format;
 
 	public function init()
     {
+		if( empty($this->mask) ) {
+			$this->mask = $this->formatToMask();
+		}
         parent::init();
-        $this->orig_id = $this->options['id'];
-        $this->options['id'] = $this->orig_id . "_date_disp";
         $this->clientOptions = array_merge([
 			"insertMode" => false,
 			'positionCaretOnClick' => 'select',
-			'positionCaretOnTab' => 'select'
+			'positionCaretOnTab' => 'select',
+			'placeHolder' => $this->formatToPlaceHolder(),
 		], $this->clientOptions);
+        $this->orig_id = $this->options['id'];
+        $this->options['id'] = $this->orig_id . "_date_disp";
+	}
 
+
+	protected function formatToMask()
+	{
+		return strtr( $this->format, [
+			'd' => '99',
+			'm' => '99',
+			'y' => '99',
+			'Y' => '99[99]',
+		]);
+	}
+
+	protected function formatToPlaceHolder()
+	{
+		return strtr( $this->format, [
+			'd' => '__',
+			'm' => '__',
+			'y' => '__',
+			'Y' => '____',
+		]);
 	}
 
     protected function renderInputHtml($type)
@@ -33,6 +58,7 @@ class DateInput extends MaskedInput
 			if( empty($this->options['value']) ) {
 				$value = Html::getAttributeValue($this->model, $this->attribute);
 				if( !empty($value) ) {
+					$date = null;
 					$dcm = \Yii::$app->getModule('datecontrol');
 					if( $dcm ) {
 						$date = DateTimeEx::createFromFormat($dcm->getSaveFormat('date'), $value);
@@ -43,8 +69,7 @@ class DateInput extends MaskedInput
 					if( $date == null ) {
 						$date = DateTimeEx::createFromFormat(DateTimeEx::DATETIME_DATE_SQL_FORMAT, $value);
 					}
-					if( $date == null ) {
-					} else {
+					if( $date != null ) {
 						$value = $date->format(self::parseFormat(\Yii::$app->formatter->dateFormat, 'date'));
 					}
 				}
@@ -57,13 +82,11 @@ class DateInput extends MaskedInput
 				$name = $this->attribute;
 			}
 			$name = $this->options['name'] = "{$name}_date_disp";
-			$this->addChange($this->options, $this->orig_id);
             $ret .= Html::activeInput($type, $this->model, $this->attribute, $this->options);
         } else {
 			throw new \Exception("to check");
 // 			$ret = Html::hiddenInput( $this->name, $this->value, $hid_options);
 // 			$name = str_replace(']','_', str_replace('[', '_', $this->name)) . "_date_disp";
-// 			$this->addChange($this->options, $this->options['id']);
 // 			$ret .= Html::input($type, $name, $value, $this->options);
 		}
 		return $ret;
@@ -76,6 +99,8 @@ class DateInput extends MaskedInput
     {
 		parent::registerClientScript();
 		$view = $this->getView();
+		$id = $this->options['id'];
+		$orig_id = $this->orig_id;
 		$js = <<<EOF
 // https://stackoverflow.com/a/499158
 function dateInputSetSelectionRange(input, selectionStart, selectionEnd) {
@@ -166,35 +191,41 @@ function dateToSQLFormat(date)
 function dateInputChange(date_input, id)
 {
 	var date_js = dateInputParseSpanishDate(date_input.value);
-	debugger;
 	if( date_js === null ) { // empty
-		$('#' + id ).val( '' );
+		$('#$orig_id' ).val( '' );
+		return true;
 	 } else if (date_js == false ) { // wrong
 		old_color = date_input.style.color;
-		date_input.style.color = "#ff0000";
-		$('#' + id ).val( date_input.value );
+		$('#$orig_id' ).val( date_input.value );
+		date_input.classList.add('.invalid');
 		setTimeout(function() {
-			date_input.stye.color = old_color;
 			date_input.focus();
-		}, 1000);
+// 			date_input.classList.remove('.invalid');
+		}, 2000);
 		return false;
 	} else {
 		date_input.value = dateToSpanishFormat( date_js );
-		$('#' + id ).val( dateToSQLFormat( date_js ) );
+		$('#$orig_id').val( dateToSQLFormat( date_js ) );
+		return true;
 	}
 }
-EOF;
-        $view->registerJs($js, View::POS_HEAD, 'DateInputWidgetJS');
-    }
 
-    private static function addChange(&$options, $id)
-    {
-		if( !isset($options['onchange']) ) {
-			$options['onchange'] = "dateInputChange(this,'$id')";
-		}
-		if( !isset($options['onfocus']) ) {
-			$options['onfocus'] = "dateInputSetSelectionRange(this,0,0)";
-		}
+
+$('#$id').closest('form').submit( function(e) {
+	const el = $('#$id')[0];
+	if( !dateInputChange(el, '$id') ) {
+		e.preventDefault();
+		return false;
+	} else {
+		return true;
+	}
+});
+$('#$id').change( function() { dateInputChange(this, '$id'); } );
+$('#$id').blur( function() { dateInputChange(this, '$id'); } );
+$('#$id').focus( function() { dateInputSetSelectionRange(this,0,0); } );
+
+EOF;
+        $view->registerJs($js, View::POS_END, 'QuickDateInputJS');
     }
 
     private static function parseFormat($format, $type)
