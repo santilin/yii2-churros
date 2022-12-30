@@ -1,6 +1,9 @@
 <?php
 /*
  * https://github.com/RobinHerbots/Inputmask
+ *
+ * https://github.com/samdark/yii2-cookbook/blob/master/book/forms-activeform-js.md
+ *
  */
 namespace santilin\churros\widgets;
 
@@ -191,21 +194,36 @@ function dateToSQLFormat(date)
 function dateInputChange(date_input, id)
 {
 	var date_js = dateInputParseSpanishDate(date_input.value);
+	let error_el = $('#$id').next('.help-block.help-block-error');
+	let form_group = $('#$id').closest(".form-group");
 	if( date_js === null ) { // empty
 		$('#$orig_id' ).val( '' );
+		if( error_el ) {
+			error_el.text("");
+		}
+		if( form_group ) {
+			form_group.removeClass('has-error');
+		}
 		return true;
 	 } else if (date_js == false ) { // wrong
-		old_color = date_input.style.color;
-		$('#$orig_id' ).val( date_input.value );
-		date_input.classList.add('.invalid');
-		setTimeout(function() {
-			date_input.focus();
-// 			date_input.classList.remove('.invalid');
-		}, 2000);
+		$('#$orig_id').val( date_input.value );
+		debugger;
+		if( error_el ) {
+			error_el.text('La fecha no es válida');
+		}
+		if( form_group ) {
+			form_group.removeClass('validating').addClass('has-error');
+		}
 		return false;
 	} else {
 		date_input.value = dateToSpanishFormat( date_js );
 		$('#$orig_id').val( dateToSQLFormat( date_js ) );
+		if( error_el ) {
+			error_el.text("");
+		}
+		if( form_group ) {
+			form_group.removeClass('has-error');
+		}
 		return true;
 	}
 }
