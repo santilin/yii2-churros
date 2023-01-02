@@ -7,9 +7,8 @@
 namespace santilin\churros\widgets;
 
 use yii;
-use yii\helpers\ArrayHelper;
+use yii\helpers\{ArrayHelper,Html};
 use yii\widgets\ListView;
-use yii\helpers\Html;
 use santilin\churros\ChurrosAsset;
 
 

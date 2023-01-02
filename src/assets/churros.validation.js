@@ -1,5 +1,5 @@
 
-function churros_extract_dot_groups(mask, dot)
+function churros_dot_dot_groups(mask, dot)
 {
 	const parts = mask.split(dot);
 	let ret = [];
@@ -9,10 +9,25 @@ function churros_extract_dot_groups(mask, dot)
 	return ret;
 }
 
-function churros_validate_dot_dot_input($form, attribute, messages, mask, dot, options)
+function churros_dot_dot_taxon_values(taxonomy, values, level)
+{
+	const levels = taxonomy.levels;
+	let options = taxonomy.items;
+	let ret = { '0': 'Elige...' };
+	for( l=0; l<level; ++l ) {
+		options = options[values[l]].items;
+	}
+	for( const v in options ) {
+		ret[v] = options[v].title;
+	}
+	console.log(ret);
+	return ret;
+}
+
+function churros_dot_dot_validate_input($form, attribute, messages, mask, dot, options)
 {
 	var $input = $form.find(attribute.input);
-	value = churros_validate_dot_dot($input.val(), mask, dot, options);
+	value = churros_dot_dot_validate($input.val(), mask, dot, options);
 	if( value !== false ) {
 		$input.val(value);
 	} else {
@@ -20,9 +35,9 @@ function churros_validate_dot_dot_input($form, attribute, messages, mask, dot, o
 	}
 }
 
-function churros_validate_dot_dot(value, mask, dot, options)
+function churros_dot_dot_validate(value, mask, dot, options)
 {
-	const groups = churros_extract_dot_groups(mask, dot);
+	const groups = churros_dot_dot_groups(mask, dot);
 	var regexp_dot;
 	if( dot == '.' ) {
 		regexp_dot = '\\.';

@@ -27,7 +27,7 @@ class DotDotValidator extends Validator
     {
         parent::init();
         if ($this->message === null) {
-             $this->message = Yii::t('yii', "{attribute} '{value}' does not conform to the mask {$this->mask}.");
+             $this->message = Yii::t('yii', "{attribute} '{value}' does not match the mask {$this->mask}.");
         }
     }
 
