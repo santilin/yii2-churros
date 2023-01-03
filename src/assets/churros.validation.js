@@ -9,20 +9,6 @@ function churros_dot_dot_groups(mask, dot)
 	return ret;
 }
 
-function churros_dot_dot_taxon_values(taxonomy, values, level)
-{
-	const levels = taxonomy.levels;
-	let options = taxonomy.items;
-	let ret = { '0': 'Elige...' };
-	for( l=0; l<level; ++l ) {
-		options = options[values[l]].items;
-	}
-	for( const v in options ) {
-		ret[v] = options[v].title;
-	}
-	console.log(ret);
-	return ret;
-}
 
 function churros_dot_dot_validate_input($form, attribute, messages, mask, dot, options)
 {

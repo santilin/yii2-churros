@@ -98,18 +98,73 @@ $('#$id').focus( function() {
   setTimeout(function(){ that.selectionStart = that.selectionEnd = 10000; }, 0);
 });
 
-$('#$id').keyup( function() {
-	matchDropDownsToInput($(this));
+$('#$id').keyup( function(e) {
+    var printable =
+		e.keyCode == 8 || e.keyCode == 46 ||
+        (e.keyCode > 47 && e.keyCode < 58)   || // number keys
+        e.keyCode == 32 || e.keyCode == 13   || // spacebar & return key(s) (if you want to allow carriage returns)
+        (e.keyCode > 64 && e.keyCode < 91)   || // letter keys
+        (e.keyCode > 95 && e.keyCode < 112)  || // numpad keys
+        (e.keyCode > 185 && e.keyCode < 193) || // ;=,-./` (in order)
+        (e.keyCode > 218 && e.keyCode < 223);   // [\]' (in order)
+	if( printable ) {
+		matchDropDownsToInput($(this), '$id', taxonomy_$j_id, drop_ids_$j_id);
+	}
+	return true;
 });
 
-function matchDropDownsToInput(j_input)
+function split_by_dot(str, dot)
 {
-	const input_values = j_input.val().split(taxonomy_{$j_id}['dot']);
-	console.log(input_values);
-	for( level = 0; level < input_values.length; ++level ) {
-		let dropdown = $('#' + drop_ids_{$j_id}[level]);
-		dropdown.val( input_values[level] ).trigger('change');
+	const ret = str.split(dot).filter(function(i) { return i });
+	console.log(str, dot, '=>', ret);
+	return ret;
+}
+
+function taxonomy_values(taxonomy, values, level)
+{
+	const levels = taxonomy.levels;
+	let options = taxonomy.items;
+ 	// find the options for input[level]
+	for( l=0; l<level; ++l ) {
+		if( options[values[l]] === undefined ) {
+			return [ [ '', 'Valor inválido' ] ];
+		}
+		options = options[values[l]].items;
 	}
+	let ret = [ [ '', 'Elige...' ] ];
+	for( const v in options ) {
+		ret.push([ v, options[v].title ]);
+	}
+	return ret;
+}
+
+function matchDropDownsToInput(j_input, id, taxonomy, drop_ids)
+{
+	const input_values = split_by_dot(j_input.val(), taxonomy['dot']);
+	if( input_values.length ) {
+		for( level = 0; level < input_values.length; ++level ) {
+			let dropdown = $('#' + drop_ids[level]);
+			dropdown.val( input_values[level] );
+			let next_dropdown = $('#taxon_' + (level + 1 ) + '_' + id);
+			change_dropdown(next_dropdown, taxonomy, input_values, level + 1);
+		}
+	} else {
+		let dropdown = $('#' + drop_ids[0]);
+		dropdown.val('');
+	}
+
+}
+
+function change_dropdown(next_dropdown, taxonomy, input_values, level)
+{
+ 	next_dropdown.empty();
+	const taxon_values = taxonomy_values(taxonomy, input_values, level);
+	$.each(taxon_values, function(k, value) {
+		next_dropdown.append($('<option>', {
+			value: value[0],
+			text : value[1]
+		}));
+ 	});
 }
 
 JS;
@@ -118,16 +173,9 @@ JS;
 			$lplus1 = $l+1;
 			$js .= <<<js
 $('#taxon_{$l}_{$id}').change(function() {
-	const input_values = $('#$id').val().split(taxonomy_{$j_id}['dot']);
+	const input_values =split_by_dot($('#$id').val(), taxonomy_{$j_id}['dot']);
 	let next_dropdown = $('#taxon_{$lplus1}_{$id}');
- 	next_dropdown.empty();
-	const taxon_values = churros_dot_dot_taxon_values(taxonomy_$j_id, input_values, $lplus1);
-	$.each(taxon_values, function(val, text) {
-		next_dropdown.append($('<option>', {
-			value: val,
-			text : text
-		}));
- 	});
+// 	change_values(next_dropdown, taxonomy_$j_id, input_values, $lplus1);
 });
 js;
 		}
