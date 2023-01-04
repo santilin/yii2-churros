@@ -2,6 +2,7 @@
 namespace santilin\churros\widgets;
 use yii\base\InvalidConfigException;
 use yii\helpers\{Html};
+use yii\web\View;
 use santilin\churros\ChurrosAsset;
 
 class TaxonomyInput extends \yii\widgets\InputWidget
@@ -91,7 +92,6 @@ class TaxonomyInput extends \yii\widgets\InputWidget
 		$j_drop_ids = json_encode($this->drop_ids);
 		$js = <<<JS
 const taxonomy_$j_id = $j_taxonomy;
-const mask_groups_$j_id = $j_mask_groups;
 const drop_ids_$j_id = $j_drop_ids;
 $('#$id').focus( function() {
   var that = this;
@@ -99,14 +99,14 @@ $('#$id').focus( function() {
 });
 
 $('#$id').keyup( function(e) {
-    var printable =
-		e.keyCode == 8 || e.keyCode == 46 ||
-        (e.keyCode > 47 && e.keyCode < 58)   || // number keys
-        e.keyCode == 32 || e.keyCode == 13   || // spacebar & return key(s) (if you want to allow carriage returns)
-        (e.keyCode > 64 && e.keyCode < 91)   || // letter keys
-        (e.keyCode > 95 && e.keyCode < 112)  || // numpad keys
-        (e.keyCode > 185 && e.keyCode < 193) || // ;=,-./` (in order)
-        (e.keyCode > 218 && e.keyCode < 223);   // [\]' (in order)
+	const is_backspace = (e.keyCode == 8 || e.keyCode == 46);
+	const printable = is_backspace ||
+		(e.keyCode > 47 && e.keyCode < 58)   || // number keys
+		e.keyCode == 32 || e.keyCode == 13   || // spacebar & return key(s) (if you want to allow carriage returns)
+		(e.keyCode > 64 && e.keyCode < 91)   || // letter keys
+		(e.keyCode > 95 && e.keyCode < 112)  || // numpad keys
+		(e.keyCode > 185 && e.keyCode < 193) || // ;=,-./` (in order)
+		(e.keyCode > 218 && e.keyCode < 223);   // [\]' (in order)
 	if( printable ) {
 		matchDropDownsToInput($(this), '$id', taxonomy_$j_id, drop_ids_$j_id);
 	}
@@ -126,27 +126,39 @@ function taxonomy_values(taxonomy, values, level)
 	let options = taxonomy.items;
  	// find the options for input[level]
 	for( l=0; l<level; ++l ) {
+		if( values[l] === undefined ) {
+			break;
+		}
 		if( options[values[l]] === undefined ) {
 			return [ [ '', 'Valor inválido' ] ];
 		}
+		console.log('Antes', options, values[l], options[values[l]]);
 		options = options[values[l]].items;
+		if( options === undefined ) {
+			break;
+		}
 	}
-	let ret = [ [ '', 'Elige...' ] ];
-	for( const v in options ) {
-		ret.push([ v, options[v].title ]);
+	if( options !== undefined && Object.keys(options).length ) { // https://stackoverflow.com/a/6700
+		let ret = [ [ '', 'Elige...' ] ];
+		for( const v in options ) {
+			ret.push([ v, options[v].title ]);
+		}
+		return ret;
+	} else {
+		return [];
 	}
-	return ret;
 }
 
 function matchDropDownsToInput(j_input, id, taxonomy, drop_ids)
 {
 	const input_values = split_by_dot(j_input.val(), taxonomy['dot']);
 	if( input_values.length ) {
-		for( level = 0; level < input_values.length; ++level ) {
+		for( level = 0; level < input_values.length && level < taxonomy.levels.length; ++level ) {
 			let dropdown = $('#' + drop_ids[level]);
 			dropdown.val( input_values[level] );
 			let next_dropdown = $('#taxon_' + (level + 1 ) + '_' + id);
 			change_dropdown(next_dropdown, taxonomy, input_values, level + 1);
+
 		}
 	} else {
 		let dropdown = $('#' + drop_ids[0]);
@@ -159,28 +171,44 @@ function change_dropdown(next_dropdown, taxonomy, input_values, level)
 {
  	next_dropdown.empty();
 	const taxon_values = taxonomy_values(taxonomy, input_values, level);
-	$.each(taxon_values, function(k, value) {
+	if( taxon_values.length == 0 ) {
 		next_dropdown.append($('<option>', {
-			value: value[0],
-			text : value[1]
+			value: '0',
+			text : 'No hay valores',
+			selected: true
 		}));
- 	});
+	} else {
+		$.each(taxon_values, function(k, value) {
+			next_dropdown.append($('<option>', {
+				value: value[0],
+				text : value[1]
+			}));
+		});
+	}
 }
-
 JS;
 		$levels = $this->taxonomy['levels'];
-		for( $l = 0; $l < count($this->taxonomy['levels'])-1; ++$l ) {
+		for( $l = 0; $l < count($this->taxonomy['levels']); ++$l ) {
 			$lplus1 = $l+1;
 			$js .= <<<js
 $('#taxon_{$l}_{$id}').change(function() {
-	const input_values =split_by_dot($('#$id').val(), taxonomy_{$j_id}['dot']);
-	let next_dropdown = $('#taxon_{$lplus1}_{$id}');
-// 	change_values(next_dropdown, taxonomy_$j_id, input_values, $lplus1);
+	const input_values = split_by_dot($('#$id').val(), taxonomy_{$j_id}['dot']).slice(0, $l);
+	input_values[$l] = $(this).val();
+	$('#$id').val( input_values.join(taxonomy_{$j_id}['dot']) );
+	let next_dropdown = $('#taxon_{$lplus1}_$id');
+	change_dropdown(next_dropdown, taxonomy_{$j_id}, input_values, $lplus1);
 });
+
 js;
 		}
-
 		$view->registerJs($js);
+
+		$ready_js = <<<js
+// inicial
+matchDropDownsToInput($('#$id'), '$id', taxonomy_$j_id, drop_ids_$j_id);
+js;
+		$view->registerJs($ready_js, View::POS_READY);
+
 	}
 
 
