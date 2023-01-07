@@ -106,7 +106,12 @@ class ActiveForm extends Bs4ActiveForm
 			case 'tabs':
 				break;
 			case 'fieldset':
-				$ret .= Html::tag('fieldset', $this->layoutFields($layout['layout'], $form_fields),
+				if( isset($layout['title']) ) {
+					$legend = Html::tag('legend', $layout['title']);
+				} else {
+					$legend = '';
+				}
+				$ret .= Html::tag('fieldset', $legend . $this->layoutFields($layout['layout'], $form_fields),
 					array_merge( ['id' => $this->options['id'] . "_layout_$lk" ], $layout['options']??[]) );
 				break;
 			case 'subtitle':
