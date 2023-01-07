@@ -19,7 +19,7 @@ class ActiveForm extends Bs4ActiveForm
 		]
     ];
 
-	public function layoutForm($form_fields, $buttons)
+	public function layoutForm($form_fields, array $buttons = []): string
 	{
 		$ret = '';
 		if( empty($this->fieldsLayout) ) {
@@ -28,28 +28,14 @@ class ActiveForm extends Bs4ActiveForm
 			}
 			return $ret;
 		}
-		// Check if some fields or buttons have been removed after setting the layout
-		foreach($this->fieldsLayout as $layout) {
-			switch( $layout['type'] ) {
-			case 'subtitle':
-			case 'tabs':
-				break;
-			case 'buttons':
-				foreach( $buttons as $bkey => $b ) {
-					if( $buttons[$bkey] === false ) {
-						unset( $buttons[$bkey] );
-					}
-				}
-				break;
-			default:
-				foreach( $layout['fields']??[] as $ffkey => $ff ) {
-					if( $form_fields[$ff] === false ) {
-						unset( $this->fieldsLayout[$lrowkey][$ffkey] );
-					}
-				}
-			}
-		}
-		foreach($this->fieldsLayout as $layout ) {
+		$ret .= $this->layoutFields($this->fieldsLayout, $form_fields, $buttons);
+		return $ret;
+	}
+
+	protected function layoutFields(array $form_layout, array $form_fields, array $buttons = []): string
+	{
+		$ret = '';
+		foreach($form_layout as $lk => $layout ) {
 			switch( $layout['type'] ) {
 			case 'buttons':
 				if( empty($buttons['buttons']) ) {
@@ -64,28 +50,32 @@ class ActiveForm extends Bs4ActiveForm
 				break;
 			case '1col_rows':
 				foreach( $layout['fields'] as $form_field ) {
-					$ret .= '<div class="row">';
-					$ret .= '<div class="col-sm-12">';
-					$ret .= $form_fields[$form_field];
-					$ret .= '</div>';
-					$ret .= '</div>';
+					if( !empty($form_fields[$form_field])) {
+						$ret .= '<div class="row">';
+						$ret .= '<div class="col-sm-12">';
+						$ret .= $form_fields[$form_field];
+						$ret .= '</div>';
+						$ret .= '</div>';
+					}
 				}
 				break;
 			case '2col_rows':
 				$nf = 0;
 				foreach( $layout['fields'] as $form_field ) {
-					if( $nf == 0 ) {
-						$nf = 1;
-						$ret .= '<div class="row">';
-						$ret .= '<div class="col-sm-6">';
-						$ret .= $form_fields[$form_field];
-						$ret .= '</div>';
-					} else {
-						$nf = 0;
-						$ret .= '<div class="col-sm-6">';
-						$ret .= $form_fields[$form_field];
-						$ret .= '</div>';
-						$ret .= '</div>';
+					if( !empty($form_fields[$form_field])) {
+						if( $nf == 0 ) {
+							$nf = 1;
+							$ret .= '<div class="row">';
+							$ret .= '<div class="col-sm-6">';
+							$ret .= $form_fields[$form_field];
+							$ret .= '</div>';
+						} else {
+							$nf = 0;
+							$ret .= '<div class="col-sm-6">';
+							$ret .= $form_fields[$form_field];
+							$ret .= '</div>';
+							$ret .= '</div>';
+						}
 					}
 				}
 				if( $nf == 1 ) {
@@ -114,6 +104,10 @@ class ActiveForm extends Bs4ActiveForm
 // 				$ret .= '</div>';
 // 				break;
 			case 'tabs':
+				break;
+			case 'fieldset':
+				$ret .= Html::tag('fieldset', $this->layoutFields($layout['layout'], $form_fields),
+					array_merge( ['id' => $this->options['id'] . "_layout_$lk" ], $layout['options']??[]) );
 				break;
 			case 'subtitle':
 				$ret .= $this->layoutContent(null, $layout['title'], $layout['options']??[]);
