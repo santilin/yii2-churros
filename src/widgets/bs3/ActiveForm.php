@@ -4,12 +4,15 @@ namespace santilin\churros\widgets\bs3;
 use yii\helpers\Html;
 use yii\bootstrap\ActiveForm as Bs3ActiveForm;
 use santilin\churros\helpers\FormHelper;
+use santilin\churros\widgets\ActiveFormTrait;
 
 // https://getbootstrap.com/docs/3.4/css/#forms
 // https://getbootstrap.com/docs/3.4/css/#grid
 
 class ActiveForm extends Bs3ActiveForm
 {
+	use ActiveFormTrait;
+
 	const SHORT_FIELD_LAYOUT = [
 		'horizontalCssClasses' => [
 			'offset' => 'col-sm-offset-3',
@@ -38,67 +41,6 @@ class ActiveForm extends Bs3ActiveForm
 		]
     ];
 
-	public function layoutFields($form_fields)
-	{
-		$ret = '';
-		if ($this->layout == "horizontal" || $this->layout == '1col' || $this->layout == "inline" ) {
-			foreach( $form_fields as $name => $code ) {
-				$ret .= $form_fields[$name]. "\n";
-			}
-		} else if( count($form_layout_rows) ) {
-			// Check if some fields have been removed after setting the layout
-			foreach($form_layout_rows as $lrowkey => $lrow ) {
-				foreach( $lrow as $ffkey => $ff ) {
-					if( $form_fields[$ff] === false ) {
-						unset( $form_layout_rows[$lrowkey][$ffkey] );
-					}
-				}
-			}
-			foreach($form_layout_rows as $lrow ) {
-				switch(count($lrow)) {
-				case 1:
-					$ret .= '<div class="row">';
-					$ret .= '<div class="col-sm-12">';
-					$ret .= $form_fields[$lrow[0]];
-					$ret .= '</div>';
-					$ret .= '</div>';
-					break;
-				case 2:
-					$ret .= '<div class="row">';
-					$ret .= '<div class="col-sm-6">';
-					$ret .= $form_fields[$lrow[0]];
-					$ret .= '</div>';
-					$ret .= '<div class="col-sm-6">';
-					$ret .= $form_fields[$lrow[1]];
-					$ret .= '</div>';
-					$ret .= '</div>';
-					break;
-				case 3:
-					$ret .= '<div class="row">';
-					$ret .= '<div class="col-sm-4">';
-					$ret .= $form_fields[$lrow[0]];
-					$ret .= '</div>';
-					$ret .= '<div class="col-sm-4">';
-					$ret .= $form_fields[$lrow[1]];
-					$ret .= '</div>';
-					$ret .= '<div class="col-sm-4">';
-					$ret .= $form_fields[$lrow[2]];
-					$ret .= '</div>';
-					$ret .= '</div>';
-					break;
-				case 4:
-					$ret .= '<div class="row">';
-					$ret .= $form_fields[$lrow[0]];
-					$ret .= $form_fields[$lrow[1]];
-					$ret .= $form_fields[$lrow[2]];
-					$ret .= $form_fields[$lrow[3]];
-					$ret .= '</div>';
-					break;
-				}
-			}
-		}
-		return $ret;
-	}
 
 	public function layoutButtons($buttons)
 	{
