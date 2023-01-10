@@ -6,8 +6,16 @@ use santilin\churros\helpers\AppHelper;
 
 trait EmailSenderModelTrait
 {
-	public function sendModelEmail(string $view_name, ?string $from, $to, string $subject,
-		array $params = []): bool
+	/**
+	 * Sends a email composed with a view and a model
+	 * @param array|string $to the recipients
+	 * @param string $subject
+	 * @param string $view_name
+	 * @param array $view_params
+	 * @param array $email_params
+	 */
+	public function sendModelEmail($to, string $subject, string $view_name,
+		array $view_params = [], array $email_params = []): bool
 	{
 		$sent = false;
 		$sent_message = '';
@@ -19,14 +27,14 @@ trait EmailSenderModelTrait
 				}
 			}
 		);
-		$params['model'] = $this;
-		if( $from == null ) {
-			$from = AppHelper::yiiparam('adminEmail');
+		if( !isset($view_params['model']) ) {
+			$view_params['model'] = $this;
 		}
-		$to = array($to);
+		$from = $email_params['from']??AppHelper::yiiparam('adminEmail');
+		$to = (array)$to;
 		try {
 			$composed = Yii::$app->mailer
-				->compose( [ 'html' => $view_name, 'text' => "text/$view_name" ], $params)
+				->compose( [ 'html' => $view_name, 'text' => "text/$view_name" ], $view_params)
 				->setFrom($from)
 				->setTo( YII_ENV_DEV ? [AppHelper::yiiparam('develEmailTo')] : $to )
 				->setSubject($subject);
@@ -50,11 +58,6 @@ trait EmailSenderModelTrait
 			return false;
 		}
 		return true;
-	}
-
-	public function composeAndSendEmail(string $view_name, string $subject, array $email_params): bool
-	{
-		return $this->sendModelEmail($view_name, null, $email_params['to']??$this->email, $subject, $email_params);
 	}
 
 } // trait

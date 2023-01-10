@@ -14,11 +14,11 @@ class ActiveForm extends Bs4ActiveForm
 
 	const SHORT_FIELD_LAYOUT = [
 		'horizontalCssClasses' => [
-			'offset' => 'offset-sm-3',
-			'label' => 'col-md-3 col-sm-3 col-xs-12',
+			'offset' => 'offset-sm-2',
+			'label' => 'col-md-2 col-sm-2 col-xs-12',
 			'wrapper' => 'col-lg-2 col-md-2 col-sm-2 col-xs-4',
 			'error' => '',
-			'hint' => 'col-sm-3 col-xs-3',
+			'hint' => 'col-sm-2 col-xs-2',
 		]
 	];
 	const MEDIUM_FIELD_LAYOUT = [
