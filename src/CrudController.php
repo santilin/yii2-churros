@@ -23,6 +23,7 @@ class CrudController extends \yii\web\Controller
 	const MSG_CREATED = '{La} {title} <a href="{model_link}">{record_medium}</a> has been successfully created.';
 	const MSG_UPDATED = '{La} {title} <a href="{model_link}">{record_medium}</a> has been successfully updated.';
 	const MSG_DELETED = '{La} {title} <strong>{record_long}</strong> has been successfully deleted.';
+	const MSG_ERROR_DELETE = 'There has been an error deleting {la} {title} <strong>{record_long}</strong>';
 	const MSG_DUPLICATED = '{La} {title} <a href="{model_link}">{record_medium}</a> has been successfully duplicated.';
 	const MSG_DEFAULT = 'The action on {la} {title} <a href="{model_link}">{record_medium}</a> has been successful.';
 
@@ -203,19 +204,23 @@ class CrudController extends \yii\web\Controller
 	*/
 	public function actionDelete($id)
 	{
-		try {
-			$model = $this->findModel($id, null, 'delete');
+		$model = $this->findModel($id, null, 'delete');
+		if( !YII_ENV_DEV ) {
 			$model->deleteWithRelated();
-		} catch (\yii\db\IntegrityException $e ) {
-			$msg = $e->getMessage();
-			Yii::$app->session->addFlash('error', $msg);
-		} catch( \yii\web\ForbiddenHttpException $e ) {
-			$msg = $e->getMessage();
-			Yii::$app->session->addFlash('error', $msg);
-			return $this->whereToGoNow('delete', null);
+			$this->showFlash('delete', $model);
+			return $this->whereToGoNow('delete', $model);
+		} else {
+			try {
+				$model->deleteWithRelated();
+				$this->showFlash('delete', $model);
+				return $this->whereToGoNow('delete', $model);
+			} catch (\yii\db\IntegrityException $e ) {
+				Yii::$app->session->addFlash('error', $model->t('churros',$this->getResultMessage('error_delete')));
+			} catch( \yii\web\ForbiddenHttpException $e ) {
+				Yii::$app->session->addFlash('error', $model->t('churros',$this->getResultMessage('error_delete')));
+			}
 		}
-		$this->showFlash('delete', $model);
- 		return $this->whereToGoNow('delete', $model);
+		return $this->whereToGoNow('delete', null);
 	}
 
 	/**
@@ -404,7 +409,7 @@ class CrudController extends \yii\web\Controller
         } /// @todo else
 	}
 
-	protected function getSuccessMessage(string $action_id): string
+	protected function getResultMessage(string $action_id): string
 	{
 		switch( $action_id ) {
 		case 'update':
@@ -415,6 +420,8 @@ class CrudController extends \yii\web\Controller
 			return self::MSG_DELETED;
 		case 'duplicate':
 			return self::MSG_DUPLICATED;
+		case 'error_delete':
+			return self::MSG_ERROR_DELETE;
 		default:
 			return self::MSG_NO_ACTION;
 		}
@@ -426,7 +433,7 @@ class CrudController extends \yii\web\Controller
 			Yii::$app->session->addFlash('error', $model->getOneError() );
 		} else {
 			if( !$success_message ) {
-				$success_message = $this->getSuccessMessage($action_id);
+				$success_message = $this->getResultMessage($action_id);
 			}
 			if( strpos( $success_message, '{model_link}') !== FALSE ) {
 				$pk = $model->getPrimaryKey();
@@ -446,10 +453,10 @@ class CrudController extends \yii\web\Controller
 	protected function showWarningFlash($action_id, $model, $warning_message = null)
 	{
 		if( !$warning_message ) {
-			$warning_message = $this->getSuccessMessage($action_id);
+			$warning_message = $this->getResultMessage($action_id);
 		}
 		if( !$warning_message ) {
-			$warning_message = $this->getSuccessMessage('update');
+			$warning_message = $this->getResultMessage('update');
 		}
 		if( strpos( $warning_message, '{model_link}') !== FALSE ) {
 			$pk = $model->getPrimaryKey();

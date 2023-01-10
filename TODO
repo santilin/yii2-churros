@@ -1,3 +1,10 @@
+= bs3:
+
+= Behaviors
+Fileuploadbehavior saveorigfname true
+
+
+
 DateInput: Mensaje de error: La fecha no es correcta.
 TabIndex de alumnas erróneo.
 Valor por defecto de Alumna_Form.provincia: A Corua
@@ -5,11 +12,9 @@ Formulario de alumnas: cancelar, no vuelve.
 DateInput => SpanishDateInput. Definir campo date_es
 
 
-https://phpstan.org/user-guide/getting-started
+
 yii2usuario: alert falla cuando se redirige de bs4 a bs3 porque no espera un array aquí: /home/santilin/devel/yii2base/vendor/2amigos/yii2-usuario/src/User/resources/views/shared/_alert.php
 Hay acceso a trivel.test/user/2
-
-definir formfield layout medium large
 
 = Optimizacion sqlite3
 https://stackoverflow.com/questions/1711631/improve-insert-per-second-performance-of-sqlite
@@ -37,7 +42,9 @@ https://stackoverflow.com/questions/32731987/adding-new-list-options-refreshing-
 * Hacer uso de los model.Agente.report
 
 == GridView ==
+- GridView: Report : grupos: opciones para Mostrar encabezado, mostrar pie.
 * ¿Quitar grid-group-head-xxxx de site.css?
+-Grid Enlaces en el joinmodels: filtro en el grid por ese valor
 * selectViews no funciona con pjax porque es un dropdown. Añadirlo dentro de un FORM
 * Grid: cuando se filtra, poner "Filtrando 1-1 de s"
 * GridView: Ocultar filtro si no hay resultados
@@ -45,7 +52,7 @@ https://stackoverflow.com/questions/32731987/adding-new-list-options-refreshing-
 * 2 gridviews: https://www.yiiframework.com/doc/guide/2.0/en/output-data-widgets#multiple-gridviews
 
 = Formularios
-Añadir el símbolo del euro al input de los forms.
+Añadir el símbolo del euro al input de los forms: bs4 input-group
 
 = No prioritario
 == Models
@@ -75,17 +82,15 @@ Añadir el símbolo del euro al input de los forms.
 * css: width = maxlength en integers, floats y dates
 
 == Formularios
-=== Búsquedas
-- allSearchFields:
-	- quitar relname de excluded y visible_fields
 
 == Inactivatable date
 * Etiquetas según género del campo
 
 == Widgets
-* Añadir layout table a form y a recordview
-* Añadir headings a forms
-* Estudiar el $toggle_boton_mas
+* Añadir layout table recordview
+* Añadir showmore a form layout
+* Añadir inline a form layout
+
 
 == SearchDropDown
 * Si un searchdropdown está disabled o readonly no mostrar el campo de búsqueda
@@ -95,8 +100,6 @@ Añadir el símbolo del euro al input de los forms.
 * Centrar verticalmente summary.
 * Añadir css como asset.
 
-== GridView ==
-- GridView: Report : grupos: opciones para Mostrar encabezado, mostrar pie.
 
 == yii2
 * Max-length: Tomar lo que se ha definido en la base de datos o capturar la excepción.
@@ -108,6 +111,7 @@ Añadir el símbolo del euro al input de los forms.
 https://github.com/pavlm/yii2-stats-widget Time Stats widget
 Modelos: Estudiar uuidbehavior, softdeletes y lock. Faltan los behaviors
 Formulario de settings: file:///home/santilin/devel/yii2base/yii2-docs/guide-input-tabular-input.html
+* https://phpstan.org/user-guide/getting-started
 * Investigar estos widgets:
 - https://www.yiiframework.com/extension/yii2-sortable-behavior
 - https://www.yiiframework.com/extension/yii2-poll-widget

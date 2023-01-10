@@ -73,7 +73,7 @@ trait RelationTrait
 				if( count($relations_in_form) && !in_array($rel_name, $relations_in_form) ) {
 					continue;
 				}
-				if( $model_relation['type'] == 'HasOne' ) {
+				if( $model_relation['type'] == 'HasOne' || $model_relation['type'] == "OneToOne" ) {
 					// Look for embedded relations data in the main form
 					$post_data = null;
 					if( isset($post[$formName][$rel_name]) && is_array($post[$formName][$rel_name]) ) {

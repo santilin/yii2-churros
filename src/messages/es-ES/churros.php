@@ -63,6 +63,7 @@ return [
     '{La} {title} <a href="{model_link}">{record_medium}</a> has been successfully duplicated.'
 		=> '{La} {title} <a href="{model_link}">{record_medium}</a> se ha duplicado correctamente.',
 	'The action on {la} {title} <a href="{model_link}">{record_medium}</a> has been successful.' => 'La acción sobre {la} {title} <a href="{model_link}">{record_medium}</a> se ha realizado correctamente.',
+	'There has been an error deleting {la} {title} <strong>{record_long}</strong>' => 'Se ha producido un error al borrar {la} {title} <strong>{record_long}</strong>',
 
 	'Duplicating {title}: {record_short}' => 'Duplicando {title}: {record_short}',
 	'Updating {title}: {record_short}' => 'Editando {title}: {record_short}',
