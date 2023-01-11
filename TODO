@@ -106,6 +106,7 @@ Añadir el símbolo del euro al input de los forms: bs4 input-group
 * Radio List: Ver cómo añadir el autofocus a cada item.
 
 == 3rd party
+* Full-text-search: https://www.sqlite.org/fts3.html#section_8_2
 * https://github.com/manuvarkey/kanboard-plugin-telegram
 * html-to-rtf y .editorconfig https://github.com/github-grabaz/html-rtf-converter/blob/master/.editorconfig
 https://github.com/pavlm/yii2-stats-widget Time Stats widget

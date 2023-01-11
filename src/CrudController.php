@@ -23,7 +23,8 @@ class CrudController extends \yii\web\Controller
 	const MSG_CREATED = '{La} {title} <a href="{model_link}">{record_medium}</a> has been successfully created.';
 	const MSG_UPDATED = '{La} {title} <a href="{model_link}">{record_medium}</a> has been successfully updated.';
 	const MSG_DELETED = '{La} {title} <strong>{record_long}</strong> has been successfully deleted.';
-	const MSG_ERROR_DELETE = 'There has been an error deleting {la} {title} <strong>{record_long}</strong>';
+	const MSG_ERROR_DELETE = 'There has been an error deleting {la} {title} <a href="{model_link}">{record_medium}</a>';
+	const MSG_ERROR_DELETE_INTEGRITY = 'Unable to delete {la} {title} <a href="{model_link}">{record_medium}</a> because it has related data';
 	const MSG_DUPLICATED = '{La} {title} <a href="{model_link}">{record_medium}</a> has been successfully duplicated.';
 	const MSG_DEFAULT = 'The action on {la} {title} <a href="{model_link}">{record_medium}</a> has been successful.';
 
@@ -215,7 +216,7 @@ class CrudController extends \yii\web\Controller
 				$this->showFlash('delete', $model);
 				return $this->whereToGoNow('delete', $model);
 			} catch (\yii\db\IntegrityException $e ) {
-				Yii::$app->session->addFlash('error', $model->t('churros',$this->getResultMessage('error_delete')));
+				Yii::$app->session->addFlash('error', $model->t('churros',$this->getResultMessage('error_delete_integrity')));
 			} catch( \yii\web\ForbiddenHttpException $e ) {
 				Yii::$app->session->addFlash('error', $model->t('churros',$this->getResultMessage('error_delete')));
 			}
@@ -422,6 +423,8 @@ class CrudController extends \yii\web\Controller
 			return self::MSG_DUPLICATED;
 		case 'error_delete':
 			return self::MSG_ERROR_DELETE;
+		case 'error_delete_integrity':
+			return self::MSG_ERROR_DELETE_INTEGRITY;
 		default:
 			return self::MSG_NO_ACTION;
 		}
