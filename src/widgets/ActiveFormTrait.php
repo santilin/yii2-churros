@@ -10,7 +10,14 @@ trait ActiveFormTrait
 	public function layoutForm($form_fields, array $buttons = []): string
 	{
 		$ret = '';
-		if( empty($this->fieldsLayout) ) {
+		if( empty($this->fieldsLayout) || $this->fieldsLayout == "1col" ) {
+			foreach( $form_fields as $name => $code ) {
+				$ret .= $form_fields[$name]. "\n";
+			}
+			$ret .= $this->layoutButtons($buttons);
+			return $ret;
+		} else if( $this->fieldsLayout == "1col_buttons_up" ) {
+			$ret .= $this->layoutButtons($buttons);
 			foreach( $form_fields as $name => $code ) {
 				$ret .= $form_fields[$name]. "\n";
 			}

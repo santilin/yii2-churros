@@ -1,4 +1,3 @@
-
 function churros_dot_dot_groups(mask, dot)
 {
 	const parts = mask.split(dot);
