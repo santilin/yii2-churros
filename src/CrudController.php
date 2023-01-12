@@ -288,6 +288,13 @@ class CrudController extends \yii\web\Controller
 		if( $returnTo ) {
 			return $this->redirect($returnTo);
 		}
+		$redirect = [];
+		if ($from == 'create') {
+			if (Yii::$app->request->post('_and_create') == '1') {
+				$redirect = ['create'];
+				goto redirect;
+			}
+		}
 		$referrer = Yii::$app->request->post("_form_referrer");
 		if ( $referrer ) {
 			return $this->redirect($referrer);
@@ -295,17 +302,17 @@ class CrudController extends \yii\web\Controller
 		if ($from == 'update') {
 			$redirect = ['view', 'id' => $model->getPrimaryKey()];
 		} else if ($from == 'create') {
-			if (Yii::$app->request->post('_and_create') == '1') {
-				$redirect = ['create'];
-			} else {
-				$redirect = ["index"];
-			}
+			$redirect = ["index"];
 		} else if ($from == 'duplicate') {
 			$redirect = ['view', 'id' => $model->getPrimaryKey()];
 		} else if ($from == 'delete' || $from == 'not_deleted') {
 			$redirect = ["index"];
 		} else {
 			throw new \Exception("Where should I go now?");
+		}
+redirect:
+		if( isset($_REQUEST['_form_cancelUrl']) ) {
+			$redirect['_form_cancelUrl'] = $_REQUEST['_form_cancelUrl'];
 		}
 		return $this->redirect($this->actionRoute($redirect));
 	}

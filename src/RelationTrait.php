@@ -225,12 +225,13 @@ trait RelationTrait
             } else {
                 return false;
             }
-        } catch (\Exception $exc) {
+		} catch (\yii\db\IntegrityException $e) {
 			if( !$in_trans ) {
 				$trans->rollBack();
 			}
             $this->isNewRecord = $isNewRecord;
-            throw $exc;
+            $this->addErrorFromException($e);
+			return false;
         }
     }
 

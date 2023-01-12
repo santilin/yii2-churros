@@ -1,7 +1,5 @@
 = Behaviors
 
-Valor por defecto de Alumna_Form.provincia: A Corua
-Formulario de alumnas: cancelar, no vuelve.
 DateInput => SpanishDateInput. Definir campo date_es
 
 yii2usuario: alert falla cuando se redirige de bs4 a bs3 porque no espera un array aquí: /home/santilin/devel/yii2base/vendor/2amigos/yii2-usuario/src/User/resources/views/shared/_alert.php
@@ -15,8 +13,6 @@ https://stackoverflow.com/questions/1711631/improve-insert-per-second-performanc
 
 = CrudController
 * Enviar a las vistas los permisos
-* WhereToGoNow en update cuando da error el backend, se queda ya en el update para siempre.
-Después de duplicar, se queda otra vez en duplicar.
 
 == Adjuntos y subir ficheros
 * Opciones

@@ -325,6 +325,10 @@ trait ModelInfoTrait
 		}
 	}
 
+	public function addErrorFromException(\Throwable $e)
+	{
+		$this->addError('record', 'Los datos están duplicados');
+	}
 
 	public function getOneError()
 	{
