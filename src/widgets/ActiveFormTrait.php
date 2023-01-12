@@ -9,26 +9,24 @@ trait ActiveFormTrait
 
 	public function layoutForm($form_fields, array $buttons = []): string
 	{
-		$ret = '';
-		if( empty($this->fieldsLayout) || $this->fieldsLayout == "1col" || $this->fieldsLayout == "inline" ) {
-			foreach( $form_fields as $name => $code ) {
-				$ret .= $form_fields[$name]. "\n";
-			}
-			$ret .= $this->layoutButtons($buttons);
-			return $ret;
-		} else if( $this->fieldsLayout == "1col_buttons_up" ) {
-			$ret .= $this->layoutButtons($buttons);
-			foreach( $form_fields as $name => $code ) {
-				$ret .= $form_fields[$name]. "\n";
-			}
-			return $ret;
-		} else if( $this->fieldsLayout == "4cols" ) {
-			$this->fieldsLayout = [
-				 [ 'type' => '4cols_rows', 'fields' => array_keys($form_fields) ]
-			];
+		if( empty($this->fieldsLayout) || $this->fieldsLayout === 'inline' ) {
+			$this->fieldsLayout = "1col";
 		}
-		$ret .= $this->layoutFields($this->fieldsLayout, $form_fields, $buttons);
-		return $ret;
+		if( is_string($this->fieldsLayout) ) {
+			// If not an array, tranform string to array
+			$layout_parts = explode(':', $this->fieldsLayout);
+			$buttons_up = in_array('buttons_up', $layout_parts);
+			$layout = implode(',', $layout_parts);
+			$this->fieldsLayout = [];
+			if( $buttons_up ) {
+				$this->fieldsLayout[] = [ 'type' => 'buttons', 'buttons' => $buttons ];
+			}
+			$this->fieldsLayout[] = [ 'type' => $layout .'_rows', 'fields' => array_keys($form_fields) ];
+			if( !$buttons_up ) {
+				$this->fieldsLayout[] = [ 'type' => 'buttons', 'buttons' => $buttons ];
+			}
+		}
+		return $this->layoutFields($this->fieldsLayout, $form_fields, $buttons);
 	}
 
 	protected function layoutFields(array $form_layout, array $form_fields, array $buttons = []): string
@@ -37,6 +35,8 @@ trait ActiveFormTrait
 		foreach($form_layout as $lk => $layout ) {
 			switch( $layout['type'] ) {
 			case 'buttons':
+				$ret .= '<div class="clearfix row">';
+				$ret .= '<div class="' . self::FIELD_HORIZ_CLASSES['default']['1col_rows']['horizontalCssClasses']['offset'] . '">';
 				if( empty($buttons['buttons']) ) {
 					$ret .= $this->layoutButtons($buttons);
 				} else {
@@ -46,9 +46,17 @@ trait ActiveFormTrait
 					}
 					$ret .= $this->layoutButtons($layout_buttons);
 				}
+				$ret .= '</div></div><!-- buttons -->' .  "\n";
 				break;
 			case '1col_rows':
 			case '1cols_rows':
+				foreach( $layout['fields'] as $form_field ) {
+					$this->setFieldClasses($form_fields, $form_field, $layout['type']);
+					if( !empty($form_fields[$form_field])) {
+						$ret .= $form_fields[$form_field];
+					}
+				}
+				break;
 			case '2col_rows':
 			case '2cols_rows':
 			case '3col_rows':
@@ -57,9 +65,6 @@ trait ActiveFormTrait
 			case '4cols_rows':
 				$cols = intval(substr($layout['type'],0,1));
 				switch( $cols ) {
-				case 1:
-					$col_sm = 12;
-					break;
 				case 2:
 					$col_sm = 6;
 					break;
@@ -72,16 +77,18 @@ trait ActiveFormTrait
 				}
 				$nf = 0;
 				foreach( $layout['fields'] as $form_field ) {
-					if( ($nf%$cols) == 0) {
-						if( $nf != 0 ) {
-							$ret .= '</div>';
-						}
-						$ret .= "\n" . '<div class="row">';
-					}
 					if( !empty($form_fields[$form_field])) {
+						$this->setFieldClasses($form_fields, $form_field, $layout['type']);
+						if( ($nf%$cols) == 0) {
+							if( $nf != 0 ) {
+								$ret .= '</div>';
+							}
+							$ret .= "\n" . '<div class="row">';
+						}
 						$ret .= "<div class=\"col-sm-$col_sm\">";
 						$ret .= $form_fields[$form_field];
 						$ret .= '</div>';
+						$nf++;
 					}
 				}
 				if( ($nf%$cols) != 0) {
@@ -124,7 +131,5 @@ trait ActiveFormTrait
 		$ret .= Html::endTag($wrapper_tag);
 		return $ret;
 	}
-
-
 
 } // form
