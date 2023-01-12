@@ -206,7 +206,7 @@ class CrudController extends \yii\web\Controller
 	public function actionDelete($id)
 	{
 		$model = $this->findModel($id, null, 'delete');
-		if( !YII_ENV_DEV ) {
+		if( YII_ENV_DEV ) {
 			$model->deleteWithRelated();
 			$this->showFlash('delete', $model);
 			return $this->whereToGoNow('delete', $model);
