@@ -1,7 +1,5 @@
 = Behaviors
 
-DateInput: Mensaje de error: La fecha no es correcta.
-TabIndex de alumnas erróneo.
 Valor por defecto de Alumna_Form.provincia: A Corua
 Formulario de alumnas: cancelar, no vuelve.
 DateInput => SpanishDateInput. Definir campo date_es
