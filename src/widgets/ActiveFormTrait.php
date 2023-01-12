@@ -10,7 +10,7 @@ trait ActiveFormTrait
 	public function layoutForm($form_fields, array $buttons = []): string
 	{
 		$ret = '';
-		if( empty($this->fieldsLayout) || $this->fieldsLayout == "1col" ) {
+		if( empty($this->fieldsLayout) || $this->fieldsLayout == "1col" || $this->fieldsLayout == "inline" ) {
 			foreach( $form_fields as $name => $code ) {
 				$ret .= $form_fields[$name]. "\n";
 			}
@@ -22,6 +22,10 @@ trait ActiveFormTrait
 				$ret .= $form_fields[$name]. "\n";
 			}
 			return $ret;
+		} else if( $this->fieldsLayout == "4cols" ) {
+			$this->fieldsLayout = [
+				 [ 'type' => '4cols_rows', 'fields' => array_keys($form_fields) ]
+			];
 		}
 		$ret .= $this->layoutFields($this->fieldsLayout, $form_fields, $buttons);
 		return $ret;
@@ -44,60 +48,46 @@ trait ActiveFormTrait
 				}
 				break;
 			case '1col_rows':
-				foreach( $layout['fields'] as $form_field ) {
-					if( !empty($form_fields[$form_field])) {
-						$ret .= '<div class="row">';
-						$ret .= '<div class="col-sm-12">';
-						$ret .= $form_fields[$form_field];
-						$ret .= '</div>';
-						$ret .= '</div>';
-					}
-				}
-				break;
+			case '1cols_rows':
 			case '2col_rows':
+			case '2cols_rows':
+			case '3col_rows':
+			case '3cols_rows':
+			case '4col_rows':
+			case '4cols_rows':
+				$cols = intval(substr($layout['type'],0,1));
+				switch( $cols ) {
+				case 1:
+					$col_sm = 12;
+					break;
+				case 2:
+					$col_sm = 6;
+					break;
+				case 3:
+					$col_sm = 4;
+					break;
+				case 4:
+				default:
+					$col_sm = 3;
+				}
 				$nf = 0;
 				foreach( $layout['fields'] as $form_field ) {
-					if( !empty($form_fields[$form_field])) {
-						if( $nf == 0 ) {
-							$nf = 1;
-							$ret .= '<div class="row">';
-							$ret .= '<div class="col-sm-6">';
-							$ret .= $form_fields[$form_field];
-							$ret .= '</div>';
-						} else {
-							$nf = 0;
-							$ret .= '<div class="col-sm-6">';
-							$ret .= $form_fields[$form_field];
-							$ret .= '</div>';
+					if( ($nf%$cols) == 0) {
+						if( $nf != 0 ) {
 							$ret .= '</div>';
 						}
+						$ret .= "\n" . '<div class="row">';
+					}
+					if( !empty($form_fields[$form_field])) {
+						$ret .= "<div class=\"col-sm-$col_sm\">";
+						$ret .= $form_fields[$form_field];
+						$ret .= '</div>';
 					}
 				}
-				if( $nf == 1 ) {
+				if( ($nf%$cols) != 0) {
 					$ret .= '</div>';
 				}
 				break;
-// 			case 3:
-// 				$ret .= '<div class="row">';
-// 				$ret .= '<div class="col-sm-4">';
-// 				$ret .= $form_fields[$lrow[0]];
-// 				$ret .= '</div>';
-// 				$ret .= '<div class="col-sm-4">';
-// 				$ret .= $form_fields[$lrow[1]];
-// 				$ret .= '</div>';
-// 				$ret .= '<div class="col-sm-4">';
-// 				$ret .= $form_fields[$lrow[2]];
-// 				$ret .= '</div>';
-// 				$ret .= '</div>';
-// 				break;
-// 			case 4:
-// 				$ret .= '<div class="row">';
-// 				$ret .= $form_fields[$lrow[0]];
-// 				$ret .= $form_fields[$lrow[1]];
-// 				$ret .= $form_fields[$lrow[2]];
-// 				$ret .= $form_fields[$lrow[3]];
-// 				$ret .= '</div>';
-// 				break;
 			case 'tabs':
 				break;
 			case 'fieldset':
