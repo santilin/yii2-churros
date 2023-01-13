@@ -13,6 +13,22 @@ class ActiveForm extends Bs3ActiveForm
 {
 	use ActiveFormTrait;
 
+	const SHORT_FIELD_LAYOUT = [
+		'horizontalCssClasses' => [
+			'layout' => 'short'
+		]
+	];
+	const MEDIUM_FIELD_LAYOUT = [
+		'horizontalCssClasses' => [
+			'layout' => 'medium'
+		]
+	];
+	const LONG_FIELD_LAYOUT = [
+		'horizontalCssClasses' => [
+			'layout' => 'long'
+		]
+	];
+
 	public const FIELD_HORIZ_CLASSES = [
 		'default' => [
 			'1col_rows' => [
@@ -148,25 +164,6 @@ class ActiveForm extends Bs3ActiveForm
 		],
 	];
 
-
-	const SHORT_FIELD_LAYOUT = [
-		'horizontalCssClasses' => [
-			'offset' => 'col-sm-offset-3',
-			'label' => 'col-md-3 col-sm-3 col-xs-12',
-			'wrapper' => 'col-lg-2 col-md-2 col-sm-2 col-xs-4',
-			'error' => '',
-			'hint' => 'col-sm-3 col-xs-3',
-		]
-	];
-	const MEDIUM_FIELD_LAYOUT = [
-		'horizontalCssClasses' => [
-			'offset' => 'col-sm-offset-3',
-			'label' => 'col-md-3 col-sm-3 col-xs-12',
-			'wrapper' => 'col-md-2 col-sm-2 col-xs-6',
-			'error' => '',
-			'hint' => 'col-sm-3 col-xs-3',
-		]
-	];
     public $fieldConfig = [
 		'horizontalCssClasses' => [
 			'offset' => '',
