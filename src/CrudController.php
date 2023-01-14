@@ -113,11 +113,7 @@ class CrudController extends \yii\web\Controller
 		}
 		if ($model->loadAll(Yii::$app->request->post(), $relations) ) {
 			if( $model->saveAll(true) ) {
-				if( !$model->hasErrors() ) {
-					$this->showFlash('create', $model);
-				} else {
-					$this->showWarningFlash('create', $model);
-				}
+				$this->addSuccessFlashes('create', $model);
 				return $this->whereToGoNow('create', $model);
 			}
 		}
@@ -152,11 +148,7 @@ class CrudController extends \yii\web\Controller
 			$model->setIsNewRecord(true);
 			$model->resetPrimaryKeys();
 			if( $model->saveAll(true) ) {
-				if( !$model->hasErrors() ) {
-					$this->showFlash('duplicate', $model);
-				} else {
-					$this->showWarningFlash('duplicate', $model);
-				}
+				$this->addSuccessFlashes('duplicate', $model);
 				return $this->whereTogoNow('duplicate', $model);
 			}
 		}
@@ -184,11 +176,7 @@ class CrudController extends \yii\web\Controller
 		}
 		if ($model->loadAll(Yii::$app->request->post(), $relations) ) {
 			if( $model->saveAll(true) ) {
-				if( !$model->hasErrors() ) {
-					$this->showFlash('update', $model);
-				} else {
-					$this->showWarningFlash('update', $model);
-				}
+				$this->addSuccessFlashes('update', $model);
 				return $this->whereTogoNow('update', $model);
 			}
 		}
@@ -208,12 +196,12 @@ class CrudController extends \yii\web\Controller
 		$model = $this->findModel($id, null, 'delete');
 		if( YII_ENV_DEV ) {
 			$model->deleteWithRelated();
-			$this->showFlash('delete', $model);
+			$this->addSuccessFlashes('delete', $model);
 			return $this->whereToGoNow('delete', $model);
 		} else {
 			try {
 				$model->deleteWithRelated();
-				$this->showFlash('delete', $model);
+				$this->addSuccessFlashes('delete', $model);
 				return $this->whereToGoNow('delete', $model);
 			} catch (\yii\db\IntegrityException $e ) {
 				Yii::$app->session->addFlash('error', $model->t('churros',$this->getResultMessage('error_delete_integrity')));
@@ -437,38 +425,15 @@ redirect:
 		}
 	}
 
-	protected function showFlash($action_id, $model, $success_message = null)
+	protected function addSuccessFlashes($action_id, $model, $success_message = null)
 	{
 		if( $model->hasErrors() ) {
-			Yii::$app->session->addFlash('error', $model->getOneError() );
-		} else {
-			if( !$success_message ) {
-				$success_message = $this->getResultMessage($action_id);
-			}
-			if( strpos( $success_message, '{model_link}') !== FALSE ) {
-				$pk = $model->getPrimaryKey();
-				if( is_array($pk) ) {
-					$link_to_me = Url::to(array_merge([$this->actionRoute('view')], $pk));
-				} else {
-					$link_to_me = $this->actionRoute('view') . "/$pk";
-				}
-			} else {
-				$link_to_me = '';
-			}
-			Yii::$app->session->addFlash('success',
-				strtr($model->t('churros', $success_message ), ['{model_link}' => $link_to_me]));
+			Yii::$app->session->addFlash('warning', $model->getOneError() );
 		}
-	}
-
-	protected function showWarningFlash($action_id, $model, $warning_message = null)
-	{
-		if( !$warning_message ) {
-			$warning_message = $this->getResultMessage($action_id);
+		if( !$success_message ) {
+			$success_message = $this->getResultMessage($action_id);
 		}
-		if( !$warning_message ) {
-			$warning_message = $this->getResultMessage('update');
-		}
-		if( strpos( $warning_message, '{model_link}') !== FALSE ) {
+		if( strpos( $success_message, '{model_link}') !== FALSE ) {
 			$pk = $model->getPrimaryKey();
 			if( is_array($pk) ) {
 				$link_to_me = Url::to(array_merge([$this->actionRoute('view')], $pk));
@@ -479,13 +444,10 @@ redirect:
 			$link_to_me = '';
 		}
 		Yii::$app->session->addFlash('success',
-			strtr($model->t('churros', $warning_message), ['{model_link}' => $link_to_me]));
-		if( $model->hasErrors() ) {
-			Yii::$app->session->addFlash('warning', $model->getOneError() );
-		}
+			strtr($model->t('churros', $success_message ), ['{model_link}' => $link_to_me]));
 	}
 
-	protected function showErrorsFlash($model)
+	protected function showErrorFlashes($model)
 	{
 		foreach($model->getErrors() as $k => $errors ) {
 			foreach($errors as $error_msg ) {

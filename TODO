@@ -5,8 +5,6 @@ DateInput => SpanishDateInput. Definir campo date_es
 yii2usuario: alert falla cuando se redirige de bs4 a bs3 porque no espera un array aquí: /home/santilin/devel/yii2base/vendor/2amigos/yii2-usuario/src/User/resources/views/shared/_alert.php
 Hay acceso a trivel.test/user/2
 
-= Optimizacion sqlite3
-https://stackoverflow.com/questions/1711631/improve-insert-per-second-performance-of-sqlite
 
 = Permisos
 * Crear Reports.view, etc.
@@ -42,6 +40,7 @@ https://stackoverflow.com/questions/32731987/adding-new-list-options-refreshing-
 
 = Formularios
 Añadir el símbolo del euro al input de los forms: bs4 input-group
+Layout de los botones como el hint default/1col_rows
 
 = No prioritario
 == Models
@@ -106,4 +105,6 @@ Formulario de settings: file:///home/santilin/devel/yii2base/yii2-docs/guide-inp
 - https://www.yiiframework.com/extension/yii2-sortable-behavior
 - https://www.yiiframework.com/extension/yii2-poll-widget
 - https://github.com/jonmiles/bootstrap-treeview
+* Optimizacion sqlite3
+https://stackoverflow.com/questions/1711631/improve-insert-per-second-performance-of-sqlite
 
