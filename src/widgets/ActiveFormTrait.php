@@ -16,7 +16,7 @@ trait ActiveFormTrait
 			// If not an array, tranform string to array
 			$layout_parts = explode(':', $this->fieldsLayout);
 			$buttons_up = in_array('buttons_up', $layout_parts);
-			$layout = implode(',', $layout_parts);
+			$layout = $layout_parts[0];
 			$this->fieldsLayout = [];
 			if( $buttons_up ) {
 				$this->fieldsLayout[] = [ 'type' => 'buttons', 'buttons' => $buttons ];
@@ -37,11 +37,11 @@ trait ActiveFormTrait
 			case 'buttons':
 				$ret .= '<div class="clearfix row">';
 				$ret .= '<div class="' . implode(',', (array)self::FIELD_HORIZ_CLASSES['default']['1col_rows']['horizontalCssClasses']['offset']) . '">';
-				if( empty($buttons['buttons']) ) {
+				if( empty($layout['buttons']) ) {
 					$ret .= $this->layoutButtons($buttons);
 				} else {
 					$layout_buttons = [];
-					foreach( $buttons['buttons'] as $bkey => $b ) {
+					foreach( $buttons as $bkey => $b ) {
 						$layout_buttons[$bkey] = $b;
 					}
 					$ret .= $this->layoutButtons($layout_buttons);

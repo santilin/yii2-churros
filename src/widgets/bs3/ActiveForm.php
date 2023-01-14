@@ -5,7 +5,6 @@ use yii\helpers\Html;
 use yii\bootstrap\ActiveForm as Bs3ActiveForm;
 use santilin\churros\helpers\FormHelper;
 use santilin\churros\widgets\ActiveFormTrait;
-
 // https://getbootstrap.com/docs/3.4/css/#forms
 // https://getbootstrap.com/docs/3.4/css/#grid
 
@@ -192,6 +191,7 @@ html;
 			$ret .= <<<html
 </div></div><!--buttons form-group-->
 html;
+			break;
 		default:
 // 		case 'horizontal':
 // 		case 'inline':
@@ -204,7 +204,6 @@ html;
 			$ret .= <<<html
 </div></div><!--buttons form-group-->
 html;
-			break;
 			break;
 		}
 		return $ret;
