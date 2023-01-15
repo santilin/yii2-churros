@@ -35,8 +35,8 @@ class TaxonomyValidator extends Validator
 			$this->taxonomy['dot'] = '.';
 		}
 		$mask_groups = $this->maskToGroups($this->taxonomy['mask'], $this->taxonomy['dot']);
-		if( count($mask_groups) != count($this->taxonomy['levels']) ) {
-			throw new InvalidConfigException("The number of levels does not macth the number of groups");
+		if( count($this->taxonomy['levels']) > count($mask_groups)   ) {
+			throw new InvalidConfigException("The number of levels can't be greater than the number of mask groups");
 		}
 
         if ($this->message === null) {
@@ -91,10 +91,11 @@ class TaxonomyValidator extends Validator
 		}
 		// Check taxonomy values
 		$input_values = explode($dot, $value);
-		for( $l=0; $l<count($mask_groups); ++$l) {
+		$ng = min(count($mask_groups), count($this->taxonomy['levels']));
+		for( $l=0; $l< $ng; ++$l) {
 			$value = $input_values[$l];
 			$taxon_values = $this->getTaxonomyValues($input_values, $l);
-			if( !isset($taxon_values[$value]) ) {
+			if( !isset($taxon_values[$value]) && $value != 0) {
 				return Yii::t('churros', 'The value \'{0}\' does not exist in the category \'{1}\'',
 					[ $value, $this->taxonomy['levels'][$l]['title']] );
 			}
@@ -138,7 +139,7 @@ class TaxonomyValidator extends Validator
 				return [];
 			}
 			if( !isset($items[$input_values[$l]]['items']) ) {
-				break;
+				return [];
 			}
 			$items = $items[$input_values[$l]]['items'];
 		}

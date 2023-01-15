@@ -21,8 +21,8 @@ class TaxonomyInput extends \yii\widgets\InputWidget
 		}
 		$levels = $this->taxonomy['levels'];
 		$mask_groups = $this->maskToGroups();
-		if( count($levels) != count($mask_groups) ) {
-			throw new InvalidConfigException("The number of mask groups doesn't match the number of taxonomy levels");
+		if( count($levels) > count($mask_groups) ) {
+			throw new InvalidConfigException("The number of levels can't be greater than the number of mask groups");
 		}
         if( !isset($this->options['id']) ) {
 			$this->options['id'] = Html::getInputId($this->model, $this->attribute);
