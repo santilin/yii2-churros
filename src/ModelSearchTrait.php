@@ -44,7 +44,7 @@ trait ModelSearchTrait
 	public function __set($name, $value)
 	{
 		if ($this->hasAttribute($name) || property_exists($this,$name) ) {
-			$this->$name = $value;
+			parent::__set($name, $value);
 		} else if( array_key_exists($name, $this->related_properties) ) {
 			$this->related_properties[$name] = $value;
 		}
@@ -176,37 +176,39 @@ trait ModelSearchTrait
 			return;
 		}
 		$fullfldname = $this->tableName() . "." . $fldname;
-		$this->addFieldFilterToQuery($query, $fullfldname, $value);
+		if( true !== $this->customFilterWhere($query, $fullfldname, $value) ) {
+			if( is_array($value['v']) ) {
+				$query->andWhere([ 'in', $fldname, $value['v']]);
+			} else switch( $value['op'] ) {
+				case "=":
+					$query->andWhere([$fldname => $value['v']]);
+					break;
+				case "<>":
+				case ">=":
+				case "<=":
+				case ">":
+				case "<":
+				case "NOT LIKE":
+				case "LIKE":
+					$query->andWhere([ $value['op'], $fldname, $value['v'] ]);
+					break;
+				case "START":
+					$query->andWhere([ 'LIKE', $fldname, $value['v'] . '%', false]);
+					break;
+				case "NOT START":
+					$query->andWhere([ 'NOT LIKE', $fldname, $value['v'] . '%', false]);
+					break;
+				case "BETWEEN":
+				case "NOT BETWEEN":
+					$query->andWhere([ $value['op'], $fldname, explode(',',$value['v']) ]);
+					break;
+			}
+		}
 	}
 
-	public function addFieldFilterToQuery(&$query, string $fldname, array $value)
+	public function customFilterWhere(&$query, string $fldname, array $value)
 	{
-		if( is_array($value['v']) ) {
- 			$query->andWhere([ 'in', $fldname, $value['v']]);
-		} else switch( $value['op'] ) {
-			case "=":
-				$query->andWhere([$fldname => $value['v']]);
-				break;
-			case "<>":
-			case ">=":
-			case "<=":
-			case ">":
-			case "<":
-			case "NOT LIKE":
-			case "LIKE":
-				$query->andWhere([ $value['op'], $fldname, $value['v'] ]);
-				break;
-			case "START":
-				$query->andWhere([ 'LIKE', $fldname, $value['v'] . '%', false]);
-				break;
-			case "NOT START":
-				$query->andWhere([ 'NOT LIKE', $fldname, $value['v'] . '%', false]);
-				break;
-			case "BETWEEN":
-			case "NOT BETWEEN":
-				$query->andWhere([ $value['op'], $fldname, explode(',',$value['v']) ]);
-				break;
-		}
+		return false;
 	}
 
 	protected function filterWhereRelated(&$query, $name, $value)
