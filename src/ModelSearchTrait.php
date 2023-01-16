@@ -175,8 +175,7 @@ trait ModelSearchTrait
 		if( $value['v'] == null ) {
 			return;
 		}
-		$fullfldname = $this->tableName() . "." . $fldname;
-		if( true !== $this->customFilterWhere($query, $fullfldname, $value) ) {
+		if( true !== $this->customFilterWhere($query, $fldname, $value) ) {
 			if( is_array($value['v']) ) {
 				$query->andWhere([ 'in', $fldname, $value['v']]);
 			} else switch( $value['op'] ) {
