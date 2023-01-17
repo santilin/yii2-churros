@@ -122,7 +122,11 @@ class TaxonomyValidator extends Validator
 			if( $ret != '' ) {
 				$ret .= $dot;
 			}
-			$ret .= str_pad($parts[$i]??'0', strlen($mask_parts[$i]), '0', STR_PAD_LEFT);
+			if( substr($mask_parts[$i],0,1) == '0' ) {
+				$ret .= str_pad($parts[$i]??'1', strlen($mask_parts[$i]), '0', STR_PAD_LEFT);
+			} else {
+				$ret .= $parts[$i]??'1';
+			}
 		}
 		return $ret;
 	}
