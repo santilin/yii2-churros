@@ -39,7 +39,7 @@ class RadioImagesInput extends \yii\widgets\InputWidget
 			]);
  			$radio .= Html::tag('label',
 				Html::img("@web/img/" . $this->images[$value],
-					array_merge(['alt' => $item], $this->imageOptions)),
+					array_merge(['alt' => $item, 'title' => $item], $this->imageOptions)),
 				[ 'for' => "{$id}-{$n}" ]);
 			$radio .= '</li>';
 			++$n;
