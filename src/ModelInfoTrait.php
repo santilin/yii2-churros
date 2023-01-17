@@ -327,7 +327,11 @@ trait ModelInfoTrait
 
 	public function addErrorFromException(\Throwable $e)
 	{
-		$this->addError('record', 'Los datos están duplicados');
+		if( YII_ENV_DEV ) {
+			$this->addError('record', $e->getMessage());
+		} else {
+			$this->addError('record', 'Para mantener la integridad de la base de datos, no se han guardado los datos.');
+		}
 	}
 
 	public function getOneError()
@@ -357,8 +361,8 @@ trait ModelInfoTrait
 	static public function findCodeAndDescFields(string $relname = null): array
 	{
 		if( $relname == null ) {
-			$r0 = explode(',',static::getModelInfo('code_field'));
-			$r1 = explode(',',static::getModelInfo('desc_field'));
+			$r0 = array_filter(explode(',',static::getModelInfo('code_field')));
+			$r1 = array_filter(explode(',',static::getModelInfo('desc_field')));
 			return array_merge($r0,$r1);
 		} else if (isset(static::$relations[$relname])) {
 			$relmodelname = static::$relations[$relname]['modelClass'];
