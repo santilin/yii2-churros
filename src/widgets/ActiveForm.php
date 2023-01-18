@@ -51,7 +51,7 @@ class ActiveForm extends Bs4ActiveForm
 
 	public const FIELD_HORIZ_CLASSES = [
 		'default' => [
-			'1col_rows' => [
+			'1col' => [
 				'horizontalCssClasses' => [
 					'offset' => ['col-lg-10 col-md-10 col-sm-9 col-xs-12', 'offset-lg-2 offset-md-2 offset-sm-3 offset-xs-0'],
 					'label' => ['col-lg-2 col-md-2 col-sm-3 col-xs-0', 'col-form-label'],
@@ -61,7 +61,7 @@ class ActiveForm extends Bs4ActiveForm
 					'field' => 'form-group row',
 				]
 			],
-			'2cols_rows' => [
+			'2cols' => [
 				'horizontalCssClasses' => [
 					'offset' => 'col-sm-offset-3',
 					'label' => 'col-sm-3',
@@ -71,14 +71,14 @@ class ActiveForm extends Bs4ActiveForm
 					'field' => 'form-group row',
 				]
 			],
-			'3cols_rows' => [
+			'3cols' => [
 				'horizontalCssClasses' => [
 					'label' => 'col-sm-3',
 					'offset' => 'col-sm-offset-1',
 					'wrapper' => 'col-sm-9',
 				]
 			],
-			'4cols_rows' => [
+			'4cols' => [
 				'horizontalCssClasses' => [
 					'label' => 'col-sm-12 text-left',
 					'offset' => 'col-sm-offset-1',
@@ -90,28 +90,28 @@ class ActiveForm extends Bs4ActiveForm
 			],
 		],
 		'large' => [
-			'1col_rows' => [
+			'1col' => [
 				'horizontalCssClasses' => [
 					'label' => 'col-sm-1 one-column-row',
 					'offset' => 'col-sm-offset-1',
 					'wrapper' => 'col-sm-11',
 				]
 			],
-			'2cols_rows' => [
+			'2cols' => [
 				'horizontalCssClasses' => [
 					'label' => 'col-sm-3',
 					'offset' => 'col-sm-offset-1',
 					'wrapper' => 'col-sm-9',
 				]
 			],
-			'3cols_rows' => [
+			'3cols' => [
 				'horizontalCssClasses' => [
 					'label' => 'col-sm-3',
 					'offset' => 'col-sm-offset-1',
 					'wrapper' => 'col-sm-9',
 				]
 			],
-			'4cols_rows' => [
+			'4cols' => [
 				'horizontalCssClasses' => [
 					'label' => 'col-sm-3',
 					'offset' => 'col-sm-offset-1',
@@ -120,7 +120,7 @@ class ActiveForm extends Bs4ActiveForm
 			],
 		],
 		'medium' => [
-			'default' => [
+			'1col' => [
 				'horizontalCssClasses' => [
 					'label' => 'col-sm-1 one-column-row',
 					'offset' => 'col-sm-offset-1',
@@ -149,13 +149,6 @@ class ActiveForm extends Bs4ActiveForm
 				],
 				'options' => [ 'class' => 'control-group col-sm-2' ],
 			],
-			'short' => [
-				'horizontalCssClasses' => [
-					'label' => 'col-sm-3',
-					'wrapper' => '',
-				],
-				'options' => [ 'class' => 'control-group col-sm-2' ],
-			],
 		],
 		'short' => [
 			'1col' => [
@@ -176,7 +169,7 @@ class ActiveForm extends Bs4ActiveForm
 					'wrapper' => 'col-sm-3',
 				]
 			],
-			'4cols_rows' => [
+			'4cols' => [
 				'horizontalCssClasses' => [
 					'label' => 'col-sm-3',
 					'wrapper' => '',
@@ -247,7 +240,7 @@ html;
 			&& empty($form_field->horizontalCssClasses['label'])
 			&& empty($form_field->horizontalCssClasses['hint'])
 			&& empty($form_field->horizontalCssClasses['error'])
-			&& empty($form_field->horizontalCssClasses['field'])
+ 			&& empty($form_field->horizontalCssClasses['field'])
 			&& empty($form_field->horizontalCssClasses['wrapper']) ) {
 			$cssClasses = self::FIELD_HORIZ_CLASSES['default'][$row_layout]['horizontalCssClasses'];
 		}

@@ -21,7 +21,7 @@ trait ActiveFormTrait
 			if( $buttons_up ) {
 				$this->fieldsLayout[] = [ 'type' => 'buttons', 'buttons' => $buttons ];
 			}
-			$this->fieldsLayout[] = [ 'type' => $layout .'_rows', 'fields' => array_keys($form_fields) ];
+			$this->fieldsLayout[] = [ 'type' => $layout, 'fields' => array_keys($form_fields) ];
 			if( !$buttons_up ) {
 				$this->fieldsLayout[] = [ 'type' => 'buttons', 'buttons' => $buttons ];
 			}
@@ -36,7 +36,7 @@ trait ActiveFormTrait
 			switch( $layout['type'] ) {
 			case 'buttons':
 				$ret .= '<div class="clearfix row">';
-				$ret .= '<div class="' . implode(',', (array)self::FIELD_HORIZ_CLASSES['default']['1col_rows']['horizontalCssClasses']['offset']) . '">';
+				$ret .= '<div class="' . implode(',', (array)self::FIELD_HORIZ_CLASSES['default']['1col']['horizontalCssClasses']['offset']) . '">';
 				if( empty($layout['buttons']) ) {
 					$ret .= $this->layoutButtons($buttons);
 				} else {
@@ -48,21 +48,21 @@ trait ActiveFormTrait
 				}
 				$ret .= '</div></div><!-- buttons -->' .  "\n";
 				break;
-			case '1col_rows':
-			case '1cols_rows':
-				foreach( $layout['fields'] as $form_field ) {
-					$this->setFieldClasses($form_fields, $form_field, $layout['type']);
-					if( !empty($form_fields[$form_field])) {
-						$ret .= $form_fields[$form_field];
+			case '1col':
+			case '1cols':
+				foreach( $layout['fields'] as $fldname ) {
+ 					$this->setFieldClasses($form_fields, $fldname, $layout['type']);
+					if( !empty($form_fields[$fldname])) {
+						$ret .= $form_fields[$fldname];
 					}
 				}
 				break;
-			case '2col_rows':
-			case '2cols_rows':
-			case '3col_rows':
-			case '3cols_rows':
-			case '4col_rows':
-			case '4cols_rows':
+			case '2col':
+			case '2cols':
+			case '3col':
+			case '3cols':
+			case '4col':
+			case '4cols':
 				$cols = intval(substr($layout['type'],0,1));
 				switch( $cols ) {
 				case 2:
@@ -130,6 +130,11 @@ trait ActiveFormTrait
 		$ret .= $content;
 		$ret .= Html::endTag($wrapper_tag);
 		return $ret;
+	}
+
+	public function getLayoutClasses($field_layout, $row_layout)
+	{
+		return self::FIELD_HORIZ_CLASSES[$field_layout][$row_layout];
 	}
 
 } // form
