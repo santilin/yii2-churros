@@ -256,7 +256,7 @@ trait ModelSearchTrait
 	}
 
 
-	protected function filterGlobal(&$query, array $attributes, string $value)
+	protected function filterGlobal(&$query, array $attributes, string $value, $inclusiva = false)
 	{
 		if( $value === null || $value === '' ) {
 			return;
@@ -270,7 +270,7 @@ trait ModelSearchTrait
 				$relation = self::$relations[$name]??null;
 				if( !$relation ) {
 					$fullfldname = $this->tableName() . "." . $name;
-					$query->orWhere( [ 'LIKE', $fullfldname, $value ] );
+					$or_conds[] = [ 'LIKE', $fullfldname, $value ];
 					continue;
 				} else {
 					$relation_name = $name;
@@ -282,7 +282,7 @@ trait ModelSearchTrait
 			}
 			if( $relation ) {
 				// Hay tres tipos de campos relacionados:
-				// 1. El nombre de la relación (attribute = '' )
+				// 1. El nombre de la relación (productora, attribute = '' )
 				// 2. Relación y campo: Productora.nombre
 				// 3. La clave foranea: productura_id
 				$table_alias = "as_$relation_name";
@@ -291,20 +291,20 @@ trait ModelSearchTrait
 				$modelClass = $relation['modelClass'];
 				$model = $modelClass::instance();
 				$search_flds = [];
-				if ($attribute == $model->primaryKey()[0] ) {
-					if( isset($relation['other']) ) {
-						list($right_table, $right_fld ) = ModelInfoTrait::splitFieldName($relation['other']);
-					} else {
-						list($right_table, $right_fld ) = ModelInfoTrait::splitFieldName($relation['right']);
-					}
-					$query->orWhere([ 'IN', "$table_alias.$right_fld", $value ]);
-				} else if( $attribute == '' ) {
+				if( $attribute == '' ) {
 					$search_flds = $model->findCodeAndDescFields();
 					$rel_conds = [ 'OR' ];
 					foreach( $search_flds as $search_fld ) {
 						$rel_conds[] = [ 'LIKE', "$table_alias.$search_fld", $value ];
 					}
 					$or_conds[] = $rel_conds;
+				} elseif ($attribute == $model->primaryKey()[0] ) {
+					if( isset($relation['other']) ) {
+						list($right_table, $right_fld ) = ModelInfoTrait::splitFieldName($relation['other']);
+					} else {
+						list($right_table, $right_fld ) = ModelInfoTrait::splitFieldName($relation['right']);
+					}
+					$or_conds[] = [ 'IN', "$table_alias.$right_fld", $value ];
 				} else {
 					$or_conds[] = ['LIKE', "$table_alias.$attribute", $value ];
 				}
@@ -313,7 +313,11 @@ trait ModelSearchTrait
 			}
 		}
 		if( count( $or_conds ) > 1 ) {
-			$query->andWhere($or_conds);
+			if( $inclusiva ) {
+				$query->orWhere($or_conds);
+			} else {
+				$query->andWhere($or_conds);
+			}
 		}
 	}
 
