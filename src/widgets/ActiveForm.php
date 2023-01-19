@@ -12,23 +12,6 @@ class ActiveForm extends Bs4ActiveForm
 {
 	use ActiveFormTrait;
 
-	const SHORT_FIELD_LAYOUT = [
-		'horizontalCssClasses' => [
-			'layout' => 'short'
-		]
-	];
-	const MEDIUM_FIELD_LAYOUT = [
-		'horizontalCssClasses' => [
-			'layout' => 'medium'
-		]
-	];
-	const LONG_FIELD_LAYOUT = [
-		'horizontalCssClasses' => [
-			'layout' => 'long'
-		]
-	];
-
-
 	const _SHORT_FIELD_LAYOUT = [
 		'horizontalCssClasses' => [
 			'offset' => 'offset-sm-2',
@@ -233,10 +216,8 @@ html;
 	{
 		$cssClasses = [];
 		$classes_set = false;
-		if( !empty($form_field->horizontalCssClasses['layout']) ) {
-			$field_layout = $form_field->horizontalCssClasses['layout'];
-			$cssClasses = self::FIELD_HORIZ_CLASSES[$field_layout][$row_layout]['horizontalCssClasses'];
-		} else if( empty($form_field->horizontalCssClasses['offset'])
+		$form_field = $form_fields[$form_field_name];
+		if( empty($form_field->horizontalCssClasses['offset'])
 			&& empty($form_field->horizontalCssClasses['label'])
 			&& empty($form_field->horizontalCssClasses['hint'])
 			&& empty($form_field->horizontalCssClasses['error'])
@@ -245,10 +226,10 @@ html;
 			$cssClasses = self::FIELD_HORIZ_CLASSES['default'][$row_layout]['horizontalCssClasses'];
 		}
 		if( count($cssClasses) ) {
-            Html::addCssClass($form_fields[$form_field]->wrapperOptions, $cssClasses['wrapper']);
-            Html::addCssClass($form_fields[$form_field]->labelOptions, $cssClasses['label']);
-            Html::addCssClass($form_fields[$form_field]->errorOptions, $cssClasses['error']);
-            Html::addCssClass($form_fields[$form_field]->hintOptions, $cssClasses['hint']);
+            Html::addCssClass($form_field->wrapperOptions, $cssClasses['wrapper']);
+            Html::addCssClass($form_field->labelOptions, $cssClasses['label']);
+            Html::addCssClass($form_field->errorOptions, $cssClasses['error']);
+            Html::addCssClass($form_field->hintOptions, $cssClasses['hint']);
 		}
 	}
 

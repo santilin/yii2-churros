@@ -33,9 +33,9 @@ class DotDotValidator extends Validator
 
     public function validateAttribute($model, $attribute)
     {
-		$value = $model->{$attribute};
+		$value = $model->$attribute;
 		if( $this->validateValue($value) === null ) {
-			$model->{$attribute} = $this->formatValue($value);
+			$model->$attribute = $this->formatValue($value);
 		} else {
 			$this->addError($model, $attribute, $this->message);
 		}

@@ -12,34 +12,18 @@ class ActiveForm extends Bs3ActiveForm
 {
 	use ActiveFormTrait;
 
-	const SHORT_FIELD_LAYOUT = [
-		'horizontalCssClasses' => [
-			'layout' => 'short'
-		]
-	];
-	const MEDIUM_FIELD_LAYOUT = [
-		'horizontalCssClasses' => [
-			'layout' => 'medium'
-		]
-	];
-	const LONG_FIELD_LAYOUT = [
-		'horizontalCssClasses' => [
-			'layout' => 'long'
-		]
-	];
-
 	public const FIELD_HORIZ_CLASSES = [
 		'default' => [
-			'1col_rows' => [
+			'1col' => [
 				'horizontalCssClasses' => [
-					'offset' => 'col-xs-offset-3 col-sm-offset-3 col-md-offset-3 col-lg-offset-3',
-					'label' => 'col-xs-12 col-sm-3 col-md-3 col-lg-3',
-					'wrapper' => 'col-xs-12 col-sm-6 col-md-6 col-lg-6',
+					'offset' => 'col-xs-offset-1 col-sm-offset-3 col-md-offset-2 col-lg-offset-2',
+					'label' => 'col-xs-12 col-sm-3 col-md-2 col-lg-2',
+					'wrapper' => 'col-xs-12 col-sm-9 col-md-10 col-lg-10',
 					'error' => '',
 					'hint' => 'col-xs-0 col-sm-3 col-md-3 col-lg-3',
 				]
 			],
-			'2cols_rows' => [
+			'2cols' => [
 				'horizontalCssClasses' => [
 					'offset' => 'col-sm-offset-3',
 					'label' => 'col-sm-3',
@@ -48,14 +32,14 @@ class ActiveForm extends Bs3ActiveForm
 					'hint' => 'col-sm-3',
 				]
 			],
-			'3cols_rows' => [
+			'3cols' => [
 				'horizontalCssClasses' => [
 					'label' => 'col-sm-3',
 					'offset' => 'col-sm-offset-1',
 					'wrapper' => 'col-sm-9',
 				]
 			],
-			'4cols_rows' => [
+			'4cols' => [
 				'horizontalCssClasses' => [
 					'label' => 'col-sm-12 text-left',
 					'offset' => 'col-sm-offset-1',
@@ -67,28 +51,28 @@ class ActiveForm extends Bs3ActiveForm
 			],
 		],
 		'large' => [
-			'1col_rows' => [
+			'1col' => [
 				'horizontalCssClasses' => [
-					'label' => 'col-sm-1 one-column-row',
-					'offset' => 'col-sm-offset-1',
-					'wrapper' => 'col-sm-11',
+					'label' => 'col-sm-12 col-lg-12',
+					'offset' => 'col-sm-offset-3 col-lg-offset-2',
+					'wrapper' => 'col-sm-9 col-lg-9',
 				]
 			],
-			'2cols_rows' => [
-				'horizontalCssClasses' => [
-					'label' => 'col-sm-3',
-					'offset' => 'col-sm-offset-1',
-					'wrapper' => 'col-sm-9',
-				]
-			],
-			'3cols_rows' => [
+			'2cols' => [
 				'horizontalCssClasses' => [
 					'label' => 'col-sm-3',
 					'offset' => 'col-sm-offset-1',
 					'wrapper' => 'col-sm-9',
 				]
 			],
-			'4cols_rows' => [
+			'3cols' => [
+				'horizontalCssClasses' => [
+					'label' => 'col-sm-3',
+					'offset' => 'col-sm-offset-1',
+					'wrapper' => 'col-sm-9',
+				]
+			],
+			'4cols' => [
 				'horizontalCssClasses' => [
 					'label' => 'col-sm-3',
 					'offset' => 'col-sm-offset-1',
@@ -153,7 +137,7 @@ class ActiveForm extends Bs3ActiveForm
 					'wrapper' => 'col-sm-3',
 				]
 			],
-			'4cols_rows' => [
+			'4cols' => [
 				'horizontalCssClasses' => [
 					'label' => 'col-sm-3',
 					'wrapper' => '',
@@ -209,14 +193,12 @@ html;
 		return $ret;
 	}
 
-	protected function setFieldClasses(array &$form_fields, string $form_field, string $row_layout)
+	protected function setFieldClasses(array &$form_fields, string $form_field_name, string $row_layout)
 	{
 		$cssClasses = [];
 		$classes_set = false;
-		if( !empty($form_field->horizontalCssClasses['layout']) ) {
-			$field_layout = $form_field->horizontalCssClasses['layout'];
-			$cssClasses = self::FIELD_HORIZ_CLASSES[$field_layout][$row_layout]['horizontalCssClasses'];
-		} else if( empty($form_field->horizontalCssClasses['offset'])
+		$form_field = $form_fields[$form_field_name];
+		if( empty($form_field->horizontalCssClasses['offset'])
 			&& empty($form_field->horizontalCssClasses['label'])
 			&& empty($form_field->horizontalCssClasses['hint'])
 			&& empty($form_field->horizontalCssClasses['error'])
@@ -224,10 +206,10 @@ html;
 			$cssClasses = self::FIELD_HORIZ_CLASSES['default'][$row_layout]['horizontalCssClasses'];
 		}
 		if( count($cssClasses) ) {
-            $form_fields[$form_field]->wrapperOptions = ['class' => $cssClasses['wrapper']];
-            $form_fields[$form_field]->labelOptions = ['class' => 'control-label ' . $cssClasses['label']];
-            $form_fields[$form_field]->errorOptions['class'] = 'help-block help-block-error ' . $cssClasses['error'];
-            $form_fields[$form_field]->hintOptions['class'] = 'help-block ' . $cssClasses['hint'];
+            $form_field->wrapperOptions = ['class' => $cssClasses['wrapper']];
+            $form_field->labelOptions = ['class' => 'control-label ' . $cssClasses['label']];
+            $form_field->errorOptions['class'] = 'help-block help-block-error ' . $cssClasses['error'];
+            $form_field->hintOptions['class'] = 'help-block ' . $cssClasses['hint'];
 		}
 	}
 
