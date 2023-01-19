@@ -1,8 +1,9 @@
 window.yii.churros = (function ($) {
 	var pub = {
 		email: function (value, messages, options) {
+			debugger;
 			value = $.trim(value);
-			if (options.skipOnEmpty && yii.validation.isEmpty(value)) {
+			if (yii.validation.isEmpty(value)) {
 				return;
 			}
 			return yii.validation.email(value, messages, options);

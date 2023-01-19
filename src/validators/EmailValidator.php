@@ -1,6 +1,7 @@
 <?php
 namespace santilin\churros\validators;
 
+use yii;
 use yii\helpers\Json;
 use yii\validators\ValidationAsset;
 use santilin\churros\ChurrosAsset;
@@ -31,7 +32,7 @@ class EmailValidator extends \yii\validators\EmailValidator
 			if( $this->required ) {
 				$this->addError($model, $attribute, $this->emptyMessage);
 			} else {
-				$model->$attribute = $default;
+				$model->$attribute = $this->default;
 			}
 		} elseif( $this->validateValue($value) === null ) {
 			$model->$attribute = $value;
@@ -52,7 +53,7 @@ class EmailValidator extends \yii\validators\EmailValidator
 		if( $this->required ) {
 			$req_options = $options;
 			$req_options['message'] = $this->emptyMessage;
-			$ret = 'yii.validation.required(value, messages, ' . Json::htmlEncode($req_options) . ')&&';
+			$ret = 'debugger;yii.validation.required(value, messages, ' . Json::htmlEncode($req_options) . ')&&';
 		}
 		$ret .= 'yii.churros.email(value, messages, ' . Json::htmlEncode($options) . ');';
 		return $ret;
