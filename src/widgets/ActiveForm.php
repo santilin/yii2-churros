@@ -92,9 +92,9 @@ class ActiveForm extends Bs4ActiveForm
 		'large' => [
 			'1col' => [
 				'horizontalCssClasses' => [
-					'label' => 'col-sm-1 one-column-row',
-					'offset' => 'col-sm-offset-1',
-					'wrapper' => 'col-sm-11',
+					'label' => 'col-sm-12',
+					'offset' => 'offset-sm-0',
+					'wrapper' => 'col-sm-12',
 				]
 			],
 			'2cols' => [
