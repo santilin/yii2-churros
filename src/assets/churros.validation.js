@@ -1,7 +1,6 @@
 window.yii.churros = (function ($) {
 	var pub = {
 		email: function (value, messages, options) {
-			debugger;
 			value = $.trim(value);
 			if (yii.validation.isEmpty(value)) {
 				return;

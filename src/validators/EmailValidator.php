@@ -53,7 +53,7 @@ class EmailValidator extends \yii\validators\EmailValidator
 		if( $this->required ) {
 			$req_options = $options;
 			$req_options['message'] = $this->emptyMessage;
-			$ret = 'debugger;yii.validation.required(value, messages, ' . Json::htmlEncode($req_options) . ')&&';
+			$ret = 'yii.validation.required(value, messages, ' . Json::htmlEncode($req_options) . ')&&';
 		}
 		$ret .= 'yii.churros.email(value, messages, ' . Json::htmlEncode($options) . ');';
 		return $ret;

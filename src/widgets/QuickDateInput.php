@@ -207,7 +207,6 @@ function dateInputChange(date_input, id)
 		return true;
 	 } else if (date_js == false ) { // wrong
 		$('#$orig_id').val( date_input.value );
-		debugger;
 		if( error_el ) {
 			error_el.text('La fecha no es válida');
 		}

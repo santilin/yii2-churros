@@ -81,7 +81,7 @@ class ActiveForm extends Bs3ActiveForm
 			],
 		],
 		'medium' => [
-			'default' => [
+			'1col' => [
 				'horizontalCssClasses' => [
 					'label' => 'col-sm-1 one-column-row',
 					'offset' => 'col-sm-offset-1',

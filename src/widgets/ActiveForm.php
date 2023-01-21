@@ -212,7 +212,7 @@ html;
 		return $ret;
 	}
 
-	protected function setFieldClasses(array &$form_fields, string $form_field, string $row_layout)
+	protected function setFieldClasses(array &$form_fields, string $form_field_name, string $row_layout)
 	{
 		$cssClasses = [];
 		$classes_set = false;

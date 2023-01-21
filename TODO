@@ -1,5 +1,5 @@
 El botón borrar del grid de bs3 no sale rojo.
-Layuot de los checkboxes fatal
+Checkboxes: unchecked: no se ven.
 
 = Behaviors
 
@@ -43,7 +43,7 @@ https://stackoverflow.com/questions/32731987/adding-new-list-options-refreshing-
 
 = Formularios
 Añadir el símbolo del euro al input de los forms: bs4 input-group
-Layout de los botones como el hint default/1col_rows
+Layout de los botones como el hint default/1col
 
 = No prioritario
 == Models
@@ -101,7 +101,7 @@ Layout de los botones como el hint default/1col_rows
 * https://github.com/manuvarkey/kanboard-plugin-telegram
 * html-to-rtf y .editorconfig https://github.com/github-grabaz/html-rtf-converter/blob/master/.editorconfig
 https://github.com/pavlm/yii2-stats-widget Time Stats widget
-Modelos: Estudiar uuidbehavior, softdeletes y lock. Faltan los behaviors
+Modelos: Estudiar softdeletes y lock. Faltan los behaviors
 Formulario de settings: file:///home/santilin/devel/yii2base/yii2-docs/guide-input-tabular-input.html
 * https://phpstan.org/user-guide/getting-started
 * Investigar estos widgets:
