@@ -196,7 +196,6 @@ html;
 	protected function setFieldClasses(array &$form_fields, string $form_field_name, string $row_layout)
 	{
 		$cssClasses = [];
-		$classes_set = false;
 		$form_field = $form_fields[$form_field_name];
 		if( empty($form_field->horizontalCssClasses['offset'])
 			&& empty($form_field->horizontalCssClasses['label'])
@@ -204,8 +203,6 @@ html;
 			&& empty($form_field->horizontalCssClasses['error'])
 			&& empty($form_field->horizontalCssClasses['wrapper']) ) {
 			$cssClasses = self::FIELD_HORIZ_CLASSES['default'][$row_layout]['horizontalCssClasses'];
-		}
-		if( count($cssClasses) ) {
             $form_field->wrapperOptions = ['class' => $cssClasses['wrapper']];
             $form_field->labelOptions = ['class' => 'control-label ' . $cssClasses['label']];
             $form_field->errorOptions['class'] = 'help-block help-block-error ' . $cssClasses['error'];

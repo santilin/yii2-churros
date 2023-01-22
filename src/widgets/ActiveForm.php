@@ -37,7 +37,7 @@ class ActiveForm extends Bs4ActiveForm
 			'1col' => [
 				'horizontalCssClasses' => [
 					'offset' => ['col-lg-10 col-md-10 col-sm-9 col-xs-12', 'offset-lg-2 offset-md-2 offset-sm-3 offset-xs-0'],
-					'label' => ['col-lg-2 col-md-2 col-sm-3 col-xs-0', 'col-form-label'],
+					'label' => ['col-lg-2 col-md-3 col-sm-3 col-xs-0', 'col-form-label'],
 					'wrapper' => 'col-lg-10 col-md-9 col-sm-9 col-xs-12',
 					'error' => '',
 					'hint' => '',
@@ -162,9 +162,6 @@ class ActiveForm extends Bs4ActiveForm
 		],
 	];
 
-
-
-
     public $fieldConfig = [
 		'horizontalCssClasses' => [
 			'offset' => '',
@@ -172,6 +169,7 @@ class ActiveForm extends Bs4ActiveForm
 			'wrapper' => '',
 			'error' => '',
 			'hint' => '',
+			'field' => null,
 // 			'offset' => ['col-lg-10 col-md-10 col-sm-9 col-xs-12', 'offset-lg-2 offset-md-2 offset-sm-3 offset-xs-0'],
 // 			'label' => ['col-lg-2 col-md-2 col-sm-3 col-xs-0', 'col-form-label'],
 // 			'wrapper' => 'col-lg-10 col-md-9 col-sm-9 col-xs-12',
@@ -186,7 +184,7 @@ class ActiveForm extends Bs4ActiveForm
 	{
 		switch($this->layout) {
 		case '2cols':
-			$classes = 'offset-md-2 col-sm-10';
+			$classes = 'offset-sm-2 col-sm-10';
 			$ret = <<<html
 <div class="form-group buttons"><div class="$classes">
 html;
@@ -199,7 +197,7 @@ html;
 // 		case '1col':
 //      case 'horizontal':
 // 		case 'inline':
-			$classes = 'offset-md-2 col-sm-10';
+			$classes = 'offset-sm-2 col-sm-10';
 			$ret = <<<html
 <div class="form-group buttons"><div class="$classes">
 html;
@@ -217,15 +215,16 @@ html;
 		$cssClasses = [];
 		$classes_set = false;
 		$form_field = $form_fields[$form_field_name];
-		if( empty($form_field->horizontalCssClasses['offset'])
-			&& empty($form_field->horizontalCssClasses['label'])
-			&& empty($form_field->horizontalCssClasses['hint'])
-			&& empty($form_field->horizontalCssClasses['error'])
- 			&& empty($form_field->horizontalCssClasses['field'])
-			&& empty($form_field->horizontalCssClasses['wrapper']) ) {
+		if(
+			(isset($form_field->horizontalCssClasses['field']) && $form_field->horizontalCssClasses['field'] === null
+			) || (
+				empty($form_field->horizontalCssClasses['offset'])
+				&& empty($form_field->horizontalCssClasses['label'])
+				&& empty($form_field->horizontalCssClasses['hint'])
+				&& empty($form_field->horizontalCssClasses['error'])
+				&& empty($form_field->horizontalCssClasses['field'])
+				&& empty($form_field->horizontalCssClasses['wrapper']) ) ) {
 			$cssClasses = self::FIELD_HORIZ_CLASSES['default'][$row_layout]['horizontalCssClasses'];
-		}
-		if( count($cssClasses) ) {
             Html::addCssClass($form_field->wrapperOptions, $cssClasses['wrapper']);
             Html::addCssClass($form_field->labelOptions, $cssClasses['label']);
             Html::addCssClass($form_field->errorOptions, $cssClasses['error']);
