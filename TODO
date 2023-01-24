@@ -1,4 +1,4 @@
-El botón borrar del grid de bs3 no sale rojo.
+El botón borrar del grid de bs3 no sale rojo ni el del bs4.
 Checkboxes: unchecked: no se ven.
 
 = Behaviors
@@ -10,10 +10,7 @@ Hay acceso a trivel.test/user/2
 
 
 = Permisos
-* Crear Reports.view, etc.
-
-= CrudController
-* Enviar a las vistas los permisos
+* Crear Reports.view, etc. (biosegura)
 
 == Adjuntos y subir ficheros
 * Opciones
@@ -28,7 +25,7 @@ https://stackoverflow.com/questions/32731987/adding-new-list-options-refreshing-
 == Print y pdf
 * CrudController::pdf: Incluir css del módulo/modelo actual
 * Quitar (no definido) al imprimir
-* Hacer uso de los model.Agente.report
+* Hacer uso de los model.Agente.report? o los permisos del Param?
 
 == GridView ==
 * OneToOne: Grid: no sortable, no filter
@@ -37,13 +34,14 @@ https://stackoverflow.com/questions/32731987/adding-new-list-options-refreshing-
 * Grid Enlaces en el joinmodels: filtro en el grid por ese valor
 * selectViews no funciona con pjax porque es un dropdown. Añadirlo dentro de un FORM
 * Grid: cuando se filtra, poner "Filtrando 1-1 de s"
+* Cuando sólo hay una página, no mostrar [1-3] de 3
 * GridView: Ocultar filtro si no hay resultados
- * BreadCrumbs: Index: Añadir el orden o el filtro ("filtrado") ("ordenado por")
+* BreadCrumbs: Index: Añadir el orden o el filtro ("filtrado") ("ordenado por")
 * 2 gridviews: https://www.yiiframework.com/doc/guide/2.0/en/output-data-widgets#multiple-gridviews
 
 = Formularios
 Añadir el símbolo del euro al input de los forms: bs4 input-group
-Layout de los botones como el hint default/1col
+Layout de los botones como el hint default/1col en bs3
 
 = No prioritario
 == Models
@@ -100,9 +98,9 @@ Layout de los botones como el hint default/1col
 * Full-text-search: https://www.sqlite.org/fts3.html#section_8_2
 * https://github.com/manuvarkey/kanboard-plugin-telegram
 * html-to-rtf y .editorconfig https://github.com/github-grabaz/html-rtf-converter/blob/master/.editorconfig
-https://github.com/pavlm/yii2-stats-widget Time Stats widget
-Modelos: Estudiar softdeletes y lock. Faltan los behaviors
-Formulario de settings: file:///home/santilin/devel/yii2base/yii2-docs/guide-input-tabular-input.html
+* https://github.com/pavlm/yii2-stats-widget Time Stats widget
+* Modelos: Estudiar softdeletes y lock. Faltan los behaviors
+* Formulario de settings: file:///home/santilin/devel/yii2base/yii2-docs/guide-input-tabular-input.html
 * https://phpstan.org/user-guide/getting-started
 * Investigar estos widgets:
 - https://www.yiiframework.com/extension/yii2-sortable-behavior
