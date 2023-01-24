@@ -36,7 +36,7 @@ trait ActiveFormTrait
 			switch( $layout['type'] ) {
 			case 'buttons':
 				$ret .= '<div class="clearfix row">';
-				$ret .= '<div class="' . implode(',', (array)self::FIELD_HORIZ_CLASSES['default']['1col']['horizontalCssClasses']['offset']) . '">';
+				$ret .= '<div class="' . implode(' ', (array)self::FIELD_HORIZ_CLASSES['default']['1col']['horizontalCssClasses']['offset']) . '">';
 				if( empty($layout['buttons']) ) {
 					$ret .= $this->layoutButtons($buttons);
 				} else {

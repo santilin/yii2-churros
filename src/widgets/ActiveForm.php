@@ -76,7 +76,7 @@ class ActiveForm extends Bs4ActiveForm
 			'1col' => [
 				'horizontalCssClasses' => [
 					'label' => 'col-sm-12',
-					'offset' => 'offset-sm-0',
+					'offset' => 'offset-sm-2',
 					'wrapper' => 'col-sm-12',
 				]
 			],
@@ -136,8 +136,12 @@ class ActiveForm extends Bs4ActiveForm
 		'short' => [
 			'1col' => [
 				'horizontalCssClasses' => [
-					'label' => 'col-sm-3',
-					'wrapper' => 'col-sm-2',
+					'offset' => ['col-lg-10 col-md-10 col-sm-9 col-xs-12', 'offset-lg-2 offset-md-2 offset-sm-3 offset-xs-0'],
+					'label' => ['col-lg-2 col-md-3 col-sm-3 col-xs-0', 'col-form-label'],
+					'wrapper' => 'col-lg-2 col-md-3 col-sm-3 col-xs-3',
+					'error' => '',
+					'hint' => '',
+					'field' => 'form-group row',
 				]
 			],
 			'2cols' => [
@@ -184,9 +188,9 @@ class ActiveForm extends Bs4ActiveForm
 	{
 		switch($this->layout) {
 		case '2cols':
-			$classes = 'offset-sm-2 col-sm-10';
+			$classes = 'col-sm-10';
 			$ret = <<<html
-<div class="form-group buttons"><div class="$classes">
+<div class="form-group row"><div class="$classes">
 html;
 			$ret .= FormHelper::displayButtons($buttons);
 			$ret .= <<<html
@@ -197,9 +201,9 @@ html;
 // 		case '1col':
 //      case 'horizontal':
 // 		case 'inline':
-			$classes = 'offset-sm-2 col-sm-10';
+			$classes = 'col-sm-10';
 			$ret = <<<html
-<div class="form-group buttons"><div class="$classes">
+<div class="form-group row"><div class="$classes">
 html;
 			$ret .= FormHelper::displayButtons($buttons);
 			$ret .= <<<html

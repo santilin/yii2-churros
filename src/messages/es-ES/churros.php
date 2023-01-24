@@ -39,6 +39,7 @@ return [
 	"Access to '{module}' module menu" => 'Acceso al menu del módulo {module}',
 	"Access to '{module}' module site" => 'Acceso al sitio del módulo {module}',
 	'their own {title_plural}' => 'sus propi{as} {title_plural}',
+	'Delete this image' => 'Borrar esta imagen',
 
 	'All' => 'Todo',
     'Show all' => 'Mostrar todo',

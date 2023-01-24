@@ -2,8 +2,8 @@
 namespace santilin\churros\widgets;
 
 use Yii;
-use yii\helpers\{Html,Url};
-use yii\base\InvalidConfigException;
+use yii\helpers\Html;
+use yii\helpers\Url;
 use santilin\churros\helpers\AppHelper;
 
 /**
@@ -11,38 +11,42 @@ use santilin\churros\helpers\AppHelper;
  *
  * @author Santilin <software@noviolento.es>
  */
-class ImageInput extends \yii\widgets\InputWidget
+class KartikImageInput extends \kartik\file\FileInput
 {
 	const ATTR_URL_VERBATIM = 0;
 	const ATTR_URL_UPLOAD_BEHAVIOR = 1;
 	const ATTR_URL_SERIALIZED = 2;
 
 	public $caption;
-	public $form = null;
-	public $thumbSize = '100px';
 	public $deleteCheck = false;
 	public $attrUrlType = self::ATTR_URL_VERBATIM;
-
-	public function init()
-	{
-		if( !$this->form ) {
-			throw new InvalidConfigException('ImageInput::form must be set');
-		}
-		return parent::init();
-	}
 
     /**
      * {@inheritdoc}
      */
     public function run()
     {
-		$thumb_options = [ 'width' => $this->thumbSize ];
+		$this->pluginOptions = [
+			'language' => substr(Yii::$app->language, 0, 2),
+			'showUpload' => false,
+			'showRemove' => true,
+			'initialPreviewShowDelete' => false,
+			// 'showDownload' => true, Tiene que estar definida la función de descargar
+			'fileActionSettings' => [
+				'showDrag' => false,
+				'showZoom' => true,
+			],
+			'initialPreviewAsData' => true,
+			'overwriteInitial' => true
+		];
+		$images = [];
 		switch( $this->attrUrlType ) {
 		case self::ATTR_URL_VERBATIM:
-			echo Html::img(Html::getAttributeValue($this->model, $this->attribute), $thumb_options);
+			$this->pluginOptions['initialPreview'][] = Html::getAttributeValue($this->model, $this->attribute);
 			break;
 		case self::ATTR_URL_UPLOAD_BEHAVIOR:
-			echo Html::img($this->model->getUploadedFileUrl($this->attribute),$thumb_options);
+			$this->pluginOptions['initialPreview'][] =
+			$this->model->getUploadedFileUrl($this->attribute);
 			break;
 		case self::ATTR_URL_SERIALIZED:
 			$serialized = Html::getAttributeValue($this->model, $this->attribute);
@@ -52,18 +56,15 @@ class ImageInput extends \yii\widgets\InputWidget
 					$images = [ $serialized ];
 				}
 				foreach( $images as $filename ) {
-					echo Html::img($filename, $thumb_options);
+					$this->pluginOptions['initialPreview'][] = Yii::getAlias("@uploads/$filename");
 				}
 			}
 			break;
 		}
-		if (!isset($this->form->options['enctype'])) {
-			$this->form->options['enctype'] = 'multipart/form-data';
-		}
-		$parent_file_input =  $this->renderInputHtml('file');
+		$parent_file_input = parent::run();
 		if( $this->deleteCheck !== false && !empty($this->model->{$this->attribute}) ) {
 			if( $this->deleteCheck == true ) {
-				$deleteCheckOptions = [ 'label' => Yii::t('churros','Delete this image') . ': ' . $this->model->{$this->attribute} ];
+				$deleteCheckOptions = [ 'label' => 'Delete me: ' . $this->model->{$this->attribute} ];
 			} else {
 				$deleteCheckOptions = $this->deleteCheck;
 			}
@@ -72,6 +73,7 @@ class ImageInput extends \yii\widgets\InputWidget
 		} else {
 			$delete_check = '';
 		}
+
 		echo Html::tag('div', $parent_file_input . $delete_check);
 	}
 
