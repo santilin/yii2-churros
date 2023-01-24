@@ -229,6 +229,7 @@ html;
             Html::addCssClass($form_field->labelOptions, $cssClasses['label']);
             Html::addCssClass($form_field->errorOptions, $cssClasses['error']);
             Html::addCssClass($form_field->hintOptions, $cssClasses['hint']);
+			Html::addCssClass($form_field->options, $cssClasses['field']);
 		}
 	}
 

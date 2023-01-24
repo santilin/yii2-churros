@@ -118,7 +118,9 @@ trait ActiveFormTrait
 	{
 		$ret = '';
 		$wrapper_options = [ 'class' => $this->fieldConfig['horizontalCssClasses']['wrapper'] ];
-// 		Html::addCssClass($config['labelOptions'], $cssClasses['label']);
+		if( isset($options['class']) ) {
+			Html::addCssClass($wrapper_options, $options['class']);
+		}
 // 		Html::addCssClass($config['errorOptions'], $cssClasses['error']);
 // 		Html::addCssClass($config['hintOptions'], $cssClasses['hint']);
 // 		Html::addCssClass($config['options'], $cssClasses['field']);
