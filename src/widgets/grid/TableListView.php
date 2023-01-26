@@ -4,13 +4,13 @@
  * @copyright Copyright (c) 2008 Yii Software LLC
  * @license http://www.yiiframework.com/license/
  */
-namespace santilin\churros\widgets;
+namespace santilin\churros\widgets\grid;
 
 use yii\helpers\ArrayHelper;
 use yii\widgets\ListView;
+use yii\base\InvalidConfigException;
 use yii\helpers\Html;
 use santilin\churros\ChurrosAsset;
-
 
 /**
  * This ListView acts like a table
@@ -26,7 +26,7 @@ class TableListView extends ListView
      * @see \yii\helpers\Html::renderTagAttributes() for details on how attributes are being rendered.
 	*/
 	public $headerOptions = [ 'class' => 'tlv-header' ];
-	public $headerContent = null;
+	public $columns;
 
 	public function __construct($config = [])
 	{
@@ -43,6 +43,9 @@ class TableListView extends ListView
 
 	public function run()
 	{
+		if( !isset($this->columns) ) {
+			throw new InvalidConfigException("TableListView: the property \$columns must be set");
+		}
 		$view = $this->getView();
         ChurrosAsset::register($view);
 
@@ -50,11 +53,20 @@ class TableListView extends ListView
 		return parent::run();
 	}
 
+	private function extractHeader()
+	{
+		$header_columns[] = '<div class="tlv-th tlv-date">Fecha</div>';
+		$header_columns[] = '<div class="tlv-th tlv-string">Concepto</div>';
+		$header_columns[] = '<div class="tlv-th tlv-string">Referencia</div>';
+		$header_columns[] = '<div class="tlv-th tlv-number">Importe</div>';
+		return implode('', $header_columns);
+	}
+
     public function renderHeader()
     {
         $headerOptions = $this->headerOptions;
         $tag = ArrayHelper::remove($headerOptions, 'tag', 'div');
-        return Html::tag($tag, $this->headerContent, $headerOptions);
+        return Html::tag($tag, $this->extractHeader(), $headerOptions);
     }
 
     /**

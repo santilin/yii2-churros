@@ -1,7 +1,9 @@
 El botón borrar del grid de bs3 no sale rojo ni el del bs4.
 Checkboxes: unchecked: no se ven.
 
-= Behaviors
+== TableListView ==
+* función extractHeaders
+* Paginador no sale bien el layout/css. Añadir el pager como en simplelistview
 
 DateInput => SpanishDateInput. Definir campo date_es
 

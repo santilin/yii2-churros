@@ -195,3 +195,50 @@
 .grid-view.isbs4 .grid-header > .pagination {
 	flex: 1;
 }
+
+/* TABLE LIST VIEW */
+.table-list-view .tlv-table {
+	display:table;
+	width:100%;
+	border-collapse: collapse;
+}
+
+.table-list-view .summary {
+	display:table-caption;
+}
+.table-list-view .tlv-header {
+	display:table-header-group;
+	border: 1px solid black;
+	font-weight: bolder;
+}
+.table-list-view .tlv-header div {
+	display:table-cell;
+	padding: 0px 2px 0px 0px;
+	width:auto;
+}
+.table-list-view .tlv-header div:first-child {
+	display:table-cell;
+	padding: 2px 2px;
+	width:auto;
+}
+.table-list-view .tlv-row {
+	display:table-row;
+}
+.table-list-view .tlv-field {
+	width:auto;
+	display:table-cell;
+	padding: 1px 4px;
+}
+.table-list-view .tlv-number {
+	text-align: right;
+}
+.table-list-view .tlv-date {
+	width: 10ch;
+}
+.table-list-view ul.pagination {
+	margin: 0px 0px 3px 0px;
+}
+.table-list-view .summary div div {
+	margin-right: 10px;
+	flex-grow:1;
+}
