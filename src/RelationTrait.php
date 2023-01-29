@@ -202,21 +202,24 @@ trait RelationTrait
      * @return bool
      * @throws Exception
      */
-    public function saveAll(bool $runValidation = true, bool $in_trans = false)
+    public function saveAll(bool $runValidation = true)
     {
-        if( !$in_trans ) {
+		$must_commit = false;
+		$trans = $this->getDb()->transaction();
+		if( !$trans ) {
 			$trans = $this->getDb()->beginTransaction();
+			$must_commit = true;
 		}
 		$isNewRecord = $this->isNewRecord;
         try {
             if ($this->save($runValidation)) {
-				if( $this->saveRelated($in_trans) ) {
-					if( !$in_trans ) {
+				if( $this->saveRelated() ) {
+					if( $must_commit ) {
 						$trans->commit();
 					}
 					return true;
 				} else {
-					if( !$in_trans ) {
+					if( $must_commit ) {
 						$trans->rollback();
 					}
                     $this->isNewRecord = $isNewRecord;
@@ -226,7 +229,7 @@ trait RelationTrait
                 return false;
             }
 		} catch (\yii\db\IntegrityException $e) {
-			if( !$in_trans ) {
+			if( $must_commit ) {
 				$trans->rollBack();
 			}
             $this->isNewRecord = $isNewRecord;
@@ -235,7 +238,7 @@ trait RelationTrait
         }
     }
 
-    public function saveRelated(bool $in_trans ): bool
+    public function saveRelated(): bool
     {
 		$success = true;
  		$isNewRecord = $this->isNewRecord;

@@ -64,11 +64,9 @@ class DetailCrudController extends CrudController
 			$relations = [];
 		}
 		if ($model->loadAll(Yii::$app->request->post(), $relations) ) {
-			if( $this->saveAll('create', $model) ) {
-				if( $this->afterSave('create', $model, $params) ) {
-					$this->showFlash('create', $model);
-					return $this->whereToGoNow('create', $model);
-				}
+			if( $model->saveAll(true) ) {
+				$this->showFlash('create', $model);
+				return $this->whereToGoNow('create', $model);
 			}
 		}
 		return $this->render('create', [
@@ -102,13 +100,13 @@ class DetailCrudController extends CrudController
 	}
 
 
-	protected function saveAll(string $context, $model, bool $in_trans = false): bool
-	{
-		if( $this->master_model && $model->getIsNewRecord() ) {
-			$model->setAttribute( $model->getRelatedFieldForModel($this->master_model), $this->master_model->getPrimaryKey());
-		}
-		return $model->saveAll();
-	}
+// 	protected function saveAll(string $context, $model): bool
+// 	{
+// 		if( $this->master_model && $model->getIsNewRecord() ) {
+// 			$model->setAttribute( $model->getRelatedFieldForModel($this->master_model), $this->master_model->getPrimaryKey());
+// 		}
+// 		return $model->saveAll();
+// 	}
 
 	public function actionRoute($action_id = null, $model = null)
 	{

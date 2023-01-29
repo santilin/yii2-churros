@@ -29,11 +29,9 @@ trait ReportsControllerTrait
 			$relations = [];
 		}
 		if ($model->loadAll(Yii::$app->request->post(), $relations) ) {
-			if( $this->saveAll('create', $model) ) {
-				if( $this->afterSave('create', $model, $params) ) {
-					$this->showFlash('create', $model);
-					return $this->whereToGoNow('create', $model);
-				}
+			if( $model->saveAll(true) ) {
+				$this->showFlash('create', $model);
+				return $this->whereToGoNow('create', $model);
 			}
 		}
 		return $this->render('create', [
@@ -70,10 +68,8 @@ trait ReportsControllerTrait
 		$report->decodeValue();
 		$report->load($params);
 		$report->encodeValue();
-		if( $this->saveAll('update', $report) ) {
-			if( $this->afterSave('update', $report, $params) ) {
-				$this->showFlash('update', $report);
-			}
+		if( $model->saveAll('update', $report) ) {
+			$this->showFlash('update', $report);
 		}
 		try {
 			return $this->render('report', [

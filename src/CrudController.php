@@ -269,7 +269,7 @@ class CrudController extends \yii\web\Controller
 
 	protected function whereToGoNow($from, $model)
 	{
-		$returnTo = Yii::$app->request->getBodyParam('returnTo');
+		$returnTo = Yii::$app->request->post('returnTo');
 		if( !$returnTo ) {
 			$returnTo = Yii::$app->request->queryParams['returnTo']??null;
 		}
@@ -283,10 +283,10 @@ class CrudController extends \yii\web\Controller
 				goto redirect;
 			}
 		}
-		$referrer = Yii::$app->request->post("_form_referrer");
-		if ( $referrer ) {
-			return $this->redirect($referrer);
-		}
+// 		$referrer = Yii::$app->request->post("_form_referrer");
+// 		if ( $referrer ) {
+// 			return $this->redirect($referrer);
+// 		}
 		if ($from == 'update') {
 			$redirect = ['view', 'id' => $model->getPrimaryKey()];
 		} else if ($from == 'create') {
