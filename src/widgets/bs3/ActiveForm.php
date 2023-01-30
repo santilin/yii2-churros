@@ -121,8 +121,11 @@ class ActiveForm extends Bs3ActiveForm
 		'short' => [
 			'1col' => [
 				'horizontalCssClasses' => [
-					'label' => 'col-sm-3',
-					'wrapper' => 'col-sm-2',
+					'offset' => 'col-xs-offset-0 col-sm-offset-1 col-md-offset-2 col-lg-offset-2',
+					'label' => 'col-xs-12 col-sm-2 col-md-2 col-lg-2',
+					'wrapper' => 'col-xs-7 col-sm-2 col-md-2 col-lg-2',
+					'error' => '',
+					'hint' => 'col-xs-0 col-sm-2 col-md-3 col-lg-3',
 				]
 			],
 			'2cols' => [
