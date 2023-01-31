@@ -35,7 +35,7 @@ class DetailCrudController extends CrudController
 	public function actionIndex()
 	{
  		$params = Yii::$app->request->queryParams;
-		$searchModel = $this->findModel(null,null,'search');
+		$searchModel = $this->createSearchModel();
 		if( $this->master_model ) {
 			$params[$searchModel->formName()][$searchModel->getRelatedFieldForModel($this->master_model)]
 				= $this->master_model->getPrimaryKey();
@@ -54,7 +54,7 @@ class DetailCrudController extends CrudController
 	public function actionCreate()
 	{
 		$params = Yii::$app->request->queryParams;
-		$model = $this->findModel(null);
+		$model = $this->findFormModel(null);
 		if( $this->master_model ) {
 			$model->setAttribute( $model->getRelatedFieldForModel($this->master_model), $this->master_model->getPrimaryKey());
 		}
@@ -65,7 +65,7 @@ class DetailCrudController extends CrudController
 		}
 		if ($model->loadAll(Yii::$app->request->post(), $relations) ) {
 			if( $model->saveAll(true) ) {
-				$this->showFlash('create', $model);
+				$this->addSuccessFlashes('create', $model);
 				return $this->whereToGoNow('create', $model);
 			}
 		}
@@ -78,7 +78,7 @@ class DetailCrudController extends CrudController
 
 	public function indexDetails($master, $params, $query = null)
 	{
-		$detail = $this->findModel(null,null,'search');
+		$detail = $this->createSearchModel();
  		$params[$detail->formName()][$detail->getRelatedFieldForModel($master)]
  				= $master->getPrimaryKey();
 		return $this->renderAjax('_detail_grid', [

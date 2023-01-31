@@ -17,7 +17,6 @@ use santilin\churros\helpers\AppHelper;
 class CrudController extends \yii\web\Controller
 {
 	protected $allowedActions = [];
-	public $onlyMine = false;
 
 	const MSG_NO_ACTION = 'The action on {La} {title} <a href="{model_link}">{record_medium}</a> has been successful.';
 	const MSG_CREATED = '{La} {title} <a href="{model_link}">{record_medium}</a> has been successfully created.';
@@ -72,9 +71,6 @@ class CrudController extends \yii\web\Controller
 	{
 		$params = Yii::$app->request->queryParams;
 		$searchModel = $this->createSearchModel();
-		if( $this->onlyMine ) {
-			$params['onlyMine'] = $this->onlyMine;
-		}
 		$params = $this->changeActionParams($params, 'index', $searchModel);
 		return $this->render('index', [
 			'searchModel' => $searchModel,
@@ -90,7 +86,7 @@ class CrudController extends \yii\web\Controller
 	public function actionView($id)
 	{
 		$params = Yii::$app->request->queryParams;
-		$model = $this->findModel($id, null, 'view', $params);
+		$model = $this->findModel($id, $params);
 		return $this->render('view', [
 			'model' => $model,
 			'extraParams' => $this->changeActionParams($params, 'view', $model)
@@ -105,7 +101,7 @@ class CrudController extends \yii\web\Controller
 	public function actionCreate()
 	{
 		$params = Yii::$app->request->queryParams;
-		$model = $this->findModel(null, null, 'create', $params);
+		$model = $this->findFormModel(null, null, 'create', $params);
 		if (isset($_POST['_form_relations']) ) {
 			$relations = explode(",", $_POST['_form_relations']);
 		} else {
@@ -136,7 +132,7 @@ class CrudController extends \yii\web\Controller
 		if (Yii::$app->request->post('_asnew') != 0) {
 			$id = Yii::$app->request->post('_asnew');
 		}
-		$model = $this->findModel($id, null, 'duplicate', $params);
+		$model = $this->findFormModel($id, null, 'duplicate', $params);
 		$model->setDefaultValues(true); // duplicating
 
 		if (isset($_POST['_form_relations']) ) {
@@ -167,7 +163,7 @@ class CrudController extends \yii\web\Controller
 	public function actionUpdate($id)
 	{
 		$params = Yii::$app->request->queryParams;
-		$model = $this->findModel($id, null, 'update', $params);
+		$model = $this->findFormModel($id, null, 'update', $params);
 
 		if (isset($_POST['_form_relations']) ) {
 			$relations = explode(",", $_POST['_form_relations']);
@@ -193,7 +189,7 @@ class CrudController extends \yii\web\Controller
 	*/
 	public function actionDelete($id)
 	{
-		$model = $this->findModel($id, null, 'delete');
+		$model = $this->findFormModel($id, null, 'delete');
 		if( YII_ENV_DEV ) {
 			$model->deleteWithRelated();
 			$this->addSuccessFlashes('delete', $model);
@@ -220,7 +216,7 @@ class CrudController extends \yii\web\Controller
 	public function actionPdf($id)
 	{
 		$params = Yii::$app->request->queryParams;
-		$model = $this->findModel($id, null, 'view', $params);
+		$model = $this->findModel($id, $params);
 		if( YII_DEBUG ) {
             Yii::$app->getModule('debug')->instance->allowedIPs = [];
         }
@@ -399,7 +395,8 @@ redirect:
 	// Ajax
 	public function actionRawModel($id)
 	{
-		$model = $this->findModel($id, null, 'view');
+		$params = Yii::$app->request->queryParams;
+		$model = $this->findModel($id, $params);
 		if( $model ) {
             return json_encode($model->getAttributes());
         } /// @todo else

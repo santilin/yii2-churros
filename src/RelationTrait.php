@@ -205,7 +205,7 @@ trait RelationTrait
     public function saveAll(bool $runValidation = true)
     {
 		$must_commit = false;
-		$trans = $this->getDb()->transaction();
+		$trans = $this->getDb()->getTransaction();
 		if( !$trans ) {
 			$trans = $this->getDb()->beginTransaction();
 			$must_commit = true;

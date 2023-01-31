@@ -8,6 +8,7 @@ use santilin\churros\ChurrosAsset;
 class TaxonomyInput extends \yii\widgets\InputWidget
 {
 	public $taxonomy;
+	public $showCode = true;
 	public $input_id;
 	protected $drop_ids;
 
@@ -32,7 +33,11 @@ class TaxonomyInput extends \yii\widgets\InputWidget
 			$html .= "<td>{$level['title']}</td>";
 		}
 		$html .= "</tr><tr><td>";
-		$html .= Html::activeInput('text', $this->model, $this->attribute, $this->options);
+		if( $this->showCode ) {
+			$html .= Html::activeInput('text', $this->model, $this->attribute, $this->options);
+		} else {
+			$html .= Html::activeHiddenInput($this->model, $this->attribute);
+		}
 		$html .= '</td><td>';
         $options = $this->options;
         $name = $options['name']??Html::getInputName($this->model, $this->attribute);

@@ -62,21 +62,9 @@ class CrudRbacAccessRule extends AccessRule
 				break;
 		}
 		if( $this->module ) {
-			if( $user->can($this->module . ".$perm.own" ) ) {
-				if( $action->controller->hasProperty('onlyMine') ) {
-					$action->controller->onlyMine = true;
-				}
-				return true;
-			}
 			if( $user->can($this->module . ".$perm" ) ) {
 				return true;
 			}
-		}
-		if( $user->can("$perm.own" ) ) {
-			if( $action->controller->hasProperty('onlyMine') ) {
-				$action->controller->onlyMine = true;
-			}
-			return true;
 		}
 		if( $user->can($perm) ) {
 			return true;
@@ -84,6 +72,6 @@ class CrudRbacAccessRule extends AccessRule
 		return false;
     }
 
-}
+} // class
 
 

@@ -20,7 +20,7 @@ trait EmailSenderModelTrait
 		$sent = false;
 		$sent_message = '';
 		Yii::$app->mailer->on(\yii\mail\BaseMailer::EVENT_AFTER_SEND,
-			function(\yii\mail\MailEvent $event) use (&$sent) {
+			function(\yii\mail\MailEvent $event) use ($sent) {
 				$sent = $event->isSuccessful;
 				if( !$event->isSuccessful  ) {
 					Yii::$app->mailer->saveMessage($event->message);
@@ -32,12 +32,20 @@ trait EmailSenderModelTrait
 		}
 		$from = $email_params['from']??AppHelper::yiiparam('adminEmail');
 		$to = (array)$to;
+		if( AppHelper::yiiparam('ccEmailTo') ) {
+			if( !array_search(AppHelper::yiiparam('ccEmailTo'), $to) ) {
+				$to[] = AppHelper::yiiparam('ccEmailTo');
+			}
+		}
+		if( YII_ENV_DEV ) {
+			$subject = "[dev:" . reset($to) . "]$subject";
+		}
 		try {
 			$composed = Yii::$app->mailer
-				->compose( [ 'html' => $view_name, 'text' => "text/$view_name" ], $view_params)
+				->compose( [ 'html' => $view_name, 'text' => "text/$view_name" ], $view_params )
 				->setFrom($from)
 				->setTo( YII_ENV_DEV ? [AppHelper::yiiparam('develEmailTo')] : $to )
-				->setSubject($subject);
+				->setSubject( $subject);
 			$sent = $composed->send();
 		} catch ( \Swift_TransportException $e ) {
 			$sent_message = $e->getMessage();
