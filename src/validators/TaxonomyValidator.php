@@ -65,8 +65,8 @@ class TaxonomyValidator extends Validator
 		if( $mask != '' ) {
 			$mask_groups = $this->maskToGroups($mask, $dot);
 			$regexp_dot = $dot;
-			if( $dot == '.' ) {
-				$regexp_dot = '\\.';
+			if( strpos('.*()[]', $dot) !== FALSE ) {
+				$regexp_dot = "\\$dot";
 			}
 			$reg_exps = [];
 			for( $i=0; $i<count($mask_groups); ++$i ) {
@@ -91,7 +91,7 @@ class TaxonomyValidator extends Validator
 		}
 		// Check taxonomy values
 		$input_values = explode($dot, $value);
-		$ng = min(count($mask_groups), count($this->taxonomy['levels']));
+		$ng = min(count($mask_groups), count($this->taxonomy['levels']), count($input_values));
 		for( $l=0; $l< $ng; ++$l) {
 			$value = $input_values[$l];
 			$taxon_values = $this->getTaxonomyValues($input_values, $l);

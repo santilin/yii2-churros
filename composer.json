@@ -16,11 +16,13 @@
         }
     ],
     "require": {
-        "yiisoft/yii2": "~2.0.0"
+        "php": ">=5.4.0",
+        "yiisoft/yii2": "~2.0.0",
+		"buttflattery/yii2-formwizard": "@dev"
     },
     "autoload": {
         "psr-4": {
-            "santilin\\churros\\": "src/"
+            "santilin\\churros\\": "//src"
         }
     },
 	"extra": {
