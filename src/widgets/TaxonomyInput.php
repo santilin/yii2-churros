@@ -9,6 +9,7 @@ class TaxonomyInput extends \yii\widgets\InputWidget
 {
 	public $taxonomy;
 	public $showCode = true;
+	public $showLabel = false;
 	public $input_id;
 	protected $drop_ids;
 
@@ -33,6 +34,9 @@ class TaxonomyInput extends \yii\widgets\InputWidget
 			$html .= "<td>{$level['title']}</td>";
 		}
 		$html .= "</tr><tr><td>";
+		if( !$this->showLabel ) {
+			$this->options['labelOptions']['class'] = 'hidden';
+		}
 		if( $this->showCode ) {
 			$html .= Html::activeInput('text', $this->model, $this->attribute, $this->options);
 		} else {

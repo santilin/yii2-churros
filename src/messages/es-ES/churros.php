@@ -104,6 +104,10 @@ return [
 	'Total <b>{count, number}</b> {count, plural, one{item} other{items}}.' => 'Total <b>{count, number}</b> {count, plural, one{item} other{items}}.',
 
 	'The value \'{0}\' does not exist in the category \'{1}\'' => 'El valor \'{0}\' no existe en la categoría \'{1}\'',
-	"{attribute} '{value}' does not match the mask {mask}." => "El valor '{value}' de '{attribute}' no concuerda con el formato {mask}"
+	"{attribute} '{value}' does not match the mask {mask}." => "El valor '{value}' de '{attribute}' no concuerda con el formato {mask}",
 
+	// WizardForm
+	'Next' => 'Siguiente',
+	'Previous' => 'Anterior',
+	'Finish' => 'Terminar',
 ];
