@@ -43,7 +43,7 @@ class FileUploadBehavior extends \yii\base\Behavior
     protected $file;
 
     protected $oldPath;
-    
+
     /**
      * @inheritdoc
      */
@@ -76,8 +76,8 @@ class FileUploadBehavior extends \yii\base\Behavior
 
         if ($this->file instanceof UploadedFile) {
             $this->owner->{$this->attribute} = $this->file;
-        } 
-        
+        }
+
     }
 
     /**
@@ -88,28 +88,28 @@ class FileUploadBehavior extends \yii\base\Behavior
     public function beforeSave()
     {
 		$this->oldPath = null;
-        if ($this->file instanceof UploadedFile) {
-            if (true !== $this->owner->isNewRecord) {
-                /** @var ActiveRecord $oldModel */
-                $oldModel = $this->owner->findOne($this->owner->primaryKey);
-                $behavior = static::getInstance($oldModel, $this->attribute);
-                $behavior->cleanFiles();
-            }
+		if ($this->file instanceof UploadedFile) {
+			if (true !== $this->owner->isNewRecord) {
+				/** @var ActiveRecord $oldModel */
+				$oldModel = $this->owner->findOne($this->owner->primaryKey);
+				$behavior = static::getInstance($oldModel, $this->attribute);
+				$behavior->cleanFiles();
+			}
 			$this->owner->{$this->attribute} = implode('.',
-                  array_filter([$this->file->baseName, $this->file->extension]));
+					array_filter([$this->file->baseName, $this->file->extension]));
 
 // 			$this->owner->{$this->attribute} = $this->getUploadedFieldValue($this->attribute);
-        } else {
+		} else {
 			if( $this->owner->{$this->attribute} === '1' ) {
 				$oldvalue = ArrayHelper::getValue($this->owner->oldAttributes, $this->attribute, null);
 				$this->oldPath = $this->resolvePath($oldvalue);
 				$this->owner->{$this->attribute} = null;
 			} else if ( false === $this->owner->isNewRecord && empty($this->owner->{$this->attribute})) {
-                $this->owner->{$this->attribute} = ArrayHelper::getValue($this->owner->oldAttributes, $this->attribute,
-                    null);
-            }
-        }
-    }
+				$this->owner->{$this->attribute} = ArrayHelper::getValue($this->owner->oldAttributes, $this->attribute,
+					null);
+			}
+		}
+	}
 
     /**
      * Returns behavior instance for specified object and attribute
