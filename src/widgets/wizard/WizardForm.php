@@ -10,6 +10,7 @@ use yii\bootstrap4\ActiveForm as BS4ActiveForm;
 class WizardForm extends FormWizard
 {
 	private $_hiddenFields = [];
+	private $_enctype_multipart = false;
 	public $formInfoOptions = [
 		'class' => 'border-bottom border-gray pb-2'
 	];
@@ -38,7 +39,8 @@ class WizardForm extends FormWizard
         }
 
         //start ActiveForm tag
-		$form = $activeForm::begin($this->formOptions);
+		$form = $activeForm::begin();
+		$form->options = $this->formOptions;
 
         //start container tag
         echo Html::beginTag('div', ['id' => $wizardContainerId]);
@@ -47,6 +49,9 @@ class WizardForm extends FormWizard
         echo $this->createFormWizard();
 
         //sct output all the collected hidden_fields
+        if( $this->_enctype_multipart ) {
+			$form->options['enctype'] = 'multipart/form-data';
+		}
         foreach( $this->_hiddenFields as $hf ) {
 			echo $hf;
 		}
@@ -131,6 +136,9 @@ class WizardForm extends FormWizard
     {
 
 		list($form, $hidden_fields, $form_fields) = $stepConfig['form_parts'];
+		if( !empty($form->options['enctype'])) {
+			$this->_enctype_multipart = true;
+		}
 		$this->_hiddenFields = array_merge($this->_hiddenFields, $hidden_fields);
 		$html = '';
 		$html .= $form->layoutForm($form_fields);
