@@ -32,13 +32,6 @@ trait EmailSenderModelTrait
 		}
 		$from = $email_params['from']??AppHelper::yiiparam('adminEmail');
 		$to = (array)$to;
-		if( !YII_ENV_TEST ) {
-			if( AppHelper::yiiparam('ccEmailTo') ) {
-				if( !array_search(AppHelper::yiiparam('ccEmailTo'), $to) ) {
-					$to[] = AppHelper::yiiparam('ccEmailTo');
-				}
-			}
-		}
 		if( YII_ENV_DEV ) {
 			$subject = "[dev:" . reset($to) . "]$subject";
 		}
