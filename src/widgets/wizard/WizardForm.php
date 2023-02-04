@@ -12,7 +12,7 @@ class WizardForm extends FormWizard
 	private $_hiddenFields = [];
 	private $_enctype_multipart = false;
 	public $formInfoOptions = [
-		'class' => 'border-bottom border-gray pb-2'
+		'class' => 'wizard-form border-bottom border-gray pb-2'
 	];
 
 	public function run()
