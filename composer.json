@@ -22,7 +22,7 @@
     },
     "autoload": {
         "psr-4": {
-            "santilin\\churros\\": "//src"
+            "santilin\\churros\\": "src/"
         }
     },
 	"extra": {
