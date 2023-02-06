@@ -234,6 +234,17 @@ class FileUploadBehavior extends \yii\base\Behavior
         $this->owner->trigger(static::EVENT_AFTER_FILE_SAVE);
     }
 
+    public function getUploadedFormFileUrl($attribute)
+    {
+		if ($this->owner->{$this->attribute} instanceof UploadedFile) {
+			$file = $this->owner->{$this->attribute};
+			$raw_image = base64_encode(file_get_contents($file->tempName));
+			return 'data:image/png;base64,' . $raw_image;
+		} else {
+			return $this->getUploadedFilePath($attribute);
+		}
+    }
+
     /**
      * Returns file path for attribute.
      *
@@ -242,11 +253,10 @@ class FileUploadBehavior extends \yii\base\Behavior
      */
     public function getUploadedFilePath($attribute)
     {
-        $behavior = static::getInstance($this->owner, $attribute);
-
         if (!$this->owner->{$attribute}) {
             return '';
         }
+        $behavior = static::getInstance($this->owner, $attribute);
 
         return $behavior->resolvePath($behavior->privateFilePath . $behavior->fileAttrValue);
     }
