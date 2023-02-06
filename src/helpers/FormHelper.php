@@ -536,7 +536,11 @@ class FormHelper
 			}
 			foreach($views as $kv => $view ) {
 				if( $_nv-- == 0 ) {
-					return [$kv, $view];
+					if( is_array($view) ) {
+						return [$kv, $view['title']];
+					} else {
+						return [$kv, $view];
+					}
 				}
 			}
 		} else {
