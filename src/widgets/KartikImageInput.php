@@ -46,7 +46,9 @@ class KartikImageInput extends \kartik\file\FileInput
 			break;
 		case self::ATTR_URL_UPLOAD_BEHAVIOR:
  			$img_data = $this->model->getUploadedFormFileUrl($this->attribute);
-			$this->pluginOptions['initialPreview'][] = $img_data;
+ 			if( $img_data ) {
+				$this->pluginOptions['initialPreview'][] = $img_data;
+			}
 			break;
 		case self::ATTR_URL_SERIALIZED:
 			$serialized = Html::getAttributeValue($this->model, $this->attribute);
