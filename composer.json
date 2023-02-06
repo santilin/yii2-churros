@@ -1,7 +1,7 @@
 {
     "name": "santilin/yii2-churros",
     "type": "yii2-extension",
-    "description": "Parar realizar programas como churros",
+    "description": "Para realizar programas como churros",
     "keywords": ["yii2","extension"],
     "license": "LGPL-3.0+",
 	"homepage": "http://github.com/santilin/yii2-churros",
