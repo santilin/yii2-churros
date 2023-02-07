@@ -2,10 +2,12 @@
 
 namespace santilin\churros\widgets;
 use yii\helpers\{ArrayHelper,Html};
+use santilin\churros\helpers\FormHelper;
 
 trait ActiveFormTrait
 {
 	public $fieldsLayout;
+	public $formLayout;
 
 	public function layoutForm($form_fields, array $buttons = []): string
 	{
@@ -16,37 +18,29 @@ trait ActiveFormTrait
 			// If not an array, tranform string to array
 			$layout_parts = explode(':', $this->fieldsLayout);
 			$buttons_up = in_array('buttons_up', $layout_parts);
-			$layout = $layout_parts[0];
+			$this->formLayout = $layout_parts[0];
 			$this->fieldsLayout = [];
 			if( $buttons_up ) {
-				$this->fieldsLayout[] = [ 'type' => 'buttons', 'buttons' => $buttons ];
+				$this->fieldsLayout[] = [ 'type' => 'buttons', 'buttons' => $buttons, 'layout' => '1col' ];
 			}
-			$this->fieldsLayout[] = [ 'type' => $layout, 'fields' => array_keys($form_fields) ];
+			$this->fieldsLayout[] = [ 'type' => $this->formLayout, 'fields' => array_keys($form_fields) ];
 			if( !$buttons_up ) {
-				$this->fieldsLayout[] = [ 'type' => 'buttons', 'buttons' => $buttons ];
+				$this->fieldsLayout[] = [ 'type' => 'buttons', 'buttons' => $buttons, 'layout' => '1col' ];
 			}
 		}
-		return $this->layoutFields($this->fieldsLayout, $form_fields, $buttons);
+		return $this->layoutFields($this->fieldsLayout, $form_fields);
 	}
 
-	protected function layoutFields(array $form_layout, array $form_fields, array $buttons = []): string
+	protected function layoutFields(array $rows_layout, array $form_fields,
+		array $buttons = []): string
 	{
 		$ret = '';
-		foreach($form_layout as $lk => $layout ) {
+		foreach($rows_layout as $lk => $layout ) {
 			switch( $layout['type'] ) {
 			case 'buttons':
 				$ret .= '<div class="clearfix row">';
-				$ret .= '<div class="' . implode(' ', (array)self::FIELD_HORIZ_CLASSES['default']['1col']['horizontalCssClasses']['offset']) . '">';
-				if( empty($layout['buttons']) ) {
-					$ret .= $this->layoutButtons($buttons);
-				} else {
-					$layout_buttons = [];
-					foreach( $buttons as $bkey => $b ) {
-						$layout_buttons[$bkey] = $b;
-					}
-					$ret .= $this->layoutButtons($layout_buttons);
-				}
-				$ret .= '</div></div><!-- buttons -->' .  "\n";
+				$ret .= $this->layoutButtons($layout['buttons'], $layout['layout']??$this->formLayout);
+				$ret .= '</div><!-- buttons -->' .  "\n";
 				break;
 			case '1col':
 			case '1cols':
@@ -138,5 +132,18 @@ trait ActiveFormTrait
 	{
 		return self::FIELD_HORIZ_CLASSES[$field_layout][$row_layout];
 	}
+
+	protected function layoutButtons($buttons, $layout)
+	{
+		$offset = static::FIELD_HORIZ_CLASSES['default'][$layout]['horizontalCssClasses']['offset'];
+		$wrapper = static::FIELD_HORIZ_CLASSES['default'][$layout]['horizontalCssClasses']['wrapper'];
+		$buttons = FormHelper::displayButtons($buttons);
+		return <<<html
+<div class="$offset $wrapper">
+$buttons
+</div><!--buttons form-group-->
+html;
+	}
+
 
 } // form

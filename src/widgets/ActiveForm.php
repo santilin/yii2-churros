@@ -3,7 +3,6 @@ namespace santilin\churros\widgets;
 
 use yii\helpers\{ArrayHelper,Html};
 use yii\bootstrap4\ActiveForm as Bs4ActiveForm;
-use santilin\churros\helpers\FormHelper;
 use santilin\churros\widgets\ActiveFormTrait;
 
 // https://getbootstrap.com/docs/4.1/components/forms/
@@ -182,37 +181,6 @@ class ActiveForm extends Bs4ActiveForm
 // 			'field' => 'form-group row'
 		]
     ];
-
-
-	public function layoutButtons($buttons)
-	{
-		switch($this->layout) {
-		case '2cols':
-			$classes = 'col-sm-10';
-			$ret = <<<html
-<div class="form-group row"><div class="$classes">
-html;
-			$ret .= FormHelper::displayButtons($buttons);
-			$ret .= <<<html
-</div></div><!--buttons form-group-->
-html;
-			break;
-		default:
-// 		case '1col':
-//      case 'horizontal':
-// 		case 'inline':
-			$classes = 'col-sm-10';
-			$ret = <<<html
-<div class="form-group row"><div class="$classes">
-html;
-			$ret .= FormHelper::displayButtons($buttons);
-			$ret .= <<<html
-</div></div><!--buttons form-group-->
-html;
-			break;
-		}
-		return $ret;
-	}
 
 	protected function setFieldClasses(array &$form_fields, string $form_field_name, string $row_layout)
 	{

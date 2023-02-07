@@ -3,7 +3,6 @@ namespace santilin\churros\widgets\bs3;
 
 use yii\helpers\Html;
 use yii\bootstrap\ActiveForm as Bs3ActiveForm;
-use santilin\churros\helpers\FormHelper;
 use santilin\churros\widgets\ActiveFormTrait;
 // https://getbootstrap.com/docs/3.4/css/#forms
 // https://getbootstrap.com/docs/3.4/css/#grid
@@ -17,10 +16,10 @@ class ActiveForm extends Bs3ActiveForm
 			'1col' => [
 				'horizontalCssClasses' => [
 					'offset' => 'col-xs-offset-1 col-sm-offset-3 col-md-offset-2 col-lg-offset-2',
-					'label' => 'col-xs-12 col-sm-3 col-md-2 col-lg-2',
-					'wrapper' => 'col-xs-12 col-sm-9 col-md-10 col-lg-10',
+					'label' => 'col-xs-11 col-sm-3 col-md-2 col-lg-2',
+					'wrapper' => 'col-xs-11 col-sm-9 col-md-10 col-lg-10',
 					'error' => '',
-					'hint' => 'col-xs-0 col-sm-3 col-md-3 col-lg-3',
+					'hint' => 'col-xs-1 col-sm-3 col-md-3 col-lg-3',
 				]
 			],
 			'2cols' => [
@@ -166,37 +165,6 @@ class ActiveForm extends Bs3ActiveForm
 // 			'hint' => 'col-sm-3 col-xs-3',
 		]
     ];
-
-
-	public function layoutButtons($buttons)
-	{
-		switch($this->layout) {
-		case '2cols':
-			$classes = 'col-md-offset-3 col-sm-9';
-			$ret = <<<html
-<div class="form-group buttons"><div class="$classes">
-html;
-			$ret .= FormHelper::displayButtons($buttons);
-			$ret .= <<<html
-</div></div><!--buttons form-group-->
-html;
-			break;
-		default:
-// 		case 'horizontal':
-// 		case 'inline':
-// 		case '1col':
-			$classes = 'col-md-offset-3 col-sm-9';
-			$ret = <<<html
-<div class="form-group buttons"><div class="$classes">
-html;
-			$ret .= FormHelper::displayButtons($buttons);
-			$ret .= <<<html
-</div></div><!--buttons form-group-->
-html;
-			break;
-		}
-		return $ret;
-	}
 
 	protected function setFieldClasses(array &$form_fields, string $form_field_name, string $row_layout)
 	{
