@@ -100,14 +100,15 @@ class CrudController extends \yii\web\Controller
 		*/
 	public function actionCreate()
 	{
-		$params = Yii::$app->request->queryParams;
+		$req = Yii::$app->request;
+		$params = $req->queryParams;
 		$model = $this->findFormModel(null, null, 'create', $params);
 		if (isset($_POST['_form_relations']) ) {
 			$relations = explode(",", $_POST['_form_relations']);
 		} else {
 			$relations = [];
 		}
-		if ($model->loadAll(Yii::$app->request->post(), $relations) ) {
+		if ($model->loadAll($req->post(), $relations) ) {
 			if( $model->saveAll(true) ) {
 				$this->addSuccessFlashes('create', $model);
 				return $this->whereToGoNow('create', $model);
@@ -128,10 +129,8 @@ class CrudController extends \yii\web\Controller
 		*/
 	public function actionDuplicate($id)
 	{
-		$params = Yii::$app->request->queryParams;
-		if (Yii::$app->request->post('_asnew') != 0) {
-			$id = Yii::$app->request->post('_asnew');
-		}
+		$req = Yii::$app->request;
+		$params = $req->queryParams;
 		$model = $this->findFormModel($id, null, 'duplicate', $params);
 		$model->setDefaultValues(true); // duplicating
 
@@ -140,7 +139,7 @@ class CrudController extends \yii\web\Controller
 		} else {
 			$relations = [];
 		}
-		if ($model->loadAll(Yii::$app->request->post(), $relations) ) {
+		if ($model->loadAll($req->post(), $relations) ) {
 			$model->setIsNewRecord(true);
 			$model->resetPrimaryKeys();
 			if( $model->saveAll(true) ) {
@@ -162,7 +161,8 @@ class CrudController extends \yii\web\Controller
 	 */
 	public function actionUpdate($id)
 	{
-		$params = Yii::$app->request->queryParams;
+		$req = Yii::$app->request;
+		$params = $req->queryParams;
 		$model = $this->findFormModel($id, null, 'update', $params);
 
 		if (isset($_POST['_form_relations']) ) {
@@ -170,7 +170,7 @@ class CrudController extends \yii\web\Controller
 		} else {
 			$relations = [];
 		}
-		if ($model->loadAll(Yii::$app->request->post(), $relations) ) {
+		if ($model->loadAll($req->post(), $relations) ) {
 			if( $model->saveAll(true) ) {
 				$this->addSuccessFlashes('update', $model);
 				return $this->whereTogoNow('update', $model);
