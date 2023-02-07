@@ -148,9 +148,8 @@ class ActiveForm extends Bs3ActiveForm
 					'error' => '',
 					'hint' => 'col-xs-12 col-sm-6 col-md-6 col-lg-6',
 				]
-// 				'options' => [ 'class' => 'control-group col-sm-2' ],
-			],
-		],
+			]
+		]
 	];
 
     public $fieldConfig = [
