@@ -9,7 +9,8 @@ class TaxonomyInput extends \yii\widgets\InputWidget
 {
 	public $taxonomy;
 	public $showCode = true;
-	public $hideFirstLabel = true;
+	public $hideFirstLabel = false;
+	public $taxonomyLevel = -1;
 	public $input_id;
 	protected $drop_ids;
 
@@ -30,7 +31,15 @@ class TaxonomyInput extends \yii\widgets\InputWidget
 			$this->options['id'] = Html::getInputId($this->model, $this->attribute);
 		}
         $html = '<table><tr><td></td>';
+		if( $this->taxonomyLevel <= 0 || $this->taxonomyLevel > count($this->taxonomy['levels']) ) {
+			$nlevels = count($this->taxonomy['levels']);
+		} else {
+			$nlevels = $this->taxonomyLevel;
+		}
         foreach( $levels as $k => $level) {
+			if( $k >= $nlevels )  {
+				break;
+			}
 			if( $k == 0 && $this->hideFirstLabel ) {
 				$html .= "<td></td>";
 			} else {
@@ -55,7 +64,6 @@ class TaxonomyInput extends \yii\widgets\InputWidget
 		$level0_values = $this->getLevelValues(0, $value);
 		$html .= Html::dropDownList("taxon_0_{$name}", $value, $level0_values, $options);
 		$html .= "</td>";
-        $nlevels = count($this->taxonomy['levels']);
         for( $l=1; $l<$nlevels; ++$l) {
 			$options['id'] = "taxon_{$l}_{$this->options['id']}";
 			$this->drop_ids[] = $options['id'];
