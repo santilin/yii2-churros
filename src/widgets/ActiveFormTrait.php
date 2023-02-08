@@ -11,19 +11,18 @@ trait ActiveFormTrait
 
 	public function layoutForm($form_fields, array $buttons = []): string
 	{
-		if( empty($this->fieldsLayout) || $this->fieldsLayout === 'inline' ) {
-			$this->fieldsLayout = "1col";
+		if( $this->formLayout == 'inline' || ($this->formLayout == '' && $this->layout == 'inline') ) {
+			$this->formLayout = 'inline';
 		}
-		if( is_string($this->fieldsLayout) ) {
-			// If not an array, tranform string to array
-			$layout_parts = explode(':', $this->fieldsLayout);
+		// horizontal layout
+		if( empty($this->fieldsLayout) ) {
+			$layout_parts = explode(':', $this->formLayout);
 			$buttons_up = in_array('buttons_up', $layout_parts);
-			$this->formLayout = $layout_parts[0];
 			$this->fieldsLayout = [];
 			if( $buttons_up ) {
 				$this->fieldsLayout[] = [ 'type' => 'buttons', 'buttons' => $buttons, 'layout' => '1col' ];
 			}
-			$this->fieldsLayout[] = [ 'type' => $this->formLayout, 'fields' => array_keys($form_fields) ];
+			$this->fieldsLayout[] = [ 'type' => $layout_parts[0], 'fields' => array_keys($form_fields) ];
 			if( !$buttons_up ) {
 				$this->fieldsLayout[] = [ 'type' => 'buttons', 'buttons' => $buttons, 'layout' => '1col' ];
 			}
@@ -136,7 +135,13 @@ trait ActiveFormTrait
 	protected function layoutButtons($buttons, $layout)
 	{
 		$offset = static::FIELD_HORIZ_CLASSES['default'][$layout]['horizontalCssClasses']['offset'];
+		if( is_array($offset) ) {
+			$offset = implode(' ', $offset);
+		}
 		$wrapper = static::FIELD_HORIZ_CLASSES['default'][$layout]['horizontalCssClasses']['wrapper'];
+		if( is_array($wrapper) ) {
+			$wrapper = implode(' ', $wrapper);
+		}
 		$buttons = FormHelper::displayButtons($buttons);
 		return <<<html
 <div class="$offset $wrapper">
