@@ -9,7 +9,7 @@ trait ActiveFormTrait
 	public $fieldsLayout;
 	public $formLayout;
 
-	public function layoutForm($form_fields, array $buttons = []): string
+	public function layoutForm(array $form_fields, array $buttons = []): string
 	{
 		if( $this->formLayout == 'inline' || ($this->formLayout == '' && $this->layout == 'inline') ) {
 			$this->formLayout = 'inline';
