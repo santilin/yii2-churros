@@ -1,6 +1,43 @@
 El botón borrar del grid de bs3 no sale rojo ni el del bs4.
 Checkboxes: unchecked: no se ven.
 
+== YII2
+=== Bugs
+==== Codeception
+Test: CrudOfertaCest. Cuando redirige de update a view, no se borra la aplicación y el componente 'view' se queda con _isPageEnded se queda a true
+
+/home/santilin/devel/yii2base/vendor/yiisoft/yii2/base/Controller.php
+    public function getView()
+    {
+        if ($this->_view === null) {
+            $this->_view = Yii::$app->getView();
+        }
+
+/home/santilin/devel/yii2base/vendor/yiisoft/yii2/base/Application.php
+    public function getView()
+    {
+        return $this->get('view');
+    }
+
+/home/santilin/devel/yii2base/vendor/yiisoft/yii2/base/Module.php
+	public function get($id, $throwException = true)
+    {
+        if (!isset($this->module)) {
+            return parent::get($id, $throwException);
+        }
+
+/home/santilin/devel/yii2base/vendor/yiisoft/yii2/di/ServiceLocator.php
+    public function get($id, $throwException = true)
+    {
+        if (isset($this->_components[$id])) {
+            return $this->_components[$id];
+        }
+
+
+/home/santilin/devel/yii2base/vendor/yiisoft/yii2/web/View.php
+    private function registerFile($type, $url, $options = [], $key = null)
+
+
 == TableListView ==
 * función extractHeaders
 * Paginador no sale bien el layout/css. Añadir el pager como en simplelistview
