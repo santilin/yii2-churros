@@ -54,7 +54,8 @@ trait EmailSenderModelTrait
 				$error_message = Yii::t('churros', 'Unable to send email to {email}', ['email' => array_pop($to) ]);
 			}
 			if( YII_ENV_DEV ) {
-				$error_message = $sent_message . '<br/>' . $error_message;
+				$m = $composed->getSwiftMessage();
+				$error_message = $sent_message . '<br/>' . $error_message . "<br/>" . $m;
 			}
 			$this->addError($view_name, $error_message);
 			$this->addError($view_name, Yii::t('churros', 'Please, send an email to {0} to get support', AppHelper::yiiparam('adminEmail')));
