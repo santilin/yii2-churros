@@ -255,7 +255,10 @@ class AppHelper
 
 	static public function hasPermission($perms, string $perm): bool
 	{
-		if( $perms === false ) {
+		if( $perm == '' ) {
+			return true;
+		}
+		if( $perms === false) {
 			return false;
 		}
 		return $perms === '' || strpos($perms, $perm) !== false;

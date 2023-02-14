@@ -45,7 +45,7 @@ trait ActiveFormTrait
 			case '1cols':
 				foreach( $layout['fields'] as $fldname ) {
  					$this->setFieldClasses($form_fields, $fldname, $layout['type']);
-					if( !empty($form_fields[$fldname])) {
+					if( array_key_exists($fldname, $form_fields)) {
 						$ret .= $form_fields[$fldname];
 					}
 				}

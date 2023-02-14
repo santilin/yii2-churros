@@ -3,6 +3,11 @@ Checkboxes: unchecked: no se ven.
 
 == YII2
 === Bugs
+
+==== bs4/ActiveForm
+getAttributeLabels called twice: breakpoint en
+/home/santilin/devel/yii2base/vendor/yiisoft/yii2-bootstrap4/src/ActiveField.php:553
+
 ==== Codeception
 Test: CrudOfertaCest. Cuando redirige de update a view, no se borra la aplicación y el componente 'view' se queda con _isPageEnded se queda a true
 

@@ -33,7 +33,7 @@ trait EmailSenderModelTrait
 		$from = $email_params['from']??AppHelper::yiiparam('adminEmail');
 		$to = (array)$to;
 		if( YII_ENV_DEV ) {
-			$subject = "[dev:" . reset($to) . "]$subject";
+			$subject = "[dev:to:" . reset($to) . "]$subject";
 		}
 		try {
 			$composed = Yii::$app->mailer
@@ -47,8 +47,6 @@ trait EmailSenderModelTrait
 		} catch( \Swift_RfcComplianceException $e ) {
 			$sent_message = $e->getMessage();
 		}
-				echo $composed->getSwiftMessage()->getBody(); die;
-				print_r(get_class_methods($m)); die;
 		if( !$sent ) {
 			if( count($to) > 1 ) {
 				$error_message = Yii::t('churros', 'Unable to send email to {email} and other {ndest} recipients', ['email' => array_pop($to), 'nemails' => count($to)]);
