@@ -47,6 +47,8 @@ trait EmailSenderModelTrait
 		} catch( \Swift_RfcComplianceException $e ) {
 			$sent_message = $e->getMessage();
 		}
+				echo $composed->getSwiftMessage()->getBody(); die;
+				print_r(get_class_methods($m)); die;
 		if( !$sent ) {
 			if( count($to) > 1 ) {
 				$error_message = Yii::t('churros', 'Unable to send email to {email} and other {ndest} recipients', ['email' => array_pop($to), 'nemails' => count($to)]);
@@ -54,7 +56,6 @@ trait EmailSenderModelTrait
 				$error_message = Yii::t('churros', 'Unable to send email to {email}', ['email' => array_pop($to) ]);
 			}
 			if( YII_ENV_DEV ) {
-				$m = $composed->getSwiftMessage();
 				$error_message = $sent_message . '<br/>' . $error_message . "<br/>" . $m;
 			}
 			$this->addError($view_name, $error_message);
