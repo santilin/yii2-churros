@@ -604,7 +604,11 @@ class FormHelper
 			$title = $button['title'];
 			$icon = $button['icon']??null;
 			if( $icon ) {
-				$title = "<i class=\"$icon\" aria-hidden=\"true\"></i> $title";
+				if( strpos($icon, '<i') !== FALSE ) {
+					$title = "$icon $title";
+				} else {
+					$title = "<i class=\"$icon\" aria-hidden=\"true\"></i> $title";
+				}
 			}
 			switch( $button['type'] ) {
 			case 'a':
