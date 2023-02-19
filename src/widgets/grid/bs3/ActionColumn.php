@@ -73,7 +73,7 @@ class ActionColumn extends \yii\grid\ActionColumn
 		$this->customButtons = []; // https://github.com/kartik-v/yii2-grid/issues/1047
     }
 
-        /**
+	/**
      * Initializes the default button rendering callback for single button.
      * @param string $name Button name as it's written in template
      * @param string $iconName The part of Bootstrap glyphicon class that makes it unique
