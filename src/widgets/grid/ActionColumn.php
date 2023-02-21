@@ -22,16 +22,16 @@ class ActionColumn extends \yii\grid\ActionColumn
     public $hAlign = 'none';
     public $iconClassPrefix = 'fa fa';
 
-    public function __construct()
+    public function __construct($config = [])
     {
-		parent::__construct();
-		if( isset($this->icons['eye-open']) ) {
+		parent::__construct($config);
+		if( !isset($this->icons['view']) && isset($this->icons['eye-open']) ) {
 			$this->icons['view'] = $this->icons['eye-open'];
 		}
-		if( isset($this->icons['pencil']) ) {
+		if( !isset($this->icons['update']) &&isset($this->icons['pencil']) ) {
 			$this->icons['update'] = $this->icons['pencil'];
 		}
-		if( isset($this->icons['trash']) ) {
+		if( !isset($this->icons['delete']) && isset($this->icons['trash']) ) {
 			$this->icons['delete'] = $this->icons['trash'];
 		}
 	}
