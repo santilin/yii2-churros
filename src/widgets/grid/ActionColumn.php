@@ -8,16 +8,33 @@
 namespace santilin\churros\widgets\grid;
 
 use Yii;
-use yii\helpers\Html;
+use yii\helpers\{Html};
 
 class ActionColumn extends \yii\grid\ActionColumn
 {
     public $template = '{view}&nbsp;{update}&nbsp;{delete}&nbsp;{duplicate}';
-    public $duplicateOptions = [];
     public $customButtons = [];
     public $crudPerms = null;
-    public $deleteOptions = [];
+    public $deleteOptions = [ 'class' => 'delete' ];
+	public $updateOptions = [ 'class' => 'update' ];
+    public $viewOptions = [ 'class' => 'view' ];
+    public $duplicateOptions = [ 'class' => 'duplicate' ];
     public $hAlign = 'none';
+    public $iconClassPrefix = 'fa fa';
+
+    public function __construct()
+    {
+		parent::__construct();
+		if( isset($this->icons['eye-open']) ) {
+			$this->icons['view'] = $this->icons['eye-open'];
+		}
+		if( isset($this->icons['pencil']) ) {
+			$this->icons['update'] = $this->icons['pencil'];
+		}
+		if( isset($this->icons['trash']) ) {
+			$this->icons['delete'] = $this->icons['trash'];
+		}
+	}
 
     /**
      * Initializes the default button rendering callbacks.
@@ -28,12 +45,14 @@ class ActionColumn extends \yii\grid\ActionColumn
         if( $this->crudPerms === null ) {
 			$this->crudPerms = 'CRUD2';
 		}
+		$options = $this->buttonOptions;
         if( strpos($this->crudPerms,'R') !== false ) {
 			if( isset($this->customButtons['view']) ) {
 				$this->buttons['view'] = $this->customButtons['view'];
 				unset( $this->customButtons['view'] );
 			} else {
-				$this->initDefaultButton('view', 'eye', [ 'title' => Yii::t('churros', 'View')]);
+				$this->initDefaultButton('view', 'view', array_merge(
+					[ 'title' => Yii::t('churros', 'View') ], $this->viewOptions));
 			}
 		}
         if( strpos($this->crudPerms,'U') !== false ) {
@@ -41,7 +60,8 @@ class ActionColumn extends \yii\grid\ActionColumn
 				$this->buttons['update'] = $this->customButtons['update'];
 				unset( $this->customButtons['update'] );
 			} else {
-				$this->initDefaultButton('update', 'pencil-alt', [ 'title' => Yii::t('churros', 'Update')]);
+				$this->initDefaultButton('update', 'update', array_merge(
+					[ 'title' => Yii::t('churros', 'Update') ], $this->updateOptions));
 			}
 		}
         if( strpos($this->crudPerms,'D') !== false ) {
@@ -49,11 +69,10 @@ class ActionColumn extends \yii\grid\ActionColumn
 				$this->buttons['delete'] = $this->customButtons['delete'];
 				unset( $this->customButtons['delete'] );
 			} else {
-				$this->initDefaultButton('delete', 'trash-alt',
-					array_merge([
-						'title' => Yii::t('churros', 'Delete'),
-						'data-confirm' => Yii::t('yii', 'Are you sure you want to delete this item?'),
-						'data-method' => 'post'
+				$this->initDefaultButton('delete', 'delete', array_merge(
+					[ 'title' => Yii::t('churros', 'Delete'),
+					  'data-confirm' => Yii::t('yii', 'Are you sure you want to delete this item?'),
+					  'data-method' => 'post'
 					], $this->deleteOptions));
 			}
 		}
@@ -62,7 +81,8 @@ class ActionColumn extends \yii\grid\ActionColumn
 				$this->buttons['duplicate'] = $this->customButtons['duplicate'];
 				unset( $this->customButtons['duplicate'] );
 			} else {
-				$this->initDefaultButton('duplicate', 'copy', [ 'title' => Yii::t('churros', 'Duplicate')]);
+				$this->initDefaultButton('duplicate', 'copy', array_merge(
+					[ 'title' => Yii::t('churros', 'Duplicate')], $this->duplicateOptions));
 			}
 		}
 		foreach( $this->customButtons as $index => $button ) {
@@ -72,32 +92,25 @@ class ActionColumn extends \yii\grid\ActionColumn
 		$this->customButtons = []; // https://github.com/kartik-v/yii2-grid/issues/1047
     }
 
-	protected function initDefaultButton($name, $iconName, $additionalOptions = [])
+	/**
+     * Initializes the default button rendering callback for single button.
+     * @param string $name Button name as it's written in template
+     * @param string $iconName The part of Bootstrap glyphicon class that makes it unique
+     * @param array $additionalOptions Array of additional options
+     * @since 2.0.11
+     */
+    protected function initDefaultButton($name, $iconName, $additionalOptions = [])
     {
         if (!isset($this->buttons[$name]) && strpos($this->template, '{' . $name . '}') !== false) {
             $this->buttons[$name] = function ($url, $model, $key) use ($name, $iconName, $additionalOptions) {
-                switch ($name) {
-                    case 'view':
-                        $title = Yii::t('churros', 'View');
-                        break;
-                    case 'update':
-                        $title = Yii::t('churros', 'Update');
-                        break;
-                    case 'delete':
-                        $title = Yii::t('churros', 'Delete');
-                        break;
-                    case 'duplicate':
-                        $title = Yii::t('churros', 'Duplicate');
-                        break;
-                    default:
-                        $title = ucfirst($name);
-                }
-                $options = array_merge([
-                    'title' => $title,
-                    'aria-label' => $title,
-                    'data-pjax' => '0',
-                ], $this->buttonOptions, $additionalOptions );
-                $icon = Html::tag('span', '', ['class' => "fa fa-$iconName"]);
+                $options = array_merge($this->buttonOptions, $additionalOptions);
+                Html::addCssClass($options, $this->buttonOptions['class']??[]);
+				if( empty($options['aria-label']) ) {
+					$options['aria-label'] = $options['title'];
+				}
+				$icon = isset($this->icons[$iconName])
+                    ? $this->icons[$iconName]
+                    : Html::tag('span', '', ['class' => "{$this->iconClassPrefix}-$iconName"]);
                 return Html::a($icon, $url, $options);
             };
         }

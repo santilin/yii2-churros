@@ -7,11 +7,12 @@ namespace santilin\churros\widgets\grid\bs3;
 
 use Yii;
 use yii\helpers\{ArrayHelper,Html,Url	};
-use kartik\grid\GridView as BaseGridView;
-use santilin\churros\widgets\grid\GridGroup;
 use yii\helpers\Json;
 use yii\web\JsExpression;
+use kartik\grid\GridView as BaseGridView;
 use kartik\grid\GridToggleDataAsset;
+use santilin\churros\widgets\grid\GridGroup;
+use santilin\churros\ChurrosAsset;
 
 
 class GridView extends BaseGridView
@@ -44,7 +45,10 @@ class GridView extends BaseGridView
 
 	public function init()
 	{
-		$this->initGroups(); // must be done before initColumns
+		$view = $this->getView();
+        ChurrosAsset::register($view);
+
+        $this->initGroups(); // must be done before initColumns
 		parent::init();
 		if( count($this->groups) != 0 || $this->totalsRow) {
 			$this->beforeRow = function($model, $key, $index, $grid) {

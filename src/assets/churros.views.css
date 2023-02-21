@@ -1,3 +1,7 @@
+.kv-grid-table .action-button.delete {
+	color: red;
+}
+
 .clv-w-25 {
 	width: 25% !important;
 	max-width: 25% !important;
