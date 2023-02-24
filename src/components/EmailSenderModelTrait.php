@@ -18,12 +18,12 @@ trait EmailSenderModelTrait
 		array $view_params = [], array $email_params = []): bool
 	{
 		$sent = false;
-		$sent_message = '';
+		$mailer_error = '';
 		Yii::$app->mailer->on(\yii\mail\BaseMailer::EVENT_AFTER_SEND,
-			function(\yii\mail\MailEvent $event) use ($sent) {
+			function(\yii\mail\MailEvent $event) use ($mailer_error, $sent) {
+			/// @todo ¿Cuándo llega aquí?
 				$sent = $event->isSuccessful;
 				if( !$event->isSuccessful  ) {
-					Yii::$app->mailer->saveMessage($event->message);
 				}
 			}
 		);
@@ -43,9 +43,9 @@ trait EmailSenderModelTrait
 		try {
 			$sent = $composed->send();
 		} catch ( \Swift_TransportException $e ) {
-			$sent_message = $e->getMessage();
+			$mailer_error = $e->getMessage();
 		} catch( \Swift_RfcComplianceException $e ) {
-			$sent_message = $e->getMessage();
+			$mailer_error = $e->getMessage();
 		}
 		if( !$sent ) {
 			if( count($to) > 1 ) {
@@ -53,13 +53,13 @@ trait EmailSenderModelTrait
 			} else {
 				$error_message = Yii::t('churros', 'Unable to send email to {email}', ['email' => array_pop($to) ]);
 			}
+			$this->addError('sendmail', $error_message);
 			if( YII_ENV_DEV ) {
 				$mail_message_parts = $composed->getSwiftMessage()->getChildren();
 				$html_mail = $mail_message_parts[0];
-				$error_message = $sent_message . '<br/>' . $error_message . "<br/>" . $html_mail->getBody();
+				$this->addError('mailbody', "View: $view_name<br/>Subject: $subject<br/>"
+					. $mailer_error . '<br/>' . $html_mail->getBody());
 			}
-			$this->addError($view_name, $error_message);
-			$this->addError($view_name, Yii::t('churros', 'Please, send an email to {0} to get support', AppHelper::yiiparam('adminEmail')));
 			return false;
 		}
 		return true;
