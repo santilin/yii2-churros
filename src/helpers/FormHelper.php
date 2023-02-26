@@ -401,174 +401,29 @@ class FormHelper
 		return $ret;
 	}
 
-	/**
-	 * fixes tabindex and layout of the form form_rows
-	 */
-	static public function fixLayoutFields(string $layout,
-		array &$form_layout_rows, array &$input_opts, array &$fldcfg, string $widgets_ver = 'bs4')
-	{
-		if( !count($form_layout_rows ) ) {
-			$row = [];
-			switch( $layout ) {
-			case 'horizontal':
-			case '1col':
-				foreach( array_keys($input_opts) as $key ) {
-					$form_layout_rows[] = [ $key ];
-				}
-				break;
-			case "2cols":
-				foreach( array_keys($input_opts) as $key ) {
-					switch(count($row)) {
-					case 2:
-						$form_layout_rows[] = $row;
-						$row = [];
-					case 0:
-						$row[0] = $key;
-						break;
-					case 1:
-						$row[1] = $key;
-						break;
-					}
-				}
-				break;
-			case "3cols":
-				foreach( array_keys($input_opts) as $key ) {
-					switch(count($row)) {
-					case 3:
-						$form_layout_rows[] = $row;
-						$row = [];
-					case 0:
-						$row[0] = $key;
-						break;
-					case 1:
-						$row[1] = $key;
-						break;
-					case 2:
-						$row[2] = $key;
-						break;
-					}
-				}
-				break;
-			case "4cols":
-				foreach( array_keys($input_opts) as $key ) {
-					switch(count($row)) {
-					case 4:
-						$form_layout_rows[] = $row;
-						$row = [];
-					case 0:
-						$row[0] = $key;
-						break;
-					case 1:
-						$row[1] = $key;
-						break;
-					case 2:
-						$row[2] = $key;
-						break;
-					case 3:
-						$row[3] = $key;
-						break;
-					}
-				}
-				break;
-			}
-			if( count($row) != 0 ) {
-				$form_layout_rows[] = $row;
-			}
-		}
-		foreach($form_layout_rows as $lrow) {
-			foreach($lrow as $f) {
-				if( intval($input_opts[$f]['tabindex']??-1) !== -1 ) {
-					$input_opts[$f]['tabindex'] = FormHelper::ti();
-				}
-			}
-			switch(count($lrow)) {
-			case 1:
-				FormHelper::setFldCfg($fldcfg, $lrow[0], $widgets_ver, $layout, '1col');
-				break;
-			case 2:
-				FormHelper::setFldCfg($fldcfg, $lrow[0], $widgets_ver, $layout, '2cols');
-				FormHelper::setFldCfg($fldcfg, $lrow[1], $widgets_ver, $layout, '2cols');
-				break;
-			case 3:
-				FormHelper::setFldCfg($fldcfg, $lrow[0], $widgets_ver, $layout, '3cols');
-				FormHelper::setFldCfg($fldcfg, $lrow[1], $widgets_ver, $layout, '3cols');
-				FormHelper::setFldCfg($fldcfg, $lrow[2], $widgets_ver, $layout, '3cols');
-				break;
-			case 4:
-				FormHelper::setFldCfg($fldcfg, $lrow[0], $widgets_ver, $layout, '4cols');
-				FormHelper::setFldCfg($fldcfg, $lrow[1], $widgets_ver, $layout, '4cols');
-				FormHelper::setFldCfg($fldcfg, $lrow[2], $widgets_ver, $layout, '4cols');
-				FormHelper::setFldCfg($fldcfg, $lrow[3], $widgets_ver, $layout, '4cols');
-				break;
-			}
-		}
-		foreach($fldcfg as $k => $v) {
-			unset($fldcfg[$k]['layout']);
-		}
-
-	}
-
-	static public function setFldCfg(&$fldcfg, $field, $widgets_ver, $layout, $cols)
-	{
-		if( $fldcfg[$field]['layout']??null !== null ) {
-			$l = $fldcfg[$field]['layout'];
-			$fldcfg[$field] = FormHelper::WIDGET_CONFIGS[$widgets_ver][$l][$cols];
-		} else {
-			$fldcfg[$field] = FormHelper::WIDGET_CONFIGS[$widgets_ver][$layout][$cols];
-		}
-	}
-
-	static public function layoutInput(string $name, string $input, string $label,
-		string $toolkit = 'bs3'): string
-	{
-		return Html::beginTag('div', ['class' => "form-group field-$name-cc"])
-			. Html::label($label, '', ['class' => 'control-label'])
-			. $input
-			. Html::endTag('div');
-	}
-
-	static public function getViewFromRequest($views, $params)
+	static public function getViewFromRequest(array $views, array $params)
 	{
 		$_nv=$params[self::VIEWS_NVIEW_PARAM]??0;
 		if( is_numeric($_nv) ) {
 			if ($_nv > (count($views)-1) ) {
 				$_nv = 0;
 			}
-			foreach($views as $kv => $view ) {
+			foreach($views as $kv => $view_info ) {
 				if( $_nv-- == 0 ) {
-					if( is_array($view) ) {
-						return [$kv, $view['title']];
+					if( is_array($view_info) ) {
+						// view_title, search_form, search_type, permissions
+						return array_merge([$kv], $view_info);
 					} else {
-						return [$kv, $view];
+						return [$kv, $view_info];
 					}
 				}
 			}
 		} else {
 			if( isset($views[$_nv])	) {
-				return [ $_nv, $views[$_nv]];
+				return array_merge([$_nv], (array)$views[$_nv]);
 			}
 		}
 		return reset($views);
-	}
-
-	static public function getViewTitleFromRequest($views, $params)
-	{
-		$_nv=$params[self::VIEWS_NVIEW_PARAM]??0;
-		if( is_numeric($_nv) ) {
-			if ($_nv > (count($views)-1) ) {
-				$_nv = 0;
-			}
-			foreach($views as $kv => $view ) {
-				if( $_nv-- == 0 ) {
-					return $view;
-				}
-			}
-		} else {
-			if( isset($views[$_nv])	) {
-				return $views[$_nv];
-			}
-		}
-		return $views[0];
 	}
 
 	public static function getConfig(string $name, string $form_name, $default_value = null)
@@ -639,5 +494,31 @@ class FormHelper
 // 		return '<ul><li>'. implode("</li><li>$sep", $ret) . '</li></ul>';
 	}
 
+	static public function mergePermissions(string $perms1, string $perms2): string
+	{
+		if( empty($perms1) ) {
+			return $perms2;
+		} else if (empty($perms2) ) {
+			return $perms1;
+		}
+		$ret = '';
+		for( $i=0; $i<strlen($perms1); ++$i ) {
+			if( str_contains($perms2, $perms1[$i]) ) {
+				$ret .= $perms1[$i];
+			}
+		}
+		return $ret;
+	}
+
+	static public function hasPermission($perms, string $perm): bool
+	{
+		if( $perm == '' ) {
+			return true;
+		}
+		if( $perms === false) {
+			return false;
+		}
+		return $perms === '' || strpos($perms, $perm) !== false;
+	}
 
 } // class

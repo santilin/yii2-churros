@@ -9,7 +9,7 @@ namespace santilin\churros\widgets\grid;
 
 use Yii;
 use yii\helpers\{Html};
-
+/// @todo trim o simflify_white_space del content final para cuando no se generan algunos botones
 class ActionColumn extends \yii\grid\ActionColumn
 {
     public $template = '{view}&nbsp;{update}&nbsp;{delete}&nbsp;{duplicate}';
