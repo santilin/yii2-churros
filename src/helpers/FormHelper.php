@@ -401,7 +401,7 @@ class FormHelper
 		return $ret;
 	}
 
-	static public function getViewFromRequest(array $views, array $params)
+	static public function getGridFromRequest(array $views, array $params)
 	{
 		$_nv=$params[self::VIEWS_NVIEW_PARAM]??0;
 		if( is_numeric($_nv) ) {
@@ -421,6 +421,30 @@ class FormHelper
 		} else {
 			if( isset($views[$_nv])	) {
 				return array_merge([$_nv], (array)$views[$_nv]);
+			}
+		}
+		return reset($views);
+	}
+
+	static public function getViewFromRequest($views, $params)
+	{
+		$_nv=$params[self::VIEWS_NVIEW_PARAM]??0;
+		if( is_numeric($_nv) ) {
+			if ($_nv > (count($views)-1) ) {
+				$_nv = 0;
+			}
+			foreach($views as $kv => $view ) {
+				if( $_nv-- == 0 ) {
+					if( is_array($view) ) {
+						return [$kv, $view['title']];
+					} else {
+						return [$kv, $view];
+					}
+				}
+			}
+		} else {
+			if( isset($views[$_nv])	) {
+				return [ $_nv, $views[$_nv]];
 			}
 		}
 		return reset($views);
