@@ -11,47 +11,61 @@ use Yii;
 
 class AppHelper
 {
-	static public function checkWritableDir($path, $perm = 0755, $eol = "\n")
+
+	public function removeDirRec(string $path): bool
 	{
-		echo "Checking if $path is writable...$eol";
+		return exec('rm -rf ' . escapeshellarg($path));
+	}
+
+	static public function checkWritableDir(string $path, int $perm = 0755, ?string $eol = "\n"): bool
+	{
+		if( $eol ) echo "Checking if $path is writable...$eol";
 		if (!is_dir($path) ) {
 			if( @mkdir($path, $perm) ) {
-				echo "$path: created$eol";
+				if( $eol ) echo "$path: created$eol";
 			} else {
 				$error = error_get_last();
-				echo "$path: " . $error['message'] . $eol;
+				if( $eol ) echo "$path: " . $error['message'] . $eol;
+				return false;
 			}
 		} else {
 			if (!is_writable($path) ) {
 				@chmod($dir, $perm);
 			}
         }
+        chgrp($path, 'www-data');
 		if (!is_writable($path) ) {
-			echo $path . ": not writable by www-data user$eol";
+			if( $eol ) echo $path . ": not writable by www-data user$eol";
+			return false;
 		} else {
-			echo $path . ": Ok$eol";
+			if( $eol ) echo $path . ": Ok$eol";
 		}
+		return true;
+
 	}
 
-	static public function checkIsLink($target, $link, $eol = "\n")
+	static public function checkIsLink(string $target, string $link, string $eol = "\n"): bool
 	{
 		echo "Checking if $link is a link to $target...$eol";
 		if( !file_exists($target) ) {
 			echo "$target: target of $link symlink not found$eol";
-			return;
+			return false;
 		}
 		if( !file_exists($link) ) {
 			@symlink($target, $link);
 			if( !is_link($link) ) {
 				$error = error_get_last();
 				echo $link . ": " . $error['message'] . " creating symlink to $target$eol";
+				return false;
 			}
 		}
 		if( !is_link($link) ) {
 			echo $link . ": is not a symlink$eol";
+			return false;
 		} else {
 			echo $link . ": Ok$eol";
 		}
+		return true;
 	}
 
 
