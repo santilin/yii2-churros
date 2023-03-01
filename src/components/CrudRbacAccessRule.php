@@ -30,7 +30,11 @@ class CrudRbacAccessRule extends AccessRule
 		if ($user === false) {
             throw new InvalidConfigException('The user application component must be available to specify roles in AccessRule.');
         }
-		$actions = array_merge($this->actions??[], ['index','create','update','delete','view','pdf','duplicate','autocomplete','remove-image']);
+        if( !empty($this->actions) ) {
+			if( !in_array($action->id, $this->actions) ) {
+				return false;
+			}
+		}
 		switch( $action->id ) {
 			case 'index':
 			case 'autocomplete':
@@ -38,6 +42,7 @@ class CrudRbacAccessRule extends AccessRule
 				break;
 			case 'view':
 			case 'pdf':
+			case 'print':
 				$perm = AppHelper::camelCase($action->controller->id) . ".view";
 				break;
 			case 'update':

@@ -8,8 +8,10 @@
 namespace santilin\churros\widgets\grid;
 
 use Yii;
-use yii\helpers\{Html};
-/// @todo trim o simflify_white_space del content final para cuando no se generan algunos botones
+use yii\helpers\Html;
+use santilin\churros\helpers\FormHelper;
+
+/// @todo No usar &nbsp; usar style padding
 class ActionColumn extends \yii\grid\ActionColumn
 {
     public $template = '{view}&nbsp;{update}&nbsp;{delete}&nbsp;{duplicate}';
@@ -43,10 +45,10 @@ class ActionColumn extends \yii\grid\ActionColumn
     {
 		$this->hAlign = 'left';
         if( $this->crudPerms === null ) {
-			$this->crudPerms = 'CRUD2';
+			$this->crudPerms = [ 'create', 'view', 'update', 'index', 'delete' ];
 		}
 		$options = $this->buttonOptions;
-        if( strpos($this->crudPerms,'R') !== false ) {
+        if( FormHelper::hasPermission($this->crudPerms, 'view') ) {
 			if( isset($this->customButtons['view']) ) {
 				$this->buttons['view'] = $this->customButtons['view'];
 				unset( $this->customButtons['view'] );
@@ -55,7 +57,7 @@ class ActionColumn extends \yii\grid\ActionColumn
 					[ 'title' => Yii::t('churros', 'View') ], $this->viewOptions));
 			}
 		}
-        if( strpos($this->crudPerms,'U') !== false ) {
+        if( FormHelper::hasPermission($this->crudPerms, 'update') ) {
 			if( isset($this->customButtons['update']) ) {
 				$this->buttons['update'] = $this->customButtons['update'];
 				unset( $this->customButtons['update'] );
@@ -64,7 +66,7 @@ class ActionColumn extends \yii\grid\ActionColumn
 					[ 'title' => Yii::t('churros', 'Update') ], $this->updateOptions));
 			}
 		}
-        if( strpos($this->crudPerms,'D') !== false ) {
+        if( FormHelper::hasPermission($this->crudPerms, 'delete') ) {
 			if( isset($this->customButtons['delete']) ) {
 				$this->buttons['delete'] = $this->customButtons['delete'];
 				unset( $this->customButtons['delete'] );
@@ -76,7 +78,7 @@ class ActionColumn extends \yii\grid\ActionColumn
 					], $this->deleteOptions));
 			}
 		}
-        if( strpos($this->crudPerms,'2') !== false ) {
+        if( FormHelper::hasAllPermissions($this->crudPerms, ['create','view']) ) {
 			if( isset($this->customButtons['duplicate']) ) {
 				$this->buttons['duplicate'] = $this->customButtons['duplicate'];
 				unset( $this->customButtons['duplicate'] );

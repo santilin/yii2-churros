@@ -518,31 +518,50 @@ class FormHelper
 // 		return '<ul><li>'. implode("</li><li>$sep", $ret) . '</li></ul>';
 	}
 
-	static public function mergePermissions(string $perms1, string $perms2): string
-	{
-		if( empty($perms1) ) {
-			return $perms2;
-		} else if (empty($perms2) ) {
-			return $perms1;
-		}
-		$ret = '';
-		for( $i=0; $i<strlen($perms1); ++$i ) {
-			if( str_contains($perms2, $perms1[$i]) ) {
-				$ret .= $perms1[$i];
-			}
-		}
-		return $ret;
-	}
-
-	static public function hasPermission($perms, string $perm): bool
+	static public function hasPermission(array $perms, string $perm): bool
 	{
 		if( $perm == '' ) {
 			return true;
 		}
-		if( $perms === false) {
-			return false;
+		if( $perms === []) {
+			return true;
 		}
-		return $perms === '' || strpos($perms, $perm) !== false;
+		return in_array($perm, $perms);
 	}
+
+
+	static public function hasAllPermissions(array $perms, array $req_perms = []): bool
+	{
+		if( $req_perms === [] ) {
+			return true;
+		}
+		if( $perms === []) {
+			return true;
+		}
+		foreach( $req_perms as $req_perm ) {
+			if( !in_array($req_perm, $perms) ) {
+				return false;
+			}
+		}
+		return true;
+	}
+
+
+	static public function hasAnyPermissions(array $perms, array $req_perms = []): bool
+	{
+		if( $req_perms === [] ) {
+			return true;
+		}
+		if( $perms === []) {
+			return true;
+		}
+		foreach( $req_perms as $req_perm ) {
+			if( in_array($req_perm, $perms) ) {
+				return true;
+			}
+		}
+		return false;
+	}
+
 
 } // class
