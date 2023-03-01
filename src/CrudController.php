@@ -17,6 +17,7 @@ use santilin\churros\helpers\AppHelper;
 class CrudController extends \yii\web\Controller
 {
 	protected $allowedActions = [];
+	protected $crudActions = [];
 
 	const MSG_NO_ACTION = 'The action on {La} {title} <a href="{model_link}">{record_medium}</a> has been successful.';
 	const MSG_CREATED = '{La} {title} <a href="{model_link}">{record_medium}</a> has been successfully created.';
@@ -71,6 +72,7 @@ class CrudController extends \yii\web\Controller
 	{
 		$params = Yii::$app->request->queryParams;
 		$searchModel = $this->createSearchModel();
+		$params['permissions'] = ($params['permissions']??true===false) ? false : $this->crudActions;
 		$params = $this->changeActionParams($params, 'index', $searchModel);
 		return $this->render('index', [
 			'searchModel' => $searchModel,
@@ -87,6 +89,7 @@ class CrudController extends \yii\web\Controller
 	{
 		$params = Yii::$app->request->queryParams;
 		$model = $this->findModel($id, $params);
+		$params['permissions'] = ($params['permissions']??true===false) ? false : $this->crudActions;
 		return $this->render('view', [
 			'model' => $model,
 			'extraParams' => $this->changeActionParams($params, 'view', $model)

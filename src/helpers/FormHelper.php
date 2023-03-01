@@ -518,8 +518,11 @@ class FormHelper
 // 		return '<ul><li>'. implode("</li><li>$sep", $ret) . '</li></ul>';
 	}
 
-	static public function hasPermission(array $perms, string $perm): bool
+	static public function hasPermission($perms, string $perm): bool
 	{
+		if( $perms === false ) {
+			return false;
+		}
 		if( $perm == '' ) {
 			return true;
 		}
@@ -530,8 +533,11 @@ class FormHelper
 	}
 
 
-	static public function hasAllPermissions(array $perms, array $req_perms = []): bool
+	static public function hasAllPermissions($perms, array $req_perms = []): bool
 	{
+		if( $perms === false ) {
+			return false;
+		}
 		if( $req_perms === [] ) {
 			return true;
 		}
@@ -547,8 +553,11 @@ class FormHelper
 	}
 
 
-	static public function hasAnyPermissions(array $perms, array $req_perms = []): bool
+	static public function hasAnyPermissions($perms, array $req_perms = []): bool
 	{
+		if( $perms === false ) {
+			return false;
+		}
 		if( $req_perms === [] ) {
 			return true;
 		}
