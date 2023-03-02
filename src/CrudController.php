@@ -286,7 +286,7 @@ class CrudController extends \yii\web\Controller
 // 		if ( $referrer ) {
 // 			return $this->redirect($referrer);
 // 		}
-		if ($from == 'update') {
+		if ($from == 'update' || $from == 'view') {
 			$redirect = ['view', 'id' => $model->getPrimaryKey()];
 		} else if ($from == 'create') {
 			$redirect = ["index"];
