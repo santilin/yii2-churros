@@ -135,12 +135,12 @@ class WizardForm extends FormWizard
     public function createStepFields($stepIndex, array $stepConfig, $isTabularStep, $limitRows)
     {
 
-		list($form, $hidden_fields, $form_fields) = $stepConfig['form_parts'];
+		list($form, $hidden_fields, $form_fields, $error_summary) = $stepConfig['form_parts'];
 		if( !empty($form->options['enctype'])) {
 			$this->_enctype_multipart = true;
 		}
 		$this->_hiddenFields = array_merge($this->_hiddenFields, $hidden_fields);
-		$html = '';
+		$html = $error_summary;
 		$html .= $form->layoutForm($form_fields);
 
 //         //parse response
