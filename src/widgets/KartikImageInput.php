@@ -47,6 +47,7 @@ class KartikImageInput extends \kartik\file\FileInput
 		case self::ATTR_URL_UPLOAD_BEHAVIOR:
  			$img_data = $this->model->getUploadedFormFileUrl($this->attribute);
  			if( $img_data ) {
+// 				$this->options['hiddenOptions'] = ['value' =>  Html::getAttributeValue($this->model, $this->attribute)];
 				$this->pluginOptions['initialPreview'][] = $img_data;
 			}
 			break;

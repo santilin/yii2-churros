@@ -64,6 +64,8 @@ class FileUploadBehavior extends \yii\base\Behavior
      */
     public function beforeValidate()
     {
+		$f = $_FILES;
+		$r = $_REQUEST;
         if ($this->owner->{$this->attribute} instanceof UploadedFile) {
             $this->file = $this->owner->{$this->attribute};
             return;
