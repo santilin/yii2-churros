@@ -271,11 +271,9 @@ class AuthController extends Controller
 		foreach( $no_model_perms as $perm ) {
 			$this->stdout($perm->name . "\n");
 		}
-		$users_ids = [];
 		$roles = $this->authManager->getItems(Item::TYPE_ROLE);
 		$this->stdout("\n== ROLES == \n");
 		foreach( $roles as $role ) {
-			$users_ids = array_merge($users_ids, $this->authManager->getUserIdsByRole($role->name));
 			$subroles = $this->authManager->getChildRoles($role->name);
 			if( count($subroles) ) {
 				$s_subroles = '';
@@ -313,6 +311,38 @@ class AuthController extends Controller
 			$this->stdout("\n");
 		}
 	}
+
+	/**
+	 * Lists the roles and permissions of a role
+	 * @param string $role name
+	 */
+	public function actionListRole($role)
+	{
+		$users_ids = $this->authManager->getUserIdsByRole($role);
+		$subroles = $this->authManager->getChildRoles($role);
+		if( count($subroles) ) {
+			$s_subroles = '';
+			foreach($subroles as $subrol) {
+				if( $subrol->name != $role ) {
+					$s_subroles .= $subrol->name . ", ";
+				}
+			}
+			if( $s_subroles ) {
+				$this->stdout("- ".$role.":roles:$s_subroles\n");
+			}
+		}
+		$role_perms = $this->authManager->getPermissionsByRole($role);
+		if( count($role_perms) ) {
+			$this->stdout("- ".$role.":perms:");
+			foreach($role_perms as $perm) {
+				$this->stdout($perm->name . ", ");
+			}
+			$this->stdout("\n");
+		} else if( empty($s_subroles) ) {
+			$this->stdout("- ". $role. "\n");
+		}
+	}
+
 
 	public function actionAssignPermToUser($perm_name, $user_id)
 	{
