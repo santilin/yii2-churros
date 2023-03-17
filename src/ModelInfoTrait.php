@@ -469,9 +469,31 @@ trait ModelInfoTrait
 		return YADTC::fromSql( $this->$fldname );
 	}
 
-	static public function byPrimaryKey($pk)
+	/**
+	 * Code copied from ActiveRecord::findByCondition.
+	 * Always Adds the tablename to the primary key field
+	 */
+	static public function byPrimaryKey($condition)
 	{
-		return static::findByCondition($pk);
+        $query = static::find();
+
+        if (!ArrayHelper::isAssociative($condition) && !$condition instanceof ExpressionInterface) {
+            // query by primary key
+            $primaryKey = static::primaryKey();
+            if (isset($primaryKey[0])) {
+                $pk = $primaryKey[0];
+				$pk = static::tableName() . '.' . $pk;
+                // if condition is scalar, search for a single primary key, if it is array, search for multiple primary key values
+                $condition = [$pk => is_array($condition) ? array_values($condition) : $condition];
+            } else {
+                throw new InvalidConfigException('"' . get_called_class() . '" must have a primary key.');
+            }
+        } elseif (is_array($condition)) {
+            $aliases = static::filterValidAliases($query);
+            $condition = static::filterCondition($condition, $aliases);
+        }
+
+        return $query->andWhere($condition);
 	}
 
 
