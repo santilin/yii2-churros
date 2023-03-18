@@ -244,7 +244,11 @@ class FileUploadBehavior extends \yii\base\Behavior
     {
 		if ($this->owner->{$this->attribute} instanceof UploadedFile) {
 			$file = $this->owner->{$this->attribute};
-			$raw_image = base64_encode(file_get_contents($file->tempName));
+			if( $file->error == 0 ) {
+				$raw_image = base64_encode(file_get_contents($file->tempName));
+			} else {
+				$raw_image = base64_encode(file_get_contents(Yii::getAlias('@churros/assets/i/wrong-uploaded-image.png')));
+			}
 			return 'data:image/png;base64,' . $raw_image;
 		} else {
 			return $this->getUploadedFilePath($attribute);
