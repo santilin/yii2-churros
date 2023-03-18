@@ -228,7 +228,13 @@ class FileUploadBehavior extends \yii\base\Behavior
         FileHelper::createDirectory(pathinfo($path, PATHINFO_DIRNAME), 0775, true);
 
         if (!$this->file->saveAs($path)) {
-            throw new FileUploadException($this->file->error, 'File saving error.');
+			if( YII_ENV_TEST ) {
+				if( !rename($this->file->tempName, Yii::getAlias($path)) ) {
+					throw new FileUploadException($this->file->error, 'File saving error.');
+				}
+			} else {
+				throw new FileUploadException($this->file->error, 'File saving error.');
+			}
         }
 
         $this->owner->trigger(static::EVENT_AFTER_FILE_SAVE);
