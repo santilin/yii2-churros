@@ -20,14 +20,16 @@ class CrudController extends \yii\web\Controller
 	protected $crudActions = [];
 	public $accessOnlyMine = false;
 
+	const MSG_DEFAULT = 'The action on {la} {title} <a href="{model_link}">{record_medium}</a> has been successful.';
 	const MSG_NO_ACTION = 'The action on {La} {title} <a href="{model_link}">{record_medium}</a> has been successful.';
 	const MSG_CREATED = '{La} {title} <a href="{model_link}">{record_medium}</a> has been successfully created.';
 	const MSG_UPDATED = '{La} {title} <a href="{model_link}">{record_medium}</a> has been successfully updated.';
 	const MSG_DELETED = '{La} {title} <strong>{record_long}</strong> has been successfully deleted.';
 	const MSG_ERROR_DELETE = 'There has been an error deleting {la} {title} <a href="{model_link}">{record_medium}</a>';
-	const MSG_ERROR_DELETE_INTEGRITY = 'Unable to delete {la} {title} <a href="{model_link}">{record_medium}</a> because it has related data';
 	const MSG_DUPLICATED = '{La} {title} <a href="{model_link}">{record_medium}</a> has been successfully duplicated.';
-	const MSG_DEFAULT = 'The action on {la} {title} <a href="{model_link}">{record_medium}</a> has been successful.';
+	const MSG_ERROR_DELETE_INTEGRITY = 'Unable to delete {la} {title} <a href="{model_link}">{record_medium}</a> because it has related data';
+	const MSG_ACCESS_DENIED = 'Access denied to this {title}.';
+	const MSG_NOT_FOUND = '{Title} with primary key {id} not found.';
 
 	/**
 	 * An array of extra params to pass to the views
@@ -204,9 +206,11 @@ class CrudController extends \yii\web\Controller
 				$this->addSuccessFlashes('delete', $model);
 				return $this->whereToGoNow('delete', $model);
 			} catch (\yii\db\IntegrityException $e ) {
-				Yii::$app->session->addFlash('error', $model->t('churros',$this->getResultMessage('error_delete_integrity')));
+				Yii::$app->session->addFlash('error', $model->t('churros',
+					$this->getResultMessage('error_delete_integrity')));
 			} catch( \yii\web\ForbiddenHttpException $e ) {
-				Yii::$app->session->addFlash('error', $model->t('churros',$this->getResultMessage('error_delete')));
+				Yii::$app->session->addFlash('error', $model->t('churros',
+					$this->getResultMessage('error_delete')));
 			}
 		}
 		return $this->whereToGoNow('delete', null);
@@ -421,6 +425,10 @@ redirect:
 			return self::MSG_ERROR_DELETE;
 		case 'error_delete_integrity':
 			return self::MSG_ERROR_DELETE_INTEGRITY;
+		case 'access_denied':
+			return self::MSG_ACCESS_DENIED;
+		case 'not_found':
+			return self::MSG_NOT_FOUND;
 		default:
 			return self::MSG_NO_ACTION;
 		}
@@ -428,32 +436,33 @@ redirect:
 
 	protected function addSuccessFlashes($action_id, $model, $success_message = null)
 	{
-		if( $model->hasErrors() ) {
-			Yii::$app->session->addFlash('warning', $model->getOneError() );
-		}
-		if( !$success_message ) {
-			$success_message = $this->getResultMessage($action_id);
-		}
-		if( strpos( $success_message, '{model_link}') !== FALSE ) {
-			$pk = $model->getPrimaryKey();
-			if( is_array($pk) ) {
-				$link_to_me = Url::to(array_merge([$this->actionRoute('view')], $pk));
-			} else {
-				$link_to_me = $this->actionRoute('view') . "/$pk";
+		if( $success_message !== false ) {
+			if( !$success_message ) {
+				$success_message = $this->getResultMessage($action_id);
 			}
-		} else {
-			$link_to_me = '';
+			$success_message = $model->t('churros', $success_message);
+			if( strpos($success_message, '{model_link}') !== FALSE ) {
+				$pk = $model->getPrimaryKey();
+				if( is_array($pk) ) {
+					$link_to_me = Url::to(array_merge([$this->actionRoute('view')], $pk));
+				} else {
+					$link_to_me = $this->actionRoute('view') . "/$pk";
+				}
+				Yii::$app->session->addFlash('success', str_replace('{model_link}', $link_to_me, $success_message));
+			} else {
+				Yii::$app->session->addFlash('success', $success_message);
+			}
 		}
-		Yii::$app->session->addFlash('success',
-			strtr($model->t('churros', $success_message ), ['{model_link}' => $link_to_me]));
+		$this->showErrorFlashes($model);
 	}
 
 	protected function showErrorFlashes($model)
 	{
-		foreach($model->getErrors() as $k => $errors ) {
-			foreach($errors as $error_msg ) {
-				Yii::$app->session->addFlash('error', $error_msg );
-			}
+		foreach($model->getFirstErrors() as $error ) {
+			Yii::$app->session->addFlash('error', $error );
+		}
+		foreach($model->getFirstWarnings() as $warning ) {
+			Yii::$app->session->addFlash('warning', $warning );
 		}
 	}
 
