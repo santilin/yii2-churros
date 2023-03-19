@@ -1,5 +1,6 @@
-No funciona upload de imagenes en mdg
-No se guarda el nombre de la imagen, aunque sí se guarda la imagen, cuando ha dado un error el formulario y se envía corregido.
+upload file cuando da error otro campo que no es el file, se pierde el nombre del fichero original
+
+
 
 cache de permisos
 

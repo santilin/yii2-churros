@@ -17,7 +17,7 @@ class AppHelper
 		return exec('rm -rf ' . escapeshellarg($path));
 	}
 
-	static public function checkWritableDir(string $path, int $perm = 0755, ?string $eol = "\n"): bool
+	static public function checkWritableDir(string $path, int $perm = 0775, ?string $eol = "\n"): bool
 	{
 		if( $eol ) echo "Checking if $path is writable...$eol";
 		if (!is_dir($path) ) {
@@ -33,9 +33,9 @@ class AppHelper
 				@chmod($dir, $perm);
 			}
         }
-        chgrp($path, 'www-data');
 		if (!is_writable($path) ) {
-			if( $eol ) echo $path . ": not writable by www-data user$eol";
+			$whoami = exec('whoami');
+			if( $eol ) echo $path . ": not writable by $whoami user$eol";
 			return false;
 		} else {
 			if( $eol ) echo $path . ": Ok$eol";
@@ -182,10 +182,11 @@ class AppHelper
 
 	static public function yiiparam($name, $default = null)
 	{
-		if ( isset(Yii::$app->params[$name]) )
+		if ( isset(Yii::$app->params[$name]) ) {
 			return Yii::$app->params[$name];
-		else
+		} else {
 			return $default;
+		}
 	}
 
 
