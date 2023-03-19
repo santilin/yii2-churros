@@ -1,7 +1,5 @@
 upload file cuando da error otro campo que no es el file, se pierde el nombre del fichero original
 
-
-
 cache de permisos
 
 Cuando va a site/error, botones o menú para volver a los módulos a los que tenga acceso la usuaria.

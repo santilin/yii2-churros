@@ -102,7 +102,8 @@ return [
 	'Showing <b>{begin, number}-{end, number}</b> of <b>{totalCount, number}</b>' => 'Mostrando <b>{begin, number}-{end, number}</b> de <b>{totalCount, number}</b>',
 	'Showing <b>{begin, number}-{end, number}</b> of <b>{totalCount, number}</b> {totalCount, plural, one{item} other{items}}.' => 'Mostrando <b>{begin, number}-{end, number}</b> de <b>{totalCount, number}</b> {totalCount, plural, one{item} other{items}}.',
 	'Total <b>{count, number}</b> {count, plural, one{item} other{items}}.' => 'Total <b>{count, number}</b> {count, plural, one{item} other{items}}.',
-	'Access denied to this {title}' => 'Acceso denegado a est{a} {title}',
+	'Access denied to this {title}.' => 'Acceso denegado a est{a} {title}.',
+	'{title} with primary key {id} not found.' => 'No se ha encontrado {la} {title}.',
 
 	'The value \'{0}\' does not exist in the category \'{1}\'' => 'El valor \'{0}\' no existe en la categoría \'{1}\'',
 	"{attribute} '{value}' does not match the mask {mask}." => "El valor '{value}' de '{attribute}' no concuerda con el formato {mask}",
