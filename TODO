@@ -8,6 +8,7 @@ Errores en formulario de Ajax. Que se quede en el formulario ajax y muestre el e
 Repensar el ActivatableInput
 Checkboxes: unchecked: no se ven en bs4.
 Cancel button: no tiene color de fondo en tabler.
+Búsqueda sadm/trivelantes/usuaria/Sí. Falla estrepitosamente.
 
 == YII2
 === Bugs
