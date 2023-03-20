@@ -1,9 +1,24 @@
-No se guarda el nombre de la imagen, aunque sí se guarda la imagen, cuando ha dado un error el formulario y se envía corregido.
+upload file cuando da error otro campo que no es el file, se pierde el nombre del fichero original
+
+cache de permisos
+
+Cuando va a site/error, botones o menú para volver a los módulos a los que tenga acceso la usuaria.
 
 Errores en formulario de Ajax. Que se quede en el formulario ajax y muestre el error.
 Repensar el ActivatableInput
-El botón borrar del grid de bs3 no sale rojo ni el del bs4.
-Checkboxes: unchecked: no se ven.
+Checkboxes: unchecked: no se ven en bs4.
+Cancel button: no tiene color de fondo en tabler.
+Búsqueda sadm/trivelantes/usuaria/Sí. Falla estrepitosamente.
+
+
+== Themes
+=== Menús
+https://bootstrapious.com/p/bootstrap-vertical-navbar
+https://codepen.io/JacobLett/pen/jaaQYG
+https://bootsnipp.com/snippets/P2dG9
+https://codepen.io/corbpie/pen/LYNwGdE
+https://getbootstrap.com/docs/3.4/examples/navbar/
+
 
 == YII2
 === Bugs

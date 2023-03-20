@@ -8,7 +8,7 @@
 namespace santilin\churros\helpers;
 
 use Yii;
-use yii\helpers\{Html};
+use yii\helpers\{ArrayHelper,Html};
 
 class FormHelper
 {
@@ -572,5 +572,22 @@ class FormHelper
 		return false;
 	}
 
+
+	static public function mergePermissions(array $final_perms, array $extra_perms): array
+	{
+		foreach( $extra_perms as $extra_perm ) {
+			if( $extra_perm[0] == '-' ) {
+				$extra_perm = substr($extra_perm,1);
+				if( in_array($extra_perm, $final_perms) ) {
+					ArrayHelper::removeValue($final_perms, $extra_perm);
+				}
+			} else {
+				if( !in_array($extra_perm, $final_perms) ) {
+					$final_perms[] = $extra_perm;
+				}
+			}
+		}
+		return $final_perms;
+	}
 
 } // class
