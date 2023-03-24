@@ -35,6 +35,8 @@ trait ActiveFormTrait
 	{
 		$ret = '';
 		foreach($rows_layout as $lk => $layout ) {
+			$col_sm = 12;
+			$col_xs = 12;
 			switch( $layout['type'] ) {
 			case 'buttons':
 				$ret .= '<div class="clearfix row">';
@@ -59,14 +61,17 @@ trait ActiveFormTrait
 				$cols = intval(substr($layout['type'],0,1));
 				switch( $cols ) {
 				case 2:
-					$col_sm = 6;
+					$col_md = 6;
+					$col_sm = 4;
 					break;
 				case 3:
+					$col_md = 4;
 					$col_sm = 4;
 					break;
 				case 4:
 				default:
-					$col_sm = 3;
+					$col_md = 3;
+					$col_sm = 6;
 				}
 				$nf = 0;
 				foreach( $layout['fields'] as $form_field ) {
@@ -78,7 +83,7 @@ trait ActiveFormTrait
 							}
 							$ret .= "\n" . '<div class="row">';
 						}
-						$ret .= "<div class=\"col-sm-$col_sm\">";
+						$ret .= "<div class=\"col-md-$col_md col-sm-$col_sm col-$col_xs\">";
 						$ret .= $form_fields[$form_field];
 						$ret .= '</div>';
 						$nf++;

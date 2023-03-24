@@ -11,26 +11,6 @@ class ActiveForm extends Bs4ActiveForm
 {
 	use ActiveFormTrait;
 
-	const _SHORT_FIELD_LAYOUT = [
-		'horizontalCssClasses' => [
-			'offset' => 'offset-sm-2',
-			'label' => 'col-md-2 col-sm-2 col-12',
-			'wrapper' => 'col-lg-2 col-md-2 col-sm-2 col-4',
-			'error' => '',
-			'hint' => 'col-sm-2 col-2',
-			'field' => 'form-group row'
-		]
-	];
-	const _MEDIUM_FIELD_LAYOUT = [
-		'horizontalCssClasses' => [
-			'offset' => 'col-sm-offset-3',
-			'label' => 'col-md-3 col-sm-3 col-12',
-			'wrapper' => 'col-md-2 col-sm-2 col-6',
-			'error' => '',
-			'hint' => 'col-sm-3 col-3',
-		]
-	];
-
 	public const FIELD_HORIZ_CLASSES = [
 		'default' => [
 			'1col' => [
@@ -63,9 +43,9 @@ class ActiveForm extends Bs4ActiveForm
 			],
 			'4cols' => [
 				'horizontalCssClasses' => [
-					'label' => 'col-sm-12 text-left',
-					'offset' => 'col-sm-offset-1',
-					'wrapper' => 'col-sm-6',
+					'offset' => ['col-lg-10 col-md-10 col-sm-9 col-12', 'offset-lg-2 offset-md-2 offset-sm-3 offset-xs-0'],
+					'label' => ['col-lg-12 col-md-12 col-sm-12 col-12', 'col-form-label text-left'],
+					'wrapper' => 'col-lg-12 col-md-12 col-sm-12 col-12',
 					'error' => '',
 					'hint' => '',
 					'field' => 'form-group row',
@@ -136,9 +116,9 @@ class ActiveForm extends Bs4ActiveForm
 		'short' => [
 			'1col' => [
 				'horizontalCssClasses' => [
-					'offset' => ['col-lg-10 col-md-10 col-sm-9 col-12', 'offset-lg-2 offset-md-2 offset-sm-3 offset-xs-0'],
-					'label' => ['col-lg-2 col-md-3 col-sm-3 col-12', 'col-form-label'],
-					'wrapper' => 'col-lg-2 col-md-3 col-sm-3 col-3',
+					'offset' => ['col-lg-3 col-md-9 col-sm-9 col-12', 'offset-lg-2 offset-md-2 offset-sm-3 offset-xs-0'],
+					'label' => ['col-lg-2 col-md-3 col-sm-12 col-12', 'col-form-label text-left text-sm-left text-md-right text-lg-right'],
+					'wrapper' => 'col-lg-3 col-md-3 col-sm-4 col-6',
 					'error' => '',
 					'hint' => '',
 					'field' => 'form-group row',
@@ -158,10 +138,13 @@ class ActiveForm extends Bs4ActiveForm
 			],
 			'4cols' => [
 				'horizontalCssClasses' => [
-					'label' => 'col-sm-3',
-					'wrapper' => '',
-				],
-				'options' => [ 'class' => 'control-group col-sm-2' ],
+					'offset' => ['col-lg-10 col-md-10 col-sm-9 col-12', 'offset-lg-2 offset-md-2 offset-sm-3 offset-xs-0'],
+					'label' => ['col-lg-12 col-md-12 col-sm-12 col-12', 'col-form-label text-left'],
+					'wrapper' => 'col-lg-12 col-md-12 col-sm-12 col-12',
+					'error' => '',
+					'hint' => '',
+					'field' => 'form-group row',
+				]
 			],
 		],
 	];
