@@ -304,7 +304,7 @@ trait ModelInfoTrait
 	{
 		$errors = $this->getFirstErrors(false);
 		if( count($errors) ) {
-			return $errors[0];
+			return reset($errors);
 		} else {
 			return '';
 		}
@@ -576,6 +576,16 @@ trait ModelInfoTrait
             unset($this->_warnings[$attribute]);
         }
     }
+
+	public function getOneWarning():string
+	{
+		$warnings = $this->getFirstWarnings(false);
+		if( count($warnings) ) {
+			return reset($warnings);
+		} else {
+			return '';
+		}
+	}
 
 } // trait ModelInfoTrait
 
