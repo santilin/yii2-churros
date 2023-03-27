@@ -450,9 +450,21 @@ class FormHelper
 		return reset($views);
 	}
 
-	public static function getConfig(string $name, string $form_name, $default_value = null)
+	public static function setConfig(string $form_name, string $name, $value)
 	{
-		if( isset($_SESSION['formconfig'][$form_name][$name]) ) {
+		if (!isset($_SESSION['formconfig'])) {
+			$_SESSION['formconfig'] = [];
+		}
+		if (!isset($_SESSION['formconfig'][$form_name])) {
+			$_SESSION['formconfig'][$form_name] = [];
+		}
+		$_SESSION['formconfig'][$form_name][$name] = $value;
+	}
+
+	public static function getConfig(string $form_name, string $name, $default_value = null)
+	{
+		if( isset($_SESSION['formconfig'][$form_name][$name])
+			&& $_SESSION['formconfig'][$form_name][$name] !== $default_value ) {
 			return $_SESSION['formconfig'][$form_name][$name];
 		} else if( isset(Yii::$app->params['formconfig'][$form_name][$name]) ) {
 			return Yii::$app->params['formconfig'][$form_name][$name];

@@ -427,7 +427,7 @@ redirect:
 			return self::MSG_ERROR_DELETE_INTEGRITY;
 		case 'access_denied':
 			return self::MSG_ACCESS_DENIED;
-		case 'not_found':
+		case 'model_not_found':
 			return self::MSG_NOT_FOUND;
 		default:
 			return self::MSG_NO_ACTION;

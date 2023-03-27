@@ -1,3 +1,9 @@
+Eliminar opción recordar contraseña de menú Ácceso
+Grid:
+- layout admin, más compacto.
+- (no definido) => en blanco
+- No aparecen los iconos de ordenar
+
 upload file cuando da error otro campo que no es el file, se pierde el nombre del fichero original
 
 cache de permisos
