@@ -165,34 +165,21 @@ trait ModelInfoTrait
 		} else if( $increment[0] != '+' ) {
 			$increment = "+$increment";
 		}
-		$tablename = $this->tableName();
-		if( $usegaps ) {
-			$sql = "SELECT [[$fldname]]";
-		} else {
-			$sql = "SELECT MAX([[$fldname]])";
-		}
-		$sql .= " FROM $tablename";
-		if( $usegaps || $conds != [] ) {
-			$sql .= " WHERE ";
-		}
-		if( $conds != [] ) {
-			$sql .= "(" . join(" AND ", $conds) . ")";
-		}
-		if( $usegaps ) {
-			if( $conds != [] ) {
-				$sql .= " AND ";
+		$query = static::find()->select("MAX([[$fldname]])");
+		$fldvalue = $this->$fldname;
+		$query->andwhere($conds);
+		if (preg_match('#^(.*?)(\d+)$#', $fldvalue, $matches)) {
+			$query->andWhere([ 'LIKE', $fldname, $matches[1] ]);
+			if( $usegaps ) {
+				$query->andWhere("(CAST([[$fldname]] AS SIGNED)$increment NOT IN (SELECT [[$fldname]] FROM {{{$tablename}}}");
 			}
-			$sql .= "(CAST([[$fldname]] AS SIGNED)$increment NOT IN (SELECT [[$fldname]] FROM $tablename";
-			if( $conds != [] ) {
-				$sql .= " WHERE (" . join(" AND ", $conds) . ")";
-			}
-			$sql .= ") )";
+		} else { // Alfanumérico
 		}
 //     try {
-		$val = Yii::$app->db->createCommand( $sql )->queryScalar();
+		$val = $query->scalar();
         $fval =  AppHelper::incrStr($val, $increment);
         return $fval;
-//     } catch( dbError &e ) {
+//     } catch( dbError &e ) { // sqlite3
 //         if( e.getNumber() == 1137 ) { // ERROR 1137 (HY000): Can't reopen table:
 //             sql = "SELECT MAX(" + nameToSQL( fldname ) + ")";
 //             sql+= " FROM " + nameToSQL( tablename );
