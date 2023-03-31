@@ -169,14 +169,16 @@ function taxonomy_values(taxonomy, values, level)
 
 function matchDropDownsToInput(j_input, id, taxonomy, drop_ids)
 {
+	empty_all_dropdowns();
 	const input_values = split_by_dot(j_input.val(), taxonomy['dot']);
 	if( input_values.length ) {
 		for( level = 0; level < input_values.length && level < taxonomy.levels.length; ++level ) {
 			let dropdown = $('#' + drop_ids[level]);
 			dropdown.val( input_values[level] );
 			let next_dropdown = $('#taxon_' + (level + 1 ) + '_' + id);
-			change_dropdown(next_dropdown, taxonomy, input_values, level + 1);
-
+			if( next_dropdown.length != 0 ) {
+				update_dropdown(next_dropdown, taxonomy, input_values, level + 1);
+			}
 		}
 	} else {
 		let dropdown = $('#' + drop_ids[0]);
@@ -185,44 +187,61 @@ function matchDropDownsToInput(j_input, id, taxonomy, drop_ids)
 
 }
 
-function change_dropdown(next_dropdown, taxonomy, input_values, level)
+function update_dropdown(this_dropdown, taxonomy, input_values, level)
 {
- 	next_dropdown.empty();
+ 	this_dropdown.empty();
 	const taxon_values = taxonomy_values(taxonomy, input_values, level);
 	if( taxon_values.length == 0 ) {
-		next_dropdown.append($('<option>', {
+		this_dropdown.append($('<option>', {
 			value: '0',
 			text : 'No hay valores',
 			selected: true
 		}));
+		// Cuando no hay valores, añadir {dot}0 al código si hace falta
+		const input_values = split_by_dot($('#$id').val(), taxonomy_{$j_id}['dot']);
+		if( level < taxonomy_{$j_id}['levels'].length && level == input_values.length ) {
+			$('#$id').val( input_values.join(taxonomy_{$j_id}['dot']) + taxonomy_{$j_id}['dot'] + '0');
+		}
 	} else {
 		$.each(taxon_values, function(k, value) {
-			next_dropdown.append($('<option>', {
+			this_dropdown.append($('<option>', {
 				value: value[0],
 				text : value[1]
 			}));
 		});
 	}
 }
+
 JS;
-		$levels = $this->taxonomy['levels'];
-		for( $l = 0; $l < count($this->taxonomy['levels']); ++$l ) {
+		// Each dropdown has its own change handler
+		$taxonomy_levels = $this->taxonomy['levels'];
+		$js_empty_dropdown = [];
+		for( $l = 0; $l < count($taxonomy_levels); ++$l ) {
 			$lplus1 = $l+1;
+			if( $l>0 ) {
+				$js_empty_dropdown[] = <<<js
+$('#taxon_{$l}_{$id}').empty();
+js;
+			}
+
 			$js .= <<<js
 $('#taxon_{$l}_{$id}').change(function() {
 	const input_values = split_by_dot($('#$id').val(), taxonomy_{$j_id}['dot']).slice(0, $l);
 	input_values[$l] = $(this).val();
 	$('#$id').val( input_values.join(taxonomy_{$j_id}['dot']) );
 	let next_dropdown = $('#taxon_{$lplus1}_$id');
-	change_dropdown(next_dropdown, taxonomy_{$j_id}, input_values, $lplus1);
+	if( next_dropdown.length != 0 ) {
+		update_dropdown(next_dropdown, taxonomy_{$j_id}, input_values, $lplus1);
+	}
 });
 
 js;
+			$js .= 'function empty_all_dropdowns() { ' . implode('', $js_empty_dropdown) . "}\n";
 		}
 		$view->registerJs($js);
 
 		$ready_js = <<<js
-// inicial
+// initial
 matchDropDownsToInput($('#$id'), '$id', taxonomy_$j_id, drop_ids_$j_id);
 js;
 		$view->registerJs($ready_js, View::POS_READY);
