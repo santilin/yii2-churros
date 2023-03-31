@@ -86,7 +86,8 @@ trait ModelSearchTrait
 					$sort_fldname = $code_field;
 				}
 				if( $sort_fldname != '' && !isset($provider->sort->attributes[$attribute])) {
-					$related_model_search_class = $related_model_class::getSearchClass();
+					$related_model_search_class = self::$relations[$relation_name]['searchClass']
+						?? str_replace('models\\', 'forms\\', $related_model_class) . '_Search';
 					if( class_exists($related_model_search_class) ) {
 						// Set orders from the related search model
 						$related_model = new $related_model_search_class;
