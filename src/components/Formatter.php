@@ -95,5 +95,23 @@ class Formatter extends \yii\i18n\Formatter
 			throw new \Exception("Please, implement asTokenized for arrays");
 		}
 	}
+	/**
+	 * @todo move to app's components/Formatter
+	 */
+	public function asTaxonomy($value, $taxonomy, $sep = '/')
+	{
+		$value_parts = explode($taxonomy['dot']??'.', $value);
+		$ret_parts = [ $value ];
+		$items = $taxonomy['items'];
+		foreach( $value_parts as $k => $v ) {
+			if( count($items) ) {
+				$ret_parts[] = $items[$v]['title']??'????';
+				$items = $items[$v]['items']??[];
+			} else {
+				break;
+			}
+		}
+		return implode($sep, $ret_parts);
+	}
 
 }
