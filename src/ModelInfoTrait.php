@@ -190,7 +190,7 @@ trait ModelInfoTrait
 		}
 //     try {
 		$val = Yii::$app->db->createCommand( $sql )->queryScalar();
-        $fval =  floatval($val) + floatval($increment);
+        $fval =  AppHelper::incrStr($val, $increment);
         return $fval;
 //     } catch( dbError &e ) {
 //         if( e.getNumber() == 1137 ) { // ERROR 1137 (HY000): Can't reopen table:
