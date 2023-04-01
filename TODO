@@ -1,10 +1,6 @@
 CreateAnother: Si está duplicando, duplicar el que acaba de guardar
 
 Eliminar opción recordar contraseña de menú Ácceso
-Grid:
-- layout admin, más compacto.
-- (no definido) => en blanco
-- No aparecen los iconos de ordenar
 
 upload file cuando da error otro campo que no es el file, se pierde el nombre del fichero original
 
@@ -102,10 +98,12 @@ https://stackoverflow.com/questions/32731987/adding-new-list-options-refreshing-
 * Hacer uso de los model.Agente.report? o los permisos del Param?
 
 == GridView ==
-* OneToOne: Grid: no sortable, no filter
+Grid:
+- layout admin, más compacto.
+- iconos de ordenar, en hasone si tiene código, icono numérico
 * GridView: Report : grupos: opciones para Mostrar encabezado, mostrar pie.
 * ¿Quitar grid-group-head-xxxx de site.css?
-* Grid Enlaces en el joinmodels: filtro en el grid por ese valor
+* Grid Enlaces en el joinmodels: filtro en el grid por ese valor?
 * selectViews no funciona con pjax porque es un dropdown. Añadirlo dentro de un FORM
 * Grid: cuando se filtra, poner "Filtrando 1-1 de s"
 * Cuando sólo hay una página, no mostrar [1-3] de 3
