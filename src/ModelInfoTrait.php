@@ -173,7 +173,7 @@ trait ModelInfoTrait
 		$base = '';
 		if (preg_match('#^(.*?)(\d+)$#', $fldvalue, $matches)) {
 			$base = $matches[1];
-			$query->andWhere([ 'LIKE', $fldname, $matches[1] ]);
+			$query->andWhere([ 'LIKE', $fldname, $base ]);
 			if( $usegaps ) {
 				$query->andWhere( [ "NOT IN", "CAST([[$fldname]] AS SIGNED) $increment",
 					static::find()->select("[[$fldname]]") ] );
@@ -184,7 +184,7 @@ trait ModelInfoTrait
 		$val = $query->scalar();
 		if( $val === null ) {
 			if( $base != '' ) {
-				$val = $base;
+				return $fldvalue;
 			}
 		}
         $fval =  AppHelper::incrStr($val, $increment);
