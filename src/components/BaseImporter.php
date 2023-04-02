@@ -55,6 +55,11 @@ abstract class BaseImporter
 	protected $csvline = 0;
 
     /**
+     * @var integer el número de registros importados
+     */
+	protected $imported = 0;
+
+    /**
      * @var array Los mensajes de error graves
      */
     protected $errors = [];
@@ -134,11 +139,17 @@ abstract class BaseImporter
     {
         $this->filename = $filename;
         $this->errors = [];
-		if ($this->dry_run) {
-			$transaction = Yii::$app->db->beginTransaction();
-		}
+		$transaction = Yii::$app->db->beginTransaction();
         $ret = $this->importCsvRecords($csvdelimiter, $csvquote);
 		if ($this->dry_run) {
+			$transaction->rollBack();
+		}
+		if( $ret == self::OK ) {
+			$transaction->commit();
+			if( $this->verbose ) {
+				$this->output("Importados {$this->imported} registros");
+			}
+		} else {
 			$transaction->rollBack();
 		}
 		return $ret;
@@ -285,6 +296,7 @@ abstract class BaseImporter
 			$has_error = true;
 		}
 		if (!$has_error) {
+			$this->imported++;
 			if( $this->verbose ) {
 				$this->output("Importado registro " . $r->recordDesc());
 			}
