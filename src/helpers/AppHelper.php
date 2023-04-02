@@ -95,7 +95,7 @@ class AppHelper
 			$value = $matches[1];
 			$vlen = strlen($value);
 			$newvalue = intval($value) + $inc;
-			$newvlen = strlen(strval($value));
+			$newvlen = strlen(strval($newvalue));
 			if( $newvlen < $vlen ) {
 				$newvalue = substr($value,0,$vlen-$newvlen) . $newvalue;
 			}

@@ -49,7 +49,7 @@ class TaxonomyValidator extends Validator
     {
 		$value = $model->{$attribute};
 		if( ($message = $this->validateValue($value)) === null ) {
-			$model->{$attribute} = $this->formatValue($this->taxonomy['mask'], $this->taxonomy['dot'],$value);
+			$model->{$attribute} = $this->formatValue($this->taxonomy['mask'], $this->taxonomy['dot'], $value);
 		} else {
 			$this->addError($model, $attribute, $message);
 		}
@@ -103,7 +103,7 @@ class TaxonomyValidator extends Validator
 		return null;
     }
 
-	protected function maskToGroups($mask, $dot)
+	protected function maskToGroups(string $mask, string $dot): array
 	{
 		$parts = explode($dot, $mask);
 		$ret = [];
@@ -113,7 +113,7 @@ class TaxonomyValidator extends Validator
 		return $ret;
 	}
 
-	protected function formatValue($mask, $dot, $value)
+	protected function formatValue(string $mask, string $dot, string $value): string
 	{
 		$mask_parts = explode($dot, $mask);
 		$parts = explode($dot, $value);
@@ -131,7 +131,7 @@ class TaxonomyValidator extends Validator
 		return $ret;
 	}
 
-	protected function getTaxonomyValues($input_values, $level)
+	protected function getTaxonomyValues(array $input_values, int $level): array
 	{
 		$items = $this->taxonomy['items'];
 		// find the options for input[level]
@@ -149,6 +149,5 @@ class TaxonomyValidator extends Validator
 		}
 		return $items;
 	}
-
 
 }

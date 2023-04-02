@@ -19,8 +19,8 @@ use santilin\churros\exceptions\ImportException;
  * los registros importados o sólamente hacer el proceso para ver los errors.
  *   3.- Al finalizar, tenemos los errors y los warnins en getErrors
  */
-abstract class BaseImporter {
-
+abstract class BaseImporter
+{
 	/** Códigos de error del proceso de importación */
 	const OK = 0;
 	const RECORD_ERRORS = 2;
@@ -102,7 +102,8 @@ abstract class BaseImporter {
 		}
 	}
 
-    public function getErrors() {
+    public function getErrors(): array
+    {
         return $this->errors;
     }
 
@@ -166,12 +167,12 @@ abstract class BaseImporter {
                 if (!$this->dry_run) {
 					try {
 						if (!$r->save() ) {
-							$this->addError($r->getErrorsAsString() );
+							$this->addError($r->getErrorsAsString());
 							$has_errors = true;
 						} else {
 							echo "Importado registro " . $r->recordDesc() . "\n";
 						}
-					} catch( \yii\db\Exception $e ) {
+					} catch( ImportException $e ) {
 						$this->addError($e->getMessage());
 						$has_errors = true;
 					}
@@ -199,7 +200,7 @@ abstract class BaseImporter {
 	* Añade un error genérico a esta importación.
 	* @param string $message
 	*/
-	public function addError($message)
+	public function addError(string $message)
 	{
 		if( $this->csvline != 0 ) {
 			$exc_message = "l:{$this->csvline}: $message";
@@ -215,7 +216,9 @@ abstract class BaseImporter {
 	protected function add_error_get_last()
 	{
 		$last_error = error_get_last();
-		$this->errors[] = $last_error['message'];
+		if( $last_error ) {
+			$this->errors[] = $last_error['message'];
+		}
 	}
 
     /**
@@ -443,19 +446,23 @@ abstract class BaseImporter {
      * @param mixed $value
      * @return mixed
      */
-    protected function import_constant($csv_value, $array_csv, $value) {
+    protected function import_constant($csv_value, array $array_csv, $value)
+    {
         return $value;
     }
 
-    protected function import_copy($csv_value, $array_csv) {
+    protected function import_copy($csv_value, array $array_csv): string
+    {
         return trim($csv_value);
     }
 
-    protected function import_copy_other($csv_value, $array_csv, $other) {
+    protected function import_copy_other($csv_value, $array_csv, $other): string
+    {
         return trim($array_csv[$other]);
     }
 
-    protected function import_copy_with_default($csv_value, $array_csv, $default) {
+    protected function import_copy_with_default($csv_value, $array_csv, string $default): string
+    {
 		if( trim($csv_value) == '') {
 			return $default;
 		} else {
@@ -497,15 +504,18 @@ abstract class BaseImporter {
         }
     }
 
-    protected function import_float($float, $array_csv) {
+    protected function import_float($float, array $array_csv): string
+    {
         return floatval(str_replace(",",".",$float));
     }
 
-    protected function import_porcentaje($porcentaje, $array_csv) {
-        return $this->import_float($porcentaje, $array_csv);
+    protected function import_percent($percent, array $array_csv): string
+    {
+        return $this->import_float($percent, $array_csv);
     }
 
-    protected function import_euros($euros, $array_csv) {
+    protected function import_euros($euros, array $array_csv): string
+    {
         return $this->import_float($euros, $array_csv);
     }
 
@@ -546,5 +556,5 @@ abstract class BaseImporter {
      *               'Fecha pago' => [ 'getAñoMes', 'año_mes' ],
      *               COLUMNA_CSV => [ método import_getAñoMes, campo en la tabla importaciones, argumentos... ]
      */
-    abstract protected function getImportFieldsInfo();
+    abstract protected function getImportFieldsInfo(): array;
 }

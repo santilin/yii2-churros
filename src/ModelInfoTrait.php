@@ -158,7 +158,7 @@ trait ModelInfoTrait
 		}
 	}
 
-	public function increment(string $fldname, string $increment, array $conds = [], bool$usegaps = true): string
+	public function increment(string $fldname, string $increment, array $conds = [], bool $usegaps = true): string
 	{
 		if( $increment == '' ) {
 			$increment = "+1";
@@ -167,16 +167,26 @@ trait ModelInfoTrait
 		}
 		$query = static::find()->select("MAX([[$fldname]])");
 		$fldvalue = $this->$fldname;
-		$query->andwhere($conds);
+		if( !empty($conds) ) {
+			$query->andwhere($conds);
+		}
+		$base = '';
 		if (preg_match('#^(.*?)(\d+)$#', $fldvalue, $matches)) {
+			$base = $matches[1];
 			$query->andWhere([ 'LIKE', $fldname, $matches[1] ]);
 			if( $usegaps ) {
-				$query->andWhere("(CAST([[$fldname]] AS SIGNED)$increment NOT IN (SELECT [[$fldname]] FROM {{{$tablename}}}");
+				$query->andWhere( [ "NOT IN", "CAST([[$fldname]] AS SIGNED) $increment",
+					static::find()->select("[[$fldname]]") ] );
 			}
 		} else { // Alfanumérico
 		}
 //     try {
 		$val = $query->scalar();
+		if( $val === null ) {
+			if( $base != '' ) {
+				$val = $base;
+			}
+		}
         $fval =  AppHelper::incrStr($val, $increment);
         return $fval;
 //     } catch( dbError &e ) { // sqlite3

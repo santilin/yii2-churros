@@ -271,7 +271,7 @@ class CrudController extends \yii\web\Controller
 		return $pdf->render();
 	}
 
-	protected function whereToGoNow($from, $model, $form_name = null)
+	protected function whereToGoNow($from, $model)
 	{
 		$returnTo = Yii::$app->request->post('returnTo');
 		if( !$returnTo ) {
@@ -303,9 +303,10 @@ class CrudController extends \yii\web\Controller
 			$to = 'index';
 			break;
 		case 'view':
+		case 'delete':
 		case 'index':
 		default:
-			$to[0] = "index";
+			$to = "index";
 		}
 		switch($to) {
 		case 'view':
@@ -318,8 +319,8 @@ class CrudController extends \yii\web\Controller
 			break;
 		default:
 		}
-		$redirect_params[0] = $to;
-		return $this->redirect($this->actionRoute($redirect_params));
+		$redirect_params[0] = $this->actionRoute($to);
+		return $this->redirect($redirect_params);
 	}
 
 	public function addParamsToUrl($url, $params)
@@ -368,7 +369,7 @@ class CrudController extends \yii\web\Controller
 		return $breadcrumbs;
 	}
 
-	public function actionRoute($action_id = null)
+	public function actionRoute(string $action_id = null): string
 	{
 		if( $action_id === null ) {
 			return $this->getRoutePrefix() . $this->id;
@@ -377,12 +378,12 @@ class CrudController extends \yii\web\Controller
 		}
 	}
 
-	public function masterRoute($master)
+	public function masterRoute($master): string
 	{
 		return $this->id . '/' . $master->id;
 	}
 
-	public function getRoutePrefix($route = null)
+	public function getRoutePrefix($route = null): string
 	{
 		if( $route === null ) {
 			$route = $this->id;

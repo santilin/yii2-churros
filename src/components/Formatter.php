@@ -4,6 +4,7 @@ namespace santilin\churros\components;
 
 use Yii;
 use yii\helpers\{Html,Url};
+use santilin\churros\components\Taxonomy;
 
 /* https://www.yiiframework.com/doc/api/2.0/yii-i18n-formatter */
 class Formatter extends \yii\i18n\Formatter
@@ -98,20 +99,9 @@ class Formatter extends \yii\i18n\Formatter
 	/**
 	 * @todo move to app's components/Formatter
 	 */
-	public function asTaxonomy($value, $taxonomy, $sep = '/')
+	public function asTaxonomy(string $value, array $taxonomy, string $sep = '/'): string
 	{
-		$value_parts = explode($taxonomy['dot']??'.', $value);
-		$ret_parts = [ $value ];
-		$items = $taxonomy['items'];
-		foreach( $value_parts as $k => $v ) {
-			if( count($items) ) {
-				$ret_parts[] = $items[$v]['abbrev']??$items[$v]['title']??'????';
-				$items = $items[$v]['items']??[];
-			} else {
-				break;
-			}
-		}
-		return implode($sep, $ret_parts);
+		return Taxonomy::format($value, $taxonomy, $sep);
 	}
 
 }
