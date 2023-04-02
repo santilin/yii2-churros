@@ -69,6 +69,10 @@ Test: CrudOfertaCest. Cuando redirige de update a view, no se borra la aplicaci�
     private function registerFile($type, $url, $options = [], $key = null)
 
 
+== Taxonomy ==
+=== Taxonomy Input ===
+Responsive: no usar una tabla, usar los divs como en activeform
+
 == TableListView ==
 * función extractHeaders
 * Paginador no sale bien el layout/css. Añadir el pager como en simplelistview

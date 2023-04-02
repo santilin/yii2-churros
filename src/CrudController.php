@@ -271,7 +271,7 @@ class CrudController extends \yii\web\Controller
 		return $pdf->render();
 	}
 
-	protected function whereToGoNow($from, $model)
+	protected function whereToGoNow($from, $model, $form_name = null)
 	{
 		$returnTo = Yii::$app->request->post('returnTo');
 		if( !$returnTo ) {
@@ -280,33 +280,46 @@ class CrudController extends \yii\web\Controller
 		if( $returnTo ) {
 			return $this->redirect($returnTo);
 		}
-		$redirect = [];
-		if ($from == 'create') {
+		$redirect_params = [];
+		if( isset($_REQUEST['sort']) ) {
+			$redirect_params['sort'] = $_REQUEST['sort'];
+		}
+		switch ($from) {
+		case 'create':
 			if (Yii::$app->request->post('_and_create') == '1') {
-				$redirect = ['create'];
-				goto redirect;
+				$to = 'create';
+			} else {
+				$to = 'view';
 			}
+			break;
+		case 'duplicate':
+			if (Yii::$app->request->post('_and_create') == '1') {
+				$to = 'duplicate';
+			} else {
+				$to = 'view';
+			}
+			break;
+		case 'update':
+			$to = 'index';
+			break;
+		case 'view':
+		case 'index':
+		default:
+			$to[0] = "index";
 		}
-// 		$referrer = Yii::$app->request->post("_form_referrer");
-// 		if ( $referrer ) {
-// 			return $this->redirect($referrer);
-// 		}
-		if ($from == 'update' || $from == 'view') {
-			$redirect = ['view', 'id' => $model->getPrimaryKey()];
-		} else if ($from == 'create') {
-			$redirect = ["index"];
-		} else if ($from == 'duplicate') {
-			$redirect = ['view', 'id' => $model->getPrimaryKey()];
-		} else if ($from == 'delete' || $from == 'not_deleted') {
-			$redirect = ["index"];
-		} else {
-			throw new \Exception("Where should I go now?");
+		switch($to) {
+		case 'view':
+		case 'update':
+		case 'duplicate':
+			if( isset($_REQUEST['_form_cancelUrl']) ) {
+				$redirect_params['_form_cancelUrl'] = $_REQUEST['_form_cancelUrl'];
+			}
+			$redirect_params = array_merge($redirect_params, $model->getPrimaryKey(true));
+			break;
+		default:
 		}
-redirect:
-		if( isset($_REQUEST['_form_cancelUrl']) ) {
-			$redirect['_form_cancelUrl'] = $_REQUEST['_form_cancelUrl'];
-		}
-		return $this->redirect($this->actionRoute($redirect));
+		$redirect_params[0] = $to;
+		return $this->redirect($this->actionRoute($redirect_params));
 	}
 
 	public function addParamsToUrl($url, $params)

@@ -75,21 +75,21 @@ class AppHelper
 		return empty($value);
 	}
 
-	static public function endsWith($stack, $needle)
+	static public function endsWith(string $stack, string $needle)
 	{
 		return substr($stack, -strlen($needle)) == $needle;
 	}
 
-	static public function startsWith($stack, $needle)
+	static public function startsWith(string $stack, string $needle): string
 	{
 		return substr($stack, 0, strlen($needle)) == $needle;
 	}
 
-	static public function getAppLocaleLanguage()
+	static public function getAppLocaleLanguage(): string
 	{
 		return str_replace("-", "_", Yii::$app->language);
 	}
-	static public function incrStr($str, $inc = 1)
+	static public function incrStr(string $str, int $inc = 1): string
 	{
 		if( preg_match('/([0-9]+)[^0-9]*$/', $str, $matches) ) {
 			$value = $matches[1];

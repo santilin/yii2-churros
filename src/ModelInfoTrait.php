@@ -158,7 +158,7 @@ trait ModelInfoTrait
 		}
 	}
 
-	public function increment($fldname, $increment, $conds = [], $usegaps = true)
+	public function increment(string $fldname, string $increment, array $conds = [], bool$usegaps = true): string
 	{
 		if( $increment == '' ) {
 			$increment = "+1";

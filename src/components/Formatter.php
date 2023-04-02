@@ -105,7 +105,7 @@ class Formatter extends \yii\i18n\Formatter
 		$items = $taxonomy['items'];
 		foreach( $value_parts as $k => $v ) {
 			if( count($items) ) {
-				$ret_parts[] = $items[$v]['title']??'????';
+				$ret_parts[] = $items[$v]['abbrev']??$items[$v]['title']??'????';
 				$items = $items[$v]['items']??[];
 			} else {
 				break;
