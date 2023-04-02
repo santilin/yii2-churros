@@ -2,6 +2,7 @@
 
 namespace santilin\churros\components;
 
+use yii\db\IntegrityException;
 use santilin\churros\helpers\AppHelper;
 use santilin\churros\exceptions\ImportException;
 
@@ -27,6 +28,10 @@ abstract class BaseImporter
 	const IMPORTED_WITH_ERRORS = 3;
 	const CSV_FILE_ERROR = 4;
 
+	protected $ignore_dups = false;
+	protected $update_dups = false;
+	protected $verbose = true;
+
     /**
      * @var string ruta y nombre del fichero a importar
      */
@@ -50,7 +55,7 @@ abstract class BaseImporter
     /**
      * @var integer el número de línea del fichero csv o el número de registro xml que se está leyendo
      */
-     protected $csvline = 0;
+	protected $csvline = 0;
 
     /**
      * @var array Los mensajes de error graves
@@ -154,45 +159,55 @@ abstract class BaseImporter
 			$this->add_error_get_last();
             return self::CSV_FILE_ERROR;
         }
-        if (!$this->dry_run) {
+        if ($this->dry_run) {
 			$transaction = $this->record->getDb()->beginTransaction();
         }
         $has_errors = false;
         foreach ($this->records_to_import as $record) {
+			$has_error = false;
 			$this->csvline = $record['csvline']; // Para recuperar el número de línea del registro erróneo
-//  			echo "Leyendo registro de la línea {$this->csvline}\n";
+			if ($this->verbose) {
+				$this->output("Leyendo registro de la línea {$this->csvline}");
+			}
             $r = $this->createRecord();
             $r->setDefaultValues();
-            if ($this->validateRecord($r, $record)) {
-                if (!$this->dry_run) {
-					try {
-						if (!$r->save() ) {
+            if ($this->validateRecord($r, $record)) { // no valida duplicados para poder hacer update_dups
+				try {
+					if( $this->update_dups ) {
+						if (!$r->upsert(false) ) {
 							$this->addError($r->getErrorsAsString());
-							$has_errors = true;
-						} else {
-							echo "Importado registro " . $r->recordDesc() . "\n";
+							$has_errors = $has_error = true;
 						}
-					} catch( ImportException $e ) {
-						$this->addError($e->getMessage());
-						$has_errors = true;
+					} else if( !$r->save(false) ) {
+						$this->addError($r->getErrorsAsString());
+						$has_errors = $has_error = true;
 					}
-                }
+				} catch( IntegrityException $e ) {
+					if ($this->ignore_dups) {
+						$this->addError("Ignorando registro duplicado " . $r->recordDesc());
+					} else {
+						$this->addError("Registro duplicado " . $r->recordDesc() . ':' . $e->getMessage());
+					}
+					$has_errors = $has_error = true;
+				} catch( ImportException $e ) {
+					$this->addError($e->getMessage());
+					$has_errors = $has_error = true;
+				}
             } else {
 				$this->addError( $r->getOneError() . json_encode($r) );
 				$has_errors = true;
             }
-        }
-        if ($has_errors) {
-			if( $this->abort_on_error) {
-				if (!$this->dry_run) {
-					$transaction->rollBack();
+			if (!$has_error) {
+				$this->output("Importado registro " . $r->recordDesc());
+			} else {
+				if ($this->abort_on_error) {
+					if (!$this->dry_run) {
+						$transaction->rollBack();
+					}
+					return self::RECORD_ERRORS;
 				}
-				return self::RECORD_ERRORS;
 			}
-		}
-		if (!$this->dry_run) {
-			$transaction->commit();
-		}
+        }
 		return ($has_errors) ? self::IMPORTED_WITH_ERRORS : self::OK;
     }
 
@@ -208,9 +223,6 @@ abstract class BaseImporter
 			$exc_message = $message;
 		}
 		$this->errors[] = $exc_message;
-		if ($this->abort_on_error) {
-			throw new ImportException($exc_message);
-		}
 	}
 
 	protected function add_error_get_last()
@@ -220,6 +232,16 @@ abstract class BaseImporter
 			$this->errors[] = $last_error['message'];
 		}
 	}
+
+	protected function output(string $message)
+	{
+		if ($this->dry_run) {
+			echo "dry_run: ";
+		}
+		echo $message;
+		echo "\n";
+	}
+
 
     /**
      * Procesamiento de valores una vez leida una línea del csv y antes de importar el registro
@@ -246,12 +268,6 @@ abstract class BaseImporter
 			if( $value != null ) { // keep default values
 				$record->$field = $value;
 			}
-/*
-			if( $record->hasAttribute($field) ) {
-			} else {
-				$this->addError("El campo $field no existe en el registro de " . get_class($record));
-			}
-*/
         }
         return $record->validate();
     }
