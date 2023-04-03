@@ -38,11 +38,17 @@ class FormatValidator extends Validator
 	{
 		for( $i=0; $i<strlen($format); ++$i) {
 			switch($format[$i]) {
-			case '<':
+			case 'A':
 				$value = mb_strtoupper($value);
 				break;
-			case '>':
+			case 'a':
 				$value = mb_strtolower($value);
+				break;
+			case '<':
+				$value = mb_strtoupper(mb_substr($value,0,1)) . mb_substr($value,1);
+				break;
+			case '>':
+				$value = mb_strtolower(mb_substr($value,0,1)) . mb_substr($value,1);
 				break;
 			default:
 				break;

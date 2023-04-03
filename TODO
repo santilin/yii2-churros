@@ -1,4 +1,4 @@
-CreateAnother: Si está duplicando, duplicar el que acaba de guardar
+sqlite3: virtual fields en todos los select * into
 
 Eliminar opción recordar contraseña de menú Ácceso
 
@@ -159,6 +159,7 @@ Layout de los botones como el hint default/1col en bs3
 
 == SearchDropDown
 * Si un searchdropdown está disabled o readonly no mostrar el campo de búsqueda
+* ¿Si hay dos coincidencias qué hacer?
 
 == TableListView
 * Quitar márgenes a pager.

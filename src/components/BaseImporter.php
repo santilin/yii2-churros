@@ -167,20 +167,20 @@ abstract class BaseImporter
         // @holadoc php/ficheros No hace falta comprobar si existe un fichero si luego lo vamos a abrir. fopen ya nos da el error si no existe.
         if (($file = @fopen($this->filename, 'r')) === false) {
             $this->errors['csv_open_file'] = error_get_last();
-            return false;
+            return self::FILE_ERROR;
         }
 
         // Descartamos la linea de las cabeceras
         if (($csvline = fgetcsv($file, 0, $csvdelimiter, $csvquote)) === false) {
             $this->errors['csv_read_header'] = $this->filename . ": CSV file can not be read";
-            return false;
+            return self::FILE_ERROR;
         }
 
         $import_fields_info = $this->getImportFieldsInfo();
         $csvheaders = array_keys($import_fields_info);
         if (count($csvline) !== count($csvheaders)) {
             $this->errors[] = "El número de columnas del fichero (" . count($csvline) . ") no coincide con el del importador (" . count($csvheaders). ")";
-            return false;
+            return self::FILE_ERROR;
         }
         if (array_diff($csvline,$csvheaders) != []
         && array_diff($csvheaders,$csvline) != [] ) {
@@ -189,9 +189,9 @@ abstract class BaseImporter
 					echo "$key=>$value <==> $key=>" . $csvheaders[$key]. "\n";
 				}
 			}
-			// @holadoc php/general array_diff es case insensitive, usa array_udiff con strcasecmp si quieres que sea
+			// array_diff es case insensitive, usa array_udiff con strcasecmp si quieres que sea
 			$this->errors[] = "El nombre de alguna(s) columna(s) del fichero csv no es correcto: " . print_r(array_udiff($csvline, $csvheaders, "strcasecmp"),true);
-            return false;
+            return self::FILE_ERROR;
         }
         $this->csvline = 1;
         // Lee el fichero linea a linea y convierte a array la linea
