@@ -141,13 +141,14 @@ abstract class BaseImporter
         $this->errors = [];
 		$transaction = Yii::$app->db->beginTransaction();
         $ret = $this->importCsvRecords($csvdelimiter, $csvquote);
-		if ($this->dry_run) {
-			$transaction->rollBack();
-		}
 		if( $ret == self::OK ) {
-			$transaction->commit();
 			if( $this->verbose ) {
 				$this->output("Importados {$this->imported} registros");
+			}
+			if (!$this->dry_run) {
+				$transaction->commit();
+			} else {
+				$this->output("NO SE HAN GUARDADO LOS REGISTROS");
 			}
 		} else {
 			$transaction->rollBack();
@@ -269,14 +270,14 @@ abstract class BaseImporter
 		$has_error = false;
 		$r = $this->createModel();
 		$r->setDefaultValues();
-		if ($this->validateRecord($r, $record)) { // no valida duplicados para poder hacer update_dups
+		if ($this->loadAll($r, $record)) { // no valida duplicados para poder hacer update_dups
 			try {
 				if( $this->update_dups ) {
 					if (!$r->upsert(false) ) {
 						$this->addError($r->getErrorsAsString());
 						$has_error = true;
 					}
-				} else if( !$r->save(false) ) {
+				} else if( !$r->saveAll(false) ) {
 					$this->addError($r->getErrorsAsString());
 					$has_error = true;
 				}
@@ -315,16 +316,22 @@ abstract class BaseImporter
      * @param HolaModel $record
      * @param array $values Los valores a importar
      */
-    public function validateRecord(& $record, $values)
+    public function loadAll(& $record, $values)
     {
         foreach ($values as $field => $value) {
-			if ($field == 'csvline') {
+			if (is_array($value)) {
 				continue;
 			}
 			if( $value != null ) { // keep default values
 				$record->$field = $value;
 			}
         }
+        foreach ($values as $field => $value) {
+			if( !is_array($value) ) {
+				continue;
+			}
+			$record->loadAll([ $record->formName() => [ $field => $value ]], [$field]);
+		}
         return $record->validate();
     }
 
