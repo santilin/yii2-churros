@@ -121,10 +121,14 @@ abstract class BaseImporter
      * @param array $record los valores que ya están en el registro
      * @param array $csv_values Los valores a importar
      */
-    protected function afterReadLine(& $record, $csv_values)
+    protected function afterReadLine(array &$record, array $csv_values)
     {
     }
 
+    protected function ignoreRecord(array $record):bool
+    {
+		return false;
+    }
 
     /**
 		Lee los registros del fichero y los guarda en un array con los nombres de campos del modelo Importacion
@@ -301,7 +305,7 @@ abstract class BaseImporter
 							$this->output("Ignorando registro duplicado " . $r->recordDesc());
 						} else {
 							$this->addError($r->getOneError());
-							$this->addError("Registro duplicado " . $r->recordDesc() . ':' . $e->getMessage());
+							$this->addError("Registro duplicado " . $r->recordDesc());
 							$has_error = true;
 						}
 					} else {

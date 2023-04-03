@@ -312,10 +312,12 @@ class CrudController extends \yii\web\Controller
 		case 'view':
 		case 'update':
 		case 'duplicate':
+			$redirect_params = array_merge($redirect_params, $model->getPrimaryKey(true));
+			// no break
+		case 'create':
 			if( isset($_REQUEST['_form_cancelUrl']) ) {
 				$redirect_params['_form_cancelUrl'] = $_REQUEST['_form_cancelUrl'];
 			}
-			$redirect_params = array_merge($redirect_params, $model->getPrimaryKey(true));
 			break;
 		default:
 		}
