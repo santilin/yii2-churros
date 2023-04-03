@@ -369,7 +369,7 @@ class CrudController extends \yii\web\Controller
 		return $breadcrumbs;
 	}
 
-	public function actionRoute(string $action_id = null): string
+  	public function actionRoute($action_id = null): string
 	{
 		if( $action_id === null ) {
 			return $this->getRoutePrefix() . $this->id;

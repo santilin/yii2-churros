@@ -25,10 +25,12 @@ abstract class BaseImporter
 {
 	/** Códigos de error del proceso de importación */
 	const OK = 0;
-	const RECORD_ERRORS = 2;
-	const EMPTY_RECORD= 3;
-	const IMPORTED_WITH_ERRORS = 4;
-	const FILE_ERROR = 5;
+ 	const FILE_ERROR = 1;
+	const ABORTED_ON_ERROR = 2;
+	const RECORD_WITH_ERRORS = 5;
+	const EMPTY_RECORD = 3;
+	const IGNORED_RECORD = 4;
+	const IMPORTED_WITH_ERRORS = 5;
 
 	protected $ignore_dups = false;
 	protected $update_dups = false;
@@ -142,9 +144,7 @@ abstract class BaseImporter
 		$transaction = Yii::$app->db->beginTransaction();
         $ret = $this->importCsvRecords($csvdelimiter, $csvquote);
 		if( $ret == self::OK ) {
-			if( $this->verbose ) {
-				$this->output("Importados {$this->imported} registros");
-			}
+			$this->output("Importados {$this->imported} registros");
 			if (!$this->dry_run) {
 				$transaction->commit();
 			} else {
@@ -152,6 +152,13 @@ abstract class BaseImporter
 			}
 		} else {
 			$transaction->rollBack();
+			switch( $ret ) {
+			case self::ABORTED_ON_ERROR:
+				$this->output("Aborted on error");
+				break;
+			default:
+				throw new \Exception("Explain me");
+			}
 		}
 		return $ret;
 	}
@@ -194,6 +201,7 @@ abstract class BaseImporter
 			$this->errors[] = "El nombre de alguna(s) columna(s) del fichero csv no es correcto: " . print_r(array_udiff($csvline, $csvheaders, "strcasecmp"),true);
             return self::FILE_ERROR;
         }
+        $csvheaders = $csvline; // Tomamos el orden del csv, no del input fields
         $this->csvline = 1;
         // Lee el fichero linea a linea y convierte a array la linea
         $ret = false;
@@ -201,14 +209,13 @@ abstract class BaseImporter
         $has_errors = false;
         while (($csvline = fgetcsv($file, 0, $csvdelimiter, $csvquote)) !== false) {
 			++$this->csvline;
-			if ($this->verbose) {
-				$this->output("Leyendo línea CSV {$this->csvline}");
-			}
+			$this->output("Leyendo línea CSV {$this->csvline}");
 			$ret = $this->importLine($import_fields_info, $csvheaders, $csvline);
-			if( $ret != self::OK ) {
+			if( $ret != self::OK  && $ret != self::IGNORED_RECORD && $ret != self::EMPTY_RECORD ) {
 				$has_errors = true;
 				if( $this->abort_on_error ) {
-					return self::RECORD_ERRORS;
+					fclose($file);
+					return self::ABORTED_ON_ERROR;
 				}
 			}
         }
@@ -231,6 +238,7 @@ abstract class BaseImporter
 			// añadimos la cabecera al array
 			$csvline = array_combine($csvheaders, $csvline);
 			$this->record_to_import = [];
+			$has_errors = false;
 			foreach ($csvline as $csvindex => $csvvalue) {
 				// Preparamos la llamada al método que va a importar este campo
 				$fld_import_info = $import_fields_info[$csvindex];
@@ -250,60 +258,75 @@ abstract class BaseImporter
 								$this->record_to_import[$import_field] = $import_value;
 							}
 						} catch (ImportException $e) {
+							$has_errors = true;
 							$this->addError($e->getMessage());
 						}
 					}
 				}
 			}
-			// Guarda la línea original de este registro por si da error poder mostrar la línea del error
-			$this->afterReadLine($this->record_to_import, $csvline);
-			if( count($this->record_to_import) > 0 ) {
-				return $this->importRecord($this->record_to_import);
+			if( !$this->ignoreRecord($this->record_to_import) ) {
+				if( $has_errors ) {
+					return self::RECORD_WITH_ERRORS;
+				} else {
+					// Guarda la línea original de este registro por si da error poder mostrar la línea del error
+					$this->afterReadLine($this->record_to_import, $csvline);
+					if( count($this->record_to_import) > 0 ) {
+						return $this->importRecord($this->record_to_import);
+					}
+				}
+			} else {
+				$this->output("Ignorando registro " . json_encode($this->record_to_import));
+				return self::IGNORED_RECORD;
 			}
-			return self::EMPTY_RECORD;
 		}
 	}
 
 
 	protected function importRecord(array $record): int
 	{
-		$has_error = false;
+		$has_error = $ignored = false;
 		$r = $this->createModel();
 		$r->setDefaultValues();
-		if ($this->loadAll($r, $record)) { // no valida duplicados para poder hacer update_dups
-			try {
+		if ($r->loadAll([ $r->formName() => $record ]) && $r->validate() ) { // no valida duplicados para poder hacer update_dups
+// 			try {
 				if( $this->update_dups ) {
 					if (!$r->upsert(false) ) {
-						$this->addError($r->getErrorsAsString());
+						$this->addError($r->getOnError());
 						$has_error = true;
 					}
 				} else if( !$r->saveAll(false) ) {
-					$this->addError($r->getErrorsAsString());
-					$has_error = true;
+					if( $r->getFirstError('yii\db\IntegrityException')) {
+						if ($this->ignore_dups) {
+							$ignored = true;
+							$this->output("Ignorando registro duplicado " . $r->recordDesc());
+						} else {
+							$this->addError($r->getOneError());
+							$this->addError("Registro duplicado " . $r->recordDesc() . ':' . $e->getMessage());
+							$has_error = true;
+						}
+					} else {
+						$this->addError($r->getOneError());
+						$has_error = true;
+					}
 				}
-			} catch( IntegrityException $e ) {
-				if ($this->ignore_dups) {
-					$this->addError("Ignorando registro duplicado " . $r->recordDesc());
-				} else {
-					$this->addError("Registro duplicado " . $r->recordDesc() . ':' . $e->getMessage());
-				}
-				$has_error = true;
-			} catch( ImportException $e ) {
-				$this->addError($e->getMessage());
-				$has_error = true;
-			}
+// 			} catch( ImportException $e ) {
+// 				$this->addError($e->getMessage());
+// 				$has_error = true;
+// 			}
 		} else {
 			$this->addError( $r->getOneError() . json_encode($r) );
 			$has_error = true;
 		}
 		if (!$has_error) {
-			$this->imported++;
-			if( $this->verbose ) {
-				$this->output("Importado registro " . $r->recordDesc());
+			if (!$ignored) {
+				$this->imported++;
+				if( $this->verbose ) {
+					$this->output("Importado registro " . $r->recordDesc());
+				}
 			}
 		} else {
 			if ($this->abort_on_error) {
-				return self::RECORD_ERRORS;
+				return self::ABORTED_ON_ERROR;
 			}
 		}
 		return self::OK;
@@ -543,6 +566,9 @@ abstract class BaseImporter
 
 	protected function output(string $message)
 	{
+		if( !$this->verbose ) {
+			return;
+		}
 		if ($this->dry_run) {
 			echo "dry_run: ";
 		}

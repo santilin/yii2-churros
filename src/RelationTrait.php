@@ -250,7 +250,7 @@ trait RelationTrait
 				$records = (array)$records;
 			}
 			if (count($records)>0) {
-				$justUpdateIds = !$records[0] instanceof \yii\db\BaseActiveRecord;
+				$justUpdateIds = !($records[0] instanceof \yii\db\BaseActiveRecord);
 				if( $justUpdateIds ) {
 					$success = $this->updateIds($isNewRecord, $rel_name, $records);
 				} else {
@@ -268,9 +268,14 @@ trait RelationTrait
 		$dontDeletePk = [];
 		$notDeletedFK = [];
 		$success = true;
-		if ($relation->multiple) {
+		$isManyMany = false;
+		if ($relation->multiple ) { // Has many or many2many
+			if ($relation->via != null ) {
+				$relModelClass = $relation->via;
+			} else {
+				$relModelClass = $relation->modelClass;
+			}
 			$links = array_keys($relation->link);
-			$relModelClass = $relation->modelClass;
 			$relModel = new $relModelClass;
 			$relPKAttr = $relModel->primarykey();
 			if( count($relPKAttr) > 1 ) {
@@ -285,21 +290,15 @@ trait RelationTrait
 			}
 
 			if (!$isNewRecord) {
-				// Delete records not in the form post data
-				$query = [];
-				foreach ($relation->link as $foreign_key => $value ) {
-					$query = [ "AND", [ $foreign_key => $this->$value ] ];
-				}
-				foreach ($records as $pk_values) {
-					if ($isManyMany) {
-						$dontDeletePk[$other_fk][] = $pk_values[$other_fk];
-					} else {
-						$dontDeletePk[] = $pk_values;
-					}
-				}
 				// DELETE WITH 'NOT IN' PK MODEL & REL MODEL
 				if ($isManyMany) {
-					// Many Many
+					$query = [];
+					foreach ($relation->link as $foreign_key => $value ) {
+						$query = [ "AND", [ $foreign_key => $this->$value ] ];
+					}
+					foreach ($records as $pk_values) {
+						$dontDeletePk[$other_fk][] = $pk_values[$other_fk];
+					}
 					foreach ($dontDeletePk as $attr => $value) {
 						$query[] = ["NOT IN", $attr, $value];
 					}
@@ -313,23 +312,33 @@ trait RelationTrait
 						$this->addError($rel_name, "Data can't be deleted because it's still used by another data.");
 						$success = false;
 					}
+					$records_in_database = $relation->select($other_fk)->asArray()->all();
 				} else {
-					// Has Many
-					if (!empty($dontDeletePk)) {
-						$query = ['and', $notDeletedFK, ['not in', $relPKAttr[0], $dontDeletePk]];
-						try {
-							if ($isSoftDelete) {
-								$relModel->updateAll($this->_rt_softdelete, $query);
-							} else {
-								$relModel->deleteAll($query);
+					if( $relation->via != null ) { // Many2Many
+						$records_in_database = $relation->asArray()->all();
+					} else {
+						$query = [];
+						foreach ($relation->link as $foreign_key => $value ) {
+							$query = [ "AND", [ $foreign_key => $this->$value ] ];
+						}
+						foreach ($records as $pk_values) {
+							$dontDeletePk[] = $pk_values;
+						}
+						if (!empty($dontDeletePk)) {
+							$query = ['and', $notDeletedFK, ['not in', $relPKAttr[0], $dontDeletePk]];
+							try {
+								if ($isSoftDelete) {
+									$relModel->updateAll($this->_rt_softdelete, $query);
+								} else {
+									$relModel->deleteAll($query);
+								}
+							} catch (IntegrityException $exc) {
+								$this->addError($rel_name, "Data can't be deleted because it's still used by another data.");
+								$success = false;
 							}
-						} catch (IntegrityException $exc) {
-							$this->addError($rel_name, "Data can't be deleted because it's still used by another data.");
-							$success = false;
 						}
 					}
 				}
-				$records_in_database = $relation->select($other_fk)->asArray()->all();
 			} else {
 				$records_in_database = [];
 			}

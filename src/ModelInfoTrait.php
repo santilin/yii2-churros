@@ -369,9 +369,9 @@ trait ModelInfoTrait
 	public function addErrorFromException(\Throwable $e)
 	{
 		if( YII_ENV_DEV ) {
-			$this->addError('record', $e->getMessage());
+			$this->addError(get_class($e), $e->getMessage());
 		} else {
-			$this->addError('record', 'Para mantener la integridad de la base de datos, no se han guardado los datos.');
+			$this->addError(get_class($e), 'Para mantener la integridad de la base de datos, no se han guardado los datos.');
 		}
 	}
 
