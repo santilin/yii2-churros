@@ -30,6 +30,8 @@ trait ModelSearchTrait
 		'NOT BETWEEN' => 'no entre dos valores',
 	];
 
+	public $_gridPageSize = 20;
+
 	public function __get($name)
 	{
 		// GridView::renderFilter: needs activeAttribute when related property

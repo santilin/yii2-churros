@@ -117,4 +117,16 @@ class ActionColumn extends \yii\grid\ActionColumn
             };
         }
     }
+
+    protected function renderFilterCellContent()
+    {
+		$pagination = $this->grid->dataProvider->getPagination();
+        if ($pagination === false || $this->grid->dataProvider->getCount() <= 0) {
+            return '';
+        }
+		return Html::activeDropDownList($this->grid->filterModel, '_gridPageSize',
+			[1=>1, 2=>2, 3=>3, 10 => 10, 20 => 20, 50 => 50, 100 => 100, 0 => 'Todo'],
+			['id'=>'_grid_view_pageSize']);
+    }
+
 }

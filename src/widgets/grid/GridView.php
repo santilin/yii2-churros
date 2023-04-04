@@ -43,24 +43,22 @@ class GridView extends SimpleGridView
     public function renderSection($name)
     {
         switch ($name) {
-            case '{summary}':
-                return $this->renderSummary();
-            case '{items}':
-				$empty_text_save = $this->emptyText;
-				$this->emptyText = false;
-                return $this->renderItems();
-				$this->emptyText = $empty_text_save;
-            case '{pager}':
-                return $this->renderPager();
-            case '{sorter}':
-                return $this->renderSorter();
             case '{toolbar}':
             case '{toolbarContainer}':
                 return $this->renderToolbar();
             default:
-                return false;
+                return parent::renderSection($name);
         }
     }
+
+    public function renderItems()
+    {
+		$empty_text_save = $this->emptyText;
+		$this->emptyText = false;
+		$ret = parent::renderItems();
+		$this->emptyText = $empty_text_save;
+		return $ret;
+	}
 
 	protected function renderSelectViews()
 	{
@@ -167,6 +165,5 @@ class GridView extends SimpleGridView
 			return $selectViewsContent . Yii::$app->getI18n()->format($summaryContent, $configSummary, Yii::$app->language);
 		}
     }
-
 
 }

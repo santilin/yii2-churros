@@ -88,16 +88,8 @@ class TableListView extends ListView
 				return '</div>';
             case '{header}':
                 return $this->renderHeader();
-            case '{summary}':
-                return $this->renderSummary();
-            case '{items}':
-                return $this->renderItems();
-            case '{pager}':
-                return $this->renderPager();
-            case '{sorter}':
-                return $this->renderSorter();
             default:
-                return false;
+                return parent::renderSection($name);
         }
     }
 
