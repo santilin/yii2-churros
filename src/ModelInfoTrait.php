@@ -486,6 +486,11 @@ trait ModelInfoTrait
 		return YADTC::fromSql( $this->$fldname );
 	}
 
+	public function asCurrency($fldname, $currency = null, $options = [], $textOptions = []): string
+	{
+		return Yii::$app->formatter->asCurrency($this->$fldname, $currency, $options, $textOptions);
+	}
+
 	/**
 	 * Code copied from ActiveRecord::findByCondition.
 	 * Always Adds the tablename to the primary key field
