@@ -238,6 +238,17 @@ trait RelationTrait
         }
     }
 
+    public function usedInRelation(string $rel_name): int
+    {
+		$rel_method_name = 'get' . ucfirst($rel_name);
+		if( method_exists($this, $rel_method_name)) {
+			return call_user_func([$this, $rel_method_name])->exists();
+		} else {
+			return 0;
+		}
+    }
+
+
     public function saveRelated(): bool
     {
 		$success = true;
@@ -653,67 +664,5 @@ trait RelationTrait
 		}
     }
 
-    /**
-     * return array like this
-     * Array
-     * (
-     *      [attr1] => value1
-     *      [attr2] => value2
-     *      [relationName] => Array
-     *          (
-     *              [0] => Array
-     *                  (
-     *                      [attr1] => value1
-     *                      [attr2] => value2
-     *                  )
-     *          )
-     *  )
-     * @return array
-     */
-    public function getAttributesWithRelated()
-    {
-        /* @var $this ActiveRecord */
-        $return = $this->attributes;
-        foreach ($this->relatedRecords as $name => $records) {
-            $AQ = $this->getRelation($name);
-            if ($AQ->multiple) {
-                foreach ($records as $index => $record) {
-                    $return[$name][$index] = $record->attributes;
-                }
-            } else {
-                $return[$name] = $records->attributes;
-            }
-        }
-        return $return;
-    }
 
-    /**
-     * TranslationTrait manages methods for all translations used in Krajee extensions
-     *
-     * @author Kartik Visweswaran <kartikv2@gmail.com>
-     * @since 1.8.8
-     * Yii i18n messages configuration for generating translations
-     * source : https://github.com/kartik-v/yii2-krajee-base/blob/master/TranslationTrait.php
-     * Edited by : Yohanes Candrajaya <moo.tensai@gmail.com>
-     *
-     *
-     * @return void
-     */
-    public function initI18N()
-    {
-        $reflector = new \ReflectionClass(get_class($this));
-        $dir = dirname($reflector->getFileName());
-
-        Yii::setAlias("@churros", $dir);
-        $config = [
-            'class' => 'yii\i18n\PhpMessageSource',
-            'basePath' => "@churros/messages",
-            'forceTranslation' => true
-        ];
-        $globalConfig = ArrayHelper::getValue(Yii::$app->i18n->translations, "churros*", []);
-        if (!empty($globalConfig)) {
-            $config = array_merge($config, is_array($globalConfig) ? $globalConfig : (array)$globalConfig);
-        }
-        Yii::$app->i18n->translations["churros*"] = $config;
-    }
 }

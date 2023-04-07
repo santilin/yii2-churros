@@ -27,7 +27,8 @@ class CrudController extends \yii\web\Controller
 	const MSG_DELETED = '{La} {title} <strong>{record_long}</strong> has been successfully deleted.';
 	const MSG_ERROR_DELETE = 'There has been an error deleting {la} {title} <a href="{model_link}">{record_medium}</a>';
 	const MSG_DUPLICATED = '{La} {title} <a href="{model_link}">{record_medium}</a> has been successfully duplicated.';
-	const MSG_ERROR_DELETE_INTEGRITY = 'Unable to delete {la} {title} <a href="{model_link}">{record_medium}</a> because it has related data';
+	const MSG_ERROR_DELETE_INTEGRITY = 'Unable to delete {la} {title} <a href="{model_link}">{record_medium}</a> because it has related data.';
+	const MSG_ERROR_DELETE_USED_IN_RELATION = 'Unable to delete {la} {title} <a href="{model_link}">{record_medium}</a> because it is used by at least one {relation_title}.';
 	const MSG_ACCESS_DENIED = 'Access denied to this {title}.';
 	const MSG_NOT_FOUND = '{Title} with primary key {id} not found.';
 
@@ -445,6 +446,8 @@ class CrudController extends \yii\web\Controller
 			return self::MSG_ACCESS_DENIED;
 		case 'model_not_found':
 			return self::MSG_NOT_FOUND;
+		case 'used_in_relation':
+			return self::MSG_ERROR_DELETE_USED_IN_RELATION;
 		default:
 			return self::MSG_NO_ACTION;
 		}
@@ -458,29 +461,44 @@ class CrudController extends \yii\web\Controller
 			}
 			$success_message = $model->t('churros', $success_message);
 			if( strpos($success_message, '{model_link}') !== FALSE ) {
-				$pk = $model->getPrimaryKey();
-				if( is_array($pk) ) {
-					$link_to_me = Url::to(array_merge([$this->actionRoute('view')], $pk));
-				} else {
-					$link_to_me = $this->actionRoute('view') . "/$pk";
-				}
-				Yii::$app->session->addFlash('success', str_replace('{model_link}', $link_to_me, $success_message));
-			} else {
-				Yii::$app->session->addFlash('success', $success_message);
+				$link_to_model = $this->linkToModel($model);
+				$success_message = str_replace('{model_link}', $link_to_model, $success_message);
 			}
+			Yii::$app->session->addFlash('success', $success_message);
 		}
 		$this->showErrorFlashes($model);
 	}
 
+
 	protected function showErrorFlashes($model)
 	{
 		foreach($model->getFirstErrors() as $error ) {
+			if( strpos($error, '{model_link}') !== FALSE ) {
+				$link_to_model = $this->linkToModel($model);
+				$error = str_replace('{model_link}', $link_to_model, $error);
+			}
 			Yii::$app->session->addFlash('error', $error );
 		}
 		foreach($model->getFirstWarnings() as $warning ) {
+			if( strpos($warning, '{model_link}') !== FALSE ) {
+				$link_to_model = $this->linkToModel($model);
+				$warning = str_replace('{model_link}', $link_to_model, $warning);
+			}
 			Yii::$app->session->addFlash('warning', $warning );
 		}
 	}
+
+	protected function linkToModel($model)
+	{
+		$pk = $model->getPrimaryKey();
+		if( is_array($pk) ) {
+			$link = Url::to(array_merge([$this->actionRoute('view')], $pk));
+		} else {
+			$link = $this->actionRoute('view') . "/$pk";
+		}
+		return $link;
+	}
+
 
 	protected function findViewFile($view)
 	{
