@@ -21,7 +21,6 @@ trait EmailSenderModelTrait
 		$mailer_error = '';
 		Yii::$app->mailer->on(\yii\mail\BaseMailer::EVENT_AFTER_SEND,
 			function(\yii\mail\MailEvent $event) use ($mailer_error, $sent) {
-			/// @todo ¿Cuándo llega aquí?
 				$sent = $event->isSuccessful;
 				if( !$event->isSuccessful  ) {
 				}
