@@ -26,8 +26,9 @@
 		"kartik-v/yii2-widget-fileinput": "dev-master",
 		"kartik-v/yii2-mpdf": "dev-master",
 		"kartik-v/yii2-bootstrap4-dropdown": "@dev",
-		"santilin/yii2-sqlite3-full-support": "@dev",
 		"santilin/yii2-churros": "dev-develop",
+		"santilin/yii2-sqlite3-full-support": "@dev",
+ 		"santilin/yii2-world-repos": "dev-develop",
 		"2amigos/yii2-usuario": "dev-master",
 		"2amigos/yii2-tinymce-widget": "~1.1",
 		"2amigos/yii2-type-ahead-widget": "~2.0",
@@ -68,9 +69,10 @@
 		"allow-plugins": {
 			"yiisoft/yii2-composer": true
 		},
-        "preferred-install": {
-            "santilin/*": "source",
-		"yiisoft/*": "source"
+		"preferred-install": {
+			"santilin/*": "source",
+			"yiisoft/*": "source",
+			"2amigos/yii2-usuario": "source"
 		}
 	},
 	"scripts": {
@@ -124,7 +126,15 @@
 		},
 		{
 			"type": "vcs",
+			"url": "git@github.com:santilin/yii2"
+		},
+		{
+			"type": "vcs",
 			"url": "git@github.com:santilin/yii2-sqlite3-full-support"
+		},
+		{
+			"type": "vcs",
+			"url": "git@github.com:santilin/yii2-world-repos"
 		}
 	]
 }
