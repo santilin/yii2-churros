@@ -61,8 +61,8 @@ trait ActiveFormTrait
 				$cols = intval(substr($layout['type'],0,1));
 				switch( $cols ) {
 				case 2:
-					$col_md = 6;
-					$col_sm = 4;
+ 					$col_md = 6;
+ 					$col_sm = 4;
 					break;
 				case 3:
 					$col_md = 4;
@@ -134,7 +134,11 @@ trait ActiveFormTrait
 
 	public function getLayoutClasses($field_layout, $row_layout)
 	{
-		return self::FIELD_HORIZ_CLASSES[$field_layout][$row_layout];
+		if( $field_layout == 'static' ) {
+			return self::FIELD_HORIZ_CLASSES['static'];
+		} else {
+			return self::FIELD_HORIZ_CLASSES[$field_layout][$row_layout];
+		}
 	}
 
 	protected function layoutButtons(array $buttons, string $layout, array $options = []): string

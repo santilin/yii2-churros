@@ -9,7 +9,16 @@ class EchoWidget extends \yii\widgets\InputWidget
 {
 	public function run()
 	{
-		$classes = ArrayHelper::remove($this->options, 'class', 'form-control readonly');
-		return "<div class=\"$classes\">{$this->value}</div>";
+		$classes = explode(' ', $this->options['class']);
+		foreach ($classes as $key => $class) {
+			if ($class=='form-control') {
+				$classes[$key] = 'form-control-static';
+			}
+		}
+		if (empty($classes)) {
+			$classes[] = 'form-control-static';
+		}
+		$s_classes = implode(',', $classes);
+		return "<div class=\"$s_classes\">{$this->value}</div>";
 	}
 }
