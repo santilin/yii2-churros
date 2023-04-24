@@ -9,7 +9,7 @@
 namespace santilin\churros\helpers;
 
 use Yii;
-use yii\rbac\Item;
+use yii\rbac\{Item,Role};
 
 class AuthHelper
 {
@@ -150,6 +150,9 @@ class AuthHelper
 		}
 		$msgs = [];
 		foreach( $perms as $perm_name ) {
+			if ($perm_name instanceof Role) {
+				$perm_name = $perm_name->name;
+			}
 			$perm = $auth->getItem($perm_name);
 			if( !$perm ) {
 				throw new \Exception( "$perm_name: permission or role not found" );
