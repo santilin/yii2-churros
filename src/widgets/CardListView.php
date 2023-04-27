@@ -18,11 +18,12 @@ use santilin\churros\ChurrosAsset;
 class CardListView extends ListView
 {
 	public $options = [ 'class' => 'cardlistview'];
-	public $itemsOptions = [ 'class' => 'row row-cols-1 row-cols-md-3' ];
-	public $itemOptions = [ 'class' => 'col mb-4 card' ];
+	public $itemsOptions = [ 'class' => 'row mb-3' ];
+	public $cardOptions = [ 'class' => 'col col-md-6 col-lg-4 col-xxl-3 px-1 mb-1' ];
 	public $layout = "{summarypager}\n{items}";
 	public $labelSingular = 'item';
 	public $labelPlural = 'items';
+	public $itemOptions = [ 'class' => 'card shadow h-100' ];
 
 	public function __construct($config = [])
 	{
@@ -44,6 +45,7 @@ class CardListView extends ListView
 			$this->summary = strtr($this->summary, ['{item}' => '{'.$this->labelSingular.'}',
 				'{items}' => '{'.$this->labelPlural.'}' ]);
 		}
+
 	}
 
 	public function run()
@@ -78,6 +80,19 @@ class CardListView extends ListView
             default:
                 return false;
         }
+    }
+
+    /**
+     * Renders a single data model.
+     * @param mixed $model the data model to be rendered
+     * @param mixed $key the key value associated with the data model
+     * @param int $index the zero-based index of the data model in the model array returned by [[dataProvider]].
+     * @return string the rendering result
+     */
+    public function renderItem($model, $key, $index)
+    {
+		$content = parent::renderItem($model, $key, $index);
+        return Html::tag('div', $content, $this->cardOptions);
     }
 
     public function renderSummaryAndPager()
