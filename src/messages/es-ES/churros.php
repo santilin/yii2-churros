@@ -50,7 +50,6 @@ return [
     'Show first page data' => 'Paginar los resultados',
     'Show all data' => 'Mostrar todos los resultados',
     'Error saving the record {title}' => 'Error guardando el registro {title}',
-    'From \'{from}\' or until \'{until}\' dates are in invalid date format' => 'Las fechas desde: \'{from}\' o hasta: \'{until}\' no tienen un formato válido',
 
     'Active' => 'Activo',
     'Inactive' => 'Inactivo',

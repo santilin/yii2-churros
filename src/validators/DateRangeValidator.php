@@ -43,7 +43,7 @@ class DateRangeValidator extends Validator
 	public function validateAttribute($model, $attribute)
     {
 		if( $this->untilAttribute == '' ) {
-			throw new \Exception('DateRangeValidator: untilAttribute not set');
+			throw new InvalidConfigException('DateRangeValidator: untilAttribute not set');
 		}
 		$format = $this->type == DateValidator::TYPE_DATE ? $this->formatDate : $this->formatDateTime;
 		$fromDate = $model->$attribute;
@@ -58,17 +58,26 @@ class DateRangeValidator extends Validator
 				'parsedUntil'
 			],
 			[
-				[$attribute, 'date', 'format' => $format,
+				[$attribute, $this->type, 'format' => $format,
 					'timestampAttribute' => 'parsedFrom'],
-				[$this->untilAttribute, 'date', 'format' => $format,
+				[$this->untilAttribute, $this->type, 'format' => $format,
 					'timestampAttribute' => 'parsedUntil'],
 			]
 		);
 
 		if ($validationModel->hasErrors()) {
-			return $this->addError($model, $attribute, Yii::t('churros',
-				"From '{from}' or until '{until}' dates are in invalid date format", [
-					'from' => $fromDate, 'until' => $untilDate ]));
+			$s_err = '';
+			$k_err = null;
+			foreach ($validationModel->getErrors() as $k => $error) {
+				if (!$k_err) {
+					$k_err = $k;
+				}
+				if ($s_err) {
+					$s_err .= ' ';
+				}
+				$s_err .= $error[0];
+			}
+			return $this->addError($model, $k, $s_err);
 		}
 
 		if( $validationModel->parsedFrom > $validationModel->parsedUntil ) {

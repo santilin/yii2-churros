@@ -39,7 +39,7 @@ trait ActiveFormTrait
 			$col_xs = 12;
 			switch( $layout['type'] ) {
 			case 'buttons':
-				$ret .= '<div class="clearfix row">';
+				$ret .= '<div class="mt-2 clearfix row">';
 				$ret .= $this->layoutButtons($layout['buttons'], $layout['layout']??$this->formLayout, $layout['options']??[]);
 				$ret .= '</div><!-- buttons -->' .  "\n";
 				break;

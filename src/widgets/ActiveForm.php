@@ -11,6 +11,8 @@ class ActiveForm extends Bs4ActiveForm
 {
 	use ActiveFormTrait;
 
+	public $errorSummaryCssClass = 'error-summary alert alert-danger';
+
 	public const FIELD_HORIZ_CLASSES = [
 		'default' => [
 			'1col' => [
@@ -87,10 +89,13 @@ class ActiveForm extends Bs4ActiveForm
 		],
 		'medium' => [
 			'1col' => [
-				'horizontalCssClasses' => [
-					'label' => 'col-sm-1 one-column-row',
-					'offset' => 'kk2 offset-sm-1',
-					'wrapper' => 'col-sm-6',
+				'horizontalCssClasses' =>[
+					'offset' => ['col-lg-3 col-md-3 col-sm-4 col-12', 'offset-lg-2 offset-md-2 offset-sm-3'],
+					'label' => ['col-lg-3 col-md-3 col-sm-4 col-12', 'col-form-label text-left text-sm-right text-md-right text-lg-right'],
+					'wrapper' => 'col-lg-5 col-md-6 col-sm-7 col-8',
+					'error' => '',
+					'hint' => '',
+					'field' => 'form-group row',
 				]
 			],
 			'2cols' => [

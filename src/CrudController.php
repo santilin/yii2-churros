@@ -108,8 +108,10 @@ class CrudController extends \yii\web\Controller
 	public function actionCreate()
 	{
 		$req = Yii::$app->request;
-		$params = $req->queryParams;
+		$params = ($req->isGet ? $req->get() : $req->post());
 		$model = $this->findFormModel(null, null, 'create', $params);
+		$model->scenario = 'create';
+
 		if (isset($_POST['_form_relations']) ) {
 			$relations = explode(",", $_POST['_form_relations']);
 		} else {
@@ -137,9 +139,10 @@ class CrudController extends \yii\web\Controller
 	public function actionDuplicate($id)
 	{
 		$req = Yii::$app->request;
-		$params = $req->queryParams;
+		$params = ($req->isGet ? $req->get() : $req->post());
 		$model = $this->findFormModel($id, null, 'duplicate', $params);
 		$model->setDefaultValues(true); // duplicating
+		$model->scenario = 'duplicate';
 
 		if (isset($_POST['_form_relations']) ) {
 			$relations = explode(",", $_POST['_form_relations']);
@@ -169,15 +172,16 @@ class CrudController extends \yii\web\Controller
 	public function actionUpdate($id)
 	{
 		$req = Yii::$app->request;
-		$params = $req->queryParams;
+		$params = ($req->isGet ? $req->get() : $req->post());
 		$model = $this->findFormModel($id, null, 'update', $params);
+		$model->scenario = 'update';
 
 		if (isset($_POST['_form_relations']) ) {
 			$relations = explode(",", $_POST['_form_relations']);
 		} else {
 			$relations = [];
 		}
-		if ($model->loadAll($req->post(), $relations) ) {
+		if ($model->loadAll($req->post(), $relations) && $req->isPost ) {
 			if( $model->saveAll(true) ) {
 				$this->addSuccessFlashes('update', $model);
 				return $this->whereTogoNow('update', $model);
