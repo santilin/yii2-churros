@@ -30,31 +30,35 @@ class TaxonomyInput extends \yii\widgets\InputWidget
         if( !isset($this->options['id']) ) {
 			$this->options['id'] = Html::getInputId($this->model, $this->attribute);
 		}
-        $html = '<table><tr><td></td>';
-		if( $this->taxonomyLevel <= 0 || $this->taxonomyLevel > count($this->taxonomy['levels']) ) {
-			$nlevels = count($this->taxonomy['levels']);
-		} else {
-			$nlevels = $this->taxonomyLevel;
-		}
-        foreach( $levels as $k => $level) {
-			if( $k >= $nlevels )  {
-				break;
-			}
-			if( $k == 0 && $this->hideFirstLabel ) {
-				$html .= "<td></td>";
-			} else {
-				$html .= "<td>{$level['title']}</td>";
-			}
-		}
-		$html .= "</tr><tr><td>";
+		$html = '';
+//         $html = '<div class="row"><div class="col col-md-9 col-lg-9 col-xxl-9 px-1 mb-1"><div class="row">';
 		if( $this->showCode ) {
 			$html .= Html::activeInput('text', $this->model, $this->attribute, $this->options);
 		} else {
 			$html .= Html::activeHiddenInput($this->model, $this->attribute);
 		}
-		$html .= '</td><td>';
-        $options = $this->options;
-        $name = $options['name']??Html::getInputName($this->model, $this->attribute);
+// 		$html .= '</div>';
+		$html .= '<div class="row taxonomy-dropdowns">';
+		if( $this->taxonomyLevel <= 0 || $this->taxonomyLevel > count($this->taxonomy['levels']) ) {
+			$nlevels = count($this->taxonomy['levels']);
+		} else {
+			$nlevels = $this->taxonomyLevel;
+		}
+		$dropdown_container_classes = 'col col-md-6 col-sm-6 col-12 col-lg-4 col-xl-3';
+		$headings = [];
+        foreach( $levels as $k => $level) {
+			if( $k >= $nlevels )  {
+				break;
+			}
+			if( $k == 0 && $this->hideFirstLabel ) {
+				$headings[$k] = '';
+			} else {
+				$headings[$k] = $level['title'];
+			}
+		}
+		$html .= "<div class=\"$dropdown_container_classes\">";
+		$options = $this->options;
+		$name = $options['name']??Html::getInputName($this->model, $this->attribute);
 		$options['id'] = "taxon_0_{$this->options['id']}";
 		$this->drop_ids[] = $options['id'];
 		$options['name'] = "taxon_{$name}[]";
@@ -62,17 +66,18 @@ class TaxonomyInput extends \yii\widgets\InputWidget
 		$options['prompt'] = $levels[0]['prompt']??'Elige';
 		$value = $this->getValueForLevel(0);
 		$level0_values = $this->getLevelValues(0, $value);
-		$html .= Html::dropDownList("taxon_0_{$name}", $value, $level0_values, $options);
-		$html .= "</td>";
+ 		$html .= "<label class=\"taxonomy level-0\">{$headings[0]}</label> " . Html::dropDownList("taxon_0_{$name}", $value, $level0_values, $options);
+ 		$html .= "</div>";
         for( $l=1; $l<$nlevels; ++$l) {
 			$options['id'] = "taxon_{$l}_{$this->options['id']}";
 			$this->drop_ids[] = $options['id'];
 			$options['name'] = "taxon_{$name}[]";
 			$options['data']['level'] = $l;
 			$options['prompt'] = $levels[$l]['prompt']??'Elige';
-			$html .= '<td>' . Html::dropDownList(null, [], [], $options) . '</td>';
+ 			$html .= "<div class=\"$dropdown_container_classes\"><label class=\"taxonomy level-$l\">{$headings[$l]}</label> "
+				. Html::dropDownList(null, [], [], $options) . '</div>';
 		}
-		$html .= '</tr></table>';
+ 		$html .= '</div><!--row-->';
         $this->registerClientScript();
 		$view = $this->getView();
         ChurrosAsset::register($view);

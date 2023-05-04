@@ -310,3 +310,7 @@
 	margin-right: 10px;
 	flex-grow:1;
 }
+label.taxonomy {
+	font-style: italic;
+	font-size: smaller;
+}
