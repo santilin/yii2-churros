@@ -8,18 +8,12 @@ Cuando va a site/error, botones o menú para volver a los módulos a los que ten
 
 Errores en formulario de Ajax. Que se quede en el formulario ajax y muestre el error.
 Repensar el ActivatableInput
-Checkboxes: unchecked: no se ven en bs4.
 Cancel button: no tiene color de fondo en tabler.
+
 Búsqueda sadm/trivelantes/usuaria/Sí. Falla estrepitosamente.
 
 
 == Themes
-=== Menús
-https://codepen.io/JacobLett/pen/jaaQYG // horizontal
-https://bootsnipp.com/snippets/P2dG9
-https://codepen.io/corbpie/pen/LYNwGdE
-https://getbootstrap.com/docs/3.4/examples/navbar/
-
 
 == YII2
 === Bugs
@@ -104,7 +98,6 @@ Grid:
 - layout admin, más compacto.
 - iconos de ordenar, en hasone si tiene código, icono numérico
 * GridView: Report : grupos: opciones para Mostrar encabezado, mostrar pie.
-* ¿Quitar grid-group-head-xxxx de site.css?
 * Grid Enlaces en el joinmodels: filtro en el grid por ese valor?
 * selectViews no funciona con pjax porque es un dropdown. Añadirlo dentro de un FORM
 * Grid: cuando se filtra, poner "Filtrando 1-1 de s"
@@ -115,13 +108,12 @@ Grid:
 
 = Formularios
 Añadir el símbolo del euro al input de los forms: bs4 input-group
-Layout de los botones como el hint default/1col en bs3
 
 = No prioritario
 == Models
 * Tres tipos campos calculados:
-- model_before_save
-- model_after_read & __set
+- VIRTUAL
+- STORED
 - form input change
 
 == Reports
@@ -139,6 +131,7 @@ Layout de los botones como el hint default/1col en bs3
 === Configuración
 - Configuración fecha: Fija, por usuario
 - Configuración idioma: Fijo, por usuario
+
 == Anidar RercordViews con un static
 
 === css
@@ -162,8 +155,6 @@ Layout de los botones como el hint default/1col en bs3
 == TableListView
 * Quitar márgenes a pager.
 * Centrar verticalmente summary.
-* Añadir css como asset.
-
 
 == yii2
 * Max-length: Tomar lo que se ha definido en la base de datos o capturar la excepción.
