@@ -160,8 +160,10 @@ abstract class BaseImporter
 			case self::ABORTED_ON_ERROR:
 				$this->output("Aborted on error");
 				break;
+			case self::FILE_ERROR:
+				break;
 			default:
-				throw new \Exception("Explain me");
+				throw new \Exception("Explain me: $ret");
 			}
 		}
 		return $ret;
@@ -169,7 +171,7 @@ abstract class BaseImporter
 
 
     /**
-     * Lee el fichero CSV e importa las línesa.
+     * Lee el fichero CSV e importa las líneas.
      * @param string $csvdelimiter
      * @param string $csvquote
      * @return bool si no ha habido errors graves
