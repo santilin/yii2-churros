@@ -52,14 +52,19 @@ abstract class BaseImporter
     protected $record = null;
 
     /**
-     * @var integer el número de línea del fichero csv o el número de registro xml que se está leyendo
+     * @var int el número de línea del fichero csv o el número de registro xml que se está leyendo
      */
 	protected $csvline = 0;
 
     /**
-     * @var integer el número de registros importados
+     * @var int el número de registros importados
      */
 	protected $imported = 0;
+
+    /**
+     * @var int el número de registros actualizados
+     */
+	protected $updated = 0;
 
     /**
      * @var array Los mensajes de error graves
@@ -130,6 +135,12 @@ abstract class BaseImporter
 		return false;
     }
 
+    protected function recordExists($record)
+    {
+		return null;
+    }
+
+
     /**
 		Lee los registros del fichero y los guarda en un array con los nombres de campos del modelo Importacion
 		y con todas las transformaciones necesarias.
@@ -148,7 +159,8 @@ abstract class BaseImporter
 		$transaction = Yii::$app->db->beginTransaction();
         $ret = $this->importCsvRecords($csvdelimiter, $csvquote);
 		if( $ret == self::OK ) {
-			$this->output("Importados {$this->imported} registros");
+			$this->output("Insertados {$this->imported} registros");
+			$this->output("Actualizados {$this->updated} registros");
 			if (!$this->dry_run) {
 				$transaction->commit();
 			} else {
@@ -287,50 +299,53 @@ abstract class BaseImporter
 		}
 	}
 
-
 	protected function importRecord(array $record): int
 	{
 		$has_error = $ignored = false;
 		$r = $this->createModel();
 		$r->setDefaultValues();
-		if ($r->loadAll([ $r->formName() => $record ]) && $r->validate() ) { // no valida duplicados para poder hacer update_dups
-// 			try {
+		// no valida duplicados para poder hacer update_dups
+		if ($r->loadAll([ $r->formName() => $record ]) && $r->validate() ) {
+			$model_dup = $this->modelExists($r);
+			if ($model_dup) {
 				if( $this->update_dups ) {
-					if (!$r->upsert(false) ) {
-						$this->addError($r->getOnError());
+					// $r se va a insertar pero ya existe $model_dup, por lo tanto, actualizamos $model_dup
+					$r = $model_dup;
+					if (!$r->loadAll([ $r->formName() => $record ]) || !$r->saveAll(true) ) {
 						$has_error = true;
-					}
-				} else if( !$r->saveAll(false) ) {
-					if( $r->getFirstError('yii\db\IntegrityException')) {
-						if ($this->ignore_dups) {
-							$ignored = true;
-							$this->output("Ignorando registro duplicado " . $r->recordDesc());
-						} else {
-							$this->addError($r->getOneError());
-							$this->addError("Registro duplicado " . $r->recordDesc());
-							$has_error = true;
-						}
 					} else {
-						$this->addError($r->getOneError());
+						$this->updated++;
+						if( $this->verbose ) {
+							$this->output("Actualizado registro " . $r->recordDesc());
+						}
+					}
+				} else {
+					$this->output("Ignorando registro duplicado " . $r->recordDesc());
+					$ignored = true;
+				}
+			} elseif( !$r->saveAll(false) ) {
+				if( $r->getFirstError('yii\db\IntegrityException')) {
+					if ($this->ignore_dups) {
+						$this->output("Ignorando registro duplicado " . $r->recordDesc());
+						$ignored = true;
+					} else {
+						$this->addError("Registro duplicado " . $r->recordDesc());
 						$has_error = true;
 					}
+				} else {
+					$has_error = true;
 				}
-// 			} catch( ImportException $e ) {
-// 				$this->addError($e->getMessage());
-// 				$has_error = true;
-// 			}
-		} else {
-			$this->addError( $r->getOneError() . json_encode($r) );
-			$has_error = true;
-		}
-		if (!$has_error) {
-			if (!$ignored) {
+			} else {
 				$this->imported++;
 				if( $this->verbose ) {
 					$this->output("Importado registro " . $r->recordDesc());
 				}
 			}
 		} else {
+			$has_error = true;
+		}
+		if ($has_error) {
+			$this->addError( $r->getOneError() . json_encode($r->getAttributes()) );
 			if ($this->abort_on_error) {
 				return self::ABORTED_ON_ERROR;
 			}
@@ -340,7 +355,7 @@ abstract class BaseImporter
 
 
     /**
-     * Importa un registro a partir de los valores en el array $record.
+     * Rellena los atributos de un registro a partir de los valores en el array $record.
      *
      * @param HolaModel $record
      * @param array $values Los valores a importar
