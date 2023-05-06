@@ -30,7 +30,7 @@ class Base extends \Faker\Provider\Base
     public function integerUnsigned($max_digits = 16)
     {
 		if( $max_digits == 1 ) {
-			return $this->randomDigitNotNull();
+			return $this->generator->randomDigit();
 		} else {
 			return $this->decimalUnsigned($max_digits);
 		}
