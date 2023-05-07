@@ -293,7 +293,7 @@ abstract class BaseImporter
 					}
 				}
 			} else {
-				$this->output("Ignorando registro " . json_encode($this->record_to_import));
+				$this->output("Ignorando registro " . json_encode($this->record_to_import,JSON_UNESCAPED_UNICODE));
 				return self::IGNORED_RECORD;
 			}
 		}
@@ -345,7 +345,7 @@ abstract class BaseImporter
 			$has_error = true;
 		}
 		if ($has_error) {
-			$this->addError( $r->getOneError() . json_encode($r->getAttributes()) );
+			$this->addError( $r->getOneError() . json_encode($r->getAttributes(),JSON_UNESCAPED_UNICODE) );
 			if ($this->abort_on_error) {
 				return self::ABORTED_ON_ERROR;
 			}
