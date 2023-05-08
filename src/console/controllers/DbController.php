@@ -43,6 +43,8 @@ class DbController extends Controller
 	/** @var string path to the seeders directory, defaults to @app/database/seeders */
 	public $seedersPath = "@app/database/seeders";
 
+	/** @var string path to the fixtures directory, defaults to @app/tests/fixtures/data*/
+	public $fixturesPath = "@app/tests/fixtures/data";
 
     public function options($actionID)
     {
@@ -111,21 +113,22 @@ class DbController extends Controller
      */
     public function actionDumpSchema($schemaName = '')
     {
-		if( $this->format != 'seeder' ) {
-			throw new InvalidConfigException("{$this->format}: formato no contemplado. Sólo se contempla 'seeder'");
+		if( $this->format != 'seeder' && $this->format != 'fixture' ) {
+			throw new InvalidConfigException("{$this->format}: formato no contemplado. Sólo se contempla 'seeder' y 'fixture'");
 		}
-		$preamble = $this->getPreamble('dump-schema', $schemaName);
-		$runseeder = '';
-		$tables = $this->db->schema->getTableSchemas($schemaName, true);
-		$full_dump = $preamble;
-		foreach ($tables as $table) {
-			if( $table->name != 'migration' ) {
-				echo "Dumping {$table->name}\n";
-				$full_dump .= $this->dumpTable($table, $schemaName);
-				$runseeder .= "\t\t\$s = new {$table->name}Seeder(); \$s->run(\$db);\n";
+		if ($this->format == 'seeder') {
+			$preamble = $this->getPreamble('dump-schema', $schemaName);
+			$runseeder = '';
+			$tables = $this->db->schema->getTableSchemas($schemaName, true);
+			$full_dump = $preamble;
+			foreach ($tables as $table) {
+				if( $table->name != 'migration' ) {
+					echo "Dumping {$table->name}\n";
+					$full_dump .= $this->dumpTable($table, $schemaName);
+					$runseeder .= "\t\t\$s = new {$table->name}Seeder(); \$s->run(\$db);\n";
+				}
 			}
-		}
-		$full_dump .= <<<EOF
+			$full_dump .= <<<EOF
 class SchemaSeeder
 {
 	public function run(\$db)
@@ -136,18 +139,43 @@ $runseeder
 }
 
 EOF;
-		if ($this->createFile ) {
-			$write_file = true;
-			$filename = Yii::getAlias($this->seedersPath) . "/SchemaSeeder.php";
-			if (\file_exists($filename) && !$this->confirm("The file $filename already exists. Do you want to overwrite it?") ) {
-				$write_file = false;
+			if ($this->createFile ) {
+				$write_file = true;
+				@mkdir(Yii::getAlias($this->seedersPath), 0777, true);
+				$filename = Yii::getAlias($this->seedersPath) . "/SchemaSeeder.php";
+				if (\file_exists($filename) && !$this->confirm("The file $filename already exists. Do you want to overwrite it?") ) {
+					$write_file = false;
+				}
+				if ($write_file) {
+					\file_put_contents($filename, $full_dump);
+					echo "Created seeder for schema in $filename\n";
+				}
+			} else {
+				echo $full_dump;
 			}
-			if ($write_file) {
-				\file_put_contents($filename, $full_dump);
-				echo "Created seeder for schema in $filename\n";
+		} else { // fixtures
+			$tables = $this->db->schema->getTableSchemas($schemaName, true);
+			foreach ($tables as $table) {
+				$table_dump = '';
+				if( $table->name != 'migration' ) {
+					echo "Dumping {$table->name}\n";
+					$table_dump .= $this->dumpTable($table, $schemaName);
+				}
+				if ($this->createFile ) {
+					$write_file = true;
+					@mkdir(Yii::getAlias($this->fixturesPath), 0777, true);
+					$filename = Yii::getAlias($this->fixturesPath) . "/" . $table->name . ".php";
+					if (\file_exists($filename) && !$this->confirm("The file $filename already exists. Do you want to overwrite it?") ) {
+						$write_file = false;
+					}
+					if ($write_file) {
+						\file_put_contents($filename, $table_dump);
+						echo "Created seeder for schema in $filename\n";
+					}
+				} else {
+					echo $table_dump;
+				}
 			}
-		} else {
-			echo $full_dump;
 		}
 	}
 
@@ -347,9 +375,6 @@ PREAMBLE;
 		return $preamble;
 	}
 
-	protected function seedTableFromCsv($table, $inputfile)
-	{
-	}
 
 } // class
 

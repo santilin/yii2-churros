@@ -119,6 +119,9 @@ class CrudController extends \yii\web\Controller
 		}
 		if ($model->loadAll($req->post(), $relations) ) {
 			if( $model->saveAll(true) ) {
+				if ($req->getIsAjax()) {
+					return json_encode($model->getAttributes());
+				}
 				$this->addSuccessFlashes('create', $model);
 				return $this->whereToGoNow('create', $model);
 			}

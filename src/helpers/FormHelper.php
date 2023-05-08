@@ -8,7 +8,8 @@
 namespace santilin\churros\helpers;
 
 use Yii;
-use yii\helpers\{ArrayHelper,Html};
+use yii\helpers\{ArrayHelper,Html,Url};
+use yii\base\InvalidConfigException;
 
 class FormHelper
 {
@@ -182,7 +183,7 @@ class FormHelper
 			if( isset($button['htmlOptions']['autofocus']) ) {
 				$button['htmlOptions']['tabindex'] = static::ti();
 			}
-			$title = $button['title'];
+			$title = $button['title']??$name;
 			$icon = $button['icon']??null;
 			if( $icon ) {
 				if( strpos($icon, '<i') !== FALSE ) {
@@ -198,6 +199,67 @@ class FormHelper
 				$ret[] = Html::a(
 					$title,
 					$button['url']??'javascript:void(0);',
+					$button['htmlOptions']);
+				break;
+			case 'ajax':
+				$request_url = Url::to((array)$button['url']);
+				$button['htmlOptions']['onclick'] = <<<ajax
+javascript:
+var btn = $(this);
+$.ajax({
+	url: '$request_url',
+	type: 'get',
+	dataType: 'json',
+	complete: function (jqXHR, textStatus) {
+		console.log('Complete: ', jqXHR, textStatus);
+	},
+	beforeSend: function (jqXHR, settings) {
+		console.log('Before send: ', jqXHR, settings);
+	},
+	success: function (data) {
+		btn.hide();
+		console.log('Success: ', data);
+	},
+	error: function (e) {
+		console.log("Error", e.responseText);
+	}
+});
+ajax;
+				$ret[] = Html::button(
+					$title,
+					$button['htmlOptions']);
+				break;
+			case 'ajax-post':
+				if (!is_array($button['url'])) {
+					throw new InvalidConfigException("Ajax-post: button url must be array");
+				}
+				$request_url = Url::to(array_shift($button['url']));
+				$data = json_encode($button['url']);
+				$button['htmlOptions']['onclick'] = <<<ajax
+javascript:
+var btn = $(this);
+$.ajax({
+	url: '$request_url',
+	type: 'post',
+	dataType: 'json',
+	data: $data,
+	complete: function (jqXHR, textStatus) {
+		console.log('Complete: ', jqXHR, textStatus);
+	},
+	beforeSend: function (jqXHR, settings) {
+		console.log('Before send: ', jqXHR, settings);
+	},
+	success: function (data) {
+		btn.hide();
+		console.log('Success: ', data);
+	},
+	error: function (e) {
+		console.log("Error", e.responseText);
+	}
+});
+ajax;
+				$ret[] = Html::button(
+					$title,
 					$button['htmlOptions']);
 				break;
 			case 'submit':
