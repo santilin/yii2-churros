@@ -212,7 +212,7 @@ class CrudController extends \yii\web\Controller
 		$model = $this->findFormModel($id, null, 'delete');
 		if( YII_ENV_DEV ) {
 			$model->deleteWithRelated();
-			if ($req->getIsAjax()) {
+			if (Yii::$app->request->getIsAjax()) {
 				return json_encode($id);
 			}
 			$this->addSuccessFlashes('delete', $model);

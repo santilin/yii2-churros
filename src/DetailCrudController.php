@@ -108,7 +108,7 @@ class DetailCrudController extends CrudController
 // 		return $model->saveAll();
 // 	}
 
-	public function actionRoute($action_id = null, $model = null)
+	public function actionRoute($action_id = null/*, $model = null*/): string
 	{
 		if( $this->master_model ) {
 			$parent_route = $this->getRoutePrefix()
@@ -125,7 +125,7 @@ class DetailCrudController extends CrudController
 				return $parent_route;
 			}
 		} else {
-			return parent::actionRoute($action_id, $model);
+			return parent::actionRoute($action_id/*, $model*/);
 		}
 	}
 

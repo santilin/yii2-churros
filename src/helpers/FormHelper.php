@@ -268,6 +268,9 @@ ajax;
 					$button['htmlOptions']);
 				break;
 			case 'button':
+				if( isset($button['url']) && !isset($button['htmlOptions']['onclick']) ) {
+					$button['htmlOptions']['onclick'] = "location.href='" . $button['url'] . "'";
+				}
 				$ret[] = Html::button(
 					$title,
 					$button['htmlOptions']);
@@ -279,7 +282,6 @@ ajax;
 			}
 		}
 		return implode($sep, $ret);
-// 		return '<ul><li>'. implode("</li><li>$sep", $ret) . '</li></ul>';
 	}
 
 	static public function hasPermission($perms, string $perm): bool
