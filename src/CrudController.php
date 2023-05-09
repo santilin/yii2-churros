@@ -156,6 +156,9 @@ class CrudController extends \yii\web\Controller
 			$model->setIsNewRecord(true);
 			$model->resetPrimaryKeys();
 			if( $model->saveAll(true) ) {
+				if ($req->getIsAjax()) {
+					return json_encode($model->getAttributes());
+				}
 				$this->addSuccessFlashes('duplicate', $model);
 				return $this->whereTogoNow('duplicate', $model);
 			}
@@ -186,6 +189,9 @@ class CrudController extends \yii\web\Controller
 		}
 		if ($model->loadAll($req->post(), $relations) && $req->isPost ) {
 			if( $model->saveAll(true) ) {
+				if ($req->getIsAjax()) {
+					return json_encode($model->getAttributes());
+				}
 				$this->addSuccessFlashes('update', $model);
 				return $this->whereTogoNow('update', $model);
 			}
@@ -206,6 +212,9 @@ class CrudController extends \yii\web\Controller
 		$model = $this->findFormModel($id, null, 'delete');
 		if( YII_ENV_DEV ) {
 			$model->deleteWithRelated();
+			if ($req->getIsAjax()) {
+				return json_encode($id);
+			}
 			$this->addSuccessFlashes('delete', $model);
 			return $this->whereToGoNow('delete', $model);
 		} else {

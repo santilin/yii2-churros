@@ -20,11 +20,15 @@ trait ActiveFormTrait
 			$buttons_up = in_array('buttons_up', $layout_parts);
 			$this->fieldsLayout = [];
 			if( $buttons_up ) {
-				$this->fieldsLayout[] = [ 'type' => 'buttons', 'buttons' => $buttons, 'layout' => '1col', 'options' => ['class' => 'mb-2'] ];
+				$this->fieldsLayout[] = [ 'type' => 'buttons', 'buttons' => $buttons,
+					'layout' => $this->formLayout=='inline'?'1col':$this->formLayout,
+					'options' => ['class' => 'mb-2'] ];
 			}
 			$this->fieldsLayout[] = [ 'type' => $layout_parts[0], 'fields' => array_keys($form_fields) ];
 			if( !$buttons_up ) {
-				$this->fieldsLayout[] = [ 'type' => 'buttons', 'buttons' => $buttons, 'layout' => '1col' ];
+				$this->fieldsLayout[] = [ 'type' => 'buttons', 'buttons' => $buttons,
+					'layout' => $this->formLayout=='inline'?'1col':$this->formLayout,
+				];
 			}
 		}
 		return $this->layoutFields($this->fieldsLayout, $form_fields);
@@ -39,9 +43,26 @@ trait ActiveFormTrait
 			$col_xs = 12;
 			switch( $layout['type'] ) {
 			case 'buttons':
+				$cols = intval(substr($layout['layout'],0,1));
+				switch( $cols ) {
+				case 2:
+ 					$col_md = 6;
+ 					$col_sm = 4;
+					break;
+				case 3:
+					$col_md = 4;
+					$col_sm = 4;
+					break;
+				case 4:
+				default:
+					$col_md = 3;
+					$col_sm = 6;
+				}
 				$ret .= '<div class="mt-2 clearfix row">';
+				$ret .= "<div class=\"col-md-$col_md col-sm-$col_sm col-$col_xs\">";
 				$ret .= $this->layoutButtons($layout['buttons'], $layout['layout']??$this->formLayout, $layout['options']??[]);
-				$ret .= '</div><!-- buttons -->' .  "\n";
+				$ret .= '</div><!--buttons -->' .  "\n";
+				$ret .= '</div><!--row-->';
 				break;
 			case '1col':
 			case '1cols':
@@ -79,7 +100,7 @@ trait ActiveFormTrait
 						$this->setFieldClasses($form_fields, $form_field, $layout['type']);
 						if( ($nf%$cols) == 0) {
 							if( $nf != 0 ) {
-								$ret .= '</div>';
+								$ret .= '</div><!--row-->';
 							}
 							$ret .= "\n" . '<div class="row">';
 						}
@@ -89,9 +110,7 @@ trait ActiveFormTrait
 						$nf++;
 					}
 				}
-				if( ($nf%$cols) != 0) {
-					$ret .= '</div>';
-				}
+				$ret .= '</div><!--row-->';
 				break;
 			case 'tabs':
 				break;

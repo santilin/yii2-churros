@@ -27,11 +27,11 @@ class ActiveForm extends Bs4ActiveForm
 			],
 			'2cols' => [
 				'horizontalCssClasses' => [
-					'offset' => 'offset-sm-3',
-					'label' => 'col-sm-3',
-					'wrapper' => 'col-sm-6',
+					'offset' => ['offset-lg-3 offset-md-3 offset-sm-3'],
+					'label' => ['col-lg-3 col-md-3 col-sm-12 col-12', 'col-form-label text-left text-sm-left text-md-right text-lg-right'],
+					'wrapper' => 'col-lg-9 col-md-9 col-sm-12 col-12',
 					'error' => '',
-					'hint' => 'col-sm-3',
+					'hint' => '',
 					'field' => 'form-group row',
 				]
 			],
@@ -99,10 +99,13 @@ class ActiveForm extends Bs4ActiveForm
 				]
 			],
 			'2cols' => [
-				'horizontalCssClasses' => [
-					'label' => 'col-sm-2',
-					'offset' => 'kk3 offset-sm-1',
-					'wrapper' => 'col-sm-7',
+				'horizontalCssClasses' =>[
+					'offset' => ['col-lg-3 col-md-3 col-sm-4 col-12', 'offset-lg-2 offset-md-2 offset-sm-3'],
+					'label' => ['col-lg-2 col-md-3 col-sm-4 col-12', 'col-form-label text-left text-sm-right text-md-right text-lg-right'],
+					'wrapper' => 'col-lg-5 col-md-6 col-sm-7 col-8',
+					'error' => '',
+					'hint' => '',
+					'field' => 'form-group row',
 				]
 			],
 			'3cols' => [
@@ -134,8 +137,8 @@ class ActiveForm extends Bs4ActiveForm
 			],
 			'2cols' => [
 				'horizontalCssClasses' => [
-					'offset' => ['col-lg-4 col-md-6 col-sm-9 col-12', 'offset-lg-2 offset-md-2 offset-sm-3'],
-					'label' => ['col-lg-4 col-md-6 col-sm-6 col-6', 'col-form-label text-left text-sm-left text-md-right text-lg-right'],
+					'offset' => ['col-lg-3 col-md-6 col-sm-9 col-12', 'offset-lg-2 offset-md-2 offset-sm-3'],
+					'label' => ['col-lg-3 col-md-6 col-sm-6 col-6', 'col-form-label text-left text-sm-left text-md-right text-lg-right'],
 					'wrapper' => 'col-lg-4 col-md-6 col-sm-6 col-6',
 					'error' => '',
 					'hint' => '',
