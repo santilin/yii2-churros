@@ -186,10 +186,18 @@ class FormHelper
 			$title = $button['title']??$name;
 			$icon = $button['icon']??null;
 			if( $icon ) {
-				if( strpos($icon, '<i') !== FALSE ) {
+				if (substr($icon, 0, 1) == '/') {
+					$title = Html::img($icon, array_merge([
+						'class'=>'icon',
+						'aria' => [ 'hidden'=>'true' ],
+						'alt' => $title ], $button['iconOptions']??[]));
+				} elseif( strpos($icon, '<i') !== FALSE ) {
 					$title = "$icon $title";
 				} else {
-					$title = "<i class=\"$icon\" aria-hidden=\"true\"></i> $title";
+					$title = Html::tag('i', '', array_merge([
+						'class' => 'icon',
+						'aria' => [ 'hidden'=>'true' ],
+						'alt' => $title ], $button['iconOptions']??[])) . $title;
 				}
 			}
 			switch( $button['type'] ) {
