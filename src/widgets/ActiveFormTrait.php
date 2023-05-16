@@ -21,13 +21,13 @@ trait ActiveFormTrait
 			$this->fieldsLayout = [];
 			if( $buttons_up ) {
 				$this->fieldsLayout[] = [ 'type' => 'buttons', 'buttons' => $buttons,
-					'layout' => $this->formLayout=='inline'?'1col':$this->formLayout,
+					'layout' => $this->formLayout=='inline'?'1col':$layout_parts[0],
 					'options' => ['class' => 'mb-2'] ];
 			}
 			$this->fieldsLayout[] = [ 'type' => $layout_parts[0], 'fields' => array_keys($form_fields) ];
 			if( !$buttons_up ) {
 				$this->fieldsLayout[] = [ 'type' => 'buttons', 'buttons' => $buttons,
-					'layout' => $this->formLayout=='inline'?'1col':$this->formLayout,
+					'layout' => $this->formLayout=='inline'?'1col':$layout_parts[0],
 				];
 			}
 		}
@@ -43,7 +43,7 @@ trait ActiveFormTrait
 			$col_xs = 12;
 			switch( $layout['type'] ) {
 			case 'buttons':
-				$cols = intval(substr($layout['layout'],0,1));
+				$cols = intval($layout['layout']??1);
 				switch( $cols ) {
 				case 2:
  					$col_md = 6;
