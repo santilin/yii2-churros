@@ -11,6 +11,7 @@ use Yii;
 use yii\helpers\Html;
 use santilin\churros\helpers\FormHelper;
 
+
 /// @todo No usar &nbsp; usar style padding
 class ActionColumn extends \yii\grid\ActionColumn
 {
@@ -62,7 +63,7 @@ class ActionColumn extends \yii\grid\ActionColumn
 				$this->buttons['update'] = $this->customButtons['update'];
 				unset( $this->customButtons['update'] );
 			} else {
-				$this->initDefaultButton('update', 'update', array_merge(
+				$this->initDefaultButton('update', 'edit', array_merge(
 					[ 'title' => Yii::t('churros', 'Update') ], $this->updateOptions));
 			}
 		}

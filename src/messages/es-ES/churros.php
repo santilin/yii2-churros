@@ -29,7 +29,7 @@ return [
 	'role updated' => 'rol actualizado',
 	'Create' => 'Crear',
 	'View' => 'Ver',
-	'Edit' => 'Editar',
+	'Update' => 'Editar',
 	'Delete' => 'Borrar',
 	'List' => 'Listar',
 	'Duplicate' => 'Duplicar',

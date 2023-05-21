@@ -65,6 +65,9 @@ class CrudController extends \yii\web\Controller
 				}
 			}
         }
+        if (YII_ENV_TEST && $action->id == "delete" ) {
+			$this->enableCsrfValidation = false;
+		}
         return parent::beforeAction($action);
 	}
 
