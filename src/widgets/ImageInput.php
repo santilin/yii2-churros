@@ -39,10 +39,16 @@ class ImageInput extends \yii\widgets\InputWidget
 		$thumb_options = [ 'width' => $this->thumbSize ];
 		switch( $this->attrUrlType ) {
 		case self::ATTR_URL_VERBATIM:
-			echo Html::img(Html::getAttributeValue($this->model, $this->attribute), $thumb_options);
+			$src = Html::getAttributeValue($this->model, $this->attribute);
+			if ($src) {
+				echo Html::img($src, $thumb_options);
+			}
 			break;
 		case self::ATTR_URL_UPLOAD_BEHAVIOR:
-			echo Html::img($this->model->getUploadedFileUrl($this->attribute),$thumb_options);
+			$src = $this->model->getUploadedFileUrl($this->attribute);
+			if ($src) {
+				echo Html::img($src, $thumb_options);
+			}
 			break;
 		case self::ATTR_URL_SERIALIZED:
 			$serialized = Html::getAttributeValue($this->model, $this->attribute);
