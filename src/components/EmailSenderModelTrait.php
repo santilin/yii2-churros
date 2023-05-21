@@ -52,12 +52,16 @@ trait EmailSenderModelTrait
 			} else {
 				$error_message = Yii::t('churros', 'Unable to send email to {email}', ['email' => array_pop($to) ]);
 			}
-			$this->addError('sendmail', $error_message);
-			if( YII_ENV_DEV ) {
-				$mail_message_parts = $composed->getSwiftMessage()->getChildren();
-				$html_mail = $mail_message_parts[0];
-				$this->addError('mailbody', "View: $view_name<br/>Subject: $subject<br/>"
-					. $mailer_error . '<br/>' . $html_mail->getBody());
+			if (strpos($mailer_error, 'php_network_getaddresses: getaddrinfo failed') !== FALSE) {
+				$this->addError('sendmail_network_error', $error_message);
+				if( YII_ENV_DEV ) {
+					$mail_message_parts = $composed->getSwiftMessage()->getChildren();
+					$html_mail = $mail_message_parts[0];
+					$this->addError('mailbody', "View: $view_name<br/>Subject: $subject<br/>"
+						. $mailer_error . '<br/>' . $html_mail->getBody());
+				}
+			} else {
+				$this->addError('sendmail', $error_message);
 			}
 			return false;
 		}
