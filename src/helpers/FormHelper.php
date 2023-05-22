@@ -211,25 +211,36 @@ class FormHelper
 				break;
 			case 'ajax':
 				$request_url = Url::to((array)$button['url']);
+				$ajax_options = $button['ajaxOptions']??[];
+// 				if (!YII_ENV_PROD) {
+// 					$ajax_success = $ajax_options['success']??'console.log("Success: ", data)';
+// 					$ajax_error = $ajax_options['error']??'console.log("Error: ", e.responseText)';
+// 					$ajax_before_send = $ajax_options['beforeSend']??'console.log("Before send: ", jqXHR, settings)';
+// 					$ajax_complete = $ajax_options['complete']??'console.log("Complete: ", jqXHR, textStatus)';
+// 				} else {
+					$ajax_success = $ajax_options['success']??'';
+					$ajax_error = $ajax_options['error']??'';
+					$ajax_before_send = $ajax_options['beforeSend']??'';
+					$ajax_complete = $ajax_options['complete']??'';
+// 				}
 				$button['htmlOptions']['onclick'] = <<<ajax
 javascript:
-var btn = $(this);
+var _button = this;
 $.ajax({
 	url: '$request_url',
 	type: 'get',
 	dataType: 'json',
 	complete: function (jqXHR, textStatus) {
-		console.log('Complete: ', jqXHR, textStatus);
+$ajax_complete;
 	},
 	beforeSend: function (jqXHR, settings) {
-		console.log('Before send: ', jqXHR, settings);
+$ajax_before_send;
 	},
 	success: function (data) {
-		btn.hide();
-		console.log('Success: ', data);
+$ajax_success;
 	},
 	error: function (e) {
-		console.log("Error", e.responseText);
+$ajax_error;
 	}
 });
 ajax;
