@@ -114,7 +114,7 @@ class FormHelper
 				return array_merge([$_nv], (array)$views[$_nv]);
 			}
 		}
-		return reset($views);
+		return array_merge([array_key_first($views)], $views[array_key_first($views)]);
 	}
 
 	static public function getViewFromRequest($views, $params)
@@ -138,7 +138,7 @@ class FormHelper
 				return [ $_nv, $views[$_nv]];
 			}
 		}
-		return reset($views);
+		return [ array_key_first($views), $views[array_key_first($views)]];
 	}
 
 	public static function setConfig(string $form_name, string $name, $value)

@@ -65,6 +65,9 @@ class CrudController extends \yii\web\Controller
 				}
 			}
         }
+        if (YII_ENV_TEST && $action->id == "delete" ) {
+			$this->enableCsrfValidation = false;
+		}
         return parent::beforeAction($action);
 	}
 
@@ -482,11 +485,11 @@ class CrudController extends \yii\web\Controller
 			}
 			Yii::$app->session->addFlash('success', $success_message);
 		}
-		$this->showErrorFlashes($model);
+		$this->addErrorFlashes($model);
 	}
 
 
-	protected function showErrorFlashes($model)
+	protected function addErrorFlashes($model)
 	{
 		foreach($model->getFirstErrors() as $error ) {
 			if( strpos($error, '{model_link}') !== FALSE ) {
