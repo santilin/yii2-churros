@@ -179,10 +179,16 @@ trait ModelSearchTrait
 			return;
 		}
 		$fullfldname = $this->tableName() . "." . $fldname;
-		$this->addFieldFilterToQuery($query, $fullfldname, $value);
+		$this->addFieldToFilterWhere($query, $fullfldname, $value);
 	}
 
-	public function addFieldFilterToQuery(&$query, string $fldname, array $value)
+	public function addFieldToFilterWhere(&$query, string $fldname, array $value)
+	{
+		return $this->baseAddFieldFilterWhere($query, $fldname, $value);
+	}
+
+
+	public function baseAddFieldToFilterWhere(&$query, string $fldname, array $value)
 	{
 		if( is_array($value['v']) ) {
  			$query->andWhere([ 'in', $fldname, $value['v']]);
