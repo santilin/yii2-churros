@@ -184,7 +184,7 @@ trait ModelSearchTrait
 
 	public function addFieldToFilterWhere(&$query, string $fldname, array $value)
 	{
-		return $this->baseAddFieldFilterWhere($query, $fldname, $value);
+		return $this->baseAddFieldToFilterWhere($query, $fldname, $value);
 	}
 
 

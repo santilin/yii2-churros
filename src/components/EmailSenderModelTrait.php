@@ -60,10 +60,11 @@ trait EmailSenderModelTrait
 					$this->addError('mailbody', "View: $view_name<br/>Subject: $subject<br/>"
 						. $mailer_error . '<br/>' . $html_mail->getBody());
 				}
+				return true;
 			} else {
 				$this->addError('sendmail', $error_message);
+				return false;
 			}
-			return false;
 		}
 		return true;
 	}
