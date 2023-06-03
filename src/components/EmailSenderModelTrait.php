@@ -48,7 +48,7 @@ trait EmailSenderModelTrait
 		}
 		if( !$sent ) {
 			if( count($to) > 1 ) {
-				$error_message = Yii::t('churros', 'Unable to send email to {email} and other {ndest} recipients', ['email' => array_pop($to), 'nemails' => count($to)]);
+				$error_message = Yii::t('churros', 'Unable to send email to {email} and other {ndest} recipients', ['email' => array_pop($to), 'ndest' => count($to)]);
 			} else {
 				$error_message = Yii::t('churros', 'Unable to send email to {email}', ['email' => array_pop($to) ]);
 			}
