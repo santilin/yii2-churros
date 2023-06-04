@@ -57,7 +57,7 @@ trait RelationTrait
 	}
 
     /**
-     * Load all attribute including related attribute
+     * Load all attributes including related attributes
      * @param $post
      * @param array $relations_in_form
      * @return bool
