@@ -44,13 +44,13 @@ class DbController extends Controller
 	public $seedersPath = "@app/database/seeders";
 
 	/** @var string path to the fixtures directory, defaults to @app/tests/fixtures/data*/
-	public $fixturesPath = "@app/tests/fixtures/data";
+	public $fixturesPath = "@app/database/fixtures";
 
     public function options($actionID)
     {
         return array_merge(
             parent::options($actionID),
-            ['format', 'truncateTables','createFile','seedersPath']
+            ['db', 'format', 'truncateTables','createFile','seedersPath','fixturesPath']
         );
     }
 
@@ -60,7 +60,8 @@ class DbController extends Controller
             'f' => 'format',
             't' => 'truncateTables',
             'c' => 'createFile',
-            'p' => 'seedersPath'
+            'p' => 'seedersPath',
+            'x' => 'fixturesPath',
         ]);
     }
 
@@ -83,6 +84,13 @@ class DbController extends Controller
 
     protected function getPhpValue($value, $phptype)
     {
+		if (substr($phptype,0,3) == 'int' || substr($phptype,0,7) == 'tinyint') {
+			$phptype = 'integer';
+		} else if (substr($phptype,0,7) == 'decimal') {
+			$phptype = 'double';
+		} else if (substr($phptype,0,7) == 'varchar') {
+			$phptype = 'string';
+		}
 		switch($phptype) {
 			case "integer":
 			case "float":
@@ -95,11 +103,15 @@ class DbController extends Controller
 					return $value;
 				}
 			case "string":
-			case "resource": // blob
+			case 'timestamp':
+			case 'date':
+			case "mediumtext":
+			case 'mediumblob':
+			case 'text':
 				if( $value == null ) {
 					return "null";
 				} else {
-					return "'" . str_replace("'", "\\'", $value). "'";
+					return "'" . strtr($value, ["\\'" => "\\\\", "'" => "\\'"]) . "'";
 				}
 			default:
 				throw new \Exception( "Type $phptype not supported in Churros/DbController::getPhpValue" );
@@ -111,21 +123,27 @@ class DbController extends Controller
      *
      * @param string $schemaName the schema name (optional)
      */
-    public function actionDumpSchema($schemaName = '')
+    public function actionDumpSchema(array $tables = [], string $schemaName = '')
     {
 		if( $this->format != 'seeder' && $this->format != 'fixture' ) {
 			throw new InvalidConfigException("{$this->format}: formato no contemplado. Sólo se contempla 'seeder' y 'fixture'");
 		}
 		if ($this->format == 'seeder') {
-			$preamble = $this->getPreamble('dump-schema', $schemaName);
+			if (($preamble_schema = $schemaName) == '') {
+				$preamble_schema = $this->db->dsn;
+			}
+			$preamble = $this->getPreamble('dump-schema', $preamble_schema,
+				count($tables) ? implode(',', $tables) : 'all-tables');
 			$runseeder = '';
-			$tables = $this->db->schema->getTableSchemas($schemaName, true);
+			$schema_tables = $this->db->schema->getTableSchemas($schemaName, true);
 			$full_dump = $preamble;
-			foreach ($tables as $table) {
-				if( $table->name != 'migration' ) {
-					echo "Dumping {$table->name}\n";
-					$full_dump .= $this->dumpTable($table, $schemaName);
-					$runseeder .= "\t\t\$s = new {$table->name}Seeder(); \$s->run(\$db);\n";
+			foreach ($schema_tables as $table) {
+				if (!count($tables) || (count($tables) && in_array($table->name, $tables))) {
+					if( $table->name != 'migration' ) {
+						echo "Dumping {$table->name}\n";
+						$full_dump .= $this->dumpTable($table, $schemaName);
+						$runseeder .= "\t\t\$s = new {$table->name}Seeder(); \$s->run(\$db);\n";
+					}
 				}
 			}
 			$full_dump .= <<<EOF
@@ -185,12 +203,12 @@ EOF;
      * @param string $tableName the table to be dumped
      * @param string $schemaName the schema the table belongs to
      */
-    public function actionDumpTable($tableName, $schemaName = '')
+    public function actionDumpTable(string $tableName, string $where = null, string $schemaName = null)
     {
-		if( $schemaName != '') {
+		if( $schemaName) {
 			$tableName = "$schemaName.$tableName";
 		} else {
-			$schemaName = $this->db->dsn; // only for preablme
+			$schemaName = $this->db->dsn; // only for preamble
 		}
 		$tableSchema = $this->db->schema->getTableSchema($tableName, true /*refresh*/);
 		if ($tableSchema == null) {
@@ -199,23 +217,27 @@ EOF;
 		$preamble = $this->getPreamble('dump-table', $tableName, $schemaName);
 		if ($this->createFile ) {
 			$write_file = true;
-			$filename = Yii::getAlias($this->seedersPath) . "/{$tableName}Seeder.php";
+			if ($this->format == 'seeder') {
+				$filename = Yii::getAlias($this->seedersPath) . "/{$tableName}Seeder.php";
+			} else {
+				$filename = Yii::getAlias($this->fixturesPath) . "/{$tableName}.php";
+			}
 			if (\file_exists($filename) && !$this->confirm("The file $filename already exists. Do you want to overwrite it?") ) {
 				$write_file = false;
 			}
 			if ($write_file) {
-				\file_put_contents($filename, $preamble . $this->dumpTable($tableSchema));
+				\file_put_contents($filename, $preamble . $this->dumpTable($tableSchema, $where));
 				echo "Created seeder for table $tableName in $filename\n";
 			}
 		} else {
-			echo $preamble . $this->dumpTable($tableSchema);
+			echo $preamble . $this->dumpTable($tableSchema, $where);
 		}
 	}
 
 	/**
 	 * Seeds the specified table from the specified file or a default one [tablenameSeeder]
 	 */
-	public function actionSeedTable($tableName, $inputfilename = null )
+	public function actionSeedTable($tableName, $inputfilename = null)
 	{
 		switch( $this->format ) {
 		case 'seeder':
@@ -249,19 +271,19 @@ EOF;
 		$s->run($this->db);
 	}
 
-	protected function dumpTable($tableSchema)
+	protected function dumpTable($tableSchema, string $where = null)
 	{
 		switch( $this->format ) {
 		case 'seeder':
-			return $this->dumpTableAsSeeder($tableSchema);
+			return $this->dumpTableAsSeeder($tableSchema, $where);
 		case 'fixture':
-			return $this->dumpTableAsFixture($tableSchema);
+			return $this->dumpTableAsFixture($tableSchema, $where);
 		default:
 			throw new InvalidArgumentException("dump-table: $this->format: no contemplado");
 		}
 	}
 
-	protected function dumpTableAsFixture($tableSchema)
+	protected function dumpTableAsFixture($tableSchema, string $where = null): string
     {
 		$txt_data = "return [\n";
 		$php_types = [];
@@ -269,10 +291,13 @@ EOF;
 		$table_name = $tableSchema->name;
 
 		foreach($tableSchema->columns as $column) {
-			$php_types[] = $column->phpType;
+			$php_types[] = $column->dbType;
 			$column_names[] = $column->name;
 		}
-		$raw_data = $this->db->createCommand("SELECT * FROM $table_name")->queryAll();
+		if ($where) {
+			$where = " WHERE $where";
+		}
+		$raw_data = $this->db->createCommand('SELECT * FROM {{' . $table_name. "}} $where")->queryAll();
 		$nrow = 0;
 		foreach( $raw_data as $row ) {
 			$ncolumn = 0;
@@ -284,12 +309,12 @@ EOF;
 			$txt_data .= "\t],\n";
 			$nrow++;
 		}
-		$txt_data .= "];";
+		$txt_data .= "];\n";
 		return $txt_data;
 	}
 
 
-	protected function dumpTableAsSeeder($tableSchema)
+	protected function dumpTableAsSeeder($tableSchema, $where = null): string
     {
 		$txt_data = '';
 		$php_types = [];
@@ -308,7 +333,10 @@ EOF;
 			$ret .= "\t\t" . strval($ncolumn ++) . " => '" . $column->name . "', // " . $column->phpType . "\n";
 		}
 		$ret .= "\t];\n\n";
-		$raw_data = $this->db->createCommand('SELECT * FROM {{' . $table_name. '}}')->queryAll();
+		if ($where) {
+			$where = " WHERE $where";
+		}
+		$raw_data = $this->db->createCommand('SELECT * FROM {{' . $table_name. "}} $where")->queryAll();
 		foreach( $raw_data as $row ) {
 			$ncolumn = 0;
 			$txt_data .= "[";
@@ -352,7 +380,7 @@ EOF;
 
 	protected function getPreamble($command, $schema, $table = null)
 	{
-		$timestamp = date('Y-m-d H:M:S', time());
+		$timestamp = date('Y-m-d H:i:s', time());
 		if ($table == null ) {
 			$table = $schema;
 		}
@@ -365,10 +393,11 @@ EOF;
 
 /**
  * Churros v $version
- * ./yii churros/db/$command --format {$this->format} $table
+ * ./yii churros/db/$command --format {$this->format} $table $schema
  * Schema: $schema
  * Timestamp: $timestamp
  */
+
 PREAMBLE;
 			break;
 		}
