@@ -43,14 +43,17 @@ class DbController extends Controller
 	/** @var string path to the seeders directory, defaults to @app/database/seeders */
 	public $seedersPath = "@app/database/seeders";
 
-	/** @var string path to the fixtures directory, defaults to @app/tests/fixtures/data*/
+	/** @var string path to the fixtures directory, defaults to @app/tests/fixtures/data */
 	public $fixturesPath = "@app/database/fixtures";
+
+	/** @var int the number or records to seed or dump, defaults to 0 meaning all */
+	public $count = 0;
 
     public function options($actionID)
     {
         return array_merge(
             parent::options($actionID),
-            ['db', 'format', 'truncateTables','createFile','seedersPath','fixturesPath']
+            ['db', 'format', 'truncateTables','createFile','seedersPath','fixturesPath','count']
         );
     }
 
@@ -62,6 +65,7 @@ class DbController extends Controller
             'c' => 'createFile',
             'p' => 'seedersPath',
             'x' => 'fixturesPath',
+            'n' => 'count',
         ]);
     }
 
@@ -82,7 +86,7 @@ class DbController extends Controller
         return false;
     }
 
-    protected function getPhpValue($value, $phptype)
+    protected function getPhpValue($value, string $phptype)
     {
 		if (substr($phptype,0,3) == 'int' || substr($phptype,0,7) == 'tinyint') {
 			$phptype = 'integer';
@@ -294,10 +298,14 @@ EOF;
 			$php_types[] = $column->dbType;
 			$column_names[] = $column->name;
 		}
+		$sql = "SELECT * FROM {{{$table_name}}}";
 		if ($where) {
-			$where = " WHERE $where";
+			$sql .= " WHERE $where";
 		}
-		$raw_data = $this->db->createCommand('SELECT * FROM {{' . $table_name. "}} $where")->queryAll();
+		if ($this->count != 0) {
+			$sql .= " LIMIT {$this->count}";
+		}
+		$raw_data = $this->db->createCommand($sql)->queryAll();
 		$nrow = 0;
 		foreach( $raw_data as $row ) {
 			$ncolumn = 0;
@@ -333,10 +341,14 @@ EOF;
 			$ret .= "\t\t" . strval($ncolumn ++) . " => '" . $column->name . "', // " . $column->phpType . "\n";
 		}
 		$ret .= "\t];\n\n";
+		$sql = "SELECT * FROM {{{$table_name}}}";
 		if ($where) {
-			$where = " WHERE $where";
+			$sql .= " WHERE $where";
 		}
-		$raw_data = $this->db->createCommand('SELECT * FROM {{' . $table_name. "}} $where")->queryAll();
+		if ($this->count != 0) {
+			$sql .= " LIMIT {$this->count}";
+		}
+		$raw_data = $this->db->createCommand($sql)->queryAll();
 		foreach( $raw_data as $row ) {
 			$ncolumn = 0;
 			$txt_data .= "[";
