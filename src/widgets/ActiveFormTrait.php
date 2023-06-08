@@ -11,7 +11,7 @@ trait ActiveFormTrait
 
 	public function layoutForm(array $form_fields, array $buttons = []): string
 	{
-		if( $this->formLayout == 'inline' || ($this->formLayout == '' && $this->layout == 'inline') ) {
+		if ($this->formLayout == '' && $this->layout == 'inline') {
 			$this->formLayout = 'inline';
 		}
 		// horizontal layout
@@ -43,23 +43,9 @@ trait ActiveFormTrait
 			$col_xs = 12;
 			switch( $layout['type'] ) {
 			case 'buttons':
-				$cols = intval($layout['layout']??1);
-				switch( $cols ) {
-				case 2:
- 					$col_md = 6;
- 					$col_sm = 4;
-					break;
-				case 3:
-					$col_md = 4;
-					$col_sm = 4;
-					break;
-				case 4:
-				default:
-					$col_md = 3;
-					$col_sm = 6;
-				}
+				$classes = static::FIELD_HORIZ_CLASSES['default'][$layout['layout']??'1col']['horizontalCssClasses'];
 				$ret .= '<div class="mt-2 clearfix row">';
-				$ret .= "<div class=\"col-md-$col_md col-sm-$col_sm col-$col_xs\">";
+				$ret .= "<div class=\"{$classes['wrapper']}\">";
 				$ret .= $this->layoutButtons($layout['buttons'], $layout['layout']??$this->formLayout, $layout['options']??[]);
 				$ret .= '</div><!--buttons -->' .  "\n";
 				$ret .= '</div><!--row-->';
