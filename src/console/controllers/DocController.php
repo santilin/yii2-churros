@@ -27,7 +27,7 @@ class DocController extends Controller
 	private $suite_params = [
 		'capel' => [
 			'doc_pattern' => '//'.'/@',
-			'find_patterns' => ["*.cpp","*.h","TODO" ],
+			'find_patterns' => ["*.cpp","*.h","TODO","*.json" ],
 			'find_exclude' => [],
 			'source_path' => '/home/santilin/devel/capel',
 			'dest_path' => '/home/santilin/devel/capel/doc/docs',
@@ -94,7 +94,7 @@ class DocController extends Controller
 
 	private function genDocFiles(array $code_comments, string $doc_pattern, string $dest_path)
 	{
-		$pat = "\.\/([^:]*):([0-9^:]+):\s*$doc_pattern\s*(.*?):([0-9:\-\s]+?)?(.*)$";
+		$pat = "\.\/([^:]*):([0-9^:]+):\s*$doc_pattern\s*(.*?):([0-9:\-\s]+)?(.*)$";
 		$comments = [];
 		foreach( $code_comments as $line ) {
 			$m = [];
@@ -106,15 +106,15 @@ class DocController extends Controller
 				} else {
 					$header = $this->sortHeader(implode('.',$file_parts));
 				}
-				if( preg_match('/^:202[0-9][0-9][0-9][0-9][0-9]$/', $m[4], $orderm) ) {
+				if( preg_match('/^202[0-9][0-9][0-9][0-9][0-9]$/', $m[4], $orderm) ) {
 					// Changelog
 					$order = '**' . substr($order,7,2) . '/' . substr($order,5,2) . '/' . substr($order,1,4) . '** ';
-				} else if( preg_match('/^:([0-9]{1,4})-([0-9][0-9])-([0-9][0-9]).*$/', $m[4], $orderm ) ) {
+				} else if( preg_match('/^([0-9]{1,4})-([0-9][0-9])-([0-9][0-9]).*$/', $m[4], $orderm ) ) {
 					$order = $orderm[3] . '/' . $orderm[2] . '/' . $orderm[1] . ' ';
 				} else {
-					$order = ":".str_pad(substr(trim($m[4]),1), 3, '0', STR_PAD_LEFT).":";
+					$order = str_pad(trim($m[4]), 3, '0', STR_PAD_LEFT);
 				}
-				$text = $order . trim($m[5]);
+				$text = ":$order:" . trim($m[5]);
 				$file_line = "[{$m[1]}:{$m[2]}]";
 				if( !isset($comments[$file]) ) {
 					$comments[$file] = [];
