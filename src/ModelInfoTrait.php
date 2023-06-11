@@ -83,7 +83,7 @@ trait ModelInfoTrait
 		return strtr($translated, $placeholders);
 	}
 
-	public function recordDesc($format=null, $max_len = 0)
+	public function recordDesc(string $format=null, int $max_len = 0): string
 	{
 		$ret = '';
 		if( $format == null || $format == 'short' ) {
@@ -441,7 +441,7 @@ trait ModelInfoTrait
 		return false;
 	}
 
-	public function defaultHandyFieldValues($field, $format, $scope=null)
+	public function defaultHandyFieldValues(string $field, string $format, string $model_format, string $scope)
 	{
 		throw new \Exception("field '$field' not supported in " . get_called_class() . "::handyFieldValues() ");
 	}
