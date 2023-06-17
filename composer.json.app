@@ -40,22 +40,25 @@
 		"aki/yii2-bot-telegram": "*",
 		"symfony/mailer": "5.4.x-dev",
 		"synamen/yii2-tabler-theme": "~1.0",
-		"rmrevin/yii2-fontawesome": "~3.0",
+		"rmrevin/yii2-fontawesome": "~3.5",
 		"horat1us/yii2-uuid-behavior":"^1.0",
-		"sergeymakinen/yii2-telegram-log": "^2.0"
+		"sergeymakinen/yii2-telegram-log": "^2.0",
+ 		"buttflattery/yii2-formwizard": "@dev",
+ 		"mdmsoft/yii2-widgets": "~1.0"
 	},
 	"require-dev": {
 		"yiisoft/yii2-debug": "^2.1.0",
 		"yiisoft/yii2-faker": "~2.0.0",
 		"codeception/codeception": "^4.0",
 		"codeception/verify": "~0.5.0 || ~1.1.0",
-		"codeception/specify": "~0.4.6",
+		"codeception/specify": "dev-master",
 		"symfony/browser-kit": ">=2.7 <=4.2.4",
 		"codeception/module-filesystem": "^1.0.0",
 		"codeception/module-yii2": "^1.0.0",
 		"codeception/module-asserts": "^1.0.0",
 		"justinrainbow/json-schema": "5.x-dev",
-		"codeception/module-webdriver": "2.0.x-dev"
+		"codeception/module-webdriver": "2.0.x-dev",
+ 		"galbar/jsonpath": "dev-master"
 	},
 	"config": {
 		"check-platform": false,
