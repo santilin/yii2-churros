@@ -9,7 +9,8 @@ trait ActiveFormTrait
 	public $fieldsLayout;
 	public $formLayout;
 
-	public function layoutForm(array $form_fields, array $buttons = []): string
+
+	public function setFieldsLayout(array &$fields_cfg, array $out_fields, array $buttons = []): void
 	{
 		if ($this->formLayout == '' && $this->layout == 'inline') {
 			$this->formLayout = 'inline';
@@ -24,21 +25,61 @@ trait ActiveFormTrait
 					'layout' => $this->formLayout=='inline'?'1col':$layout_parts[0],
 					'options' => ['class' => 'mb-2'] ];
 			}
-			$this->fieldsLayout[] = [ 'type' => $layout_parts[0], 'fields' => array_keys($form_fields) ];
+			$this->fieldsLayout[] = [ 'type' => $layout_parts[0], 'fields' => $out_fields ];
 			if( !$buttons_up ) {
 				$this->fieldsLayout[] = [ 'type' => 'buttons', 'buttons' => $buttons,
 					'layout' => $this->formLayout=='inline'?'1col':$layout_parts[0],
 				];
 			}
 		}
-		return $this->layoutFields($this->fieldsLayout, $form_fields);
+		foreach($this->fieldsLayout as $lk => $layout ) {
+			$col_sm = 12;
+			$col_xs = 12;
+			switch( $layout['type'] ) {
+			case '1col':
+			case '1cols':
+				foreach( $layout['fields'] as $fldname ) {
+					if (!isset($fields_cfg[$fldname])) {
+						$fields_cfg[$fldname] = $this->getFieldClasses($layout['type']);
+					}
+				}
+				break;
+			case '2col':
+			case '2cols':
+			case '3col':
+			case '3cols':
+			case '4col':
+			case '4cols':
+				$cols = intval(substr($layout['type'],0,1));
+				switch( $cols ) {
+				case 2:
+ 					$col_md = 6;
+ 					$col_sm = 4;
+					break;
+				case 3:
+					$col_md = 4;
+					$col_sm = 4;
+					break;
+				case 4:
+				default:
+					$col_md = 3;
+					$col_sm = 6;
+				}
+				$nf = 0;
+				foreach( $layout['fields'] as $fldname ) {
+					if (!isset($fields_cfg[$fldname])) {
+						$fields_cfg[$fldname] = $this->getFieldClasses($layout['type']);
+					}
+				}
+				break;
+			}
+		}
 	}
 
-	protected function layoutFields(array $rows_layout, array $form_fields,
-		array $buttons = []): string
+	public function layoutFields(array $layout_fields, array $form_fields): string
 	{
 		$ret = '';
-		foreach($rows_layout as $lk => $layout ) {
+		foreach($layout_fields as $lk => $layout ) {
 			$col_sm = 12;
 			$col_xs = 12;
 			switch( $layout['type'] ) {
@@ -53,7 +94,7 @@ trait ActiveFormTrait
 			case '1col':
 			case '1cols':
 				foreach( $layout['fields'] as $fldname ) {
- 					$this->setFieldClasses($form_fields, $fldname, $layout['type']);
+//  					$this->setFieldClasses($form_fields, $fldname, $layout['type']);
 					if( array_key_exists($fldname, $form_fields)) {
 						$ret .= $form_fields[$fldname];
 					}
@@ -83,7 +124,7 @@ trait ActiveFormTrait
 				$nf = 0;
 				foreach( $layout['fields'] as $form_field ) {
 					if( !empty($form_fields[$form_field])) {
-						$this->setFieldClasses($form_fields, $form_field, $layout['type']);
+// 						$this->setFieldClasses($form_fields, $form_field, $layout['type']);
 						if( ($nf%$cols) == 0) {
 							if( $nf != 0 ) {
 								$ret .= '</div><!--row-->';

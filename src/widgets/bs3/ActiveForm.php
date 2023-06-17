@@ -166,21 +166,16 @@ class ActiveForm extends Bs3ActiveForm
 		]
     ];
 
-	protected function setFieldClasses(array &$form_fields, string $form_field_name, string $row_layout)
+	protected function getFieldClasses(string $row_layout): array
 	{
-		$cssClasses = [];
-		$form_field = $form_fields[$form_field_name];
-		if( empty($form_field->horizontalCssClasses['offset'])
-			&& empty($form_field->horizontalCssClasses['label'])
-			&& empty($form_field->horizontalCssClasses['hint'])
-			&& empty($form_field->horizontalCssClasses['error'])
-			&& empty($form_field->horizontalCssClasses['wrapper']) ) {
-			$cssClasses = self::FIELD_HORIZ_CLASSES['default'][$row_layout]['horizontalCssClasses'];
-            $form_field->wrapperOptions = ['class' => $cssClasses['wrapper']];
-            $form_field->labelOptions = ['class' => 'control-label ' . $cssClasses['label']];
-            $form_field->errorOptions['class'] = 'help-block help-block-error ' . $cssClasses['error'];
-            $form_field->hintOptions['class'] = 'help-block ' . $cssClasses['hint'];
-		}
+		$form_field_cfg = [];
+		$cssClasses = self::FIELD_HORIZ_CLASSES['default'][$row_layout]['horizontalCssClasses'];
+		Html::addCssClass($form_field_cfg['wrapperOptions'], $cssClasses['wrapper']);
+		Html::addCssClass($form_field_cfg['labelOptions'], $cssClasses['label']);
+		Html::addCssClass($form_field_cfg['errorOptions'], $cssClasses['error']);
+		Html::addCssClass($form_field_cfg['hintOptions'], $cssClasses['hint']);
+		Html::addCssClass($form_field_cfg['options'], $cssClasses['field']);
+		return $form_field_cfg;
 	}
 
 }
