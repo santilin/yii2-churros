@@ -9,69 +9,86 @@ trait ActiveFormTrait
 	public $fieldsLayout;
 	public $formLayout;
 
-
-	public function setFieldsLayout(array &$fields_cfg, array $out_fields, array $buttons = []): void
+	public function fixFieldsLayout(array &$fields_cfg, array $render_fields, array $buttons = []): void
 	{
 		if ($this->formLayout == '' && $this->layout == 'inline') {
 			$this->formLayout = 'inline';
-		}
-		// horizontal layout
-		if( empty($this->fieldsLayout) ) {
+			$layout_parts = ['1col'];
+		} else { // horizontal layout
 			$layout_parts = explode(':', $this->formLayout);
+		}
+		if( empty($this->fieldsLayout) ) {
 			$buttons_up = in_array('buttons_up', $layout_parts);
 			$this->fieldsLayout = [];
 			if( $buttons_up ) {
-				$this->fieldsLayout[] = [ 'type' => 'buttons', 'buttons' => $buttons,
-					'layout' => $this->formLayout=='inline'?'1col':$layout_parts[0],
-					'options' => ['class' => 'mb-2'] ];
+				$this->fieldsLayout[] = [
+					'type' => 'buttons',
+					'buttons' => $buttons,
+					'layout' => $layout_parts[0],
+					'options' => ['class' => 'mb-2']
+				];
 			}
-			$this->fieldsLayout[] = [ 'type' => $layout_parts[0], 'fields' => $out_fields ];
+			$this->fieldsLayout[] = [
+				'type' => 'fields',
+				'fields' => $render_fields,
+				'layout' => $layout_parts[0]
+			];
 			if( !$buttons_up ) {
-				$this->fieldsLayout[] = [ 'type' => 'buttons', 'buttons' => $buttons,
-					'layout' => $this->formLayout=='inline'?'1col':$layout_parts[0],
+				$this->fieldsLayout[] = [
+					'type' => 'buttons',
+					'buttons' => $buttons,
+					'layout' => $layout_parts[0],
 				];
 			}
 		}
-		foreach($this->fieldsLayout as $lk => $layout ) {
-			$col_sm = 12;
-			$col_xs = 12;
-			switch( $layout['type'] ) {
-			case '1col':
-			case '1cols':
-				foreach( $layout['fields'] as $fldname ) {
+		$this->addLayoutClasses($fields_cfg, $this->fieldsLayout);
+	}
+
+	private function getBoostrapColumnClasses(int $cols): string
+	{
+		switch( $cols ) {
+		case 1:
+			$col = $col_sm = $col_md = $col_lg = $col_xl = 12;
+			break;
+		case 2:
+			$col = $col_md = 6;
+			$col_sm = $col_lg = $col_xl = 4;
+			break;
+		case 3:
+			$col = $col_md = 4;
+			$col_sm = $col_lg = $col_xl = 4;
+			break;
+		case 4:
+		default:
+			$col = $col_md = 3;
+			$col_sm = $col_lg = $col_xl = 6;
+		}
+		return "col-$col col-sm-$col_sm col-md-$col_md col-lg-$col_lg col-xl-$col_xl";
+	}
+
+	private function addLayoutClasses(array &$fields_cfg, array $fields_in_row, string $fields_layout = '1col'): void
+	{
+		$ret = '';
+		foreach($fields_in_row as $rlk => $row_layout ) {
+			$layout = $row_layout['layout']??$fields_layout;
+			switch ($row_layout['type']) {
+			case 'container':
+				$this->addLayoutClasses($fields_cfg, $row_layout['content'], $layout);
+				break;
+			case 'fields':
+				foreach( $row_layout['fields'] as $fldname ) {
 					if (!isset($fields_cfg[$fldname])) {
-						$fields_cfg[$fldname] = $this->getFieldClasses($layout['type']);
+						$fields_cfg[$fldname] = $this->getFieldClasses($layout);
+					} else {
+						if (isset($fields_cfg[$fldname]['layout'])) {
+							$fld_layout = $fields_cfg[$fldname]['layout'];
+							unset($fields_cfg[$fldname]['layout']);
+							$fields_cfg[$fldname] = array_merge(
+								$this->getFieldClasses($layout,$fld_layout),
+								$fields_cfg[$fldname]);
+						}
 					}
 				}
-				break;
-			case '2col':
-			case '2cols':
-			case '3col':
-			case '3cols':
-			case '4col':
-			case '4cols':
-				$cols = intval(substr($layout['type'],0,1));
-				switch( $cols ) {
-				case 2:
- 					$col_md = 6;
- 					$col_sm = 4;
-					break;
-				case 3:
-					$col_md = 4;
-					$col_sm = 4;
-					break;
-				case 4:
-				default:
-					$col_md = 3;
-					$col_sm = 6;
-				}
-				$nf = 0;
-				foreach( $layout['fields'] as $fldname ) {
-					if (!isset($fields_cfg[$fldname])) {
-						$fields_cfg[$fldname] = $this->getFieldClasses($layout['type']);
-					}
-				}
-				break;
 			}
 		}
 	}
@@ -79,79 +96,65 @@ trait ActiveFormTrait
 	public function layoutFields(array $layout_fields, array $form_fields): string
 	{
 		$ret = '';
-		foreach($layout_fields as $lk => $layout ) {
-			$col_sm = 12;
-			$col_xs = 12;
-			switch( $layout['type'] ) {
+		foreach($layout_fields as $rlk => $row_layout ) {
+			$layout = $row_layout['layout']??'1col';
+			$cols = intval($layout)?:1;
+			$type = $row_layout['type']??'field';
+			switch ($type) {
+			case 'container':
+				$ret .= '<div class="row">';
+				foreach ($row_layout['content'] as $kc=>$container) {
+					$ret .= '<div class="' . $this->getBoostrapColumnClasses($cols) . '">';
+// 					$ret .= "<h1>$kc container</h1>";
+					$ret .= $this->layoutFields([$container], $form_fields);
+					$ret .= "</div>\n";
+				}
+				$ret .= "</div><!--container[$kc]-->";
+				break;
+			case 'fields':
+			case 'fieldset':
+				$nf = 0;
+				$fs = '';
+				foreach( $row_layout['fields'] as $form_field ) {
+					if( !empty($form_fields[$form_field])) {
+						if( ($nf%$cols) == 0) {
+							if( $nf != 0 ) {
+								$fs .= '</div><!--row-->';
+							}
+							$fs .= "\n" . '<div class="row">';
+						}
+						$fs .= '<div class="'
+							. $this->getBoostrapColumnClasses($cols)
+							. '">';
+						$fs .= $form_fields[$form_field];
+						$fs .= '</div>';
+						$nf++;
+					}
+				}
+				$fs .= '</div><!--row-->';
+				if( isset($row_layout['title']) || $type == 'fieldset' ) {
+					$legend = Html::tag('legend', $row_layout['title']);
+					$ret .= Html::tag('fieldset', $legend . $fs, array_merge( ['id' => $this->options['id'] . "_layout_$rlk" ], $row_layout['options']??[]) );
+				} else {
+					$ret .= $fs;
+				}
+				break;
 			case 'buttons':
-				$classes = static::FIELD_HORIZ_CLASSES['default'][$layout['layout']??'1col']['horizontalCssClasses'];
+				$classes = static::FIELD_HORIZ_CLASSES[$layout??'1col']['large']['horizontalCssClasses'];
 				$ret .= '<div class="mt-2 clearfix row">';
 				$ret .= "<div class=\"{$classes['wrapper']}\">";
-				$ret .= $this->layoutButtons($layout['buttons'], $layout['layout']??$this->formLayout, $layout['options']??[]);
+				$ret .= $this->layoutButtons($row_layout['buttons'], $layout??$this->formLayout, $row_layout['options']??[]);
 				$ret .= '</div><!--buttons -->' .  "\n";
 				$ret .= '</div><!--row-->';
 				break;
-			case '1col':
-			case '1cols':
-				foreach( $layout['fields'] as $fldname ) {
-//  					$this->setFieldClasses($form_fields, $fldname, $layout['type']);
+				foreach( $row_layout['fields'] as $fldname ) {
 					if( array_key_exists($fldname, $form_fields)) {
 						$ret .= $form_fields[$fldname];
 					}
 				}
 				break;
-			case '2col':
-			case '2cols':
-			case '3col':
-			case '3cols':
-			case '4col':
-			case '4cols':
-				$cols = intval(substr($layout['type'],0,1));
-				switch( $cols ) {
-				case 2:
- 					$col_md = 6;
- 					$col_sm = 4;
-					break;
-				case 3:
-					$col_md = 4;
-					$col_sm = 4;
-					break;
-				case 4:
-				default:
-					$col_md = 3;
-					$col_sm = 6;
-				}
-				$nf = 0;
-				foreach( $layout['fields'] as $form_field ) {
-					if( !empty($form_fields[$form_field])) {
-// 						$this->setFieldClasses($form_fields, $form_field, $layout['type']);
-						if( ($nf%$cols) == 0) {
-							if( $nf != 0 ) {
-								$ret .= '</div><!--row-->';
-							}
-							$ret .= "\n" . '<div class="row">';
-						}
-						$ret .= "<div class=\"col-md-$col_md col-sm-$col_sm col-$col_xs\">";
-						$ret .= $form_fields[$form_field];
-						$ret .= '</div>';
-						$nf++;
-					}
-				}
-				$ret .= '</div><!--row-->';
-				break;
-			case 'tabs':
-				break;
-			case 'fieldset':
-				if( isset($layout['title']) ) {
-					$legend = Html::tag('legend', $layout['title']);
-				} else {
-					$legend = '';
-				}
-				$ret .= Html::tag('fieldset', $legend . $this->layoutFields($layout['layout'], $form_fields),
-					array_merge( ['id' => $this->options['id'] . "_layout_$lk" ], $layout['options']??[]) );
-				break;
 			case 'subtitle':
-				$ret .= $this->layoutContent(null, $layout['title'], $layout['options']??[]);
+				$ret .= $this->layoutContent(null, $row_layout['title'], $row_layout['options']??[]);
 				break;
 			}
 		}
@@ -189,11 +192,11 @@ trait ActiveFormTrait
 
 	protected function layoutButtons(array $buttons, string $layout, array $options = []): string
 	{
-		$offset = static::FIELD_HORIZ_CLASSES['default'][$layout]['horizontalCssClasses']['offset'];
+		$offset = static::FIELD_HORIZ_CLASSES[$layout]['large']['horizontalCssClasses']['offset'];
 		if( is_array($offset) ) {
 			$offset = implode(' ', $offset);
 		}
-		$wrapper = static::FIELD_HORIZ_CLASSES['default'][$layout]['horizontalCssClasses']['wrapper'];
+		$wrapper = static::FIELD_HORIZ_CLASSES[$layout]['large']['horizontalCssClasses']['wrapper'];
 		if( is_array($wrapper) ) {
 			$wrapper = implode(' ', $wrapper);
 		}
