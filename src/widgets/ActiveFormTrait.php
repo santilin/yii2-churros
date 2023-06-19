@@ -42,6 +42,13 @@ trait ActiveFormTrait
 			}
 		}
 		$this->addLayoutClasses($fields_cfg, $this->fieldsLayout);
+		// check there are no render_fields with incorrect settings
+		foreach ($render_fields as $render_field) {
+			if (isset($fields_cfg[$render_field]['layout'])) {
+				unset($fields_cfg[$render_field]['layout']);
+			}
+		}
+
 	}
 
 	private function getBoostrapColumnClasses(int $cols): string
@@ -51,8 +58,8 @@ trait ActiveFormTrait
 			$col = $col_sm = $col_md = $col_lg = $col_xl = 12;
 			break;
 		case 2:
-			$col = $col_md = 6;
-			$col_sm = $col_lg = $col_xl = 4;
+			$col = $col_md = 12;
+			$col_sm = $col_lg = $col_xl = 6;
 			break;
 		case 3:
 			$col = $col_md = 4;
@@ -75,6 +82,7 @@ trait ActiveFormTrait
 			case 'container':
 				$this->addLayoutClasses($fields_cfg, $row_layout['content'], $layout);
 				break;
+			case 'fieldset':
 			case 'fields':
 				foreach( $row_layout['fields'] as $fldname ) {
 					if (!isset($fields_cfg[$fldname])) {
@@ -132,9 +140,12 @@ trait ActiveFormTrait
 					}
 				}
 				$fs .= '</div><!--row-->';
-				if( isset($row_layout['title']) || $type == 'fieldset' ) {
-					$legend = Html::tag('legend', $row_layout['title']);
+				if( isset($row_layout['title']) && $type == 'fieldset' ) {
+					$legend = Html::tag('legend', $row_layout['title'], $row_layout['title_options']??[]);
 					$ret .= Html::tag('fieldset', $legend . $fs, array_merge( ['id' => $this->options['id'] . "_layout_$rlk" ], $row_layout['options']??[]) );
+				} else if( isset($row_layout['title'])  ) {
+					$legend = Html::tag('div', $row_layout['title'], $row_layout['title_options']??[]);
+					$ret .= Html::tag('div', $legend . $fs, array_merge( ['id' => $this->options['id'] . "_layout_$rlk" ], $row_layout['options']??[]) );
 				} else {
 					$ret .= $fs;
 				}

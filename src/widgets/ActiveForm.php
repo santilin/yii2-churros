@@ -25,7 +25,7 @@ class ActiveForm extends Bs4ActiveForm
 
 	public const FIELD_HORIZ_CLASSES = [
 		'1col' => [
-			'default' => [
+			'large' => [
 				'horizontalCssClasses' =>[
 					'offset' => ['col-lg-2 col-md-3 col-sm-12 col-12', 'offset-lg-2 offset-md-2 offset-sm-3'],
 					'label' => ['col-lg-2 col-md-3 col-sm-12 col-12', 'col-form-label text-left text-sm-left text-md-right text-lg-right'],
@@ -33,13 +33,6 @@ class ActiveForm extends Bs4ActiveForm
 					'error' => '',
 					'hint' => '',
 					'field' => 'form-group row',
-				]
-			],
-			'large' => [
-				'horizontalCssClasses' => [
-					'label' => 'col-sm-12',
-					'offset' => 'offset-sm-2',
-					'wrapper' => 'col-sm-12',
 				]
 			],
 			'medium' => [
@@ -65,16 +58,16 @@ class ActiveForm extends Bs4ActiveForm
 		],
 
 		'2cols' => [
-			'default' => [
-				'horizontalCssClasses' => [
-					'offset' => ['offset-lg-3 offset-md-3 offset-sm-3'],
-					'label' => ['col-lg-3 col-md-3 col-sm-12 col-12', 'col-form-label text-left text-sm-left text-md-right text-lg-right'],
-					'wrapper' => 'col-lg-9 col-md-9 col-sm-12 col-12',
-					'error' => '',
-					'hint' => '',
-					'field' => 'form-group row',
-				]
-			],
+// 			'default' => [
+// 				'horizontalCssClasses' => [
+// 					'offset' => ['offset-lg-3 offset-md-3 offset-sm-3'],
+// 					'label' => ['col-lg-3 col-md-3 col-sm-12 col-12', 'col-form-label text-left text-sm-left text-md-right text-lg-right'],
+// 					'wrapper' => 'col-lg-9 col-md-9 col-sm-12 col-12',
+// 					'error' => '',
+// 					'hint' => '',
+// 					'field' => 'form-group row',
+// 				]
+// 			],
 			'large' => [
 				'horizontalCssClasses' => [
 					'offset' => ['offset-lg-3 offset-md-3 offset-sm-3'],
@@ -98,8 +91,8 @@ class ActiveForm extends Bs4ActiveForm
 			'short' => [
 				'horizontalCssClasses' => [
 					'offset' => ['col-lg-3 col-md-6 col-sm-9 col-12', 'offset-lg-2 offset-md-2 offset-sm-3'],
-					'label' => ['col-lg-3 col-md-6 col-sm-6 col-6', 'col-form-label text-left text-sm-left text-md-right text-lg-right'],
-					'wrapper' => 'col-lg-4 col-md-6 col-sm-6 col-6',
+					'label' => ['col-lg-3 col-md-6 col-sm-12 col-12', 'col-form-label text-left text-sm-left text-md-right text-lg-right'],
+					'wrapper' => 'col-lg-6 col-lg-6 col-md-6 col-sm-12 col-12',
 					'error' => '',
 					'hint' => '',
 					'field' => 'form-group row',
@@ -143,21 +136,11 @@ class ActiveForm extends Bs4ActiveForm
 
 
 		'4cols' => [
-			'default' => [
+			'large' => [
 				'horizontalCssClasses' => [
 					'offset' => ['col-lg-10 col-md-10 col-sm-9 col-12', 'offset-lg-2 offset-md-2 offset-sm-3'],
 					'label' => ['col-lg-12 col-md-12 col-sm-12 col-12', 'col-form-label text-left'],
 					'wrapper' => 'col-lg-12 col-md-12 col-sm-12 col-12',
-					'error' => '',
-					'hint' => '',
-					'field' => 'form-group row',
-				]
-			],
-			'large' => [
-				'horizontalCssClasses' => [
-					'offset' => ['offset-lg-3 offset-md-3 offset-sm-3'],
-					'label' => ['col-lg-3 col-md-3 col-sm-12 col-12', 'col-form-label text-left text-sm-left text-md-right text-lg-right'],
-					'wrapper' => 'col-lg-9 col-md-9 col-sm-12 col-12',
 					'error' => '',
 					'hint' => '',
 					'field' => 'form-group row',
@@ -198,7 +181,7 @@ class ActiveForm extends Bs4ActiveForm
 	protected function getFieldClasses(string $row_layout, string $fld_layout = 'large'): array
 	{
 		$form_field_cfg = self::FIELD_HORIZ_CLASSES[$row_layout][$fld_layout];
-		if (!YII_ENV_DEV) {
+		if (YII_ENV_DEV) {
 			if (is_array($form_field_cfg['horizontalCssClasses']['wrapper'])) {
 				$form_field_cfg['horizontalCssClasses']['wrapper'] = array_merge(
 					[ "wrapper $row_layout $fld_layout "],
@@ -209,8 +192,8 @@ class ActiveForm extends Bs4ActiveForm
 			}
 			if (is_array($form_field_cfg['horizontalCssClasses']['label'])) {
 				$form_field_cfg['horizontalCssClasses']['label'] = array_merge(
-					[ "label $row_layout $fld_layout "]);
-// 					$form_field_cfg['horizontalCssClasses']['label']);
+					[ "label $row_layout $fld_layout "],
+ 					$form_field_cfg['horizontalCssClasses']['label']);
 			} else {
 				$form_field_cfg['horizontalCssClasses']['label'] = "label $row_layout $fld_layout "
 					. $form_field_cfg['horizontalCssClasses']['label'];
