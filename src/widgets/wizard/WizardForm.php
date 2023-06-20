@@ -141,7 +141,7 @@ class WizardForm extends FormWizard
 		}
 		$this->_hiddenFields = array_merge($this->_hiddenFields, $hidden_fields);
 		$html = $error_summary;
-		$html .= $form->layoutForm($form_fields);
+		$html .= $form->layoutFields($form->fieldsLayout, $form_fields);
 
 //         //parse response
 //         $this->_dependentInputScript .= $response->dependentInputJs;

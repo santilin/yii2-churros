@@ -99,9 +99,13 @@ class Formatter extends \yii\i18n\Formatter
 	/**
 	 * @todo move to app's components/Formatter
 	 */
-	public function asTaxonomy(string $value, array $taxonomy, string $sep = '/'): string
+	public function asTaxonomy(?string $value, array $taxonomy, string $sep = '/'): string
 	{
-		return Taxonomy::format($value, $taxonomy, $sep);
+		if ($value) {
+			return Taxonomy::format($value, $taxonomy, $sep);
+		} else {
+			return '';
+		}
 	}
 
 }
