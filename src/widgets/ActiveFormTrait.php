@@ -201,7 +201,7 @@ trait ActiveFormTrait
 		}
 	}
 
-	protected function layoutButtons(array $buttons, string $layout, array $options = []): string
+	public function layoutButtons(array $buttons, string $layout, array $options = []): string
 	{
 		$offset = static::FIELD_HORIZ_CLASSES[$layout]['large']['horizontalCssClasses']['offset'];
 		if( is_array($offset) ) {
