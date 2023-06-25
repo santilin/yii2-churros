@@ -193,16 +193,22 @@ function dateToSQLFormat(date)
 
 function dateInputChange(date_input, id)
 {
+// 	debugger;
 	var date_js = dateInputParseSpanishDate(date_input.value);
-	let error_el = $('#$id').next('.help-block.help-block-error');
-	let form_group = $('#$id').closest(".form-group");
+// 	let error_el = $('#$id').next('.help-block.help-block-error'); // bs3
+//	let form_group = $('#$id').closest(".form-group"); // bs3
+	let error_el = $('#$id').next('.invalid-feedback');
+	let form_control = $('#$id').closest(".form-control");
 	if( date_js === null ) { // empty
 		$('#$orig_id' ).val( '' );
 		if( error_el ) {
 			error_el.text("");
 		}
-		if( form_group ) {
-			form_group.removeClass('has-error');
+// 		if( form_group ) {
+// 			form_group.removeClass('has-error');
+// 		}
+		if( form_control ) {
+			form_control.removeClass('is-invalid');
 		}
 		return true;
 	 } else if (date_js == false ) { // wrong
@@ -210,8 +216,10 @@ function dateInputChange(date_input, id)
 		if( error_el ) {
 			error_el.text('La fecha no es válida');
 		}
-		if( form_group ) {
-			form_group.removeClass('validating').addClass('has-error');
+// 		if( form_group ) {
+// 			form_group.removeClass('validating').addClass('has-error'); // bs3
+		if (form_control) {
+ 			form_control.addClass('is-invalid');
 		}
 		return false;
 	} else {
@@ -220,8 +228,11 @@ function dateInputChange(date_input, id)
 		if( error_el ) {
 			error_el.text("");
 		}
-		if( form_group ) {
-			form_group.removeClass('has-error');
+// 		if( form_group ) {
+// 			form_group.removeClass('has-error');
+// 		}
+		if( form_control ) {
+			form_control.removeClass('is-invalid');
 		}
 		return true;
 	}

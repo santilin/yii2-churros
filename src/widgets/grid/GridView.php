@@ -17,6 +17,8 @@ class GridView extends SimpleGridView
 	public $selectViewsOptions = [];
 	public $toolbarButtons = [];
 	public $toolbarButtonsOptions = [];
+	public $condensed = false;
+	public $hover = false;
 
 
     public function init()
