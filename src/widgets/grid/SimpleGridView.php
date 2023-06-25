@@ -6,8 +6,8 @@
 namespace santilin\churros\widgets\grid;
 
 use Yii;
-use yii\helpers\{ArrayHelper,Html,Url	};
-use santilin\churros\grid\GridGroup;
+use yii\helpers\{ArrayHelper,Html,Url};
+use santilin\churros\widgets\grid\GridGroup;
 use yii\helpers\Json;
 use yii\web\JsExpression;
 use yii\data\Pagination;

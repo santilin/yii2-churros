@@ -161,12 +161,12 @@ trait ReportsModelTrait
 				if( empty($column['attribute']) ) {
 					$column['attribute'] = $matches[2];
 				}
-				$column['columnSummaryFunc'] = $matches[1];
+				$column['pageSummaryFunc'] = $matches[1];
 			} else {
 				if( empty($column['attribute']) ) {
 					$column['attribute'] = $colname;
 				}
-				$column['columnSummaryFunc'] = $column['summary']??'';
+				$column['pageSummaryFunc'] = $column['summary']??'';
 			}
 			unset($column['summary']);
 			$ta = $column['attribute'];
@@ -318,8 +318,8 @@ trait ReportsModelTrait
 			if( $alias != null ) {
  				$columns[$kc]['attribute'] = $alias;
 			}
-// 			if( !empty($column_def['columnSummaryFunc']) ) {
-// 				$agg = $column_def['columnSummaryFunc'];
+// 			if( !empty($column_def['pageSummaryFunc']) ) {
+// 				$agg = $column_def['pageSummaryFunc'];
 // 				$pks = $model->primaryKey();
 // 				foreach( $pks as $pk ) {
 // 					$groupby = $model->tableName() . ".$pk";
@@ -380,11 +380,11 @@ trait ReportsModelTrait
 				$columns[$colname] = $allColumns[$colname];
 			}
 			if( isset($column['summary']) ) {
-				$columns[$colname]['pageSummary'] = true;
+// 				$columns[$colname]['pageSummary'] = true;
 				$columns[$colname]['pageSummaryFunc'] = $column['summary'];
 			} else if( isset($columns[$colname]['summary']) ) {
 				// la definición del campo ya tiene un summary
-				$columns[$colname]['pageSummary'] = true;
+// 				$columns[$colname]['pageSummary'] = true;
 				$columns[$colname]['pageSummaryFunc'] = $columns[$colname]['summary'];
 				unset($columns[$colname]['summary']);
 			}
