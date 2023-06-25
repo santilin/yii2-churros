@@ -62,7 +62,7 @@ trait ModelSearchTrait
 	/**
 	 * Adds related sorts and filters to dataproviders for grids
 	*/
-    public function addColumnSortsToProvider($gridColumns, &$provider)
+    public function addRelatedSortsToProvider($gridColumns, &$provider)
     {
 		foreach( $gridColumns as $attribute => $column_def ) {
 			if ( is_int($attribute)

@@ -88,10 +88,10 @@ trait ModelInfoTrait
 		$ret = '';
 		if( $format == null || $format == 'short' ) {
 			$_format = self::getModelInfo('record_desc_format_short');
-		} elseif( $format == 'long' ) {
-			$_format = self::getModelInfo('record_desc_format_long');
 		} elseif( $format == 'medium' ) {
 			$_format = self::getModelInfo('record_desc_format_medium');
+		} elseif( $format == 'long' ) {
+			$_format = self::getModelInfo('record_desc_format_long');
 		} elseif( $format == 'code&desc' ) {
 			$fields = static::findCodeAndDescFields();
 			$_format = '{' . implode('}, {',array_filter($fields)) . '}';
