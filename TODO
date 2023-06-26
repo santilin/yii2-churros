@@ -1,3 +1,9 @@
+Reports:
+	- AllReportFields: ver si ponerlo en otro lugar.
+	- fixColumnDefinitions: Añadir adhoc los campos relacionados.
+	- gui: ¿Añadir relación?
+
+
 ¿Opción para obligar a cambiar la contraseña?
 
 Eliminar opción recordar contraseña de menú Ácceso

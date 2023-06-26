@@ -301,9 +301,10 @@ trait ReportsModelTrait
 			}
 			if( !isset($column_def['attribute']) ) {
 				Yii::$app->session->addFlash("error", "Report '" . $this->name . "': column '$kc' has no attribute");
-				continue;
+				$attribute = $kc;
+			} else {
+				$attribute = $column_def['attribute'];
 			}
-			$attribute = $column_def['attribute'];
 			$tablename = str_replace(['{','}','%'], '', $model->tableName() );
 			$alias = null;
 			if( $calc) {
