@@ -139,6 +139,7 @@ trait ReportsModelTrait
 		$columns = [];
 		$tablename = str_replace(['{','}','%'], '', $model->tableName());
 		foreach( $allColumns as $colname => $column ) {
+			$column['colname'] = $colname;
 // 			if( null != ($repcol = $this->findColumn($colname)) ) {
 // 				$column = ArrayHelper::merge($column, $repcol);
 // 			}
@@ -170,14 +171,14 @@ trait ReportsModelTrait
 			}
 			unset($column['summary']);
 			$ta = $column['attribute'];
-			// If the tablename of the column is this model, remove it
-			if( ($dotpos=strpos($ta, '.')) !== FALSE ) {
-				$t = substr($ta, 0, $dotpos);
-				if( $t == $tablename ) {
-					$a = substr($ta, $dotpos+1);
-					$column['attribute'] = $a;
-				}
-			}
+			// If the tablename of the column is this model, remove it from the attribute name
+// 			if( ($dotpos=strpos($ta, '.')) !== FALSE ) {
+// 				$t = substr($ta, 0, $dotpos);
+// 				if( $t == $tablename ) {
+// 					$a = substr($ta, $dotpos+1);
+// 					$column['attribute'] = $a;
+// 				}
+// 			}
 			if( empty($column['label']) ) {
 				if( isset( $report_column['label'] ) ) {
 					$column['label'] = $report_column['label'];
@@ -300,7 +301,7 @@ trait ReportsModelTrait
 				unset($columns[$kc]['calc']);
 			}
 			if( !isset($column_def['attribute']) ) {
-				Yii::$app->session->addFlash("error", "Report '" . $this->name . "': column '$kc' has no attribute");
+ 				Yii::$app->session->addFlash("error", "Report '" . $this->name . "': column '$kc' has no attribute in addSelectToQuery");
 				$attribute = $kc;
 			} else {
 				$attribute = $column_def['attribute'];
@@ -363,22 +364,28 @@ trait ReportsModelTrait
 	/**
 	 * Gets only the columns used in this report
 	 */
-	public function reportColumns($allColumns)
+	public function reportColumns($model, $allColumns)
 	{
+		$tablename = str_replace(['{','}','%'], '', $model->tableName());
 		$columns = [];
 		foreach( $this->report_columns as $kc => $column ) {
-			$colname = $column['attribute']??$kc;
-			if( !isset($allColumns[$colname]) ) {
-				$point_parts = explode('.',$colname);
-				$last_part = array_pop($point_parts);
-				if( in_array($last_part, ['sum','avg','count','distinct count', 'concat', 'distinct concat', 'max', 'min']) ) {
-					$cn = $last_part . ":" . implode($point_parts, '.');
-					if(isset($allColumns[$cn])) {
-						$columns[$colname] = $allColumns[$cn];
-					}
-				}
-			} else {
+			$colname = $column['colname']??$column['attribute']??$kc;
+			if( isset($allColumns[$colname]) ) {
 				$columns[$colname] = $allColumns[$colname];
+			} else if (isset($allColumns["$tablename.$colname"])) {
+				$colname = "$tablename.$colname";
+				$columns[$colname] = $allColumns[$colname];
+			} else {
+ 				Yii::$app->session->addFlash("error", "Report '" . $this->name . "': column '$kc' has no attribute in reportColumns");
+ 				continue;
+// 				$point_parts = explode('.',$colname);
+// 				$last_part = array_pop($point_parts);
+// 				if( in_array($last_part, ['sum','avg','count','distinct count', 'concat', 'distinct concat', 'max', 'min']) ) {
+// 					$cn = $last_part . ":" . implode($point_parts, '.');
+// 					if(isset($allColumns[$cn])) {
+// 						$columns[$colname] = $allColumns[$cn];
+// 					}
+// 				}
 			}
 			if( isset($column['summary']) ) {
 // 				$columns[$colname]['pageSummary'] = true;
@@ -389,6 +396,7 @@ trait ReportsModelTrait
 				$columns[$colname]['pageSummaryFunc'] = $columns[$colname]['summary'];
 				unset($columns[$colname]['summary']);
 			}
+			unset($columns[$colname]['colname']);
 		}
 		foreach( $this->report_sorting as $kc => $sorting_def ) {
 			$colname = $sorting_def['attribute']??$kc;
@@ -414,7 +422,7 @@ trait ReportsModelTrait
 					$rc = $report_columns[$colname];
 					$groups[$colname] = [
 						'column' => $rc['attribute'],
-						'format' => $rc['label'] . ': {group_value}',
+						'format' => !empty($rc['label']) ? ($rc['label'] . ': {group_value}') : '{group_value}',
 						'header' => $column['show_header']??true,
 						'footer' => $column['show_footer']??true,
 					];

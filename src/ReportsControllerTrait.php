@@ -53,10 +53,10 @@ trait ReportsControllerTrait
 		}
 		$search_model_name = $report->model;
 		if( strpos($search_model_name, '\\') === FALSE ) {
-			$search_model_name= "app\models\comp\\$search_model_name";
+			$search_model_name= "app\\forms\\$search_model_name";
 		}
-		if( substr($search_model_name, -6) != "Search" ) {
-			$search_model_name .= "Search";
+		if( substr($search_model_name, -7) != "_Search" ) {
+			$search_model_name .= "_Search";
 		}
 		if( $report->model == '' || !class_exists($search_model_name) ) {
 			Yii::$app->session->setFlash('error',
