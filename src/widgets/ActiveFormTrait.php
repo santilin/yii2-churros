@@ -84,17 +84,25 @@ trait ActiveFormTrait
 				break;
 			case 'fieldset':
 			case 'fields':
-				foreach( $row_layout['fields'] as $fldname ) {
+				foreach ($row_layout['fields'] as $fldname) {
 					if (!isset($fields_cfg[$fldname])) {
-						$fields_cfg[$fldname] = $this->getFieldClasses($layout);
+						$fields_cfg[$fldname] = $this->fieldClasses($layout);
 					} else {
 						if (isset($fields_cfg[$fldname]['layout'])) {
 							$fld_layout = $fields_cfg[$fldname]['layout'];
 							unset($fields_cfg[$fldname]['layout']);
 							$fields_cfg[$fldname] = array_merge(
-								$this->getFieldClasses($layout,$fld_layout),
+								$this->fieldClasses($layout,$fld_layout),
 								$fields_cfg[$fldname]);
 						}
+					}
+					switch($row_layout['labels']??null) {
+					case 'none':
+						$fields_cfg[$fldname]['horizontalCssClasses']['label'][] = 'hidden';
+						break;
+					case 'vertical':
+						$fields_cfg[$fldname]['horizontalCssClasses']['label']
+							= $fields_cfg[$fldname]['horizontalCssClasses']['wrapper'];
 					}
 				}
 			}

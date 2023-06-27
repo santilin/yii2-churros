@@ -178,7 +178,7 @@ class ActiveForm extends Bs4ActiveForm
 		]
 	];
 
-	protected function getFieldClasses(string $row_layout, string $fld_layout = 'large'): array
+	protected function fieldClasses(string $row_layout, string $fld_layout = 'large'): array
 	{
 		$form_field_cfg = self::FIELD_HORIZ_CLASSES[$row_layout][$fld_layout];
 		if (YII_ENV_DEV) {
