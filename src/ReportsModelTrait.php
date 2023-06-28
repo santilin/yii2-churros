@@ -316,7 +316,10 @@ trait ReportsModelTrait
 			} else if( ($dotpos = strpos($attribute, '.')) !== FALSE ) {
 				list($tablename, $attribute, $alias) = static::addRelatedField($model, $attribute, $joins);
 				$select_field = $tablename.'.'.$attribute;
+			} else {
+				$select_field = $attribute;
 			}
+
 			if( $alias != null ) {
  				$columns[$kc]['attribute'] = $alias;
 			}
@@ -364,16 +367,12 @@ trait ReportsModelTrait
 	/**
 	 * Gets only the columns used in this report
 	 */
-	public function reportColumns($model, $allColumns)
+	public function extractReportColumns($allColumns)
 	{
-		$tablename = str_replace(['{','}','%'], '', $model->tableName());
 		$columns = [];
 		foreach( $this->report_columns as $kc => $column ) {
 			$colname = $column['colname']??$column['attribute']??$kc;
 			if( isset($allColumns[$colname]) ) {
-				$columns[$colname] = $allColumns[$colname];
-			} else if (isset($allColumns["$tablename.$colname"])) {
-				$colname = "$tablename.$colname";
 				$columns[$colname] = $allColumns[$colname];
 			} else {
  				Yii::$app->session->addFlash("error", "Report '" . $this->name . "': column '$kc' has no attribute in reportColumns");

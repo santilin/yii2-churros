@@ -11,16 +11,16 @@ class ActiveForm extends Bs4ActiveForm
 {
 	use ActiveFormTrait;
 
-    public $fieldConfig = [
-		'horizontalCssClasses' => [
-			'offset' => '',
-			'label' => '',
-			'wrapper' => '',
-			'error' => '',
-			'hint' => '',
-		]
-    ];
-
+//     public $fieldConfig = [
+// 		'horizontalCssClasses' => [
+// 			'offset' => '',
+// 			'label' => '',
+// 			'wrapper' => '',
+// 			'error' => '',
+// 			'hint' => '',
+// 		]
+//     ];
+//
 	public $errorSummaryCssClass = 'error-summary alert alert-danger';
 
 	public const FIELD_HORIZ_CLASSES = [

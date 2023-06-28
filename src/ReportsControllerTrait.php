@@ -20,7 +20,7 @@ trait ReportsControllerTrait
 	public function actionCreate()
 	{
 		$params = Yii::$app->request->queryParams;
-		$model_name = '\\app\\models\\comp\\' . $this->_model_name . '_reportForm';
+		$model_name = '\\app\\forms\\' . $this->_model_name . '_report_Form';
 		$model = new $model_name;
 		$model->setDefaultValues();
 		if (isset($_POST['_form_relations']) ) {
@@ -30,7 +30,7 @@ trait ReportsControllerTrait
 		}
 		if ($model->loadAll(Yii::$app->request->post(), $relations) ) {
 			if( $model->saveAll(true) ) {
-				$this->showFlash('create', $model);
+				$this->addSuccessFlashes('create', $model);
 				return $this->whereToGoNow('create', $model);
 			}
 		}
@@ -69,7 +69,7 @@ trait ReportsControllerTrait
 		$report->load($params);
 		$report->encodeValue();
 		if( $model->saveAll('update', $report) ) {
-			$this->showFlash('update', $report);
+			$this->addSuccessFlashes('update', $report);
 		}
 		try {
 			return $this->render('report', [
