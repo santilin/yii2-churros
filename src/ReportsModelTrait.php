@@ -170,21 +170,15 @@ trait ReportsModelTrait
 				$column['pageSummaryFunc'] = $column['summary']??'';
 			}
 			unset($column['summary']);
-			$ta = $column['attribute'];
-			// If the tablename of the column is this model, remove it from the attribute name
-// 			if( ($dotpos=strpos($ta, '.')) !== FALSE ) {
-// 				$t = substr($ta, 0, $dotpos);
-// 				if( $t == $tablename ) {
-// 					$a = substr($ta, $dotpos+1);
-// 					$column['attribute'] = $a;
-// 				}
-// 			}
 			if( empty($column['label']) ) {
-				if( isset( $report_column['label'] ) ) {
-					$column['label'] = $report_column['label'];
-				} else {
-					$column['label'] = $model->getAttributeLabel($column['attribute']);
+				$a = $column['attribute'];
+				if( ($dotpos=strpos($a, '.')) !== FALSE ) {
+					$t = substr($a, 0, $dotpos);
+					if( $t == $tablename ) {
+						$a = substr($a, $dotpos+1);
+					}
 				}
+				$column['label'] = $model->getAttributeLabel($a);
 			}
 			$columns[$colname] = $column;
 		}
@@ -446,16 +440,23 @@ trait ReportsModelTrait
 			if( empty($tablename) ) {
 				$tablename = $modeltablename;
 			}
+			if ($tablename != $modeltablename) {
+				$love = true;
+			}
 			$group = $titles[$tablename]??$tablename;
 			$attr = $colattrs['attribute']??null;
 			if( substr($colname, -11) == '.desc_short' ) {
-				$title = 'descripción';
+				$title = ' (descripción)';
 			} else if( substr($colname, -10) == '.desc_long' ) {
-				$title = 'descripción larga';
+				$title = ' (descripción larga)';
 			} else {
-				$title = $group;
+				if ($modeltablename != $tablename) {
+					$title = " ($group)";
+				} else {
+					$title = '';
+				}
 			}
-			$dropdown_options[$group][$colname] = $colattrs['label'] . " ($title)";
+			$dropdown_options[$group][$colname] = $colattrs['label'] . $title;
 		}
 		return $dropdown_options;
 	}

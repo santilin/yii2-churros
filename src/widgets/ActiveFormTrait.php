@@ -43,9 +43,9 @@ trait ActiveFormTrait
 		}
 		$this->addLayoutClasses($fields_cfg, $this->fieldsLayout);
 		// check there are no render_fields with incorrect settings
-		foreach ($render_fields as $render_field) {
-			if (isset($fields_cfg[$render_field]['layout'])) {
-				unset($fields_cfg[$render_field]['layout']);
+		foreach ($fields_cfg as $kf => $fldcfg_info) {
+			if (isset($fields_cfg[$kf]['layout'])) {
+				unset($fields_cfg[$kf]['layout']);
 			}
 		}
 
