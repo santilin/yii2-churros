@@ -445,16 +445,17 @@ trait ReportsModelTrait
 			}
 			$group = $titles[$tablename]??$tablename;
 			$attr = $colattrs['attribute']??null;
+			$title = '';
 			if( substr($colname, -11) == '.desc_short' ) {
 				$title = ' (descripción)';
 			} else if( substr($colname, -10) == '.desc_long' ) {
 				$title = ' (descripción larga)';
-			} else {
-				if ($modeltablename != $tablename) {
-					$title = " ($group)";
-				} else {
-					$title = '';
-				}
+// 			} else {
+// 				if ($modeltablename != $tablename) {
+// 					$title = " ($group)";
+// 				} else {
+// 					$title = '';
+// 				}
 			}
 			$dropdown_options[$group][$colname] = $colattrs['label'] . $title;
 		}

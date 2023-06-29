@@ -670,33 +670,27 @@ trait ModelInfoTrait
 	public function relationsLabels(int $level): array
 	{
 		$tbname = $this->bareTableName();
-		$ret = [ $tbname => static::getModelInfo('title_plural') ];
-		if (--$level>0) {
-			$ret = array_merge($ret, self::recRelationsLabels($this, $level, "$tbname."));
-		}
+		$ret[$tbname] = $title = static::getModelInfo('title_plural');
+		self::recRelationsLabels($ret, $this, $level, $tbname, $title);
 		return $ret;
 	}
 
-	static public function recRelationsLabels($model, int $level, string $relname_prev = ''): array
+	static public function recRelationsLabels(array &$ret, $model, int $level, string $parent_relname, string $parent_title): void
 	{
-		$tbname = $relname_prev . static::bareTableName();
-//  		$ret = [ $tbname => $model::getModelInfo('title_plural') ];
+		if ($level == 0 ) {
+			return;
+		}
 		foreach ($model::$relations as $relname => $relinfo ) {
 			$rel_model = $relinfo['modelClass'];
-			$relname = "$relname_prev$relname";
-			if ($relinfo['type'] == "hasMany") {
-				$ret[$relname] = $rel_model::getModelInfo('title_plural');
+			$relname = "$parent_relname.$relname";
+			if ($relinfo['type'] == 'HasMany' || $relinfo['type'] == 'ManyToMany') {
+				$title = $rel_model::getModelInfo('title_plural');
 			} else {
-				$ret[$relname] = $rel_model::getModelInfo('title');
+				$title = $rel_model::getModelInfo('title');
 			}
+			$ret[$relname] = $title . ' (' . $parent_title . ')';
+			self::recRelationsLabels($ret, $rel_model, $level-1, $relname, $title);
 		}
-		if (--$level > 0) {
-			foreach ($model::$relations as $relname => $relinfo ) {
-				$relname = "$relname_prev$relname";
-				$ret = array_merge($ret, self::recRelationsLabels($model, $level, "$relname."));
-			}
-		}
-		return $ret;
 	}
 
 } // trait ModelInfoTrait
