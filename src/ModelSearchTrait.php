@@ -162,7 +162,11 @@ trait ModelSearchTrait
 	static public function toOpExpression($value, $strict)
 	{
 		if( isset($value['op']) ) {
-			return $value;
+			if (isset($value['lft'])) {
+				return [ 'op' => $value, 'v' => $value['lft'] ];
+			} else {
+				return $value;
+			}
 		}
 		if( is_string($value) && $value != '') {
 			if( substr($value,0,2) == '{"' && substr($value,-2) == '"}' ) {
@@ -177,7 +181,7 @@ trait ModelSearchTrait
 	public function filterWhere(&$query, $fldname, $value)
 	{
 		$value = static::toOpExpression($value, false );
-		if( $value['v'] == null ) {
+		if( !isset($value['v']) && $value['v'] == null ) {
 			return;
 		}
 		$fullfldname = $this->tableName() . "." . $fldname;

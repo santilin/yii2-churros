@@ -74,26 +74,12 @@ trait ReportsModelTrait
 			}
 		}
 		$searchScope = $this->model;
-		if( substr($searchScope, -6) != "Search" ) {
-			$searchScope .= "Search";
+		if( substr($searchScope, -7) != "_Search" ) {
+			$searchScope .= "_Search";
 		}
 		if( isset($data[$searchScope]) ) {
-			$this->report_filters = [];
-			$svalues = $data[$searchScope];
-			// The HTML form sends the data trasposed
-			foreach( $svalues['attribute'] as $key => $value) {
-				if( empty($value) ) {
-					continue; // The column has not been specified
-				}
-				if( $svalues['lft']!=='' || $svalues['rgt'] != '' || $svalues['op'] != 'LIKE' ) {
-					$this->report_filters[] = [
-						'attribute' => $value,
-						'lft' => $svalues['lft'][$key],
-						'rgt' => $svalues['rgt'][$key],
-						'op' => $svalues['op'][$key]??'LIKE'
-					];
-				}
-			}
+			unset($data[$searchScope]['_index_']);
+			$this->report_filters = $data[$searchScope];
 		}
 		return true;
 	}
@@ -229,8 +215,10 @@ trait ReportsModelTrait
 		$provider->query->orderBy( join(',',$orderby) );
 		$provider->sort = false;
 
+		$filter_columns = [];
 		foreach( $this->report_filters as $kc => $filter_def ) {
 			$colname = $filter_def['attribute'];
+			$filter_columns[] = $colname;
 			if( !isset($all_columns[$colname]) ) {
 				Yii::$app->session->addFlash("error", "Report '" . $this->name . "': column '$colname' of filter not found");
 				continue;
@@ -247,7 +235,7 @@ trait ReportsModelTrait
 				$model->filterWhere($query, $colname, $filter_def);
 			}
 		}
-		$this->addSelectToQuery($model, $columns, array_keys($this->report_filters), $query);
+		$this->addSelectToQuery($model, $columns, $filter_columns, $query);
 		return $provider;
 	}
 
@@ -351,7 +339,7 @@ trait ReportsModelTrait
 				$selects[] = $select_field;
 			}
 		}
-		$query->select($selects);
+// 		$query->select($filters);
 		foreach( $joins as $jk => $jv ) {
 			$query->innerJoin($jk, $jv);
 		}
