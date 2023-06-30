@@ -332,7 +332,7 @@ trait ModelSearchTrait
 		}
 	}
 
-	public function createReportFilterField(array $dropdown_columns, ?string $attribute,
+	public function createReportFilterField($index, array $dropdown_columns, ?string $attribute,
 		array $value, string $type = 'string', array $options = [], $attribute_values = null)
 	{
 		$attr_class = str_replace('.','_',$attribute);
@@ -351,7 +351,7 @@ trait ModelSearchTrait
 			$extra_visible = '';
 		}
 		$ret .= "<td>";
-		$ret .= Html::dropDownList("{$scope}[attribute][]", $attribute,
+		$ret .= Html::dropDownList("{$scope}[$index][attribute]", $attribute,
 		$dropdown_columns, [
 			'class' => 'form-control',
 			'prompt' => [
@@ -362,7 +362,7 @@ trait ModelSearchTrait
 		$ret .= "</td>";
 
 		$ret .= "<td class='control-form'>";
-		$ret .= Html::dropDownList("${scope}[op][]",
+		$ret .= Html::dropDownList("${scope}[$index][op]",
 			$value['op'], self::$operators, [
 			'id' => "drop-$attr_class", 'class' => 'search-dropdown form-control',
 			] );
@@ -370,7 +370,7 @@ trait ModelSearchTrait
 
 		if( is_array($attribute_values) || is_array($value['lft']) ) {
 			$ret .= "<td class='control-form'>";
-			$ret .= Html::dropDownList("${scope}[lft][]",
+			$ret .= Html::dropDownList("${scope}[$index][lft]",
 				$value['lft'], $attribute_values,
 				array_merge($options['htmlOptions']??[], [ 'prompt' => Yii::t('churros', 'Cualquiera')]));
 			$ret .= "</td>";
@@ -378,7 +378,7 @@ trait ModelSearchTrait
 			$ret .= <<<EOF
 	<td class="input-group">
 EOF;
-			$ret .= Html::input($control_type, "${scope}[lft][]", $value['lft'],
+			$ret .= Html::input($control_type, "${scope}[$index][lft]", $value['lft'],
 				array_merge($options['htmlOptions']??[], [ 'class' => 'form-control' ]));
 			$ret .= <<<EOF
     </td>
@@ -391,13 +391,13 @@ EOF;
 
 		if( is_array($attribute_values) ) {
 			$ret .= "<span class='control-form'>";
-			$ret .= Html::dropDownList("${scope}[rgt][]",
+			$ret .= Html::dropDownList("${scope}[$index][rgt]",
 				$value['rgt'], $attribute_values,
 				array_merge($options['htmlOptions']??[], [ 'prompt' => Yii::t('churros', 'Cualquiera')]));
 			$ret .= '</span>';
 		} else {
 			$ret .= '<span class="input-group">';
-			$ret .= Html::input($control_type, "${scope}[rgt][]", $value['rgt'],
+			$ret .= Html::input($control_type, "${scope}[$index][rgt]", $value['rgt'],
 				array_merge($options['htmlOptions']??[], [ 'class' => 'form-control' ]));
 			$ret .= <<<EOF
 	</span>
