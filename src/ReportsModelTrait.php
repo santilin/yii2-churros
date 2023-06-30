@@ -42,19 +42,8 @@ trait ReportsModelTrait
 			$this->landscape = boolval($data[$scope]['landscape']);
 		}
 		if( isset($data['report_columns']) ) {
-			// The HTML form sends the data trasposed
-			$this->report_columns = [];
-			foreach( $data['report_columns']['name'] as $key => $value) {
-				if( empty($value) ) {
-					continue; // The column has not been specified
-				}
-				$this->report_columns[] = [
-					'attribute' => $value,
-					'summary' => $data['report_columns']['summary'][$key],
-					'label' => $data['report_columns']['label'][$key],
-					'format' => $data['report_columns']['format'][$key]??'raw'
-				];
-			}
+			unset($data['report_columns']['_index_']);
+			$this->report_columns = $data['report_columns'];
 		}
 		if( isset($data['report_sorting']) ) {
 			$this->report_sorting = [];
@@ -125,10 +114,6 @@ trait ReportsModelTrait
 		$columns = [];
 		$tablename = str_replace(['{','}','%'], '', $model->tableName());
 		foreach( $allColumns as $colname => $column ) {
-			$column['colname'] = $colname;
-// 			if( null != ($repcol = $this->findColumn($colname)) ) {
-// 				$column = ArrayHelper::merge($column, $repcol);
-// 			}
 			if( !isset($column['contentOptions']) ) {
 				$column['contentOptions'] = [];
 			}
@@ -174,8 +159,11 @@ trait ReportsModelTrait
 	/**
 	 * Creates the data provider for the report grid.
 	 * Sets the query, select, joins, orderBy, groupBy and filters
+	 * @param ModelInfoTrait $model the data model for the report
+	 * @param array $columns the columns included in the report definition
+	 * @param array $all_columns all the columns available for the rerpot definition
 	 */
-	public function dataProviderForReport($model, &$columns, $all_columns)
+	public function dataProviderForReport($model, array &$columns, array $all_columns)
     {
         $query = new Query(); // Do not use $model->find(), as we want a query, not active records
 
@@ -216,29 +204,37 @@ trait ReportsModelTrait
 		$provider->sort = false;
 
 		$filter_columns = [];
-		foreach( $this->report_filters as $kc => $filter_def ) {
-			$colname = $filter_def['attribute'];
+		foreach( $this->report_filters as $filter_def ) {
+			$colname = $filter_def['name'];
 			$filter_columns[] = $colname;
 			if( !isset($all_columns[$colname]) ) {
 				Yii::$app->session->addFlash("error", "Report '" . $this->name . "': column '$colname' of filter not found");
 				continue;
 			}
 			$column_def = $all_columns[$colname];
-			unset($filter_def['attribute']);
-			if( isset($column_def['calc']) ) {
+			unset($filter_def['name']);
+			if( $colname != $column_def['attribute']) {
 				$model->filterWhere($query,
-					new \yii\db\Expression(strtr($all_columns[$colname]['attribute'], [ '{tablename}' => $tablename ])),
-					$filter_def);
-			} else if( isset($all_columns[$colname]) ) {
-				$model->filterWhere($query, $all_columns[$colname]['attribute'], $filter_def);
+					new \yii\db\Expression(strtr($column_def['attribute'],
+						[ '{tablename}' => $tablename ])), $filter_def);
 			} else {
-				$model->filterWhere($query, $colname, $filter_def);
+				$attribute = static::removeTableName($column_def['attribute']);
+				$model->filterWhere($query, $attribute, $filter_def);
 			}
 		}
 		$this->addSelectToQuery($model, $columns, $filter_columns, $query);
 		return $provider;
 	}
 
+	static protected function removeTableName(string $fullname): string
+	{
+		$parts = explode('.', $fullname);
+		if ( count($parts)>1 ) {
+			return implode('.', array_slice($parts,1));
+		} else {
+			return $fullname;
+		}
+	}
 
 	static protected function addRelatedField($left_model, $attribute, &$joins)
 	{
@@ -278,10 +274,6 @@ trait ReportsModelTrait
 		$groups = [];
 		$selects = [];
 		foreach( $columns as $kc => $column_def ) {
-			$calc = !empty($column_def['calc']);
-			if( $calc ) {
-				unset($columns[$kc]['calc']);
-			}
 			if( !isset($column_def['attribute']) ) {
  				Yii::$app->session->addFlash("error", "Report '" . $this->name . "': column '$kc' has no attribute in addSelectToQuery");
 				$attribute = $kc;
@@ -290,7 +282,7 @@ trait ReportsModelTrait
 			}
 			$tablename = str_replace(['{','}','%'], '', $model->tableName() );
 			$alias = null;
-			if( $calc) {
+			if ($column_def['name'] != $column_def['attribute']) {
 				$alias = str_replace('.','_',$kc);
 				$select_field = new yii\db\Expression(strtr($attribute, [ '{tablename}' => $tablename ]));
 			} else if ( is_int($attribute) || array_key_exists($attribute, $model->attributes ) ) {
@@ -352,32 +344,25 @@ trait ReportsModelTrait
 	public function extractReportColumns($allColumns)
 	{
 		$columns = [];
-		foreach( $this->report_columns as $kc => $column ) {
-			$colname = $column['colname']??$column['attribute']??$kc;
-			if( isset($allColumns[$colname]) ) {
-				$columns[$colname] = $allColumns[$colname];
-			} else {
- 				Yii::$app->session->addFlash("error", "Report '" . $this->name . "': column '$kc' has no attribute in reportColumns");
+		foreach( $this->report_columns as $column_def ) {
+			$colname = $column_def['name'];
+			if( !isset($allColumns[$colname]) ) {
+ 				Yii::$app->session->addFlash("error", "Report '" . $this->name . "': column '$colname' does not exist in extractReportColumns");
  				continue;
-// 				$point_parts = explode('.',$colname);
-// 				$last_part = array_pop($point_parts);
-// 				if( in_array($last_part, ['sum','avg','count','distinct count', 'concat', 'distinct concat', 'max', 'min']) ) {
-// 					$cn = $last_part . ":" . implode($point_parts, '.');
-// 					if(isset($allColumns[$cn])) {
-// 						$columns[$colname] = $allColumns[$cn];
-// 					}
-// 				}
 			}
-			if( isset($column['summary']) ) {
-// 				$columns[$colname]['pageSummary'] = true;
-				$columns[$colname]['pageSummaryFunc'] = $column['summary'];
-			} else if( isset($columns[$colname]['summary']) ) {
-				// la definición del campo ya tiene un summary
-// 				$columns[$colname]['pageSummary'] = true;
-				$columns[$colname]['pageSummaryFunc'] = $columns[$colname]['summary'];
-				unset($columns[$colname]['summary']);
+			$column_to_add = array_merge($allColumns[$colname], $column_def);
+			if( !isset($column_to_add['attribute']) ) {
+				$column_to_add['attribute'] = $colname;
 			}
-			unset($columns[$colname]['colname']);
+			if( isset($column_to_add['pre_summary']) ) {
+				$column_to_add['attribute'] = $column_to_add['pre_summary'] . '(' . $column_to_add['attribute'] . ')';
+				unset($column_to_add['pre_summary']);
+			}
+			if( isset($column_to_add['summary']) ) {
+				$column_to_add['pageSummaryFunc'] = $column_to_add['summary'];
+				unset($column_to_add['summary']);
+			}
+			$columns[$colname] = $column_to_add;
 		}
 		foreach( $this->report_sorting as $kc => $sorting_def ) {
 			$colname = $sorting_def['attribute']??$kc;

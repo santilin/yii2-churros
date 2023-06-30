@@ -163,7 +163,7 @@ trait ModelSearchTrait
 	{
 		if( isset($value['op']) ) {
 			if (isset($value['lft'])) {
-				return [ 'op' => $value, 'v' => $value['lft'] ];
+				return [ 'op' => $value['op'], 'v' => $value['lft'] ];
 			} else {
 				return $value;
 			}
@@ -178,10 +178,13 @@ trait ModelSearchTrait
 		return [ 'op' => $strict ? '=' : 'LIKE', 'v' => $value ];
 	}
 
+	/**
+	 * Función compartida por search y report
+	 */
 	public function filterWhere(&$query, $fldname, $value)
 	{
 		$value = static::toOpExpression($value, false );
-		if( !isset($value['v']) && $value['v'] == null ) {
+		if( !isset($value['v']) || $value['v'] === null ) {
 			return;
 		}
 		$fullfldname = $this->tableName() . "." . $fldname;
@@ -355,7 +358,7 @@ trait ModelSearchTrait
 			$extra_visible = '';
 		}
 		$ret .= "<td>";
-		$ret .= Html::dropDownList("{$scope}[$index][attribute]", $attribute,
+		$ret .= Html::dropDownList("{$scope}[$index][name]", $attribute,
 		$dropdown_columns, [
 			'class' => 'form-control',
 			'prompt' => [

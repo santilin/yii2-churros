@@ -71,6 +71,9 @@ class SimpleGridView extends \yii\grid\GridView
 	public function init()
 	{
 		$this->initGroups(); // must be done before initColumns
+		foreach ($this->columns as &$column) {
+			unset($column['name']);
+		}
 		parent::init();
 		if( count($this->groups) != 0 || $this->totalsRow) {
 			$this->beforeRow = function($model, $key, $index, $grid) {
