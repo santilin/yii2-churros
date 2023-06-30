@@ -16,10 +16,14 @@ class SimpleGridView extends \yii\grid\GridView
 {
     const F_COUNT = 'f_count';
     const F_SUM = 'f_sum';
-    const F_MAX = 'f_max';
-    const F_MIN = 'f_min';
     const F_AVG = 'f_avg';
     const F_CONCAT = 'f_concat';
+    const F_MAX = 'f_max';
+    const F_MIN = 'f_min';
+    const F_DISTINCT_COUNT = 'f_distinct_count';
+    const F_DISTINCT_SUM = 'f_distinct_sum';
+    const F_DISTINCT_AVG = 'f_distinct_avg';
+    const F_DISTINCT_CONCAT = 'f_distinct_concat';
 
     const FILTER_SELECT2 = 0;
 

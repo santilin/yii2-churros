@@ -6,7 +6,7 @@ use yii\helpers\{Html,ArrayHelper};
 use yii\db\Query;
 use yii\data\ActiveDataProvider;
 use santilin\churros\ModelSearchTrait;
-use santilin\churros\grid\ReportView;
+use santilin\churros\widgets\grid\ReportView;
 
 trait ReportsModelTrait
 {
@@ -226,6 +226,56 @@ trait ReportsModelTrait
 		return $provider;
 	}
 
+	/**
+	 * Adds related select and joins to dataproviders for reports
+	 */
+	public function addSelectToQuery($model, &$columns, $filters, &$query)
+	{
+		$joins = [];
+		$groups = [];
+		$selects = [];
+		foreach( $columns as $kc => $column_def ) {
+			if( !isset($column_def['attribute']) ) {
+ 				Yii::$app->session->addFlash("error", "Report '" . $this->name . "': column '$kc' has no attribute in addSelectToQuery");
+ 				continue;
+			}
+			$fldname = static::removeTableName($column_def['name']);
+			$attribute = $column_def['attribute'];
+			$tablename = str_replace(['{','}','%'], '', $model->tableName() );
+			if( ($dotpos = strpos($fldname, '.')) !== FALSE ) {
+				static::addRelatedField($model, $fldname, $joins);
+				$select_field = $attribute;
+			} else {
+				$alias = $select_field = $attribute;
+			}
+			$alias = strtr($select_field, [
+				'.' => '_',
+				'(' => '_', ')' => '_'
+			]);
+			if ($alias != $select_field) {
+				$selects[$alias] = $select_field;
+			} else {
+				$selects[] = $select_field;
+ 			}
+ 			$columns[$kc]['attribute'] = $alias;
+		}
+		$query->select($selects);
+		foreach( $joins as $jk => $jv ) {
+			$query->innerJoin($jk, $jv);
+		}
+		$query->groupBy($groups);
+    }
+
+	static protected function removeFirstTableName(string $fullname): string
+	{
+		$parts = explode('.', $fullname);
+		if ( count($parts)>2 ) {
+			return implode('.', array_slice($parts,1));
+		} else {
+			return $fullname;
+		}
+	}
+
 	static protected function removeTableName(string $fullname): string
 	{
 		$parts = explode('.', $fullname);
@@ -266,79 +316,6 @@ trait ReportsModelTrait
 
 
 	/**
-	 * Adds related select and joins to dataproviders for reports
-	 */
-	public function addSelectToQuery($model, &$columns, $filters, &$query)
-	{
-		$joins = [];
-		$groups = [];
-		$selects = [];
-		foreach( $columns as $kc => $column_def ) {
-			if( !isset($column_def['attribute']) ) {
- 				Yii::$app->session->addFlash("error", "Report '" . $this->name . "': column '$kc' has no attribute in addSelectToQuery");
-				$attribute = $kc;
-			} else {
-				$attribute = $column_def['attribute'];
-			}
-			$tablename = str_replace(['{','}','%'], '', $model->tableName() );
-			$alias = null;
-			if ($column_def['name'] != $column_def['attribute']) {
-				$alias = str_replace('.','_',$kc);
-				$select_field = new yii\db\Expression(strtr($attribute, [ '{tablename}' => $tablename ]));
-			} else if ( is_int($attribute) || array_key_exists($attribute, $model->attributes ) ) {
-				$select_field = $tablename.'.'.$attribute;
-			} else if( ($dotpos = strpos($attribute, '.')) !== FALSE ) {
-				list($tablename, $attribute, $alias) = static::addRelatedField($model, $attribute, $joins);
-				$select_field = $tablename.'.'.$attribute;
-			} else {
-				$select_field = $attribute;
-			}
-
-			if( $alias != null ) {
- 				$columns[$kc]['attribute'] = $alias;
-			}
-// 			if( !empty($column_def['pageSummaryFunc']) ) {
-// 				$agg = $column_def['pageSummaryFunc'];
-// 				$pks = $model->primaryKey();
-// 				foreach( $pks as $pk ) {
-// 					$groupby = $model->tableName() . ".$pk";
-// 					if( !isset($groups[$groupby]) ) {
-// 						$groups[$groupby] = $groupby;
-// 					}
-// 				}
-// 				switch($agg) {
-// 				case ReportView::F_COUNT:
-// 					$f_agg = 'COUNT';
-// 					break;
-// 				case ReportView::F_SUM:
-// 					$f_agg = 'SUM';
-// 					break;
-// 				case ReportView::F_MAX;
-// 					$f_agg = 'MAX';
-// 					break;
-// 				case ReportView::F_MIN;
-// 					$f_agg = 'MIN';
-// 					break;
-// 				case ReportView::F_AVG;
-// 					$f_agg = 'AVERAGE';
-// 					break;
-// 				}
-// 				$select_field = $f_agg."($select_field)";
-// 			}
-			if( $alias ) {
-				$selects[$alias] = $select_field;
-			} else {
-				$selects[] = $select_field;
-			}
-		}
-// 		$query->select($filters);
-		foreach( $joins as $jk => $jv ) {
-			$query->innerJoin($jk, $jv);
-		}
-		$query->groupBy($groups);
-    }
-
-	/**
 	 * Gets only the columns used in this report
 	 */
 	public function extractReportColumns($allColumns)
@@ -352,12 +329,15 @@ trait ReportsModelTrait
 			}
 			$column_to_add = array_merge($allColumns[$colname], $column_def);
 			if( !isset($column_to_add['attribute']) ) {
-				$column_to_add['attribute'] = $colname;
+				$column_to_add['attribute'] = static::removeFirstTableName($column_to_add['attribute']);
+			} else {
+				$column_to_add['attribute'] = static::removeFirstTableName($colname);
 			}
-			if( isset($column_to_add['pre_summary']) ) {
-				$column_to_add['attribute'] = $column_to_add['pre_summary'] . '(' . $column_to_add['attribute'] . ')';
-				unset($column_to_add['pre_summary']);
+			if( !empty($column_to_add['pre_summary']) ) {
+				$pre_sum_func = substr($column_to_add['pre_summary'],2);
+				$column_to_add['attribute'] = "$pre_sum_func({$column_to_add['attribute']})";
 			}
+			unset($column_to_add['pre_summary']);
 			if( isset($column_to_add['summary']) ) {
 				$column_to_add['pageSummaryFunc'] = $column_to_add['summary'];
 				unset($column_to_add['summary']);

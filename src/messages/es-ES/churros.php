@@ -108,6 +108,10 @@ return [
 	'The value \'{0}\' does not exist in the category \'{1}\'' => 'El valor \'{0}\' no existe en la categoría \'{1}\'',
 	"{attribute} '{value}' does not match the mask {mask}." => "El valor '{value}' de '{attribute}' no concuerda con el formato {mask}",
 
+	// reports
+	'New column' => 'Nueva columna',
+	'New fitler' => 'Nuevo filtro',
+
 	// WizardForm
 	'Next' => 'Siguiente',
 	'Previous' => 'Anterior',
