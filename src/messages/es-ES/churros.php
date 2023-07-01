@@ -51,6 +51,18 @@ return [
     'Show all data' => 'Mostrar todos los resultados',
     'Error saving the record {title}' => 'Error guardando el registro {title}',
 
+	'None' => 'Nada',
+    'Sum' => 'Suma',
+    'Count' => 'Cuenta',
+    'Average' => 'Media',
+    'Concatenate' => 'Unir',
+    'Max' => 'Máx',
+    'Min' => 'Mín',
+    'Sum (distinct)' => 'Suma distinta',
+    'Count (distinct)' => 'Cuenta dstinta',
+    'Avg (distinct)' => 'Media distinta',
+    'Concat (distinct)' => 'Unir distinta',
+
     'Active' => 'Activo',
     'Inactive' => 'Inactivo',
     '{inactive} since' => '{inactive} desde',
@@ -93,7 +105,8 @@ return [
 		=> 'El informe "{record}" tiene errores en su definición.',
 	'Not showing totals because not all the rows have been shown' =>
 		'No se muestran los totales porque no se están mostrando todos los registros',
-
+	'The report <a href="{model_link}">{record_medium}</a> has been successfully updated.'
+		=> 'El informe <a href="{model_link}">{record_medium}</a> se ha guardado correctamente..',
 	'Unable to send email to {email}' => 'No se ha podido enviar el email a {email}',
 	'Unable to send email to {email} and other {ndest} recipients' => 'No se ha podido enviar el email a {email} y a otros {ndest} destinatarios',
 

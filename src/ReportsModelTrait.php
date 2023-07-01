@@ -142,7 +142,7 @@ trait ReportsModelTrait
 			}
 			unset($column['summary']);
 			if( empty($column['label']) ) {
-				$a = $column['attribute'];
+				$a = $colname;
 				if( ($dotpos=strpos($a, '.')) !== FALSE ) {
 					$t = substr($a, 0, $dotpos);
 					if( $t == $tablename ) {
@@ -327,7 +327,7 @@ trait ReportsModelTrait
  				Yii::$app->session->addFlash("error", "Report '" . $this->name . "': column '$colname' does not exist in extractReportColumns");
  				continue;
 			}
-			$column_to_add = array_merge($allColumns[$colname], $column_def);
+			$column_to_add = array_merge($allColumns[$colname], array_filter($column_def));
 			if( !isset($column_to_add['attribute']) ) {
 				$column_to_add['attribute'] = static::removeFirstTableName($column_to_add['attribute']);
 			} else {
