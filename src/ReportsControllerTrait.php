@@ -67,7 +67,7 @@ trait ReportsControllerTrait
 		$report_def->decodeValue();
 		$report_def->load($params);
 		$report_def->encodeValue();
-		if( $report_def->saveAll() ) {
+		if( $report_def->save() ) {
 			$this->addSuccessFlashes('update', $report_def);
 		}
 		try {

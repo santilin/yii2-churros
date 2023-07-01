@@ -15,6 +15,7 @@ trait ReportsModelTrait
 	public $report_sorting = [];
 	public $only_totals = false;
 	public $landscape = false;
+	protected $pre_summary_columns = [];
 
 	public function getReportValue($var, $default)
 	{
@@ -46,20 +47,17 @@ trait ReportsModelTrait
 			$this->report_columns = $data['report_columns'];
 		}
 		if( isset($data['report_sorting']) ) {
+			unset($data['report_sorting']['_index_']);
 			$this->report_sorting = [];
-			// The HTML form sends the data trasposed
-			foreach( $data['report_sorting']['name'] as $key => $value) {
-				if( empty($value) ) {
-					continue; // The column has not been specified
+			foreach ($data['report_sorting'] as $rs) {
+				unset($rs['group_check'], $rs['show_header_check'], $rs['show_footer_check'],
+					$rs['show_column_check']);
+				if ($rs['group'] ) {
+					$rs['show_header'] = 0;
+					$rs['show_footer'] = 0;
+					$rs['show_column'] = 1;
 				}
-				$this->report_sorting[] = [
-					'attribute' => $value,
-					'asc' => $data['report_sorting']['asc'][$key]??SORT_ASC,
-					'group' => $data['report_sorting']['group'][$key]??true,
-					'show_column' => $data['report_sorting']['show_column'][$key]??false,
-					'show_header' => $data['report_sorting']['show_header'][$key]??true,
-					'show_footer' => $data['report_sorting']['show_footer'][$key]??true,
-				];
+				$this->report_sorting[] = $rs;
 			}
 		}
 		$searchScope = $this->model;
@@ -177,28 +175,24 @@ trait ReportsModelTrait
 
 		$tablename = $model->tableName();
 		$orderby = [];
-		foreach( $this->report_sorting as $kc => $sorting_def ) {
-			$colname = $sorting_def['attribute']??$kc;
+		foreach( $this->report_sorting as $sorting_def ) {
+			$colname = $sorting_def['name'];
 			if( !isset($columns[$colname]) ) {
 				Yii::$app->session->addFlash("error", "Report '" . $this->name . "': column '$colname' not found in sorting");
 				continue;
 			}
 			$column_def = $all_columns[$colname];
 			$attribute = $column_def['attribute'];
-			if( isset($column_def['calc']) ) {
-				$orderby[] = new yii\db\Expression(strtr($attribute, [ '{tablename}' => $tablename ]));
-			} else if ( is_int($attribute) || array_key_exists($attribute, $model->attributes ) ) {
-				$orderby[] = $tablename .'.'.$attribute
-					. ($sorting_def['asc']??SORT_ASC==SORT_ASC?' ASC':' DESC');
-			} else if( ($dotpos = strpos($attribute, '.')) !== FALSE ) {
+			$fldname = static::removeTableName($colname);
+// 				$orderby[] = new yii\db\Expression(strtr($attribute, [ '{tablename}' => $tablename ]));
+			if( ($dotpos = strpos($fldname, '.')) !== FALSE ) {
 				$joins = [];
-				list($tablename, $attribute, $alias) = static::addRelatedField($model, $attribute, $joins);
-				$orderby[] = $tablename .'.'.$attribute
-					. ($sorting_def['asc']??SORT_ASC==SORT_ASC?' ASC':' DESC');
+				list(, , $alias) = static::addRelatedField($model, $fldname, $joins);
 			} else {
-				Yii::$app->session->addFlash("error", "Report '" . $this->name . "': order '$attribute' not found");
-				continue;
+				$attribute = static::removeTableName($attribute);
 			}
+			$orderby[] = $tablename .'.'.$attribute
+				. ($sorting_def['asc']??SORT_ASC==SORT_ASC?' ASC':' DESC');
 		}
 		$provider->query->orderBy( join(',',$orderby) );
 		$provider->sort = false;
@@ -257,6 +251,10 @@ trait ReportsModelTrait
 			} else {
 				$selects[] = $select_field;
  			}
+ 			if (count($this->pre_summary_columns)
+				&& !in_array($column_def['name'], $this->pre_summary_columns) ) {
+				$groups[] = $alias;
+			}
  			$columns[$kc]['attribute'] = $alias;
 		}
 		$query->select($selects);
@@ -334,6 +332,7 @@ trait ReportsModelTrait
 				$column_to_add['attribute'] = static::removeFirstTableName($colname);
 			}
 			if( !empty($column_to_add['pre_summary']) ) {
+				$this->pre_summary_columns[] = $colname;
 				$pre_sum_func = substr($column_to_add['pre_summary'],2);
 				$column_to_add['attribute'] = "$pre_sum_func({$column_to_add['attribute']})";
 			}
@@ -344,8 +343,8 @@ trait ReportsModelTrait
 			}
 			$columns[$colname] = $column_to_add;
 		}
-		foreach( $this->report_sorting as $kc => $sorting_def ) {
-			$colname = $sorting_def['attribute']??$kc;
+		foreach( $this->report_sorting as $sorting_def ) {
+			$colname = $sorting_def['name'];
 			if( !isset($columns[$colname]) ) {
 				if( isset($allColumns[$colname]) ) {
 					$columns[$colname] = $allColumns[$colname];
@@ -361,9 +360,9 @@ trait ReportsModelTrait
 	public function reportGroups(&$report_columns)
 	{
 		$groups = [];
-		foreach( $this->report_sorting as $kc => $column ) {
+		foreach( $this->report_sorting as $column ) {
 			if( !empty($column['group']) ) {
-				$colname = $column['attribute']??$kc;
+				$colname = $column['name'];
 				if( isset($report_columns[$colname]) ) {
 					$rc = $report_columns[$colname];
 					$groups[$colname] = [

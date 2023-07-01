@@ -357,7 +357,7 @@ trait ModelSearchTrait
 		} else {
 			$extra_visible = '';
 		}
-		$ret .= "<td>";
+		$ret .= "<td class=control-form>";
 		$ret .= Html::dropDownList("{$scope}[$index][name]", $attribute,
 		$dropdown_columns, [
 			'class' => 'form-control',
@@ -368,7 +368,7 @@ trait ModelSearchTrait
 		]);
 		$ret .= "</td>";
 
-		$ret .= "<td class='control-form'>";
+		$ret .= "<td class=control-form>";
 		$ret .= Html::dropDownList("${scope}[$index][op]",
 			$value['op'], self::$operators, [
 			'id' => "drop-$attr_class", 'class' => 'search-dropdown form-control',
