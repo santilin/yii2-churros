@@ -108,4 +108,9 @@ class Formatter extends \yii\i18n\Formatter
 		}
 	}
 
+	public function asLabel($value, $options): string
+	{
+		return $options[$value]??$value;
+	}
+
 }

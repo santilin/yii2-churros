@@ -123,7 +123,11 @@ trait ReportsModelTrait
 			}
 			$classes = explode(' ', $column['options']['class']??'');
 			if( isset($column['format']) ) {
-				$classes[] = 'reportview-' . $column['format'];
+				if( is_array($column['format']) ) {
+					$classes[] = 'reportview-' . $column['format'][0];
+				} else {
+					$classes[] = 'reportview-' . $column['format'];
+				}
 			}
 			$column['contentOptions']['class'] = $column['headerOptions']['class']
 				= $column['footerOptions']['class'] = trim(implode(' ', $classes));
@@ -131,7 +135,7 @@ trait ReportsModelTrait
 				if( empty($column['attribute']) ) {
 					$column['attribute'] = $matches[2];
 				}
-				$column['pageSummaryFunc'] = $matches[1];
+				$column['pre_summary'] = $matches[1];
 			} else {
 				if( empty($column['attribute']) ) {
 					$column['attribute'] = $colname;
@@ -325,11 +329,16 @@ trait ReportsModelTrait
  				Yii::$app->session->addFlash("error", "Report '" . $this->name . "': column '$colname' does not exist in extractReportColumns");
  				continue;
 			}
-			$column_to_add = array_merge($allColumns[$colname], array_filter($column_def));
+			$column_def_format = ArrayHelper::getValue($column_def, 'format', 'raw');
+			if (is_array($allColumns[$colname]['format']) &&
+				$column_def_format == $allColumns[$colname]['format'][0] ) {
+				$column_def['format'] = $allColumns[$colname]['format'];
+			}
+			$column_to_add = ArrayHelper::merge($allColumns[$colname], array_filter($column_def));
 			if( !isset($column_to_add['attribute']) ) {
-				$column_to_add['attribute'] = static::removeFirstTableName($column_to_add['attribute']);
+ 				$column_to_add['attribute'] = static::removeFirstTableName($colname);
 			} else {
-				$column_to_add['attribute'] = static::removeFirstTableName($colname);
+				$column_to_add['attribute'] = static::removeFirstTableName($column_to_add['attribute']);
 			}
 			if( !empty($column_to_add['pre_summary']) ) {
 				$this->pre_summary_columns[] = $colname;

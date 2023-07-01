@@ -98,7 +98,8 @@ class SimpleGridView extends \yii\grid\GridView
 	static public function columnFormatOptions()
 	{
 		return [
-			"raw" => Yii::t('churros', "Short text"),
+			"raw" => Yii::t('churros', "As it is"),
+			"label" => Yii::t('churros', 'Etiqueta'),
 			"boolean" => Yii::t('churros', "Booleano"),
 			Yii::t('churros', "Numbers") => [
 				"integer" => Yii::t('churros', "Integer"),
