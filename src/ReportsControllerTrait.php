@@ -51,29 +51,30 @@ trait ReportsControllerTrait
 				$report_def->t('churros', "{model.title}: you have not access to this report"));
 			return $this->redirect(['index']);
 		}
-		$search_model_name = $report_def->model;
-		if( strpos($search_model_name, '\\') === FALSE ) {
-			$search_model_name= "app\\forms\\$search_model_name";
+		$report_model_name = $report_def->model;
+		if( strpos($report_model_name, '\\') === FALSE ) {
+			$report_model_name= "\\app\\models\\$report_model_name";
 		}
-		if( substr($search_model_name, -7) != "_Search" ) {
-			$search_model_name .= "_Search";
-		}
-		if( $report_def->model == '' || !class_exists($search_model_name) ) {
+// 		if( substr($search_model_name, -7) != "_Search" ) {
+// 			$search_model_name .= "_Search";
+// 		}
+		if( $report_def->model == '' || !class_exists($report_model_name) ) {
 			Yii::$app->session->setFlash('error',
-				$report_def->t('churros', '{search_model_name}: search model not found in report "{record}"', ['{search_model_name}' => $search_model_name]));
+				$report_def->t('churros', '{search_model_name}: search model not found in report "{record}"', ['search_model_name' => $search_model_name]));
 			return $this->redirect(['view', 'id'=>$id]);
 		}
-		$search_model = new $search_model_name;
 		$report_def->decodeValue();
-		$report_def->load($params);
+		if (!$report_def->load($params)) {
+			throw new \Exception("Error al cargar los datos del formulario via POST");
+		}
 		$report_def->encodeValue();
 		if( $report_def->save() ) {
 			$this->addSuccessFlashes('update', $report_def);
 		}
 		try {
 			return $this->render('report', [
-				'report' => $report_def,
-				'reportModel' => $search_model,
+				'reportDef' => $report_def,
+				'reportModel' => new $report_model_name,
 				'params' => $params,
 				'extraParams' => $this->changeActionParams($params, 'report', $report_def)
 			]);
@@ -95,29 +96,25 @@ trait ReportsControllerTrait
 		if( isset($params['save']) ) {
 			return $this->actionUpdate($id);
 		}
-		$report_def = $this->findModel($id);
+		$model_name = '\\app\\forms\\' . $this->_model_name . '_report_Form';
+		$report_def = $this->findFormModel($id, $model_name, 'update', $params);
 		if( !$report_def->checkAccessByRole('roles') ) {
 			Yii::$app->session->setFlash('error',
 				$report_def->t('churros', "{model.title}: you have not access to this report"));
 			return $this->redirect(['index']);
 		}
-		$search_model_name = $report_def->model;
-		if( strpos($search_model_name, '\\') === FALSE ) {
-			$search_model_name= "app\\forms\\$search_model_name";
+		$report_model_name = $report_def->model;
+		if( strpos($report_model_name, '\\') === FALSE ) {
+			$report_model_name= "\\app\\models\\$report_model_name";
 		}
-		if( substr($search_model_name, -7) != "_Search" ) {
-			$search_model_name .= "_Search";
-		}
-		if( $report_def->model == '' || !class_exists($search_model_name) ) {
+// 		if( substr($search_model_name, -7) != "_Search" ) {
+// 			$search_model_name .= "_Search";
+// 		}
+		if( $report_def->model == '' || !class_exists($report_model_name) ) {
 			Yii::$app->session->setFlash('error',
-				$report_def->t('churros', '{search_model_name}: model not found in report "{record}"', ['search_model_name' => $search_model_name]));
-			if ($req->isGet) {
-				return $this->redirect(['index', 'id'=>$id]);
-			} else {
-				return $this->redirect(['index', 'id'=>$id]);
-			}
+				$report_def->t('churros', '{search_model_name}: search model not found in report "{record}"', ['search_model_name' => $search_model_name]));
+			return $this->redirect(['index']);
 		}
-		$search_model = new $search_model_name;
 		// The columns, filters, etc, from the saved definition
 		$report_def->decodeValue();
 		// Merge the post params and replace the saved ones
@@ -125,8 +122,8 @@ trait ReportsControllerTrait
 		try {
 			if( isset($params['pdf']) ) {
 				$content = $this->renderPartial('report', [
-					'report' => $report_def,
-					'reportModel' => $search_model,
+					'reportDef' => $report_def,
+					'reportModel' => new $report_model_name,
 					'params' => $params,
 					'extraParams' => $this->changeActionParams($params, 'report', $report_def)
 				]);
@@ -134,8 +131,8 @@ trait ReportsControllerTrait
 				die;
 			} else {
 				return $this->render('report', [
-					'report' => $report_def,
-					'reportModel' => $search_model,
+					'reportDef' => $report_def,
+					'reportModel' => new $report_model_name,
 					'params' => $params,
 					'extraParams' => $this->changeActionParams($params, 'report', $report_def)
 				]);
