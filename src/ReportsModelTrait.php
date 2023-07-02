@@ -46,6 +46,10 @@ trait ReportsModelTrait
 			unset($data['report_columns']['_index_']);
 			$this->report_columns = $data['report_columns'];
 		}
+		if( isset($data['report_filters']) ) {
+			unset($data['report_filters']['_index_']);
+			$this->report_filters = $data['report_filters'];
+		}
 		if( isset($data['report_sorting']) ) {
 			unset($data['report_sorting']['_index_']);
 			$this->report_sorting = [];
@@ -59,14 +63,6 @@ trait ReportsModelTrait
 				}
 				$this->report_sorting[] = $rs;
 			}
-		}
-		$searchScope = $this->model;
-		if( substr($searchScope, -7) != "_Search" ) {
-			$searchScope .= "_Search";
-		}
-		if( isset($data[$searchScope]) ) {
-			unset($data[$searchScope]['_index_']);
-			$this->report_filters = $data[$searchScope];
 		}
 		return true;
 	}
@@ -433,7 +429,6 @@ trait ReportsModelTrait
 			$control_type = 'text';
 		}
 		$ret = '';
-		$scope = $this->formName();
 		if( empty($value) ) {
 			$value = [ 'op' => 'LIKE', 'lft' => '', 'rgt' => '' ];
 		}
@@ -443,7 +438,7 @@ trait ReportsModelTrait
 			$extra_visible = '';
 		}
 		$ret .= "<td class=control-form>";
-		$ret .= Html::dropDownList("{$scope}[$index][name]", $attribute,
+		$ret .= Html::dropDownList("report_filters[$index][name]", $attribute,
 		$dropdown_columns, [
 			'class' => 'form-control',
 			'prompt' => [
@@ -454,7 +449,7 @@ trait ReportsModelTrait
 		$ret .= "</td>";
 
 		$ret .= "<td class=control-form>";
-		$ret .= Html::dropDownList("${scope}[$index][op]",
+		$ret .= Html::dropDownList("report_filters[$index][op]",
 			$value['op'], ModelSearchTrait::$operators, [
 			'id' => "drop-$attr_class", 'class' => 'search-dropdown form-control',
 			] );
@@ -462,7 +457,7 @@ trait ReportsModelTrait
 
 		if( is_array($attribute_values) || is_array($value['lft']) ) {
 			$ret .= "<td class='control-form'>";
-			$ret .= Html::dropDownList("${scope}[$index][lft]",
+			$ret .= Html::dropDownList("report_filters[$index][lft]",
 				$value['lft'], $attribute_values,
 				array_merge($options['htmlOptions']??[], [ 'prompt' => Yii::t('churros', 'Cualquiera')]));
 			$ret .= "</td>";
@@ -470,7 +465,7 @@ trait ReportsModelTrait
 			$ret .= <<<EOF
 	<td class="input-group">
 EOF;
-			$ret .= Html::input($control_type, "${scope}[$index][lft]", $value['lft'],
+			$ret .= Html::input($control_type, "report_filters[$index][lft]", $value['lft'],
 				array_merge($options['htmlOptions']??[], [ 'class' => 'form-control' ]));
 			$ret .= <<<EOF
     </td>
@@ -483,13 +478,13 @@ EOF;
 
 		if( is_array($attribute_values) ) {
 			$ret .= "<span class='control-form'>";
-			$ret .= Html::dropDownList("${scope}[$index][rgt]",
+			$ret .= Html::dropDownList("report_filters[$index][rgt]",
 				$value['rgt'], $attribute_values,
 				array_merge($options['htmlOptions']??[], [ 'prompt' => Yii::t('churros', 'Cualquiera')]));
 			$ret .= '</span>';
 		} else {
 			$ret .= '<span class="input-group">';
-			$ret .= Html::input($control_type, "${scope}[$index][rgt]", $value['rgt'],
+			$ret .= Html::input($control_type, "report_filters[$index][rgt]", $value['rgt'],
 				array_merge($options['htmlOptions']??[], [ 'class' => 'form-control' ]));
 			$ret .= <<<EOF
 	</span>

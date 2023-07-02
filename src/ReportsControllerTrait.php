@@ -127,7 +127,7 @@ trait ReportsControllerTrait
 					'params' => $params,
 					'extraParams' => $this->changeActionParams($params, 'report', $report_def)
 				]);
-				$this->sendPdf($report_def, $content);
+				$this->sendPdf($report_def, $content, $this->pdf_css);
 				die;
 			} else {
 				return $this->render('report', [
@@ -144,15 +144,15 @@ trait ReportsControllerTrait
 		}
 	}
 
-	protected function sendPdf($report_def, $content)
+	protected function sendPdf($report_def, string $content, array $css)
 	{
 		$pdfHeader=<<<EOF
 <table width="100%" height="48px" style="vertical-align: bottom; font-family: serif;
 	font-size: 8pt; color: #000000; font-weight: bold; font-style: italic;">
 	<tr>
 		<td width="20%"><img height='48px' src='/img/logo_icono.jpg'/></td>
-		<td width="" style="text-align: center;">{$report_def->getReportTitle()}</td>
-		<td width="20%" align="right">{DATE j-m-Y} - {PAGENO}/{nbpg}</td>
+		<td span style="font-size:x-large;text-align: right;">{$report_def->getReportTitle()}</span><br/>
+		{DATE d-m-Y} - {PAGENO}/{nbpg}</td>
 	</tr>
 </table>
 EOF;
@@ -185,6 +185,11 @@ EOF;
 		} else {
 			$methods['setFooter'] = $pdfFooter;
 		}
+		$css[] = '/web/css/print.css';
+		$inline_css = '';
+		foreach ($css as $css_file) {
+			$inline_css .= file_get_contents(Yii::getAlias('@app') . $css_file);
+		}
 		$pdf = new \kartik\mpdf\Pdf([
 			'mode' => \kartik\mpdf\Pdf::MODE_CORE,
 			'format' => \kartik\mpdf\Pdf::FORMAT_A4,
@@ -197,7 +202,7 @@ EOF;
 			'marginBottom' => $margin_bottom, // $margin_footer,
 			'content' => $content,
 // 			'cssFile' => '@vendor/kartik-v/yii2-mpdf/src/assets/kv-mpdf-bootstrap.min.css',
-			'cssInline' => file_get_contents(Yii::getAlias('@app') . '/web/css/print.css'),
+			'cssInline' => $inline_css,
 			'options' => ['title' => $report_def->recordDesc()],
 			'methods' => $methods,
 		]);
