@@ -229,8 +229,8 @@ trait ReportsModelTrait
 		$groups = [];
 		$selects = [];
 		foreach( $columns as $kc => $column_def ) {
-			if( !isset($column_def['attribute']) ) {
- 				Yii::$app->session->addFlash("error", "Report '" . $this->name . "': column '$kc' has no attribute in addSelectToQuery");
+			if( !isset($column_def['name']) ) {
+ 				Yii::$app->session->addFlash("error", "Report '" . $this->name . "': column '$kc' has no name in addSelectToQuery");
  				continue;
 			}
 			$fldname = static::removeTableName($column_def['name']);
