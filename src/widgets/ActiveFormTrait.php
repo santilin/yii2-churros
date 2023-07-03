@@ -166,12 +166,6 @@ trait ActiveFormTrait
 				$ret .= '</div><!--buttons -->' .  "\n";
 				$ret .= '</div><!--row-->';
 				break;
-				foreach( $row_layout['fields'] as $fldname ) {
-					if( array_key_exists($fldname, $form_fields)) {
-						$ret .= $form_fields[$fldname];
-					}
-				}
-				break;
 			case 'subtitle':
 				$ret .= $this->layoutContent(null, $row_layout['title'], $row_layout['options']??[]);
 				break;
