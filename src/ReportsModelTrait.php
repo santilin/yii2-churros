@@ -56,7 +56,7 @@ trait ReportsModelTrait
 			foreach ($data['report_sorting'] as $rs) {
 				unset($rs['group_check'], $rs['show_header_check'], $rs['show_footer_check'],
 					$rs['show_column_check']);
-				if ($rs['group'] ) {
+				if (empty($rs['group'])) {
 					$rs['show_header'] = 0;
 					$rs['show_footer'] = 0;
 					$rs['show_column'] = 1;
@@ -103,7 +103,7 @@ trait ReportsModelTrait
 	/**
 	 * Transforms grid columns into report columns
 	 */
-	public function fixColumnDefinitions($model, $allColumns)
+	public function fixColumnDefinitions($model, array $allColumns): array
 	{
 		$columns = [];
 		$tablename = str_replace(['{','}','%'], '', $model->tableName());
@@ -174,39 +174,43 @@ trait ReportsModelTrait
 		]);
 
 		$tablename = $model->tableName();
+		$joins = [];
+		$groups = [];
 		$orderby = [];
+
+		// Añadir join y orderby de los report_sorting
 		foreach( $this->report_sorting as $sorting_def ) {
 			$colname = $sorting_def['name'];
-			if( !isset($columns[$colname]) ) {
-				Yii::$app->session->addFlash("error", "Report '" . $this->name . "': column '$colname' not found in sorting");
+			if( !isset($all_columns[$colname]) ) {
+				Yii::$app->session->addFlash("error", "Report '" . $this->name . "': column '$colname' not found @dataProviderForReport");
 				continue;
 			}
 			$column_def = $all_columns[$colname];
 			$attribute = $column_def['attribute'];
 			$fldname = static::removeTableName($colname);
-// 				$orderby[] = new yii\db\Expression(strtr($attribute, [ '{tablename}' => $tablename ]));
 			if( ($dotpos = strpos($fldname, '.')) !== FALSE ) {
-				$joins = [];
-				list(, , $alias) = static::addRelatedField($model, $fldname, $joins);
+				list($table_alias, $fldname, $alias) = static::addRelatedField($model, $fldname, $joins);
+				$orderby[] = $table_alias . ".$fldname"
+					. ($sorting_def['asc']??SORT_ASC==SORT_ASC?' ASC':' DESC');
 			} else {
 				$attribute = static::removeTableName($attribute);
+				$orderby[] = $tablename .'.'.$attribute
+					. ($sorting_def['asc']??SORT_ASC==SORT_ASC?' ASC':' DESC');
 			}
-			$orderby[] = $tablename .'.'.$attribute
-				. ($sorting_def['asc']??SORT_ASC==SORT_ASC?' ASC':' DESC');
 		}
 		$provider->query->orderBy( join(',',$orderby) );
 		$provider->sort = false;
 
-		$filter_columns = [];
+
+		// Añadir join y where de los report_filters
 		foreach( $this->report_filters as $filter_def ) {
 			$colname = $filter_def['name'];
-			$filter_columns[] = $colname;
 			if( !isset($all_columns[$colname]) ) {
 				Yii::$app->session->addFlash("error", "Report '" . $this->name . "': column '$colname' of filter not found");
 				continue;
 			}
 			$column_def = $all_columns[$colname];
-			unset($filter_def['name']);
+			$attribute = $column_def['attribute'];
 			if( $colname != $column_def['attribute']) {
 				$model->filterWhere($query,
 					new \yii\db\Expression(strtr($column_def['attribute'],
@@ -215,19 +219,14 @@ trait ReportsModelTrait
 				$attribute = static::removeTableName($column_def['attribute']);
 				$model->filterWhere($query, $attribute, $filter_def);
 			}
+			$fldname = static::removeTableName($colname);
+			if( ($dotpos = strpos($fldname, '.')) !== FALSE ) {
+				list(, , $alias) = static::addRelatedField($model, $fldname, $joins);
+			}
 		}
-		$this->addSelectToQuery($model, $columns, $filter_columns, $query);
-		return $provider;
-	}
 
-	/**
-	 * Adds related select and joins to dataproviders for reports
-	 */
-	public function addSelectToQuery($model, &$columns, $filters, &$query)
-	{
-		$joins = [];
-		$groups = [];
 		$selects = [];
+		// Añadir join y from de los report_columns
 		foreach( $columns as $kc => $column_def ) {
 			if( !isset($column_def['name']) ) {
  				Yii::$app->session->addFlash("error", "Report '" . $this->name . "': column '$kc' has no name in addSelectToQuery");
@@ -237,8 +236,8 @@ trait ReportsModelTrait
 			$attribute = $column_def['attribute'];
 			$tablename = str_replace(['{','}','%'], '', $model->tableName() );
 			if( ($dotpos = strpos($fldname, '.')) !== FALSE ) {
-				static::addRelatedField($model, $fldname, $joins);
-				$select_field = $attribute;
+				list ($table_alias, $select_field ,$alias) = static::addRelatedField($model, $column_def['name'], $joins);
+				$select_field = $table_alias.".$select_field";
 			} else {
 				$alias = $select_field = $attribute;
 			}
@@ -251,17 +250,25 @@ trait ReportsModelTrait
 			} else {
 				$selects[] = $select_field;
  			}
+ 			// group by solo de los pre_summary, los otros grupos los maneja ReportView
  			if (count($this->pre_summary_columns)
 				&& !in_array($column_def['name'], $this->pre_summary_columns) ) {
 				$groups[] = $alias;
 			}
  			$columns[$kc]['attribute'] = $alias;
 		}
+
 		$query->select($selects);
 		foreach( $joins as $jk => $jv ) {
-			$query->innerJoin($jk, $jv);
+			$related_table  = array_shift($jv);
+			if ($jk != $related_table) {
+				$query->innerJoin([$jk=>$related_table], $jv[0]);
+			} else {
+				$query->innerJoin($jk, $jv[0]);
+			}
 		}
 		$query->groupBy($groups);
+		return $provider;
     }
 
 	static protected function removeFirstTableName(string $fullname): string
@@ -284,32 +291,38 @@ trait ReportsModelTrait
 		}
 	}
 
+	/* Añade a $joins todas las joins necesarias para este campo relacionado, multinivel */
 	static protected function addRelatedField($left_model, $attribute, &$joins)
 	{
-		$tablename = $alias = '';
+		$table_alias = '';
 		while( ($dotpos = strpos($attribute, '.')) !== FALSE ) {
 			$relation_name = substr($attribute, 0, $dotpos);
-			if( !empty($alias) ) { $alias .= "_"; }
-			$alias .= $relation_name;
 			$attribute = substr($attribute, $dotpos + 1);
-			if( $relation_name == str_replace(['{','}','%'],'',$left_model->tableName() ) ) {
-				$tablename = $relation_name;
-				continue;
+			if( empty($table_alias) ) {
+				if( $relation_name == str_replace(['{','}','%'],'',$left_model->tableName() ) ) {
+					continue;
+				}
+			} else {
+				$table_alias .= "_";
 			}
+			$table_alias .= $relation_name;
 			if( isset($left_model::$relations[$relation_name]) ) {
 				$relation = $left_model::$relations[$relation_name];
-				$tablename = $relation['relatedTablename'];
-				// @todo if more than one, ¿add with an alias x1, x2...?
-				if( !isset($joins[$tablename]) ) {
-					$joins[$tablename] = $relation['join'];
+				if( !isset($joins[$table_alias]) ) {
+					$relation_table = $relation['relatedTablename'];
+					if ($table_alias != $relation_table) {
+						$joins[$table_alias] = [ $relation_table, str_replace($relation_table.'.', $table_alias.'.', $relation['join'])];
+					} else {
+						$joins[$table_alias] = [ $relation_table, $relation['join']];
+					}
 				}
 				$left_model = $relation['modelClass']::instance();
 			} else {
 				throw new \Exception($relation_name . ": relation not found in model " . $left_model::className() . " with relations " . join(',', array_keys($left_model::$relations)));
 			}
 		}
-		$alias .= "_$attribute";
-		return [ $tablename, $attribute, $alias ];
+		$alias = $table_alias . "_$attribute";
+		return [ $table_alias, $attribute, $alias ];
 	}
 
 
@@ -322,7 +335,7 @@ trait ReportsModelTrait
 		foreach( $this->report_columns as $column_def ) {
 			$colname = $column_def['name'];
 			if( !isset($allColumns[$colname]) ) {
- 				Yii::$app->session->addFlash("error", "Report '" . $this->name . "': column '$colname' does not exist in extractReportColumns");
+ 				Yii::$app->session->addFlash("error", "Report '" . $this->name . "': column '$colname' does not exist in report_columns @extractReportColumns");
  				continue;
 			}
 			$column_def_format = ArrayHelper::getValue($column_def, 'format', 'raw');
@@ -348,21 +361,11 @@ trait ReportsModelTrait
 			}
 			$columns[$colname] = $column_to_add;
 		}
-		foreach( $this->report_sorting as $sorting_def ) {
-			$colname = $sorting_def['name'];
-			if( !isset($columns[$colname]) ) {
-				if( isset($allColumns[$colname]) ) {
-					$columns[$colname] = $allColumns[$colname];
-				} else {
-					Yii::$app->session->addFlash("error", "Report '" . $this->name . "': column '$colname' not found in sorting");
-				}
-			}
-		}
 		return $columns;
 	}
 
 
-	public function reportGroups(&$report_columns)
+	public function reportGroups(array &$report_columns, array $all_columns): array
 	{
 		$groups = [];
 		foreach( $this->report_sorting as $column ) {
@@ -376,9 +379,20 @@ trait ReportsModelTrait
 						'header' => $column['show_header']??true,
 						'footer' => $column['show_footer']??true,
 					];
-					if( empty($column['show_column']) ) {
-						$report_columns[$colname]['visible'] = false;
-					}
+				} else if( isset($all_columns[$colname]) ) {
+					$rc = $all_columns[$colname];
+					$groups[$colname] = [
+						'column' => $rc['attribute'],
+						'format' => !empty($rc['label']) ? ($rc['label'] . ': {group_value}') : '{group_value}',
+						'header' => $column['show_header']??true,
+						'footer' => $column['show_footer']??true,
+					];
+				} else {
+					Yii::$app->session->addFlash("error", "Report '" . $this->name . "': group column '$colname' not found @reportGroups");
+					continue;
+				}
+				if( empty($column['show_column']) ) {
+					$report_columns[$colname]['visible'] = false;
 				}
 			}
 		}
