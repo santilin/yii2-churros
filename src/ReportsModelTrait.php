@@ -173,10 +173,10 @@ trait ReportsModelTrait
 			],
 		]);
 
-		$tablename = $model->tableName();
 		$joins = [];
 		$groups = [];
 		$orderby = [];
+		$tablename = str_replace(['{','}','%'], '', $model->tableName() );
 
 		// Añadir join y orderby de los report_sorting
 		foreach( $this->report_sorting as $sorting_def ) {
@@ -186,17 +186,10 @@ trait ReportsModelTrait
 				continue;
 			}
 			$column_def = $all_columns[$colname];
-			$attribute = $column_def['attribute'];
-			$fldname = static::removeTableName($colname);
-			if( ($dotpos = strpos($fldname, '.')) !== FALSE ) {
-				list($table_alias, $fldname, $alias) = static::addRelatedField($model, $fldname, $joins);
-				$orderby[] = $table_alias . ".$fldname"
+			list($select_field_alias, $select_field) = $this->aliasesAndJoins($model,
+				$tablename, $column_def['attribute'], $colname, $joins);
+			$orderby[] = $select_field_alias
 					. ($sorting_def['asc']??SORT_ASC==SORT_ASC?' ASC':' DESC');
-			} else {
-				$attribute = static::removeTableName($attribute);
-				$orderby[] = $tablename .'.'.$attribute
-					. ($sorting_def['asc']??SORT_ASC==SORT_ASC?' ASC':' DESC');
-			}
 		}
 		$provider->query->orderBy( join(',',$orderby) );
 		$provider->sort = false;
@@ -210,19 +203,9 @@ trait ReportsModelTrait
 				continue;
 			}
 			$column_def = $all_columns[$colname];
-			$attribute = $column_def['attribute'];
-			if( $colname != $column_def['attribute']) {
-				$model->filterWhere($query,
-					new \yii\db\Expression(strtr($column_def['attribute'],
-						[ '{tablename}' => $tablename ])), $filter_def);
-			} else {
-				$attribute = static::removeTableName($column_def['attribute']);
-				$model->filterWhere($query, $attribute, $filter_def);
-			}
-			$fldname = static::removeTableName($colname);
-			if( ($dotpos = strpos($fldname, '.')) !== FALSE ) {
-				list(, , $alias) = static::addRelatedField($model, $fldname, $joins);
-			}
+			list($select_field_alias, $select_field) = $this->aliasesAndJoins($model,
+				$tablename, $column_def['attribute'], $colname, $joins);
+			$model->filterWhere($query, $select_field, $filter_def);
 		}
 
 		$selects = [];
@@ -232,30 +215,15 @@ trait ReportsModelTrait
  				Yii::$app->session->addFlash("error", "Report '" . $this->name . "': column '$kc' has no name in addSelectToQuery");
  				continue;
 			}
-			$fldname = static::removeTableName($column_def['name']);
-			$attribute = $column_def['attribute'];
-			$tablename = str_replace(['{','}','%'], '', $model->tableName() );
-			if( ($dotpos = strpos($fldname, '.')) !== FALSE ) {
-				list ($table_alias, $select_field ,$alias) = static::addRelatedField($model, $column_def['name'], $joins);
-				$select_field = $table_alias.".$select_field";
-			} else {
-				$alias = $select_field = $attribute;
-			}
-			$alias = strtr($select_field, [
-				'.' => '_',
-				'(' => '_', ')' => '_'
-			]);
-			if ($alias != $select_field) {
-				$selects[$alias] = $select_field;
-			} else {
-				$selects[] = $select_field;
- 			}
+			list($select_field_alias, $select_field) = $this->aliasesAndJoins($model,
+				$tablename, $column_def['attribute'], $colname, $joins);
+			$selects[$select_field_alias] = $select_field;
  			// group by solo de los pre_summary, los otros grupos los maneja ReportView
  			if (count($this->pre_summary_columns)
 				&& !in_array($column_def['name'], $this->pre_summary_columns) ) {
-				$groups[] = $alias;
+				$groups[] = $select_field_alias;
 			}
- 			$columns[$kc]['attribute'] = $alias;
+ 			$columns[$kc]['attribute'] = $select_field_alias;
 		}
 
 		$query->select($selects);
@@ -271,58 +239,52 @@ trait ReportsModelTrait
 		return $provider;
     }
 
-	static protected function removeFirstTableName(string $fullname): string
-	{
-		$parts = explode('.', $fullname);
-		if ( count($parts)>2 ) {
-			return implode('.', array_slice($parts,1));
-		} else {
-			return $fullname;
-		}
-	}
-
-	static protected function removeTableName(string $fullname): string
-	{
-		$parts = explode('.', $fullname);
-		if ( count($parts)>1 ) {
-			return implode('.', array_slice($parts,1));
-		} else {
-			return $fullname;
-		}
-	}
-
 	/* Añade a $joins todas las joins necesarias para este campo relacionado, multinivel */
-	static protected function addRelatedField($left_model, $attribute, &$joins)
+	protected function aliasesAndJoins($left_model, string $tablename,
+		string $attribute, string $colname, array &$joins): array
 	{
 		$table_alias = '';
-		while( ($dotpos = strpos($attribute, '.')) !== FALSE ) {
-			$relation_name = substr($attribute, 0, $dotpos);
-			$attribute = substr($attribute, $dotpos + 1);
-			if( empty($table_alias) ) {
-				if( $relation_name == str_replace(['{','}','%'],'',$left_model->tableName() ) ) {
-					continue;
-				}
-			} else {
-				$table_alias .= "_";
-			}
-			$table_alias .= $relation_name;
-			if( isset($left_model::$relations[$relation_name]) ) {
-				$relation = $left_model::$relations[$relation_name];
-				if( !isset($joins[$table_alias]) ) {
-					$relation_table = $relation['relatedTablename'];
-					if ($table_alias != $relation_table) {
-						$joins[$table_alias] = [ $relation_table, str_replace($relation_table.'.', $table_alias.'.', $relation['join'])];
-					} else {
-						$joins[$table_alias] = [ $relation_table, $relation['join']];
+		if( ($dotpos = strpos($colname, '.')) !== FALSE ) {
+			while( ($dotpos = strpos($colname, '.')) !== FALSE ) {
+				$relation_name = substr($colname, 0, $dotpos);
+				$colname = substr($colname, $dotpos + 1);
+				if( empty($table_alias) ) {
+					if($relation_name == $tablename) {
+						continue;
 					}
+				} else {
+					$table_alias .= "_";
 				}
-				$left_model = $relation['modelClass']::instance();
-			} else {
-				throw new \Exception($relation_name . ": relation not found in model " . $left_model::className() . " with relations " . join(',', array_keys($left_model::$relations)));
+				$table_alias .= $relation_name;
+				if( isset($left_model::$relations[$relation_name]) ) {
+					$relation = $left_model::$relations[$relation_name];
+					if( !isset($joins[$table_alias]) ) {
+						$relation_table = $relation['relatedTablename'];
+						if ($table_alias != $relation_table) {
+							$joins[$table_alias] = [ $relation_table, str_replace($relation_table.'.', $table_alias.'.', $relation['join'])];
+						} else {
+							$joins[$table_alias] = [ $relation_table, $relation['join']];
+						}
+					}
+					$left_model = $relation['modelClass']::instance();
+				} else {
+					throw new \Exception($relation_name . ": relation not found in model " . $left_model::className() . " with relations " . join(',', array_keys($left_model::$relations)));
+				}
 			}
+			$aliased_attribute = $table_alias . "_$colname";
+		} else {
+			if ($attribute != $colname) {
+				$attribute = new \yii\db\Expression($attribute);
+			}
+			$aliased_attribute = $attribute;
 		}
-		$alias = $table_alias . "_$attribute";
-		return [ $table_alias, $attribute, $alias ];
+		$aliased_attribute = strtr($aliased_attribute, [
+			'.' => '_', ',' => '_',
+			'(' => '_', ')' => '_',
+			"'" => '_', '"' => '_',
+			' ' => '',
+		]);
+		return [ $aliased_attribute, $attribute ];
 	}
 
 
@@ -339,15 +301,14 @@ trait ReportsModelTrait
  				continue;
 			}
 			$column_def_format = ArrayHelper::getValue($column_def, 'format', 'raw');
-			if (is_array($allColumns[$colname]['format']) &&
-				$column_def_format == $allColumns[$colname]['format'][0] ) {
+			$all_columns_format = $allColumns[$colname]['format'][0]??false;
+			if ( is_array($all_columns_format) && $column_def_format == $all_columns_format) {
+				// format => [ 'label', $label_values ]
 				$column_def['format'] = $allColumns[$colname]['format'];
 			}
 			$column_to_add = ArrayHelper::merge($allColumns[$colname], array_filter($column_def));
 			if( !isset($column_to_add['attribute']) ) {
- 				$column_to_add['attribute'] = static::removeFirstTableName($colname);
-			} else {
-				$column_to_add['attribute'] = static::removeFirstTableName($column_to_add['attribute']);
+ 				$column_to_add['attribute'] = $colname;
 			}
 			if( !empty($column_to_add['pre_summary']) ) {
 				$this->pre_summary_columns[] = $colname;
