@@ -108,6 +108,11 @@ trait ReportsModelTrait
 		$columns = [];
 		$tablename = str_replace(['{','}','%'], '', $model->tableName());
 		foreach( $allColumns as $colname => $column ) {
+			if (!isset[$column['attribute']) ) {
+				$column['attribute'] = static::removeMainTablename($colname);
+			} else {
+				$column['attribute'] = static::removeMainTablename($column['attribute']);
+			}
 			if( !isset($column['contentOptions']) ) {
 				$column['contentOptions'] = [];
 			}
