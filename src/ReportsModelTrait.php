@@ -101,6 +101,14 @@ trait ReportsModelTrait
 		}
 	}
 
+	private static function removeMainTablename(string $selectExpression, string $tableName): string
+	{
+		// Create a regular expression pattern to match the table name preceded by a dot
+		$pattern = '/(\[)?(\{)?' . preg_quote($tableName, '/') . '(\})?(\])?\./i';
+		$modifiedExpression = preg_replace($pattern, '', $selectExpression);
+		return $modifiedExpression;
+	}
+
 	/**
 	 * Transforms grid columns into report columns
 	 */
@@ -109,10 +117,9 @@ trait ReportsModelTrait
 		$columns = [];
 		$tablename = str_replace(['{','}','%'], '', $model->tableName());
 		foreach( $allColumns as $colname => $column ) {
-			if (!isset[$column['attribute']) ) {
-				$column['attribute'] = static::removeMainTablename($colname);
-			} else {
-				$column['attribute'] = static::removeMainTablename($column['attribute']);
+			$colname = static::removeMainTablename($colname, $tablename);
+			if (!isset($column['attribute']) ) {
+				$column['attribute'] = $colname;
 			}
 			if( !isset($column['contentOptions']) ) {
 				$column['contentOptions'] = [];
@@ -260,7 +267,6 @@ trait ReportsModelTrait
 				$colname = substr($colname, $dotpos + 1);
 				if( empty($table_alias) ) {
 					if($relation_name == $tablename) {
-// 						$attribute = AppHelper::removePrefix($attribute, "$tablename.");
 						continue;
 					}
 				} else {
