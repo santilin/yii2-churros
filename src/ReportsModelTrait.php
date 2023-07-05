@@ -7,6 +7,7 @@ use yii\db\Query;
 use yii\data\ActiveDataProvider;
 use santilin\churros\ModelSearchTrait;
 use santilin\churros\widgets\grid\ReportView;
+use santilin\churros\helpers\AppHelper;
 
 trait ReportsModelTrait
 {
@@ -211,6 +212,7 @@ trait ReportsModelTrait
 		$selects = [];
 		// Añadir join y from de los report_columns
 		foreach( $columns as $kc => $column_def ) {
+			$colname = $column_def['name'];
 			if( !isset($column_def['name']) ) {
  				Yii::$app->session->addFlash("error", "Report '" . $this->name . "': column '$kc' has no name in addSelectToQuery");
  				continue;
@@ -243,19 +245,25 @@ trait ReportsModelTrait
 	protected function aliasesAndJoins($left_model, string $tablename,
 		string $attribute, string $colname, array &$joins): array
 	{
-		$table_alias = '';
-		if( ($dotpos = strpos($colname, '.')) !== FALSE ) {
+		if ($attribute != $colname) {
+			$aliased_attribute = $attribute;
+			$attribute = new \yii\db\Expression($attribute);
+		} else if( ($dotpos = strpos($colname, '.')) !== FALSE ) {
+			$table_alias = $final_table = '';
 			while( ($dotpos = strpos($colname, '.')) !== FALSE ) {
 				$relation_name = substr($colname, 0, $dotpos);
 				$colname = substr($colname, $dotpos + 1);
 				if( empty($table_alias) ) {
 					if($relation_name == $tablename) {
+// 						$attribute = AppHelper::removePrefix($attribute, "$tablename.");
 						continue;
 					}
 				} else {
 					$table_alias .= "_";
+					$final_table .= '.';
 				}
 				$table_alias .= $relation_name;
+				$final_table .= $relation_name;
 				if( isset($left_model::$relations[$relation_name]) ) {
 					$relation = $left_model::$relations[$relation_name];
 					if( !isset($joins[$table_alias]) ) {
@@ -272,11 +280,11 @@ trait ReportsModelTrait
 				}
 			}
 			$aliased_attribute = $table_alias . "_$colname";
-		} else {
-			if ($attribute != $colname) {
-				$attribute = new \yii\db\Expression($attribute);
+			if (substr_count($attribute, '.') > 1 ) {
+				$attribute = AppHelper::removePrefix($attribute, "$tablename.");
 			}
-			$aliased_attribute = $attribute;
+			$attribute = str_replace($final_table, $table_alias, $attribute);
+			$love = true;
 		}
 		$aliased_attribute = strtr($aliased_attribute, [
 			'.' => '_', ',' => '_',

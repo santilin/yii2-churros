@@ -85,10 +85,29 @@ class AppHelper
 		return substr($stack, 0, strlen($needle)) == $needle;
 	}
 
+	static public function removeFirstWord(string $stack, string $sep = ' '): string
+	{
+		$pos_sep = strpos($stack, $sep);
+		if ($pos_sep === FALSE) {
+			return $stack;
+		} else {
+			return substr($stack, $pos_sep);
+		}
+	}
+
+	static public function removePrefix(string $string, string $prefix): string
+	{
+		if (strncasecmp($string, $prefix, strlen($prefix)) === 0) {
+			$string = substr($string, strlen($prefix));
+		}
+		return $string;
+	}
+
 	static public function getAppLocaleLanguage(): string
 	{
 		return str_replace("-", "_", Yii::$app->language);
 	}
+
 	static public function incrStr(string $str, int $inc = 1): string
 	{
 		if( preg_match('/([0-9]+)[^0-9]*$/', $str, $matches) ) {

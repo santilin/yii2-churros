@@ -20,7 +20,7 @@ trait ReportsControllerTrait
 	{
 		$params = Yii::$app->request->queryParams;
 		$model_name = '\\app\\forms\\' . $this->_model_name . '_report_Form';
-		$report_def = $this->findFormModel(null, $report_def_name, 'create', $params);
+		$report_def = $this->findFormModel(null, $model_name, 'create', $params);
 		if (isset($_POST['_form_relations']) ) {
 			$relations = explode(",", $_POST['_form_relations']);
 		} else {
