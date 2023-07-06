@@ -117,7 +117,6 @@ trait ReportsModelTrait
 		$columns = [];
 		$tablename = str_replace(['{','}','%'], '', $model->tableName());
 		foreach( $allColumns as $colname => $column ) {
-			$colname = static::removeMainTablename($colname, $tablename);
 			if (!isset($column['attribute']) ) {
 				$column['attribute'] = $colname;
 			}
@@ -186,6 +185,7 @@ trait ReportsModelTrait
 			],
 		]);
 
+		$selects = [];
 		$joins = [];
 		$groups = [];
 		$orderby = [];
@@ -201,6 +201,7 @@ trait ReportsModelTrait
 			$column_def = $all_columns[$colname];
 			list($select_field_alias, $select_field) = $this->aliasesAndJoins($model,
 				$tablename, $column_def['attribute'], $colname, $joins);
+			$selects[$select_field_alias] = $select_field;
 			$orderby[] = $select_field_alias
 					. ($sorting_def['asc']??SORT_ASC==SORT_ASC?' ASC':' DESC');
 		}
@@ -221,7 +222,6 @@ trait ReportsModelTrait
 			$model->filterWhere($query, $select_field, $filter_def);
 		}
 
-		$selects = [];
 		// Añadir join y from de los report_columns
 		foreach( $columns as $kc => $column_def ) {
 			$colname = $column_def['name'];
@@ -257,16 +257,17 @@ trait ReportsModelTrait
 	protected function aliasesAndJoins($left_model, string $tablename,
 		string $attribute, string $colname, array &$joins): array
 	{
-		if ($attribute != $colname) {
-			$aliased_attribute = $attribute;
-			$attribute = new \yii\db\Expression($attribute);
-		} else if( ($dotpos = strpos($colname, '.')) !== FALSE ) {
+		if( ($dotpos = strpos($colname, '.')) !== FALSE ) {
 			$table_alias = $final_table = '';
+			$inner_relations = 0;
 			while( ($dotpos = strpos($colname, '.')) !== FALSE ) {
+				++$inner_relations;
 				$relation_name = substr($colname, 0, $dotpos);
 				$colname = substr($colname, $dotpos + 1);
 				if( empty($table_alias) ) {
 					if($relation_name == $tablename) {
+						$table_alias = $tablename;
+						$final_table = $tablename;
 						continue;
 					}
 				} else {
@@ -280,7 +281,14 @@ trait ReportsModelTrait
 					if( !isset($joins[$table_alias]) ) {
 						$relation_table = $relation['relatedTablename'];
 						if ($table_alias != $relation_table) {
-							$joins[$table_alias] = [ $relation_table, str_replace($relation_table.'.', $table_alias.'.', $relation['join'])];
+							$on_expression = str_replace($relation_table.'.', $table_alias.'.', $relation['join']);
+							if (count($joins) > 0 ) {
+								$join_alias = array_keys($joins)[count($joins)-1];
+								$join_table = $joins[$join_alias][0];
+								$on_expression = str_replace("$join_table.", "$join_alias.", $on_expression);
+							}
+							$joins[$table_alias] = [ $relation_table, $on_expression];
+
 						} else {
 							$joins[$table_alias] = [ $relation_table, $relation['join']];
 						}
@@ -290,12 +298,21 @@ trait ReportsModelTrait
 					throw new \Exception($relation_name . ": relation not found in model " . $left_model::className() . " with relations " . join(',', array_keys($left_model::$relations)));
 				}
 			}
-			$aliased_attribute = $table_alias . "_$colname";
-			if (substr_count($attribute, '.') > 1 ) {
-				$attribute = AppHelper::removePrefix($attribute, "$tablename.");
+			if ($colname != $attribute) {
+				$aliased_attribute = $attribute;
+			} else {
+				$aliased_attribute = $table_alias . "_$attribute";
 			}
-			$attribute = str_replace($final_table, $table_alias, $attribute);
-			$love = true;
+			if ($inner_relations>1) {
+				$attribute = static::removeMainTablename($attribute, $tablename);
+				$final_table = static::removeMainTablename($final_table, $tablename);
+			}
+			$attribute = str_replace("$final_table.", "$table_alias.", $attribute);
+		} else {
+			$aliased_attribute = $attribute;
+		}
+		if (strpos($attribute, '(')!==FALSE) {
+			$attribute = new \yii\db\Expression($attribute);
 		}
 		$aliased_attribute = strtr($aliased_attribute, [
 			'.' => '_', ',' => '_',
