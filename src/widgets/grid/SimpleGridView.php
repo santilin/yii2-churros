@@ -99,8 +99,8 @@ class SimpleGridView extends \yii\grid\GridView
 	{
 		return [
 			"raw" => Yii::t('churros', "As it is"),
-			"label" => Yii::t('churros', 'Etiqueta'),
-			"boolean" => Yii::t('churros', "Booleano"),
+			"label" => Yii::t('churros', 'Label'),
+			"boolean" => Yii::t('churros', "Boolean"),
 			Yii::t('churros', "Numbers") => [
 				"integer" => Yii::t('churros', "Integer"),
 				"decimal" => Yii::t('churros', "Decimal"),
@@ -125,6 +125,7 @@ class SimpleGridView extends \yii\grid\GridView
 				"hours" => Yii::t('churros', "Hours as decimal"),
 			],
 			Yii::t('churros', "Text") => [
+				"class:oneline" => Yii::t('churros', 'One line only'),
 				"tokenized" => Yii::t('churros', "Tokenized by ','"),
 				"truncatedText" => Yii::t('churros', "Truncated text"),
 				"html" => Yii::t('churros', "Html text"),

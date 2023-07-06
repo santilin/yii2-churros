@@ -131,10 +131,11 @@ trait ReportsModelTrait
 			}
 			$classes = explode(' ', $column['options']['class']??'');
 			if( isset($column['format']) ) {
-				if( is_array($column['format']) ) {
-					$classes[] = 'reportview-' . $column['format'][0];
+				$f = $column['format'];
+				if( is_array($f) ) {
+					$classes[] = 'reportview-' . $f[0];
 				} else {
-					$classes[] = 'reportview-' . $column['format'];
+					$classes[] = "reportview-$f";
 				}
 			}
 			$column['contentOptions']['class'] = $column['headerOptions']['class']
@@ -337,11 +338,21 @@ trait ReportsModelTrait
  				continue;
 			}
 			$column_def_format = ArrayHelper::getValue($column_def, 'format', 'raw');
-			$all_columns_format = $allColumns[$colname]['format'][0]??false;
-			if ( is_array($all_columns_format) && $column_def_format == $all_columns_format) {
-				// format => [ 'label', $label_values ]
-				$column_def['format'] = $allColumns[$colname]['format'];
+			$all_columns_format = $allColumns[$colname]['format']??false;
+			if (is_array($all_columns_format)) {
+				if( $column_def_format == $all_columns_format[0]) {
+					// format => [ 'label', $label_values ]
+					$column_def['format'] = $allColumns[$colname]['format'];
+				}
+			} else if (AppHelper::startsWith($column_def_format, 'class:')) {
+				if (!isset($column_def['contentOptions'])) {
+					$column_def['contentOptions'] = [];
+				}
+				Html::addCssClass($column_def['contentOptions'],
+					'reportview-' .  AppHelper::removePrefix($column_def_format, 'class:') );
+				$column_def['format'] = 'raw';
 			}
+
 			$column_to_add = ArrayHelper::merge($allColumns[$colname], array_filter($column_def));
 			if( !isset($column_to_add['attribute']) ) {
  				$column_to_add['attribute'] = $colname;
