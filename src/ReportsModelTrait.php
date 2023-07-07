@@ -275,11 +275,11 @@ trait ReportsModelTrait
 					$final_table .= '.';
 				}
 				$table_alias .= $relation_name;
-				$final_table .= $relation_name;
 				if( isset($left_model::$relations[$relation_name]) ) {
 					$relation = $left_model::$relations[$relation_name];
+					$relation_table = $relation['relatedTablename'];
+					$final_table .= $relation_table;
 					if( !isset($joins[$table_alias]) ) {
-						$relation_table = $relation['relatedTablename'];
 						if ($table_alias != $relation_table) {
 							$on_expression = str_replace($relation_table.'.', $table_alias.'.', $relation['join']);
 							if (count($joins) > 0 ) {
@@ -288,7 +288,6 @@ trait ReportsModelTrait
 								$on_expression = str_replace("$join_table.", "$join_alias.", $on_expression);
 							}
 							$joins[$table_alias] = [ $relation_table, $on_expression];
-
 						} else {
 							$joins[$table_alias] = [ $relation_table, $relation['join']];
 						}
@@ -307,7 +306,9 @@ trait ReportsModelTrait
 				$attribute = static::removeMainTablename($attribute, $tablename);
 				$final_table = static::removeMainTablename($final_table, $tablename);
 			}
-			$attribute = str_replace("$final_table.", "$table_alias.", $attribute);
+			foreach ($joins as $join_alias => list($join_table,) ) {
+				$attribute = str_replace("$join_table.", "$join_alias.", $attribute);
+			}
 		} else {
 			$aliased_attribute = $attribute;
 		}

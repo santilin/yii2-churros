@@ -238,6 +238,7 @@ class SimpleGridView extends \yii\grid\GridView
 		foreach( $this->groups as $kg => $group_def ) {
             if (is_string($group_def)) {
                 $group = $this->createGroup($group_def);
+				$group->footer = true;
             } else {
                 $group = Yii::createObject(array_merge([
                     'class' => GridGroup::className(),
@@ -249,7 +250,6 @@ class SimpleGridView extends \yii\grid\GridView
                 continue;
             }
             $group->level = $level++;
-            $group->footer = true;
             $this->groups[$kg] = $group;
         }
 	}
