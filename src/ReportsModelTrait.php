@@ -258,39 +258,43 @@ trait ReportsModelTrait
 		string $attribute, string $colname, array &$joins): array
 	{
 		if( ($dotpos = strpos($colname, '.')) !== FALSE ) {
-			$table_alias = $final_table = '';
+			$full_relation_name = '';
+			$full_table_name = '';
 			$inner_relations = 0;
+			$tables_replacements = [];
 			while( ($dotpos = strpos($colname, '.')) !== FALSE ) {
 				++$inner_relations;
 				$relation_name = substr($colname, 0, $dotpos);
 				$colname = substr($colname, $dotpos + 1);
-				if( empty($table_alias) ) {
+				if( empty($full_relation_name) ) {
 					if($relation_name == $tablename) {
-						$table_alias = $tablename;
-						$final_table = $tablename;
+// 						$full_relation_name = $tablename;
 						continue;
 					}
 				} else {
-					$table_alias .= "_";
-					$final_table .= '.';
+					if ($full_table_name != '') {
+						$full_table_name .= '.';
+						$full_relation_name .= ".";
+					}
 				}
-				$table_alias .= $relation_name;
+				$full_relation_name .= $relation_name;
 				if( isset($left_model::$relations[$relation_name]) ) {
 					$relation = $left_model::$relations[$relation_name];
 					$relation_table = $relation['relatedTablename'];
-					$final_table .= $relation_table;
-					if( !isset($joins[$table_alias]) ) {
-						if ($table_alias != $relation_table) {
-							$on_expression = str_replace($relation_table.'.', $table_alias.'.', $relation['join']);
-							if (count($joins) > 0 ) {
-								$join_alias = array_keys($joins)[count($joins)-1];
-								$join_table = $joins[$join_alias][0];
-								$on_expression = str_replace("$join_table.", "$join_alias.", $on_expression);
-							}
-							$joins[$table_alias] = [ $relation_table, $on_expression];
-						} else {
-							$joins[$table_alias] = [ $relation_table, $relation['join']];
+					$full_table_name .= $relation_table;
+					$aliased_full_relation_name = str_replace('.','_',$full_relation_name);
+					if ($full_relation_name != $relation_table) {
+						$aliased_full_table_name = str_replace('.','_',$full_table_name);
+						$on_expression = str_replace($relation_table.'.', $aliased_full_relation_name.'.', $relation['join']); // the right part of the join
+						if (count($joins) > 0 ) { // último join añadido
+							$join_alias = array_keys($joins)[count($joins)-1];
+							$join_table = $joins[$join_alias][0];
+							$on_expression = str_replace("$join_table.", "$join_alias.", $on_expression); // The left part of the join
 						}
+						$joins[$aliased_full_relation_name] = [ $relation_table, $on_expression];
+						$tables_replacements[$full_relation_name] = $aliased_full_relation_name;
+					} else {
+						$joins[$aliased_full_relation_name] = [ $relation_table, $relation['join']];
 					}
 					$left_model = $relation['modelClass']::instance();
 				} else {
@@ -300,13 +304,12 @@ trait ReportsModelTrait
 			if ($colname != $attribute) {
 				$aliased_attribute = $attribute;
 			} else {
-				$aliased_attribute = $table_alias . "_$attribute";
+				$aliased_attribute = $full_relation_name . "_$attribute";
 			}
 			if ($inner_relations>1) {
 				$attribute = static::removeMainTablename($attribute, $tablename);
-				$final_table = static::removeMainTablename($final_table, $tablename);
 			}
-			foreach ($joins as $join_alias => list($join_table,) ) {
+			foreach (array_reverse($tables_replacements) as $join_table => $join_alias ) {
 				$attribute = str_replace("$join_table.", "$join_alias.", $attribute);
 			}
 		} else {
