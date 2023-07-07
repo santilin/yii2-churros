@@ -301,11 +301,7 @@ trait ReportsModelTrait
 					throw new \Exception($relation_name . ": relation not found in model " . $left_model::className() . " with relations " . join(',', array_keys($left_model::$relations)));
 				}
 			}
-			if ($colname != $attribute) {
-				$aliased_attribute = $attribute;
-			} else {
-				$aliased_attribute = $full_relation_name . "_$attribute";
-			}
+			$aliased_attribute = $attribute;
 			if ($inner_relations>1) {
 				$attribute = static::removeMainTablename($attribute, $tablename);
 			}
@@ -348,7 +344,7 @@ trait ReportsModelTrait
 					$column_def['format'] = $allColumns[$colname]['format'];
 				}
 			} else if (AppHelper::startsWith($column_def_format, 'class:')) {
-				if (!isset($column_def['contentOptions'])) {
+				if (!isset($column_def['contentOptions'])) { // Ojo, sum_expedientes_gastos_minutos tiene contradicción de clases
 					$column_def['contentOptions'] = [];
 				}
 				Html::addCssClass($column_def['contentOptions'],
@@ -382,10 +378,9 @@ trait ReportsModelTrait
 					$column_to_add['attribute'] = $colname;
 				}
 				$column_to_add['visible'] = false;
+				$columns[$colname] = $column_to_add;
 			}
-			$columns[$colname] = $column_to_add;
 		}
-
 		return $columns;
 	}
 

@@ -702,8 +702,8 @@ trait ModelInfoTrait
 		if( !isset($value['v']) || $value['v'] === null ) {
 			return;
 		}
-		$fullfldname = $this->tableName() . "." . $fldname;
-		$this->addFieldToFilterWhere($query, $fullfldname, $value);
+// 		$fullfldname = $this->tableName() . "." . $fldname;
+		$this->addFieldToFilterWhere($query, $fldname, $value);
 	}
 
 

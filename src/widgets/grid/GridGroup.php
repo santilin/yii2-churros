@@ -189,7 +189,7 @@ class GridGroup extends BaseObject
 					break;
 			}
 		}
-		if( $fc === true /*'summary'*/ ) {
+		if( $fc == 1 /*'summary'*/ ) {
 			$ret .= $this->getSummaryContent($summary_columns, $content);
 		} else {
 			Html::addCssClass($tdoptions, 'reportview-group-foot-total-' . strval($this->level) . ' reportview-group-foot-' . strval($this->level) . ' w1');

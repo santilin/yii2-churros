@@ -370,7 +370,7 @@ class SimpleGridView extends \yii\grid\GridView
 				[ 'class' => 'reportview-total-label', 'colspan' => $colspan ] );
 		}
 		$nc = 0;
-		foreach( $this->columns as $column ) {
+		foreach ($this->columns as $column) {
 			if( $nc++ < $colspan ) {
 				continue;
 			}
