@@ -192,37 +192,6 @@ trait ReportsModelTrait
 		$orderby = [];
 		$tablename = str_replace(['{','}','%'], '', $model->tableName() );
 
-		// Añadir join y orderby de los report_sorting
-		foreach( $this->report_sorting as $sorting_def ) {
-			$colname = $sorting_def['name'];
-			if( !isset($all_columns[$colname]) ) {
-				Yii::$app->session->addFlash("error", "Report '" . $this->name . "': column '$colname' not found @dataProviderForReport");
-				continue;
-			}
-			$column_def = $all_columns[$colname];
-			list($select_field_alias, $select_field) = $this->aliasesAndJoins($model,
-				$tablename, $column_def['attribute'], $colname, $joins);
-			$selects[$select_field_alias] = $select_field;
-			$orderby[] = $select_field_alias
-					. ($sorting_def['asc']??SORT_ASC==SORT_ASC?' ASC':' DESC');
-		}
-		$provider->query->orderBy( join(',',$orderby) );
-		$provider->sort = false;
-
-
-		// Añadir join y where de los report_filters
-		foreach( $this->report_filters as $filter_def ) {
-			$colname = $filter_def['name'];
-			if( !isset($all_columns[$colname]) ) {
-				Yii::$app->session->addFlash("error", "Report '" . $this->name . "': column '$colname' of filter not found");
-				continue;
-			}
-			$column_def = $all_columns[$colname];
-			list($select_field_alias, $select_field) = $this->aliasesAndJoins($model,
-				$tablename, $column_def['attribute'], $colname, $joins);
-			$model->filterWhere($query, $select_field, $filter_def);
-		}
-
 		// Añadir join y from de los report_columns
 		foreach( $columns as $kc => $column_def ) {
 			$colname = $column_def['name'];
@@ -240,6 +209,36 @@ trait ReportsModelTrait
 			}
  			$columns[$kc]['attribute'] = $select_field_alias;
 		}
+
+		// Añadir join y where de los report_filters
+		foreach( $this->report_filters as $filter_def ) {
+			$colname = $filter_def['name'];
+			if( !isset($all_columns[$colname]) ) {
+				Yii::$app->session->addFlash("error", "Report '" . $this->name . "': column '$colname' of filter not found");
+				continue;
+			}
+			$column_def = $all_columns[$colname];
+			list($select_field_alias, $select_field) = $this->aliasesAndJoins($model,
+				$tablename, $column_def['attribute'], $colname, $joins);
+			$model->filterWhere($query, $select_field, $filter_def);
+		}
+
+		// Añadir join y orderby de los report_sorting
+		foreach( $this->report_sorting as $sorting_def ) {
+			$colname = $sorting_def['name'];
+			if( !isset($all_columns[$colname]) ) {
+				Yii::$app->session->addFlash("error", "Report '" . $this->name . "': column '$colname' not found @dataProviderForReport");
+				continue;
+			}
+			$column_def = $all_columns[$colname];
+			list($select_field_alias, $select_field) = $this->aliasesAndJoins($model,
+				$tablename, $column_def['attribute'], $colname, $joins);
+			$selects[$select_field_alias] = $select_field;
+			$orderby[] = $select_field_alias
+					. ($sorting_def['asc']??SORT_ASC==SORT_ASC?' ASC':' DESC');
+		}
+		$provider->query->orderBy( join(',',$orderby) );
+		$provider->sort = false;
 
 		$query->select($selects);
 		foreach( $joins as $jk => $jv ) {
@@ -369,6 +368,20 @@ trait ReportsModelTrait
 			}
 			$columns[$colname] = $column_to_add;
 		}
+		// Añado también las columnas del report_sorting para que estén disponibles en el grid para los grupos
+		foreach ($this->report_sorting as $column_def) {
+			$colname = $column_def['name'];
+			if( !isset($columns[$colname]) ) {
+				$column_to_add = $allColumns[$colname];
+				$column_to_add['name'] = $colname;
+				if( !isset($column_to_add['attribute']) ) {
+					$column_to_add['attribute'] = $colname;
+				}
+				$column_to_add['visible'] = false;
+			}
+			$columns[$colname] = $column_to_add;
+		}
+
 		return $columns;
 	}
 
@@ -381,14 +394,6 @@ trait ReportsModelTrait
 				$colname = $column['name'];
 				if( isset($report_columns[$colname]) ) {
 					$rc = $report_columns[$colname];
-					$groups[$colname] = [
-						'column' => $rc['attribute'],
-						'format' => !empty($rc['label']) ? ($rc['label'] . ': {group_value}') : '{group_value}',
-						'header' => $column['show_header']??true,
-						'footer' => $column['show_footer']??true,
-					];
-				} else if( isset($all_columns[$colname]) ) {
-					$rc = $all_columns[$colname];
 					$groups[$colname] = [
 						'column' => $rc['attribute'],
 						'format' => !empty($rc['label']) ? ($rc['label'] . ': {group_value}') : '{group_value}',

@@ -84,6 +84,9 @@ class SimpleGridView extends \yii\grid\GridView
 				return $grid->groupHeader($model, $key, $index, $grid);
 			};
 			$this->afterRow = function($model, $key, $index, $grid) {
+				if( $this->recno < $this->dataProvider->getCount() ) {
+					return '';
+				}
 				return $grid->finalRow($model, $key, $index, $grid);
 			};
 		}
@@ -321,9 +324,6 @@ class SimpleGridView extends \yii\grid\GridView
 	public function finalRow($model, $key, $index, $grid)
 	{
 		// Once the dataprovider has been consumed, print all the group footers and the grand total
-		if( $this->recno < $this->dataProvider->getCount() ) {
-			return '';
-		}
 		$tdoptions = [ 'colspan' => count($this->columns) ];
 		$ret = '';
 		foreach( array_reverse($this->groups) as $kg => $group ) {
