@@ -92,7 +92,7 @@ class FormHelper
 		return $ret;
 	}
 
-	static public function getGridFromRequest(array $views, array $params)
+	static public function gridFromRequest(array $views, array $params)
 	{
 		$_nv=$params[self::VIEWS_NVIEW_PARAM]??0;
 		if( is_numeric($_nv) ) {
@@ -101,23 +101,20 @@ class FormHelper
 			}
 			foreach($views as $kv => $view_info ) {
 				if( $_nv-- == 0 ) {
-					if( is_array($view_info) ) {
-						// view_title, search_form, search_type, permissions
-						return array_merge([$kv], $view_info);
-					} else {
-						return [$kv, $view_info];
-					}
+					// search_form, permissions
+					return [ $view_info[1], $view_info[2] ];
 				}
 			}
 		} else {
 			if( isset($views[$_nv])	) {
-				return array_merge([$_nv], (array)$views[$_nv]);
+				return [ $views[$_nv][1], $views[$_nv][2] ];
 			}
 		}
-		return array_merge([array_key_first($views)], $views[array_key_first($views)]);
+		$index = reset(array_keys($views));
+		return [ $views[$index][1], $views[$index][2] ];
 	}
 
-	static public function getViewFromRequest($views, $params)
+	static public function viewFromRequest($views, $params)
 	{
 		$_nv=$params[self::VIEWS_NVIEW_PARAM]??0;
 		if( is_numeric($_nv) ) {
@@ -126,19 +123,15 @@ class FormHelper
 			}
 			foreach($views as $kv => $view ) {
 				if( $_nv-- == 0 ) {
-					if( is_array($view) ) {
-						return [$kv, $view['title']];
-					} else {
-						return [$kv, $view];
-					}
+					return [ $kv, $view[0], $view[1] ];
 				}
 			}
 		} else {
 			if( isset($views[$_nv])	) {
-				return [ $_nv, $views[$_nv]];
+				return [ $_nv, $views[$_nv][0], $views[$_nv][0]];
 			}
 		}
-		return [ array_key_first($views), $views[array_key_first($views)]];
+		return array_slice($views, 0, 1);
 	}
 
 	public static function setConfig(string $form_name, string $name, $value)

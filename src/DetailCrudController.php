@@ -40,9 +40,12 @@ class DetailCrudController extends CrudController
 			$params[$searchModel->formName()][$searchModel->getRelatedFieldForModel($this->master_model)]
 				= $this->master_model->getPrimaryKey();
 		}
+		$params['permissions'] = ($params['permissions']??true===false) ? false : $this->crudActions;
+		$params = $this->changeActionParams($params, 'index', $searchModel);
 		return $this->render('index', [
 			'searchModel' => $searchModel,
-			'indexParams' => $this->changeActionParams($params, 'index', $searchModel),
+			'indexParams' => $params,
+			'indexGrids' => [ '_grid' => [ '', [] ] ],
 		]);
 	}
 
@@ -76,12 +79,12 @@ class DetailCrudController extends CrudController
 	}
 
 
-	public function indexDetails($master, $params, $query = null)
+	public function indexDetails($master, $view, $params)
 	{
 		$detail = $this->createSearchModel();
  		$params[$detail->formName()][$detail->getRelatedFieldForModel($master)]
  				= $master->getPrimaryKey();
-		return $this->renderAjax('_detail_grid', [
+		return $this->renderAjax($view, [
 			'dataProvider' => $detail->search($params),
 			'searchModel' => $detail,
 			'master' => $master,

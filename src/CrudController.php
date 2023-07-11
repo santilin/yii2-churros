@@ -84,6 +84,7 @@ class CrudController extends \yii\web\Controller
 		return $this->render('index', [
 			'searchModel' => $searchModel,
 			'indexParams' => $params,
+			'indexGrids' => [ '_grid' => [ '', [] ] ]
 		]);
 	}
 
@@ -99,7 +100,8 @@ class CrudController extends \yii\web\Controller
 		$params['permissions'] = ($params['permissions']??true===false) ? false : $this->crudActions;
 		return $this->render('view', [
 			'model' => $model,
-			'extraParams' => $this->changeActionParams($params, 'view', $model)
+			'viewViews' => [ '_view' => [ '', [] ] ],
+			'viewParams' => $this->changeActionParams($params, 'view', $model)
 		]);
 	}
 
@@ -131,7 +133,8 @@ class CrudController extends \yii\web\Controller
 		}
 		return $this->render('create', [
 			'model' => $model,
-			'extraParams' => $this->changeActionParams($params, 'create', $model)
+			'createForms' => [ '_form' => [ '', [] ] ],
+			'formParams' => $this->changeActionParams($params, 'create', $model)
 		]);
 	}
 
@@ -168,7 +171,8 @@ class CrudController extends \yii\web\Controller
 		}
 		return $this->render('duplicate', [
 			'model' => $model,
-			'extraParams' => $this->changeActionParams($params, 'duplicate', $model)
+			'duplicateForms' => [ '_form' => [ '', [] ] ],
+			'formParams' => $this->changeActionParams($params, 'duplicate', $model)
 		]);
 	}
 
@@ -201,7 +205,8 @@ class CrudController extends \yii\web\Controller
 		}
 		return $this->render('update', [
 			'model' => $model,
-			'extraParams' => $this->changeActionParams($params, 'update', $model)
+			'updateForms' => [ '_form' => [ '', [] ] ],
+			'formParams' => $this->changeActionParams($params, 'update', $model)
 		]);
 	}
 
@@ -251,7 +256,7 @@ class CrudController extends \yii\web\Controller
 		// https://stackoverflow.com/a/54568044/8711400
 		$content = $this->renderAjax('_pdf', [
 			'model' => $model,
-			'extraParams' => $this->changeActionParams($params, 'pdf', $model)
+			'viewParams' => $this->changeActionParams($params, 'pdf', $model)
 		]);
 		$methods = [];
 		$margin_header = AppHelper::yiiparam('pdfMarginHeader', 15);
