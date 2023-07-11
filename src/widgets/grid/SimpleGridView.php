@@ -155,7 +155,7 @@ class SimpleGridView extends \yii\grid\GridView
 	 */
 	protected function initSummaryColumns()
 	{
-		foreach( $this->columns as $column ) {
+		foreach( $this->columns as $kc => $column ) {
 			if( !empty($column->pageSummaryFunc) ) {
 				$kc = $column->attribute;
 				$this->summaryColumns[$kc] = $column->pageSummaryFunc;
@@ -353,14 +353,14 @@ class SimpleGridView extends \yii\grid\GridView
 			return '<td colspan="42">No muestro totales porque no se están mostrando todos los registros.</tr>';
 		}
 		$colspan = 0;
-		foreach( $this->columns as $kc => $column ) {
-			if( !isset($summary_columns[$column->attribute]) ) {
+		foreach ($this->columns as $kc => $column) {
+			if (!array_key_exists($kc, $summary_columns)) {
 				$colspan++;
 			} else {
 				break;
 			}
 		}
-		if( $colspan==0) {
+		if ($colspan==0) {
 			$ret = '</tr><tr>';
 			$ret .= Html::tag('td', Yii::t('churros', "Report totals") . ' ', [
 				'class' => 'reportview-total-label', 'colspan' => 42] );

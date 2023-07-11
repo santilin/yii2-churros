@@ -693,19 +693,27 @@ trait ModelInfoTrait
 		}
 	}
 
-		/**
-	 * Función compartida por search y report
-	 */
-	public function filterWhere(&$query, $fldname, $value)
+	public function reportFilterWhere(&$query, $fldname, $value)
 	{
 		$value = static::toOpExpression($value, false );
-		if( !isset($value['v']) || $value['v'] === null ) {
+		if (!isset($value['v']) || $value['v'] === null) {
 			return;
 		}
-// 		$fullfldname = $this->tableName() . "." . $fldname;
 		$this->addFieldToFilterWhere($query, $fldname, $value);
 	}
 
+	/**
+	 * Función compartida por search y report
+	 */
+	public function searchFilterWhere(&$query, $fldname, $value)
+	{
+		$value = static::toOpExpression($value, false );
+		if (!isset($value['v']) || $value['v'] === null || $value['v'] === '') {
+			return;
+		}
+ 		$fullfldname = $this->tableName() . "." . $fldname;
+		$this->addFieldToFilterWhere($query, $fullfldname, $value);
+	}
 
 	static public function toOpExpression($value, $strict)
 	{
