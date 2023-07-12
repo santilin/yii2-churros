@@ -92,7 +92,8 @@ class FormHelper
 		return $ret;
 	}
 
-	static public function gridFromRequest(array $views, array $params)
+	/// @return [ view_name, search_model, permissions ]
+	static public function gridFromRequest(array $views, array $params): array
 	{
 		$_nv=$params[self::VIEWS_NVIEW_PARAM]??0;
 		if( is_numeric($_nv) ) {
@@ -114,7 +115,8 @@ class FormHelper
 		return [ $views[$index][1], $views[$index][2] ];
 	}
 
-	static public function viewFromRequest($views, $params)
+	/// @return [ view_name, title, $model, $permissions ]
+	static public function viewFromRequest(array $views, array $params): array
 	{
 		$_nv=$params[self::VIEWS_NVIEW_PARAM]??0;
 		if( is_numeric($_nv) ) {
@@ -123,12 +125,12 @@ class FormHelper
 			}
 			foreach($views as $kv => $view ) {
 				if( $_nv-- == 0 ) {
-					return [ $kv, $view[0], $view[1] ];
+					return [ $kv, $view[0], $view[1], $view[2] ];
 				}
 			}
 		} else {
 			if( isset($views[$_nv])	) {
-				return [ $_nv, $views[$_nv][0], $views[$_nv][0]];
+				return [ $_nv, $views[$_nv][0], $views[$_nv][1], $views[$_nv][2]];
 			}
 		}
 		return array_slice($views, 0, 1);
@@ -367,5 +369,14 @@ ajax;
 		}
 		return $final_perms;
 	}
+
+	static public function resolvePermissions($all_disabled, array $available, $granted): array
+	{
+		if ($all_disabled === false || $granted === false) {
+			return [];
+		}
+		return array_intersect($available, $all_disabled, $granted);
+	}
+
 
 } // class

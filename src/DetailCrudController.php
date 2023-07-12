@@ -74,6 +74,7 @@ class DetailCrudController extends CrudController
 		}
 		return $this->render('create', [
 			'model' => $model,
+			'viewViews' => [ '_view' => [ '', [] ] ],
 			'extraParams' => $this->changeActionParams($params, 'create', $model)
 		]);
 	}

@@ -84,7 +84,7 @@ class CrudController extends \yii\web\Controller
 		return $this->render('index', [
 			'searchModel' => $searchModel,
 			'indexParams' => $params,
-			'indexGrids' => [ '_grid' => [ '', [] ] ]
+			'indexGrids' => [ '_grid' => [ '', null, [] ] ]
 		]);
 	}
 
@@ -100,7 +100,7 @@ class CrudController extends \yii\web\Controller
 		$params['permissions'] = ($params['permissions']??true===false) ? false : $this->crudActions;
 		return $this->render('view', [
 			'model' => $model,
-			'viewViews' => [ '_view' => [ '', [] ] ],
+			'viewViews' => [ '_view' => [ '', null, [] ] ],
 			'viewParams' => $this->changeActionParams($params, 'view', $model)
 		]);
 	}
@@ -133,7 +133,7 @@ class CrudController extends \yii\web\Controller
 		}
 		return $this->render('create', [
 			'model' => $model,
-			'createForms' => [ '_form' => [ '', [] ] ],
+			'createForms' => [ '_form' => [ '', null, [] ] ],
 			'formParams' => $this->changeActionParams($params, 'create', $model)
 		]);
 	}
@@ -171,7 +171,7 @@ class CrudController extends \yii\web\Controller
 		}
 		return $this->render('duplicate', [
 			'model' => $model,
-			'duplicateForms' => [ '_form' => [ '', [] ] ],
+			'duplicateForms' => [ '_form' => [ '', null, [] ] ],
 			'formParams' => $this->changeActionParams($params, 'duplicate', $model)
 		]);
 	}
@@ -205,7 +205,7 @@ class CrudController extends \yii\web\Controller
 		}
 		return $this->render('update', [
 			'model' => $model,
-			'updateForms' => [ '_form' => [ '', [] ] ],
+			'updateForms' => [ '_form' => [ '', null, [] ] ],
 			'formParams' => $this->changeActionParams($params, 'update', $model)
 		]);
 	}
@@ -405,11 +405,6 @@ class CrudController extends \yii\web\Controller
 		}
 	}
 
-	public function masterRoute($master): string
-	{
-		return $this->id . '/' . $master->id;
-	}
-
 	public function getRoutePrefix($route = null): string
 	{
 		if( $route === null ) {
@@ -589,6 +584,11 @@ class CrudController extends \yii\web\Controller
 		return join($glue, $attrs);
 	}
 
+
+	public function masterRoute($master): string
+	{
+		return $this->id . '/' . $master->id;
+	}
 
 	public function getMasterModel()
 	{
