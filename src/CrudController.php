@@ -100,7 +100,7 @@ class CrudController extends \yii\web\Controller
 		$params['permissions'] = ($params['permissions']??true===false) ? false : $this->crudActions;
 		return $this->render('view', [
 			'model' => $model,
-			'viewViews' => [ '_view' => [ '', null, [] ] ],
+			'viewForms' => [ '_view' => [ '', null, [] ] ],
 			'viewParams' => $this->changeActionParams($params, 'view', $model)
 		]);
 	}
@@ -133,7 +133,7 @@ class CrudController extends \yii\web\Controller
 		}
 		return $this->render('create', [
 			'model' => $model,
-			'createForms' => [ '_form' => [ '', null, [] ] ],
+			'viewForms' => [ '_form' => [ '', null, [] ] ],
 			'formParams' => $this->changeActionParams($params, 'create', $model)
 		]);
 	}
@@ -171,7 +171,7 @@ class CrudController extends \yii\web\Controller
 		}
 		return $this->render('duplicate', [
 			'model' => $model,
-			'duplicateForms' => [ '_form' => [ '', null, [] ] ],
+			'viewForms' => [ '_form' => [ '', null, [] ] ],
 			'formParams' => $this->changeActionParams($params, 'duplicate', $model)
 		]);
 	}
@@ -205,7 +205,7 @@ class CrudController extends \yii\web\Controller
 		}
 		return $this->render('update', [
 			'model' => $model,
-			'updateForms' => [ '_form' => [ '', null, [] ] ],
+			'viewForms' => [ '_form' => [ '', null, [] ] ],
 			'formParams' => $this->changeActionParams($params, 'update', $model)
 		]);
 	}
