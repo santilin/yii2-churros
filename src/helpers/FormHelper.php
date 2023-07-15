@@ -103,12 +103,12 @@ class FormHelper
 			foreach($views as $kv => $view_info ) {
 				if( $_nv-- == 0 ) {
 					// search_form, permissions
-					return [ $view_info[1], $view_info[2] ];
+					return [ $kv, $view_info[0], $view_info[1] ];
 				}
 			}
 		} else {
 			if( isset($views[$_nv])	) {
-				return [ $views[$_nv][1], $views[$_nv][2] ];
+				return [ $kv, $views[$_nv][0], $views[$_nv][1] ];
 			}
 		}
 		$index = reset(array_keys($views));
@@ -125,12 +125,12 @@ class FormHelper
 			}
 			foreach($views as $kv => $view ) {
 				if( $_nv-- == 0 ) {
-					return [ $kv, $view[0], $view[1], $view[2] ];
+					return [ $kv, $view[0], $view[1], $view[2], $view[3] ];
 				}
 			}
 		} else {
 			if( isset($views[$_nv])	) {
-				return [ $_nv, $views[$_nv][0], $views[$_nv][1], $views[$_nv][2]];
+				return [ $_nv, $views[$_nv][0], $views[$_nv][1], $views[$_nv][2], $views[$_nv][3]];
 			}
 		}
 		return array_slice($views, 0, 1);
