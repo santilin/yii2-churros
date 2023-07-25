@@ -283,7 +283,11 @@ ajax;
 				break;
 			case 'button':
 				if( isset($button['url']) && !isset($button['htmlOptions']['onclick']) ) {
-					$button['htmlOptions']['onclick'] = "location.href='" . $button['url'] . "'";
+					if( is_array($button['url']) ) {
+						$button['htmlOptions']['onclick'] = "location.href='" . Url::to($button['url']) . "'";
+					} else {
+						$button['htmlOptions']['onclick'] = "location.href='" . $button['url'] . "'";
+					}
 				}
 				$ret[] = Html::button(
 					$title,
