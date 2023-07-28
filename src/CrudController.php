@@ -127,7 +127,7 @@ class CrudController extends \yii\web\Controller
 					return json_encode($model->getAttributes());
 				}
 				$this->addSuccessFlashes('create', $model);
-				return $this->whereToGoNow('create', $model);
+				return $this->redirect($this->whereToGoNow('create', $model));
 			}
 		}
 		return $this->render('create', [
@@ -165,7 +165,7 @@ class CrudController extends \yii\web\Controller
 					return json_encode($model->getAttributes());
 				}
 				$this->addSuccessFlashes('duplicate', $model);
-				return $this->whereTogoNow('duplicate', $model);
+				return $this->redirect($this->whereTogoNow('duplicate', $model));
 			}
 		}
 		return $this->render('duplicate', [
@@ -199,7 +199,7 @@ class CrudController extends \yii\web\Controller
 					return json_encode($model->getAttributes());
 				}
 				$this->addSuccessFlashes('update', $model);
-				return $this->whereTogoNow('update', $model);
+				return $this->redirect($this->whereTogoNow('update', $model));
 			}
 		}
 		return $this->render('update', [
@@ -223,12 +223,12 @@ class CrudController extends \yii\web\Controller
 				return json_encode($id);
 			}
 			$this->addSuccessFlashes('delete', $model);
-			return $this->whereToGoNow('delete', $model);
+			return $this->redirect($this->whereTogoNow('delete', $model));
 		} else {
 			try {
 				$model->deleteWithRelated();
 				$this->addSuccessFlashes('delete', $model);
-				return $this->whereToGoNow('delete', $model);
+				return $this->redirect($this->whereTogoNow('delete', $model));
 			} catch (\yii\db\IntegrityException $e ) {
 				Yii::$app->session->addFlash('error', $model->t('churros',
 					$this->getResultMessage('error_delete_integrity')));
@@ -237,7 +237,7 @@ class CrudController extends \yii\web\Controller
 					$this->getResultMessage('error_delete')));
 			}
 		}
-		return $this->whereToGoNow('delete', null);
+		return $this->redirect($this->whereTogoNow('delete', null));
 	}
 
 	/**
@@ -295,14 +295,14 @@ class CrudController extends \yii\web\Controller
 		return $pdf->render();
 	}
 
-	protected function whereToGoNow($from, $model)
+	protected function whereToGoNow(string $from, $model)
 	{
 		$returnTo = Yii::$app->request->post('returnTo');
 		if( !$returnTo ) {
 			$returnTo = Yii::$app->request->queryParams['returnTo']??null;
 		}
 		if( $returnTo ) {
-			return $this->redirect($returnTo);
+			return $returnTo;
 		}
 		$redirect_params = [];
 		if( isset($_REQUEST['sort']) ) {
@@ -346,7 +346,7 @@ class CrudController extends \yii\web\Controller
 		default:
 		}
 		$redirect_params[0] = $this->actionRoute($to);
-		return $this->redirect($redirect_params);
+		return $redirect_params;
 	}
 
 	public function addParamsToUrl($url, $params)

@@ -111,6 +111,9 @@ class AuthHelper
 		}
 		$msgs = [];
 		foreach( $perms as $perm_name => $perm_desc ) {
+			if( is_int($perm_name) ) {
+				$perm_name = $perm_desc;
+			}
 			$perm = AuthHelper::createOrUpdatePermission($perm_name,
 				$perm_desc, $auth);
 			if( static::$lastMessage ) $msgs[] = static::$lastMessage;
