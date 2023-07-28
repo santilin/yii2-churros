@@ -16,7 +16,6 @@ use santilin\churros\helpers\AppHelper;
  */
 class CrudController extends \yii\web\Controller
 {
-	protected $allowedActions = [];
 	protected $crudActions = [];
 	public $accessOnlyMine = false;
 

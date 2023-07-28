@@ -6,12 +6,12 @@ class NoProfileController extends \Da\User\Controller\SettingsController
 {
     public function actionProfile()
     {
-		$this->layout = "/login";
+		$this->layout = "/main";
 		return parent::actionAccount();
 	}
     public function actionAccount()
     {
-		$this->layout = "/login";
+		$this->layout = "/main";
 		return parent::actionAccount();
 	}
 }

@@ -129,9 +129,9 @@ trait ModelSearchTrait
         $scope = $formName === null ? $this->formName() : $formName;
         if (isset($data[$scope])) {
 			foreach( $data[$scope] as $name => &$value ) {
-				if( is_array($value) ) {
-					$value = json_encode($value);
-				}
+// 				if( is_array($value) ) {
+// 					$value = json_encode($value);
+// 				}
 				$this->$name = $value;
 			}
             return true;
