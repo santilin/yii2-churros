@@ -19,7 +19,7 @@ trait ReportsControllerTrait
 	public function actionCreate()
 	{
 		$params = Yii::$app->request->queryParams;
-		$model_name = '\\app\\forms\\' . $this->_model_name . '_report_Form';
+		$model_name = '\\app\\forms\\' . $this->_model_name . '_report_form_Form';
 		$report_def = $this->findFormModel(null, $model_name, 'create', $params);
 		if (isset($_POST['_form_relations']) ) {
 			$relations = explode(",", $_POST['_form_relations']);
@@ -44,7 +44,7 @@ trait ReportsControllerTrait
 	public function actionUpdate($id)
 	{
 		$params = Yii::$app->request->post();
-		$model_name = '\\app\\forms\\' . $this->_model_name . '_report_Form';
+		$model_name = '\\app\\forms\\' . $this->_model_name . '_report_form_Form';
 		$report_def = $this->findFormModel($id, $model_name, 'update', $params);
 		if( !$report_def->checkAccessByRole('roles') ) {
 			Yii::$app->session->setFlash('error',
@@ -96,7 +96,7 @@ trait ReportsControllerTrait
 		if( isset($params['save']) ) {
 			return $this->actionUpdate($id);
 		}
-		$model_name = '\\app\\forms\\' . $this->_model_name . '_report_Form';
+		$model_name = '\\app\\forms\\' . $this->_model_name . '_report_form_Form';
 		$report_def = $this->findFormModel($id, $model_name, 'update', $params);
 		if( !$report_def->checkAccessByRole('roles') ) {
 			Yii::$app->session->setFlash('error',
