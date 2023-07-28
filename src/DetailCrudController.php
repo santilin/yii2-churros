@@ -45,7 +45,7 @@ class DetailCrudController extends CrudController
 		return $this->render('index', [
 			'searchModel' => $searchModel,
 			'indexParams' => $params,
-			'indexGrids' => [ '_grid' => [ '', [] ] ],
+			'indexGrids' => [ '_grid' => [ '', null, [] ] ]
 		]);
 	}
 
@@ -74,8 +74,8 @@ class DetailCrudController extends CrudController
 		}
 		return $this->render('create', [
 			'model' => $model,
-			'viewForms' => [ '_view' => [ '', [], '' ] ],
-			'extraParams' => $this->changeActionParams($params, 'create', $model)
+			'viewForms' => [ '_form' => [ '', null, [], '' ] ],
+			'formParams' => $this->changeActionParams($params, 'create', $model)
 		]);
 	}
 
