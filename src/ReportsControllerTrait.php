@@ -12,6 +12,23 @@ use santilin\churros\grid\ReportView;
 trait ReportsControllerTrait
 {
 	/**
+	 * Lists all models.
+	 * @return mixed
+	 */
+	public function actionIndex()
+	{
+		$params = Yii::$app->request->queryParams;
+		$searchModel = $this->createSearchModel();
+		$params['permissions'] = ($params['permissions']??true===false) ? false : $this->crudActions;
+		$params = $this->changeActionParams($params, 'index', $searchModel);
+		return $this->render('index', [
+			'searchModel' => $searchModel,
+			'indexParams' => $params,
+			'indexGrids' => [ '_report_grid' => [ '', null, [] ] ]
+		]);
+	}
+
+	/**
 	 * Creates a new model.
 	 * If creation is successful, the browser will be redirected to the 'view' page.
 	 * @return mixed
