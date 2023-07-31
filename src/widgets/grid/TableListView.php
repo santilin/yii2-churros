@@ -6,12 +6,13 @@
  */
 namespace santilin\churros\widgets\grid;
 
+use Yii;
 use yii\helpers\ArrayHelper;
+use yii\i18n\formatter;
 use yii\widgets\ListView;
 use yii\base\InvalidConfigException;
 use yii\helpers\Html;
 use santilin\churros\ChurrosAsset;
-
 /**
  * This ListView acts like a table
  */
@@ -20,6 +21,9 @@ class TableListView extends ListView
 	public $options = [ 'class' => 'table-list-view'];
 	public $itemOptions = [ 'class' => 'tlv-row' ];
 	public $layout = "{summarypager}\n{header}\n{items}";
+	public $model = null;
+	public $formatter = null;
+
    /**
      * @var array the HTML attributes for the header of the list view.
      * The "tag" element specifies the tag name of the header element and defaults to "div".
@@ -46,6 +50,14 @@ class TableListView extends ListView
 		if( !isset($this->columns) ) {
 			throw new InvalidConfigException("TableListView: the property \$columns must be set");
 		}
+        if ($this->formatter === null) {
+            $this->formatter = Yii::$app->getFormatter();
+        } elseif (is_array($this->formatter)) {
+            $this->formatter = Yii::createObject($this->formatter);
+        }
+        if (!$this->formatter instanceof Formatter) {
+            throw new InvalidConfigException('The "formatter" property must be either a Format object or a configuration array.');
+        }
 		$view = $this->getView();
         ChurrosAsset::register($view);
 
@@ -55,10 +67,15 @@ class TableListView extends ListView
 
 	private function extractHeader()
 	{
-		$header_columns[] = '<div class="tlv-th tlv-date">Fecha</div>';
-		$header_columns[] = '<div class="tlv-th tlv-string">Concepto</div>';
-		$header_columns[] = '<div class="tlv-th tlv-string">Referencia</div>';
-		$header_columns[] = '<div class="tlv-th tlv-number">Importe</div>';
+		foreach ($this->columns as $key => $column) {
+			if ($this->model) {
+				$header_columns[] = '<div class="tlv-th tlv-date">'
+					. ($column['title']??$this->model->attributeLabels()[$key]??$key) . '</div>';
+			} else {
+				$header_columns[] = '<div class="tlv-th tlv-date">'
+					. ($column['title']??$key) . '</div>';
+			}
+		}
 		return implode('', $header_columns);
 	}
 
@@ -117,6 +134,22 @@ class TableListView extends ListView
 		$tag = ArrayHelper::remove($sv_options, 'tag', 'div');
 		return Html::tag($tag, $summary, $this->summaryOptions)
 			. '</div>';
+    }
+
+    public function renderColumns($model, $key, $index)
+    {
+		$col_contents = [];
+		foreach ($this->columns as $kc => $column) {
+			if (is_callable($column['value'])) {
+				$col_value = call_user_func($column['value'], $model, $key, $index);
+			} else {
+				$col_value = $model->$kc;
+			}
+			$col_contents[$kc] = "<div class=tlv-field>"
+				. $this->formatter->format($col_value, $column['format']??'raw')
+				. '</div>';
+		}
+		return implode('', $col_contents);
     }
 
 

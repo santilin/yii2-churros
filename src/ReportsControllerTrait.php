@@ -24,7 +24,7 @@ trait ReportsControllerTrait
 		return $this->render('index', [
 			'searchModel' => $searchModel,
 			'indexParams' => $params,
-			'indexGrids' => [ '_report_grid' => [ '', null, [] ] ]
+			'indexGrids' => [ '_reports_grid' => [ '', null, [] ] ]
 		]);
 	}
 
