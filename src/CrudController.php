@@ -34,9 +34,9 @@ class CrudController extends \yii\web\Controller
 	/**
 	 * An array of extra params to pass to the views
 	 */
-	protected function changeActionParams(array $queryParams, string $action_id, $model)
+	protected function changeActionParams(array $actionParams, string $action_id, $model)
 	{
-		return $queryParams;
+		return $actionParams;
 	}
 
 	public function behaviors()

@@ -51,7 +51,7 @@ trait ReportsControllerTrait
 		}
 		return $this->render('create', [
 			'model' => $report_def,
-			'extraParams' => $this->changeActionParams($params, 'create', $report_def)
+			'formParams' => $this->changeActionParams($params, 'create', $report_def)
 		]);
 	}
 
@@ -92,8 +92,7 @@ trait ReportsControllerTrait
 			return $this->render('report', [
 				'reportDef' => $report_def,
 				'reportModel' => new $report_model_name,
-				'params' => $params,
-				'extraParams' => $this->changeActionParams($params, 'report', $report_def)
+				'formParams' => $this->changeActionParams($params, 'report', $report_def)
 			]);
 		} catch( \yii\base\InvalidArgumentException $e ) {
 			Yii::$app->session->setFlash('error',
@@ -137,12 +136,11 @@ trait ReportsControllerTrait
 		// Merge the post params and replace the saved ones
 		$report_def->load($params);
 		try {
-			if( isset($params['pdf']) ) {
+			if( !empty($params['pdf']) ) {
 				$content = $this->renderPartial('report', [
 					'reportDef' => $report_def,
 					'reportModel' => new $report_model_name,
-					'params' => $params,
-					'extraParams' => $this->changeActionParams($params, 'report', $report_def)
+					'viewParams' => $this->changeActionParams($params, 'report', $report_def)
 				]);
 				$this->sendPdf($report_def, $content, $this->pdf_css);
 				die;
@@ -150,8 +148,7 @@ trait ReportsControllerTrait
 				return $this->render('report', [
 					'reportDef' => $report_def,
 					'reportModel' => new $report_model_name,
-					'params' => $params,
-					'extraParams' => $this->changeActionParams($params, 'report', $report_def)
+					'viewParams' => $this->changeActionParams($params, 'report', $report_def)
 				]);
 			}
 		} catch( \yii\base\InvalidArgumentException $e ) {
