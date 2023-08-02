@@ -307,4 +307,20 @@ class AppHelper
 		"Otras" => "Otras",
 	];
 
+	static public function splitFieldName($fieldname, $reverse = true)
+	{
+		if( $reverse ) {
+			$dotpos = strrpos($fieldname, '.');
+		} else {
+			$dotpos = strpos($fieldname, '.');
+		}
+		if( $dotpos !== FALSE ) {
+			$fldname = substr($fieldname, $dotpos + 1);
+			$tablename = substr($fieldname, 0, $dotpos);
+			return [ $tablename, $fldname ];
+		} else {
+			return [ "", $fieldname ];
+		}
+	}
+
 }

@@ -419,7 +419,7 @@ trait ReportsModelTrait
  		$dropdown_options = [];
 		$modeltablename = str_replace(['{','}','%'], '', $model->tableName());
 		foreach( $columns as $colname => $colattrs ) {
-			list($tablename, $fieldname) = ModelInfoTrait::splitFieldName($colname);
+			list($tablename, $fieldname) = AppHelper::splitFieldName($colname);
 			if( empty($tablename) ) {
 				$tablename = $modeltablename;
 			}

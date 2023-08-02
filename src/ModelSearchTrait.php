@@ -6,6 +6,7 @@ use yii\helpers\Html;
 use yii\helpers\ArrayHelper;
 use yii\base\InvalidArgumentException;
 use kartik\grid\GridView;
+use santilin\churros\Helpers\AppHelper;
 
 /**
  * Eases the definition of filters and sorts in grids for search models
@@ -77,7 +78,7 @@ trait ModelSearchTrait
 				$relation_name = $attribute;
 				$sort_fldname = '';
 			} else {
-				list($relation_name, $sort_fldname) = ModelInfoTrait::splitFieldName($attribute);
+				list($relation_name, $sort_fldname) = AppHelper::splitFieldName($attribute);
 			}
 			if (isset(self::$relations[$relation_name]) ) {
 				$related_model_class = self::$relations[$relation_name]['modelClass'];
@@ -180,7 +181,7 @@ trait ModelSearchTrait
 					$attribute = '';
 				}
 			} else {
-				list($relation_name, $attribute) = ModelInfoTrait::splitFieldName($name);
+				list($relation_name, $attribute) = AppHelper::splitFieldName($name);
 				$relation = self::$relations[$relation_name]??null;
 			}
 			if( $relation ) {
@@ -203,9 +204,9 @@ trait ModelSearchTrait
 					$or_conds[] = $rel_conds;
 				} elseif ($attribute == $model->primaryKey()[0] ) {
 					if( isset($relation['other']) ) {
-						list($right_table, $right_fld ) = ModelInfoTrait::splitFieldName($relation['other']);
+						list($right_table, $right_fld ) = AppHelper::splitFieldName($relation['other']);
 					} else {
-						list($right_table, $right_fld ) = ModelInfoTrait::splitFieldName($relation['right']);
+						list($right_table, $right_fld ) = AppHelper::splitFieldName($relation['right']);
 					}
 					$or_conds[] = [ 'IN', "$table_alias.$right_fld", $value ];
 				} else {

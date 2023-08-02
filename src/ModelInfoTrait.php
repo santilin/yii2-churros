@@ -328,7 +328,7 @@ trait ModelInfoTrait
 			$cn = $related_model->className();
 			if( $rel_info['modelClass'] == $cn ) {
 				$related_field = $rel_info['left'];
-				list($table, $field) = static::splitFieldName($related_field);
+				list($table, $field) = AppHelper::splitFieldName($related_field);
 				return $field;
 			}
 		}
@@ -337,7 +337,7 @@ trait ModelInfoTrait
 			$cn = get_parent_class($related_model);
 			if( $rel_info['modelClass'] == $cn ) {
 				$related_field = $rel_info['left'];
-				list($table, $field) = static::splitFieldName($related_field);
+				list($table, $field) = AppHelper::splitFieldName($related_field);
 				return $field;
 			}
 		}
@@ -462,22 +462,6 @@ trait ModelInfoTrait
 			return $values[$this->$field]??null;
 		} else {
 			return $values;
-		}
-	}
-
-	static public function splitFieldName($fieldname, $reverse = true)
-	{
-		if( $reverse ) {
-			$dotpos = strrpos($fieldname, '.');
-		} else {
-			$dotpos = strpos($fieldname, '.');
-		}
-		if( $dotpos !== FALSE ) {
-			$fldname = substr($fieldname, $dotpos + 1);
-			$tablename = substr($fieldname, 0, $dotpos);
-			return [ $tablename, $fldname ];
-		} else {
-			return [ "", $fieldname ];
 		}
 	}
 
@@ -779,7 +763,7 @@ trait ModelInfoTrait
 			$relation_name = $name;
 			$attribute = '';
 		} else {
-			list($relation_name, $attribute) = ModelInfoTrait::splitFieldName($name);
+			list($relation_name, $attribute) = AppHelper::splitFieldName($name);
 		}
 		$relation = self::$relations[$relation_name]??null;
 		if( $relation ) {
@@ -796,9 +780,9 @@ trait ModelInfoTrait
 			$search_flds = [];
 			if ($attribute == $model->primaryKey()[0] ) {
 				if( isset($relation['other']) ) {
-					list($right_table, $right_fld ) = ModelInfoTrait::splitFieldName($relation['other']);
+					list($right_table, $right_fld ) = AppHelper::splitFieldName($relation['other']);
 				} else {
-					list($right_table, $right_fld ) = ModelInfoTrait::splitFieldName($relation['right']);
+					list($right_table, $right_fld ) = AppHelper::splitFieldName($relation['right']);
 				}
 				$query->andWhere([$value['op'], "$table_alias.$right_fld", $value['v'] ]);
 			} else if( $attribute == '' ) {

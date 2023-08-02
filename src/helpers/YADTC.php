@@ -8,7 +8,7 @@ class YADTC extends \DateTime
 	const SQL_DATE_FORMAT = 'Y-m-d';
 	const NOW = '\\app\\lib\\YADTC::NOW';
 
-    static public function createFromFormat($format, $time, \DateTimeZone $timezone = null)
+    static public function createFromFormat($format, $time, \DateTimeZone $timezone = null): YADTC|false
     {
         $ext_dt = new static();
         $parent_dt = parent::createFromFormat($format, $time, $timezone);
@@ -264,7 +264,7 @@ class YADTC extends \DateTime
 		return $this->getTimestamp() >= $d1->getTimeStamp()
 			&& $this->getTimestamp() <= $d2->getTimeStamp();
 	}
-	public function diff($other, $absolute = NULL)
+	public function diff($other, $absolute = NULL): \DateInterval
 	{
         if( $other instanceof YADTC ) {
             $t = $other->getTimeStamp();
