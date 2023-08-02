@@ -220,7 +220,7 @@ trait ReportsModelTrait
 			$column_def = $all_columns[$colname];
 			list($select_field_alias, $select_field) = $this->aliasesAndJoins($model,
 				$tablename, $column_def['attribute'], $colname, $joins);
-			$model->filterWhere($query, $select_field, $filter_def);
+			$model->reportFilterWhere($query, $select_field, $filter_def);
 		}
 
 		// Añadir join y orderby de los report_sorting
