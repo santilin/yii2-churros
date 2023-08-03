@@ -8,13 +8,13 @@ class YADTC extends \DateTime
 	const SQL_DATE_FORMAT = 'Y-m-d';
 	const NOW = '\\app\\lib\\YADTC::NOW';
 
-    static public function createFromFormat($format, $time, \DateTimeZone $timezone = null): YADTC|false
+    static public function createFromFormat($format, $time, \DateTimeZone $timezone = null): ?YADTC
     {
         $ext_dt = new static();
         $parent_dt = parent::createFromFormat($format, $time, $timezone);
 
         if (!$parent_dt) {
-            return false;
+            return null;
         }
 
         $ext_dt->setTimestamp($parent_dt->getTimestamp());
