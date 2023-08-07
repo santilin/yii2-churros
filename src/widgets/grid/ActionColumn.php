@@ -28,15 +28,15 @@ class ActionColumn extends \yii\grid\ActionColumn
     public function __construct($config = [])
     {
 		parent::__construct($config);
-		if( !isset($this->icons['view']) && isset($this->icons['eye-open']) ) {
-			$this->icons['view'] = $this->icons['eye-open'];
-		}
-		if( !isset($this->icons['update']) &&isset($this->icons['pencil']) ) {
-			$this->icons['update'] = $this->icons['pencil'];
-		}
-		if( !isset($this->icons['delete']) && isset($this->icons['trash']) ) {
-			$this->icons['delete'] = $this->icons['trash'];
-		}
+// 		if( !isset($this->icons['view']) && isset($this->icons['eye-open']) ) {
+// 			$this->icons['view'] = $this->icons['eye-open'];
+// 		}
+// 		if( !isset($this->icons['update']) && isset($this->icons['pencil']) ) {
+// 			$this->icons['update'] = $this->icons['pencil'];
+// 		}
+// 		if( !isset($this->icons['delete']) && isset($this->icons['trash']) ) {
+// 			$this->icons['delete'] = $this->icons['trash'];
+// 		}
 	}
 
     /**
@@ -54,7 +54,7 @@ class ActionColumn extends \yii\grid\ActionColumn
 				$this->buttons['view'] = $this->customButtons['view'];
 				unset( $this->customButtons['view'] );
 			} else {
-				$this->initDefaultButton('view', 'view', array_merge(
+				$this->initDefaultButton('view', 'eye', array_merge(
 					[ 'title' => Yii::t('churros', 'View') ], $this->viewOptions));
 			}
 		}
@@ -63,7 +63,7 @@ class ActionColumn extends \yii\grid\ActionColumn
 				$this->buttons['update'] = $this->customButtons['update'];
 				unset( $this->customButtons['update'] );
 			} else {
-				$this->initDefaultButton('update', 'edit', array_merge(
+				$this->initDefaultButton('update', 'pencil-alt', array_merge(
 					[ 'title' => Yii::t('churros', 'Update') ], $this->updateOptions));
 			}
 		}
@@ -72,7 +72,7 @@ class ActionColumn extends \yii\grid\ActionColumn
 				$this->buttons['delete'] = $this->customButtons['delete'];
 				unset( $this->customButtons['delete'] );
 			} else {
-				$this->initDefaultButton('delete', 'delete', array_merge(
+				$this->initDefaultButton('delete', 'trash-alt', array_merge(
 					[ 'title' => Yii::t('churros', 'Delete'),
 					  'data-confirm' => Yii::t('yii', 'Are you sure you want to delete this item?'),
 					  'data-method' => 'post'
