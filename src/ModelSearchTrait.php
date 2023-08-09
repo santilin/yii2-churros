@@ -99,8 +99,12 @@ trait ModelSearchTrait
 						$related_model_provider = $related_model->search([]);
 						if (isset( $related_model_provider->sort->attributes[$sort_fldname]) ) {
 							$related_sort = $related_model_provider->sort->attributes[$sort_fldname];
-							$new_related_sort = [ 'label' => $related_sort['label']];
-							unset($related_sort['label']);
+							if (isset($related_sort['label'])) {
+								$new_related_sort = [ 'label' => $related_sort['label']];
+								unset($related_sort['label']);
+							} else {
+								$new_related_sort = [];
+							}
 							foreach( $related_sort as $asc_desc => $sort_def) {
 								foreach( $sort_def as $key => $value ) {
 									$new_related_sort[$asc_desc]
