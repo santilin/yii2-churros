@@ -1,9 +1,7 @@
 <?php
 /**
  * Adapted from https://github.com/nerburish/yii2-daterange-validator
- *
  */
-
 namespace santilin\churros\validators;
 use santilin\churros\helpers\DateTimeEx;
 use yii\validators\Validator;

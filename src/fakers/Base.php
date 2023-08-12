@@ -156,4 +156,10 @@ class Base extends \Faker\Provider\Base
 		. ':' . str_pad($this->generator->numberBetween(0,59), 2, '0', STR_PAD_LEFT);
 	}
 
+	public function autoIncrement(): int
+	{
+		static $last_value = 0;
+		return ++$last_value;
+	}
+
 }
