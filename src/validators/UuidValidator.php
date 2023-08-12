@@ -2,7 +2,7 @@
 namespace santilin\churros\validators;
 
 use yii\validators\Validator;
-use \Ramsey\Uuid\Uuid;
+use Ramsey\Uuid\Uuid;
 
 class UuidValidator extends Validator
 {
