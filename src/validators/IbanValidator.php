@@ -2,17 +2,33 @@
 namespace santilin\churros\validators;
 
 use yii\validators\Validator;
-use Iban\Validation\Validator\IbanValidator;
+use Iban\Validation\Validator\IbanValidator as BaseIvanValidator;
 
 class IbanValidator extends Validator
 {
+    public function validateValue($iban)
+    {
+        $validator = new IbanValidator();
+		return true;
+//         return $validator->validate($iban);
+    }
+
     public function validateAttribute($model, $attribute)
     {
-        $iban = $model->$attribute;
+		$value = $model->$attribute;
+		if( $this->validateValue($value) ) {
+			$model->$attribute = $this->formatValue($value);
+			return true;
+		} else {
+			$this->addError($model, $attribute, $this->message);
+		}
+		return null;
+	}
 
-        $validator = new IbanValidator();
-        if (!$validator->validate($iban)) {
-            $this->addError($model, $attribute, 'Invalid IBAN number.');
-        }
-    }
+	public function formatValue($value)
+	{
+		return $value;
+	}
+
+
 }

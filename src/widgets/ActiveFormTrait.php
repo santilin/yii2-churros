@@ -58,17 +58,17 @@ trait ActiveFormTrait
 			$col = $col_sm = $col_md = $col_lg = $col_xl = 12;
 			break;
 		case 2:
-			$col = $col_md = 12;
-			$col_sm = $col_lg = $col_xl = 6;
+			$col = $col_sm = 12;
+			$col_md = $col_lg = $col_xl = 6;
 			break;
 		case 3:
-			$col = $col_md = 4;
-			$col_sm = $col_lg = $col_xl = 4;
+			$col = $col_sm = 4;
+			$col_md = $col_lg = $col_xl = 4;
 			break;
 		case 4:
 		default:
-			$col = $col_md = 3;
-			$col_sm = $col_lg = $col_xl = 6;
+			$col = $col_sm = 3;
+			$col_md = $col_lg = $col_xl = 6;
 		}
 		return "col-$col col-sm-$col_sm col-md-$col_md col-lg-$col_lg col-xl-$col_xl";
 	}
@@ -86,10 +86,12 @@ trait ActiveFormTrait
 			case 'fields':
 				foreach ($row_layout['fields'] as $fldname) {
 					if (!isset($fields_cfg[$fldname])) {
+// 						echo "fld:$fldname, layout:$layout, fld_layout:large<br>";
 						$fields_cfg[$fldname] = $this->fieldClasses($layout);
 					} else {
+						$fld_layout = $fields_cfg[$fldname]['layout'];
+// 						echo "fld:$fldname, layout:$layout, fld_layout:$fld_layout<br>";
 						if (isset($fields_cfg[$fldname]['layout'])) {
-							$fld_layout = $fields_cfg[$fldname]['layout'];
 							unset($fields_cfg[$fldname]['layout']);
 							$fields_cfg[$fldname] = array_merge(
 								$this->fieldClasses($layout,$fld_layout),
