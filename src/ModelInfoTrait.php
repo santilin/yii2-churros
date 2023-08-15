@@ -187,7 +187,7 @@ trait ModelInfoTrait
 				return $fldvalue;
 			}
 		}
-        $fval =  AppHelper::incrStr($val, $increment);
+        $fval =  AppHelper::incrStr($val??0, $increment);
         return $fval;
 //     } catch( dbError &e ) { // sqlite3
 //         if( e.getNumber() == 1137 ) { // ERROR 1137 (HY000): Can't reopen table:
