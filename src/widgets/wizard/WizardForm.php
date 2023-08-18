@@ -4,8 +4,7 @@ namespace santilin\churros\widgets\wizard;
 use yii;
 use buttflattery\formwizard\FormWizard;
 use yii\helpers\{ArrayHelper,Html,Json};
-use yii\bootstrap\ActiveForm as BS3ActiveForm;
-use yii\bootstrap4\ActiveForm as BS4ActiveForm;
+use yii\bootstrap4\ActiveForm;
 
 class WizardForm extends FormWizard
 {
@@ -32,11 +31,7 @@ class WizardForm extends FormWizard
         $wizardContainerId = $this->wizardContainerId;
 
         //load respective bootstrap assets
-        if ($this->isBs3()) {
-            $activeForm = BS3ActiveForm::class;
-        } else {
-            $activeForm = BS4ActiveForm::class;
-        }
+		$activeForm = ActiveForm::class;
 
         //start ActiveForm tag
 		$form = $activeForm::begin();
