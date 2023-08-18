@@ -441,7 +441,7 @@ trait ModelInfoTrait
 		return false;
 	}
 
-	public function defaultHandyFieldValues(string $field, string $format, string $model_format, string $scope)
+	public function defaultHandyFieldValues(string $field, string $format, string $model_format, ?string $scope)
 	{
 		throw new \Exception("field '$field' not supported in " . get_called_class() . "::handyFieldValues() ");
 	}

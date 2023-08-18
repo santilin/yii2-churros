@@ -9,6 +9,11 @@ trait ActiveFormTrait
 	public $fieldsLayout;
 	public $formLayout;
 
+	public function getInputId($model, string $attribute): string
+	{
+		return Html::getInputId($model, $attribute);
+	}
+
 	public function fixFieldsLayout(array &$fields_cfg, array $render_fields, array $buttons = []): void
 	{
 		if ($this->formLayout == '' && $this->layout == 'inline') {
