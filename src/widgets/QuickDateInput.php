@@ -220,9 +220,6 @@ function dateInputChange(date_input, id)
 		if( error_el ) {
 			error_el.text("");
 		}
-// 		if( form_group ) {
-// 			form_group.removeClass('has-error');
-// 		}
 		if( form_control ) {
 			form_control.removeClass('is-invalid');
 		}
