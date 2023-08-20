@@ -124,7 +124,6 @@ class ActiveForm extends Bs4ActiveForm
 			],
 		],
 
-
 		'4cols' => [
 			'large' => [
 				'horizontalCssClasses' => [

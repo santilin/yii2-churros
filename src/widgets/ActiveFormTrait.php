@@ -73,7 +73,7 @@ trait ActiveFormTrait
 		case 4:
 		default:
 			$col = $col_sm = 3;
-			$col_md = $col_lg = $col_xl = 6;
+			$col_md = $col_lg = $col_xl = 3;
 		}
 		return "col-$col col-sm-$col_sm col-md-$col_md col-lg-$col_lg col-xl-$col_xl";
 	}
@@ -89,12 +89,13 @@ trait ActiveFormTrait
 				break;
 			case 'fieldset':
 			case 'fields':
+				$nf = 0;
 				foreach ($row_layout['fields'] as $fldname) {
 					if (!isset($fields_cfg[$fldname])) {
 // 						echo "fld:$fldname, layout:$layout, fld_layout:large<br>";
 						$fields_cfg[$fldname] = $this->fieldClasses($layout);
 					} else {
-						$fld_layout = $fields_cfg[$fldname]['layout'];
+						$fld_layout = $fields_cfg[$fldname]['layout']??'1col';
 // 						echo "fld:$fldname, layout:$layout, fld_layout:$fld_layout<br>";
 						if (isset($fields_cfg[$fldname]['layout'])) {
 							unset($fields_cfg[$fldname]['layout']);
@@ -109,8 +110,13 @@ trait ActiveFormTrait
 						break;
 					case 'vertical':
 						$fields_cfg[$fldname]['horizontalCssClasses']['label']
-							= $fields_cfg[$fldname]['horizontalCssClasses']['wrapper'];
+							= $fields_cfg[$fldname]['horizontalCssClasses']['wrapper']
+							= 'col-lg-12 col-md-12 col-sm-12 col-12 col-12';
 					}
+					if ($nf == 0 && !empty($row_layout['hide_first_label']) ) {
+						$fields_cfg[$fldname]['horizontalCssClasses']['label'] = "hidden";
+					}
+					$nf++;
 				}
 			}
 		}
