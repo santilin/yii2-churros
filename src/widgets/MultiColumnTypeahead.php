@@ -8,7 +8,7 @@ use yii\base\InvalidConfigException;
 use kartik\typeahead\Typeahead;
 
 
-class IdAndValuesTypeahead extends Typeahead
+class MultiColumnTypeahead extends Typeahead
 {
 	public $inputFields = [];
 	public $remoteUrl;
@@ -103,6 +103,7 @@ js
 		$view = $this->getView();
 		$id = $this->options['id'];
 
+		// Cuando se pulsa INTRO y está desplegado el menú de sugerencias, se selecciona la primera
 		$set_fields_values = [];
 		if ($this->concatToIdField) {
 			$set_fields_values[] = <<<js
@@ -123,7 +124,11 @@ js;
 		$view->registerJS(<<<js
 $('#$id').keydown(function(e) {
 	if (e.keyCode === 13) {
-		const selectedDatum = $(this).data('ttTypeahead').menu.getTopSelectable();
+		debugger;
+		let selectedDatum = $(this).data('ttTypeahead').menu.getActiveSelectable();
+		if (!selectedDatum) {
+			selectedDatum = $(this).data('ttTypeahead').menu.getTopSelectable();
+		}
 		if (selectedDatum) {
 			console.log(selectedDatum[0].innerText);
 			const datumParts = selectedDatum[0].innerText.split('{$this->displaySeparator},');
