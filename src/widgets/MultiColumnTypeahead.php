@@ -50,7 +50,7 @@ js;
 			$concat_item .= " + item.{$this->inputFields[$i]}";
 			$fld_id = Html::getInputId($this->model, $this->inputFields[$i]);
 			$set_fields_values[] = <<<js
-$('#$fld_id').val(item.{$this->inputFields[$i]});
+	if (item.{$this->inputFields[$i]} != '') $('#$fld_id').val(item.{$this->inputFields[$i]});
 js;
 		}
 
@@ -89,8 +89,6 @@ jsexpr
 		$js_set_fields_values = implode("\n", $set_fields_values);
 		$this->pluginEvents["typeahead:select"] = new \yii\web\JsExpression(<<<js
 function(event, item) {
-	console.log(item);
-	debugger;
 	$js_set_fields_values
 }
 js
@@ -107,31 +105,35 @@ js
 		$set_fields_values = [];
 		if ($this->concatToIdField) {
 			$set_fields_values[] = <<<js
-$(this).typeahead('val', selectedDatum[0].innerText);
+			$(this).typeahead('val', selectedDatum[0].innerText);
 js;
 		} else {
 			$set_fields_values[] = <<<js
-$(this).typeahead('val', datumParts[0]);
+			$(this).typeahead('val', datumParts[0]);
 js;
 		}
 		for ($i=1; $i<count($this->inputFields); $i++) {
 			$fld_id = Html::getInputId($this->model, $this->inputFields[$i]);
 			$set_fields_values[] = <<<js
-if (datumParts[$i] !== undefined) { $('#$fld_id').val(datumParts[$i]) };
+			if (datumParts[$i] !== undefined && datumParts[$i] != '') { $('#$fld_id').val(datumParts[$i]) };
 js;
 		}
 		$js_set_fields_values = implode("\n", $set_fields_values);
+		$js_id = str_replace('-','_',$id);
 		$view->registerJS(<<<js
+let mctahead_changed_$js_id = false;
+$('#$id').change(function(e) {
+	mctahead_changed_$js_id = true;
+});
 $('#$id').keydown(function(e) {
-	if (e.keyCode === 13) {
-		debugger;
+	if (e.keyCode === 13 && mctahead_changed_$js_id) {
 		let selectedDatum = $(this).data('ttTypeahead').menu.getActiveSelectable();
 		if (!selectedDatum) {
 			selectedDatum = $(this).data('ttTypeahead').menu.getTopSelectable();
 		}
 		if (selectedDatum) {
 			console.log(selectedDatum[0].innerText);
-			const datumParts = selectedDatum[0].innerText.split('{$this->displaySeparator},');
+			const datumParts = selectedDatum[0].innerText.split('{$this->displaySeparator}');
 			$js_set_fields_values
 		}
 	}
