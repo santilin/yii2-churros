@@ -8,7 +8,7 @@ class YADTC extends \DateTime
 	const SQL_DATE_FORMAT = 'Y-m-d';
 	const NOW = '\\app\\lib\\YADTC::NOW';
 
-    static public function createFromFormat($format, $time, \DateTimeZone $timezone = null): YADTC
+    static public function createFromFormat($format, $time, \DateTimeZone $timezone = null)
     {
         $ext_dt = new static();
         $parent_dt = parent::createFromFormat($format, $time, $timezone);
@@ -90,7 +90,7 @@ class YADTC extends \DateTime
 			return null;
 		}
 		$ret = self::createFromFormat('Y-m-d H:i:s', $date);
-		if( $ret === false ) {
+		if( !$ret ) {
 			$ret = self::createFromFormat('!Y-m-d', $date);
 		}
 		if ($ret!==false) {
