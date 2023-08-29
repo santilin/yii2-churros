@@ -8,7 +8,6 @@ use santilin\churros\ModelSearchTrait;
 
 trait ModelInfoTrait
 {
-	use RelationTrait;
     /**
      * @var array validation warnings (attribute name => array of warnings)
      */

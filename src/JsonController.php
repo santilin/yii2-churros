@@ -14,7 +14,7 @@ use santilin\churros\helpers\AppHelper;
 /**
  * CrudController implements the CRUD actions for yii2 models
  */
-class CrudController extends \yii\web\Controller
+class JsonController extends \yii\web\Controller
 {
 	protected $crudActions = [];
 	public $accessOnlyMine = false;

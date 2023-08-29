@@ -59,7 +59,8 @@ class DetailCrudController extends CrudController
 		$params = Yii::$app->request->queryParams;
 		$model = $this->findFormModel(null);
 		if( $this->master_model ) {
-			$model->setAttribute( $model->getRelatedFieldForModel($this->master_model), $this->master_model->getPrimaryKey());
+			$model->setAttribute($model->getRelatedFieldForModel($this->master_model),
+				$this->master_model->getPrimaryKey());
 		}
 		if (isset($_POST['_form_relations']) ) {
 			$relations = explode(",", $_POST['_form_relations']);
@@ -102,15 +103,6 @@ class DetailCrudController extends CrudController
 		$queryParams['master'] = $this->master_model;
 		return $queryParams;
 	}
-
-
-// 	protected function saveAll(string $context, $model): bool
-// 	{
-// 		if( $this->master_model && $model->getIsNewRecord() ) {
-// 			$model->setAttribute( $model->getRelatedFieldForModel($this->master_model), $this->master_model->getPrimaryKey());
-// 		}
-// 		return $model->saveAll();
-// 	}
 
 	public function actionRoute($action_id = null/*, $model = null*/): string
 	{
