@@ -123,12 +123,9 @@ trait ReportsControllerTrait
 		if( strpos($report_model_name, '\\') === FALSE ) {
 			$report_model_name= "\\app\\models\\$report_model_name";
 		}
-// 		if( substr($search_model_name, -7) != "_Search" ) {
-// 			$search_model_name .= "_Search";
-// 		}
 		if( $report_def->model == '' || !class_exists($report_model_name) ) {
 			Yii::$app->session->setFlash('error',
-				$report_def->t('churros', '{search_model_name}: search model not found in report "{record}"', ['search_model_name' => $search_model_name]));
+				$report_def->t('churros', '{search_model_name}: search model not found in report "{record}"', ['search_model_name' => $report_model_name]));
 			return $this->redirect(['index']);
 		}
 		// The columns, filters, etc, from the saved definition
