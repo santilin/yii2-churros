@@ -474,6 +474,13 @@ trait ModelInfoTrait
 		return Yii::$app->formatter->asCurrency($this->$fldname, $currency, $options, $textOptions);
 	}
 
+	public function resetPrimaryKeys()
+	{
+		foreach( $this->primaryKey() as $key_name ) {
+			$this->$key_name = null;
+		}
+	}
+
 	/**
 	 * Code copied from ActiveRecord::findByCondition.
 	 * Always Adds the tablename to the primary key field

@@ -48,14 +48,6 @@ use yii\helpers\ArrayHelper;
 
 trait RelationTrait
 {
-
-	public function resetPrimaryKeys()
-	{
-		foreach( $this->primaryKey() as $key_name ) {
-			$this->$key_name = null;
-		}
-	}
-
     /**
      * Load all attributes including related attributes
      * @param $post
