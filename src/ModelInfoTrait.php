@@ -12,7 +12,7 @@ trait ModelInfoTrait
      * @var array validation warnings (attribute name => array of warnings)
      */
     private $_warnings;
-    public $crudScenarios = ['default', 'create','duplicate','update'];
+    public $crudScenarios = [ 'default', 'create', 'duplicate', 'update' ];
 
     static public function empty($value)
     {
