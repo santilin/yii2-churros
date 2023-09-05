@@ -165,7 +165,7 @@ trait ModelInfoTrait
 			$increment = "+$increment";
 		}
 		$query = static::find()->select("MAX([[$fldname]])");
-		$fldvalue = $this->$fldname;
+		$fldvalue = $this->$fldname??'';
 		if( !empty($conds) ) {
 			$query->andwhere($conds);
 		}
