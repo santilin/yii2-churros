@@ -53,6 +53,10 @@ a.desc:after {
 	max-width: 50% !important;
 }
 
+body.dark .record-view .rv-field, .record-view .rv-label {
+	color: black;
+}
+
 .record-view .rv-field, .record-view .rv-label {
 	display: block;
 	padding: 6px 12px;
