@@ -27,9 +27,9 @@ class ActiveForm extends Bs4ActiveForm
 		'1col' => [
 			'large' => [
 				'horizontalCssClasses' =>[
-					'offset' => ['offset-lg-2 offset-md-2 offset-sm-3 offset-3'],
-					'label' => ['col-lg-2 col-md-3 col-sm-12 col-12', 'col-form-label text-left text-sm-left text-md-right text-lg-right'],
-					'wrapper' => 'col-lg-10 col-md-10 col-sm-12 col-12',
+					'offset' => ['offset-xl-2 offset-lg-2 offset-md-2 offset-sm-3 offset-3'],
+					'label' => ['col-xl-2 col-lg-2 col-md-2 col-sm-12 col-12', 'col-form-label text-left text-sm-left text-md-right text-lg-right text-xl-right'],
+					'wrapper' => 'col-xl-10 col-lg-10 col-md-10 col-sm-12 col-12',
 					'error' => '',
 					'hint' => '',
 					'field' => 'form-group row',
@@ -37,8 +37,8 @@ class ActiveForm extends Bs4ActiveForm
 			],
 			'medium' => [
 				'horizontalCssClasses' =>[
-					'offset' => ['offset-lg-2 offset-md-2 offset-sm-3'],
-					'label' => ['col-lg-3 col-md-3 col-sm-4 col-12', 'col-form-label text-left text-sm-right text-md-right text-lg-right'],
+					'offset' => ['offset-xl-2 offset-lg-2 offset-md-2 offset-sm-3 offset-3'],
+					'label' => ['col-xl-2 col-lg-2 col-md-2 col-sm-12 col-12', 'col-form-label text-left text-sm-left text-md-right text-lg-right'],
 					'wrapper' => 'col-lg-5 col-md-6 col-sm-7 col-8',
 					'error' => '',
 					'hint' => '',
@@ -47,9 +47,9 @@ class ActiveForm extends Bs4ActiveForm
 			],
 			'short' => [
 				'horizontalCssClasses' =>[
-					'offset' => ['offset-lg-2 offset-md-2 offset-sm-3'],
-					'label' => ['col-lg-2 col-md-3 col-sm-12 col-12', 'col-form-label text-left text-sm-left text-md-right text-lg-right'],
-					'wrapper' => 'col-lg-3 col-md-3 col-sm-4 col-6',
+					'offset' => ['offset-lg-2 offset-md-2 offset-sm-3 offset-3'],
+					'label' => ['col-lg-2 col-md-2 col-sm-12 col-12', 'col-form-label text-left text-sm-left text-md-right text-lg-right'],
+					'wrapper' => 'col-lg-2 col-md-3 col-sm-4 col-6',
 					'error' => '',
 					'hint' => '',
 					'field' => 'form-group row',
@@ -173,26 +173,26 @@ class ActiveForm extends Bs4ActiveForm
 		if (YII_ENV_DEV) {
 			if (is_array($form_field_cfg['horizontalCssClasses']['wrapper'])) {
 				$form_field_cfg['horizontalCssClasses']['wrapper'] = array_merge(
-					[ "wrapper $row_layout $fld_layout "],
+					[ "wrapper row-$row_layout fld-$fld_layout"],
 					$form_field_cfg['horizontalCssClasses']['wrapper']);
 			} else {
-				$form_field_cfg['horizontalCssClasses']['wrapper'] = "wrapper $row_layout $fld_layout "
+				$form_field_cfg['horizontalCssClasses']['wrapper'] = "wrapper row-$row_layout fld-$fld_layout "
 					. $form_field_cfg['horizontalCssClasses']['wrapper'];
 			}
 			if (is_array($form_field_cfg['horizontalCssClasses']['label'])) {
 				$form_field_cfg['horizontalCssClasses']['label'] = array_merge(
-					[ "label $row_layout $fld_layout "],
+					[ "label row-$row_layout fld-$fld_layout"],
  					$form_field_cfg['horizontalCssClasses']['label']);
 			} else {
-				$form_field_cfg['horizontalCssClasses']['label'] = "label $row_layout $fld_layout "
+				$form_field_cfg['horizontalCssClasses']['label'] = "label row-$row_layout fld-$fld_layout "
 					. $form_field_cfg['horizontalCssClasses']['label'];
 			}
 			if (is_array($form_field_cfg['horizontalCssClasses']['offset'])) {
 				$form_field_cfg['horizontalCssClasses']['offset'] = array_merge(
-					[ "offset $row_layout $fld_layout "],
+					[ "offset row-$row_layout fld-$fld_layout"],
 					$form_field_cfg['horizontalCssClasses']['offset']);
 			} else {
-				$form_field_cfg['horizontalCssClasses']['offset'] = "offset $row_layout $fld_layout "
+				$form_field_cfg['horizontalCssClasses']['offset'] = "offset row-$row_layout fld-$fld_layout "
 					. $form_field_cfg['horizontalCssClasses']['offset'];
 			}
 		}

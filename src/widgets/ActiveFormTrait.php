@@ -92,17 +92,17 @@ trait ActiveFormTrait
 				$nf = 0;
 				foreach ($row_layout['fields'] as $fldname) {
 					if (!isset($fields_cfg[$fldname])) {
-// 						echo "fld:$fldname, layout:$layout, fld_layout:large<br>";
-						$fields_cfg[$fldname] = $this->fieldClasses($layout);
+						$fields_cfg[$fldname] = $this->fieldClasses($layout, 'large');
 					} else {
-						$fld_layout = $fields_cfg[$fldname]['layout']??'1col';
-// 						echo "fld:$fldname, layout:$layout, fld_layout:$fld_layout<br>";
 						if (isset($fields_cfg[$fldname]['layout'])) {
+							$fld_layout = $fields_cfg[$fldname]['layout'];
 							unset($fields_cfg[$fldname]['layout']);
-							$fields_cfg[$fldname] = array_merge(
-								$this->fieldClasses($layout,$fld_layout),
-								$fields_cfg[$fldname]);
+						} else {
+							$fld_layout = 'large';
 						}
+						$fields_cfg[$fldname] = array_merge(
+							$this->fieldClasses($layout,$fld_layout),
+							$fields_cfg[$fldname]);
 					}
 					switch($row_layout['labels']??null) {
 					case 'none':
