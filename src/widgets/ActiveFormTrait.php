@@ -174,9 +174,12 @@ trait ActiveFormTrait
 				}
 				break;
 			case 'buttons':
-				$classes = static::FIELD_HORIZ_CLASSES[$layout??'1col']['large']['horizontalCssClasses'];
+				$classes = static::FIELD_HORIZ_CLASSES[$layout??'1col']['large']['horizontalCssClasses']['offset'];
 				$ret .= '<div class="mt-2 clearfix row">';
-				$ret .= "<div class=\"{$classes['wrapper']}\">";
+				if (is_array($classes)) {
+					$s_classes = implode(' ', $classes);
+				}
+				$ret .= "<div class=\"$s_classes\">";
 				$ret .= $this->layoutButtons($row_layout['buttons'], $layout??$this->formLayout, $row_layout['options']??[]);
 				$ret .= '</div><!--buttons -->' .  "\n";
 				$ret .= '</div><!--row-->';
@@ -220,16 +223,8 @@ trait ActiveFormTrait
 
 	public function layoutButtons(array $buttons, string $layout, array $options = []): string
 	{
-		$offset = static::FIELD_HORIZ_CLASSES[$layout]['large']['horizontalCssClasses']['offset'];
-		if( is_array($offset) ) {
-			$offset = implode(' ', $offset);
-		}
-		$wrapper = static::FIELD_HORIZ_CLASSES[$layout]['large']['horizontalCssClasses']['wrapper'];
-		if( is_array($wrapper) ) {
-			$wrapper = implode(' ', $wrapper);
-		}
 		$buttons = FormHelper::displayButtons($buttons);
-		Html::addCssClass($options, $offset . ' ' . $wrapper);
+		Html::addCssClass($options, 'form-buttons-group');
 		return <<<html
 <div class="{$options['class']}">
 $buttons
