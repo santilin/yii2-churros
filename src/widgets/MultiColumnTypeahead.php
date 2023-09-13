@@ -135,6 +135,7 @@ $('#$id').keydown(function(e) {
 			console.log(selectedDatum[0].innerText);
 			const datumParts = selectedDatum[0].innerText.split('{$this->displaySeparator}');
 			$js_set_fields_values
+			return false;
 		}
 	}
 });

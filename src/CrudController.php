@@ -9,7 +9,7 @@ use yii\web\NotFoundHttpException;
 use yii\web\HttpException;
 use yii\base\ErrorException;
 use santilin\churros\exceptions\{DeleteModelException,SaveModelException};
-use santilin\churros\helpers\AppHelper;
+use santilin\churros\helpers\{AppHelper,FormHelper};
 
 /**
  * CrudController implements the CRUD actions for yii2 models
@@ -131,7 +131,7 @@ class CrudController extends \yii\web\Controller
 		}
 		return $this->render('create', [
 			'model' => $model,
-			'viewForms' => [ '_form' => [ '', null, [], '' ] ],
+			'viewForms' => [ '_form' => [ '', null, $this->crudActions, '' ] ],
 			'formParams' => $this->changeActionParams($params, 'create', $model)
 		]);
 	}
@@ -359,14 +359,16 @@ class CrudController extends \yii\web\Controller
     }
 
 
-	public function genBreadCrumbs($action_id, $model)
+	public function genBreadCrumbs(string $action_id, $model, array $permissions = [])
 	{
 		$breadcrumbs = [];
 		$prefix = $this->getRoutePrefix();
-		$breadcrumbs['index'] = [
-			'label' =>  $model->getModelInfo('title_plural'),
-			'url' => [ $this->id . '/index' ]
-		];
+		if (FormHelper::hasPermission($permissions, 'index')) {
+			$breadcrumbs['index'] = [
+				'label' =>  $model->getModelInfo('title_plural'),
+				'url' => [ $this->id . '/index' ]
+			];
+		}
 		switch( $action_id ) {
 			case 'update':
 				$breadcrumbs['action'] = [
