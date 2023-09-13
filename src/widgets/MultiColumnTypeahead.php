@@ -14,7 +14,7 @@ class MultiColumnTypeahead extends Typeahead
 	public $remoteUrl;
 	public $highlight = true;
 	public $minLength = 3;
-	public $displaySeparator = ', ';
+	public $displaySeparator = ',\u{2007}';
 	public $createButton = false;
 	public $pageParam = 'page';
 	public $searchParam = 'search';
@@ -31,29 +31,26 @@ class MultiColumnTypeahead extends Typeahead
             throw new InvalidConfigException("You must define al least one inputField");
 		}
 
-		$set_fields_values = [];
-		$concat_item = "item.{$this->inputFields[0]}";
+		$set_dest_fields_values = [];
+		$concat_items = [ "item.{$this->inputFields[0]}" ];
 		$idField = $this->inputFields[0];
 		if ($this->concatToIdField) {
-			$set_fields_values[] = <<<js
+			$set_dest_fields_values[] = <<<js
 $(this).typeahead('val', selectedDatum[0].innerText);
 js;
 		} else {
-			$set_fields_values[] = <<<js
+			$set_dest_fields_values[] = <<<js
 $(this).typeahead('val', item.{$this->inputFields[0]});
 js;
 		}
 		for ($i=1; $i<count($this->inputFields); $i++) {
-			if ($concat_item != '') {
-				$concat_item .= " + '{$this->displaySeparator}'";
-			}
-			$concat_item .= " + item.{$this->inputFields[$i]}";
+			$concat_items[] = " + item.{$this->inputFields[$i]}";
 			$fld_id = Html::getInputId($this->model, $this->inputFields[$i]);
-			$set_fields_values[] = <<<js
+			$set_dest_fields_values[] = <<<js
 	if (item.{$this->inputFields[$i]} != '') $('#$fld_id').val(item.{$this->inputFields[$i]});
 js;
 		}
-
+		$s_concat_items = implode("+ '{$this->displaySeparator}'", $concat_items);
 		$this->dataset = [[
 			'remote' => [
 				'url' => $this->remoteUrl . '?' . $this->searchParam . '=&' . $this->pageParam . '=',
@@ -73,20 +70,20 @@ jsexpr
 			'templates' => [
 				'notFound' => '<div class="text-danger" style="padding:0 8px">No hay resultados.</div>',
 				'suggestion' => new \yii\web\JsExpression(<<<jsexpr
-function(item) { return '<div class="suggestion">' + $concat_item + '</div>'; }
+function(item) { return '<div class="suggestion">' + $s_concat_items + '</div>'; }
 jsexpr
 				),
 			],
 			'display' => new \yii\web\JsExpression(<<<jsexpr
 function(item) {
-	return $concat_item;
+	return {$concat_items[0]};
 }
 jsexpr
 			),
 		]];
 
 
-		$js_set_fields_values = implode("\n", $set_fields_values);
+		$js_set_fields_values = implode("\n", $set_dest_fields_values);
 		$this->pluginEvents["typeahead:select"] = new \yii\web\JsExpression(<<<js
 function(event, item) {
 	$js_set_fields_values
@@ -102,28 +99,43 @@ js
 		$id = $this->options['id'];
 
 		// Cuando se pulsa INTRO y está desplegado el menú de sugerencias, se selecciona la primera
-		$set_fields_values = [];
+		$set_dest_fields_values = [];
 		if ($this->concatToIdField) {
-			$set_fields_values[] = <<<js
+			$set_dest_fields_values[] = <<<js
 			$(this).typeahead('val', selectedDatum[0].innerText);
 js;
 		} else {
-			$set_fields_values[] = <<<js
+			$set_dest_fields_values[] = <<<js
 			$(this).typeahead('val', datumParts[0]);
 js;
 		}
 		for ($i=1; $i<count($this->inputFields); $i++) {
 			$fld_id = Html::getInputId($this->model, $this->inputFields[$i]);
-			$set_fields_values[] = <<<js
+			$set_dest_fields_values[] = <<<js
 			if (datumParts[$i] !== undefined && datumParts[$i] != '') { $('#$fld_id').val(datumParts[$i]) };
 js;
 		}
-		$js_set_fields_values = implode("\n", $set_fields_values);
+		$js_set_fields_values = implode("\n", $set_dest_fields_values);
 		$js_id = str_replace('-','_',$id);
+		/// @todo make a module an refactor change an blur event handlers
 		$view->registerJS(<<<js
 let mctahead_changed_$js_id = false;
 $('#$id').change(function(e) {
 	mctahead_changed_$js_id = true;
+});
+$('#$id').blur(function(e) {
+	if (mctahead_changed_$js_id) {
+		let selectedDatum = $(this).data('ttTypeahead').menu.getActiveSelectable();
+		if (!selectedDatum) {
+			selectedDatum = $(this).data('ttTypeahead').menu.getTopSelectable();
+		}
+		if (selectedDatum) {
+			console.log(selectedDatum[0].innerText);
+			const datumParts = selectedDatum[0].innerText.split('{$this->displaySeparator}');
+			$js_set_fields_values
+			return false;
+		}
+	}
 });
 $('#$id').keydown(function(e) {
 	if (e.keyCode === 13 && mctahead_changed_$js_id) {
