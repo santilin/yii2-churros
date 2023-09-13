@@ -134,6 +134,34 @@ trait ModelInfoTrait
 		return $ret;
 	}
 
+	public function relatedRecordDescs(array $relations, string $format=null, int $max_len = 0): array
+	{
+		return [
+			$this->getPrimaryKey() => [
+				$this->recordDesc($format, $max_len),
+				$this->recRelatedRecordDescs($relations, $this, 0, $format, $max_len)
+			]
+		];
+	}
+
+	public function recRelatedRecordDescs(array $relations, $model, int $level, string $format=null, int $max_len = 0): array
+	{
+		$ret = [];
+		if ($level < count($relations)) {
+			$relation = $relations[$level++];
+			$relrecs = $model->$relation;
+			if ($relrecs != null) {
+				foreach ( $relrecs as $related_record) {
+					$ret[$related_record->getPrimaryKey()] = [
+						$related_record->recordDesc($format, $max_len),
+						$related_record->recRelatedRecordDescs($relations, $related_record, $level, $format, $max_len)
+					];
+				}
+			}
+		}
+		return $ret;
+	}
+
 	public function linkToMe($base_route = '', $action = 'view')
 	{
 		$link = self::getModelInfo('controller_name') . "/$action/" . $this->getPrimaryKey();
