@@ -37,7 +37,7 @@ trait EmailSenderModelTrait
 		$composed = Yii::$app->mailer
 			->compose( [ 'html' => $view_name, 'text' => "text/$view_name" ], $view_params )
 			->setFrom($from)
-			->setTo( YII_ENV_DEV ? [AppHelper::yiiparam('develEmailTo')] : $to )
+			->setTo( YII_ENV_DEV ? [AppHelper::yiiparam('develEmail')] : $to )
 			->setSubject( $subject);
 		try {
 			$sent = $composed->send();

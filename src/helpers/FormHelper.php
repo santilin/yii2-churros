@@ -379,7 +379,13 @@ ajax;
 		if ($all_disabled === false || $granted === false) {
 			return [];
 		}
-		return array_intersect($available, $all_disabled, $granted);
+		if ($granted == [] && $all_disabled == []) { // todos
+			return $available;
+		} else if ($granted == []) {
+			return array_intersect($available, $all_disabled);
+		} else {
+			return array_intersect($available, $granted);
+		}
 	}
 
 
