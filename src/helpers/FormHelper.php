@@ -302,7 +302,7 @@ ajax;
 		return implode($sep, $ret);
 	}
 
-	static public function hasPermission(array $perms, string $perm): bool
+	static public function hasPermission(?array $perms, string $perm): bool
 	{
 		if( $perms === false ) {
 			return false;
@@ -310,7 +310,7 @@ ajax;
 		if( $perm == '' ) {
 			return true;
 		}
-		if( $perms === []) {
+		if( $perms === [] || $perms === null) {
 			return true;
 		}
 		return in_array($perm, $perms);
