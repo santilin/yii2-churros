@@ -360,7 +360,7 @@ class CrudController extends \yii\web\Controller
     }
 
 
-	public function genBreadCrumbs(string $action_id, $model, array $permissions = [])
+	public function genBreadCrumbs(string $action_id, $model, array $permissions = []): array
 	{
 		$breadcrumbs = [];
 		$prefix = $this->getRoutePrefix();

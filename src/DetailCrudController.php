@@ -164,7 +164,7 @@ class DetailCrudController extends CrudController
 		}
 	}
 
-	public function genBreadCrumbs($action_id, $model)
+	public function genBreadCrumbs(string $action_id, $model, array $permissions = []): array
 	{
 		$breadcrumbs = [];
 		if( $this->master_model) {
