@@ -72,6 +72,8 @@ trait RelationTrait
 						$post_data = $post[$formName][$rel_name];
 					} else if( isset($post[$formName][$model_relation['model']]) && is_array($post[$formName][$model_relation['model']]) ) {
 						$post_data = $post[$formName][$model_relation['model']];
+					} else if( isset($post[$model_relation['model']]) && is_array($post[$model_relation['model']]) ) {
+						$post_data = $post[$model_relation['model']];
 					}
 					if( $post_data ) {
 						$rel_model = new $model_relation['modelClass'];
