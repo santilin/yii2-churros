@@ -18,7 +18,7 @@ class Base extends \Faker\Provider\Base
 		}
     }
 
-    public function integer($max_digits = 16)
+    public function integer($max_digits = 18)
     {
 		if( $max_digits == 1 ) {
 			return $this->randomDigitNotNull();
@@ -27,7 +27,7 @@ class Base extends \Faker\Provider\Base
 		}
     }
 
-    public function integerUnsigned($max_digits = 16)
+    public function integerUnsigned($max_digits = 18)
     {
 		if( $max_digits == 1 ) {
 			return $this->generator->randomDigit();
@@ -36,7 +36,7 @@ class Base extends \Faker\Provider\Base
 		}
     }
 
-    public function integerUnsignedOrNull($max_digits = 16)
+    public function integerUnsignedOrNull($max_digits = 18)
     {
 		$n = $this->integerUnsigned($max_digits);
 		if( $n == 0 ) {
@@ -56,7 +56,7 @@ class Base extends \Faker\Provider\Base
 		return $this->decimalUnsigned(4);
     }
 
-	public function decimal($max_digits = 16, $decimals = 0)
+	public function decimal($max_digits = 18, $decimals = 0)
     {
 		assert($decimals < $max_digits);
 		$ret = $this->generator->randomElement(["-",""]);
@@ -76,7 +76,7 @@ class Base extends \Faker\Provider\Base
 		return $ret;
     }
 
-	public function decimalUnsigned($max_digits = 16, $decimals = 0)
+	public function decimalUnsigned($max_digits = 18, $decimals = 0)
     {
 		assert($decimals < $max_digits);
 		$max_digits = $this->generator->numberBetween(3, $max_digits);
