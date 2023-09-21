@@ -152,8 +152,7 @@ class DetailCrudController extends CrudController
 			$this->master_controller = Yii::$app->request->get('parent_controller');
 			assert($this->master_controller != '');
 			$master_model_name = 'app\\models\\'. AppHelper::camelCase($this->master_controller);
-			$master_model = new $master_model_name;
-			$this->master_model = $master_model->findOne($master_id);
+			$this->master_model = $master_model_name::findOne($master_id);
 			if ($this->master_model == null) {
 				throw new NotFoundHttpException($master_model->t('churros',
 					"The master record of {title} with '{id}' id does not exist",
