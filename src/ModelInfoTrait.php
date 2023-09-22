@@ -12,8 +12,13 @@ trait ModelInfoTrait
      * @var array validation warnings (attribute name => array of warnings)
      */
     private $_warnings;
-    public $crudScenarios = [ 'default', 'create', 'duplicate', 'update' ];
+    protected $crudScenarios = [ 'default', 'create', 'duplicate', 'update' ];
 
+	public function getCrudScenarios(): array
+	{
+		// crudScenarios is protected to avoid returning it in $model->attributes()
+		return $this->crudScenarios;
+	}
     static public function empty($value)
     {
 		return empty($value);

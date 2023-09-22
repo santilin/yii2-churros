@@ -111,7 +111,7 @@ class CrudController extends \yii\web\Controller
 	public function actionCreate()
 	{
 		$req = Yii::$app->request;
-		$params = ($req->isGet ? $req->get() : $req->post());
+		$params = array_merge($req->get(), $req->post());
 		$params['permissions'] = ($params['permissions']??true===false) ? false : $this->crudActions;
 		$model = $this->findFormModel(null, null, 'create', $params);
 		$model->scenario = 'create';
@@ -147,7 +147,7 @@ class CrudController extends \yii\web\Controller
 	public function actionDuplicate($id)
 	{
 		$req = Yii::$app->request;
-		$params = ($req->isGet ? $req->get() : $req->post());
+		$params = array_merge($req->get(), $req->post());
 		$model = $this->findFormModel($id, null, 'duplicate', $params);
 		$model->setDefaultValues(true); // duplicating
 		$model->scenario = 'duplicate';
@@ -184,7 +184,7 @@ class CrudController extends \yii\web\Controller
 	public function actionUpdate($id)
 	{
 		$req = Yii::$app->request;
-		$params = ($req->isGet ? $req->get() : $req->post());
+		$params = array_merge($req->get(), $req->post());
 		$model = $this->findFormModel($id, null, 'update', $params);
 		$model->scenario = 'update';
 
