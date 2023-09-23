@@ -32,7 +32,7 @@ trait ModelInfoTrait
 	public function t($category, $message, $params = [], $language = null )
 	{
 		$translated = Yii::t($category, $message, $params, $language);
-		if( ($language == null || $language == 'es') ) {
+		if( ($language == 'es' || substr(Yii::$app->language,0,2) == 'es') ) {
 			$male_words = AppHelper::SPANISH_MALE_WORDS;
 		} else {
 			$male_words = [];
