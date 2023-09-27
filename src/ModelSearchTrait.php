@@ -17,22 +17,6 @@ use santilin\churros\Helpers\AppHelper;
  */
 trait ModelSearchTrait
 {
-	static public $operators = [
-		'=' => '=',
-		'<>' => '<>',
-		'START' => 'Comienza por', 'NOT START' => 'No comienza por',
-		'LIKE' => 'Contiene', 'NOT LIKE' => 'No contiene',
-		'<=' => '<=',
-		'>=' => '>=',
-		'>' => '>',
-		'<' => '<',
-	];
-	static public $extra_operators = [
-		'SELECT' => 'Valor(es) de la lista',
-		'BETWEEN' => 'entre dos valores',
-		'NOT BETWEEN' => 'no entre dos valores',
-	];
-
 	public $_gridPageSize = 20;
 
 	public function __get($name)
@@ -163,6 +147,65 @@ trait ModelSearchTrait
 			}
 		}
 	}
+
+	protected function filterWhereRelated(&$query, $relation_name, $value)
+	{
+		if ($value === null || $value === '') {
+			return;
+		}
+		$attribute = $relation_name;
+		$model = $this;
+		$nested_relations = '';
+		while (strpos($relation_name, '.') !== FALSE) {
+			list($relation_name, $attribute) = AppHelper::splitFieldName($relation_name);
+			$nested_relations .= $relation_name;
+			$relation = self::$relations[$relation_name]??null;
+			if( $relation ) {
+				// Hay tres tipos de campos relacionados:
+				// 1. El nombre de la relación (attribute = '' )
+				// 2. Relación y campo: Productora.nombre
+				// 3. La clave foranea: productura_id
+				$table_alias = "as_$relation_name";
+				// Activequery removes duplicate joins (added also in addSort)
+				$query->joinWith("$relation_name $table_alias");
+				$modelClass = $relation['modelClass'];
+				$model = $modelClass::instance();
+			} else {
+				throw new InvalidArgumentException($relation_name . ": relation not found in model " . self::class . ' (SearchModel::filterWhereRelated)');
+			}
+		}
+		$relation = $model::$relations[$attribute]??null;
+		if( $relation ) {
+			// Hay tres tipos de campos relacionados:
+			// 1. El nombre de la relación (attribute = '' )
+			// 2. Relación y campo: Productora.nombre
+			// 3. La clave foranea: productura_id
+			$table_alias = "as_$attribute";
+			// Activequery removes duplicate joins (added also in addSort)
+			$query->joinWith("$nested_relations.$attribute $table_alias");
+			$attribute = '';
+		}
+		$value = static::toOpExpression($value, false );
+		$search_flds = [];
+		if ($attribute == $model->primaryKey()[0] ) {
+			if( isset($relation['other']) ) {
+				list($right_table, $right_fld ) = AppHelper::splitFieldName($relation['other']);
+			} else {
+				list($right_table, $right_fld ) = AppHelper::splitFieldName($relation['right']);
+			}
+			$query->andWhere([$value['op'], "$table_alias.$right_fld", $value['v'] ]);
+		} else if( $attribute == '' ) {
+			$search_flds = $model->findCodeAndDescFields();
+			$rel_conds = [ 'OR' ];
+			foreach( $search_flds as $search_fld ) {
+				$rel_conds[] = [$value['op'], "$table_alias.$search_fld", $value['v'] ];
+			}
+			$query->andWhere( $rel_conds );
+		} else {
+			$query->andWhere([$value['op'], "$table_alias.$attribute", $value['v'] ]);
+		}
+	}
+
 
 	protected function filterGlobal(&$query, array $attributes, string $value, $inclusiva = false)
 	{
