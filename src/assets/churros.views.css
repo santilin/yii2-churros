@@ -359,3 +359,92 @@ label.taxonomy {
 	font-style: italic;
 	font-size: smaller;
 }
+
+.reportview-currency, .reportview-integer, .reportview-decimal, .reportview-hours {
+	text-align: right;
+}
+
+.reportview-grand-total td {
+	border-top: 2px solid blue;
+	border-bottom: 2px solid blue;
+	color: black;
+	font-weight: bold;
+	font-size: larger;
+}
+
+.reportview-total-label {
+	text-align: right;
+}
+
+.reportview-group-total-label {
+	text-align: right;
+	border-bottom: 1px solid blue;
+	color: black;
+	font-weight: bold;
+}
+
+.reportview-group-head-1 {
+	border-bottom: 1px solid blue;
+	background-color: white;
+	color: blue;
+	font-weight: bold;
+}
+
+.reportview-group-foot-1 {
+	border-top: 1px solid blue;
+	font-weight: bold;
+	color: blue;
+}
+
+.reportview-group-head-1, .reportview-group-foot-1 {
+/*	background-color: gray;
+    color: white;*/
+    font-size: 1.1em;
+    padding-left: 10px;
+    padding-top: 2px;
+    padding-bottom: 2px;
+    padding-right: 0px;
+    margin-left: 0px;
+    margin-right: 0px;
+}
+
+.reportview-group-head-2, .reportview-group-foot-2 {
+    background-color: white;
+    color: black;
+    font-size: 1.1em;
+    padding-left: 10px;
+    padding-top: 2px;
+    padding-bottom: 2px;
+    padding-right: 0px;
+    margin-left: 0px;
+    margin-right: 0px;
+	font-style: italic;
+}
+
+.reportview-group-foot-2 {
+	text-align: right;
+}
+.reportview-group-foot-text-2::before {
+       content: '+'
+}
+.reportview-group-head-2::before {
+       content: '+'
+}
+.reportview-group-foot-text-3::before {
+       content: '++'
+}
+.reportview-group-head-3::before {
+       content: '++'
+}
+.reportview-group-head-3, .reportview-group-foot-3 {
+    background-color: gray;
+    color: white;
+    font-size: 1.1em;
+    padding-left: 10px;
+    padding-left: 5px;
+	padding-top: 2px;
+	padding-bottom: 2px;
+	padding-right: 0px;
+    margin-left: -5px;
+	margin-right: 0px;
+}

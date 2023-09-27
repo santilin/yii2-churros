@@ -8,7 +8,6 @@ namespace santilin\churros\widgets\grid;
 use yii;
 use yii\helpers\{ArrayHelper,Html};
 use santilin\churros\helpers\FormHelper;
-use santilin\churros\ChurrosAsset;
 use santilin\churros\widgets\grid\SimpleGridView;
 
 class GridView extends SimpleGridView
@@ -27,13 +26,6 @@ class GridView extends SimpleGridView
             $this->emptyText = Yii::t('churros', 'No {items} found.');
         }
         parent::init();
-	}
-
-	public function run()
-	{
-		$view = $this->getView();
-        ChurrosAsset::register($view);
-        return parent::run();
 	}
 
     /**
