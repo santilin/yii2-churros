@@ -57,7 +57,7 @@ trait NoRelationTrait
      */
     public function deleteWithRelated($relations = [])
     {
-		return;
+		return $this->delete();
 	}
 
 }
