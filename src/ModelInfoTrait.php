@@ -2,6 +2,7 @@
 
 use Yii;
 use yii\db\ActiveRecord;
+use yii\base\InvalidArgumentException;
 use yii\helpers\ArrayHelper;
 use santilin\churros\helpers\{YADTC,AppHelper};
 use santilin\churros\ModelSearchTrait;
@@ -13,6 +14,7 @@ trait ModelInfoTrait
      */
     private $_warnings;
     protected $crudScenarios = [ 'default', 'create', 'duplicate', 'update' ];
+
 
 	public function getCrudScenarios(): array
 	{
@@ -461,7 +463,7 @@ trait ModelInfoTrait
 
 	public function checkAccessByRole(string $fldname): bool
 	{
-		if( trim($this->$fldname) == '' || AppHelper::userIsAdmin() ) {
+		if( trim($this->$fldname?:'') == '' || AppHelper::userIsAdmin() ) {
 			return true;
 		}
 		$perms = explode(',:;|',$this->$fldname);
@@ -793,51 +795,6 @@ trait ModelInfoTrait
 		}
 	}
 
-	protected function filterWhereRelated(&$query, $name, $value)
-	{
-		if( $value === null || $value === '' ) {
-			return;
-		}
-		if( strpos($name, '.') === FALSE ) {
-			$relation_name = $name;
-			$attribute = '';
-		} else {
-			list($relation_name, $attribute) = AppHelper::splitFieldName($name);
-		}
-		$relation = self::$relations[$relation_name]??null;
-		if( $relation ) {
-			// Hay tres tipos de campos relacionados:
-			// 1. El nombre de la relación (attribute = '' )
-			// 2. Relación y campo: Productora.nombre
-			// 3. La clave foranea: productura_id
-			$table_alias = "as_$relation_name";
-			// Activequery removes duplicate joins (added also in addSort)
-			$query->joinWith("$relation_name $table_alias");
-			$value = static::toOpExpression($value, false );
-			$modelClass = $relation['modelClass'];
-			$model = $modelClass::instance();
-			$search_flds = [];
-			if ($attribute == $model->primaryKey()[0] ) {
-				if( isset($relation['other']) ) {
-					list($right_table, $right_fld ) = AppHelper::splitFieldName($relation['other']);
-				} else {
-					list($right_table, $right_fld ) = AppHelper::splitFieldName($relation['right']);
-				}
-				$query->andWhere([$value['op'], "$table_alias.$right_fld", $value['v'] ]);
-			} else if( $attribute == '' ) {
-				$search_flds = $model->findCodeAndDescFields();
-				$rel_conds = [ 'OR' ];
-				foreach( $search_flds as $search_fld ) {
-					$rel_conds[] = [$value['op'], "$table_alias.$search_fld", $value['v'] ];
-				}
-				$query->andWhere( $rel_conds );
-			} else {
-				$query->andWhere([$value['op'], "$table_alias.$attribute", $value['v'] ]);
-			}
-		} else {
-			throw new InvalidArgumentException($relation_name . ": relation not found in model " . self::class . ' (SearchModel::filterWhereRelated)');
-		}
-	}
 
 } // trait ModelInfoTrait
 

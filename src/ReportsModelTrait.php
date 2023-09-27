@@ -7,7 +7,7 @@ use yii\db\Query;
 use yii\data\ActiveDataProvider;
 use santilin\churros\ModelSearchTrait;
 use santilin\churros\widgets\grid\ReportView;
-use santilin\churros\helpers\AppHelper;
+use santilin\churros\helpers\{AppHelper,FormHelper};
 
 trait ReportsModelTrait
 {
@@ -446,7 +446,7 @@ trait ReportsModelTrait
 	}
 
 
-	public function createReportFilterField($index, array $dropdown_columns, ?string $attribute,
+	public function createReportFilterField($index, array $dropdown_columns, string $attribute,
 		array $value, string $type = 'string', array $options = [], $attribute_values = null)
 	{
 		$attr_class = str_replace('.','_',$attribute);
@@ -458,7 +458,7 @@ trait ReportsModelTrait
 		if( empty($value) ) {
 			$value = [ 'op' => 'LIKE', 'lft' => '', 'rgt' => '' ];
 		}
-		if( !in_array($value['op'], ModelSearchTrait::$extra_operators) ) {
+		if( !in_array($value['op'], FormHelper::$extra_operators) ) {
 			$extra_visible = "display:none";
 		} else {
 			$extra_visible = '';
@@ -476,7 +476,7 @@ trait ReportsModelTrait
 
 		$ret .= "<td class=control-form>";
 		$ret .= Html::dropDownList("report_filters[$index][op]",
-			$value['op'], ModelSearchTrait::$operators, [
+			$value['op'], FormHelper::$operators, [
 			'id' => "drop-$attr_class", 'class' => 'search-dropdown form-control',
 			] );
 		$ret .= "</td>";

@@ -32,7 +32,7 @@ class SearchInput extends \yii\bootstrap4\InputWidget
 		$ret .= "<div class='row form-inline'>";
 		$ret .= "<div class='operators control-form'>";
 		$ret .= Html::dropDownList("${scope}[$attribute][op]",
-			$value['op'], ModelSearchTrait::$operators, [
+			$value['op'], FormHelper::$operators, [
 			'id' => "drop-op-$attr_class", 'class' => 'search-dropdown',
 			'Prompt' => 'Operador']);
 		$ret .= "</div>";

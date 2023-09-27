@@ -15,6 +15,21 @@ class FormHelper
 {
 	public const VIEWS_NVIEW_PARAM = '_v';
 	static private $tabindex = 0;
+	static public $operators = [
+		'=' => '=',
+		'<>' => '<>',
+		'START' => 'Comienza por', 'NOT START' => 'No comienza por',
+		'LIKE' => 'Contiene', 'NOT LIKE' => 'No contiene',
+		'<=' => '<=',
+		'>=' => '>=',
+		'>' => '>',
+		'<' => '<',
+	];
+	static public $extra_operators = [
+		'SELECT' => 'Valor(es) de la lista',
+		'BETWEEN' => 'entre dos valores',
+		'NOT BETWEEN' => 'no entre dos valores',
+	];
 
 	static public function ti($inc=1)
 	{

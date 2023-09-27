@@ -6,11 +6,13 @@
 namespace santilin\churros\widgets\grid;
 
 use Yii;
-use yii\helpers\{ArrayHelper,Html,Url};
-use santilin\churros\widgets\grid\GridGroup;
 use yii\helpers\Json;
 use yii\web\JsExpression;
 use yii\data\Pagination;
+use yii\helpers\{ArrayHelper,Html,Url};
+use yii\grid\DataColumn;
+use santilin\churros\widgets\grid\GridGroup;
+use santilin\churros\ChurrosAsset;
 
 class SimpleGridView extends \yii\grid\GridView
 {
@@ -96,6 +98,13 @@ class SimpleGridView extends \yii\grid\GridView
 		if ($this->onlySummary) {
 			$this->dataProvider->pagination = false;
 		}
+	}
+
+	public function run()
+	{
+		$view = $this->getView();
+        ChurrosAsset::register($view);
+        return parent::run();
 	}
 
 	static public function columnFormatOptions()
@@ -354,10 +363,12 @@ class SimpleGridView extends \yii\grid\GridView
 		}
 		$colspan = 0;
 		foreach ($this->columns as $kc => $column) {
-			if (!array_key_exists($kc, $summary_columns)) {
-				$colspan++;
-			} else {
-				break;
+			if ($column instanceof DataColumn) {
+				if (!array_key_exists($column->attribute?:$kc, $summary_columns)) {
+					$colspan++;
+				} else {
+					break;
+				}
 			}
 		}
 		if ($colspan==0) {
