@@ -5,7 +5,6 @@ use Yii;
 use yii\helpers\Html;
 use yii\helpers\ArrayHelper;
 use yii\base\InvalidArgumentException;
-use kartik\grid\GridView;
 use santilin\churros\Helpers\AppHelper;
 
 /**
