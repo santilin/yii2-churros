@@ -93,19 +93,20 @@ class CrudController extends \yii\web\Controller
  		$params[$detail->formName()][$detail->getRelatedFieldForModel($master)]
  				= $master->getPrimaryKey();
 		$params['master'] = $master;
+		$params['embedded'] = true;
 		return $this->renderAjax($view, [
 			'dataProvider' => $detail->search($params),
 			'searchModel' => $detail,
 			'indexParams' => $this->changeActionParams($params, 'index', $detail),
-			'indexGrids' => [ '_grid' => [ '', null, [] ] ]
+			'indexGrids' => [ '_grid' => [ '', null, [] ] ],
 		]);
 	}
 
 	/**
-		* Displays a single model.
-		* @param integer $id
-		* @return mixed
-		*/
+	 * Displays a single model.
+	 * @param integer $id
+	 * @return mixed
+	 */
 	public function actionView($id)
 	{
 		$params = Yii::$app->request->queryParams;
@@ -359,7 +360,7 @@ class CrudController extends \yii\web\Controller
 			break;
 		default:
 		}
-		$redirect_params[0] = $this->actionRoute($to);
+		$redirect_params[0] = $this->getActionRoute($to);
 		return $redirect_params;
 	}
 
@@ -411,13 +412,13 @@ class CrudController extends \yii\web\Controller
 		return $breadcrumbs;
 	}
 
-  	public function actionRoute($action_id = null, $master_model = null): string
+  	public function getActionRoute($action_id = null, $master_model = null): string
 	{
 		if( $action_id === null ) {
 			if ($master_model) {
 				return $this->getRoutePrefix($master_model->getModelInfo('controller_name')) . $this->id;
 			} else {
-				return $this->getRoutePrefix() . $this->id;
+				return $this->getRoutePrefix($this->id) . $this->id;
 			}
 		} else {
 			return Url::toRoute($action_id);
@@ -530,9 +531,9 @@ class CrudController extends \yii\web\Controller
 	{
 		$pk = $model->getPrimaryKey();
 		if( is_array($pk) ) {
-			$link = Url::to(array_merge([$this->actionRoute('view')], $pk));
+			$link = Url::to(array_merge([$this->getActionRoute('view')], $pk));
 		} else {
-			$link = $this->actionRoute('view') . "/$pk";
+			$link = $this->getActionRoute('view') . "/$pk";
 		}
 		return $link;
 	}

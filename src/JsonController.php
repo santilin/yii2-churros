@@ -344,7 +344,7 @@ class JsonController extends \yii\web\Controller
 			break;
 		default:
 		}
-		$redirect_params[0] = $this->actionRoute($to);
+		$redirect_params[0] = $this->getActionRoute($to);
 		return $redirect_params;
 	}
 
@@ -394,7 +394,7 @@ class JsonController extends \yii\web\Controller
 		return $breadcrumbs;
 	}
 
-  	public function actionRoute($action_id = null): string
+  	public function getActionRoute($action_id = null): string
 	{
 		if( $action_id === null ) {
 			return $this->getRoutePrefix() . $this->id;
@@ -509,9 +509,9 @@ class JsonController extends \yii\web\Controller
 	{
 		$pk = $model->getPrimaryKey();
 		if( is_array($pk) ) {
-			$link = Url::to(array_merge([$this->actionRoute('view')], $pk));
+			$link = Url::to(array_merge([$this->getActionRoute('view')], $pk));
 		} else {
-			$link = $this->actionRoute('view') . "/$pk";
+			$link = $this->getActionRoute('view') . "/$pk";
 		}
 		return $link;
 	}

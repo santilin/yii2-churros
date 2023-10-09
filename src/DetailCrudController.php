@@ -90,7 +90,7 @@ class DetailCrudController extends CrudController
 		return $queryParams;
 	}
 
-	public function actionRoute($action_id = null/*, $model = null*/): string
+	public function actionRoute($action_id = null): string
 	{
 		if( $this->master_model ) {
 			$parent_route = $this->getRoutePrefix()
@@ -107,7 +107,7 @@ class DetailCrudController extends CrudController
 				return $parent_route;
 			}
 		} else {
-			return parent::actionRoute($action_id/*, $model*/);
+			return $ths->getActionRoute($action_id, null);
 		}
 	}
 
@@ -168,13 +168,13 @@ class DetailCrudController extends CrudController
 			// child
 			$breadcrumbs[] = [
 				'label' => AppHelper::mb_ucfirst($model->getModelInfo('title_plural')),
-				'url' => $this->actionRoute('index')
+				'url' => $this->getActionRoute('index')
 			];
 			switch( $action_id ) {
 				case 'update':
 					$breadcrumbs[] = [
 						'label' => $model->recordDesc('short', 25),
-						'url' => array_merge([$this->actionRoute('view')], $model->getPrimaryKey(true))
+						'url' => array_merge([$this->getActionRoute('view')], $model->getPrimaryKey(true))
 					];
 					break;
 				case 'index':
