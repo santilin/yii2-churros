@@ -81,20 +81,6 @@ class DetailCrudController extends CrudController
 	}
 
 
-	public function indexDetails($master, $view, $params)
-	{
-		$detail = $this->createSearchModel();
- 		$params[$detail->formName()][$detail->getRelatedFieldForModel($master)]
- 				= $master->getPrimaryKey();
-		return $this->renderAjax($view, [
-			'dataProvider' => $detail->search($params),
-			'searchModel' => $detail,
-			'master' => $master,
-			'indexParams' => $this->changeActionParams($params, 'index', $detail),
-		]);
-	}
-
-
 	/**
 	 * An array of extra params to pass to the views
 	 **/

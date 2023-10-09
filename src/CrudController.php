@@ -87,6 +87,20 @@ class CrudController extends \yii\web\Controller
 		]);
 	}
 
+	public function indexDetails($master, $view, $params)
+	{
+		$detail = $this->createSearchModel();
+ 		$params[$detail->formName()][$detail->getRelatedFieldForModel($master)]
+ 				= $master->getPrimaryKey();
+		$params['master'] = $master;
+		return $this->renderAjax($view, [
+			'dataProvider' => $detail->search($params),
+			'searchModel' => $detail,
+			'indexParams' => $this->changeActionParams($params, 'index', $detail),
+			'indexGrids' => [ '_grid' => [ '', null, [] ] ]
+		]);
+	}
+
 	/**
 		* Displays a single model.
 		* @param integer $id
@@ -397,10 +411,14 @@ class CrudController extends \yii\web\Controller
 		return $breadcrumbs;
 	}
 
-  	public function actionRoute($action_id = null): string
+  	public function actionRoute($action_id = null, $master_model = null): string
 	{
 		if( $action_id === null ) {
-			return $this->getRoutePrefix() . $this->id;
+			if ($master_model) {
+				return $this->getRoutePrefix($master_model->getModelInfo('controller_name')) . $this->id;
+			} else {
+				return $this->getRoutePrefix() . $this->id;
+			}
 		} else {
 			return Url::toRoute($action_id);
 		}
@@ -409,7 +427,7 @@ class CrudController extends \yii\web\Controller
 	public function getRoutePrefix($route = null): string
 	{
 		if( $route === null ) {
-			$route = $this->id;
+			$route = Url::toRoute($this->id);
 		}
 		$request_url = '/' . Yii::$app->request->getPathInfo();
 		$route_pos = strpos($request_url, $route);
