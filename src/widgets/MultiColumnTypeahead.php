@@ -26,6 +26,7 @@ class MultiColumnTypeahead extends Typeahead
 	public $pageParam = 'page';
 	public $searchParam = 'search';
 	public $concatToIdField = false;
+	public $scrollable = true;
 
     /**
      * Initializes the widget
