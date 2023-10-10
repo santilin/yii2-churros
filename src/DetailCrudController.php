@@ -107,7 +107,7 @@ class DetailCrudController extends CrudController
 				return $parent_route;
 			}
 		} else {
-			return $ths->getActionRoute($action_id, null);
+			return $this->getActionRoute($action_id, null);
 		}
 	}
 
