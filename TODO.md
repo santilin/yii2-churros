@@ -74,8 +74,6 @@ Test: CrudOfertaCest. Cuando redirige de update a view, no se borra la aplicaci√
 
 
 == Taxonomy ==
-=== Taxonomy Input ===
-Responsive: no usar una tabla, usar los divs como en activeform
 
 == TableListView ==
 * funci√≥n extractHeaders

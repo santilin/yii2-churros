@@ -24,6 +24,9 @@ class ExpandableTextColumn extends DataColumn
     protected function renderDataCellContent($model, $key, $index)
     {
 		$text = $model->{$this->attribute};
+		if (!$text || !trim($text)) {
+			return '';
+		}
 		if( $this->format == 'html' ) {
 			$text = html_entity_decode(strip_tags($text));
 		}
