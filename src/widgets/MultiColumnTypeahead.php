@@ -16,17 +16,16 @@ use kartik\typeahead\Typeahead;
 
 class MultiColumnTypeahead extends Typeahead
 {
-	public $inputFields = [];
-	public $inputDisplayFields = [];
+	public $formFields = [];
+	public $suggestionsDisplay;
+	public $display;
 	public $remoteUrl;
-	public $highlight = true;
-	public $minLength = 3;
-	public $displaySeparator = ',\u{2007}';
-	public $createButton = false;
 	public $pageParam = 'page';
+	public $perPageParam = 'pagesize';
 	public $searchParam = 'search';
 	public $concatToIdField = false;
-	public $scrollable = true;
+	public $createButton = false;
+	public $limit = 5;
 
     /**
      * Initializes the widget
@@ -35,76 +34,60 @@ class MultiColumnTypeahead extends Typeahead
      */
     public function init()
 	{
-		if (count($this->inputFields)==0) {
-            throw new InvalidConfigException("You must define al least one inputField");
-		}
-		if (count($this->inputDisplayFields) == 0) {
-			$this->inputDisplayFields = $this->inputFields;
+		if (count($this->formFields)==0) {
+            throw new InvalidConfigException("You must define al least one formField");
 		}
 		// Create
 		$set_dest_fields_values = [];
-		if ($this->concatToIdField) {
+// 		if ($this->concatToIdField) {
+// 			$set_dest_fields_values[] = <<<js
+// $(this).typeahead('val', selectedDatum[0].querySelector(".suggestion-values").innerHTML);
+// js;
+// 		} else {
+// 			$set_dest_fields_values[] = <<<js
+// $(this).typeahead('val', item.{$this->inputFields[0]});
+// js;
+// 		}
+		foreach ($this->formFields as $formField => $dbField) {
+			$fld_id = Html::getInputId($this->model, $formField);
 			$set_dest_fields_values[] = <<<js
-$(this).typeahead('val', selectedDatum[0].querySelector(".suggestion-values").innerHTML);
-js;
-		} else {
-			$set_dest_fields_values[] = <<<js
-$(this).typeahead('val', item.{$this->inputFields[0]});
+	if (item.$dbField != '') $('#$fld_id').val(item.$dbField);
 js;
 		}
-		for ($i=1; $i<count($this->inputDisplayFields); $i++) {
-			$fld_id = Html::getInputId($this->model, $this->inputDisplayFields[$i]);
-			$set_dest_fields_values[] = <<<js
-	if (item.{$this->inputFields[$i]} != '') $('#$fld_id').val(item.{$this->inputFields[$i]});
-js;
-		}
-		$s_item_props = "'" . implode("','", $this->inputDisplayFields) . "'";
 		$this->dataset = [[
+			'limit' => $this->limit,
 			'remote' => [
-				'url' => $this->remoteUrl . '?' . $this->searchParam . '=&' . $this->pageParam . '=',
-				'wildcard' => '%QUERY',
+				'url' => $this->remoteUrl . '?' . $this->searchParam . '=&' . $this->pageParam . '=&'
+					. $this->perPageParam . '=',
+// 				'wildcard' => '%QUERY',
 				'replace' => new \yii\web\JsExpression(<<<jsexpr
 function(url, query) {
-	var page = url.split("&{$this->pageParam}=")[1];
+	const urlParams = new URLSearchParams(url);
+	let page = urlParams.get('{$this->pageParam}');
+	let perpage = urlParams.get('{$this->perPageParam}');
 	if (page === undefined || page == '' ) {
 		page = 1;
 	}
-	return url.split("?")[0] + "?{$this->searchParam}=" + query + "&{$this->pageParam}=" + page;
+	if (perpage === undefined || perpage == '' ) {
+		perpage = {$this->limit};
+	}
+	return url.split("?")[0] + "?{$this->searchParam}=" + query + "&{$this->pageParam}=" + page + "&{$this->perPageParam}=" + perpage;
 }
 jsexpr
 				),
 			],
 //  		'datumTokenizer' => "Bloodhound.tokenizers.obj.whitespace('value')",
 			'templates' => [
-				'notFound' => '<div class="text-danger" style="padding:0 8px">No hay resultados.</div>',
+				'notFound' => '<div class="text-danger" style="padding:0 8px">' .
+					Yii::t('churros', 'No results found') . '</div>',
 				// The items in the dropdown
-				'suggestion' => new \yii\web\JsExpression(<<<jsexpr
-function(item) {
-	const props=[$s_item_props];
-	let s_items='';
-	for (i=0; i<props.length; ++i) {
-		if (item[props[i]]!='') {
-			if (s_items.length != 0 ) {
-				s_items += '{$this->displaySeparator}';
-			}
-			s_items += item[props[i]];
-		}
-	}
-	return '<div data="' + JSON.stringify(item) + '" class="suggestion">' + s_items + '</div>'; }
-jsexpr
-				)
+				'suggestion' => new \yii\web\JsExpression($this->suggestionsDisplay)
 			],
-			'display' => new \yii\web\JsExpression(<<<jsexpr
-function(item) {
-	return item.{$this->inputDisplayFields[0]};
-}
-jsexpr
-			),
+ 			'display' => $this->display ? new \yii\web\JsExpression($this->display) : null,
 		]];
 		$js_set_fields_values = implode("\n", $set_dest_fields_values);
 		$this->pluginEvents["typeahead:select"] = new \yii\web\JsExpression(<<<js
 function(event, item) {
-	debugger;
 	$js_set_fields_values
 }
 js
@@ -119,19 +102,19 @@ js
 
 		// Cuando se pulsa INTRO y está desplegado el menú de sugerencias, se selecciona la primera
 		$set_dest_fields_values = [];
-		if ($this->concatToIdField) {
+// 		if ($this->concatToIdField) {
+// 			$set_dest_fields_values[] = <<<js
+// 		$(this).typeahead('val', selectedDatum[0].querySelector(".suggestion-values").innerHTML;
+// js;
+// 		} else {
+// 			$set_dest_fields_values[] = <<<js
+// 		$(this).typeahead('val', datumParts.{$this->inputFields[0]});
+// js;
+// 		}
+		foreach ($this->formFields as $formField => $dbField) {
+			$fld_id = Html::getInputId($this->model, $formField);
 			$set_dest_fields_values[] = <<<js
-		$(this).typeahead('val', selectedDatum[0].querySelector(".suggestion-values").innerHTML;
-js;
-		} else {
-			$set_dest_fields_values[] = <<<js
-		$(this).typeahead('val', datumParts.{$this->inputFields[0]});
-js;
-		}
-		for ($i=1; $i<count($this->inputFields); $i++) {
-			$fld_id = Html::getInputId($this->model, $this->inputDisplayFields[$i]);
-			$set_dest_fields_values[] = <<<js
-			if (datumParts.{$this->inputFields[$i]} !== undefined && datumParts.{$this->inputFields[$i]} != '') { $('#$fld_id').val(datumParts.{$this->inputFields[$i]}) };
+			if (datumParts.$dbField !== undefined && datumParts.$dbField != '') { $('#$fld_id').val(datumParts.$dbField) };
 js;
 		}
 		$js_set_fields_values = implode("\n", $set_dest_fields_values);
