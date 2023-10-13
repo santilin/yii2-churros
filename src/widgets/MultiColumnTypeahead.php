@@ -134,8 +134,9 @@ $('#$id').blur(function(e) {
 		if (selectedDatum) {
 			const datumParts = $(selectedDatum[0]).data('ttSelectableObject');
 			$js_set_fields_values
-			return false;
 		}
+		mctahead_changed_$js_id = false;
+		return true;
 	}
 });
 $('#$id').keydown(function(e) {
@@ -147,8 +148,9 @@ $('#$id').keydown(function(e) {
 		if (selectedDatum) {
 			const datumParts = $(selectedDatum[0]).data('ttSelectableObject');
 			$js_set_fields_values
-			return false;
 		}
+		mctahead_changed_$js_id = false;
+		return true;
 	}
 });
 js
