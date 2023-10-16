@@ -18,10 +18,10 @@ class ActionColumn extends \yii\grid\ActionColumn
     public $template = '{view}&nbsp;{update}&nbsp;{delete}&nbsp;{duplicate}';
     public $customButtons = [];
     public $crudPerms = null;
-    public $deleteOptions = [ 'class' => 'delete' ];
-	public $updateOptions = [ 'class' => 'update' ];
-    public $viewOptions = [ 'class' => 'view' ];
-    public $duplicateOptions = [ 'class' => 'duplicate' ];
+    public $deleteOptions = [ 'class' => 'delete action-button' ];
+	public $updateOptions = [ 'class' => 'update action-button' ];
+    public $viewOptions = [ 'class' => 'view action-button' ];
+    public $duplicateOptions = [ 'class' => 'duplicate action-button' ];
     public $hAlign = 'none';
     public $iconClassPrefix = 'fa fa';
 
