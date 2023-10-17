@@ -58,28 +58,6 @@ trait ActiveFormTrait
 
 	}
 
-	private function getBoostrapColumnClasses(int $cols): string
-	{
-		switch( $cols ) {
-		case 1:
-			$col = $col_sm = $col_md = $col_lg = $col_xl = 12;
-			break;
-		case 2:
-			$col = $col_sm = 12;
-			$col_md = $col_lg = $col_xl = 6;
-			break;
-		case 3:
-			$col = $col_sm = 4;
-			$col_md = $col_lg = $col_xl = 4;
-			break;
-		case 4:
-		default:
-			$col = $col_sm = 3;
-			$col_md = $col_lg = $col_xl = 3;
-		}
-		return "col-$col col-sm-$col_sm col-md-$col_md col-lg-$col_lg col-xl-$col_xl";
-	}
-
 	private function addLayoutClasses(array &$fields_cfg, array $fields_in_row, string $fields_layout = '1col'): void
 	{
 		$ret = '';
@@ -130,12 +108,12 @@ trait ActiveFormTrait
 		foreach($layout_fields as $rlk => $row_layout ) {
 			$layout = $row_layout['layout']??'1col';
 			$cols = intval($layout)?:1;
-			$type = $row_layout['type']??'field';
+			$type = $row_layout['type']??'fields';
 			switch ($type) {
 			case 'container':
 				$ret .= '<div class="row">';
 				foreach ($row_layout['content'] as $kc=>$container) {
-					$ret .= '<div class="' . $this->getBoostrapColumnClasses($cols) . '">';
+					$ret .= '<div class="' . FormHelper::getBoostrapColumnClasses($cols) . '">';
 // 					$ret .= "<h1>$kc container</h1>";
 					$ret .= $this->layoutFields([$container], $form_fields);
 					$ret .= "</div>\n";
@@ -155,7 +133,7 @@ trait ActiveFormTrait
 							$fs .= "\n" . '<div class="row">';
 						}
 						$fs .= '<div class="'
-							. $this->getBoostrapColumnClasses($cols)
+							. FormHelper::getBoostrapColumnClasses($cols)
 							. '">';
 						$fs .= $form_fields[$form_field];
 						$fs .= '</div>';

@@ -42,71 +42,6 @@ class FormHelper
 		static::$tabindex = $reset;
 	}
 
-	// Obsoleta
-	static public function layoutFields($layout, $form_fields, $form_layout_rows)
-	{
-		$ret = '';
-		if ($layout == "horizontal" )
-			die("Horizontal layout");
-		if ( $layout == '1col' || $layout == "inline" ) {
-			foreach( $form_fields as $name => $code ) {
-				$ret .= $form_fields[$name]. "\n";
-			}
-		} else if( count($form_layout_rows) ) {
-			// Check if some fields have been removed after setting the layout
-			foreach($form_layout_rows as $lrowkey => $lrow ) {
-				foreach( $lrow as $ffkey => $ff ) {
-					if( $form_fields[$ff] === false ) {
-						unset( $form_layout_rows[$lrowkey][$ffkey] );
-					}
-				}
-			}
-			foreach($form_layout_rows as $lrow ) {
-				switch(count($lrow)) {
-				case 1:
-					$ret .= '<div class="row">';
-					$ret .= '<div class="col-sm-12">';
-					$ret .= $form_fields[$lrow[0]];
-					$ret .= '</div>';
-					$ret .= '</div>';
-					break;
-				case 2:
-					$ret .= '<div class="row">';
-					$ret .= '<div class="col-sm-6">';
-					$ret .= $form_fields[$lrow[0]];
-					$ret .= '</div>';
-					$ret .= '<div class="col-sm-6">';
-					$ret .= $form_fields[$lrow[1]];
-					$ret .= '</div>';
-					$ret .= '</div>';
-					break;
-				case 3:
-					$ret .= '<div class="row">';
-					$ret .= '<div class="col-sm-4">';
-					$ret .= $form_fields[$lrow[0]];
-					$ret .= '</div>';
-					$ret .= '<div class="col-sm-4">';
-					$ret .= $form_fields[$lrow[1]];
-					$ret .= '</div>';
-					$ret .= '<div class="col-sm-4">';
-					$ret .= $form_fields[$lrow[2]];
-					$ret .= '</div>';
-					$ret .= '</div>';
-					break;
-				case 4:
-					$ret .= '<div class="row">';
-					$ret .= $form_fields[$lrow[0]];
-					$ret .= $form_fields[$lrow[1]];
-					$ret .= $form_fields[$lrow[2]];
-					$ret .= $form_fields[$lrow[3]];
-					$ret .= '</div>';
-					break;
-				}
-			}
-		}
-		return $ret;
-	}
-
 	/// @return [ view_name, search_model, permissions ]
 	static public function gridFromRequest(array $views, array $params): array
 	{
@@ -403,5 +338,27 @@ ajax;
 		}
 	}
 
+
+	static public function getBoostrapColumnClasses(int $cols): string
+	{
+		switch( $cols ) {
+		case 1:
+			$col = $col_sm = $col_md = $col_lg = $col_xl = 12;
+			break;
+		case 2:
+			$col = $col_sm = 12;
+			$col_md = $col_lg = $col_xl = 6;
+			break;
+		case 3:
+			$col = $col_sm = 4;
+			$col_md = $col_lg = $col_xl = 4;
+			break;
+		case 4:
+		default:
+			$col = $col_sm = 3;
+			$col_md = $col_lg = $col_xl = 3;
+		}
+		return "col-$col col-sm-$col_sm col-md-$col_md col-lg-$col_lg col-xl-$col_xl";
+	}
 
 } // class

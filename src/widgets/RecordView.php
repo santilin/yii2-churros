@@ -18,6 +18,7 @@ use yii\helpers\Inflector;
 use yii\i18n\Formatter;
 use santilin\churros\ChurrosAsset;
 use santilin\churros\helpers\{AppHelper,FormHelper};
+use santilin\churros\widgets\ActiveForm;
 
 
 /**
@@ -52,6 +53,8 @@ html;
      * @var string
      */
 	public $layout = 'horizontal';
+
+    public $fieldsLayout;
 
 	public $title = null;
 	public $buttons = [];
@@ -172,11 +175,11 @@ html;
         if (is_string($template)) {
             $labelOptions = AppHelper::mergeAndConcat(['class'],
 				$labelOptions,
-				$attribute['labelOptions']??[ 'class' => 'rv-label']);
+				$attribute['labelOptions']??[]);
             $labelOptions = Html::renderTagAttributes($labelOptions);
             $contentOptions = array_merge(
 				$contentOptions,
-				$attribute['contentOptions']??[ 'class' => 'rv-field']);
+				$attribute['contentOptions']??[]);
 			switch( $attribute['format'] ) {
 			case 'integer':
 			case 'currency':
@@ -259,62 +262,151 @@ html;
         }
     }
 
-    protected function layoutAttributes()
+
+
+	protected function layoutFields(array $layout_fields, array $view_attrs): string
 	{
 		$ret = '';
-		$layout_rows = [];
-		$labelOptions = $contentOptions = [];
-		if( !is_array($this->layout) ) {
-			$ncols = 1;
-			switch( $this->layout ) {
-			case "3cols":
-				$ncols++;
-			case "2cols":
-				$ncols++;
-				$layout_rows = [];
-				$row = [];
-				$nc = $ncols;
-				foreach( $this->attributes as $key => $attribute ) {
-					if ($nc-- == 0 ) {
-						$nc = $ncols-1;
-						$layout_rows[] = $row;
-						$row = [$key];
-					} else {
-						$row[] = $key;
+		foreach($layout_fields as $rlk => $row_layout ) {
+			$layout = $row_layout['layout']??'1col';
+			$cols = intval($layout)?:1;
+			$type = $row_layout['type']??'fields';
+			switch ($type) {
+			case 'container':
+				$ret .= '<div class="row">';
+				foreach ($row_layout['content'] as $kc=>$container) {
+					$ret .= '<div class="' . FormHelper::getBoostrapColumnClasses($cols) . '">';
+// 					$ret .= "<h1>$kc container</h1>";
+					$ret .= $this->layoutFields([$container], $view_attrs);
+					$ret .= "</div>\n";
+				}
+				$ret .= "</div><!--container[$kc]-->";
+				break;
+			case 'fields':
+			case 'fieldset':
+				$nf = 0;
+				$fs = '';
+ 				$rowOptions = [ 'class' => "field-container layout-$layout"];
+				foreach ($row_layout['fields'] as $attribute => $form_field ) {
+					if (!empty($view_attrs[$attribute])) {
+                        if ('static' == ($fld_layout=$attribute['layout']??'large')) {
+                            $classes = ActiveForm::FIELD_HORIZ_CLASSES['static']['horizontalCssClasses'];
+                        } else {
+                            $classes = ActiveForm::FIELD_HORIZ_CLASSES[$layout][$fld_layout]['horizontalCssClasses'];
+                        }
+						if( ($nf%$cols) == 0) {
+							if( $nf != 0 ) {
+								$fs .= '</div><!--row-->';
+							}
+							$fs .= "\n" . '<div class="row">';
+						}
+						$fs .= '<div class="'
+							. FormHelper::getBoostrapColumnClasses($cols)
+							. '"><div class=row>';
+                        $rowOptions = AppHelper::mergeAndConcat(['class'],
+                            $rowOptions,
+                            $view_attrs[$attribute]['rowOptions']??[]);
+                        $lo = [ 'class' => "label-$attribute " . implode(' ',$classes['label'])  ];
+                        $fo = [ 'class' => "field field-$attribute " . $classes['wrapper'] ];
+                        $fs .= $this->renderAttribute($attribute, $lo, $fo, $nf);
+						$fs .= '</div></div>';
+						$nf++;
 					}
 				}
-				if ($nc >= 0 ) {
-					$layout_rows[] = $row;
+				$fs .= '</div><!--row-->';
+				if( isset($row_layout['title']) && $type == 'fieldset' ) {
+					$legend = Html::tag('legend', $row_layout['title'], $row_layout['title_options']??[]);
+					$ret .= Html::tag('fieldset', $legend . $fs, array_merge( ['id' => $this->options['id'] . "_layout_$rlk" ], $row_layout['options']??[]) );
+				} else if( isset($row_layout['title'])  ) {
+					$legend = Html::tag('div', $row_layout['title'], $row_layout['title_options']??[]);
+					$ret .= Html::tag('div', $legend . $fs, array_merge( ['id' => $this->options['id'] . "_layout_$rlk" ], $row_layout['options']??[]) );
+				} else {
+					$ret .= $fs;
 				}
 				break;
-			case "horizontal": // 1col
-			case "1col":
-			case 'inline':
-				foreach( array_keys($this->attributes) as $key ) {
-					$layout_rows[] = [$key];
+			case 'buttons':
+				$classes = static::FIELD_HORIZ_CLASSES[$layout??'1col']['large']['horizontalCssClasses']['offset'];
+				$ret .= '<div class="mt-2 clearfix row">';
+				if (is_array($classes)) {
+					$s_classes = implode(' ', $classes);
 				}
+				$ret .= "<div class=\"$s_classes\">";
+				$ret .= $this->layoutButtons($row_layout['buttons'], $layout??$this->formLayout, $row_layout['options']??[]);
+				$ret .= '</div><!--buttons -->' .  "\n";
+				$ret .= '</div><!--row-->';
 				break;
-			}
-		}
-		if( count($layout_rows) ) {
-			$index = 0; // ??
-			foreach($layout_rows as $lrow ) {
-				$c = count($lrow);
-				$row = '';
-				$rowOptions = [ 'class' => "field-container cols-$c"];
-				foreach( $lrow as $attribute ) {
-					$rowOptions = AppHelper::mergeAndConcat(['class'],
-						$rowOptions,
-						$this->attributes[$attribute]['rowOptions']??[]);
-					$lo = [ 'class' => "label-$attribute" ];
-					$fo = [ 'class' => "field-$attribute" ];
-					$row .= $this->renderAttribute($attribute, $lo, $fo, $index);
-				}
-				$ret .= '<div' . Html::renderTagAttributes($rowOptions)
-					. ">$row</div>";
+			case 'subtitle':
+				$ret .= $this->layoutContent(null, $row_layout['title'], $row_layout['options']??[]);
+				break;
 			}
 		}
 		return $ret;
+	}
+
+	protected function layoutContent(?string $label, string $content, array $options = []):string
+	{
+		$ret = '';
+		$wrapper_options = [ 'class' => $this->fieldConfig['horizontalCssClasses']['wrapper'] ];
+		if( isset($options['class']) ) {
+			Html::addCssClass($wrapper_options, $options['class']);
+		}
+// 		Html::addCssClass($config['errorOptions'], $cssClasses['error']);
+// 		Html::addCssClass($config['hintOptions'], $cssClasses['hint']);
+// 		Html::addCssClass($config['options'], $cssClasses['field']);
+		if( empty($label) ) {
+			Html::addCssClass($wrapper_options, $this->fieldConfig['horizontalCssClasses']['offset']);
+		}
+		$wrapper_tag = ArrayHelper::remove($wrapper_options, 'tag', 'div');
+		$ret .= Html::beginTag($wrapper_tag, $wrapper_options);
+		$ret .= $content;
+		$ret .= Html::endTag($wrapper_tag);
+		return $ret;
+	}
+
+
+    protected function layoutAttributes()
+	{
+// 		if ($this->layout == 'inline') {
+// 			$this->formLayout = 'inline';
+// 			$layout_parts = ['1col'];
+// 		} else { // horizontal layout
+// 			$layout_parts = explode(':', $this->formLayout);
+// 		}
+		if( empty($this->fieldsLayout) ) {
+			$this->fieldsLayout[] = [
+				'type' => 'fields',
+				'fields' => $this->attributes,
+				'layout' => $this->layout
+			];
+		}
+// 		$this->addLayoutClasses($fields_cfg, $this->fieldsLayout);
+		// check there are no render_fields with incorrect settings
+// 		foreach ($fields_cfg as $kf => $fldcfg_info) {
+// 			if (isset($fields_cfg[$kf]['layout'])) {
+// 				unset($fields_cfg[$kf]['layout']);
+// 			}
+// 		}
+
+ 		return $this->layoutFields($this->fieldsLayout, $this->attributes);
+// 		if( count($layout_rows) ) {
+// 			$index = 0; // ??
+// 			foreach($layout_rows as $lrow ) {
+// 				$c = count($lrow);
+// 				$row = '';
+// 				$rowOptions = [ 'class' => "field-container cols-$c"];
+// 				foreach( $lrow as $attribute ) {
+// 					$rowOptions = AppHelper::mergeAndConcat(['class'],
+// 						$rowOptions,
+// 						$this->attributes[$attribute]['rowOptions']??[]);
+// 					$lo = [ 'class' => "label-$attribute" ];
+// 					$fo = [ 'class' => "field-$attribute" ];
+// 					$row .= $this->renderAttribute($attribute, $lo, $fo, $index);
+// 				}
+// 				$ret .= '<div' . Html::renderTagAttributes($rowOptions)
+// 					. ">$row</div>";
+// 			}
+// 		}
+// 		return $ret;
 	}
 
 

@@ -78,14 +78,18 @@ body.dark .record-view .rv-field, .record-view .rv-label {
 	flex-direction: row;
 }
 
-.record-view .rv-label {
+.record-view label {
 	font-weight:normal;
-	color: darkblue;
+	color: lightblue;
 	flex: 3 0 20%;
 }
-.record-view .rv-field {
+.record-view .field {
 	font-weight: bolder;
-	flex: 3 0 80%;
+	padding-top: calc(0.375rem + 1px);
+	padding-bottom: calc(0.375rem + 1px);
+	margin-bottom: 0;
+	font-size: inherit;
+	line-height: 1.5;
 }
 .record-view .cols-2 .rv-label {
 	font-weight:normal;
