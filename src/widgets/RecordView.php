@@ -264,10 +264,10 @@ html;
 
 
 
-	protected function layoutFields(array $layout_fields, array $view_attrs): string
+	protected function layoutFields(array $layout_rows, array $view_attrs): string
 	{
 		$ret = '';
-		foreach($layout_fields as $rlk => $row_layout ) {
+		foreach($layout_rows as $rlk => $row_layout ) {
 			$layout = $row_layout['layout']??'1col';
 			$cols = intval($layout)?:1;
 			$type = $row_layout['type']??'fields';
@@ -379,14 +379,6 @@ html;
 				'layout' => $this->layout
 			];
 		}
-// 		$this->addLayoutClasses($fields_cfg, $this->fieldsLayout);
-		// check there are no render_fields with incorrect settings
-// 		foreach ($fields_cfg as $kf => $fldcfg_info) {
-// 			if (isset($fields_cfg[$kf]['layout'])) {
-// 				unset($fields_cfg[$kf]['layout']);
-// 			}
-// 		}
-
  		return $this->layoutFields($this->fieldsLayout, $this->attributes);
 // 		if( count($layout_rows) ) {
 // 			$index = 0; // ??
