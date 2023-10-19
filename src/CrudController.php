@@ -17,6 +17,9 @@ use santilin\churros\helpers\{AppHelper,FormHelper};
 class CrudController extends \yii\web\Controller
 {
 	protected $crudActions = [];
+	protected $masterModel = false;
+	protected $masterController = null;
+
 	public $accessOnlyMine = false;
 
 	const MSG_DEFAULT = 'The action on {la} {title} <a href="{model_link}">{record_medium}</a> has been successful.';
@@ -36,6 +39,9 @@ class CrudController extends \yii\web\Controller
 	 */
 	protected function changeActionParams(array $actionParams, string $action_id, $model)
 	{
+		if ($this->getMasterModel() && !array_key_exists('master', $queryParmas)) {
+			$queryParams['master'] = $this->getMasterModel();
+		}
 		return $actionParams;
 	}
 
@@ -79,6 +85,11 @@ class CrudController extends \yii\web\Controller
 		$params = Yii::$app->request->queryParams;
 		$searchModel = $this->createSearchModel();
 		$params['permissions'] = ($params['permissions']??true===false) ? false : $this->crudActions;
+		if ($this->getMasterModel()) {
+			$related_field = $searchModel->getRelatedFieldForModel($this->getMasterModel())
+			$searchModel->setAttribute($related_field,
+				$params[$searchModel->formName()][$relateld_field] = $this->getMasterModel()->getPrimaryKey());
+		}
 		$params = $this->changeActionParams($params, 'index', $searchModel);
 		return $this->render('index', [
 			'searchModel' => $searchModel,
@@ -90,8 +101,8 @@ class CrudController extends \yii\web\Controller
 	public function indexDetails($master, $view, $params)
 	{
 		$detail = $this->createSearchModel();
- 		$params[$detail->formName()][$detail->getRelatedFieldForModel($master)]
- 				= $master->getPrimaryKey();
+		$related_field = $detail->getRelatedFieldForModel($master);
+ 		$params[$detail->formName()][$related_field] = $detail->$related_field = $master->getPrimaryKey();
 		$params['master'] = $master;
 		$params['embedded'] = true;
 		return $this->renderAjax($view, [
@@ -129,14 +140,14 @@ class CrudController extends \yii\web\Controller
 		$params = array_merge($req->get(), $req->post());
 		$params['permissions'] = ($params['permissions']??true===false) ? false : $this->crudActions;
 		$model = $this->findFormModel(null, null, 'create', $params);
+		if ($this->getMasterModel()) {
+			$related_field = $model->getRelatedFieldForModel($this->getMasterModel())
+			$model->setAttribute($related_field, $this->getMasterModel()->getPrimaryKey());
+		}
 		$model->scenario = 'create';
 
-		if (isset($_POST['_form_relations']) ) {
-			$relations = explode(",", $_POST['_form_relations']);
-		} else {
-			$relations = [];
-		}
-		if ($model->loadAll($req->post(), $relations) ) {
+		if (isset($_POST['_form_relations'])) $relations = explode(",", $_POST['_form_relations']); else $relations = [];
+		if ($model->loadAll($req->post(), $relations) ) { // ?? $req->post
 			if ($model->saveAll(true) ) {
 				if ($req->getIsAjax()) {
 					return json_encode($model->getAttributes());
@@ -378,52 +389,107 @@ class CrudController extends \yii\web\Controller
 	public function genBreadCrumbs(string $action_id, $model, array $permissions = []): array
 	{
 		$breadcrumbs = [];
-		$prefix = $this->getRoutePrefix();
-		if (FormHelper::hasPermission($permissions, 'index')) {
-			$breadcrumbs['index'] = [
-				'label' =>  $model->getModelInfo('title_plural'),
-				'url' => [ $this->id . '/index' ]
+		if( $this->getMasterModel() ) {
+			$master = $this->master_model;
+			$prefix = $this->getRoutePrefix() . $master->controllerName(). '/';
+			$breadcrumbs[] = [
+				'label' => AppHelper::mb_ucfirst($master->getModelInfo('title_plural')),
+				'url' => [ $prefix . 'index']
 			];
-		}
-		switch( $action_id ) {
-			case 'update':
-				$breadcrumbs['action'] = [
-					'label' => $model->t('churros', 'Updating {title}: {record_short}'),
-// 					'url' => array_merge([ $prefix . $this->id . '/view'], $model->getPrimaryKey(true))
+			$keys = $master->getPrimaryKey(true);
+			$keys[0] = $prefix . 'view';
+			$breadcrumbs[] = [
+				'label' => $master->recordDesc('short', 25),
+				'url' => $keys
+			];
+			// child
+			$breadcrumbs[] = [
+				'label' => AppHelper::mb_ucfirst($model->getModelInfo('title_plural')),
+				'url' => $this->getActionRoute('index')
+			];
+			switch( $action_id ) {
+				case 'update':
+					$breadcrumbs[] = [
+						'label' => $model->recordDesc('short', 25),
+						'url' => array_merge([$this->getActionRoute('view')], $model->getPrimaryKey(true))
+					];
+					break;
+				case 'index':
+					break;
+			}
+		} else {
+			$prefix = $this->getRoutePrefix();
+			if (FormHelper::hasPermission($permissions, 'index')) {
+				$breadcrumbs['index'] = [
+					'label' =>  $model->getModelInfo('title_plural'),
+					'url' => [ $this->id . '/index' ]
 				];
-				break;
-			case 'duplicate':
-				$breadcrumbs['action'] = [
-					'label' => Yii::t('churros', 'Duplicating ') . $model->recordDesc('short', 20),
-					'url' => array_merge([ $prefix . $this->id . '/view'], $model->getPrimaryKey(true))
-				];
-				break;
-			case 'view':
-				$breadcrumbs['action'] = $model->recordDesc('short', 20);
-				break;
-			case 'create':
-				$breadcrumbs['action'] = $model->t('churros', 'Creating {title}');
-				break;
-			case 'index':
-				break;
-			default:
-				throw new \Exception($action_id);
+			}
+			switch( $action_id ) {
+				case 'update':
+					$breadcrumbs['action'] = [
+						'label' => $model->t('churros', 'Updating {title}: {record_short}'),
+	// 					'url' => array_merge([ $prefix . $this->id . '/view'], $model->getPrimaryKey(true))
+					];
+					break;
+				case 'duplicate':
+					$breadcrumbs['action'] = [
+						'label' => Yii::t('churros', 'Duplicating ') . $model->recordDesc('short', 20),
+						'url' => array_merge([ $prefix . $this->id . '/view'], $model->getPrimaryKey(true))
+					];
+					break;
+				case 'view':
+					$breadcrumbs['action'] = $model->recordDesc('short', 20);
+					break;
+				case 'create':
+					$breadcrumbs['action'] = $model->t('churros', 'Creating {title}');
+					break;
+				case 'index':
+					break;
+				default:
+					throw new \Exception($action_id);
+			}
 		}
 		return $breadcrumbs;
 	}
 
+
+
   	public function getActionRoute($action_id = null, $master_model = null): string
 	{
-		if( $action_id === null ) {
-			if ($master_model) {
+		if (!$master_model) {
+			$master_model = $this->getMasterModel();
+		}
+		if ($master_model) {
+			if( $action_id === null ) {
 				return $this->getRoutePrefix($master_model->getModelInfo('controller_name')) . $this->id;
 			} else {
-				return $this->getRoutePrefix($this->id) . $this->id;
+				return $this->getRoutePrefix($master_model->getModelInfo('controller_name')) . $this->id . '/' . $action_id;
 			}
-		} else {
-			return Url::toRoute($action_id);
 		}
+		return Url::toRoute($action_id);
 	}
+
+// 	public function actionRoute($action_id = null): string
+// 	{
+// 		if( $this->master_model ) {
+// 			$parent_route = $this->getRoutePrefix()
+// 				. $this->id;
+// 			if( $action_id ) {
+// 				$action_id = (array) $action_id;
+// 				if ($action_id[0] != '' && $action_id[0] == '/' ) {
+// 					$action_id[0] = $parent_route . $action_id[0];
+// 				} else {
+// 					$action_id[0] = $parent_route . '/' . $action_id[0];
+// 				}
+// 				return Url::toRoute($action_id??'');
+// 			} else {
+// 				return $parent_route;
+// 			}
+// 		} else {
+// 			return $this->getActionRoute($action_id, null);
+// 		}
+// 	}
 
 	public function getRoutePrefix($route = null): string
 	{
@@ -604,15 +670,43 @@ class CrudController extends \yii\web\Controller
 		return join($glue, $attrs);
 	}
 
-
-	public function masterRoute($master): string
-	{
-		return $this->id . '/' . $master->id;
-	}
-
 	public function getMasterModel()
 	{
-		return null;
+		if ($this->masterModel === false) {
+			$master_id = intval(Yii::$app->request->get('parent_id', 0));
+			if ($master_id !== 0) {
+				$this->masterController = Yii::$app->request->get('parent_controller');
+				assert($this->masterController != '');
+				$master_model_name = 'app\\models\\'. AppHelper::camelCase($this->masterController);
+				$this->masterModel = $master_model_name::findOne($master_id);
+				if ($this->masterModel == null) {
+					throw new NotFoundHttpException($master_model->t('churros',
+						"The master record of {title} with '{id}' id does not exist",
+						[ '{id}' => $master_id]));
+				}
+			} else {
+				$this->masterModel = null;
+			}
+		}
+		return $this->masterModel;
+	}
+
+	/**
+	 * @param Model $master The master model (for detail_grids)
+	 * @param Model $child The child model (for detail_grids)
+	 * @todo Eliminar
+	 */
+	public function controllerRoute($master = null, $child = null): ?string
+	{
+		if( $master == null ) {
+			$master = $this->master_model;
+		}
+		$master_route = $master->getModelInfo('controller_name');
+		$ret = $this->getRoutePrefix($master_route);
+		$ret .= $master->controllerName() . '/'
+			. $master->getPrimaryKey() . '/';
+		$ret .= $child->controllerName();
+		return $ret;
 	}
 
 }

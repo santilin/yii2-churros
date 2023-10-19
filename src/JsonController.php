@@ -583,11 +583,6 @@ class JsonController extends \yii\web\Controller
 	}
 
 
-	public function masterRoute($master): string
-	{
-		return $this->id . '/' . $master->id;
-	}
-
 	public function getMasterModel()
 	{
 		return null;

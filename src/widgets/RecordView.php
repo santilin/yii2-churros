@@ -303,12 +303,12 @@ html;
 						$fs .= '<div class="'
 							. FormHelper::getBoostrapColumnClasses($cols)
 							. '"><div class=row>';
-                        $rowOptions = AppHelper::mergeAndConcat(['class'],
-                            $rowOptions,
-                            ['class' => "field field-$attribute " . $classes['wrapper']],
-                            $view_attrs[$attribute]['rowOptions']??[]);
                         $lo = [ 'class' => "label-$attribute " . implode(' ',$classes['label'])  ];
-                        $fs .= $this->renderAttribute($attribute, $lo, $rowOptions, $nf);
+                        $fs .= $this->renderAttribute($attribute, $lo,
+                            AppHelper::mergeAndConcat(['class'], $rowOptions,
+                                ['class' => "field field-$attribute " . $classes['wrapper']],
+                                $view_attrs[$attribute]['rowOptions']??[]),
+                            $nf);
 						$fs .= '</div></div>';
 						$nf++;
 					}
