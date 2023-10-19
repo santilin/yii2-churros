@@ -67,16 +67,6 @@ body.dark .record-view .rv-field, .record-view .rv-label {
 	border: 1px solid #ccc;
 	margin: 0;
 }
-.record-view .record-fields {
-	margin: 0;
-	display: flex;
-	flex-direction: column;
-}
-.record-view .record-fields .field-container {
-	flex-wrap: wrap;
-	display: flex;
-	flex-direction: row;
-}
 
 .record-view label {
 	font-weight:normal;

@@ -228,11 +228,8 @@ class AppHelper
 		}
 	}
 
-    public static function mergeAndConcat(array $keys_to_concat, $a, $b)
+    public static function mergeAndConcat(array $keys_to_concat, ...$args)
     {
-        $args = func_get_args();
-        array_shift($args);
-        $res = array_shift($args);
         while (!empty($args)) {
             foreach (array_shift($args) as $k => $v) {
                 if ($v instanceof UnsetArrayValue) {

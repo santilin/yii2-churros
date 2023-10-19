@@ -196,12 +196,6 @@ class ActiveForm extends Bs4ActiveForm
 					. $form_field_cfg['horizontalCssClasses']['offset'];
 			}
 		}
-// 		Html::addCssClass($form_field_cfg['horizontalCssClasses']['wrapperOptions'], $cssClasses['wrapper']);
-// 		Html::addCssClass($form_field_cfg['labelOptions'], $cssClasses['label']);
-// 		Html::addCssClass($form_field_cfg['errorOptions'], $cssClasses['error']);
-// 		Html::addCssClass($form_field_cfg['hintOptions'], $cssClasses['hint']);
-// 		Html::addCssClass($form_field_cfg['options'], $cssClasses['field']);
-
 		return $form_field_cfg;
 	}
 

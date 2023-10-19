@@ -286,7 +286,7 @@ html;
 			case 'fieldset':
 				$nf = 0;
 				$fs = '';
- 				$rowOptions = [ 'class' => "field-container layout-$layout"];
+ 				$rowOptions = ['class' => "field-container layout-$layout"];
 				foreach ($row_layout['fields'] as $attribute => $form_field ) {
 					if (!empty($view_attrs[$attribute])) {
                         if ('static' == ($fld_layout=$attribute['layout']??'large')) {
@@ -305,10 +305,10 @@ html;
 							. '"><div class=row>';
                         $rowOptions = AppHelper::mergeAndConcat(['class'],
                             $rowOptions,
+                            ['class' => "field field-$attribute " . $classes['wrapper']],
                             $view_attrs[$attribute]['rowOptions']??[]);
                         $lo = [ 'class' => "label-$attribute " . implode(' ',$classes['label'])  ];
-                        $fo = [ 'class' => "field field-$attribute " . $classes['wrapper'] ];
-                        $fs .= $this->renderAttribute($attribute, $lo, $fo, $nf);
+                        $fs .= $this->renderAttribute($attribute, $lo, $rowOptions, $nf);
 						$fs .= '</div></div>';
 						$nf++;
 					}
