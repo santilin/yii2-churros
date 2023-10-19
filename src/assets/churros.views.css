@@ -80,7 +80,7 @@ body.dark .record-view .rv-field, .record-view .rv-label {
 
 .record-view label {
 	font-weight:normal;
-	color: lightblue;
+	color: gray;
 	flex: 3 0 20%;
 }
 .record-view .field {
