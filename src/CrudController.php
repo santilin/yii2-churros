@@ -39,8 +39,8 @@ class CrudController extends \yii\web\Controller
 	 */
 	protected function changeActionParams(array $actionParams, string $action_id, $model)
 	{
-		if ($this->getMasterModel() && !array_key_exists('master', $queryParmas)) {
-			$queryParams['master'] = $this->getMasterModel();
+		if ($this->getMasterModel() && !array_key_exists('master', $actionParams)) {
+			$actionParams['master'] = $this->getMasterModel();
 		}
 		return $actionParams;
 	}
@@ -86,9 +86,9 @@ class CrudController extends \yii\web\Controller
 		$searchModel = $this->createSearchModel();
 		$params['permissions'] = ($params['permissions']??true===false) ? false : $this->crudActions;
 		if ($this->getMasterModel()) {
-			$related_field = $searchModel->getRelatedFieldForModel($this->getMasterModel())
+			$related_field = $searchModel->getRelatedFieldForModel($this->getMasterModel());
 			$searchModel->setAttribute($related_field,
-				$params[$searchModel->formName()][$relateld_field] = $this->getMasterModel()->getPrimaryKey());
+				$params[$searchModel->formName()][$related_field] = $this->getMasterModel()->getPrimaryKey());
 		}
 		$params = $this->changeActionParams($params, 'index', $searchModel);
 		return $this->render('index', [
@@ -141,7 +141,7 @@ class CrudController extends \yii\web\Controller
 		$params['permissions'] = ($params['permissions']??true===false) ? false : $this->crudActions;
 		$model = $this->findFormModel(null, null, 'create', $params);
 		if ($this->getMasterModel()) {
-			$related_field = $model->getRelatedFieldForModel($this->getMasterModel())
+			$related_field = $model->getRelatedFieldForModel($this->getMasterModel());
 			$model->setAttribute($related_field, $this->getMasterModel()->getPrimaryKey());
 		}
 		$model->scenario = 'create';
@@ -389,9 +389,9 @@ class CrudController extends \yii\web\Controller
 	public function genBreadCrumbs(string $action_id, $model, array $permissions = []): array
 	{
 		$breadcrumbs = [];
-		if( $this->getMasterModel() ) {
-			$master = $this->master_model;
-			$prefix = $this->getRoutePrefix() . $master->controllerName(). '/';
+ 		$master = $this->getMasterModel();
+		if ($master) {
+			$prefix = '/' . $this->getFullRoute() . '/' . $master->controllerName(). '/';
 			$breadcrumbs[] = [
 				'label' => AppHelper::mb_ucfirst($master->getModelInfo('title_plural')),
 				'url' => [ $prefix . 'index']
@@ -453,7 +453,10 @@ class CrudController extends \yii\web\Controller
 		return $breadcrumbs;
 	}
 
-
+	private function getFullRoute(): string
+	{
+		return $this->module instanceof \yii\base\Application ? $this->id : $this->module->getUniqueId();
+	}
 
   	public function getActionRoute($action_id = null, $master_model = null): string
 	{
@@ -461,13 +464,21 @@ class CrudController extends \yii\web\Controller
 			$master_model = $this->getMasterModel();
 		}
 		if ($master_model) {
-			if( $action_id === null ) {
-				return $this->getRoutePrefix($master_model->getModelInfo('controller_name')) . $this->id;
-			} else {
-				return $this->getRoutePrefix($master_model->getModelInfo('controller_name')) . $this->id . '/' . $action_id;
+			$controller_route = '/' . $this->getFullRoute();
+			$controller_route .= '/' . $master_model->controllerName()
+				. '/' . $master_model->getPrimaryKey() . '/' .  $this->id;
+			if (is_array($action_id)) {
+				$action_id[0] = $controller_route . '/' . $action_id[0];
+				$controller_route = Url::toRoute($action_id);
+			} else if ($action_id != null ) {
+				$controller_route .= '/' . $action_id;
 			}
+			return $controller_route;
+		} else if ($action_id === null) {
+			return substr(Url::toRoute('r'), 0, -2);
+		} else {
+			return Url::toRoute($action_id);
 		}
-		return Url::toRoute($action_id);
 	}
 
 // 	public function actionRoute($action_id = null): string
@@ -701,7 +712,7 @@ class CrudController extends \yii\web\Controller
 		if( $master == null ) {
 			$master = $this->master_model;
 		}
-		$master_route = $master->getModelInfo('controller_name');
+		$master_route = $master->controllerName();
 		$ret = $this->getRoutePrefix($master_route);
 		$ret .= $master->controllerName() . '/'
 			. $master->getPrimaryKey() . '/';
