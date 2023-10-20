@@ -11,8 +11,6 @@ trait ActiveFormTrait
 
 	public function getInputId($model, string $attribute): string
 	{
-// 		if (strpos($attribute, '.') !== FALSE) {
-// 			return
 		return Html::getInputId($model, $attribute);
 	}
 

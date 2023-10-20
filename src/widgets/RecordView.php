@@ -286,10 +286,10 @@ html;
 			case 'fieldset':
 				$nf = 0;
 				$fs = '';
- 				$rowOptions = ['class' => "field-container layout-$layout"];
+ 				$rowOptions = ['class' => "field-container"];
 				foreach ($row_layout['fields'] as $attribute => $form_field ) {
 					if (!empty($view_attrs[$attribute])) {
-                        if ('static' == ($fld_layout=$attribute['layout']??'large')) {
+                        if ('static' == ($fld_layout=$view_attrs[$attribute]['layout']??'large')) {
                             $classes = ActiveForm::FIELD_HORIZ_CLASSES['static']['horizontalCssClasses'];
                         } else {
                             $classes = ActiveForm::FIELD_HORIZ_CLASSES[$layout][$fld_layout]['horizontalCssClasses'];
@@ -298,7 +298,7 @@ html;
 							if( $nf != 0 ) {
 								$fs .= '</div><!--row-->';
 							}
-							$fs .= "\n" . '<div class="row">';
+							$fs .= "\n" . "<div class=\"row layout-$layout\">";
 						}
 						$fs .= '<div class="'
 							. FormHelper::getBoostrapColumnClasses($cols)
@@ -380,25 +380,6 @@ html;
 			];
 		}
  		return $this->layoutFields($this->fieldsLayout, $this->attributes);
-// 		if( count($layout_rows) ) {
-// 			$index = 0; // ??
-// 			foreach($layout_rows as $lrow ) {
-// 				$c = count($lrow);
-// 				$row = '';
-// 				$rowOptions = [ 'class' => "field-container cols-$c"];
-// 				foreach( $lrow as $attribute ) {
-// 					$rowOptions = AppHelper::mergeAndConcat(['class'],
-// 						$rowOptions,
-// 						$this->attributes[$attribute]['rowOptions']??[]);
-// 					$lo = [ 'class' => "label-$attribute" ];
-// 					$fo = [ 'class' => "field-$attribute" ];
-// 					$row .= $this->renderAttribute($attribute, $lo, $fo, $index);
-// 				}
-// 				$ret .= '<div' . Html::renderTagAttributes($rowOptions)
-// 					. ">$row</div>";
-// 			}
-// 		}
-// 		return $ret;
 	}
 
 

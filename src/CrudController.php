@@ -418,17 +418,21 @@ class CrudController extends \yii\web\Controller
 					break;
 			}
 		} else {
-			$prefix = $this->getRoutePrefix();
+			$prefix = '/' . $this->getFullRoute();
 			if (FormHelper::hasPermission($permissions, 'index')) {
 				$breadcrumbs['index'] = [
 					'label' =>  $model->getModelInfo('title_plural'),
 					'url' => [ $this->id . '/index' ]
 				];
+			} else {
+				$breadcrumbs['index'] = [
+					'label' =>  $model->getModelInfo('title_plural'),
+				];
 			}
 			switch( $action_id ) {
 				case 'update':
 					$breadcrumbs['action'] = [
-						'label' => $model->t('churros', 'Updating {title}: {record_short}'),
+						'label' => $model->t('churros', 'Updating {record_short}'),
 	// 					'url' => array_merge([ $prefix . $this->id . '/view'], $model->getPrimaryKey(true))
 					];
 					break;
