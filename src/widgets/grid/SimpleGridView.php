@@ -46,6 +46,7 @@ class SimpleGridView extends \yii\grid\GridView
 	public $itemLabelFew = null;
 	public $itemLabelMany = null;
 	public $itemLabelAccusative = null;
+	public $grandTotalLabel = null;
 
     public $layout = "{summary}\n{pager}\n{items}";
     public $output = 'Screen';
@@ -61,7 +62,7 @@ class SimpleGridView extends \yii\grid\GridView
 				'prevPageLabel' => '<',
 			];
 		}
-		if( !$this->output == 'Screen' ) {
+		if( $this->output != 'Screen' ) {
 			$config['dataProvider']->pagination = false;
 		}
 		if( empty($config['dataColumnClass']) ) {
@@ -373,11 +374,11 @@ class SimpleGridView extends \yii\grid\GridView
 		}
 		if ($colspan==0) {
 			$ret = '</tr><tr>';
-			$ret .= Html::tag('td', Yii::t('churros', "Report totals") . ' ', [
-				'class' => 'reportview-total-label', 'colspan' => 42] );
+			$ret .= Html::tag('td', $this->grandTotalLabel?:Yii::t('churros', "Totals") . ' ',
+				[ 'class' => 'reportview-total-label', 'colspan' => 42] );
 			$ret .= '</tr><tr>';
 		} else {
-			$ret = Html::tag('td',Yii::t('churros', "Report totals") . ' ',
+			$ret = Html::tag('td', $this->grandTotalLabel?:Yii::t('churros', "Totals") . ' ',
 				[ 'class' => 'reportview-total-label', 'colspan' => $colspan ] );
 		}
 		$nc = 0;

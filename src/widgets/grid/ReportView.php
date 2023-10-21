@@ -21,5 +21,13 @@ class ReportView extends SimpleGridView
 		ReportView::F_DISTINCT_CONCAT => [ 'Concat (distinct)', false ],
 	];
 
+	public function init()
+    {
+        if ($this->grandTotalLabel === null) {
+            $this->grandTotalLabel = Yii::t('churros', 'Report totals');
+        }
+        parent::init();
+	}
+
 
 }

@@ -165,6 +165,8 @@ trait ModelSearchTrait
 				// Activequery removes duplicate joins (added also in addSort)
 				$query->joinWith("$relation_name $table_alias");
 				$attribute = '';
+				$modelClass = $relation['modelClass'];
+				$model = $modelClass::instance();
 			}
 		} else {
 			while (strpos($relation_name, '.') !== FALSE) {
