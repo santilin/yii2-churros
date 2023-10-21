@@ -15,7 +15,7 @@ class IbanValidator extends Validator
     public function validateAttribute($model, $attribute)
     {
 		$value = $model->$attribute;
-		$iv = new IBAN($iban);
+		$iv = new IBAN($value);
 		if ($iv->verify()) {
 			$model->$attribute = $iv->MachineFormat();
 			return true;
