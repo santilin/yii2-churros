@@ -112,21 +112,6 @@ trait ModelSearchTrait
 		}
 	}
 
-    public function load($data, $formName = null)
-    {
-        $scope = $formName === null ? $this->formName() : $formName;
-        if (isset($data[$scope])) {
-			foreach( $data[$scope] as $name => &$value ) {
-// 				if( is_array($value) ) {
-// 					$value = json_encode($value);
-// 				}
-				$this->$name = $value;
-			}
-            return true;
-        }
-        return false;
-    }
-
 	/*
 	 * Intenta poner un valor legible en el filtro del gridview
 	 */

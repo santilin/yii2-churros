@@ -98,15 +98,16 @@ class CrudController extends \yii\web\Controller
 		]);
 	}
 
-	public function indexDetails($master, $view, $params)
+	public function indexDetails($master, string $view, string $search_model_class, array $params)
 	{
-		$detail = $this->createSearchModel();
+		$detail = $this->createSearchModel($search_model_class);
 		$related_field = $detail->getRelatedFieldForModel($master);
- 		$params[$detail->formName()][$related_field] = $detail->$related_field = $master->getPrimaryKey();
+ 		$params[$detail->formName()][$related_field] = $master->getPrimaryKey();
+  		$detail->$related_field = $master->getPrimaryKey();
 		$params['master'] = $master;
 		$params['embedded'] = true;
 		return $this->renderAjax($view, [
-			'dataProvider' => $detail->search($params),
+// 			'dataProvider' => $detail->search($params),
 			'searchModel' => $detail,
 			'indexParams' => $this->changeActionParams($params, 'index', $detail),
 			'indexGrids' => [ '_grid' => [ '', null, [] ] ],
