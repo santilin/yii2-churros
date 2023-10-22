@@ -259,7 +259,7 @@ class CrudController extends \yii\web\Controller
 			} catch (\yii\db\IntegrityException $e ) {
 				Yii::$app->session->addFlash('error', $model->t('churros',
 					$this->getResultMessage('error_delete_integrity')));
-			} catch( \yii\web\ForbiddenHttpException $e ) {
+			} catch (\yii\web\ForbiddenHttpException $e ) {
 				Yii::$app->session->addFlash('error', $model->t('churros',
 					$this->getResultMessage('error_delete')));
 			}
@@ -353,8 +353,9 @@ class CrudController extends \yii\web\Controller
 		case 'update':
 			$to = 'index';
 			break;
-		case 'view':
 		case 'delete':
+			return Yii::$app->request->referrer;
+		case 'view':
 		case 'index':
 		default:
 			$to = "index";
