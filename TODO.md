@@ -1,3 +1,7 @@
+# CrudController
+- Duplicar: imágenes, aparece el check para borrar la imagen.
+
+
 https://wbraganca.com/yii2extensions/yii2-fancytree-widget/usage
 
 param develemailto => develemail

@@ -48,8 +48,8 @@ class BooleanColumn extends \yii\grid\DataColumn
 				$options['value'] = null; // Select 'All'
 			}
 			return Html::activeDropDownList($model, $this->attribute, [
-				1 => $this->grid->formatter->booleanFormat[1],
-				0 => $this->grid->formatter->booleanFormat[0],
+				'true' => $this->grid->formatter->booleanFormat[1],
+				'false' => $this->grid->formatter->booleanFormat[0],
 			], $options) . $error;
 		}
         return parent::renderFilterCellContent();

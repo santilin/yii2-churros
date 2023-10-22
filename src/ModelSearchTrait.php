@@ -156,7 +156,7 @@ trait ModelSearchTrait
 		} else {
 			while (strpos($relation_name, '.') !== FALSE) {
 				list($relation_name, $attribute) = AppHelper::splitFieldName($relation_name);
-				$relation = $model->$relations[$relation_name]??null;
+				$relation = $model::$relations[$relation_name]??null;
 				if ($nested_relations!='') {
 					$nested_relations .= '.';
 				}
@@ -183,13 +183,12 @@ trait ModelSearchTrait
 				$table_alias = "as_$attribute";
 				// Activequery removes duplicate joins (added also in addSort)
 				$query->joinWith("$nested_relations $table_alias");
-				$attribute = '';
 			}
 		}
 
 		$value = static::toOpExpression($value, false );
 		$search_flds = [];
-		if( $attribute == '' ) {
+		if ($attribute == '') {
 			$search_flds = $model->findCodeAndDescFields();
 			$rel_conds = [ 'OR' ];
 			foreach( $search_flds as $search_fld ) {
@@ -202,7 +201,13 @@ trait ModelSearchTrait
 			} else {
 				list($right_table, $right_fld ) = AppHelper::splitFieldName($relation['right']);
 			}
-			$query->andWhere([$value['op'], "$table_alias.$right_fld", $value['v'] ]);
+			if ($value['v']=== 'true') {
+				$query->andWhere(["not", ["$table_alias.$right_fld" => null]]);
+			} else if ($value['v'] === 'false') {
+				$query->andWhere(["$table_alias.$right_fld" => null]);
+			} else {
+				$query->andWhere(["$table_alias.$right_fld" => $value['v']]);
+			}
 		} else {
 			$query->andWhere([$value['op'], "$table_alias.$attribute", $value['v'] ]);
 		}
