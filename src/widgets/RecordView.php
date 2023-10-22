@@ -262,8 +262,6 @@ html;
         }
     }
 
-
-
 	protected function layoutFields(array $layout_rows, array $view_attrs): string
 	{
 		$ret = '';
@@ -284,7 +282,7 @@ html;
 				break;
 			case 'fields':
 			case 'fieldset':
-				$nf = 0;
+				$nf = $indexf = 0;
 				$fs = '';
  				$rowOptions = ['class' => "field-container"];
 				foreach ($row_layout['fields'] as $attribute => $form_field ) {
@@ -294,6 +292,9 @@ html;
                         } else {
                             $classes = ActiveForm::FIELD_HORIZ_CLASSES[$layout][$fld_layout]['horizontalCssClasses'];
                         }
+                        if ($fld_layout == 'full') {
+							while ($nf++%$cols != 0);
+						}
 						if( ($nf%$cols) == 0) {
 							if( $nf != 0 ) {
 								$fs .= '</div><!--row-->';
@@ -301,14 +302,13 @@ html;
 							$fs .= "\n" . "<div class=\"row layout-$layout\">";
 						}
 						$fs .= '<div class="'
-							. FormHelper::getBoostrapColumnClasses($cols)
+							. FormHelper::getBoostrapColumnClasses($fld_layout == 'full' ? 1 : $cols)
 							. '"><div class=row>';
                         $lo = [ 'class' => "label-$attribute " . implode(' ',$classes['label'])  ];
                         $fs .= $this->renderAttribute($attribute, $lo,
                             AppHelper::mergeAndConcat(['class'], $rowOptions,
                                 ['class' => "field field-$attribute " . $classes['wrapper']],
-                                $view_attrs[$attribute]['rowOptions']??[]),
-                            $nf);
+                                $view_attrs[$attribute]['rowOptions']??[]), $indexf++);
 						$fs .= '</div></div>';
 						$nf++;
 					}
