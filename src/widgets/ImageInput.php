@@ -78,7 +78,7 @@ class ImageInput extends \yii\widgets\InputWidget
 		} else {
 			$delete_check = '';
 		}
-		echo Html::tag('div', $parent_file_input . $delete_check);
+		echo Html::tag('div', $delete_check . $parent_file_input);
 	}
 
 }

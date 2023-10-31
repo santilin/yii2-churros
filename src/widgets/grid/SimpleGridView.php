@@ -343,9 +343,10 @@ class SimpleGridView extends \yii\grid\GridView
 			}
 		}
 		if( $this->totalsRow ) {
-			$ret .= Html::tag('tr',
-				$this->getFooterSummary($this->summaryColumns, $tdoptions),
-				[ 'class' => 'reportview-grand-total']);
+			$fs = $this->getFooterSummary($this->summaryColumns, $tdoptions);
+			if ($fs) {
+				$ret .= Html::tag('tr', $fs, [ 'class' => 'reportview-grand-total']);
+			}
 		}
 		return $ret;
 	}
