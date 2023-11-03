@@ -243,19 +243,24 @@ class CrudController extends \yii\web\Controller
 	*/
 	public function actionDelete($id)
 	{
-		$model = $this->findFormModel($id, null, 'delete');
+		try {
+			$model = $this->findFormModel($id, null, 'delete');
+		} catch( ForbiddenHttpException $e ) {
+			Yii::$app->session->addFlash('error', $e->getMessage());
+			return $this->redirect(Yii::$app->request->referrer?:Yii::$app->homeUrl);
+		}
 		if( YII_ENV_DEV ) {
 			$model->deleteWithRelated();
 			if (Yii::$app->request->getIsAjax()) {
 				return json_encode($id);
 			}
 			$this->addSuccessFlashes('delete', $model);
-			return $this->redirect($this->whereTogoNow('delete', $model));
+			return $this->redirect($this->whereTogoNow('delete', $model), 200);
 		} else {
 			try {
 				$model->deleteWithRelated();
 				$this->addSuccessFlashes('delete', $model);
-				return $this->redirect($this->whereTogoNow('delete', $model));
+				return $this->redirect($this->whereTogoNow('delete', $model), 200);
 			} catch (\yii\db\IntegrityException $e ) {
 				Yii::$app->session->addFlash('error', $model->t('churros',
 					$this->getResultMessage('error_delete_integrity')));
@@ -264,7 +269,7 @@ class CrudController extends \yii\web\Controller
 					$this->getResultMessage('error_delete')));
 			}
 		}
-		return $this->redirect($this->whereTogoNow('delete', null));
+		return $this->redirect($this->whereTogoNow('delete', null), 200);
 	}
 
 	/**
