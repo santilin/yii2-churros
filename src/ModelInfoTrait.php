@@ -792,6 +792,9 @@ trait ModelInfoTrait
 			case "NOT BETWEEN":
 				$query->andWhere([ $value['op'], $fldname, explode(',',$value['v']) ]);
 				break;
+			case "bool":
+				$query->andWhere([$fldname => ($value['v'] == 'true') ? 1 : ($value['v'] == 'false' ? 0 : boolval($value['v']))]);
+				break;
 		}
 	}
 
