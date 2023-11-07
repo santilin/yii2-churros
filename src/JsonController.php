@@ -18,6 +18,9 @@ class JsonController extends \yii\web\Controller
 {
 	protected $crudActions = [];
 	public $accessOnlyMine = false;
+	protected $root_model = null;
+	protected $root_id = null;
+	protected $json_id = null;
 
 	const MSG_DEFAULT = 'The action on {la} {title} <a href="{model_link}">{record_medium}</a> has been successful.';
 	const MSG_NO_ACTION = 'The action on {La} {title} <a href="{model_link}">{record_medium}</a> has been successful.';
@@ -67,6 +70,7 @@ class JsonController extends \yii\web\Controller
         if (YII_ENV_TEST && $action->id == "delete" ) {
 			$this->enableCsrfValidation = false;
 		}
+		$this->getMasterFromRequest();
         return parent::beforeAction($action);
 	}
 
@@ -345,6 +349,10 @@ class JsonController extends \yii\web\Controller
 		default:
 		}
 		$redirect_params[0] = $this->getActionRoute($to);
+		if ($this->getMasterModel()) {
+			$redirect_params['root_model'] = $this->getMasterModel()->getModelInfo('controller');
+			$redirect_params['root_id'] = $this->getMasterModel()->primaryKey();
+		}
 		return $redirect_params;
 	}
 
@@ -582,10 +590,24 @@ class JsonController extends \yii\web\Controller
 		return join($glue, $attrs);
 	}
 
-
-	public function getMasterModel()
+	protected function getMasterFromRequest()
 	{
-		return null;
+		if( $this->root_model != null ) {
+			return $this->root_model;
+		}
+		$req = Yii::$app->request;
+		$this->json_id = $req->post('id')?:$req->get('id');
+		if ($this->json_id) {
+			$this->root_id = $req->post('root_id')?:$req->get('id');
+			$root_model_name = $req->post('root_model')?:$req->get('root_model');
+			$root_model_name = 'app\\models\\'. AppHelper::camelCase($root_model_name);
+			$this->root_model = $root_model_name::findOne($this->root_id);
+			if ($this->root_model == null) {
+				throw new NotFoundHttpException($this->root_model->t('churros',
+					"The json record of {title}.{id} does not exist",
+					[ '{id}' => $this>_json_id]));
+			}
+		}
 	}
 
 }
