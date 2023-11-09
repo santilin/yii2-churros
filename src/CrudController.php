@@ -255,12 +255,12 @@ class CrudController extends \yii\web\Controller
 				return json_encode($id);
 			}
 			$this->addSuccessFlashes('delete', $model);
-			return $this->redirect($this->whereTogoNow('delete', $model), 200);
+			return $this->redirect($this->whereTogoNow('delete', $model));
 		} else {
 			try {
 				$model->deleteWithRelated();
 				$this->addSuccessFlashes('delete', $model);
-				return $this->redirect($this->whereTogoNow('delete', $model), 200);
+				return $this->redirect($this->whereTogoNow('delete', $model));
 			} catch (\yii\db\IntegrityException $e ) {
 				Yii::$app->session->addFlash('error', $model->t('churros',
 					$this->getResultMessage('error_delete_integrity')));
@@ -269,7 +269,7 @@ class CrudController extends \yii\web\Controller
 					$this->getResultMessage('error_delete')));
 			}
 		}
-		return $this->redirect($this->whereTogoNow('delete', null), 200);
+		return $this->redirect($this->whereTogoNow('delete', null));
 	}
 
 	/**

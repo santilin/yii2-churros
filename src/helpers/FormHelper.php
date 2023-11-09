@@ -222,14 +222,10 @@ $.ajax({
 	}
 });
 ajax;
-				$ret[] = Html::button(
-					$title,
-					$button['htmlOptions']);
+				$ret[] = Html::button($title, $button['htmlOptions']);
 				break;
 			case 'submit':
-				$ret[] = Html::submitButton(
-					$title,
-					$button['htmlOptions']);
+				$ret[] = Html::submitButton($title, $button['htmlOptions']);
 				break;
 			case 'button':
 				if( isset($button['url']) && !isset($button['htmlOptions']['onclick']) ) {
@@ -239,14 +235,20 @@ ajax;
 						$button['htmlOptions']['onclick'] = "location.href='" . $button['url'] . "'";
 					}
 				}
-				$ret[] = Html::button(
-					$title,
-					$button['htmlOptions']);
+				$ret[] = Html::button($title, $button['htmlOptions']);
 				break;
 			case 'select':
 				$ret[] = Html::dropDownList( $name, $button['selections']??null,
 					$button['options'], $button['htmlOptions']);
 				break;
+			case "submitPostForm":
+				$post_form = Html::beginForm(Url::to($button['url']), 'post', $button['formOptions']??[]);
+				foreach ($button['hiddenInputs'] as $hidden_name => $hidden_value) {
+					$post_form .= Html::hiddenInput($hidden_name, $hidden_value);
+				}
+				$post_form .= Html::submitButton($title, $button['htmlOptions']);
+				$post_form .= Html::endForm();
+				$ret[] = $post_form;
 			}
 		}
 		return implode($sep, $ret);
