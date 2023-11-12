@@ -359,7 +359,7 @@ class CrudController extends \yii\web\Controller
 			$to = 'index';
 			break;
 		case 'delete':
-			return [ Yii::$app->request->referrer ];
+			return Yii::$app->request->referrer;
 		case 'view':
 		case 'index':
 		default:
