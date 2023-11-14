@@ -9,7 +9,7 @@ namespace santilin\churros\widgets\grid;
 
 use Yii;
 use yii\base\Model;
-use yii\bootstrap\Html;
+use yii\bootstrap4\Html;
 
 class BooleanColumn extends \yii\grid\DataColumn
 {
