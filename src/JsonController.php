@@ -19,8 +19,8 @@ class JsonController extends \yii\web\Controller
 	protected $crudActions = [];
 	public $accessOnlyMine = false;
 	protected $root_model = null;
-	protected $root_id = null;
-	protected $root_json_path = null;
+	protected $_root_id = null;
+	protected $_path = null;
 	protected $root_json_field = null;
 
 	const MSG_DEFAULT = 'The action on {la} {title} <a href="{model_link}">{record_medium}</a> has been successful.';
@@ -593,23 +593,28 @@ class JsonController extends \yii\web\Controller
 		return join($glue, $attrs);
 	}
 
+	protected function getPath()
+	{
+		return $this->_path;
+	}
+
 	protected function getRootModel()
 	{
 		if ($this->root_model != null) {
 			return $this->root_model;
 		}
 		$req = Yii::$app->request;
-		$this->root_json_path = $req->post('path')?:$req->get('path');
-		if ($this->root_json_path) {
+		$this->_root_id = $req->post('root_id')?:$req->get('root_id');
+		$this->_path = $req->post('path')?:$req->get('path');
+		if ($this->_root_id) {
 			$this->root_json_field = $req->post('root_jf')?:$req->get('root_jf')?:'json';
-			$this->root_id = $req->post('root_id')?:$req->get('root_id');
 			$root_model_name = $req->post('root_model')?:$req->get('root_model');
 			$root_model_name = 'app\\models\\'. AppHelper::camelCase($root_model_name);
-			$this->root_model = $root_model_name::findOne($this->root_id);
+			$this->root_model = $root_model_name::findOne($this->_root_id);
 			if ($this->root_model == null) {
 				throw new NotFoundHttpException($this->root_model->t('churros',
 					"The root json record of {title}.{id} does not exist",
-					[ '{id}' => $this->root_id, '{title}' => $root_model_name]));
+					[ '{id}' => $this->_root_id, '{title}' => $root_model_name]));
 			}
 		}
 	}
