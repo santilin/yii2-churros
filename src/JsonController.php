@@ -16,12 +16,14 @@ use santilin\churros\helpers\AppHelper;
  */
 class JsonController extends \yii\web\Controller
 {
-	protected $crudActions = [];
 	public $accessOnlyMine = false;
+	protected $crudActions = [];
 	protected $root_model = null;
 	protected $_root_id = null;
 	protected $_path = null;
 	protected $root_json_field = null;
+	protected $_path_start = null;
+
 
 	const MSG_DEFAULT = 'The action on {la} {title} <a href="{model_link}">{record_medium}</a> has been successful.';
 	const MSG_NO_ACTION = 'The action on {La} {title} <a href="{model_link}">{record_medium}</a> has been successful.';
@@ -218,12 +220,12 @@ class JsonController extends \yii\web\Controller
 	 * @param string $path
 	 * @return mixed
 	*/
-	public function actionDelete(string $path)
+	public function actionDelete(string $id)
 	{
 		$root_model = $this->getRootModel();
-		$model = $this->findModel($root_model, $path);
+		$model = $this->findModel($root_model, $this->getPath());
 		if( YII_ENV_DEV ) {
-			$model->delete($root_model, $path);
+			$model->delete($root_model, $id);
 			if (Yii::$app->request->getIsAjax()) {
 				return json_encode($path);
 			}
@@ -231,7 +233,7 @@ class JsonController extends \yii\web\Controller
 			return $this->redirect($this->whereTogoNow('delete', $model));
 		} else {
 			try {
-				$model->deleteJsonPath($path);
+				$model->deleteJsonPath(basename($this->getPath()), $id);
 				$this->addSuccessFlashes('delete', $model);
 				return $this->redirect($this->whereTogoNow('delete', $model));
 			} catch (\yii\db\IntegrityException $e ) {
@@ -605,7 +607,16 @@ class JsonController extends \yii\web\Controller
 		}
 		$req = Yii::$app->request;
 		$this->_root_id = $req->post('root_id')?:$req->get('root_id');
-		$this->_path = $req->post('path')?:$req->get('path');
+		$this->_path = parse_url($_SERVER['REQUEST_URI'], PHP_URL_PATH);
+		if ($this->_path) {
+			$pos_path = strpos($this->_path, "/{$this->_path_start}/");
+			if ($pos_path === false) {
+				$pos_path = strpos($this->_path, "/{$this->id}/");
+			}
+			if ($pos_path !== false) {
+				$this->_path = substr($this->_path, $pos_path);
+			}
+		}
 		if ($this->_root_id) {
 			$this->root_json_field = $req->post('root_jf')?:$req->get('root_jf')?:'json';
 			$root_model_name = $req->post('root_model')?:$req->get('root_model');
