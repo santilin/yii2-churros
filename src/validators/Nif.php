@@ -152,13 +152,10 @@ class Nif
      */
     protected function normalizeToDni()
     {
-        $replace = [
-            'X' => 0,
-            'Y' => 1,
-            'Z' => 2,
-        ];
-
-        return strtr($this->nif, $replace);
+        $f = $this->nif[0];
+        $rest = substr($this->nif,1);
+        $f = strtr($f, [ 'X' => 0, 'Y' => 1, 'Z' => 2]);
+        return $f . $rest;
     }
 
     /**
