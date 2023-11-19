@@ -402,10 +402,9 @@ trait ModelInfoTrait
 
 	public function addErrorFromException(\Throwable $e)
 	{
-		if( YII_ENV_DEV ) {
-			$this->addError(get_class($e), $e->getMessage());
-		} else {
-			$this->addError(get_class($e), 'Para mantener la integridad de la base de datos, no se han guardado los datos.');
+		$devel_info = YII_ENV_PROD ? '' : "\n" . $e->getMessage();
+		$this->addError(get_class($e), Yii::t('churros',
+			"Data was not saved in order to maintain the data integrity.") . $devel_info);
 		}
 	}
 
