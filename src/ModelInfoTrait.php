@@ -404,8 +404,7 @@ trait ModelInfoTrait
 	{
 		$devel_info = YII_ENV_PROD ? '' : "\n" . $e->getMessage();
 		$this->addError(get_class($e), Yii::t('churros',
-			"Data was not saved in order to maintain the data integrity.") . $devel_info);
-		}
+			"Data was not saved in order to maintain the database integrity.") . $devel_info);
 	}
 
 	public function getOneError():string
