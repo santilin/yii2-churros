@@ -1,6 +1,6 @@
 <?php
 
-namespace santilin\churros;
+namespace santilin\churros\json;
 
 use Yii;
 use yii\helpers\Url;
@@ -225,7 +225,7 @@ class JsonController extends \yii\web\Controller
 		$root_model = $this->getRootModel();
 		$model = $this->findModel($root_model, $this->getPath());
 		if( YII_ENV_DEV ) {
-			$model->delete($root_model, $id);
+			$model->delete($root_model, $this->getPath(), $id);
 			if (Yii::$app->request->getIsAjax()) {
 				return json_encode($path);
 			}
@@ -623,9 +623,8 @@ class JsonController extends \yii\web\Controller
 			$root_model_name = 'app\\models\\'. AppHelper::camelCase($root_model_name);
 			$this->root_model = $root_model_name::findOne($this->_root_id);
 			if ($this->root_model == null) {
-				throw new NotFoundHttpException($this->root_model->t('churros',
-					"The root json record of {title}.{id} does not exist",
-					[ '{id}' => $this->_root_id, '{title}' => $root_model_name]));
+				throw new NotFoundHttpException(Yii::t('churros',
+					"The root json record for $root_model_name does not exist"));
 			}
 		}
 	}
