@@ -223,14 +223,19 @@ class JsonController extends \yii\web\Controller
 	public function actionDelete(string $id)
 	{
 		$root_model = $this->getRootModel();
-		$model = $this->findModel($root_model, $this->getPath());
-		if( YII_ENV_DEV ) {
-			$model->delete($root_model, $this->getPath(), $id);
-			if (Yii::$app->request->getIsAjax()) {
-				return json_encode($path);
+		$model = $this->findModel($root_model, $this->getPath(), $id);
+		if (YII_ENV_DEV) {
+			if ($model->delete()) {
+				if (Yii::$app->request->getIsAjax()) {
+					return json_encode($path);
+				}
+				$this->addSuccessFlashes('delete', $model);
+				return $this->redirect($this->whereTogoNow('delete', $model));
+			} else {
+				$e = $model->getErrors();
+				Yii::$app->session->addFlash('error', $model->t('churros', $this->getResultMessage('error_delete'))
+					. '.<br/>' . implode('<br/>', $model->getErrors()[0]));
 			}
-			$this->addSuccessFlashes('delete', $model);
-			return $this->redirect($this->whereTogoNow('delete', $model));
 		} else {
 			try {
 				$model->deleteJsonPath(basename($this->getPath()), $id);
@@ -241,10 +246,10 @@ class JsonController extends \yii\web\Controller
 					$this->getResultMessage('error_delete_integrity')));
 			} catch( \yii\web\ForbiddenHttpException $e ) {
 				Yii::$app->session->addFlash('error', $model->t('churros',
-					$this->getResultMessage('error_delete')));
+					$this->getResultMessage('access_denied')));
 			}
 		}
-		return $this->redirect($this->whereTogoNow('delete', null));
+		return $this->redirect($this->whereTogoNow('delete_error', null));
 	}
 
 	/**
@@ -310,6 +315,9 @@ class JsonController extends \yii\web\Controller
 		}
 		if( $returnTo ) {
 			return $returnTo;
+		}
+		if ($from == 'delete_error') {
+			return Yii::$app->request->referrer;
 		}
 		$redirect_params = [];
 		if( isset($_REQUEST['sort']) ) {
