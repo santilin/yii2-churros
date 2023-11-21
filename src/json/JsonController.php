@@ -22,6 +22,8 @@ class JsonController extends \yii\web\Controller
 	protected $_root_id = null;
 	protected $_path = null;
 	protected $root_json_field = null;
+
+ 	/** @var The start of the json path in the current url. If null, the url is substracted the root part */
 	protected $_path_start = null;
 
 
@@ -222,9 +224,8 @@ class JsonController extends \yii\web\Controller
 	*/
 	public function actionDelete(string $id)
 	{
-		$root_model = $this->getRootModel();
-		$model = $this->findModel($root_model, $this->getPath(), $id);
-		if (YII_ENV_DEV) {
+		$model = $this->findModel($this->getPath(), $id);
+		try {
 			if ($model->delete()) {
 				if (Yii::$app->request->getIsAjax()) {
 					return json_encode($path);
@@ -232,21 +233,21 @@ class JsonController extends \yii\web\Controller
 				$this->addSuccessFlashes('delete', $model);
 				return $this->redirect($this->whereTogoNow('delete', $model));
 			} else {
-				$e = $model->getErrors();
-				Yii::$app->session->addFlash('error', $model->t('churros', $this->getResultMessage('error_delete'))
-					. '.<br/>' . implode('<br/>', $model->getErrors()[0]));
+				Yii::$app->session->addFlash('error', $model->t('churros', $this->getResultMessage('error_delete')));
+				$this->addErrorFlashes($model);
 			}
-		} else {
-			try {
-				$model->deleteJsonPath(basename($this->getPath()), $id);
-				$this->addSuccessFlashes('delete', $model);
-				return $this->redirect($this->whereTogoNow('delete', $model));
-			} catch (\yii\db\IntegrityException $e ) {
-				Yii::$app->session->addFlash('error', $model->t('churros',
-					$this->getResultMessage('error_delete_integrity')));
-			} catch( \yii\web\ForbiddenHttpException $e ) {
-				Yii::$app->session->addFlash('error', $model->t('churros',
-					$this->getResultMessage('access_denied')));
+		} catch (\yii\db\IntegrityException $e ) {
+			Yii::$app->session->addFlash('error', $model->t('churros',
+				$this->getResultMessage('error_delete_integrity')));
+			if (YII_ENV_DEV) {
+				$this->addErrorFlashes($model);
+			}
+			return $this->redirect($this->whereTogoNow('delete_error', null));
+		} catch( \yii\web\ForbiddenHttpException $e ) {
+			Yii::$app->session->addFlash('error', $model->t('churros',
+				$this->getResultMessage('access_denied')));
+			if (YII_ENV_DEV) {
+				$this->addErrorFlashes($model);
 			}
 		}
 		return $this->redirect($this->whereTogoNow('delete_error', null));
@@ -510,19 +511,29 @@ class JsonController extends \yii\web\Controller
 
 	protected function addErrorFlashes($model)
 	{
+		$errors = [];
 		foreach($model->getFirstErrors() as $error ) {
 			if( strpos($error, '{model_link}') !== FALSE ) {
 				$link_to_model = $this->linkToModel($model);
-				$error = str_replace('{model_link}', $link_to_model, $error);
+				$errors[] = str_replace('{model_link}', $link_to_model, $error);
+			} else {
+				$errors[] = $error;
 			}
-			Yii::$app->session->addFlash('error', $error );
 		}
+		if (count($errors)) {
+			Yii::$app->session->addFlash('error', implode('<br/>', $errors) );
+		}
+		$warnings = [];
 		foreach($model->getFirstWarnings() as $warning ) {
 			if( strpos($warning, '{model_link}') !== FALSE ) {
 				$link_to_model = $this->linkToModel($model);
-				$warning = str_replace('{model_link}', $link_to_model, $warning);
+				$warnings[] = str_replace('{model_link}', $link_to_model, $warning);
+			} else {
+				$warnings[] = $warning;
 			}
-			Yii::$app->session->addFlash('warning', $warning );
+		}
+		if (count($warnings)) {
+			Yii::$app->session->addFlash('warning', implode('<br/>', $warnings) );
 		}
 	}
 
@@ -615,24 +626,38 @@ class JsonController extends \yii\web\Controller
 		}
 		$req = Yii::$app->request;
 		$this->_root_id = $req->post('root_id')?:$req->get('root_id');
-		$this->_path = parse_url($_SERVER['REQUEST_URI'], PHP_URL_PATH);
-		if ($this->_path) {
-			$pos_path = strpos($this->_path, "/{$this->_path_start}/");
-			if ($pos_path === false) {
-				$pos_path = strpos($this->_path, "/{$this->id}/");
-			}
-			if ($pos_path !== false) {
-				$this->_path = substr($this->_path, $pos_path);
-			}
+		$root_model_name = $req->post('root_model')?:$req->get('root_model');
+		if ($root_model_name) {
+			$root_model_name = 'app\\models\\'. AppHelper::camelCase($root_model_name);
 		}
 		if ($this->_root_id) {
 			$this->root_json_field = $req->post('root_jf')?:$req->get('root_jf')?:'json';
-			$root_model_name = $req->post('root_model')?:$req->get('root_model');
-			$root_model_name = 'app\\models\\'. AppHelper::camelCase($root_model_name);
 			$this->root_model = $root_model_name::findOne($this->_root_id);
 			if ($this->root_model == null) {
 				throw new NotFoundHttpException(Yii::t('churros',
 					"The root json record for $root_model_name does not exist"));
+			}
+		}
+		$this->_path = parse_url($_SERVER['REQUEST_URI'], PHP_URL_PATH);
+		if ($this->_path) {
+			$pos_path = false;
+			if ($this->_path_start) {
+				$pos_path = strpos($this->_path, "/{$this->_path_start}/");
+			}
+			if ($pos_path === false) {
+				if ($root_model_name) {
+					$root_controller = $root_model_name::getModelInfo('controller_name');
+					$pos_path = strpos($this->_path, "/$root_controller/");
+					if ($pos_path !== false) {
+						$pos_path += strlen("/$root_controller/") + 1;
+						while ($pos_path < strlen($this->_path && $this->_path[$pos_path] != '/')) {
+							$pos_path++;
+						}
+					}
+				}
+			}
+			if ($pos_path !== false) {
+				$this->_path = substr($this->_path, $pos_path);
 			}
 		}
 	}
