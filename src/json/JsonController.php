@@ -122,15 +122,10 @@ class JsonController extends \yii\web\Controller
 		$req = Yii::$app->request;
 		$params = array_merge($req->get(), $req->post());
 		$model = $this->findFormModel(null, null, 'create', $params);
+		$relations = empty($params['_form.relations'])?[]:explode(",", $params['_form.relations']);
 		$model->scenario = 'create';
-
-		if (isset($_POST['_form_relations']) ) {
-			$relations = explode(",", $_POST['_form_relations']);
-		} else {
-			$relations = [];
-		}
-		if ($model->loadAll($req->post(), $relations) ) {
-			if ($model->saveAll(true) ) {
+		if ($model->loadAll($params, $relations) ) {
+			if ($model->validate && $model->insert() ) {
 				if ($req->getIsAjax()) {
 					return json_encode($model->getAttributes());
 				}
@@ -158,13 +153,8 @@ class JsonController extends \yii\web\Controller
 		$params = array_merge($req->get(), $req->post());
 		$model = $this->findFormModel($id, null, 'duplicate', $params);
 		$model->setDefaultValues(true); // duplicating
+		$relations = empty($params['_form.relations'])?[]:explode(",", $params['_form.relations']);
 		$model->scenario = 'duplicate';
-
-		if (isset($_POST['_form_relations']) ) {
-			$relations = explode(",", $_POST['_form_relations']);
-		} else {
-			$relations = [];
-		}
 		if ($model->loadAll($req->post(), $relations) ) {
 			$model->setIsNewRecord(true);
 			$model->resetPrimaryKeys();
@@ -321,7 +311,7 @@ class JsonController extends \yii\web\Controller
 			return Yii::$app->request->referrer;
 		}
 		$redirect_params = [];
-		if( isset($_REQUEST['sort']) ) {
+		if (!empty($_REQUEST['sort']) ) {
 			$redirect_params['sort'] = $_REQUEST['sort'];
 		}
 		switch ($from) {
