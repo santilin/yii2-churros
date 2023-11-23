@@ -245,31 +245,22 @@ class CrudController extends \yii\web\Controller
 	{
 		try {
 			$model = $this->findFormModel($id, null, 'delete');
-		} catch( ForbiddenHttpException $e ) {
-			Yii::$app->session->addFlash('error', $e->getMessage());
-			return $this->redirect(Yii::$app->request->referrer?:Yii::$app->homeUrl);
-		}
-		if( YII_ENV_DEV ) {
 			$model->deleteWithRelated();
 			if (Yii::$app->request->getIsAjax()) {
 				return json_encode($id);
 			}
 			$this->addSuccessFlashes('delete', $model);
 			return $this->redirect($this->whereTogoNow('delete', $model));
-		} else {
-			try {
-				$model->deleteWithRelated();
-				$this->addSuccessFlashes('delete', $model);
-				return $this->redirect($this->whereTogoNow('delete', $model));
-			} catch (\yii\db\IntegrityException $e ) {
-				Yii::$app->session->addFlash('error', $model->t('churros',
-					$this->getResultMessage('error_delete_integrity')));
-			} catch (\yii\web\ForbiddenHttpException $e ) {
-				Yii::$app->session->addFlash('error', $model->t('churros',
-					$this->getResultMessage('error_delete')));
-			}
+		} catch( ForbiddenHttpException $e ) {
+			Yii::$app->session->addFlash('error', $e->getMessage());
+			return $this->redirect(Yii::$app->request->referrer?:Yii::$app->homeUrl);
+		} catch (\yii\db\IntegrityException $e ) {
+			Yii::$app->session->addFlash('error', $model->t('churros',
+				$this->getResultMessage('error_delete_integrity')));
+		} catch (\yii\web\ForbiddenHttpException $e ) {
+			Yii::$app->session->addFlash('error', $model->t('churros',
+				$this->getResultMessage('error_delete')));
 		}
-		return $this->redirect($this->whereTogoNow('delete', null));
 	}
 
 	/**
@@ -337,7 +328,7 @@ class CrudController extends \yii\web\Controller
 			return $returnTo;
 		}
 		$redirect_params = [];
-		if( isset($_REQUEST['sort']) ) {
+		if( !empty($_REQUEST['sort']) ) {
 			$redirect_params['sort'] = $_REQUEST['sort'];
 		}
 		switch ($from) {
@@ -359,7 +350,12 @@ class CrudController extends \yii\web\Controller
 			$to = 'index';
 			break;
 		case 'delete':
-			return Yii::$app->request->referrer;
+			if (Yii::$app->request->referrer) {
+				return Yii::$app->request->referrer;
+			} else {
+				$to = 'index';
+			}
+			break;
 		case 'view':
 		case 'index':
 		default:
