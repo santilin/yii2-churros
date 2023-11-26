@@ -1,9 +1,11 @@
 <?php
 
 namespace santilin\churros\json;
+use JsonPath\JsonObject;
 
-interface JsonModelable {
-
+interface JsonModelable
+{
+	public function createJsonRoot();
 }
 
 

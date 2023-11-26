@@ -121,7 +121,7 @@ class JsonController extends \yii\web\Controller
 	{
 		$req = Yii::$app->request;
 		$params = array_merge($req->get(), $req->post());
-		$model = $this->findFormModel(null, null, 'create', $params);
+		$model = $this->findFormModel($this->getPath(), null, null, 'create', $params);
 		$relations = empty($params['_form.relations'])?[]:explode(",", $params['_form.relations']);
 		$model->scenario = 'create';
 		if ($model->loadAll($params, $relations) ) {
@@ -151,11 +151,11 @@ class JsonController extends \yii\web\Controller
 	{
 		$req = Yii::$app->request;
 		$params = array_merge($req->get(), $req->post());
-		$model = $this->findFormModel($id, null, 'duplicate', $params);
+		$model = $this->findFormModel($this->getPath(), $id, null, 'duplicate', $params);
 		$model->setDefaultValues(true); // duplicating
 		$relations = empty($params['_form.relations'])?[]:explode(",", $params['_form.relations']);
 		$model->scenario = 'duplicate';
-		if ($model->loadAll($req->post(), $relations) ) {
+		if ($model->loadAll($params, $relations) ) {
 			$model->setIsNewRecord(true);
 			$model->resetPrimaryKeys();
 			if( $model->saveAll(true) ) {
@@ -183,15 +183,10 @@ class JsonController extends \yii\web\Controller
 	{
 		$req = Yii::$app->request;
 		$params = array_merge($req->get(), $req->post());
-		$model = $this->findFormModel($id, null, 'update', $params);
-		$model->scenario = 'update';
+		$model = $this->findFormModel($this->getPath(), $id, null, 'update', $params);
+		$relations = empty($params['_form.relations'])?[]:explode(",", $params['_form.relations']);
 
-		if (isset($_POST['_form_relations']) ) {
-			$relations = explode(",", $_POST['_form_relations']);
-		} else {
-			$relations = [];
-		}
-		if ($model->loadAll($req->post(), $relations) && $req->isPost ) {
+		if ($model->loadAll($params, $relations) && $req->isPost ) {
 			if( $model->saveAll(true) ) {
 				if ($req->getIsAjax()) {
 					return json_encode($model->getAttributes());
@@ -634,6 +629,7 @@ class JsonController extends \yii\web\Controller
 			if ($this->_path_start) {
 				$pos_path = strpos($this->_path, "/{$this->_path_start}/");
 			}
+			// Remove root model part
 			if ($pos_path === false) {
 				if ($root_model_name) {
 					$root_controller = $root_model_name::getModelInfo('controller_name');
@@ -648,6 +644,13 @@ class JsonController extends \yii\web\Controller
 			}
 			if ($pos_path !== false) {
 				$this->_path = substr($this->_path, $pos_path);
+			}
+			// Remove action part
+			$action_parts = explode('/', $this->_path);
+			$pos_action = array_search($this->action->id, array_reverse($action_parts));
+			if ($pos_action !== false) {
+				$pos_action = count($action_parts)-$pos_action-1;
+				$this->_path = implode('/',array_slice($action_parts,0,$pos_action));
 			}
 		}
 	}
