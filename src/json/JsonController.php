@@ -645,12 +645,16 @@ class JsonController extends \yii\web\Controller
 			if ($pos_path !== false) {
 				$this->_path = substr($this->_path, $pos_path);
 			}
-			// Remove action part
-			$action_parts = explode('/', $this->_path);
-			$pos_action = array_search($this->action->id, array_reverse($action_parts));
+			// Remove action part to get only the json path
+			$pos_action = strrpos($this->_path, '/'. $this->action->id . '/');
+			if ($pos_action === false) {
+				$action_len = strlen($this->action->id)+1;
+				if (substr($this->path,-$action_len) == '/'.$this->action->id) {
+					$pos_action = strlen($this->path) - $action_len;
+				}
+			}
 			if ($pos_action !== false) {
-				$pos_action = count($action_parts)-$pos_action-1;
-				$this->_path = implode('/',array_slice($action_parts,0,$pos_action));
+				$this->_path = substr($this->path, 0, $pos_action);
 			}
 		}
 	}
