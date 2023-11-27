@@ -1,3 +1,7 @@
+# Sqlite3
+- Crear issue en github PRAGMA
+
+
 # CrudController
 - Duplicar: imágenes, aparece el check para borrar la imagen.
 
