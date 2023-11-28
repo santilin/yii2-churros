@@ -299,6 +299,12 @@ class JsonController extends \yii\web\Controller
 		if( !$returnTo ) {
 			$returnTo = Yii::$app->request->queryParams['returnTo']??null;
 		}
+		if( !$returnTo ) {
+			$returnTo = Yii::$app->request->post('_form_returnTo');
+		}
+		if( !$returnTo ) {
+			$returnTo = Yii::$app->request->queryParams['_form_returnTo']??null;
+		}
 		if( $returnTo ) {
 			return $returnTo;
 		}
