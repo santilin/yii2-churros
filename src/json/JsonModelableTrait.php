@@ -8,9 +8,8 @@ trait JsonModelableTrait
 	/** @var JsonPath\JsonObject the root of the json content */
 	protected $_json_root = false;
 
-	public function getJsonObject(string $path, ?string $id): ?JsonObject
+	public function getJsonObject(string $path, ?string $id, ?string $locator=null): ?JsonObject
 	{
-		$locator = 'name';
 		if ($this->_json_root === false) {
 			$this->_json_root = $this->createJsonRoot();
 		}
