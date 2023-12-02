@@ -246,10 +246,9 @@ trait RelationTrait
     public function saveRelated(): bool
     {
 		$success = true;
- 		$isNewRecord = $this->isNewRecord;
 		foreach ($this->relatedRecords as $rel_name => $records) {
 			/* @var $records ActiveRecord | ActiveRecord[] */
-			if( $records instanceof \yii\db\ActiveRecord && !$records->getIsNewRecord() ) {
+			if( $records instanceof \yii\db\BaseActiveRecord && !$records->getIsNewRecord() ) {
 				continue;
 			} else if ( $records instanceof \yii\db\ActiveRecord ) {
 				$records = (array)$records;
@@ -257,17 +256,18 @@ trait RelationTrait
 			if (count($records)>0) {
 				$justUpdateIds = !($records[0] instanceof \yii\db\BaseActiveRecord);
 				if( $justUpdateIds ) {
-					$success = $this->updateIds($isNewRecord, $rel_name, $records);
+					$success = $this->updateIds($rel_name, $records);
 				} else {
-					$success = $this->updateRecords($isNewRecord, $rel_name, $records);
+					$success = $this->updateRecords($rel_name, $records);
 				}
 			}
 		}
 		return $success;
     }
 
-    private function updateIds($isNewRecord, $rel_name, $records)
+    private function updateIds($rel_name, $records)
     {
+		$isNewRecord = $this->isNewRecord;
 		$relation = $this->getRelation($rel_name);
         $isSoftDelete = isset($this->_rt_softdelete);
 		$dontDeletePk = [];
@@ -395,8 +395,9 @@ trait RelationTrait
 		return $success;
     }
 
-    private function updateRecords($isNewRecord, $rel_name, $records)
+    private function updateRecords($rel_name, $records)
     {
+		$isNewRecord = $this->isNewRecord;
 		$success = true;
 		$relation = $this->getRelation($rel_name);
         $isSoftDelete = isset($this->_rt_softdelete);

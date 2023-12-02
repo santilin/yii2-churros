@@ -220,7 +220,7 @@ class CrudController extends \yii\web\Controller
 		} else {
 			$relations = [];
 		}
-		if ($model->loadAll($req->post(), $relations) && $req->isPost ) {
+		if ($model->loadAll($params, $relations) && $req->isPost ) {
 			if( $model->saveAll(true) ) {
 				if ($req->getIsAjax()) {
 					return json_encode($model->getAttributes());
