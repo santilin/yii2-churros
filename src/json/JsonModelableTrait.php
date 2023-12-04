@@ -22,11 +22,11 @@ trait JsonModelableTrait
 				return $ret;
 			}
 		} else {
-			$ret =$this->_json_root->getJsonObjects('$' . str_replace('/','.',$path));
-			if (is_array($ret) && $id ) {
-				return $ret[$id]??null;
-			} else {
+			$ret = $this->_json_root->getJsonObjects('$' . str_replace('/','.',$path) . ($id?('.' . $id):''));
+			if ($ret) {
 				return $ret;
+			} else {
+				return null;
 			}
 		}
 	}
