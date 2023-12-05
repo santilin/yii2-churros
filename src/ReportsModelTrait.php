@@ -466,7 +466,7 @@ trait ReportsModelTrait
 		$ret .= "<td class=control-form>";
 		$ret .= Html::dropDownList("report_filters[$index][name]", $attribute,
 		$dropdown_columns, [
-			'class' => 'form-control',
+ 			'class' => 'form-select',
 			'prompt' => [
 				'text' => 'Elige una columna', 'options' => ['value' => '', 'class' => 'prompt',
 					'label' => 'Elige una columna']
@@ -477,7 +477,7 @@ trait ReportsModelTrait
 		$ret .= "<td class=control-form>";
 		$ret .= Html::dropDownList("report_filters[$index][op]",
 			$value['op'], FormHelper::$operators, [
-			'id' => "drop-$attr_class", 'class' => 'search-dropdown form-control',
+			'id' => "drop-$attr_class", 'class' => 'search-dropdown form-select',
 			] );
 		$ret .= "</td>";
 
