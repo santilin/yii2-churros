@@ -116,6 +116,8 @@ return [
 	'Label' => 'Etiqueta',
 	'One line only' => 'Una sola línea',
 
+	'Showing <b>{totalCount, number}</b> {totalCount, plural, one{{item}} other{{items}}}.'
+		=> 'Mostrando <b>{totalCount, number}</b> {totalCount, plural, one{{item}} other{{items}}}.',
 	'{model.title}: you have not access to this report' => '{model.title}: no tienes acceso a este informe',
     'Showing <b>{begin, number}-{end, number}</b> of <b>{totalCount, number}</b> {totalCount, plural, one{{item}} other{{items}}}.' => 'Mostrando <b>{begin, number}-{end, number}</b> de <b>{totalCount, number}</b> {totalCount, plural, one{{item}} other{{items}}}.',
 	'Showing <b>{begin, number}-{end, number}</b> of <b>{totalCount, number}</b>' => 'Mostrando <b>{begin, number}-{end, number}</b> de <b>{totalCount, number}</b>',
