@@ -31,5 +31,28 @@ trait JsonModelableTrait
 		}
 	}
 
+	public function getJsonArray(string $path, ?string $id, ?string $locator=null): ?array
+	{
+		if ($this->_json_root === false) {
+			$this->_json_root = $this->createJsonRoot();
+		}
+		if ($locator && $id) {
+			$ret = $this->_json_root->get('$' . str_replace('/','.',$path)
+				. "[?(@.$locator=='$id')]");
+			if (is_array($ret)) {
+				return $ret[0];
+			} else {
+				return $ret;
+			}
+		} else {
+			$ret = $this->_json_root->get('$' . str_replace('/','.',$path) . ($id?('.' . $id):''));
+			if (!empty($ret)) {
+				return $ret;
+			} else {
+				return null;
+			}
+		}
+	}
+
 
 }

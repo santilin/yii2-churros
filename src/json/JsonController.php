@@ -605,12 +605,12 @@ class JsonController extends \yii\web\Controller
 		return join($glue, $attrs);
 	}
 
-	protected function getPath()
+	public function getPath()
 	{
 		return $this->_path;
 	}
 
-	protected function getRootModel()
+	public function getRootModel()
 	{
 		if ($this->root_model != null) {
 			return $this->root_model;
