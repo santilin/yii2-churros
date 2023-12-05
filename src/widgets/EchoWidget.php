@@ -19,6 +19,10 @@ class EchoWidget extends \yii\widgets\InputWidget
 // 			$classes[] = 'form-control-plaintext';
 // 		}
 		$s_classes = implode(' ', $classes);
-		return "<div class=\"$s_classes\">{$this->value}</div>";
+		if (is_callable($this->value)) {
+			return "<div class=\"$s_classes\">" . call_user_func($this->value) . "</div>";
+		} else {
+			return "<div class=\"$s_classes\">{$this->value}</div>";
+		}
 	}
 }
