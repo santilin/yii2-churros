@@ -361,7 +361,7 @@ class SimpleGridView extends \yii\grid\GridView
 		}
 		$p = $this->dataProvider->getPagination();
 		if( $p && $p->getPageCount() > 1 ) {
-			return '<td colspan="42">No muestro totales porque no se están mostrando todos los registros.</tr>';
+			return '<td colspan="42">Not showing totals because not all the rows have been shown</td>';
 		}
 		$colspan = 0;
 		foreach ($this->columns as $kc => $column) {
