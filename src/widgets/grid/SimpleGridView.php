@@ -70,7 +70,9 @@ class SimpleGridView extends \yii\grid\GridView
 		}
 		// Eliminar propiedades de kartik data column
 		foreach( $config['columns'] as &$column ) {
-			unset($column['filterType'],$column['filterWidgetOptions']);
+			if (is_array($column)) {
+				unset($column['filterType'],$column['filterWidgetOptions']);
+			}
 		}
 		parent::__construct($config);
 	}
@@ -79,7 +81,9 @@ class SimpleGridView extends \yii\grid\GridView
 	{
 		$this->initGroups(); // must be done before initColumns
 		foreach ($this->columns as &$column) {
-			unset($column['name']);
+			if (is_array($column)) {
+				unset($column['name']);
+			}
 		}
 		parent::init();
 		if( count($this->groups) != 0 || $this->totalsRow) {
