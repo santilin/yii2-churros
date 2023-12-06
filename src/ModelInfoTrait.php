@@ -82,6 +82,11 @@ trait ModelInfoTrait
 						} else {
 							$placeholders[$bracket_match] = $male_words[$match];
 						}
+					} else { // allows any other array inside brackets
+						$value = ArrayHelper::getValue($params, $match, 'qué raro');
+						if ($value !== 'qué raro') {
+							$placeholders[$bracket_match] = $value;
+						}
 					}
 				}
 			}
