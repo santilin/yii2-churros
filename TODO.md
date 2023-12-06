@@ -1,6 +1,8 @@
 # Sqlite3
 - Crear issue en github PRAGMA
 
+# ActionColumn
+- Usar propiedad visible de los botones
 
 # CrudController
 - Duplicar: imágenes, aparece el check para borrar la imagen.
