@@ -688,10 +688,16 @@ class CrudController extends \yii\web\Controller
 		$keys[0] = 'view';
 		$parent_route = Url::toRoute($keys);
 		$attrs = [];
+		$first_model = reset($models);
+		$no_urls = is_array($first_model->getPrimaryKey());
 		foreach((array)$models as $model) {
 			if( $model != null ) {
-				$url = $parent_route . '/'.  $model->controllerName() . '/' . strval($model->getPrimaryKey());
-				$attrs[] = "<a href='$url'>" .  $model->recordDesc() . "</a>";
+				if ($no_urls) {
+					$attrs[] = $model->recordDesc();
+				} else {
+					$url = $parent_route . '/'.  $model->controllerName() . '/' . strval($model->getPrimaryKey());
+					$attrs[] = "<a href='$url'>" .  $model->recordDesc() . "</a>";
+				}
 			}
 		}
 		return join($glue, $attrs);

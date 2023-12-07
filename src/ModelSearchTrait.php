@@ -50,14 +50,14 @@ trait ModelSearchTrait
 	*/
     public function addRelatedSortsToProvider($gridColumns, &$provider)
     {
-		foreach( $gridColumns as $attribute => $column_def ) {
-			if ( is_int($attribute)
+		foreach ($gridColumns as $attribute => $column_def) {
+			if (is_int($attribute)
 				|| $attribute == '__actions__'
 				|| array_key_exists($attribute, $this->attributes ) ) {
 				continue;
 			}
 			$attribute = $column_def['attribute'];
-			if( strpos($attribute, '.') === FALSE ) {
+			if (strpos($attribute, '.') === FALSE) {
 				$relation_name = $attribute;
 				$sort_fldname = '';
 			} else {
@@ -69,14 +69,14 @@ trait ModelSearchTrait
 				// Activequery removes duplicate joins
 				$provider->query->joinWith("$relation_name $table_alias");
 				$provider->query->distinct(); // Evitar duplicidades debido a las relaciones hasmany
-				if ($sort_fldname == '' ) { /// @todo junction tables
-					$code_field = $related_model_class::instance()->findCodeField();
-					$sort_fldname = $code_field;
-				}
-				if( $sort_fldname != '' && !isset($provider->sort->attributes[$attribute])) {
+				if (!isset($provider->sort->attributes[$attribute])) {
 					$related_model_search_class = self::$relations[$relation_name]['searchClass']
 						?? str_replace('models\\', 'forms\\', $related_model_class) . '_Search';
 					if( class_exists($related_model_search_class) ) {
+						if ($sort_fldname == '' ) { /// @todo junction tables
+							$code_field = $related_model_class::instance()->findCodeField();
+							$sort_fldname = $code_field;
+						}
 						// Set orders from the related search model
 						$related_model = new $related_model_search_class;
 						$related_model_provider = $related_model->search([]);
