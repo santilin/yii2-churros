@@ -399,7 +399,7 @@ class CrudController extends \yii\web\Controller
 		$breadcrumbs = [];
  		$master = $this->getMasterModel();
 		if ($master) {
-			$prefix = '/' . $this->getFullRoute() . '/' . $master->controllerName(). '/';
+			$prefix = $this->getFullRoute() . '/' . $master->controllerName(). '/';
 			$breadcrumbs[] = [
 				'label' => AppHelper::mb_ucfirst($master->getModelInfo('title_plural')),
 				'url' => [ $prefix . 'index']
@@ -426,7 +426,7 @@ class CrudController extends \yii\web\Controller
 					break;
 			}
 		} else {
-			$prefix = '/' . $this->getFullRoute();
+			$prefix = $this->getFullRoute();
 			if (FormHelper::hasPermission($permissions, 'index')) {
 				$breadcrumbs['index'] = [
 					'label' =>  $model->getModelInfo('title_plural'),
@@ -467,7 +467,11 @@ class CrudController extends \yii\web\Controller
 
 	private function getFullRoute(): string
 	{
-		return $this->module instanceof \yii\base\Application ? $this->id : $this->module->getUniqueId();
+		if ($this->module instanceof \yii\base\Application) {
+			return '';
+		} else {
+			return '/' . $this->module->getUniqueId();
+		}
 	}
 
   	public function getActionRoute($action_id = null, $master_model = null): string
@@ -476,7 +480,7 @@ class CrudController extends \yii\web\Controller
 			$master_model = $this->getMasterModel();
 		}
 		if ($master_model) {
-			$controller_route = '/' . $this->getFullRoute();
+			$controller_route = $this->getFullRoute();
 			$controller_route .= '/' . $master_model->controllerName()
 				. '/' . $master_model->getPrimaryKey() . '/' .  $this->id;
 			if (is_array($action_id)) {
