@@ -204,10 +204,10 @@ trait RelationTrait
 			$trans = $this->getDb()->beginTransaction();
 			$must_commit = true;
 		}
-		$isNewRecord = $this->isNewRecord;
+		$wasNewRecord = $this->isNewRecord;
         try {
             if ($this->save($runValidation)) {
-				if( $this->saveRelated() ) {
+				if ($this->saveRelated($wasNewRecord)) {
 					if( $must_commit ) {
 						$trans->commit();
 					}
@@ -216,7 +216,7 @@ trait RelationTrait
 					if( $must_commit ) {
 						$trans->rollback();
 					}
-                    $this->isNewRecord = $isNewRecord;
+                    $this->isNewRecord = $wasNewRecord;
                     return false;
 				}
             } else {
@@ -226,7 +226,7 @@ trait RelationTrait
 			if( $must_commit ) {
 				$trans->rollBack();
 			}
-            $this->isNewRecord = $isNewRecord;
+            $this->isNewRecord = $wasNewRecord;
             $this->addErrorFromException($e);
 			return false;
         }
@@ -243,7 +243,7 @@ trait RelationTrait
     }
 
 
-    public function saveRelated(): bool
+    public function saveRelated(bool $wasNewRecord): bool
     {
 		$success = true;
 		foreach ($this->relatedRecords as $rel_name => $records) {
@@ -256,18 +256,17 @@ trait RelationTrait
 			if (count($records)>0) {
 				$justUpdateIds = !($records[0] instanceof \yii\db\BaseActiveRecord);
 				if( $justUpdateIds ) {
-					$success = $this->updateIds($rel_name, $records);
+					$success = $this->updateIds($wasNewRecord, $rel_name, $records);
 				} else {
-					$success = $this->updateRecords($rel_name, $records);
+					$success = $this->updateRecords($wasNewRecord, $rel_name, $records);
 				}
 			}
 		}
 		return $success;
     }
 
-    private function updateIds($rel_name, $records)
+    private function updateIds(bool $wasNewRecord, string $rel_name, $records)
     {
-		$isNewRecord = $this->isNewRecord;
 		$relation = $this->getRelation($rel_name);
         $isSoftDelete = isset($this->_rt_softdelete);
 		$dontDeletePk = [];
@@ -283,7 +282,7 @@ trait RelationTrait
 			$links = array_keys($relation->link);
 			$relModel = new $relModelClass;
 			$relPKAttr = $relModel->primarykey();
-			if( count($relPKAttr) > 1 ) {
+			if (count($relPKAttr) > 1) {
 				$isManyMany = true;
 				foreach ($relPKAttr as $attr ) {
 					if (!in_array($attr, $links) ) {
@@ -294,7 +293,7 @@ trait RelationTrait
 				}
 			}
 
-			if (!$isNewRecord) {
+			if (!$wasNewRecord) {
 				// DELETE WITH 'NOT IN' PK MODEL & REL MODEL
 				if ($isManyMany) {
 					$query = [];
@@ -397,7 +396,7 @@ trait RelationTrait
 
     private function updateRecords($rel_name, $records)
     {
-		$isNewRecord = $this->isNewRecord;
+		$wasNewRecord = $this->isNewRecord;
 		$success = true;
 		$relation = $this->getRelation($rel_name);
         $isSoftDelete = isset($this->_rt_softdelete);
@@ -456,7 +455,7 @@ trait RelationTrait
 					}
 				}
 
-				if (!$isNewRecord) {
+				if (!$wasNewRecord) {
 					// DELETE WITH 'NOT IN' PK MODEL & REL MODEL
 					if ($isManyMany) {
 						// Many Many
