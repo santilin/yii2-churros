@@ -91,16 +91,16 @@ class FileUploadBehavior extends \yii\base\Behavior
     {
 		$this->oldPath = null;
 		if ($this->file instanceof UploadedFile) {
-			if (true !== $this->owner->isNewRecord) {
+			if (!$this->owner->isNewRecord) {
 				/** @var ActiveRecord $oldModel */
 				$oldModel = $this->owner->findOne($this->owner->primaryKey);
 				$behavior = static::getInstance($oldModel, $this->attribute);
-				$behavior->cleanFiles();
+                if ( '' != $oldModel->{$this->attribute}) {
+                    $behavior->cleanFiles();
+                }
 			}
 			$this->owner->{$this->attribute} = implode('.',
 					array_filter([$this->file->baseName, $this->file->extension]));
-
-// 			$this->owner->{$this->attribute} = $this->getUploadedFieldValue($this->attribute);
 		} else {
 			if( $this->owner->{$this->attribute} === '1' ) {
 				$oldvalue = ArrayHelper::getValue($this->owner->oldAttributes, $this->attribute, null);
