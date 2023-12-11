@@ -341,6 +341,13 @@ class CrudController extends \yii\web\Controller
 			if (Yii::$app->request->post('_and_create') == '1') {
 				$to = 'create';
 			} else {
+				$master = $this->getMasterModel();
+				if ($master) {
+					$prefix = $this->getFullRoute() . '/' . $master->controllerName(). '/';
+					$keys = $master->getPrimaryKey(true);
+					$keys[0] = $prefix . 'view';
+					return $keys;
+				}
 				$to = 'view';
 			}
 			break;
@@ -427,7 +434,6 @@ class CrudController extends \yii\web\Controller
 		}
 		return $breadcrumbs;
 	}
-
 
 	public function genBreadCrumbs(string $action_id, $model, array $permissions = []): array
 	{
