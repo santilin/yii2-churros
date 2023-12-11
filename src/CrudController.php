@@ -393,8 +393,7 @@ class CrudController extends \yii\web\Controller
         return Url::to($params);
     }
 
-
-	public function genBreadCrumbs(string $action_id, $model, array $permissions = []): array
+    public function genBaseBreadCrumbs($model, array $permissions = []): array
 	{
 		$breadcrumbs = [];
  		$master = $this->getMasterModel();
@@ -410,51 +409,62 @@ class CrudController extends \yii\web\Controller
 				'label' => $master->recordDesc('short', 25),
 				'url' => $keys
 			];
-			// child
 			$breadcrumbs[] = [
 				'label' => AppHelper::mb_ucfirst($model->getModelInfo('title_plural')),
 				'url' => $this->getActionRoute('index')
 			];
+		} else {
+			if (FormHelper::hasPermission($permissions, 'index')) {
+				$breadcrumbs[] = [
+					'label' =>  $model->getModelInfo('title_plural'),
+					'url' => [ $this->id . '/index' ]
+				];
+			} else {
+				$breadcrumbs[] = [
+					'label' =>  $model->getModelInfo('title_plural'),
+				];
+			}
+		}
+		return $breadcrumbs;
+	}
+
+
+	public function genBreadCrumbs(string $action_id, $model, array $permissions = []): array
+	{
+		$breadcrumbs = $this->genBaseBreadCrumbs($model, $permissions);
+ 		$master = $this->getMasterModel();
+		if ($master) {
 			switch( $action_id ) {
 				case 'update':
 					$breadcrumbs[] = [
 						'label' => $model->recordDesc('short', 25),
 						'url' => array_merge([$this->getActionRoute('view')], $model->getPrimaryKey(true))
 					];
+				case 'create':
+					$breadcrumbs[] = $model->t('churros', 'Creating {title}');
 					break;
 				case 'index':
 					break;
 			}
 		} else {
 			$prefix = $this->getFullRoute();
-			if (FormHelper::hasPermission($permissions, 'index')) {
-				$breadcrumbs['index'] = [
-					'label' =>  $model->getModelInfo('title_plural'),
-					'url' => [ $this->id . '/index' ]
-				];
-			} else {
-				$breadcrumbs['index'] = [
-					'label' =>  $model->getModelInfo('title_plural'),
-				];
-			}
 			switch( $action_id ) {
 				case 'update':
-					$breadcrumbs[0] = [
+					$breadcrumbs[] = [
 						'label' => $model->t('churros', 'Updating {record_short}'),
-	// 					'url' => array_merge([ $prefix . $this->id . '/view'], $model->getPrimaryKey(true))
 					];
 					break;
 				case 'duplicate':
-					$breadcrumbs[0] = [
+					$breadcrumbs[] = [
 						'label' => Yii::t('churros', 'Duplicating ') . $model->recordDesc('short', 20),
 						'url' => array_merge([ $prefix . $this->id . '/view'], $model->getPrimaryKey(true))
 					];
 					break;
 				case 'view':
-					$breadcrumbs[0] = $model->recordDesc('short', 20);
+					$breadcrumbs[] = $model->recordDesc('short', 20);
 					break;
 				case 'create':
-					$breadcrumbs[0] = $model->t('churros', 'Creating {title}');
+					$breadcrumbs[] = $model->t('churros', 'Creating {title}');
 					break;
 				case 'index':
 					break;
