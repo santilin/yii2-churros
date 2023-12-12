@@ -49,7 +49,7 @@ class ActiveForm extends Bs4ActiveForm
 				'horizontalCssClasses' =>[
 					'offset' => ['offset-xl-2 offset-lg-2 offset-md-2 offset-sm-3 offset-3'],
 					'label' => ['col-xl-2 col-lg-2 col-md-2 col-sm-12 col-12', 'col-form-label text-left text-sm-left text-md-right text-lg-right'],
-					'wrapper' => 'col-lg-5 col-md-6 col-sm-7 col-8',
+					'wrapper' => 'col-xl-10 col-lg-10 col-md-10 col-sm-12 col-12',
 					'error' => '',
 					'hint' => '',
 					'field' => 'form-group row',
@@ -57,9 +57,9 @@ class ActiveForm extends Bs4ActiveForm
 			],
 			'short' => [
 				'horizontalCssClasses' =>[
-					'offset' => ['offset-lg-2 offset-md-2 offset-sm-3 offset-3'],
-					'label' => ['col-lg-2 col-md-2 col-sm-12 col-12', 'col-form-label text-left text-sm-left text-md-right text-lg-right'],
-					'wrapper' => 'col-lg-2 col-md-3 col-sm-4 col-6',
+					'offset' => ['offset-xl-2 offset-lg-2 offset-md-2 offset-sm-3 offset-3'],
+					'label' => ['col-xl-2 col-lg-2 col-md-2 col-sm-2 col-12', 'col-form-label text-left text-sm-left text-md-right text-lg-right'],
+					'wrapper' => 'col-xl-10 col-lg-10 col-md-10 col-sm-10 col-12',
 					'error' => '',
 					'hint' => '',
 					'field' => 'form-group row',
