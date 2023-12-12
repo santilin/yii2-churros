@@ -363,4 +363,21 @@ ajax;
 		return "col-$col col-sm-$col_sm col-md-$col_md col-lg-$col_lg col-xl-$col_xl";
 	}
 
+	static public function detailsTag(string $summary, string $body, bool $open = false,
+						array $body_options = [], array $summary_options = [])
+	{
+		$dt = '<details';
+		if ($open) {
+			$dt .= ' open';
+		}
+		$dt .= Html::renderTagAttributes($body_options) . '>';
+		$dt .= '<summary' . Html::renderTagAttributes($summary_options) . '>';
+		$dt .= Html::encode($summary);
+		$dt .= "</summary>\n";
+		$dt .= $body;
+		$dt .= "</details>\n";
+		return $dt;
+	}
+
+
 } // class
