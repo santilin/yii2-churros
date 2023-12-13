@@ -268,6 +268,14 @@ ajax;
 		return in_array($perm, $perms);
 	}
 
+	static public function removePermission(?array $perms, string $perm): array
+	{
+		$k = array_search($perm, $perms);
+		if ($k !== false) {
+			unset ($perms[$k]);
+		}
+		return $perms;
+	}
 
 	static public function hasAllPermissions($perms, array $req_perms = []): bool
 	{
