@@ -114,7 +114,8 @@ class CrudController extends \yii\web\Controller
   		$detail->$related_field = $master->getPrimaryKey();
 		$params['master'] = $master;
 		$params['embedded'] = true;
-		return $this->renderAjax($view, [
+		$this->layout = false;
+		return $this->render($view, [
 			'searchModel' => $detail,
 			'indexParams' => $this->changeActionParams($params, 'index', $detail),
 			'indexGrids' => [ '_grid' => [ '', null, [] ] ],
