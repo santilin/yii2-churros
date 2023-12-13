@@ -19,6 +19,8 @@ use santilin\churros\helpers\AppHelper;
  */
 class JsonController extends \yii\web\Controller
 {
+	use \santilin\churros\ControllerTrait;
+
 	public $accessOnlyMine = false;
 	protected $crudActions = [];
 	protected $root_model = null;
