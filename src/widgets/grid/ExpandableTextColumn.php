@@ -23,7 +23,7 @@ class ExpandableTextColumn extends DataColumn
      */
     protected function renderDataCellContent($model, $key, $index)
     {
-		$text = $model->{$this->attribute};
+		$text = $this->getDataCellValue($model, $key, $index);
 		if (!$text || !trim($text)) {
 			return '';
 		}
