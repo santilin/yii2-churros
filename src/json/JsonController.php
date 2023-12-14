@@ -91,7 +91,7 @@ class JsonController extends \yii\web\Controller
 	public function actionIndex()
 	{
 		$params = Yii::$app->request->queryParams;
-		$searchModel = $this->createSearchModel();
+		$searchModel = $this->createSearchModel($this->getPath());
 		$params['permissions'] = ($params['permissions']??true===false) ? false : $this->crudActions;
 		$params = $this->changeActionParams($params, 'index', $searchModel);
 		return $this->render('index', [
@@ -109,7 +109,7 @@ class JsonController extends \yii\web\Controller
 	public function actionView($id)
 	{
 		$params = Yii::$app->request->queryParams;
-		$model = $this->findModel($id, $params);
+		$model = $this->findModel($this->getPath(), $id, $params);
 		$params['permissions'] = ($params['permissions']??true===false) ? false : $this->crudActions;
 		return $this->render('view', [
 			'model' => $model,

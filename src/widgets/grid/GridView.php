@@ -51,13 +51,10 @@ class GridView extends SimpleGridView
         }
     }
 
-    // emptyText is managed in the summary section.
+    // Dont show emptyText here, emptyText is managed in the summary section.
     public function renderItems()
     {
-		$empty_text_save = $this->emptyText;
-		$this->emptyText = false;
-		$models = array_values($this->dataProvider->getModels());
-		if (count($models) == 0) {
+		if ($this->filterModel && count($this->dataProvider->getModels()) == 0) {
 			$has_filters = false;
 			$filter_attrs = $this->filterModel->activeAttributes();
 			foreach ($filter_attrs as $attr) {
@@ -69,6 +66,8 @@ class GridView extends SimpleGridView
 				$this->showHeader = false;
 			}
 		}
+		$empty_text_save = $this->emptyText;
+		$this->emptyText = false;
 		$ret = parent::renderItems();
 		$this->emptyText = $empty_text_save;
 		return $ret;
