@@ -62,14 +62,16 @@ class SessionAlert extends \yii\base\Widget
             }
 
             foreach ((array) $flash as $i => $message) {
-                echo \yii\bootstrap4\Alert::widget([
-                    'body' => $message,
-                    'closeButton' => $this->closeButton,
-                    'options' => array_merge($this->htmlOptions, [
-                        'id' => $this->getId() . '-' . $type . '-' . $i,
-                        'class' => $this->alertTypes[$type] . $appendClass,
-                    ]),
-                ]);
+                if (!empty($message)) {
+                    echo \yii\bootstrap4\Alert::widget([
+                        'body' => $message,
+                        'closeButton' => $this->closeButton,
+                        'options' => array_merge($this->htmlOptions, [
+                            'id' => $this->getId() . '-' . $type . '-' . $i,
+                            'class' => $this->alertTypes[$type] . $appendClass,
+                        ]),
+                    ]);
+                }
             }
 
             $session->removeFlash($type);
