@@ -436,7 +436,7 @@ class CrudController extends \yii\web\Controller
 
 	public function genBreadCrumbs(string $action_id, $model, array $permissions = []): array
 	{
-		$breadcrumbs = $this->genBaseBreadCrumbs($model, $permissions);
+		$breadcrumbs = $this->genBaseBreadCrumbs($action_id, $model, $permissions);
  		$master = $this->getMasterModel();
 		if ($master) {
 			switch( $action_id ) {
