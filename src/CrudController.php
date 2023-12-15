@@ -393,7 +393,7 @@ class CrudController extends \yii\web\Controller
 		return $redirect_params;
 	}
 
-    public function genBaseBreadCrumbs($model, array $permissions = []): array
+    public function genBaseBreadCrumbs(string $action_id, $model, array $permissions = []): array
 	{
 		$breadcrumbs = [];
  		$master = $this->getMasterModel();
@@ -422,6 +422,12 @@ class CrudController extends \yii\web\Controller
 			} else {
 				$breadcrumbs[] = [
 					'label' =>  $model->getModelInfo('title_plural'),
+				];
+			}
+			if ($action_id!='view') {
+				$breadcrumbs[] = [
+					'label' => $model->recordDesc('short', 25),
+					'url' => array_merge([$this->getActionRoute('view')], $model->getPrimaryKey(true))
 				];
 			}
 		}
