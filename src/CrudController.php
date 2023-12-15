@@ -414,7 +414,7 @@ class CrudController extends \yii\web\Controller
 				'url' => $this->getActionRoute('index')
 			];
 		} else {
-			if (FormHelper::hasPermission($permissions, 'index')) {
+			if (FormHelper::hasPermission($permissions, 'index') && $action_id != 'index') {
 				$breadcrumbs[] = [
 					'label' =>  $model->getModelInfo('title_plural'),
 					'url' => [ $this->id . '/index' ]
@@ -424,12 +424,12 @@ class CrudController extends \yii\web\Controller
 					'label' =>  $model->getModelInfo('title_plural'),
 				];
 			}
-			if ($action_id!='view') {
-				$breadcrumbs[] = [
-					'label' => $model->recordDesc('short', 25),
-					'url' => array_merge([$this->getActionRoute('view')], $model->getPrimaryKey(true))
-				];
-			}
+		}
+		if ($action_id != 'index') {
+			$breadcrumbs[] = [
+				'label' => $model->recordDesc('short', 25),
+				'url' => $action_id!='view' ? array_merge([$this->getActionRoute('view')], $model->getPrimaryKey(true)) : null,
+			];
 		}
 		return $breadcrumbs;
 	}

@@ -141,7 +141,7 @@ trait ModelInfoTrait
 		} else {
 			$len = strlen($ret);
 			if( $len > $max_len ) {
-				$ret = mb_substr($ret, 0, ($max_len/2)-2) . '...' . mb_substr($ret, -($max_len/2)+2);
+				$ret = mb_substr($ret, 0, floor($max_len/2)-2) . '...' . mb_substr($ret, -floor($max_len/2)+2);
 			}
 		}
 		return $ret;
