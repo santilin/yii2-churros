@@ -2,7 +2,7 @@
 
 use Yii;
 use yii\db\ActiveRecord;
-use yii\base\InvalidArgumentException;
+use yii\base\{InvalidConfigException,InvalidArgumentException};
 use yii\helpers\ArrayHelper;
 use santilin\churros\helpers\{YADTC,AppHelper};
 use santilin\churros\ModelSearchTrait;

@@ -116,11 +116,11 @@ trait RelationTrait
 		$relModelClass = $relation['modelClass'];
         $relPKAttr = $relModelClass::primaryKey();
 
+		$container = [];
 		if (count($relPKAttr) > 1) { // Many to many with junction model
 			$link = $relation['link'];
 			$link_keys = array_keys($link);
 			$this_pk = reset($link_keys);
-            $container = [];
             foreach ($v as $relPost) {
 				if( $relPost == null ) {
 					continue;
@@ -155,25 +155,39 @@ trait RelationTrait
 					$container[] = $m2mkeys;
                 }
             }
-        } else if ($relation['via'] == null) { // Has Many
-            $container = [];
-            foreach ($v as $relPost) {
-                if (is_array($relPost) ) {
-					if( array_filter($relPost) ) {
-						/* @var $relObj ActiveRecord */
-						$relObj = (empty($relPost[$relPKAttr[0]])) ? new $relModelClass() : $relModelClass::findOne($relPost[$relPKAttr[0]]);
-						if (is_null($relObj)) {
-							$relObj = new $relModelClass();
+        } else if ($relation['via'] == null) {
+			if (count($relPKAttr)) { // Has Many with primary key
+				foreach ($v as $relPost) {
+					if (is_array($relPost) ) {
+						if( array_filter($relPost) ) {
+							/* @var $relObj ActiveRecord */
+							$relObj = (empty($relPost[$relPKAttr[0]])) ? new $relModelClass() : $relModelClass::findOne($relPost[$relPKAttr[0]]);
+							if (is_null($relObj)) {
+								$relObj = new $relModelClass();
+							}
+							$relObj->load($relPost, '');
+							$container[] = $relObj;
 						}
-						$relObj->load($relPost, '');
-						$container[] = $relObj;
+					} else {
+						// Just primary key of records, just one field in primary key
+						$container[] = [ $relPKAttr[0] => $relPost ];
 					}
-				} else {
-					// Just primary key of records, just one field in primary key
-					$container[] = [ $relPKAttr[0] => $relPost ];
 				}
-            }
-        } else { // Many2Many
+			} else { // Has Many without primary key
+				foreach ($v as $relPost) {
+					if (is_array($relPost) ) {
+						if( array_filter($relPost) ) {
+							/* @var $relObj ActiveRecord */
+							$relObj = new $relModelClass();
+							$relObj->load($relPost, '');
+							$container[] = $relObj;
+						}
+					} else {
+						throw new \Exception("no primery key found");
+					}
+				}
+			}
+		} else { // Many2Many
 			foreach( $v as $relPost ) {
 				if( is_array($relPost) ) {
 					$id = $relPost[$relPKAttr[0]];
@@ -248,9 +262,9 @@ trait RelationTrait
 		$success = true;
 		foreach ($this->relatedRecords as $rel_name => $records) {
 			/* @var $records ActiveRecord | ActiveRecord[] */
-			if( $records instanceof \yii\db\BaseActiveRecord && !$records->getIsNewRecord() ) {
+			if ($records instanceof \yii\db\BaseActiveRecord && !$records->getIsNewRecord()) {
 				continue;
-			} else if ( $records instanceof \yii\db\ActiveRecord ) {
+			} else if ($records instanceof \yii\db\BaseActiveRecord) {
 				$records = (array)$records;
 			}
 			if (count($records)>0) {
@@ -394,9 +408,8 @@ trait RelationTrait
 		return $success;
     }
 
-    private function updateRecords($rel_name, $records)
+    private function updateRecords(bool $wasNewRecord, string $rel_name, array $records): bool
     {
-		$wasNewRecord = $this->isNewRecord;
 		$success = true;
 		$relation = $this->getRelation($rel_name);
         $isSoftDelete = isset($this->_rt_softdelete);
@@ -431,53 +444,65 @@ trait RelationTrait
 			if ($relation->multiple) {
 				$relModelClass = $relation->modelClass;
 				$relPKAttr = $relModelClass::primarykey();
-				$isManyMany = (count($relPKAttr) > 1);
-				/* @var $relModel ActiveRecord */
-				foreach ($records as $index => $relModel) {
-					// Set relModel foreign key
-					foreach ($relation->link as $foreign_key => $value) {
-						if( is_object($relModel) ) {
-							$relModel->$foreign_key = $this->$value;
-						}
-						$notDeletedFK[$foreign_key] = $this->$value;
-					}
+				if (count($relPKAttr) == 0) { // HasMany without primary key
 
-					// get primary key of related model
-					if ($isManyMany) {
-						$mainPK = array_keys($relation->link)[0];
-						foreach ($relModel->primaryKey as $attr => $value) {
-							if ($attr != $mainPK) {
-								$dontDeletePk[$attr][] = $value;
+
+					foreach ($records as $index => $relModel) {
+						// Set relModel foreign key
+						foreach ($relation->link as $foreign_key => $value) {
+							if( is_object($relModel) ) {
+								$relModel->$foreign_key = $this->$value;
 							}
 						}
-					} else {
-						$dontDeletePk[] = is_object($relModel) ? $relModel->primaryKey : $relModel;
-					}
-				}
 
-				if (!$wasNewRecord) {
-					// DELETE WITH 'NOT IN' PK MODEL & REL MODEL
-					if ($isManyMany) {
-						// Many Many
-						$query = ['and', $notDeletedFK];
-						foreach ($dontDeletePk as $attr => $value) {
-							$notIn = ['not in', $attr, $value];
-							array_push($query, $notIn);
-						}
-						try {
-							if ($isSoftDelete) {
-								$relModel->updateAll($this->_rt_softdelete, $query);
-							} else {
-								$relModel->deleteAll($query);
+						$relSave = $relModel->save();
+
+						if (!$relSave || !empty($relModel->errors)) {
+							$relModelWords = Yii:: t('churros', Inflector::camel2words(StringHelper::basename($relModelClass)));
+							$index++;
+							foreach ($relModel->errors as $validation) {
+								foreach ($validation as $errorMsg) {
+									$this->addError($rel_name, "$relModelWords #$index : $errorMsg");
+								}
 							}
-						} catch (IntegrityException $exc) {
-							$this->addError($rel_name, "Data can't be deleted because it's still used by another data.");
 							$success = false;
 						}
-					} else {
-						// Has Many
-						$query = ['and', $notDeletedFK, ['not in', $relPKAttr[0], $dontDeletePk]];
-						if (!empty($dontDeletePk)) {
+					}
+
+				} else {
+					$isManyMany = (count($relPKAttr) > 1);
+					/* @var $relModel ActiveRecord */
+					foreach ($records as $index => $relModel) {
+						// Set relModel foreign key
+						foreach ($relation->link as $foreign_key => $value) {
+							if( is_object($relModel) ) {
+								$relModel->$foreign_key = $this->$value;
+							}
+							$notDeletedFK[$foreign_key] = $this->$value;
+						}
+
+						// get primary key of related model
+						if ($isManyMany) {
+							$mainPK = array_keys($relation->link)[0];
+							foreach ($relModel->primaryKey as $attr => $value) {
+								if ($attr != $mainPK) {
+									$dontDeletePk[$attr][] = $value;
+								}
+							}
+						} else {
+							$dontDeletePk[] = is_object($relModel) ? $relModel->primaryKey : $relModel;
+						}
+					}
+
+					if (!$wasNewRecord) {
+						// DELETE WITH 'NOT IN' PK MODEL & REL MODEL
+						if ($isManyMany) {
+							// Many Many
+							$query = ['and', $notDeletedFK];
+							foreach ($dontDeletePk as $attr => $value) {
+								$notIn = ['not in', $attr, $value];
+								array_push($query, $notIn);
+							}
 							try {
 								if ($isSoftDelete) {
 									$relModel->updateAll($this->_rt_softdelete, $query);
@@ -488,22 +513,37 @@ trait RelationTrait
 								$this->addError($rel_name, "Data can't be deleted because it's still used by another data.");
 								$success = false;
 							}
-						}
-					}
-				}
-
-				foreach ($records as $index => $relModel) {
-					$relSave = $relModel->save();
-
-					if (!$relSave || !empty($relModel->errors)) {
-						$relModelWords = Yii:: t('churros', Inflector::camel2words(StringHelper::basename($AQ->modelClass)));
-						$index++;
-						foreach ($relModel->errors as $validation) {
-							foreach ($validation as $errorMsg) {
-								$this->addError($rel_name, "$relModelWords #$index : $errorMsg");
+						} else {
+							// Has Many
+							$query = ['and', $notDeletedFK, ['not in', $relPKAttr[0], $dontDeletePk]];
+							if (!empty($dontDeletePk)) {
+								try {
+									if ($isSoftDelete) {
+										$relModel->updateAll($this->_rt_softdelete, $query);
+									} else {
+										$relModel->deleteAll($query);
+									}
+								} catch (IntegrityException $exc) {
+									$this->addError($rel_name, "Data can't be deleted because it's still used by another data.");
+									$success = false;
+								}
 							}
 						}
-						$success = false;
+					}
+
+					foreach ($records as $index => $relModel) {
+						$relSave = $relModel->save();
+
+						if (!$relSave || !empty($relModel->errors)) {
+							$relModelWords = Yii:: t('churros', Inflector::camel2words(StringHelper::basename($relModelClass)));
+							$index++;
+							foreach ($relModel->errors as $validation) {
+								foreach ($validation as $errorMsg) {
+									$this->addError($rel_name, "$relModelWords #$index : $errorMsg");
+								}
+							}
+							$success = false;
+						}
 					}
 				}
 			} else {
@@ -523,6 +563,7 @@ trait RelationTrait
 				}
 			}
 		}
+		return $success;
 
     }
 
