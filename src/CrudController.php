@@ -252,7 +252,7 @@ class CrudController extends \yii\web\Controller
 	public function actionDelete($id)
 	{
 		try {
-			$model = $this->findFormModel($id, null, 'delete');
+			$model = $this->findModel($id);
 			$model->deleteWithRelated();
 			if (Yii::$app->request->getIsAjax()) {
 				return json_encode($id);
@@ -269,6 +269,7 @@ class CrudController extends \yii\web\Controller
 			Yii::$app->session->addFlash('error', $model->t('churros',
 				$this->getResultMessage('error_delete')));
 		}
+		return $this->redirect($this->whereTogoNow('delete', $model));
 	}
 
 	/**
