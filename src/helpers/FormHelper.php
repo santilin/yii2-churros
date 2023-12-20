@@ -378,9 +378,17 @@ ajax;
 		if ($open) {
 			$dt .= ' open';
 		}
+		$encode_summary = ArrayHelper::remove($summary_options, 'encodeSummary', true);
+		$summary_tag = ArrayHelper::remove($summary_options, 'summaryTag', null);
+		$summary_tag_options = ArrayHelper::remove($summary_options, 'summarytagOptions', []);
 		$dt .= Html::renderTagAttributes($body_options) . '>';
 		$dt .= '<summary' . Html::renderTagAttributes($summary_options) . '>';
-		$dt .= Html::encode($summary);
+		$summary_content = $encode_summary ? Html::encode($summary) : $summary;
+		if ($summary_tag) {
+			$dt .= Html::tag($summary_tag, $summary_content, $summary_tag_options);
+		} else {
+			$dt .= $summary_content;
+		}
 		$dt .= "</summary>\n";
 		$dt .= $body;
 		$dt .= "</details>\n";
