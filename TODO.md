@@ -6,7 +6,7 @@
 
 # CrudController
 - Duplicar: imágenes, aparece el check para borrar la imagen.
-
+- Behaviors: access-control tiene que ejecutarse antes que verb, para que no dé error si no tiene acceso.
 
 https://wbraganca.com/yii2extensions/yii2-fancytree-widget/usage
 

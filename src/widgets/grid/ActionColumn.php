@@ -18,7 +18,6 @@ class ActionColumn extends \yii\grid\ActionColumn
     public $template = '{view}&nbsp;{update}&nbsp;{delete}&nbsp;{duplicate}';
     public $customButtons = [];
     public $crudPerms = null;
-    public $duplicateOptions = [ 'class' => 'duplicate action-button' ];
     public $hAlign = 'none';
     public $iconClassPrefix = 'fa fa';
 
@@ -108,7 +107,7 @@ class ActionColumn extends \yii\grid\ActionColumn
             return '';
         }
 		return Html::activeDropDownList($this->grid->filterModel, '_gridPageSize',
-			[1=>1, 2=>2, 3=>3, 10 => 10, 20 => 20, 50 => 50, 100 => 100, 0 => 'Todo'],
+			[1=>1, 5=>5, 10 => 10, 20 => 20, 50 => 50, 100 => 100, 0 => 'Todo'],
 			['id'=>'_grid_view_pageSize']);
     }
 

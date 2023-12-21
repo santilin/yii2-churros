@@ -8,7 +8,7 @@
 namespace santilin\churros\widgets\bs5\grid;
 
 use Yii;
-use yii\helpers\Html;
+use yii\helpers\{Html,Url};
 use santilin\churros\helpers\FormHelper;
 
 
@@ -17,10 +17,6 @@ class ActionColumn extends \yii\grid\ActionColumn
     public $template = '{view}&nbsp;{update}&nbsp;{delete}&nbsp;{duplicate}';
     public $customButtons = [];
     public $crudPerms = false;
-    public $deleteOptions = [ 'class' => 'delete action-button' ];
-	public $updateOptions = [ 'class' => 'update action-button' ];
-    public $viewOptions = [ 'class' => 'view action-button' ];
-    public $duplicateOptions = [ 'class' => 'duplicate action-button' ];
     public $hAlign = 'none';
     public $iconClassPrefix = 'bi bi';
 	public $icons = [
@@ -43,13 +39,13 @@ class ActionColumn extends \yii\grid\ActionColumn
         if( $this->crudPerms === false || FormHelper::hasPermission($this->crudPerms, 'view') ) {
 			if( !isset($this->buttons['view']) ) {
 				$this->initDefaultButton('view', 'view', array_merge(
-					[ 'title' => Yii::t('churros', 'View') ], $this->viewOptions));
+					[ 'title' => Yii::t('churros', 'View') ]));
 			}
 		}
         if( $this->crudPerms === false || FormHelper::hasPermission($this->crudPerms, 'update') ) {
 			if( !isset($this->customButtons['update']) ) {
 				$this->initDefaultButton('update', 'update', array_merge(
-					[ 'title' => Yii::t('churros', 'Update') ], $this->updateOptions));
+					[ 'title' => Yii::t('churros', 'Update') ]));
 			}
 		}
         if( $this->crudPerms === false || FormHelper::hasPermission($this->crudPerms, 'delete') ) {
@@ -58,13 +54,13 @@ class ActionColumn extends \yii\grid\ActionColumn
 					[ 'title' => Yii::t('churros', 'Delete'),
 					  'data-confirm' => Yii::t('yii', 'Are you sure you want to delete this item?'),
 					  'data-method' => 'post'
-					], $this->deleteOptions));
+					]));
 			}
 		}
         if( $this->crudPerms === false || FormHelper::hasAllPermissions($this->crudPerms, ['create','view']) ) {
 			if( !isset($this->customButtons['duplicate']) ) {
 				$this->initDefaultButton('duplicate', 'duplicate', array_merge(
-					[ 'title' => Yii::t('churros', 'Duplicate')], $this->duplicateOptions));
+					[ 'title' => Yii::t('churros', 'Duplicate')]));
 			}
 		}
 		foreach( $this->buttons as $index => $button ) {
@@ -75,7 +71,6 @@ class ActionColumn extends \yii\grid\ActionColumn
 				$this->template .= '{'.$index.'}';
 			}
 		}
-
     }
 
 	/**
@@ -109,7 +104,7 @@ class ActionColumn extends \yii\grid\ActionColumn
             return '';
         }
 		return Html::activeDropDownList($this->grid->filterModel, '_gridPageSize',
-			[1=>1, 2=>2, 3=>3, 10 => 10, 20 => 20, 50 => 50, 100 => 100, 0 => 'Todo'],
+			[1=>1, 5=>5, 10 => 10, 20 => 20, 50 => 50, 100 => 100, 0 => 'Todo'],
 			['id'=>'_grid_view_pageSize']);
     }
 

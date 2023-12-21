@@ -161,9 +161,7 @@ class JsonController extends \yii\web\Controller
 		$relations = empty($params['_form.relations'])?[]:explode(",", $params['_form.relations']);
 		$model->scenario = 'duplicate';
 		if ($model->loadAll($params, $relations) ) {
-			$model->setIsNewRecord(true);
-			$model->resetPrimaryKeys();
-			if( $model->saveAll(true) ) {
+			if ($model->saveAll(true)) {
 				if ($req->getIsAjax()) {
 					return json_encode($model->getAttributes());
 				}
@@ -361,6 +359,11 @@ class JsonController extends \yii\web\Controller
 			$redirect_params['root_field'] = $this->root_json_field;
 		}
 		return $redirect_params;
+	}
+
+	public function genBaseBreadCrumbs($action_id, $model)
+	{
+		return $this->genBreadCrumbs($action_id, $model);
 	}
 
 	public function genBreadCrumbs($action_id, $model)

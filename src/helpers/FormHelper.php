@@ -395,5 +395,13 @@ ajax;
 		return $dt;
 	}
 
+	static public function columnUrlCreatorWithReturnTo($action, $model, $key, $index, $column)
+	{
+		$params = is_array($key) ? $key : ['id' => (string) $key];
+		$params[0] = $column->controller ? $column->controller . '/' . $action : $action;
+		$params['returnTo'] = Url::current();
+		return Url::toRoute($params);
+	}
+
 
 } // class
