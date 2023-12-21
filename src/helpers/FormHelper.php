@@ -334,7 +334,7 @@ ajax;
 		return $final_perms;
 	}
 
-	static public function resolvePermissions($all_disabled, array $available, $granted): array
+	static public function resolvePermissions($all_disabled, array $available, array $granted = []): array
 	{
 		if ($all_disabled === false || $granted === false) {
 			return [];

@@ -10,7 +10,7 @@ use yii\web\HttpException;
 use yii\base\ErrorException;
 use santilin\churros\ControllerTrait;
 use santilin\churros\exceptions\{DeleteModelException,SaveModelException};
-use santilin\churros\helpers\AppHelper;
+use santilin\churros\helpers\{AppHelper,FormHelper};
 
 /**
  * CrudController implements the CRUD actions for yii2 models
@@ -92,7 +92,7 @@ class JsonController extends \yii\web\Controller
 	{
 		$params = Yii::$app->request->queryParams;
 		$searchModel = $this->createSearchModel($this->getPath());
-		$params['permissions'] = ($params['permissions']??true===false) ? false : $this->crudActions;
+		$params['permissions'] = FormHelper::resolvePermissions($params['permissions']??[], $this->crudActions);
 		$params = $this->changeActionParams($params, 'index', $searchModel);
 		return $this->render('index', [
 			'searchModel' => $searchModel,
@@ -109,6 +109,7 @@ class JsonController extends \yii\web\Controller
 	public function actionView($id)
 	{
 		$params = Yii::$app->request->queryParams;
+		$params['permissions'] = FormHelper::resolvePermissions($params['permissions']??[], $this->crudActions);
 		$model = $this->findModel($this->getPath(), $id, $params);
 		$params['permissions'] = ($params['permissions']??true===false) ? false : $this->crudActions;
 		return $this->render('view', [
@@ -126,6 +127,7 @@ class JsonController extends \yii\web\Controller
 	{
 		$req = Yii::$app->request;
 		$params = array_merge($req->get(), $req->post());
+		$params['permissions'] = FormHelper::resolvePermissions($params['permissions']??[], $this->crudActions);
 		$model = $this->findFormModel($this->getPath(), null, null, 'create', $params);
 		$relations = empty($params['_form.relations'])?[]:explode(",", $params['_form.relations']);
 		$model->scenario = 'create';
@@ -156,12 +158,14 @@ class JsonController extends \yii\web\Controller
 	{
 		$req = Yii::$app->request;
 		$params = array_merge($req->get(), $req->post());
+		$params['permissions'] = FormHelper::resolvePermissions($params['permissions']??[], $this->crudActions);
 		$model = $this->findFormModel($this->getPath(), $id, null, 'duplicate', $params);
 		$model->setDefaultValues(true); // duplicating
 		$relations = empty($params['_form.relations'])?[]:explode(",", $params['_form.relations']);
 		$model->scenario = 'duplicate';
 		if ($model->loadAll($params, $relations) ) {
-			if ($model->saveAll(true)) {
+			$model->setIsNewRecord(true);
+			if ($model->validate() && $model->saveAll(false)) {
 				if ($req->getIsAjax()) {
 					return json_encode($model->getAttributes());
 				}
@@ -186,11 +190,12 @@ class JsonController extends \yii\web\Controller
 	{
 		$req = Yii::$app->request;
 		$params = array_merge($req->get(), $req->post());
+		$params['permissions'] = FormHelper::resolvePermissions($params['permissions']??[], $this->crudActions);
 		$model = $this->findFormModel($this->getPath(), $id, null, 'update', $params);
 		$relations = empty($params['_form.relations'])?[]:explode(",", $params['_form.relations']);
 
 		if ($model->loadAll($params, $relations) && $req->isPost ) {
-			if( $model->saveAll(true) ) {
+			if ($model->validate() && $model->saveAll(false) ) {
 				if ($req->getIsAjax()) {
 					return json_encode($model->getAttributes());
 				}

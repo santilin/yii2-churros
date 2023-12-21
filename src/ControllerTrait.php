@@ -68,19 +68,25 @@ trait ControllerTrait
 
 	protected function addErrorFlashes($model)
 	{
+		$errors = [];
 		foreach($model->getFirstErrors() as $error ) {
 			if( strpos($error, '{model_link}') !== FALSE ) {
 				$link_to_model = $this->linkToModel($model);
-				$error = str_replace('{model_link}', $link_to_model, $error);
+				$errors[] = str_replace('{model_link}', $link_to_model, $error);
 			}
-			Yii::$app->session->addFlash('error', $error );
 		}
+		if (count($errors)) {
+			Yii::$app->session->addFlash('error', implode($errors));
+		}
+		$warnings = [];
 		foreach($model->getFirstWarnings() as $warning ) {
 			if( strpos($warning, '{model_link}') !== FALSE ) {
 				$link_to_model = $this->linkToModel($model);
-				$warning = str_replace('{model_link}', $link_to_model, $warning);
+				$warnings[] = str_replace('{model_link}', $link_to_model, $warning);
 			}
-			Yii::$app->session->addFlash('warning', $warning );
+		}
+		if (count($warnings)) {
+			Yii::$app->session->addFlash('warning', implode("\n",$warnings));
 		}
 	}
 

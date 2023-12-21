@@ -445,8 +445,6 @@ trait RelationTrait
 				$relModelClass = $relation->modelClass;
 				$relPKAttr = $relModelClass::primarykey();
 				if (count($relPKAttr) == 0) { // HasMany without primary key
-
-
 					foreach ($records as $index => $relModel) {
 						// Set relModel foreign key
 						foreach ($relation->link as $foreign_key => $value) {
@@ -454,9 +452,7 @@ trait RelationTrait
 								$relModel->$foreign_key = $this->$value;
 							}
 						}
-
 						$relSave = $relModel->save();
-
 						if (!$relSave || !empty($relModel->errors)) {
 							$relModelWords = Yii:: t('churros', Inflector::camel2words(StringHelper::basename($relModelClass)));
 							$index++;
