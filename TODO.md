@@ -1,3 +1,10 @@
+# Notifications
+- Añadir propiedad mail subject prefix
+
+
+# CrudController
+* CrudController::pdf: Incluir css del módulo/modelo actual
+
 # Sqlite3
 - Crear issue en github PRAGMA
 
@@ -8,37 +15,84 @@
 - Duplicar: imágenes, aparece el check para borrar la imagen.
 - Behaviors: access-control tiene que ejecutarse antes que verb, para que no dé error si no tiene acceso.
 
-https://wbraganca.com/yii2extensions/yii2-fancytree-widget/usage
+# FormHelper
+- El responsive de 3 columnas va fatal.
 
-param develemailto => develemail
-where_to_go: no return $this->redirect, que lo haga quien le llama.
+# Reports:
+* Quitar (no definido) al imprimir
+- AllReportFields: ver si ponerlo en otro lugar.
+- fixColumnDefinitions: Añadir adhoc los campos relacionados.
+- gui: ¿Añadir relación?
+* Hacer uso de los model.Agente.report? o los permisos del Param?
 
-El responsive de 3 columnas va fatal.
+# User
+- ¿Opción para obligar a cambiar la contraseña?
+- Eliminar opción recordar contraseña de menú Ácceso
+- cache de permisos
+- yii2usuario: alert falla cuando se redirige de bs4 a bs3 porque no espera un array aquí: /home/santilin/devel/-yii2base/vendor/2amigos/yii2-usuario/src/User/resources/views/shared/_alert.php
+- Hay acceso a trivel.test/user/2
+- Añadir opción visible en profile en resources ... _menu.php: yiiparam('user_profile');
+- Actualizar a bootstrap4
+- Customize views form bootstrap4
+- usuarios: grid: etiquetas salen en inglés.
 
-Reports:
-	- AllReportFields: ver si ponerlo en otro lugar.
-	- fixColumnDefinitions: Añadir adhoc los campos relacionados.
-	- gui: ¿Añadir relación?
+# UploadBehavior
+- cuando da error otro campo que no es el file, se pierde el nombre del fichero original
+## Adjuntos y subir ficheros
+* Opciones
+	- tabla de adjuntos.
+	- behaviour
+	- behaviour con múltiple
+* Fileuploadbehavior saveorigfname true
+
+# SiteController
+- Cuando va a site/error, botones o menú para volver a los módulos a los que tenga acceso la usuaria.
+- Errores en formulario de Ajax. Que se quede en el formulario ajax y muestre el error.
+
+# Widgets
+
+* Anidar RercordViews con un static
+* css: width = maxlength en integers, floats y dates
+* Max-length: Tomar lo que se ha definido en la base de datos o capturar la excepción.
+* Radio List: Ver cómo añadir el autofocus a cada item.
+* Añadir layout table recordview
+* Añadir showmore a form layout
+* Añadir inline a form layout
+
+## Inactivatable date
+- Repensar el ActivatableInput
+* Etiquetas según género del campo
 
 
-¿Opción para obligar a cambiar la contraseña?
+## SearchDropDown
+* Si un searchdropdown está disabled o readonly no mostrar el campo de búsqueda
+* ¿Si hay dos coincidencias qué hacer?
 
-Eliminar opción recordar contraseña de menú Ácceso
+## TableListView
+* Quitar márgenes a pager.
+* Centrar verticalmente summary.
+- Añadir el símbolo del euro al input de los forms: bs4 input-group
+- función extractHeaders
+- Paginador no sale bien el layout/css. Añadir el pager como en simplelistview
 
-upload file cuando da error otro campo que no es el file, se pierde el nombre del fichero original
+## DateInput
+- SpanishDateInput. Definir campo date_es
 
-cache de permisos
+## GridView
+- layout admin, más compacto.
+- iconos de ordenar, en hasone si tiene código, icono numérico
+* GridView: Report : grupos: opciones para Mostrar encabezado, mostrar pie.
+* Grid Enlaces en el joinmodels: filtro en el grid por ese valor?
+* selectViews no funciona con pjax porque es un dropdown. Añadirlo dentro de un FORM
+* Grid: cuando se filtra, poner "Filtrando 1-1 de s"
+* Cuando sólo hay una página, no mostrar [1-3] de 3
+* GridView: Ocultar filtro si no hay resultados
+* BreadCrumbs: Index: Añadir el orden o el filtro ("filtrado") ("ordenado por")
+* 2 gridviews: https://www.yiiframework.com/doc/guide/2.0/en/output-data-widgets#multiple-gridviews
 
-Cuando va a site/error, botones o menú para volver a los módulos a los que tenga acceso la usuaria.
 
-Errores en formulario de Ajax. Que se quede en el formulario ajax y muestre el error.
-Repensar el ActivatableInput
-Cancel button: no tiene color de fondo en tabler.
-
-== Themes
-
-== YII2
-=== Bugs
+# YII2
+## Bugs
 
 === model.php:372
         return !$this->hasErrors();
@@ -48,7 +102,7 @@ Cancel button: no tiene color de fondo en tabler.
 getAttributeLabels called twice: breakpoint en
 /home/santilin/devel/yii2base/vendor/yiisoft/yii2-bootstrap4/src/ActiveField.php:553
 
-==== Codeception
+### Codeception
 Test: CrudOfertaCest. Cuando redirige de update a view, no se borra la aplicación y el componente 'view' se queda con _isPageEnded se queda a true
 
 /home/santilin/devel/yii2base/vendor/yiisoft/yii2/base/Controller.php
@@ -78,109 +132,24 @@ Test: CrudOfertaCest. Cuando redirige de update a view, no se borra la aplicaci�
             return $this->_components[$id];
         }
 
-
 /home/santilin/devel/yii2base/vendor/yiisoft/yii2/web/View.php
     private function registerFile($type, $url, $options = [], $key = null)
 
 
-== Taxonomy ==
-
-== TableListView ==
-* función extractHeaders
-* Paginador no sale bien el layout/css. Añadir el pager como en simplelistview
-
-DateInput => SpanishDateInput. Definir campo date_es
-
-yii2usuario: alert falla cuando se redirige de bs4 a bs3 porque no espera un array aquí: /home/santilin/devel/yii2base/vendor/2amigos/yii2-usuario/src/User/resources/views/shared/_alert.php
-Hay acceso a trivel.test/user/2
-
-
-= Permisos
+## Reports
 * Crear Reports.view, etc. (biosegura)
-
-== Adjuntos y subir ficheros
-* Opciones
-	- tabla de adjuntos.
-	- behaviour
-	- behaviour con múltiple
-* Fileuploadbehavior saveorigfname true
-
-= Creación dinámica de etiquetas:
-https://stackoverflow.com/questions/32731987/adding-new-list-options-refreshing-updated-list-dynamically
-
-== Print y pdf
-* CrudController::pdf: Incluir css del módulo/modelo actual
-* Quitar (no definido) al imprimir
-* Hacer uso de los model.Agente.report? o los permisos del Param?
-
-== GridView ==
-Grid:
-- layout admin, más compacto.
-- iconos de ordenar, en hasone si tiene código, icono numérico
-* GridView: Report : grupos: opciones para Mostrar encabezado, mostrar pie.
-* Grid Enlaces en el joinmodels: filtro en el grid por ese valor?
-* selectViews no funciona con pjax porque es un dropdown. Añadirlo dentro de un FORM
-* Grid: cuando se filtra, poner "Filtrando 1-1 de s"
-* Cuando sólo hay una página, no mostrar [1-3] de 3
-* GridView: Ocultar filtro si no hay resultados
-* BreadCrumbs: Index: Añadir el orden o el filtro ("filtrado") ("ordenado por")
-* 2 gridviews: https://www.yiiframework.com/doc/guide/2.0/en/output-data-widgets#multiple-gridviews
-
-= Formularios
-Añadir el símbolo del euro al input de los forms: bs4 input-group
-
-= No prioritario
-== Models
-* Tres tipos campos calculados:
-- VIRTUAL
-- STORED
-- form input change
-
-== Reports
 * Añadir más funciones sobre los campos: año, mes, día, cuenta, media, máximo, mínimo, etc.
 
-== Administración de usuarios
-=== 2amigos-usuario
-	- Añadir opción visible en profile en resources ... _menu.php: yiiparam('user_profile');
-	- Actualizar a bootstrap4
-	- Arreglar vistas en bootstrap3
-	- Customize views form bootstrap4
-	- usuarios: grid: etiquetas salen en inglés.
-
-== Web
-=== Configuración
+## Configuración
+- Configuración tema: Fijo, por usuario
 - Configuración fecha: Fija, por usuario
 - Configuración idioma: Fijo, por usuario
 
-== Anidar RercordViews con un static
 
-=== css
-* css: width = maxlength en integers, floats y dates
-
-== Formularios
-
-== Inactivatable date
-* Etiquetas según género del campo
-
-== Widgets
-* Añadir layout table recordview
-* Añadir showmore a form layout
-* Añadir inline a form layout
-
-
-== SearchDropDown
-* Si un searchdropdown está disabled o readonly no mostrar el campo de búsqueda
-* ¿Si hay dos coincidencias qué hacer?
-
-== TableListView
-* Quitar márgenes a pager.
-* Centrar verticalmente summary.
-
-== yii2
-* Max-length: Tomar lo que se ha definido en la base de datos o capturar la excepción.
-* Radio List: Ver cómo añadir el autofocus a cada item.
-
-== 3rd party
+# Third-party
+- https://wbraganca.com/yii2extensions/yii2-fancytree-widget/usage
+- Creación dinámica de etiquetas:
+    - https://stackoverflow.com/questions/32731987/adding-new-list-options-refreshing-updated-list-dynamically
 * Full-text-search: https://www.sqlite.org/fts3.html#section_8_2
 * https://github.com/manuvarkey/kanboard-plugin-telegram
 * html-to-rtf y .editorconfig https://github.com/github-grabaz/html-rtf-converter/blob/master/.editorconfig
