@@ -132,7 +132,7 @@ class JsonController extends \yii\web\Controller
 		$relations = empty($params['_form.relations'])?[]:explode(",", $params['_form.relations']);
 		$model->scenario = 'create';
 		if ($model->loadAll($params, $relations) ) {
-			if ($model->validate && $model->insert() ) {
+			if ($model->validate() && $model->insert() ) {
 				if ($req->getIsAjax()) {
 					return json_encode($model->getAttributes());
 				}
@@ -366,46 +366,6 @@ class JsonController extends \yii\web\Controller
 		return $redirect_params;
 	}
 
-	public function genBaseBreadCrumbs($action_id, $model)
-	{
-		return $this->genBreadCrumbs($action_id, $model);
-	}
-
-	public function genBreadCrumbs($action_id, $model)
-	{
-		$breadcrumbs = [];
-		$prefix = $this->getRoutePrefix();
-		$breadcrumbs['index'] = [
-			'label' =>  $model->getModelInfo('title_plural'),
-			'url' => [ $this->id . '/index' ]
-		];
-		switch( $action_id ) {
-			case 'update':
-				$breadcrumbs['action'] = [
-					'label' => $model->t('churros', 'Updating {title}: {record_short}'),
-// 					'url' => array_merge([ $prefix . $this->id . '/view'], $model->getPrimaryKey(true))
-				];
-				break;
-			case 'duplicate':
-				$breadcrumbs['action'] = [
-					'label' => Yii::t('churros', 'Duplicating ') . $model->recordDesc('short', 20),
-					'url' => array_merge([ $prefix . $this->id . '/view'], $model->getPrimaryKey(true))
-				];
-				break;
-			case 'view':
-				$breadcrumbs['action'] = $model->recordDesc('short', 20);
-				break;
-			case 'create':
-				$breadcrumbs['action'] = $model->t('churros', 'Creating {title}');
-				break;
-			case 'index':
-				break;
-			default:
-				throw new \Exception($action_id);
-		}
-		return $breadcrumbs;
-	}
-
   	public function getActionRoute($action_id = null): string
 	{
 		if( $action_id === null ) {
@@ -460,6 +420,11 @@ class JsonController extends \yii\web\Controller
 	public function getPath()
 	{
 		return $this->_path;
+	}
+
+	public function getMasterModel()
+	{
+		return $this->getRootModel();
 	}
 
 	public function getRootModel()
