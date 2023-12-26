@@ -4,7 +4,6 @@ namespace santilin\churros;
 
 use Yii;
 use yii\base\ViewNotFoundException;
-use yii\web\Response;
 
 use santilin\churros\helpers\AppHelper;
 use santilin\churros\grid\ReportView;
@@ -19,7 +18,7 @@ trait ReportsControllerTrait
 	{
 		$params = Yii::$app->request->queryParams;
 		$searchModel = $this->createSearchModel();
-		$params['permissions'] = ($params['permissions']??true===false) ? false : $this->crudActions;
+		$params['permissions'] = FormHelper::resolvePermissions($params['permissions']??[], $this->crudActions);
 		$params = $this->changeActionParams($params, 'index', $searchModel);
 		return $this->render('index', [
 			'searchModel' => $searchModel,

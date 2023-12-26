@@ -214,7 +214,7 @@ class AppHelper
 	* @param int|string $position
 	* @param mixed      $insert
 	*/
-	function array_insert(&$array, $position, $insert)
+	static public function array_insert(&$array, $position, $insert)
 	{
 		if (is_int($position)) {
 			array_splice($array, $position, 0, $insert);
@@ -306,7 +306,7 @@ class AppHelper
 		"Otras" => "Otras",
 	];
 
-	static public function splitFieldName($fieldname, $reverse = true)
+	static public function splitFieldName($fieldname, $reverse = true): array
 	{
 		if( $reverse ) {
 			$dotpos = strrpos($fieldname, '.');

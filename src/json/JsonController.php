@@ -111,7 +111,6 @@ class JsonController extends \yii\web\Controller
 		$params = Yii::$app->request->queryParams;
 		$params['permissions'] = FormHelper::resolvePermissions($params['permissions']??[], $this->crudActions);
 		$model = $this->findModel($this->getPath(), $id, $params);
-		$params['permissions'] = ($params['permissions']??true===false) ? false : $this->crudActions;
 		return $this->render('view', [
 			'model' => $model,
 			'viewForms' => [ '_view' => [ '', null, [], '' ] ],

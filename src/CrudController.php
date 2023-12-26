@@ -86,7 +86,7 @@ class CrudController extends \yii\web\Controller
 	{
 		$params = Yii::$app->request->queryParams;
 		$searchModel = $this->createSearchModel();
-		$params['permissions'] = ($params['permissions']??true===false) ? false : $this->crudActions;
+		$params['permissions'] = FormHelper::resolvePermissions($params['permissions']??[], $this->crudActions);
 		if ($this->getMasterModel()) {
 			$related_field = $searchModel->getRelatedFieldForModel($this->getMasterModel());
 			$searchModel->setAttribute($related_field,
@@ -131,7 +131,7 @@ class CrudController extends \yii\web\Controller
 	{
 		$params = Yii::$app->request->queryParams;
 		$model = $this->findModel($id, $params);
-		$params['permissions'] = ($params['permissions']??true===false) ? false : $this->crudActions;
+		$params['permissions'] = FormHelper::resolvePermissions($params['permissions']??[], $this->crudActions);
 		return $this->render('view', [
 			'model' => $model,
 			'viewForms' => [ '_view' => [ '', null, [], '' ] ],
@@ -147,7 +147,7 @@ class CrudController extends \yii\web\Controller
 	{
 		$req = Yii::$app->request;
 		$params = array_merge($req->get(), $req->post());
-		$params['permissions'] = ($params['permissions']??true===false) ? false : $this->crudActions;
+		$params['permissions'] = FormHelper::resolvePermissions($params['permissions']??[], $this->crudActions);
 		$model = $this->findFormModel(null, null, 'create', $params);
 		if ($this->getMasterModel()) {
 			$related_field = $model->getRelatedFieldForModel($this->getMasterModel());
@@ -183,6 +183,7 @@ class CrudController extends \yii\web\Controller
 	{
 		$req = Yii::$app->request;
 		$params = array_merge($req->get(), $req->post());
+		$params['permissions'] = FormHelper::resolvePermissions($params['permissions']??[], $this->crudActions);
 		$model = $this->findFormModel($id, null, 'duplicate', $params);
 		$model->setDefaultValues(true); // duplicating
 		$model->scenario = 'duplicate';
@@ -220,7 +221,11 @@ class CrudController extends \yii\web\Controller
 	{
 		$req = Yii::$app->request;
 		$params = array_merge($req->get(), $req->post());
+		$params['permissions'] = FormHelper::resolvePermissions($params['permissions']??[], $this->crudActions);
 		$model = $this->findFormModel($id, null, 'update', $params);
+		if ($model === null) {
+			return $this->redirect(array_merge(['create'], $params));
+		}
 		$model->scenario = 'update';
 
 		if (isset($_POST['_form_relations']) ) {
@@ -251,6 +256,10 @@ class CrudController extends \yii\web\Controller
 	*/
 	public function actionDelete($id)
 	{
+		if (!in_array($this->crudActions, 'delete')) {
+			throw new ForbiddenHttpException($model_form_class::instance()->t('churros',
+				$this->getResultMessage('access_denied')));
+		}
 		try {
 			$model = $this->findModel($id);
 			$model->deleteWithRelated();

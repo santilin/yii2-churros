@@ -74,20 +74,24 @@ trait ControllerTrait
 			if( strpos($error, '{model_link}') !== FALSE ) {
 				$link_to_model = $this->linkToModel($model);
 				$errors[] = str_replace('{model_link}', $link_to_model, $error);
+			} else {
+				$errors[] = $error;
 			}
 		}
 		if (count($errors)) {
-			Yii::$app->session->addFlash('error', implode($errors));
+			Yii::$app->session->addFlash('error', implode("<br/>\n",$errors));
 		}
 		$warnings = [];
 		foreach($model->getFirstWarnings() as $warning ) {
 			if( strpos($warning, '{model_link}') !== FALSE ) {
 				$link_to_model = $this->linkToModel($model);
 				$warnings[] = str_replace('{model_link}', $link_to_model, $warning);
+			} else {
+				$warnings[] = $warning;
 			}
 		}
 		if (count($warnings)) {
-			Yii::$app->session->addFlash('warning', implode("\n",$warnings));
+			Yii::$app->session->addFlash('warning', implode("<br/>\n",$warnings));
 		}
 	}
 
