@@ -131,7 +131,8 @@ class JsonController extends \yii\web\Controller
 		$relations = empty($params['_form.relations'])?[]:explode(",", $params['_form.relations']);
 		$model->scenario = 'create';
 		if ($model->loadAll($params, $relations) ) {
-			if ($model->validate() && $model->insert() ) {
+			$model->setIsnewRecord(true);
+			if ($model->validate() && $model->save(false) ) {
 				if ($req->getIsAjax()) {
 					return json_encode($model->getAttributes());
 				}
@@ -359,7 +360,7 @@ class JsonController extends \yii\web\Controller
 		$redirect_params[0] = $this->getActionRoute($to);
 		if ($this->getRootModel()) {
 			$redirect_params['root_model'] = basename(str_replace('\\', '/', get_class($this->getRootModel())));
-			$redirect_params['root_id'] = $this->getRootModel()->primaryKey();
+			$redirect_params['root_id'] = $this->getRootModel()->getPrimaryKey();
 			$redirect_params['root_field'] = $this->root_json_field;
 		}
 		return $redirect_params;

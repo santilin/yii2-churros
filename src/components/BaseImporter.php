@@ -174,6 +174,8 @@ abstract class BaseImporter
 				break;
 			case self::FILE_ERROR:
 				break;
+			case self::RECORD_WITH_ERRORS:
+				break;
 			default:
 				throw new \Exception("Explain me: $ret");
 			}
@@ -290,6 +292,8 @@ abstract class BaseImporter
 					$this->afterReadLine($this->record_to_import, $csvline);
 					if( count($this->record_to_import) > 0 ) {
 						return $this->importRecord($this->record_to_import);
+					} else {
+						return self::RECORD_WITH_ERRORS;
 					}
 				}
 			} else {
@@ -319,11 +323,14 @@ abstract class BaseImporter
 							$this->output("Actualizado registro " . $r->recordDesc());
 						}
 					}
-				} else {
+				} else if ($this->ignore_dups) {
 					$this->output("Ignorando registro duplicado " . $r->recordDesc());
 					$ignored = true;
+				} else {
+					$this->addError("Registro duplicado " . $r->recordDesc());
+					$has_error = true;
 				}
-			} elseif( !$r->saveAll(false) ) {
+			} elseif (!$r->saveAll(false)) {
 				if( $r->getFirstError('yii\db\IntegrityException')) {
 					if ($this->ignore_dups) {
 						$this->output("Ignorando registro duplicado " . $r->recordDesc());
@@ -345,12 +352,12 @@ abstract class BaseImporter
 			$has_error = true;
 		}
 		if ($has_error) {
-			$this->addError( $r->getOneError() . json_encode($r->getAttributes(),JSON_UNESCAPED_UNICODE) );
+			$this->addError($r->getOneError() . json_encode($r->getAttributes(),JSON_UNESCAPED_UNICODE) );
 			if ($this->abort_on_error) {
 				return self::ABORTED_ON_ERROR;
 			}
 		}
-		return self::OK;
+		return $has_error ? self::RECORD_WITH_ERRORS : self::OK;
     }
 
 

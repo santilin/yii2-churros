@@ -3,7 +3,6 @@ namespace santilin\churros\components;
 
 class Taxonomy
 {
-
 	static public function titlesToCode(array $titles, array $taxonomy): string
 	{
 		$items = $taxonomy['items'];
@@ -52,7 +51,7 @@ class Taxonomy
 	}
 
 
-	public function calcLevel(string $value, array $taxonomy): int
+	static public function calcLevel(string $value, array $taxonomy): int
 	{
 		$parts = explode($taxonomy['dot']??'.', $value);
 		return count($parts);
