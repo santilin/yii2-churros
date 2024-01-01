@@ -256,7 +256,7 @@ class CrudController extends \yii\web\Controller
 	*/
 	public function actionDelete($id)
 	{
-		if (!in_array($this->crudActions, 'delete')) {
+		if (!in_array('delete', $this->crudActions)) {
 			throw new ForbiddenHttpException($model_form_class::instance()->t('churros',
 				$this->getResultMessage('access_denied')));
 		}

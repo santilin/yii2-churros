@@ -46,6 +46,16 @@ class Base extends \Faker\Provider\Base
 		}
 	}
 
+	public function integerUnsignedNonZero($max_digits = 18)
+	{
+		$n = $this->integerUnsigned($max_digits);
+		if( $n == 0 ) {
+			return 1;
+		} else {
+			return $n;
+		}
+	}
+
 	public function smallInteger()
     {
 		return $this->decimal(4);
