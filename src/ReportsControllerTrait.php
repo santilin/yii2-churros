@@ -5,7 +5,7 @@ namespace santilin\churros;
 use Yii;
 use yii\base\ViewNotFoundException;
 
-use santilin\churros\helpers\AppHelper;
+use santilin\churros\helpers\{AppHelper,FormHelper};
 use santilin\churros\grid\ReportView;
 
 trait ReportsControllerTrait
