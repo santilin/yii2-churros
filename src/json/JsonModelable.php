@@ -8,6 +8,7 @@ interface JsonModelable
 	public function createJsonRoot();
 	public function getJsonObject(string $path, ?string $id): ?JsonObject;
 	public function getJsonArray(string $path, ?string $id): ?array;
+	public function getJsonValue(string $path);
 }
 
 

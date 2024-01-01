@@ -54,5 +54,12 @@ trait JsonModelableTrait
 		}
 	}
 
+	public function getJsonValue(string $path)
+	{
+		if ($this->_json_root === false) {
+			$this->_json_root = $this->createJsonRoot();
+		}
+		return $this->_json_root->get($path);
+	}
 
 }

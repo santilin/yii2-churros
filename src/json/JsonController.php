@@ -91,7 +91,7 @@ class JsonController extends \yii\web\Controller
 	public function actionIndex()
 	{
 		$params = Yii::$app->request->queryParams;
-		$searchModel = $this->createSearchModel($this->getPath());
+		$searchModel = $this->createSearchModel();
 		$params['permissions'] = FormHelper::resolvePermissions($params['permissions']??[], $this->crudActions);
 		$params = $this->changeActionParams($params, 'index', $searchModel);
 		return $this->render('index', [
