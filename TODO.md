@@ -1,9 +1,8 @@
 # Notifications
 - Añadir propiedad mail subject prefix
 
-
-# CrudController
-* CrudController::pdf: Incluir css del módulo/modelo actual
+# SiteController
+- Error en producción, pantalla en blanco.
 
 # Sqlite3
 - Crear issue en github PRAGMA
@@ -12,6 +11,7 @@
 - Usar propiedad visible de los botones
 
 # CrudController
+* CrudController::pdf: Incluir css del módulo/modelo actual
 - Duplicar: imágenes, aparece el check para borrar la imagen.
 - Behaviors: access-control tiene que ejecutarse antes que verb, para que no dé error si no tiene acceso.
 
