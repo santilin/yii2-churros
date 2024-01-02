@@ -60,9 +60,12 @@ trait RelationTrait
 			$formName = $this->formName();
 		}
         if ($this->load($post, $formName)) {
+			if (count($relations_in_form)==0) {
+				return true;
+			}
             $relations_in_model = static::$relations;
             foreach($relations_in_model as $rel_name => $model_relation ) {
-				if( count($relations_in_form) && !in_array($rel_name, $relations_in_form) ) {
+				if( !in_array($rel_name, $relations_in_form) ) {
 					continue;
 				}
 				if( $model_relation['type'] == 'HasOne' || $model_relation['type'] == "OneToOne" ) {
