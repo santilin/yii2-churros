@@ -215,7 +215,7 @@ trait ControllerTrait
 				];
 			}
 		}
-		if ($action_id != 'index') {
+		if ($action_id != 'index' && $action_id != 'create') {
 			$breadcrumbs[] = [
 				'label' => $model->recordDesc('short', 25),
 				'url' => $action_id!='view' ? array_merge([$this->getActionRoute('view')], $model->getPrimaryKey(true)) : null,

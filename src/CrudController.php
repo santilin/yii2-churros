@@ -223,7 +223,7 @@ class CrudController extends \yii\web\Controller
 		$params = array_merge($req->get(), $req->post());
 		$params['permissions'] = FormHelper::resolvePermissions($params['permissions']??[], $this->crudActions);
 		$model = $this->findFormModel($id, null, 'update', $params);
-		if ($model === null) {
+ 		if ($model === null && FormHelper::hasPermission($params['permissions'], 'create')) {
 			return $this->redirect(array_merge(['create'], $params));
 		}
 		$model->scenario = 'update';
