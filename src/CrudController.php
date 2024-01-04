@@ -100,28 +100,6 @@ class CrudController extends \yii\web\Controller
 		]);
 	}
 
-	public function indexDetails($master, string $view, string $search_model_class, array $params)
-	{
-		$detail = $this->createSearchModel("$search_model_class{$view}_Search");
-		if (!$detail) {
-			$detail = $this->createSearchModel("{$search_model_class}_Search");
-		}
-		if (!$detail) {
-			throw new \Exception("No {$search_model_class}_Search nor $search_model_class{$view}_Search class found in CrudController::indexDetails");
-		}
-		$related_field = $detail->getRelatedFieldForModel($master);
- 		$params[$detail->formName()][$related_field] = $master->getPrimaryKey();
-  		$detail->$related_field = $master->getPrimaryKey();
-		$params['master'] = $master;
-		$params['embedded'] = true;
-		$this->layout = false;
-		return $this->render($view, [
-			'searchModel' => $detail,
-			'indexParams' => $this->changeActionParams($params, 'index', $detail),
-			'indexGrids' => [ '_grid' => [ '', null, [] ] ],
-		]);
-	}
-
 	/**
 	 * Displays a single model.
 	 * @param integer $id

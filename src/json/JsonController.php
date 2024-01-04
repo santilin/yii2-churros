@@ -91,7 +91,7 @@ class JsonController extends \yii\web\Controller
 	public function actionIndex()
 	{
 		$params = Yii::$app->request->queryParams;
-		$searchModel = $this->createSearchModel();
+		$searchModel = $this->createSearchModel($this->getPath());
 		$params['permissions'] = FormHelper::resolvePermissions($params['permissions']??[], $this->crudActions);
 		$params = $this->changeActionParams($params, 'index', $searchModel);
 		return $this->render('index', [
@@ -100,6 +100,33 @@ class JsonController extends \yii\web\Controller
 			'indexGrids' => [ '_grid' => [ '', null, [] ] ]
 		]);
 	}
+
+	public function indexDetails($master, string $view, string $search_model_class, array $params)
+	{
+		$rm = $this->getRootModel();
+		$detail = $this->createSearchModel($this->getPath(), "$search_model_class{$view}_Search");
+		if (!$detail) {
+			$detail = $this->createSearchModel($this->getPath(), "{$search_model_class}_Search");
+		} else {
+			$detail = $this->createSearchModel($this->getPath());
+		}
+		if (!$detail) {
+			throw new \Exception("No {$search_model_class}_Search nor $search_model_class{$view}_Search class found in CrudController::indexDetails");
+		}
+		$related_field = $detail->getRelatedFieldForModel($master);
+		$params[$detail->formName()][$related_field] = $master->getPrimaryKey();
+		$detail->$related_field = $master->getPrimaryKey();
+		$params['master'] = $master;
+		$params['embedded'] = true;
+		$this->layout = false;
+		return $this->render($view, [
+			'searchModel' => $detail,
+			'indexParams' => $this->changeActionParams($params, 'index', $detail),
+							 'indexGrids' => [ '_grid' => [ '', null, [] ] ],
+					   'gridName' => $view,
+		]);
+	}
+
 
 	/**
 		* Displays a single model.
@@ -443,7 +470,7 @@ class JsonController extends \yii\web\Controller
 			$this->root_model = $root_model_name::findOne($this->_root_id);
 			if ($this->root_model == null) {
 				throw new NotFoundHttpException(Yii::t('churros',
-					"The root json record for $root_model_name does not exist"));
+					"The root json record for '$root_model_name' does not exist"));
 			}
 		}
 		$this->_path = parse_url($_SERVER['REQUEST_URI'], PHP_URL_PATH);
@@ -468,18 +495,21 @@ class JsonController extends \yii\web\Controller
 			if ($pos_path !== false) {
 				$this->_path = substr($this->_path, $pos_path);
 			}
-			// Remove action part to get only the json path
-			$pos_action = strrpos($this->_path, '/'. $this->action->id . '/');
-			if ($pos_action === false) {
-				$action_len = strlen($this->action->id)+1;
-				if (substr($this->path,-$action_len) == '/'.$this->action->id) {
-					$pos_action = strlen($this->path) - $action_len;
+			if ($this->action) {
+				// Remove action part to get only the json path
+				$pos_action = strrpos($this->_path, '/'. $this->action->id . '/');
+				if ($pos_action === false) {
+					$action_len = strlen($this->action->id)+1;
+					if (substr($this->path,-$action_len) == '/'.$this->action->id) {
+						$pos_action = strlen($this->path) - $action_len;
+					}
+				}
+				if ($pos_action !== false) {
+					$this->_path = substr($this->path, 0, $pos_action);
 				}
 			}
-			if ($pos_action !== false) {
-				$this->_path = substr($this->path, 0, $pos_action);
-			}
 		}
+		return $this->root_model;
 	}
 
 }
