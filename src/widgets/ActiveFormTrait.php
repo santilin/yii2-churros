@@ -59,7 +59,7 @@ trait ActiveFormTrait
 	private function addLayoutClasses(array &$fields_cfg, array $fields_in_row, string $fields_layout = '1col'): void
 	{
 		$ret = '';
-		foreach($fields_in_row as $rlk => $row_layout ) {
+		foreach($fields_in_row as $lrk => $row_layout ) {
 			$layout = $row_layout['layout']??$fields_layout;
 			switch ($row_layout['type']) {
 			case 'container':
@@ -100,19 +100,22 @@ trait ActiveFormTrait
 		}
 	}
 
-	public function layoutFields(array $layout_fields, array $form_fields): string
+
+	/**
+	 * Recursivelly lays out the fiels of a form
+	 */
+	public function layoutFields(array $layout_rows, array $form_fields): string
 	{
 		$ret = '';
-		foreach($layout_fields as $rlk => $row_layout ) {
+		foreach($layout_rows as $lrk => $row_layout ) {
 			$layout = $row_layout['layout']??'1col';
 			$cols = intval($layout)?:1;
 			$type = $row_layout['type']??'fields';
 			switch ($type) {
 			case 'container':
 				$ret .= '<div class="row">';
-				foreach ($row_layout['content'] as $kc=>$container) {
+				foreach ($row_layout['content'] as $kc => $container) {
 					$ret .= '<div class="' . FormHelper::getBoostrapColumnClasses($cols) . '">';
-// 					$ret .= "<h1>$kc container</h1>";
 					$ret .= $this->layoutFields([$container], $form_fields);
 					$ret .= "</div>\n";
 				}
@@ -122,7 +125,7 @@ trait ActiveFormTrait
 			case 'fieldset':
 				$nf = 0;
 				$fs = '';
-				foreach( $row_layout['fields'] as $form_field ) {
+				foreach( $row_layout['fields'] as $attribute => $form_field ) {
 					if( !empty($form_fields[$form_field])) {
 						if( ($nf%$cols) == 0) {
 							if( $nf != 0 ) {
@@ -141,10 +144,10 @@ trait ActiveFormTrait
 				$fs .= '</div><!--row-->';
 				if( isset($row_layout['title']) && $type == 'fieldset' ) {
 					$legend = Html::tag('legend', $row_layout['title'], $row_layout['title_options']??[]);
-					$ret .= Html::tag('fieldset', $legend . $fs, array_merge( ['id' => $this->options['id'] . "_layout_$rlk" ], $row_layout['options']??[]) );
+					$ret .= Html::tag('fieldset', $legend . $fs, array_merge( ['id' => $this->options['id'] . "_layout_$lrk" ], $row_layout['options']??[]) );
 				} else if( isset($row_layout['title'])  ) {
 					$legend = Html::tag('div', $row_layout['title'], $row_layout['title_options']??[]);
-					$ret .= Html::tag('div', $legend . $fs, array_merge( ['id' => $this->options['id'] . "_layout_$rlk" ], $row_layout['options']??[]) );
+					$ret .= Html::tag('div', $legend . $fs, array_merge( ['id' => $this->options['id'] . "_layout_$lrk" ], $row_layout['options']??[]) );
 				} else {
 					$ret .= $fs;
 				}

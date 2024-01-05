@@ -16,6 +16,7 @@ use yii\helpers\ArrayHelper;
 use yii\helpers\Html;
 use yii\helpers\Inflector;
 use yii\i18n\Formatter;
+use yii\bootstrap4\Tabs;
 use santilin\churros\ChurrosAsset;
 use santilin\churros\helpers\{AppHelper,FormHelper};
 use santilin\churros\widgets\ActiveForm;
@@ -272,31 +273,66 @@ html;
         }
     }
 
-	protected function layoutFields(array $layout_rows, array $view_attrs): string
+	protected function layoutFields(array $layout_rows, array $view_fields, string $parent_layout = '1col'): string
 	{
 		$ret = '';
-		foreach($layout_rows as $rlk => $row_layout ) {
-			$layout = $row_layout['layout']??'1col';
-			$cols = intval($layout)?:1;
+        $only_field_names = true;
+        foreach($layout_rows as $lrk => $row_layout ) {
+            if (is_array($row_layout)) {
+                $only_field_names = false;
+                break;
+            }
+        }
+        if ($only_field_names) {
+            $layout_rows = [ ['type' => 'fields', 'fields' => $layout_rows] ];
+        }
+		foreach($layout_rows as $lrk => $row_layout ) {
+			$layout_of_row = $row_layout['layout']??$parent_layout;
+			$cols = intval($layout_of_row)?:1;
 			$type = $row_layout['type']??'fields';
 			switch ($type) {
 			case 'container':
-				$ret .= '<div class="row">';
-				foreach ($row_layout['content'] as $kc=>$container) {
-					$ret .= '<div class="' . FormHelper::getBoostrapColumnClasses($cols) . '">';
-// 					$ret .= "<h1>$kc container</h1>";
-					$ret .= $this->layoutFields([$container], $view_attrs);
-					$ret .= "</div>\n";
-				}
-				$ret .= "</div><!--container[$kc]-->";
+				$ret .= '<div class=row><div class="'
+                    . FormHelper::getBoostrapColumnClasses(1) . '">';
+                switch ($row_layout['style']??'row') {
+                    case 'tabs':
+                        $tab_items = [];
+                        foreach ($row_layout['content'] as $kc => $content) {
+                            if (!is_array($content)) {
+                                $content = [
+                                    'label' => $kc,
+                                    'layout' => $layout_of_row,
+                                    'content' => $content
+                                ];
+                            } else {
+                                if (!array_key_exists('layout', $content)) {
+                                    $content['layout'] = $layout_of_row;
+                                }
+                            }
+                            $tab_items[] = [
+                                'label' => $content['label']??$kc,
+                                'content' => $this->layoutFields($content['content'], $view_fields,$content['layout']),
+                            ];
+                        }
+                        $ret .= Tabs::widget([ 'items' => $tab_items ]);
+                        break;
+                    case 'row':
+                        foreach ($row_layout['content'] as $kc => $content) {
+                            $ret .= '<div class="' . FormHelper::getBoostrapColumnClasses($cols) . '">';
+                            $ret .= $this->layoutFields([$content], $view_fields, $layout_of_row);
+                            $ret .= "</div>\n";
+                        }
+                        break;
+                }
+				$ret .= "</div></div><!--container_[$lrk]-->";
 				break;
 			case 'fields':
 			case 'fieldset':
                 $nf = $indexf = 0;
                 $fs = '';
-                foreach ($row_layout['fields'] as $attribute => $form_field ) {
-                    $fld_layout=$view_attrs[$attribute]['layout']??null;
-                    if (!empty($view_attrs[$attribute])) {
+                foreach ($row_layout['fields'] as $view_field) {
+                    if (!empty($view_fields[$view_field])) {
+                        $fld_layout=$view_fields[$view_field]['layout']??null;
                         if ($fld_layout == 'full' && $nf != 0) {
                             while ($nf++%$cols != 0);
                         }
@@ -304,9 +340,9 @@ html;
                             if( $nf != 0 ) {
                                 $fs .= '</div><!--row-->';
                             }
-                            $fs .= "\n" . "<div class=\"row layout-$layout\">";
+                            $fs .= "\n" . "<div class=\"row layout-$layout_of_row\">";
                         }
-                        switch ($row_layout['style']) {
+                        switch ($row_layout['style']??'grid') {
                             case 'grid':
                                 if ($fld_layout === null) {
                                     $fld_layout = 'large';
@@ -315,14 +351,14 @@ html;
                                 if ('static' == ($fld_layout)) {
                                     $classes = ActiveForm::FIELD_HORIZ_CLASSES['static']['horizontalCssClasses'];
                                 } else {
-                                    $classes = ActiveForm::FIELD_HORIZ_CLASSES[$layout][$fld_layout]['horizontalCssClasses'];
+                                    $classes = ActiveForm::FIELD_HORIZ_CLASSES[$layout_of_row][$fld_layout]['horizontalCssClasses'];
                                 }
-                                $lo = [ 'class' => "label-$attribute " . implode(' ',$classes['label'])  ];
+                                $lo = [ 'class' => "label-$view_field" . implode(' ',$classes['label'])  ];
                                 $fs .= '<div class="'
                                     . FormHelper::getBoostrapColumnClasses($fld_layout == 'full' ? 1 : $cols)
                                     . '"><div class=row>';
-                                $co = [ 'class' => "field field-$attribute " . $classes['wrapper'] ];
-                                $fs .= $this->renderAttribute($attribute, $lo, $co, $indexf++);
+                                $co = [ 'class' => "field field-$view_field" . $classes['wrapper'] ];
+                                $fs .= $this->renderAttribute($view_field, $lo, $co, $indexf++);
                                 $fs .= '</div></div>';
                                 break;
                             case 'grid-cards':
@@ -343,35 +379,37 @@ html;
                                 }
                                 $fs.= '<div class="col' . $bs_classes . '">';
                                 $ro = ['class' => "card field-container border-primary my-3 col"];
-                                $lo = [ 'class' => "card-header label-$attribute"];
+                                $lo = [ 'class' => "card-header label-$view_field"];
                                 $co = [ 'class' => 'card-text' ];
                                 $fs .= '<div' . Html::renderTagAttributes($ro) . '>';
-                                $fs .= $this->renderAttribute($attribute, $lo, $co, $indexf++);
-                                $fs .= "</div></div><!--$attribute-->";
+                                $fs .= $this->renderAttribute($view_field, $lo, $co, $indexf++);
+                                $fs .= "</div></div><!--$view_field-->";
                                 break;
                         }
                         $nf++;
+                    } else {
+                        throw new InvalidConfigException($view_field . ": not found in recordview attributes");
                     }
                 }
                 $fs .= '</div><!--row-->';
 				if( isset($row_layout['title']) && $type == 'fieldset' ) {
 					$legend = Html::tag('legend', $row_layout['title'], $row_layout['title_options']??[]);
-					$ret .= Html::tag('fieldset', $legend . $fs, array_merge( ['id' => $this->options['id'] . "_layout_$rlk" ], $row_layout['options']??[]) );
+					$ret .= Html::tag('fieldset', $legend . $fs, array_merge( ['id' => $this->options['id'] . "_layout_$lrk" ], $row_layout['options']??[]) );
 				} else if( isset($row_layout['title'])  ) {
 					$legend = Html::tag('div', $row_layout['title'], $row_layout['title_options']??[]);
-					$ret .= Html::tag('div', $legend . $fs, array_merge( ['id' => $this->options['id'] . "_layout_$rlk" ], $row_layout['options']??[]) );
+					$ret .= Html::tag('div', $legend . $fs, array_merge( ['id' => $this->options['id'] . "_layout_$lrk" ], $row_layout['options']??[]) );
 				} else {
 					$ret .= $fs;
 				}
 				break;
 			case 'buttons':
-				$classes = static::FIELD_HORIZ_CLASSES[$layout??'1col']['large']['horizontalCssClasses']['offset'];
+				$classes = static::FIELD_HORIZ_CLASSES[$layout_of_row??'1col']['large']['horizontalCssClasses']['offset'];
 				$ret .= '<div class="mt-2 clearfix row">';
 				if (is_array($classes)) {
 					$s_classes = implode(' ', $classes);
 				}
 				$ret .= "<div class=\"$s_classes\">";
-				$ret .= $this->layoutButtons($row_layout['buttons'], $layout??$this->formLayout, $row_layout['options']??[]);
+				$ret .= $this->layoutButtons($row_layout['buttons'], $layout_of_row??$this->formLayout, $row_layout['options']??[]);
 				$ret .= '</div><!--buttons -->' .  "\n";
 				$ret .= '</div><!--row-->';
 				break;
@@ -406,12 +444,6 @@ html;
 
     protected function layoutAttributes()
 	{
-// 		if ($this->layout == 'inline') {
-// 			$this->formLayout = 'inline';
-// 			$layout_parts = ['1col'];
-// 		} else { // horizontal layout
-// 			$layout_parts = explode(':', $this->formLayout);
-// 		}
 		if( empty($this->fieldsLayout) ) {
 			$this->fieldsLayout[] = [
 				'type' => 'fields',
@@ -420,7 +452,7 @@ html;
                 'style' => $this->style,
 			];
 		}
- 		return $this->layoutFields($this->fieldsLayout, $this->attributes);
+ 		return $this->layoutFields($this->fieldsLayout, $this->attributes, $this->layout);
 	}
 
 
