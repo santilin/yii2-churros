@@ -310,8 +310,8 @@ html;
                                 }
                             }
                             $tab_items[] = [
-                                'label' => $content['label']??$kc,
-                                'content' => $this->layoutFields($content['content'], $view_fields,$content['layout']),
+                                'label' => $content['title']??$kc,
+                                'content' => $this->layoutFields($content['fields'], $view_fields,$content['layout']),
                             ];
                         }
                         $ret .= Tabs::widget([ 'items' => $tab_items ]);
