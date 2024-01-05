@@ -284,7 +284,7 @@ html;
             }
         }
         if ($only_field_names) {
-            $layout_rows = [ ['type' => 'fields', 'fields' => $layout_rows] ];
+            $layout_rows = [ ['type' => 'fields', 'fields' => $layout_rows, 'layout' => $parent_layout] ];
         }
 		foreach($layout_rows as $lrk => $row_layout ) {
 			$layout_of_row = $row_layout['layout']??$parent_layout;
@@ -292,8 +292,7 @@ html;
 			$type = $row_layout['type']??'fields';
 			switch ($type) {
 			case 'container':
-				$ret .= '<div class=row><div class="'
-                    . FormHelper::getBoostrapColumnClasses(1) . '">';
+				$ret .= '<div class=row><div class="' . FormHelper::getBoostrapColumnClasses(1) . '">';
                 switch ($row_layout['style']??'row') {
                     case 'tabs':
                         $tab_items = [];
@@ -330,9 +329,19 @@ html;
 			case 'fieldset':
                 $nf = $indexf = 0;
                 $fs = '';
+                $only_field_names = true;
+                foreach($row_layout as $lrk => $rl) {
+                    if (is_array($rl)) {
+                        $only_field_names = false;
+                        break;
+                    }
+                }
+                if ($only_field_names) {
+                    $row_layout = ['type' => 'fields', 'fields' => $row_layout];
+                }
                 foreach ($row_layout['fields'] as $view_field) {
                     if (!empty($view_fields[$view_field])) {
-                        $fld_layout=$view_fields[$view_field]['layout']??null;
+                        $fld_layout=$view_fields[$view_field]['layout']??'large';
                         if ($fld_layout == 'full' && $nf != 0) {
                             while ($nf++%$cols != 0);
                         }
@@ -344,22 +353,19 @@ html;
                         }
                         switch ($row_layout['style']??'grid') {
                             case 'grid':
-                                if ($fld_layout === null) {
-                                    $fld_layout = 'large';
-                                }
                                 $ro = ['class' => "field-container"];
                                 if ('static' == ($fld_layout)) {
                                     $classes = ActiveForm::FIELD_HORIZ_CLASSES['static']['horizontalCssClasses'];
                                 } else {
                                     $classes = ActiveForm::FIELD_HORIZ_CLASSES[$layout_of_row][$fld_layout]['horizontalCssClasses'];
                                 }
-                                $lo = [ 'class' => "label-$view_field" . implode(' ',$classes['label'])  ];
-                                $fs .= '<div class="'
-                                    . FormHelper::getBoostrapColumnClasses($fld_layout == 'full' ? 1 : $cols)
-                                    . '"><div class=row>';
-                                $co = [ 'class' => "field field-$view_field" . $classes['wrapper'] ];
+                                $lo = [ 'class' => "label-$view_field " . implode(' ',$classes['label'])  ];
+                                $fs .= '<div class="d-flex '
+                                     . FormHelper::getBoostrapColumnClasses($fld_layout == 'full' ? 1 : $cols)
+                                     . '">';
+                                $co = [ 'class' => "field field-$view_field " . $classes['wrapper'] ];
                                 $fs .= $this->renderAttribute($view_field, $lo, $co, $indexf++);
-                                $fs .= '</div></div>';
+                                $fs .= '</div>';
                                 break;
                             case 'grid-cards':
                                 switch ($fld_layout) {
