@@ -57,6 +57,10 @@ body.dark .record-view .rv-field, .record-view .rv-label {
 	color: black;
 }
 
+.record-view .row.layout-2cols > div, .record-view .row.layout-3cols > div {
+	display:flex; /* Evita que se baje field */
+}
+
 .record-view .rv-field, .record-view .rv-label {
 	display: block;
 	padding: 6px 12px;
@@ -71,8 +75,8 @@ body.dark .record-view .rv-field, .record-view .rv-label {
 .record-view label {
 	font-weight:normal;
 	color: gray;
-	flex: 3 0 20%;
 }
+
 .record-view .field {
 	font-weight: bolder;
 	padding-top: calc(0.375rem + 1px);

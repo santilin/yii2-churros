@@ -28,7 +28,7 @@ class ActionColumn extends \yii\grid\ActionColumn
     {
 		$this->hAlign = 'left';
         if( $this->crudPerms === null ) {
-			$this->crudPerms = [ 'create', 'view', 'update', 'index', 'delete' ];
+			$this->crudPerms = [ 'create', 'view', 'update', 'index', 'delete', 'duplicate' ];
 		}
         if( FormHelper::hasPermission($this->crudPerms, 'view') ) {
 			if( isset($this->customButtons['view']) ) {

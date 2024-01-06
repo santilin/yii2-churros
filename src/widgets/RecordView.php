@@ -21,7 +21,6 @@ use santilin\churros\ChurrosAsset;
 use santilin\churros\helpers\{AppHelper,FormHelper};
 use santilin\churros\widgets\ActiveForm;
 
-
 /**
  * RecordView displays the detail of a single data [[model]].
  *
@@ -295,7 +294,7 @@ html;
 			$type = $row_layout['type']??'fields';
 			switch ($type) {
 			case 'container':
-				$ret .= '<div class=row><div class="' . FormHelper::getBoostrapColumnClasses(1) . '">';
+				$ret .= '<div class=row><div class="' . $this->columnClasses(1) . '">';
                 switch ($row_layout['style']??'row') {
                     case 'tabs':
                         $tab_items = [];
@@ -309,14 +308,14 @@ html;
                             $tab_items[] = [
                                 'label' => $content['title']??$kc,
                                 'content' => $this->layoutFields($content['fields'], $view_fields,
-                                    ['layout' => $layout_of_row, 'style' => $style_of_row]),
+                                    ['layout' => $content['layout']??$layout_of_row, 'style' => $content['style']??$style_of_row]),
                             ];
                         }
                         $ret .= Tabs::widget([ 'items' => $tab_items ]);
                         break;
                     case 'row':
                         foreach ($row_layout['content'] as $kc => $content) {
-                            $ret .= '<div class="' . FormHelper::getBoostrapColumnClasses($cols) . '">';
+                            $ret .= '<div class="' . $this->columnClasses($cols) . '">';
                             $ret .= $this->layoutFields([$content], $view_fields,
                                 ['layout' => $layout_of_row, 'style' => $style_of_row]);
                             $ret .= "</div>\n";
@@ -359,13 +358,16 @@ html;
                                 } else {
                                     $classes = ActiveForm::FIELD_HORIZ_CLASSES[$layout_of_row][$fld_layout]['horizontalCssClasses'];
                                 }
-                                $lo = [ 'class' => "label-$view_field " . implode(' ',$classes['label'])  ];
-                                $fs .= '<div class="d-flex '
-                                     . FormHelper::getBoostrapColumnClasses($fld_layout == 'full' ? 1 : $cols)
-                                     . '">';
+                                $lo = [ 'class' => "label-$view_field " . implode(' ', $classes['label'])  ];
                                 $co = [ 'class' => "field field-$view_field " . $classes['wrapper'] ];
-                                $fs .= $this->renderAttribute($view_field, $lo, $co, $indexf++);
-                                $fs .= '</div>';
+                                $col_classes = $this->columnClasses($fld_layout == 'full' ? 1 : $cols);
+                                if ($col_classes == 'col col-12') {
+                                    $fs .= $this->renderAttribute($view_field, $lo, $co, $indexf++);
+                                } else {
+                                    $fs .= "<div class=\"$col_classes\">";
+                                    $fs .= $this->renderAttribute($view_field, $lo, $co, $indexf++);
+                                    $fs .= '</div>';
+                                }
                                 break;
                             case 'grid-cards':
                                 switch ($fld_layout) {
@@ -434,9 +436,6 @@ html;
 		if( isset($options['class']) ) {
 			Html::addCssClass($wrapper_options, $options['class']);
 		}
-// 		Html::addCssClass($config['errorOptions'], $cssClasses['error']);
-// 		Html::addCssClass($config['hintOptions'], $cssClasses['hint']);
-// 		Html::addCssClass($config['options'], $cssClasses['field']);
 		if( empty($label) ) {
 			Html::addCssClass($wrapper_options, $this->fieldConfig['horizontalCssClasses']['offset']);
 		}
@@ -462,6 +461,26 @@ html;
         ]);
 	}
 
+	protected function columnClasses(int $cols): string
+    {
+        switch( $cols ) {
+            case 1:
+                return 'col col-12';
+            case 2:
+                $col = $col_sm = 12;
+                $col_md = $col_lg = $col_xl = 6;
+                break;
+            case 3:
+                $col = $col_sm = 4;
+                $col_md = $col_lg = $col_xl = 4;
+                break;
+            case 4:
+            default:
+                $col = $col_sm = 3;
+                $col_md = $col_lg = $col_xl = 3;
+        }
+        return "col col-$col col-sm-$col_sm col-md-$col_md col-lg-$col_lg col-xl-$col_xl";
+    }
 
 }
 

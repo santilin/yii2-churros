@@ -115,7 +115,7 @@ trait ActiveFormTrait
 			case 'container':
 				$ret .= '<div class="row">';
 				foreach ($row_layout['content'] as $kc => $container) {
-					$ret .= '<div class="' . FormHelper::getBoostrapColumnClasses($cols) . '">';
+					$ret .= '<div class="' . $this->columnClasses($cols) . '">';
 					$ret .= $this->layoutFields([$container], $form_fields);
 					$ret .= "</div>\n";
 				}
@@ -133,9 +133,7 @@ trait ActiveFormTrait
 							}
 							$fs .= "\n" . '<div class="row">';
 						}
-						$fs .= '<div class="'
-							. FormHelper::getBoostrapColumnClasses($cols)
-							. '">';
+						$fs .= '<div class="' . $this->columnClasses($cols) . '">';
 						$fs .= $form_fields[$form_field];
 						$fs .= '</div>';
 						$nf++;

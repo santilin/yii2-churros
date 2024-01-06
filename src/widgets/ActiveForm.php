@@ -27,9 +27,9 @@ class ActiveForm extends Bs4ActiveForm
 		'1col' => [
 			'full' => [
 				'horizontalCssClasses' =>[
-					'offset' => ['offset-xl-2 offset-lg-2 offset-md-2'],
-					'label' => ['col-xl-2 col-lg-2 col-md-2 col-sm-12 col-12', 'col-form-label text-left text-sm-left text-md-right text-lg-right text-xl-right'],
-					'wrapper' => 'col-xl-10 col-lg-10 col-md-10 col-sm-12 col-12',
+					'offset' => 'offset-12',
+					'label' => ['col-12', 'col-form-label text-left'],
+					'wrapper' => 'col-12',
 					'error' => '',
 					'hint' => '',
 					'field' => 'form-group row',
@@ -207,6 +207,28 @@ class ActiveForm extends Bs4ActiveForm
 			]
 		]
 	];
+
+	public function columnClasses(int $cols): string
+	{
+		switch( $cols ) {
+			case 1:
+				$col = $col_sm = $col_md = $col_lg = $col_xl = 12;
+				break;
+			case 2:
+				$col = $col_sm = 12;
+				$col_md = $col_lg = $col_xl = 6;
+				break;
+			case 3:
+				$col = $col_sm = 4;
+				$col_md = $col_lg = $col_xl = 4;
+				break;
+			case 4:
+			default:
+				$col = $col_sm = 3;
+				$col_md = $col_lg = $col_xl = 3;
+		}
+		return "col-$col col-sm-$col_sm col-md-$col_md col-lg-$col_lg col-xl-$col_xl";
+	}
 
 	protected function fieldClasses(string $row_layout, string $fld_layout = 'large'): array
 	{

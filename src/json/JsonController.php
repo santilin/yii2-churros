@@ -23,7 +23,7 @@ class JsonController extends \yii\web\Controller
 
 	public $accessOnlyMine = false;
 	protected $crudActions = [];
-	protected $root_model = null;
+	protected $root_model = false;
 	protected $_root_id = null;
 	protected $_path = null;
 	protected $root_json_field = null;
@@ -101,14 +101,15 @@ class JsonController extends \yii\web\Controller
 		]);
 	}
 
-	public function indexDetails($master, string $view, string $search_model_class, array $params)
+	public function indexDetails($master, string $view, string $search_model_class, array $params, $previous_context = null)
 	{
-		$rm = $this->getRootModel();
-		$detail = $this->createSearchModel($this->getPath(), "$search_model_class{$view}_Search");
+		$this->action = $this->createAction($previous_context->action->id);
+		$detail = $this->createSearchModel($master->fullPath(), "$search_model_class{$view}_Search");
 		if (!$detail) {
-			$detail = $this->createSearchModel($this->getPath(), "{$search_model_class}_Search");
-		} else {
-			$detail = $this->createSearchModel($this->getPath());
+			$detail = $this->createSearchModel($master->fullPath(), "{$search_model_class}_Search");
+		}
+		if (!$detail) {
+			$detail = $this->createSearchModel($master->fullPath());
 		}
 		if (!$detail) {
 			throw new \Exception("No {$search_model_class}_Search nor $search_model_class{$view}_Search class found in CrudController::indexDetails");
@@ -118,12 +119,13 @@ class JsonController extends \yii\web\Controller
 		$detail->$related_field = $master->getPrimaryKey();
 		$params['master'] = $master;
 		$params['embedded'] = true;
+		$params['previous_context'] = $previous_context;
 		$this->layout = false;
 		return $this->render($view, [
 			'searchModel' => $detail,
 			'indexParams' => $this->changeActionParams($params, 'index', $detail),
-							 'indexGrids' => [ '_grid' => [ '', null, [] ] ],
-					   'gridName' => $view,
+			'indexGrids' => [ '_grid' => [ '', null, [] ] ],
+			'gridName' => $view,
 		]);
 	}
 
@@ -393,25 +395,30 @@ class JsonController extends \yii\web\Controller
 		return $redirect_params;
 	}
 
-  	public function getActionRoute($action_id = null): string
+	public function getActionRoute($action_id = null, $model = null): string
 	{
-		if( $action_id === null ) {
-			return $this->getRoutePrefix() . $this->id;
+		if (!$model) {
+			return $this->getRoutePrefix($this->getPath());
+		}
+		$route = $this->getRoutePrefix($this->getPath(), false)
+			. $model->getPath()
+			. '/' . $model->jsonPath();
+		if ($action_id) {
+			return $route . '/' . $action_id;
 		} else {
-			return Url::toRoute($action_id);
+			return $route;
 		}
 	}
 
-	public function getRoutePrefix($route = null): string
+	public function getRoutePrefix($route = null, bool $add_slash = true): string
 	{
-		if( $route === null ) {
-			$route = $this->id;
-		}
 		$request_url = '/' . Yii::$app->request->getPathInfo();
 		$route_pos = strpos($request_url, $route);
 		$prefix = substr($request_url, 0, $route_pos);
-		if( substr($prefix, -1) != '/' ) {
-			$prefix .= '/';
+		if ($add_slash) {
+			if( substr($prefix, -1) != '/' ) {
+				$prefix .= '/';
+			}
 		}
 		return $prefix;
 	}
@@ -446,6 +453,9 @@ class JsonController extends \yii\web\Controller
 
 	public function getPath()
 	{
+		if ($this->root_model === false ) {
+			$this->getRootModel();
+		}
 		return $this->_path;
 	}
 
@@ -456,7 +466,7 @@ class JsonController extends \yii\web\Controller
 
 	public function getRootModel()
 	{
-		if ($this->root_model != null) {
+		if ($this->root_model !== false) {
 			return $this->root_model;
 		}
 		$req = Yii::$app->request;

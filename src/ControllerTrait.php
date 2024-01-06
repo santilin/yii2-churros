@@ -188,7 +188,7 @@ trait ControllerTrait
 		$breadcrumbs = [];
 		$master = $this->getMasterModel();
 		if ($master) {
-			$prefix = $this->getFullRoute() . '/' . $master->controllerName(). '/';
+			$prefix = $this->getBaseRoute() . '/' . $master->controllerName(). '/';
 			$breadcrumbs[] = [
 				'label' => AppHelper::mb_ucfirst($master->getModelInfo('title_plural')),
 				'url' => [ $prefix . 'index']
@@ -201,7 +201,7 @@ trait ControllerTrait
 			];
 			$breadcrumbs[] = [
 				'label' => AppHelper::mb_ucfirst($model->getModelInfo('title_plural')),
-				'url' => $this->getActionRoute('index')
+				'url' => $this->getActionRoute('index', $model)
 			];
 		} else {
 			if (FormHelper::hasPermission($permissions, 'index') && $action_id != 'index') {
@@ -218,7 +218,7 @@ trait ControllerTrait
 		if ($action_id != 'index' && $action_id != 'create') {
 			$breadcrumbs[] = [
 				'label' => $model->recordDesc('short', 25),
-				'url' => $action_id!='view' ? array_merge([$this->getActionRoute('view')], $model->getPrimaryKey(true)) : null,
+				'url' => $action_id!='view' ? array_merge([$this->getActionRoute('view', $model)], $model->getPrimaryKey(true)) : null,
 			];
 		}
 		return $breadcrumbs;
@@ -242,7 +242,7 @@ trait ControllerTrait
 					break;
 			}
 		} else {
-			$prefix = $this->getFullRoute();
+			$prefix = $this->getBaseRoute();
 			switch( $action_id ) {
 				case 'update':
 					$breadcrumbs[] = [
@@ -270,7 +270,7 @@ trait ControllerTrait
 		return $breadcrumbs;
 	}
 
-	private function getFullRoute(): string
+	private function getBaseRoute(): string
 	{
 		if ($this->module instanceof \yii\base\Application) {
 			return '';

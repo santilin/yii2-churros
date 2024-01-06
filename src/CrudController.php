@@ -100,25 +100,27 @@ class CrudController extends \yii\web\Controller
 		]);
 	}
 
-	public function indexDetails($master, string $view, string $search_model_class, array $params)
+	public function indexDetails($master, string $view, string $search_model_class, array $params, $previous_context = null)
 	{
 		$detail = $this->createSearchModel("$search_model_class{$view}_Search");
 		if (!$detail) {
-				$detail = $this->createSearchModel("{$search_model_class}_Search");
+			$detail = $this->createSearchModel("{$search_model_class}_Search");
 		}
 		if (!$detail) {
-				throw new \Exception("No {$search_model_class}_Search nor $search_model_class{$view}_Search class found in CrudController::indexDetails");
+			throw new \Exception("No {$search_model_class}_Search nor $search_model_class{$view}_Search class found in CrudController::indexDetails");
 		}
 		$related_field = $detail->getRelatedFieldForModel($master);
 		$params[$detail->formName()][$related_field] = $master->getPrimaryKey();
 		$detail->$related_field = $master->getPrimaryKey();
 		$params['master'] = $master;
 		$params['embedded'] = true;
+		$params['previous_context'] = $previous_context;
 		$this->layout = false;
 		return $this->render($view, [
-				'searchModel' => $detail,
-				'indexParams' => $this->changeActionParams($params, 'index', $detail),
-				'indexGrids' => [ '_grid' => [ '', null, [] ] ],
+			'searchModel' => $detail,
+			'indexParams' => $this->changeActionParams($params, 'index', $detail),
+			'indexGrids' => [ '_grid' => [ '', null, [] ] ],
+			'gridName' => $view,
 		]);
 	}
 
@@ -357,7 +359,7 @@ class CrudController extends \yii\web\Controller
 			} else {
 				$master = $this->getMasterModel();
 				if ($master) {
-					$prefix = $this->getFullRoute() . '/' . $master->controllerName(). '/';
+					$prefix = $this->getBaseRoute() . '/' . $master->controllerName(). '/';
 					$keys = $master->getPrimaryKey(true);
 					$keys[0] = $prefix . 'view';
 					return $keys;
@@ -403,13 +405,14 @@ class CrudController extends \yii\web\Controller
 		$redirect_params[0] = $this->getActionRoute($to);
 		return $redirect_params;
 	}
+
   	public function getActionRoute($action_id = null, $master_model = null): string
 	{
 		if (!$master_model) {
 			$master_model = $this->getMasterModel();
 		}
 		if ($master_model) {
-			$controller_route = $this->getFullRoute();
+			$controller_route = $this->getBaseRoute();
 			$controller_route .= '/' . $master_model->controllerName()
 				. '/' . $master_model->getPrimaryKey() . '/' .  $this->id;
 			if (is_array($action_id)) {

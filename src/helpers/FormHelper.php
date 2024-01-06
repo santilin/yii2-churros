@@ -348,29 +348,6 @@ ajax;
 		}
 	}
 
-
-	static public function getBoostrapColumnClasses(int $cols): string
-	{
-		switch( $cols ) {
-		case 1:
-			$col = $col_sm = $col_md = $col_lg = $col_xl = 12;
-			break;
-		case 2:
-			$col = $col_sm = 12;
-			$col_md = $col_lg = $col_xl = 6;
-			break;
-		case 3:
-			$col = $col_sm = 4;
-			$col_md = $col_lg = $col_xl = 4;
-			break;
-		case 4:
-		default:
-			$col = $col_sm = 3;
-			$col_md = $col_lg = $col_xl = 3;
-		}
-		return "col-$col col-sm-$col_sm col-md-$col_md col-lg-$col_lg col-xl-$col_xl";
-	}
-
 	static public function detailsTag(string $summary, string $body, bool $open = false,
 						array $body_options = [], array $summary_options = [])
 	{
