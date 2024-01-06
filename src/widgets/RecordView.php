@@ -273,9 +273,11 @@ html;
         }
     }
 
-	protected function layoutFields(array $layout_rows, array $view_fields, string $parent_layout = '1col'): string
+	protected function layoutFields(array $layout_rows, array $view_fields, array $parent_options = []): string
 	{
-		$ret = '';
+        $parent_layout = $parent_options['layout']??'1col';
+        $parent_style = $parent_options['style']??'grid';
+        $ret = '';
         $only_field_names = true;
         foreach($layout_rows as $lrk => $row_layout ) {
             if (is_array($row_layout)) {
@@ -288,6 +290,7 @@ html;
         }
 		foreach($layout_rows as $lrk => $row_layout ) {
 			$layout_of_row = $row_layout['layout']??$parent_layout;
+            $style_of_row = $row_layout['style']??$parent_style;
 			$cols = intval($layout_of_row)?:1;
 			$type = $row_layout['type']??'fields';
 			switch ($type) {
@@ -300,17 +303,13 @@ html;
                             if (!is_array($content)) {
                                 $content = [
                                     'label' => $kc,
-                                    'layout' => $layout_of_row,
                                     'content' => $content
                                 ];
-                            } else {
-                                if (!array_key_exists('layout', $content)) {
-                                    $content['layout'] = $layout_of_row;
-                                }
                             }
                             $tab_items[] = [
                                 'label' => $content['title']??$kc,
-                                'content' => $this->layoutFields($content['fields'], $view_fields,$content['layout']),
+                                'content' => $this->layoutFields($content['fields'], $view_fields,
+                                    ['layout' => $layout_of_row, 'style' => $style_of_row]),
                             ];
                         }
                         $ret .= Tabs::widget([ 'items' => $tab_items ]);
@@ -318,7 +317,8 @@ html;
                     case 'row':
                         foreach ($row_layout['content'] as $kc => $content) {
                             $ret .= '<div class="' . FormHelper::getBoostrapColumnClasses($cols) . '">';
-                            $ret .= $this->layoutFields([$content], $view_fields, $layout_of_row);
+                            $ret .= $this->layoutFields([$content], $view_fields,
+                                ['layout' => $layout_of_row, 'style' => $style_of_row]);
                             $ret .= "</div>\n";
                         }
                         break;
@@ -453,12 +453,13 @@ html;
 		if( empty($this->fieldsLayout) ) {
 			$this->fieldsLayout[] = [
 				'type' => 'fields',
-				'fields' => $this->attributes,
-				'layout' => $this->layout,
-                'style' => $this->style,
+				'fields' => array_keys($this->attributes),
 			];
 		}
- 		return $this->layoutFields($this->fieldsLayout, $this->attributes, $this->layout);
+ 		return $this->layoutFields($this->fieldsLayout, $this->attributes, [
+            'layout' => $this->layout,
+            'style' => $this->style,
+        ]);
 	}
 
 
