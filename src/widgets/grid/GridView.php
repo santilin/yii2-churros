@@ -21,13 +21,19 @@ class GridView extends SimpleGridView
 	public $layout = "{summary}\n{selectViews}\n{items}\n{pager}";
 
 
-
-    public function init()
-    {
-        if ($this->emptyText === null) {
-            $this->emptyText = Yii::t('churros', 'No {items} found.');
-        }
-        parent::init();
+	public function init()
+	{
+		if ($this->emptyText === null) {
+			$configItems = [
+				'item' => $this->itemLabelSingle,
+				'items' => $this->itemLabelPlural,
+				'items-few' => $this->itemLabelFew,
+				'items-many' => $this->itemLabelMany,
+				'items-acc' => $this->itemLabelAccusative,
+			];
+			$this->emptyText = Yii::t('churros', 'No {items} found.', $configItems);
+		}
+		parent::init();
 	}
 
     /**
@@ -54,7 +60,7 @@ class GridView extends SimpleGridView
     // Dont show emptyText here, emptyText is managed in the summary section.
     public function renderItems()
     {
-		if ($this->filterModel && count($this->dataProvider->getModels()) == 0) {
+		if ($this->filterModel && $this->dataProvider->getCount() == 0) {
 			$has_filters = false;
 			$filter_attrs = $this->filterModel->activeAttributes();
 			foreach ($filter_attrs as $attr) {
@@ -100,7 +106,7 @@ class GridView extends SimpleGridView
     public function renderSummaryWithSelectViews()
     {
 		$selectViewsContent = $this->renderSelectViews();
-        $count = $this->dataProvider->getCount();
+        $count = $this->dataProvider->getCount(); // records in current page
 		$summaryOptions = $this->summaryOptions;
 		$configItems = [
 			'item' => $this->itemLabelSingle,
