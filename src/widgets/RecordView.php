@@ -276,7 +276,6 @@ html;
 	{
         $parent_layout = $parent_options['layout']??'1col';
         $parent_style = $parent_options['style']??'grid';
-        $ret = '';
         $only_field_names = true;
         foreach($layout_rows as $lrk => $row_layout ) {
             if (is_array($row_layout)) {
@@ -287,6 +286,7 @@ html;
         if ($only_field_names) {
             $layout_rows = [ ['type' => 'fields', 'fields' => $layout_rows, 'layout' => $parent_layout] ];
         }
+        $ret = '';
 		foreach($layout_rows as $lrk => $row_layout ) {
 			$layout_of_row = $row_layout['layout']??$parent_layout;
             $style_of_row = $row_layout['style']??$parent_style;
@@ -350,7 +350,7 @@ html;
                             }
                             $fs .= "\n" . "<div class=\"row layout-$layout_of_row\">";
                         }
-                        switch ($row_layout['style']??'grid') {
+                        switch ($row_layout['style']??$style_of_row) {
                             case 'grid':
                                 $ro = ['class' => "field-container"];
                                 if ('static' == ($fld_layout)) {
@@ -370,28 +370,14 @@ html;
                                 }
                                 break;
                             case 'grid-cards':
-                                switch ($fld_layout) {
-                                    case null:
-                                        $bs_classes = ' col-sm-' . (12 / $cols);
-                                        break;
-                                    case 'medium':
-                                    case 'short':
-                                        $bs_classes= ' col-sm-4';
-                                        break;
-                                    case 'large':
-                                    case 'full':
-                                    default:
-                                        $bs_classes= ' col-sm-12';
-                                        break;
-                                    break;
-                                }
-                                $fs.= '<div class="col' . $bs_classes . '">';
-                                $ro = ['class' => "card field-container border-primary my-3 col"];
+                                $col_classes = $this->columnClasses($fld_layout == 'full' ? 1 : $cols);
+//                                 $fs.= '<div class="col ' . $col_classes . '">';
+                                $ro = ['class' => "$col_classes card field-container border-primary my-3"];
                                 $lo = [ 'class' => "card-header label-$view_field"];
                                 $co = [ 'class' => 'card-text' ];
                                 $fs .= '<div' . Html::renderTagAttributes($ro) . '>';
                                 $fs .= $this->renderAttribute($view_field, $lo, $co, $indexf++);
-                                $fs .= "</div></div><!--$view_field-->";
+                                $fs .= "</div><!--$view_field-->";
                                 break;
                         }
                         $nf++;
@@ -471,13 +457,10 @@ html;
                 $col_md = $col_lg = $col_xl = 6;
                 break;
             case 3:
-                $col = $col_sm = 4;
-                $col_md = $col_lg = $col_xl = 4;
-                break;
+                return 'col col-4';
             case 4:
             default:
-                $col = $col_sm = 3;
-                $col_md = $col_lg = $col_xl = 3;
+                return 'col col-3';
         }
         return "col col-$col col-sm-$col_sm col-md-$col_md col-lg-$col_lg col-xl-$col_xl";
     }
