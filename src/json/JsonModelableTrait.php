@@ -31,7 +31,7 @@ trait JsonModelableTrait
 		}
 	}
 
-	public function getJsonArray(string $path, ?string $id, ?string $locator=null): ?array
+	public function getJsonArray(string $path, ?string $id, ?string $locator=null): array
 	{
 		if ($this->_json_root === false) {
 			$this->_json_root = $this->createJsonRoot();
@@ -49,7 +49,7 @@ trait JsonModelableTrait
 			if (!empty($ret)) {
 				return $ret;
 			} else {
-				return null;
+				return [];
 			}
 		}
 	}
