@@ -21,6 +21,7 @@ class MultiColumnTypeahead extends Typeahead
 	public $display;
 	public $remoteUrl;
 	public $pageParam = 'page';
+	public $fieldsParam = 'fields';
 	public $perPageParam = 'pagesize';
 	public $searchParam = 'search';
 	public $concatToIdField = false;
@@ -39,30 +40,24 @@ class MultiColumnTypeahead extends Typeahead
 		}
 		// Create
 		$set_dest_fields_values = [];
-// 		if ($this->concatToIdField) {
-// 			$set_dest_fields_values[] = <<<js
-// $(this).typeahead('val', selectedDatum[0].querySelector(".suggestion-values").innerHTML);
-// js;
-// 		} else {
-// 			$set_dest_fields_values[] = <<<js
-// $(this).typeahead('val', item.{$this->inputFields[0]});
-// js;
-// 		}
 		foreach ($this->formFields as $formField => $dbField) {
 			$fld_id = Html::getInputId($this->model, $formField);
 			$set_dest_fields_values[] = <<<js
 	if (item.$dbField != '') $('#$fld_id').val(item.$dbField);
 js;
 		}
+		$s_fields = implode(",",array_keys($this->formFields));
 		$this->dataset = [[
 			'limit' => $this->limit,
 			'remote' => [
-				'url' => $this->remoteUrl . '?' . $this->searchParam . '=&' . $this->pageParam . '=&'
-					. $this->perPageParam . '=',
+				'url' => $this->remoteUrl . '?'
+					. $this->searchParam . '=&' . $this->fieldsParam . '=&'
+					. $this->pageParam . '=&' . $this->perPageParam . '=',
 // 				'wildcard' => '%QUERY',
 				'replace' => new \yii\web\JsExpression(<<<jsexpr
 function(url, query) {
 	const urlParams = new URLSearchParams(url);
+	let fields = urlParams.get('{$this->fieldsParam}');
 	let page = urlParams.get('{$this->pageParam}');
 	let perpage = urlParams.get('{$this->perPageParam}');
 	if (page === undefined || page == '' ) {
@@ -71,7 +66,9 @@ function(url, query) {
 	if (perpage === undefined || perpage == '' ) {
 		perpage = {$this->limit};
 	}
-	return url.split("?")[0] + "?{$this->searchParam}=" + query + "&{$this->pageParam}=" + page + "&{$this->perPageParam}=" + perpage;
+	return url.split("?")[0] + "?{$this->searchParam}=" + query
+		+ "&{$this->fieldsParam}=" + '$s_fields' +
+		+ "&{$this->pageParam}=" + page + "&{$this->perPageParam}=" + perpage;
 }
 jsexpr
 				),
@@ -102,15 +99,6 @@ js
 
 		// Cuando se pulsa INTRO y está desplegado el menú de sugerencias, se selecciona la primera
 		$set_dest_fields_values = [];
-// 		if ($this->concatToIdField) {
-// 			$set_dest_fields_values[] = <<<js
-// 		$(this).typeahead('val', selectedDatum[0].querySelector(".suggestion-values").innerHTML;
-// js;
-// 		} else {
-// 			$set_dest_fields_values[] = <<<js
-// 		$(this).typeahead('val', datumParts.{$this->inputFields[0]});
-// js;
-// 		}
 		foreach ($this->formFields as $formField => $dbField) {
 			$fld_id = Html::getInputId($this->model, $formField);
 			$set_dest_fields_values[] = <<<js
