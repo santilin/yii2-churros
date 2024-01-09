@@ -371,13 +371,13 @@ html;
                                 break;
                             case 'grid-cards':
                                 $col_classes = $this->columnClasses($fld_layout == 'full' ? 1 : $cols);
-//                                 $fs.= '<div class="col ' . $col_classes . '">';
-                                $ro = ['class' => "$col_classes card field-container border-primary my-3"];
+                                $fs.= '<div class="col ' . $col_classes . '">';
+                                $ro = ['class' => "card field-container border-primary my-3 w-100"];
                                 $lo = [ 'class' => "card-header label-$view_field"];
                                 $co = [ 'class' => 'card-text' ];
                                 $fs .= '<div' . Html::renderTagAttributes($ro) . '>';
                                 $fs .= $this->renderAttribute($view_field, $lo, $co, $indexf++);
-                                $fs .= "</div><!--$view_field-->";
+                                $fs .= "</div></div><!--$view_field-->";
                                 break;
                         }
                         $nf++;
