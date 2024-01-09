@@ -1,13 +1,13 @@
 <?php
-namespace santilin\churros\widgets;
+namespace santilin\churros\widgets\bs5;
 
 use yii\helpers\{ArrayHelper,Html};
-use yii\bootstrap4\ActiveForm as Bs4ActiveForm;
+use yii\bootstrap5\ActiveForm as Bs5ActiveForm;
 use santilin\churros\widgets\ActiveFormTrait;
 
 // https://getbootstrap.com/docs/4.1/components/forms/
 
-class ActiveForm extends Bs4ActiveForm
+class ActiveForm extends Bs5ActiveForm
 {
 	use ActiveFormTrait;
 
@@ -227,7 +227,7 @@ class ActiveForm extends Bs4ActiveForm
 				$col = $col_sm = 3;
 				$col_md = $col_lg = $col_xl = 3;
 		}
-		return "col col-$col col-sm-$col_sm col-md-$col_md col-lg-$col_lg col-xl-$col_xl";
+		return "col col-$col col-sm-$col_sm col-md-$col_md col-lg-$col_lg col-xl-$col_xl my-1";
 	}
 
 	protected function fieldClasses(string $row_layout, string $fld_layout = 'large'): array
