@@ -85,7 +85,7 @@ class GridView extends SimpleGridView
 			$selectViewsOptions = $this->selectViewsOptions;
 			$tag = ArrayHelper::remove($selectViewsOptions, 'tag', 'span');
 			return Html::tag($tag,
-				FormHelper::displayButtons([ $this->selectViews ]), $selectViewsOptions);
+				FormHelper::displayButtons([$this->selectViews]), $selectViewsOptions);
 		} else {
 			return '';
 		}
@@ -95,8 +95,9 @@ class GridView extends SimpleGridView
     {
 		if( count( $this->toolbarButtons) ) {
 			$toolbarButtonsOptions = $this->toolbarButtonsOptions;
+			Html::addCssClass($toolbarButtonsOptions, 'toolbar');
 			$tag = ArrayHelper::remove($toolbarButtonsOptions, 'tag', 'div');
-			$toolbarButtonsContent = FormHelper::displayButtons( $this->toolbarButtons, '' );
+			$toolbarButtonsContent = FormHelper::displayButtons($this->toolbarButtons,'');
 			return Html::tag($tag, $toolbarButtonsContent, $toolbarButtonsOptions);
 		} else {
 			return '';

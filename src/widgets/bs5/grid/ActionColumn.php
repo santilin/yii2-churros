@@ -86,6 +86,7 @@ class ActionColumn extends \yii\grid\ActionColumn
 			$this->buttons[$name] = function ($url, $model, $key) use ($name, $iconName, $additionalOptions) {
 				$options = array_merge($this->buttonOptions, $additionalOptions);
 				Html::addCssClass($options, $this->buttonOptions['class']??[]);
+                Html::addCssClass($options, $name);
 				if( empty($options['aria-label']) ) {
 					$options['aria-label'] = $options['title'];
 				}
