@@ -469,9 +469,9 @@ class CrudController extends \yii\web\Controller
 				$master_model_name = 'app\\models\\'. AppHelper::camelCase($this->masterController);
 				$this->masterModel = $master_model_name::findOne($master_id);
 				if ($this->masterModel == null) {
-					throw new NotFoundHttpException($master_model->t('churros',
+					throw new NotFoundHttpException(Yii::t('churros',
 						"The master record of {title} with '{id}' id does not exist",
-						[ '{id}' => $master_id]));
+						[ '{id}' => $master_id, '{title}' => $master_model_name ]));
 				}
 			} else {
 				$this->masterModel = null;

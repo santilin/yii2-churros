@@ -396,19 +396,21 @@ class JsonController extends \yii\web\Controller
 		return $redirect_params;
 	}
 
-	public function getActionRoute($action_id = null, $model, $master_model = null): string
+	public function getActionRoute(?string $action_id, $model, $master_model = null): string
 	{
 		if (!$master_model) {
-			return $this->getRoutePrefix($this->getPath());
-		}
-		$route = $this->getRoutePrefix($this->getPath(), false)
-			. $master_model->getPath() . '/' . $master_model->getPrimaryKey()
-			. '/' . $model->jsonPath();
-		if ($action_id) {
-			return $route . '/' . $action_id;
+			$route = $this->getRoutePrefix($this->getPath(), false)
+				. $model->getPath();
 		} else {
-			return $route;
+			$route = $this->getRoutePrefix($this->getPath(), false)
+				. $master_model->getPath() . '/' . $master_model->getPrimaryKey()
+				. '/' .  $model->getPath();
 		}
+		if ($action_id) {
+			$route .= '/' . $action_id;
+			return Url::to(array_merge([$route], $model->getPrimaryKey(true)));
+		}
+		return $route;
 	}
 
 	public function getRoutePrefix($route = null, bool $add_slash = true): string
