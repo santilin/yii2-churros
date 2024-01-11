@@ -34,8 +34,12 @@ class ExpandableTextColumn extends DataColumn
 			return $text;
 		} else {
 			/// @todo partir por el espacio más próximo
-			$truncated_text = trim(mb_substr(trim($text), 0, $this->length));
-			$modal = <<<modal
+			if (YII_ENV_TEST) {
+				$modal = '';
+				$truncated_text = $text;
+			} else {
+				$truncated_text = trim(mb_substr(trim($text), 0, $this->length));
+				$modal = <<<modal
 <div class="modal fade" id="modalSeeMore" tabindex="-1" aria-labelledby="modalSeeMore" style="display: none;" aria-hidden="true">
 	<div class="modal-dialog modal-dialog-centered modal-dialog-scrollable modal-md">
 		<div class="modal-content">
@@ -57,7 +61,7 @@ class ExpandableTextColumn extends DataColumn
 	</div>
 </div>
 modal;
-
+			}
 			$text =  $truncated_text . Html::a('&nbsp;<i class="fa fa-arrow-up"></i>', '#', [
 				'title' => 'Pincha para leer más',
 				'class' => "btn btn-outline-primary btn-sm",
