@@ -355,16 +355,16 @@ trait ModelInfoTrait
 		return $prefix . $c;
     }
 
-    public function viewPath($prefix = '')
+    public function viewPath(string $prefix = ''): string
     {
 		$c = AppHelper::stripNamespaceFromClassName($this);
 		$c = lcfirst(str_replace("Search", "", $c));
 		return "$prefix$c/";
     }
 
-    public function getRelatedFieldForModel($related_model)
+    public function getRelatedFieldForModel($related_model): ?string
     {
-		foreach( self::$relations as $relname => $rel_info ) {
+		foreach (self::$relations as $relname => $rel_info) {
 			$cn = $related_model->className();
 			if( $rel_info['modelClass'] == $cn ) {
 				$related_field = $rel_info['left'];
@@ -373,7 +373,7 @@ trait ModelInfoTrait
 			}
 		}
 		// If it's a derived class like *Form, *Search, look up its parent
-		foreach( self::$relations as $relname => $rel_info ) {
+		foreach (self::$relations as $relname => $rel_info) {
 			$cn = get_parent_class($related_model);
 			if( $rel_info['modelClass'] == $cn ) {
 				$related_field = $rel_info['left'];
@@ -381,7 +381,7 @@ trait ModelInfoTrait
 				return $field;
 			}
 		}
-		throw new \Exception( self::className() . ": not related to " . $related_model->className() );
+		return null;
     }
 
     public function getRelatedModelClass($relation_name)

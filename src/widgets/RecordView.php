@@ -289,7 +289,6 @@ html;
         $ret = '';
 		foreach($layout_rows as $lrk => $row_layout ) {
 			$layout_of_row = $row_layout['layout']??$parent_layout;
-            $style_of_row = $row_layout['style']??$parent_style;
 			$cols = intval($layout_of_row)?:1;
 			$type = $row_layout['type']??'fields';
 			switch ($type) {
@@ -308,7 +307,7 @@ html;
                             $tab_items[] = [
                                 'label' => $content['title']??$kc,
                                 'content' => $this->layoutFields($content['fields'], $view_fields,
-                                    ['layout' => $content['layout']??$layout_of_row, 'style' => $content['style']??$style_of_row]),
+                                    ['layout' => $content['layout']??$layout_of_row, 'style' => $content['style']??$parent_style]),
                             ];
                         }
                         $ret .= Tabs::widget([ 'items' => $tab_items ]);
@@ -317,7 +316,7 @@ html;
                         foreach ($row_layout['content'] as $kc => $content) {
                             $ret .= '<div class="' . $this->columnClasses($cols) . '">';
                             $ret .= $this->layoutFields([$content], $view_fields,
-                                ['layout' => $layout_of_row, 'style' => $style_of_row]);
+                                ['layout' => $layout_of_row, 'style' => $parent_style]);
                             $ret .= "</div>\n";
                         }
                         break;
@@ -350,7 +349,7 @@ html;
                             }
                             $fs .= "\n" . "<div class=\"row layout-$layout_of_row\">";
                         }
-                        switch ($row_layout['style']??$style_of_row) {
+                        switch ($row_layout['style']??$parent_style) {
                             case 'grid':
                                 $ro = ['class' => "field-container"];
                                 if ('static' == ($fld_layout)) {

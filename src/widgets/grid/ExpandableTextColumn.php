@@ -34,12 +34,39 @@ class ExpandableTextColumn extends DataColumn
 			return $text;
 		} else {
 			/// @todo partir por el espacio más próximo
-			$truncated_text = trim(mb_substr($text, 0, $this->length));
-			return Html::a($truncated_text,
-				"#collapse$key$index{$this->attribute}",
-				[ 'class' => "fa fa-expand",  'data-toggle' =>'collapse', 'role'=>'button',
-				  'aria-expanded'=>'false', 'aria-controls'=>"collapse$key$index{$this->attribute}"]
-				) . "<div class='collapse' id='collapse$key$index{$this->attribute}'><div class='card card-body' style='display:inline'>".mb_substr($text,$this->length). "</div></div>";
+			$truncated_text = trim(mb_substr(trim($text), 0, $this->length));
+			$modal = <<<modal
+<div class="modal fade" id="modalSeeMore" tabindex="-1" aria-labelledby="modalSeeMore" style="display: none;" aria-hidden="true">
+	<div class="modal-dialog modal-dialog-centered modal-dialog-scrollable modal-md">
+		<div class="modal-content">
+			<div class="modal-header bg-primary text-white">
+				<h1 class="modal-title fs-5" id="modalLeerMasTitle">Título</h1>
+				<button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+			</div>
+			<div class="modal-body">
+				<div class="mb-3 bg-primary text-white p-2" id="modalLeerMasLabel">Leer más...</div>
+				<div id="modalLeerMasContenido"></div>
+
+
+			</div>
+			<div class="modal-footer">
+				<button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
+				<button type="button" class="btn btn-primary" data-bs-dismiss="modal" id="modalLeerMasBtn">Aceptar</button>
+			</div>
+		</div>
+	</div>
+</div>
+modal;
+
+			$text =  $truncated_text . Html::a('&nbsp;<i class="fa fa-arrow-up"></i>', '#', [
+				'title' => 'Pincha para leer más',
+				'class' => "btn btn-outline-primary btn-sm",
+				'data' => [
+					'bs-toggle' => 'modal',
+					'bs-target' => '#modalSeeMore'
+				]
+			]);
+			return $modal . $text;
 		}
     }
 
