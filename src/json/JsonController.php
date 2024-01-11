@@ -396,13 +396,13 @@ class JsonController extends \yii\web\Controller
 		return $redirect_params;
 	}
 
-	public function getActionRoute($action_id = null, $model = null): string
+	public function getActionRoute($action_id = null, $model, $master_model = null): string
 	{
-		if (!$model) {
+		if (!$master_model) {
 			return $this->getRoutePrefix($this->getPath());
 		}
 		$route = $this->getRoutePrefix($this->getPath(), false)
-			. $model->getPath()
+			. $master_model->getPath() . '/' . $master_model->getPrimaryKey()
 			. '/' . $model->jsonPath();
 		if ($action_id) {
 			return $route . '/' . $action_id;

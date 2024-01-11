@@ -403,11 +403,11 @@ class CrudController extends \yii\web\Controller
 			break;
 		default:
 		}
-		$redirect_params[0] = $this->getActionRoute($to);
+		$redirect_params[0] = $this->getActionRoute($to, $model);
 		return $redirect_params;
 	}
 
-  	public function getActionRoute($action_id = null, $master_model = null): string
+  	public function getActionRoute($action_id = null, $model = null, $master_model = null): string
 	{
 		if (!$master_model) {
 			$master_model = $this->getMasterModel();

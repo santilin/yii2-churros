@@ -99,9 +99,9 @@ trait ControllerTrait
 	{
 		$pk = $model->getPrimaryKey();
 		if( is_array($pk) ) {
-			$link = Url::to(array_merge([$this->getActionRoute('view')], $pk));
+			$link = Url::to(array_merge([$this->getActionRoute('view', $model)], $pk));
 		} else {
-			$link = $this->getActionRoute('view') . "/$pk";
+			$link = $this->getActionRoute('view', $model) . "/$pk";
 		}
 		return $link;
 	}
