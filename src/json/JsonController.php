@@ -513,16 +513,104 @@ class JsonController extends \yii\web\Controller
 				$pos_action = strrpos($this->_path, '/'. $this->action->id . '/');
 				if ($pos_action === false) {
 					$action_len = strlen($this->action->id)+1;
-					if (substr($this->path,-$action_len) == '/'.$this->action->id) {
-						$pos_action = strlen($this->path) - $action_len;
+					if (substr($this->_path,-$action_len) == '/'.$this->action->id) {
+						$pos_action = strlen($this->_path) - $action_len;
 					}
 				}
 				if ($pos_action !== false) {
-					$this->_path = substr($this->path, 0, $pos_action);
+					$this->_path = substr($this->_path, 0, $pos_action);
 				}
 			}
 		}
 		return $this->root_model;
 	}
+
+    public function genBaseBreadCrumbs(string $action_id, $model, array $permissions = []): array
+	{
+		$breadcrumbs = [];
+		$master = $this->getMasterModel();
+		if ($master) {
+			$prefix = $this->getBaseRoute() . '/' . $master->controllerName(). '/';
+			$breadcrumbs[] = [
+				'label' => AppHelper::mb_ucfirst($master->getModelInfo('title_plural')),
+				'url' => [ $prefix . 'index']
+			];
+			$keys = $master->getPrimaryKey(true);
+			$keys[0] = $prefix . 'view'; /// @todo defaultAction
+			$breadcrumbs[] = [
+				'label' => $master->recordDesc('short', 25),
+				'url' => $keys
+			];
+			$breadcrumbs[] = [
+				'label' => AppHelper::mb_ucfirst($model->getModelInfo('title_plural')),
+				'url' => $this->getActionRoute('index', $model)
+			];
+		} else {
+			if (FormHelper::hasPermission($permissions, 'index') && $action_id != 'index') {
+				$breadcrumbs[] = [
+					'label' =>  $model->getModelInfo('title_plural'),
+					'url' => [ $this->id . '/index' ]
+				];
+			} else {
+				$breadcrumbs[] = [
+					'label' =>  $model->getModelInfo('title_plural'),
+				];
+			}
+		}
+		if ($action_id != 'index' && $action_id != 'create') {
+			$breadcrumbs[] = [
+				'label' => $model->getJsonId(),
+				'url' => $action_id!='view' ? array_merge([$this->getActionRoute('view', $model)], $model->getPrimaryKey(true)) : null,
+			];
+		}
+		return $breadcrumbs;
+	}
+
+	public function genBreadCrumbs(string $action_id, $model, array $permissions = []): array
+	{
+		$breadcrumbs = $this->genBaseBreadCrumbs($action_id, $model, $permissions);
+		$master = $this->getMasterModel();
+		if ($master) {
+			switch( $action_id ) {
+				case 'update':
+					$breadcrumbs[] = [
+						'label' => $model->recordDesc('short', 25),
+						'url' => array_merge([$this->getActionRoute('view')], $model->getPrimaryKey(true))
+					];
+				case 'create':
+					$breadcrumbs[] = $model->t('churros', 'Creating {title}');
+					break;
+				case 'index':
+					break;
+			}
+		} else {
+			$prefix = $this->getBaseRoute();
+			switch( $action_id ) {
+				case 'update':
+					$breadcrumbs[] = [
+						'label' => $model->t('churros', 'Updating {record_short}'),
+					];
+					break;
+				case 'duplicate':
+					$breadcrumbs[] = [
+						'label' => Yii::t('churros', 'Duplicating ') . $model->recordDesc('short', 20),
+						'url' => array_merge([ $prefix . $this->id . '/view'], $model->getPrimaryKey(true))
+					];
+					break;
+				case 'view':
+					$breadcrumbs[] = $model->recordDesc('short', 20);
+					break;
+				case 'create':
+					$breadcrumbs[] = $model->t('churros', 'Creating {title}');
+					break;
+				case 'index':
+					break;
+				default:
+					throw new \Exception($action_id);
+			}
+		}
+		return $breadcrumbs;
+	}
+
 
 }

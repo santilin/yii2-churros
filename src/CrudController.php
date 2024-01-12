@@ -116,6 +116,8 @@ class CrudController extends \yii\web\Controller
 		$index_params['master'] = $master;
 		$index_params['embedded'] = true;
 		$index_params['previous_context'] = $previous_context;
+		$related_field = $detail->getRelatedFieldForModel($master);
+		$index_params[$detail->formName()][$related_field] = $master->getPrimaryKey();
 		$this->layout = false;
 		return $this->render($view, [
 			'searchModel' => $detail,
@@ -497,5 +499,93 @@ class CrudController extends \yii\web\Controller
 		$ret .= $child->controllerName();
 		return $ret;
 	}
+
+    public function genBaseBreadCrumbs(string $action_id, $model, array $permissions = []): array
+	{
+		$breadcrumbs = [];
+		$master = $this->getMasterModel();
+		if ($master) {
+			$prefix = $this->getBaseRoute() . '/' . $master->controllerName(). '/';
+			$breadcrumbs[] = [
+				'label' => AppHelper::mb_ucfirst($master->getModelInfo('title_plural')),
+				'url' => [ $prefix . 'index']
+			];
+			$keys = $master->getPrimaryKey(true);
+			$keys[0] = $prefix . 'view';
+			$breadcrumbs[] = [
+				'label' => $master->recordDesc('short', 25),
+				'url' => $keys
+			];
+			$breadcrumbs[] = [
+				'label' => AppHelper::mb_ucfirst($model->getModelInfo('title_plural')),
+				'url' => $this->getActionRoute('index', $model)
+			];
+		} else {
+			if (FormHelper::hasPermission($permissions, 'index') && $action_id != 'index') {
+				$breadcrumbs[] = [
+					'label' =>  $model->getModelInfo('title_plural'),
+					'url' => [ $this->id . '/index' ]
+				];
+			} else {
+				$breadcrumbs[] = [
+					'label' =>  $model->getModelInfo('title_plural'),
+				];
+			}
+		}
+		if ($action_id != 'index' && $action_id != 'create') {
+			$breadcrumbs[] = [
+				'label' => $model->recordDesc('short', 25),
+				'url' => $action_id!='view' ? array_merge([$this->getActionRoute('view', $model)], $model->getPrimaryKey(true)) : null,
+			];
+		}
+		return $breadcrumbs;
+	}
+
+	public function genBreadCrumbs(string $action_id, $model, array $permissions = []): array
+	{
+		$breadcrumbs = $this->genBaseBreadCrumbs($action_id, $model, $permissions);
+		$master = $this->getMasterModel();
+		if ($master) {
+			switch( $action_id ) {
+				case 'update':
+					$breadcrumbs[] = [
+						'label' => $model->recordDesc('short', 25),
+						'url' => array_merge([$this->getActionRoute('view')], $model->getPrimaryKey(true))
+					];
+				case 'create':
+					$breadcrumbs[] = $model->t('churros', 'Creating {title}');
+					break;
+				case 'index':
+					break;
+			}
+		} else {
+			$prefix = $this->getBaseRoute();
+			switch( $action_id ) {
+				case 'update':
+					$breadcrumbs[] = [
+						'label' => $model->t('churros', 'Updating {record_short}'),
+					];
+					break;
+				case 'duplicate':
+					$breadcrumbs[] = [
+						'label' => Yii::t('churros', 'Duplicating ') . $model->recordDesc('short', 20),
+						'url' => array_merge([ $prefix . $this->id . '/view'], $model->getPrimaryKey(true))
+					];
+					break;
+				case 'view':
+					$breadcrumbs[] = $model->recordDesc('short', 20);
+					break;
+				case 'create':
+					$breadcrumbs[] = $model->t('churros', 'Creating {title}');
+					break;
+				case 'index':
+					break;
+				default:
+					throw new \Exception($action_id);
+			}
+		}
+		return $breadcrumbs;
+	}
+
 
 }
