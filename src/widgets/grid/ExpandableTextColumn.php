@@ -6,6 +6,7 @@ use yii\grid\DataColumn;
 use yii\helpers\Html;
 use yii\helpers\Url;
 /**
+ * @todo botón copiar al portapapeles
  */
 class ExpandableTextColumn extends DataColumn
 {
@@ -15,6 +16,9 @@ class ExpandableTextColumn extends DataColumn
      */
     public $length = 30;
     public $format = 'text';
+	public $captionOptions = []; // @todo
+	public $modalBodyOptions = [];
+        public $titulo = "Título";
 
     /**
      * {@inheritdoc}
@@ -30,45 +34,41 @@ class ExpandableTextColumn extends DataColumn
 		if( $this->format == 'html' ) {
 			$text = html_entity_decode(strip_tags($text));
 		}
-		if( $this->length == 0 || strlen($text)<=$this->length) {
+		if( $this->length == 0 ) {// || strlen($text)<=$this->length) {
 			return $text;
 		} else {
-			/// @todo partir por el espacio más próximo
-			if (YII_ENV_TEST) {
-				$modal = '';
-				$truncated_text = $text;
-			} else {
-				$truncated_text = trim(mb_substr(trim($text), 0, $this->length));
-				$modal = <<<modal
+			$truncated_text = trim(mb_substr(trim($text), 0, $this->length));
+			$encoded_text = Html::encode($text); // Html::tag('p', Html::encode($text), $this->modalBodyOptions);
+			$modal = <<<modal
 <div class="modal fade" id="modalSeeMore" tabindex="-1" aria-labelledby="modalSeeMore" style="display: none;" aria-hidden="true">
 	<div class="modal-dialog modal-dialog-centered modal-dialog-scrollable modal-md">
 		<div class="modal-content">
 			<div class="modal-header bg-primary text-white">
-				<h1 class="modal-title fs-5" id="modalLeerMasTitle">Título</h1>
+				<h1 class="modal-title fs-5" id="modalLeerMasTitle">$this->titulo</h1>
 				<button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
 			</div>
 			<div class="modal-body">
-				<div class="mb-3 bg-primary text-white p-2" id="modalLeerMasLabel">Leer más...</div>
 				<div id="modalLeerMasContenido"></div>
-
+				$encoded_text
 
 			</div>
 			<div class="modal-footer">
-				<button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
-				<button type="button" class="btn btn-primary" data-bs-dismiss="modal" id="modalLeerMasBtn">Aceptar</button>
+				<button type="button" class="btn btn-primary" data-bs-dismiss="modal" id="modalLeerMasBtn">Copiar</button>
 			</div>
 		</div>
 	</div>
 </div>
+
 modal;
-			}
-			$text =  $truncated_text . Html::a('&nbsp;<i class="fa fa-arrow-up"></i>', '#', [
+
+			$text = Html::tag('span', $truncated_text, $this->captionOptions) . Html::a('<i class="bi bi-arrow-right-circle"></i>', '#', [
 				'title' => 'Pincha para leer más',
 				'class' => "btn btn-outline-primary btn-sm",
 				'data' => [
 					'bs-toggle' => 'modal',
 					'bs-target' => '#modalSeeMore'
-				]
+				],
+				'style' => 'position: absolute; right: 0;',
 			]);
 			return $modal . $text;
 		}
