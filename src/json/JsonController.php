@@ -387,9 +387,9 @@ class JsonController extends \yii\web\Controller
 			break;
 		default:
 		}
-		$redirect_params[0] = $this->getActionRoute($to);
+		$redirect_params[0] = $this->getActionRoute($to, $model);
 		if ($this->getRootModel()) {
-			$redirect_params['root_model'] = basename(str_replace('\\', '/', get_class($this->getRootModel())));
+			$redirect_params['root_model'] = $this->getRootModel()->getModelInfo('controller_name');
 			$redirect_params['root_id'] = $this->getRootModel()->getPrimaryKey();
 			$redirect_params['root_field'] = $this->root_json_field;
 		}
@@ -398,17 +398,14 @@ class JsonController extends \yii\web\Controller
 
 	public function getActionRoute(?string $action_id, $model, $master_model = null): string
 	{
-		if (!$master_model) {
-			$route = $this->getRoutePrefix($this->getPath(), false)
-				. $model->getPath();
-		} else {
-			$route = $this->getRoutePrefix($this->getPath(), false)
-				. $master_model->getPath() . '/' . $master_model->getPrimaryKey()
-				. '/' .  $model->getPath();
+		$route = $this->getRoutePrefix($this->getPath(), false)
+			. $model->getPath();
+		if (!AppHelper::endsWith($route, '/' . $model->jsonPath())) {
+			$route .= '/' . $model->jsonPath();
 		}
-		if ($action_id) {
+		if ($action_id && $action_id != 'index') {
 			$route .= '/' . $action_id;
-			return Url::to(array_merge([$route], $model->getPrimaryKey(true)));
+			return Url::to(array_merge([$route], ['id' => $model->getPrimaryKey()]));
 		}
 		return $route;
 	}
@@ -532,7 +529,7 @@ class JsonController extends \yii\web\Controller
 		if ($master) {
 			$prefix = $this->getBaseRoute() . '/' . $master->controllerName(). '/';
 			$breadcrumbs[] = [
-				'label' => AppHelper::mb_ucfirst($master->getModelInfo('title_plural')),
+				'label' => $master->getModelInfo('title_plural'),
 				'url' => [ $prefix . 'index']
 			];
 			$keys = $master->getPrimaryKey(true);
@@ -542,8 +539,8 @@ class JsonController extends \yii\web\Controller
 				'url' => $keys
 			];
 			$breadcrumbs[] = [
-				'label' => AppHelper::mb_ucfirst($model->getModelInfo('title_plural')),
-				'url' => $this->getActionRoute('index', $model)
+				'label' => $model->getModelInfo('title_plural'),
+				'url' => $this->getActionRoute('index', $model, $master)
 			];
 		} else {
 			if (FormHelper::hasPermission($permissions, 'index') && $action_id != 'index') {
