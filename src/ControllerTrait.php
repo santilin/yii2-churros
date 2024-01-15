@@ -155,7 +155,7 @@ trait ControllerTrait
 		return join($glue, $attrs);
 	}
 
-	public function joinHasManyModels($glue, $parent, $models)
+ 	public function joinHasManyModels($glue, $parent, $models, $record_format = 'long')
 	{
 		if( $models == null || count($models)==0 ) {
 			return "";
@@ -167,7 +167,7 @@ trait ControllerTrait
 		foreach((array)$models as $model) {
 			if( $model != null ) {
 				$url = $parent_route . '/'.  $model->controllerName() . '/' . strval($model->getPrimaryKey());
-				$attrs[] = "<a href='$url'>" .  $model->recordDesc() . "</a>";
+				$attrs[] = "<a href='$url'>" .  $model->recordDesc($record_format) . "</a>";
 			}
 		}
 		return join($glue, $attrs);
