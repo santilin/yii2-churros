@@ -51,7 +51,8 @@ trait ModelSearchTrait
     public function addRelatedSortsToProvider($gridColumns, &$provider)
     {
 		foreach ($gridColumns as $attribute => $column_def) {
-			if (is_int($attribute)
+			if ( $column_def === null
+				|| is_int($attribute)
 				|| $attribute == '__actions__'
 				|| array_key_exists($attribute, $this->attributes ) ) {
 				continue;

@@ -80,7 +80,10 @@ class SimpleGridView extends \yii\grid\GridView
 	public function init()
 	{
 		$this->initGroups(); // must be done before initColumns
-		foreach ($this->columns as &$column) {
+		foreach ($this->columns as $kc => &$column) {
+			if ($column === null) {
+				unset($this->columns[$kc]);
+			}
 			if (is_array($column)) {
 				unset($column['name']);
 			}
