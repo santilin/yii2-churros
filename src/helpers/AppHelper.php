@@ -194,6 +194,13 @@ class AppHelper
         . mb_substr($str, 1, mb_strlen($str), $encoding);
     }
 
+	static public function mb_strcasecmp($str1, $str2, $encoding = null)
+	{
+		if (null === $encoding) { $encoding = mb_internal_encoding(); }
+		return strcmp(mb_strtoupper($str1, $encoding), mb_strtoupper($str2, $encoding));
+	}
+
+
     static public function userIsAdmin()
     {
 		return Yii::$app->user && Yii::$app->user->identity && Yii::$app->user->identity->isAdmin;
