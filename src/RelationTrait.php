@@ -54,7 +54,7 @@ trait RelationTrait
      * @param array $relations_in_form
      * @return bool
      */
-    public function loadAll($post, $relations_in_form = [], $formName = null)
+    public function loadAll($post, $relations_in_form = [], $formName = null): bool
     {
         if( $formName === null ) {
 			$formName = $this->formName();
@@ -213,7 +213,7 @@ trait RelationTrait
      * @return bool
      * @throws Exception
      */
-    public function saveAll(bool $runValidation = true)
+    public function saveAll(bool $runValidation = true): bool
     {
 		$must_commit = false;
 		$trans = $this->getDb()->getTransaction();
