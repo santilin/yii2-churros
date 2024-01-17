@@ -1,8 +1,3 @@
-.grid-view .action-button.delete {
-	color: red;
-}
-
-
 .clv-w-25 {
 	width: 25% !important;
 	max-width: 25% !important;
@@ -208,6 +203,23 @@ body.dark .record-view .rv-field, .record-view .rv-label {
 }
 .grid-view.isbs4 .grid-header > .pagination {
 	flex: 1;
+}
+
+.grid-view .action-button.delete {
+	color: red;
+}
+
+.grid-view .see-more-container {
+	position: relative;
+	max-width: 100px;
+}
+
+.grid-view .see-more-content {
+	overflow: hidden;
+	text-overflow: ellipsis;
+	white-space: nowrap;
+	max-width: 80%;
+	display: inline-block
 }
 
 /* add sorting icons to gridview sort links */
