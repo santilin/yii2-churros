@@ -115,4 +115,9 @@ class Formatter extends \yii\i18n\Formatter
 		return $options[$value]??$value;
 	}
 
+	public function asMarkdown2Html($value, $options = []): string
+	{
+		return \yii\helpers\Markdown::process($value??'', $options['flavor']??null);
+	}
+
 }

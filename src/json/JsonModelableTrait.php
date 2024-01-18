@@ -1,6 +1,7 @@
 <?php
 
 namespace santilin\churros\json;
+use santilin\churros\Helpers\AppHelper;
 use JsonPath\JsonObject;
 
 trait JsonModelableTrait
@@ -14,6 +15,9 @@ trait JsonModelableTrait
 			$this->_json_root = $this->createJsonRoot();
 		}
 		if ($locator && $id) {
+			if (AppHelper::lastWord($path, '/') == $id) {
+				$path = AppHelper::removeLastWord($path, '/');
+			}
 			$ret = $this->_json_root->getJsonObjects('$' . str_replace('/','.',$path)
 				. "[?(@.$locator=='$id')]");
 			if (is_array($ret)) {

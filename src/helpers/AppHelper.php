@@ -95,6 +95,16 @@ class AppHelper
 		}
 	}
 
+	static public function removeLastWord(string $stack, string $sep = ' '): string
+	{
+		$pos_sep = strrpos($stack, $sep);
+		if ($pos_sep === FALSE) {
+			return $stack;
+		} else {
+			return substr($stack, 0, $pos_sep);
+		}
+	}
+
 	static public function removePrefix(string $string, string $prefix): string
 	{
 		if (strncasecmp($string, $prefix, strlen($prefix)) === 0) {

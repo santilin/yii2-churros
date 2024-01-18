@@ -380,5 +380,18 @@ ajax;
 		return Url::toRoute($params);
 	}
 
+	static public function jsonColumnUrlCreatorWithReturnTo($action, $model, $key, $index, $column)
+	{
+		if ($column->controller) {
+			$params = [ $column->controller . '/' . $key . '/' . $action];
+		} else {
+			$params = is_array($key) ? $key : ['id' => (string) $key];
+		}
+		$params['returnTo'] = Url::current();
+		return Url::toRoute($params);
+	}
+
+
+
 
 } // class

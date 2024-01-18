@@ -366,13 +366,19 @@ class JsonController extends \yii\web\Controller
 			}
 			break;
 		case 'update':
-			$to = 'index';
+			$to = 'view';
 			break;
 		case 'view':
-		case 'delete':
 		case 'index':
 		default:
 			$to = "index";
+			break;
+		case 'delete':
+			$to = 'view';
+			$new_model = $model->parentModel();
+			if ($new_model) {
+				$model = $new_model;
+			}
 		}
 		switch($to) {
 		case 'view':
@@ -387,7 +393,7 @@ class JsonController extends \yii\web\Controller
 			break;
 		default:
 		}
-		$redirect_params[0] = $this->getActionRoute($to);
+		$redirect_params[0] = $this->getActionRoute($to, $model, $this->getRootModel());
 		if ($this->getRootModel()) {
 			$redirect_params['root_model'] = basename(str_replace('\\', '/', get_class($this->getRootModel())));
 			$redirect_params['root_id'] = $this->getRootModel()->getPrimaryKey();
@@ -398,16 +404,25 @@ class JsonController extends \yii\web\Controller
 
 	public function getActionRoute(?string $action_id, $model, $master_model = null): string
 	{
-		if (!$master_model) {
-			$route = $this->getRoutePrefix($this->getPath(), false)
-				. $model->getPath();
-		} else {
-			$route = $this->getRoutePrefix($this->getPath(), false)
-				. $model->getPath() . '/' . $model->jsonPath();
-		}
 		if ($action_id) {
+			if (!$master_model) {
+				$route = $this->getRoutePrefix($this->getPath(), false)
+					. $model->getPath();
+			} else {
+				$route = $this->getRoutePrefix($this->getPath(), false)
+					. $model->getPath();
+			}
+// 			$route .= '/' . $model->getJsonId() ?: $model->getPrimaryKey();
 			$route .= '/' . $action_id;
-			return Url::to(array_merge([$route], $model->getPrimaryKey(true)));
+			return $route;
+		} else {
+			if (!$master_model) {
+				$route = $this->getRoutePrefix($this->getPath(), false)
+					. $model->getPath();
+			} else {
+				$route = $this->getRoutePrefix($this->getPath(), false)
+					. $model->getPath() . '/' . $model->jsonPath();
+			}
 		}
 		return $route;
 	}

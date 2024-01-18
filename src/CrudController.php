@@ -378,15 +378,7 @@ class CrudController extends \yii\web\Controller
 			}
 			break;
 		case 'update':
-			$to = 'index';
-			break;
 		case 'delete':
-			if (Yii::$app->request->referrer) {
-				return Yii::$app->request->referrer;
-			} else {
-				$to = 'index';
-			}
-			break;
 		case 'view':
 		case 'index':
 		default:
