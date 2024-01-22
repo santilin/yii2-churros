@@ -80,6 +80,7 @@ class CrudController extends \yii\web\Controller
 
 	/**
 	 * Lists all models.
+	 * @todo Revisar, no es exactamente MVC
 	 * @return mixed
 	 */
 	public function actionIndex()
@@ -427,7 +428,7 @@ class CrudController extends \yii\web\Controller
 
 
 	// Ajax
-	public function actionAutocomplete()
+	public function actionAutocomplete($q)
 	{
 		$ret = [];
 		static $clientIdGetParamName = 'search';
@@ -465,7 +466,7 @@ class CrudController extends \yii\web\Controller
 				if ($this->masterModel == null) {
 					throw new NotFoundHttpException(Yii::t('churros',
 						"The master record of {title} with '{id}' id does not exist",
-						[ '{id}' => $master_id, '{title}' => $master_model_name ]));
+						[ 'id' => $master_id, 'title' => $master_model_name ]));
 				}
 			} else {
 				$this->masterModel = null;
