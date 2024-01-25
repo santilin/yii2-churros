@@ -241,9 +241,13 @@ class CrudController extends \yii\web\Controller
 			$relations = [];
 		}
 		if ($model->loadAll($params, $relations) && $req->isPost ) {
-			if( $model->saveAll(true) ) {
+			if ($model->saveAll(true)) {
 				if ($req->getIsAjax()) {
-					return json_encode($model->getAttributes());
+					\Yii::$app->response->format = \yii\web\Response::FORMAT_JSON;
+					return [
+						'data' => $model->getAttributes(),
+						'success_message' => $model->t('churros', $this->getResultMessage('update')),
+					];
 				}
 				$this->addSuccessFlashes('update', $model);
 				return $this->redirect($this->whereToGoNow('update', $model));
