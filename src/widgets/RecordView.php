@@ -32,7 +32,7 @@ class RecordView extends Widget
     public $attributes;
     public $template = '{header}{record}{footer}';
     public $headerTemplate = <<<html
-<div class="panel panel-primary">
+<div class="panel panel-primary mb-2">
 	<div class="panel-heading panel-primary">
 		<div class="panel-title">
 		{title}
@@ -45,7 +45,7 @@ class RecordView extends Widget
 html;
     public $fieldsTemplate = null;
     public $footerTemplate = '';
-    public $options = ['class' => 'record-view'];
+    public $options = [];
     public $style = 'grid'; // grid, table, grid-cards
     public $formatter;
 
@@ -92,6 +92,7 @@ html;
         if (!isset($this->options['id'])) {
             $this->options['id'] = $this->getId();
         }
+        Html::addCssClass($this->options, 'record-view');
     }
 
     /**
@@ -181,12 +182,17 @@ html;
     protected function renderAttribute($attr_key, $labelOptions, $contentOptions, $index)
     {
 		$attribute = $this->attributes[$attr_key];
+        if ($labelOptions === false) {
+            $attribute['label'] = false;
+        }
 		$template = $attribute['template']??$this->fieldsTemplate;
         if (is_string($template)) {
-            $labelOptions = AppHelper::mergeAndConcat(['class'],
-				$labelOptions,
-				$attribute['labelOptions']??[]);
-            $labelOptions = Html::renderTagAttributes($labelOptions);
+            if ($labelOptions !== false) {
+                $labelOptions = AppHelper::mergeAndConcat(['class'],
+                    $labelOptions,
+                    $attribute['labelOptions']??[]);
+                $labelOptions = Html::renderTagAttributes($labelOptions);
+            }
             $contentOptions = array_merge(
 				$contentOptions,
 				$attribute['contentOptions']??[]);
@@ -349,15 +355,21 @@ html;
                             }
                             $fs .= "\n" . "<div class=\"row layout-$layout_of_row\">";
                         }
-                        switch ($row_layout['style']??$parent_style) {
+                        $row_style = $row_layout['style']??$parent_style;
+                        switch ($row_style) {
                             case 'grid':
+                            case 'grid-nolabels':
                                 $ro = ['class' => "field-container"];
                                 if ('static' == ($fld_layout)) {
                                     $classes = ActiveForm::FIELD_HORIZ_CLASSES['static']['horizontalCssClasses'];
                                 } else {
                                     $classes = ActiveForm::FIELD_HORIZ_CLASSES[$layout_of_row][$fld_layout]['horizontalCssClasses'];
                                 }
-                                $lo = [ 'class' => "label-$view_field " . implode(' ', $classes['label'])  ];
+                                if ($row_style == 'grid-nolabels') {
+                                    $lo = false;
+                                } else {
+                                    $lo = ['class' => "label-$view_field " . implode(' ', $classes['label'])];
+                                }
                                 $co = [ 'class' => "field field-$view_field " . $classes['wrapper'] ];
                                 $col_classes = $this->columnClasses($fld_layout == 'full' ? 1 : $cols);
                                 if ($col_classes == 'col col-12') {
@@ -372,8 +384,8 @@ html;
                                 $col_classes = $this->columnClasses($fld_layout == 'full' ? 1 : $cols);
                                 $fs.= '<div class="col ' . $col_classes . '">';
                                 $ro = ['class' => "card field-container border-primary my-3 w-100"];
-                                $lo = [ 'class' => "card-header label-$view_field"];
-                                $co = [ 'class' => 'card-text' ];
+                                $lo = ['class' => "card-header label-$view_field"];
+                                $co = ['class' => 'card-text'];
                                 $fs .= '<div' . Html::renderTagAttributes($ro) . '>';
                                 $fs .= $this->renderAttribute($view_field, $lo, $co, $indexf++);
                                 $fs .= "</div></div><!--$view_field-->";
@@ -402,7 +414,7 @@ html;
 					$s_classes = implode(' ', $classes);
 				}
 				$ret .= "<div class=\"$s_classes\">";
-				$ret .= $this->layoutButtons($row_layout['buttons'], $layout_of_row??$this->formLayout, $row_layout['options']??[]);
+				$ret .= $this->layoutButtons($row_layout['buttons'], $layout_of_row??$this->layout, $row_layout['options']??[]);
 				$ret .= '</div><!--buttons -->' .  "\n";
 				$ret .= '</div><!--row-->';
 				break;
@@ -441,7 +453,7 @@ html;
 			];
 		}
  		return $this->layoutFields($this->fieldsLayout, $this->attributes, [
-            'layout' => $this->layout,
+            'layout' => $this->layout == 'horizontal' ? '1col' : $this->layout,
             'style' => $this->style,
         ]);
 	}

@@ -7,7 +7,6 @@ use santilin\churros\helpers\FormHelper;
 trait ActiveFormTrait
 {
 	public $fieldsLayout;
-	public $formLayout;
 
 	public function getInputId($model, string $attribute): string
 	{
@@ -16,35 +15,18 @@ trait ActiveFormTrait
 
 	public function fixFieldsLayout(array &$fields_cfg, array $render_fields, array $buttons = []): void
 	{
-		if ($this->formLayout == '' && $this->layout == 'inline') {
-			$this->formLayout = 'inline';
-			$layout_parts = ['1col'];
-		} else { // horizontal layout
-			$layout_parts = explode(':', $this->formLayout);
-		}
 		if( empty($this->fieldsLayout) ) {
-			$buttons_up = in_array('buttons_up', $layout_parts);
 			$this->fieldsLayout = [];
-			if( $buttons_up ) {
-				$this->fieldsLayout[] = [
-					'type' => 'buttons',
-					'buttons' => $buttons,
-					'layout' => $layout_parts[0],
-					'options' => ['class' => 'mb-2']
-				];
-			}
 			$this->fieldsLayout[] = [
 				'type' => 'fields',
 				'fields' => $render_fields,
-				'layout' => $layout_parts[0]
+				'layout' => $this->layout == 'horizontal' ? '1col' : $this->layout,
 			];
-			if( !$buttons_up ) {
-				$this->fieldsLayout[] = [
-					'type' => 'buttons',
-					'buttons' => $buttons,
-					'layout' => $layout_parts[0],
-				];
-			}
+			$this->fieldsLayout[] = [
+				'type' => 'buttons',
+				'buttons' => $buttons,
+				'layout' => $this->layout == 'horizontal' ? '1col' : $this->layout,
+			];
 		}
 		$this->addLayoutClasses($fields_cfg, $this->fieldsLayout);
 		// check there are no render_fields with incorrect settings
@@ -53,7 +35,6 @@ trait ActiveFormTrait
 				unset($fields_cfg[$kf]['layout']);
 			}
 		}
-
 	}
 
 	private function addLayoutClasses(array &$fields_cfg, array $fields_in_row, string $fields_layout = '1col'): void
