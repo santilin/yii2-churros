@@ -5,9 +5,8 @@ namespace santilin\churros\json;
 use Yii;
 use yii\helpers\Url;
 use yii\filters\VerbFilter;
-use yii\web\NotFoundHttpException;
-use yii\web\HttpException;
-use yii\base\ErrorException;
+use yii\web\{HttpException,NotFoundHttpException};
+use yii\base\{InvalidArgumentException,ErrorException};
 use santilin\churros\ControllerTrait;
 use santilin\churros\exceptions\{DeleteModelException,SaveModelException};
 use santilin\churros\helpers\{AppHelper,FormHelper};
@@ -92,6 +91,12 @@ class JsonController extends \yii\web\Controller
 	{
 		$params = Yii::$app->request->queryParams;
 		$searchModel = $this->createSearchModel($this->getPath());
+		if ($searchModel === null) {
+			$searchModel = $this->createSearchModel($this->getPath(), $this->_model_name . '_Search');
+		}
+		if (!$searchModel) {
+			throw new InvalidArgumentException("No searchModel found for " . $this->id . " controller");
+		}
 		$params['permissions'] = FormHelper::resolvePermissions($params['permissions']??[], $this->crudActions);
 		$params = $this->changeActionParams($params, 'index', $searchModel);
 		return $this->render('index', [
