@@ -184,7 +184,7 @@ trait ControllerTrait
     }
 
 
-	private function getBaseRoute(): string
+	public function getBaseRoute(): string
 	{
 		if ($this->module instanceof \yii\base\Application) {
 			return '';
