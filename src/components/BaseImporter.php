@@ -309,18 +309,24 @@ abstract class BaseImporter
 		$r = $this->createModel();
 		$r->setDefaultValues();
 		// no valida duplicados para poder hacer update_dups
-		if ($r->loadAll([ $r->formName() => $record ]) && $r->validate() ) {
+		if ($r->loadAll([$r->formName() => $record], array_keys($r::$relations)) && $r->validate() ) {
 			$model_dup = $this->modelExists($r);
 			if ($model_dup) {
-				if( $this->update_dups ) {
+				if ($this->update_dups) {
 					// $r se va a insertar pero ya existe $model_dup, por lo tanto, actualizamos $model_dup
 					$r = $model_dup;
-					if (!$r->loadAll([ $r->formName() => $record ]) || !$r->saveAll(true) ) {
+					unset($record['codigo']);
+					if ($r->loadAll([$r->formName()=>$record], array_keys($r::$relations)) && $r->validate()) {
+						$changes = $r->getDirtyAttributes();
+					} else {
+						$has_error = true;
+					}
+					if (!$has_error && !$r->saveAll(false) ) {
 						$has_error = true;
 					} else {
 						$this->updated++;
 						if( $this->verbose ) {
-							$this->output("Actualizado registro " . $r->recordDesc());
+							$this->output("Actualizado registro " . $r->recordDesc() . "\n" . json_encode($changes));
 						}
 					}
 				} else if ($this->ignore_dups) {
