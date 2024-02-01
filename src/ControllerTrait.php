@@ -193,4 +193,41 @@ trait ControllerTrait
 		}
 	}
 
+	/**
+	 * Breadcrumbs for only one model, taking into account a prefix for:
+	 * a) the parent on a hiearchy
+	 * b) the parent in a master/detail
+	 */
+ 	public function modelBreadCrumbs($model, string $action_id, string $prefix, array $permissions = [],
+									 bool $last_one = false): array
+	{
+		$breadcrumbs = [];
+		if ($prefix == '') {
+			$prefix = $this->getBaseRoute() . '/';
+		}
+		$prefix .= $model->controllerName(). '/';
+		$index_bc = [
+			'label' => AppHelper::mb_ucfirst($model->getModelInfo('title_plural')),
+		];
+		if (FormHelper::hasPermission($permissions, 'index') && $action_id != 'index') {
+			$index_bc['url'] = [ $prefix . 'index'];
+		}
+		$breadcrumbs[] = $index_bc;
+		if (!$model->getIsNewRecord()) {
+			$keys = $model->getPrimaryKey(true);
+			$keys[0] = $prefix . 'view';
+			$view_bc = [
+				'label' => $model->recordDesc('short', 25)
+			];
+			if (!$last_one) {
+				$view_bc['url'] = $keys;
+			} else if ($action_id != 'view' && FormHelper::hasPermission($permissions, 'view')) {
+				$view_bc['url'] = $keys;
+			}
+			$breadcrumbs[] = $view_bc;
+		}
+		return $breadcrumbs;
+	}
+
+
 } // trait
