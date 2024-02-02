@@ -393,7 +393,7 @@ html;
                         }
                         $nf++;
                     } else {
-                        throw new InvalidConfigException($view_field . ": not found in recordview attributes");
+                        throw new InvalidConfigException($view_field . ": 'fields' not found in row layout");
                     }
                 }
                 $fs .= '</div><!--row-->';
