@@ -295,7 +295,11 @@ html;
         $ret = '';
 		foreach($layout_rows as $lrk => $row_layout ) {
 			$layout_of_row = $row_layout['layout']??$parent_layout;
-			$cols = intval($layout_of_row)?:1;
+            if ($layout_of_row == 'inline' ) {
+                $cols = 10000;
+            } else {
+                $cols = intval($layout_of_row)?:1;
+            }
 			$type = $row_layout['type']??'fields';
 			switch ($type) {
 			case 'container':
@@ -362,6 +366,8 @@ html;
                                 $ro = ['class' => "field-container"];
                                 if ('static' == ($fld_layout)) {
                                     $classes = ActiveForm::FIELD_HORIZ_CLASSES['static']['horizontalCssClasses'];
+                                } else if ($layout_of_row == 'inline') {
+                                    $classes = [];
                                 } else {
                                     $classes = ActiveForm::FIELD_HORIZ_CLASSES[$layout_of_row][$fld_layout]['horizontalCssClasses'];
                                 }
@@ -408,12 +414,16 @@ html;
 				}
 				break;
 			case 'buttons':
-				$classes = static::FIELD_HORIZ_CLASSES[$layout_of_row??'1col']['large']['horizontalCssClasses']['offset'];
-				$ret .= '<div class="mt-2 clearfix row">';
-				if (is_array($classes)) {
-					$s_classes = implode(' ', $classes);
-				}
-				$ret .= "<div class=\"$s_classes\">";
+                $ret .= '<div class="mt-2 clearfix row">';
+                if ($layout_of_row != 'inline') {
+                    $classes = static::FIELD_HORIZ_CLASSES[$layout_of_row??'1col']['large']['horizontalCssClasses']['offset'];
+                    if (is_array($classes)) {
+                        $s_classes = implode(' ', $classes);
+                        $ret .= "<div class=\"$s_classes\">";
+                    }
+                } else {
+                    $ret .= "<div>";
+                }
 				$ret .= $this->layoutButtons($row_layout['buttons'], $layout_of_row??$this->layout, $row_layout['options']??[]);
 				$ret .= '</div><!--buttons -->' .  "\n";
 				$ret .= '</div><!--row-->';
