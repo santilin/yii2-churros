@@ -22,7 +22,9 @@ trait ActiveFormTrait
 			case 'inline':
 				break;
 			case 'horizontal':
-				if (is_string($this->fieldsLayout)) {
+				if (empty($this->fieldsLayout)) {
+					$form_layout = '1col';
+				} else if (is_string($this->fieldsLayout)) {
 					$form_layout = $this->fieldsLayout;
 					$this->fieldsLayout = null;
 				}
