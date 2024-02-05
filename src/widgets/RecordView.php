@@ -456,10 +456,13 @@ html;
 
     protected function layoutAttributes()
 	{
-		if( empty($this->fieldsLayout) ) {
-			$this->fieldsLayout[] = [
-				'type' => 'fields',
-				'fields' => array_keys($this->attributes),
+		if (empty($this->fieldsLayout) || is_string($this->fieldsLayout)) {
+			$this->fieldsLayout = [
+                [
+                    'type' => 'fields',
+                    'layout' => $this->fieldsLayout,
+                    'fields' => array_keys($this->attributes),
+                ]
 			];
 		}
  		return $this->layoutFields($this->fieldsLayout, $this->attributes, [

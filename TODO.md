@@ -1,8 +1,5 @@
-# Notifications
-- Añadir propiedad mail subject prefix
-
-# SiteController
-- Error en producción, pantalla en blanco.
+## QuickDateInput
+- SpanishDateInput. Definir campo date_es
 
 # Sqlite3
 - Crear issue en github PRAGMA
@@ -15,9 +12,6 @@
 - Duplicar: imágenes, aparece el check para borrar la imagen.
 - Behaviors: access-control tiene que ejecutarse antes que verb, para que no dé error si no tiene acceso.
 
-# FormHelper
-- El responsive de 3 columnas va fatal.
-
 # Reports:
 * Quitar (no definido) al imprimir
 - AllReportFields: ver si ponerlo en otro lugar.
@@ -27,30 +21,27 @@
 
 # User
 - ¿Opción para obligar a cambiar la contraseña?
-- Eliminar opción recordar contraseña de menú Ácceso
 - cache de permisos
 - yii2usuario: alert falla cuando se redirige de bs4 a bs3 porque no espera un array aquí: /home/santilin/devel/-yii2base/vendor/2amigos/yii2-usuario/src/User/resources/views/shared/_alert.php
 - Hay acceso a trivel.test/user/2
 - Añadir opción visible en profile en resources ... _menu.php: yiiparam('user_profile');
-- Actualizar a bootstrap4
-- Customize views form bootstrap4
 - usuarios: grid: etiquetas salen en inglés.
+- Si no hay rbac, que no aparezcan los menús relacionados con roles, etc.
 
-# UploadBehavior
-- cuando da error otro campo que no es el file, se pierde el nombre del fichero original
-## Adjuntos y subir ficheros
+# Adjuntos y subir ficheros
 * Opciones
 	- tabla de adjuntos.
 	- behaviour
 	- behaviour con múltiple
+## UploadBehavior
 * Fileuploadbehavior saveorigfname true
+- cuando da error otro campo que no es el file, se pierde el nombre del fichero original
 
 # SiteController
 - Cuando va a site/error, botones o menú para volver a los módulos a los que tenga acceso la usuaria.
 - Errores en formulario de Ajax. Que se quede en el formulario ajax y muestre el error.
 
 # Widgets
-
 * Anidar RercordViews con un static
 * css: width = maxlength en integers, floats y dates
 * Max-length: Tomar lo que se ha definido en la base de datos o capturar la excepción.
@@ -63,7 +54,6 @@
 - Repensar el ActivatableInput
 * Etiquetas según género del campo
 
-
 ## SearchDropDown
 * Si un searchdropdown está disabled o readonly no mostrar el campo de búsqueda
 * ¿Si hay dos coincidencias qué hacer?
@@ -75,9 +65,6 @@
 - función extractHeaders
 - Paginador no sale bien el layout/css. Añadir el pager como en simplelistview
 
-## DateInput
-- SpanishDateInput. Definir campo date_es
-
 ## GridView
 - layout admin, más compacto.
 - iconos de ordenar, en hasone si tiene código, icono numérico
@@ -86,7 +73,6 @@
 * selectViews no funciona con pjax porque es un dropdown. Añadirlo dentro de un FORM
 * Grid: cuando se filtra, poner "Filtrando 1-1 de s"
 * Cuando sólo hay una página, no mostrar [1-3] de 3
-* GridView: Ocultar filtro si no hay resultados
 * BreadCrumbs: Index: Añadir el orden o el filtro ("filtrado") ("ordenado por")
 * 2 gridviews: https://www.yiiframework.com/doc/guide/2.0/en/output-data-widgets#multiple-gridviews
 
