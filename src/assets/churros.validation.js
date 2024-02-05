@@ -67,6 +67,23 @@ window.yii.churros = (function ($) {
 			} else {
 				return false;
 			}
+		},
+		inputSetSelectionRange(input, selectionStart, selectionEnd) {
+			// https://stackoverflow.com/a/499158
+			console.log("Ya tenía el foco", input.selectionStart, input.selectionEnd);
+			return;
+			if (document.activeElement == input) {
+				return;
+			}
+			if (input.setSelectionRange) {
+				input.setSelectionRange(selectionStart, selectionEnd);
+			} else if (input.createTextRange) {
+				var range = input.createTextRange();
+				range.collapse(true);
+				range.moveEnd('character', selectionEnd);
+				range.moveStart('character', selectionStart);
+				range.select();
+			}
 		}
 	}
 	return pub;
