@@ -2,7 +2,6 @@
 
 namespace santilin\churros\helpers;
 
-
 class YADTC extends \DateTime
 {
 	const SQL_DATE_FORMAT = 'Y-m-d';
@@ -560,6 +559,40 @@ class YADTC extends \DateTime
 		}
 		return $ret;
 	}
+
+	static public function guessTypeFromFormat($format)
+	{
+		$dateIndicators = ['d', 'j', 'D', 'l', 'N', 'S', 'w', 'z', 'W', 'F', 'm', 'M', 'n', 't', 'L', 'o', 'Y', 'y'];
+		$timeIndicators = ['a', 'A', 'B', 'g', 'G', 'h', 'H', 'i', 's', 'u', 'e', 'I', 'O', 'P', 'T', 'Z'];
+
+		$isDate = false;
+		$isDateTime = false;
+		$isTime = false;
+
+		for ($i = 0; $i < strlen($format); $i++) {
+			$char = $format[$i];
+			if ($char === '\\') {
+				$i++; // Skip the next character after backslash
+				continue;
+			}
+			if (in_array($char, $dateIndicators)) {
+				$isDate = true;
+			} elseif (in_array($char, $timeIndicators)) {
+				$isTime = true;
+			}
+		}
+
+		if ($isDate && $isTime) {
+			return 'datetime';
+		} else if ($isDate) {
+			return 'date';
+		} else if ($isTime) {
+			return 'time';
+		} else {
+			throw new \Exception($this->format . ': unable to guess type from format');
+		}
+	}
+
 
 
 } // class YADTC

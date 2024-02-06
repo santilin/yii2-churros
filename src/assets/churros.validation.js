@@ -70,11 +70,6 @@ window.yii.churros = (function ($) {
 		},
 		inputSetSelectionRange(input, selectionStart, selectionEnd) {
 			// https://stackoverflow.com/a/499158
-			console.log("Ya tenía el foco", input.selectionStart, input.selectionEnd);
-			return;
-			if (document.activeElement == input) {
-				return;
-			}
 			if (input.setSelectionRange) {
 				input.setSelectionRange(selectionStart, selectionEnd);
 			} else if (input.createTextRange) {
@@ -84,7 +79,102 @@ window.yii.churros = (function ($) {
 				range.moveStart('character', selectionStart);
 				range.select();
 			}
+		},
+		dateParseFromFormat(datestr, format) {
+			// https://stackoverflow.com/questions/60759006/is-there-a-way-to-prevent-the-date-object-in-js-from-overflowing-days-months
+			console.log("Matching datestr `" + datestr + "` against regexp `/^" + format + "$/`");
+			matches = datestr.match('^' + format + '$');
+			console.log(matches);
+			if (matches === null) {
+				return false;
+			}
+			let today = new Date();
+			if (matches.groups.year_long !== undefined) {
+				year = parseInt(matches.groups.year_long);
+			} else if (matches.groups.year_short !== undefined) {
+				year = parseInt(matches.groups.year_short);
+			} else {
+				year = today.getFullYear();;
+			}
+			if (year<100) {
+				year += 2000;
+			}
+			if (matches.groups.month !== undefined) {
+				month = parseInt(matches.groups.month);
+			} else {
+				month = today.getMonth() + 1;
+			}
+			if (matches.groups.day !== undefined) {
+				day = parseInt(matches.groups.day);
+			} else {
+				day = today.getDate();
+			}
+			if (matches.groups.hour !== undefined) {
+				hour = parseInt(matches.groups.hour);
+			} else {
+				hour = today.getHours();
+			}
+			if (matches.groups.minute !== undefined) {
+				minute = parseInt(matches.groups.minute);
+			} else {
+				minute = today.getMinutes();
+			}
+			if (matches.groups.second !== undefined) {
+				second = parseInt(matches.groups.second);
+			} else {
+				second = 0;
+			}
+
+			var d = new Date(year, month-1, day);
+			if( d.getFullYear() != year || d.getMonth() != month-1 || d.getDate() != day ) {
+				return null;
+			} else {
+				d.setHours(hour);
+				d.setMinutes(minute);
+				d.setSeconds(second);
+				return d;
+			}
+		},
+		dateInputChange(date_input, orig_id, format, saveFormat, format_as_regex, err_message) {
+			if ($.trim(date_input.val()) == '') {
+				var date_js = null;
+			} else {
+				var date_js = window.yii.churros.dateParseFromFormat(date_input.val(), format_as_regex);
+			}
+			let error_el = date_input.next('.invalid-feedback');
+			let form_control = date_input.closest(".form-control");
+			if( date_js === null ) { // empty
+				$('#' + orig_id).val('');
+				if (error_el) {
+					error_el.text("");
+				}
+				if (form_control) {
+					form_control.removeClass('is-invalid');
+				}
+				return true;
+			} else if (date_js == false ) { // wrong
+				$('#' + orig_id).val( date_input.val() );
+				if (error_el) {
+					error_el.text(err_message);
+				}
+				if (form_control) {
+					form_control.addClass('is-invalid');
+				}
+				return false;
+			} else {
+				var fmt = new DateFormatter();
+				date_input.val(fmt.formatDate(date_js, format));
+				$('#' + orig_id).val(fmt.formatDate(date_js, saveFormat));
+				if (error_el) {
+					error_el.text("");
+				}
+				if (form_control) {
+					form_control.removeClass('is-invalid');
+				}
+				return true;
+			}
 		}
+
 	}
 	return pub;
 })(window.jQuery);
