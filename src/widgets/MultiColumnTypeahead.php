@@ -40,34 +40,74 @@ class MultiColumnTypeahead extends Typeahead
 		}
 		// Create
 		$set_dest_fields_values = [];
+		$item_fields = [];
 		foreach ($this->formFields as $formField => $dbField) {
 			$fld_id = Html::getInputId($this->model, $formField);
+ 			$item_fields[] = "item.$dbField";
 			$set_dest_fields_values[] = <<<js
 	if (item.$dbField != '') $('#$fld_id').val(item.$dbField);
 js;
 		}
-		$s_fields = implode(",",array_keys($this->formFields));
+		$s_item_fields = implode(',',$item_fields);
+		if (empty($this->suggestionsDisplay)) {
+			$this->suggestionsDisplay = <<<js
+function(item) {
+	const props = [$s_item_fields];
+	let s_items='';
+	for (i=0; i<props.length; ++i) {
+		if (props[i]!='') {
+			if (s_items.length != 0 ) {
+				s_items += ', ';
+			}
+			s_items += props[i];
+		}
+	}
+	return '<div data=\"' + JSON.stringify(item) + '\" class=suggestion>' + s_items + '</div>';
+}
+js;
+		}
+		$s_item_fields = $item_fields[0];
+ 		if (empty($this->display)) {
+			$this->display = <<<js
+function(item) {
+	const props = [$s_item_fields];
+	let s_items='';
+	for (i=0; i<props.length; ++i) {
+		if (props[i]!='') {
+			if (s_items.length != 0 ) {
+				s_items += ', ';
+			}
+			s_items += props[i];
+		}
+	}
+	return s_items;
+}
+js;
+		}
+		$s_fields = implode(",",$this->formFields);
 		$this->dataset = [[
 			'limit' => $this->limit,
 			'remote' => [
 				'url' => $this->remoteUrl . '?'
 					. $this->searchParam . '=&' . $this->fieldsParam . '=&'
 					. $this->pageParam . '=&' . $this->perPageParam . '=',
-// 				'wildcard' => '%QUERY',
 				'replace' => new \yii\web\JsExpression(<<<jsexpr
 function(url, query) {
 	const urlParams = new URLSearchParams(url);
 	let fields = urlParams.get('{$this->fieldsParam}');
 	let page = urlParams.get('{$this->pageParam}');
 	let perpage = urlParams.get('{$this->perPageParam}');
+	if (fields === undefined || fields == '' ) {
+		fields = '$s_fields';
+	}
 	if (page === undefined || page == '' ) {
-		page = 1;
+		page = '1';
 	}
 	if (perpage === undefined || perpage == '' ) {
-		perpage = {$this->limit};
+		perpage = '{$this->limit}';
 	}
 	return url.split("?")[0] + "?{$this->searchParam}=" + query
-		+ "&{$this->fieldsParam}=" + '$s_fields' +
+		+ "&{$this->fieldsParam}=" + fields
 		+ "&{$this->pageParam}=" + page + "&{$this->perPageParam}=" + perpage;
 }
 jsexpr
@@ -80,7 +120,7 @@ jsexpr
 				// The items in the dropdown
 				'suggestion' => new \yii\web\JsExpression($this->suggestionsDisplay)
 			],
- 			'display' => $this->display ? new \yii\web\JsExpression($this->display) : null,
+ 			'display' => new \yii\web\JsExpression($this->display),
 		]];
 		$js_set_fields_values = implode("\n", $set_dest_fields_values);
 		$this->pluginEvents["typeahead:select"] = new \yii\web\JsExpression(<<<js

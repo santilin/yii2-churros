@@ -734,14 +734,14 @@ trait ModelInfoTrait
 	/**
 	 * Función compartida por search y report
 	 */
-	public function searchFilterWhere(&$query, $fldname, $value)
+	public function searchFilterWhere(&$query, string $fldname, $value, bool $is_and = true)
 	{
 		$value = static::toOpExpression($value, false );
 		if (!isset($value['v']) || $value['v'] === null || $value['v'] === '') {
 			return;
 		}
  		$fullfldname = $this->tableName() . "." . $fldname;
-		$this->addFieldToFilterWhere($query, $fullfldname, $value);
+		$this->addFieldToFilterWhere($query, $fullfldname, $value, $is_and);
 	}
 
 	static public function toOpExpression($value, $strict)
@@ -763,19 +763,23 @@ trait ModelInfoTrait
 		return [ 'op' => $strict ? '=' : 'LIKE', 'v' => $value ];
 	}
 
-	public function addFieldToFilterWhere(&$query, string $fldname, array $value)
+	public function addFieldToFilterWhere(&$query, string $fldname, array $value, bool $is_and = true)
 	{
-		return $this->baseAddFieldToFilterWhere($query, $fldname, $value);
+		return $this->baseAddFieldToFilterWhere($query, $fldname, $value, $is_and);
 	}
 
 
-	public function baseAddFieldToFilterWhere(&$query, string $fldname, array $value)
+	public function baseAddFieldToFilterWhere(&$query, string $fldname, array $value, bool $is_and = true)
 	{
 		if( is_array($value['v']) ) {
  			$query->andWhere([ 'in', $fldname, $value['v']]);
 		} else switch( $value['op'] ) {
 			case "=":
-				$query->andWhere([$fldname => $value['v']]);
+				if ($is_and) {
+					$query->andWhere([$fldname => $value['v']]);
+				} else {
+					$query->andWhere([$fldname => $value['v']]);
+				}
 				break;
 			case "<>":
 			case ">=":
@@ -784,20 +788,41 @@ trait ModelInfoTrait
 			case "<":
 			case "NOT LIKE":
 			case "LIKE":
-				$query->andWhere([ $value['op'], $fldname, $value['v'] ]);
+				if ($is_and) {
+					$query->andWhere([ $value['op'], $fldname, $value['v'] ]);
+				} else {
+					$query->orWhere([ $value['op'], $fldname, $value['v'] ]);
+				}
+
 				break;
 			case "START":
-				$query->andWhere([ 'LIKE', $fldname, $value['v'] . '%', false]);
+				if ($is_and) {
+					$query->andWhere([ 'LIKE', $fldname, $value['v'] . '%', false]);
+				} else {
+					$query->orWhere([ 'LIKE', $fldname, $value['v'] . '%', false]);
+				}
 				break;
 			case "NOT START":
-				$query->andWhere([ 'NOT LIKE', $fldname, $value['v'] . '%', false]);
+				if ($is_and) {
+					$query->andWhere([ 'NOT LIKE', $fldname, $value['v'] . '%', false]);
+				} else {
+					$query->orWhere([ 'NOT LIKE', $fldname, $value['v'] . '%', false]);
+				}
 				break;
 			case "BETWEEN":
 			case "NOT BETWEEN":
-				$query->andWhere([ $value['op'], $fldname, explode(',',$value['v']) ]);
+				if ($is_and) {
+					$query->andWhere([ $value['op'], $fldname, explode(',',$value['v']) ]);
+				} else {
+					$query->orWhere([ $value['op'], $fldname, explode(',',$value['v']) ]);
+				}
 				break;
 			case "bool":
-				$query->andWhere([$fldname => ($value['v'] == 'true') ? 1 : ($value['v'] == 'false' ? 0 : boolval($value['v']))]);
+				if ($is_and) {
+					$query->andWhere([$fldname => ($value['v'] == 'true') ? 1 : ($value['v'] == 'false' ? 0 : boolval($value['v']))]);
+				} else {
+					$query->orWhere([ $value['op'], $fldname, explode(',',$value['v']) ]);
+				}
 				break;
 		}
 	}
