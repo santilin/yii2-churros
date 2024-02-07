@@ -39,6 +39,15 @@ class MultiColumnTypeahead extends Typeahead
             throw new InvalidConfigException("You must define al least one formField");
 		}
 		// Create
+		$ordered_form_fields = [];
+		foreach ($this->formFields as $formField => $dbField) {
+			if (is_array($dbField)) {
+				$ordered_form_fields += $dbField;
+			} else {
+				$ordered_form_fields[$formField] = $dbField;
+			}
+		}
+		$this->formFields = $ordered_form_fields;
 		$set_dest_fields_values = [];
 		$item_fields = [];
 		foreach ($this->formFields as $formField => $dbField) {
@@ -150,11 +159,9 @@ js;
 		/// @todo make a module and refactor change an blur event handlers
 		$view->registerJS(<<<js
 let mctahead_changed_$js_id = false;
-$('#$id').change(function(e) {
-	mctahead_changed_$js_id = true;
-});
 $('#$id').blur(function(e) {
 	if (mctahead_changed_$js_id) {
+		mctahead_changed_$js_id = false;
 		let selectedDatum = $(this).data('ttTypeahead').menu.getActiveSelectable();
 		if (!selectedDatum) {
 			selectedDatum = $(this).data('ttTypeahead').menu.getTopSelectable();
@@ -163,12 +170,15 @@ $('#$id').blur(function(e) {
 			const datumParts = $(selectedDatum[0]).data('ttSelectableObject');
 			$js_set_fields_values
 		}
-		mctahead_changed_$js_id = false;
-		return true;
 	}
+	return true;
 });
 $('#$id').keydown(function(e) {
+	if (e.key.length === 1) {
+		mctahead_changed_$js_id = true;
+	}
 	if (e.keyCode === 13 && mctahead_changed_$js_id) {
+		mctahead_changed_$js_id = false;
 		let selectedDatum = $(this).data('ttTypeahead').menu.getActiveSelectable();
 		if (!selectedDatum) {
 			selectedDatum = $(this).data('ttTypeahead').menu.getTopSelectable();
@@ -176,10 +186,11 @@ $('#$id').keydown(function(e) {
 		if (selectedDatum) {
 			const datumParts = $(selectedDatum[0]).data('ttSelectableObject');
 			$js_set_fields_values
+			$('#$id').trigger("change");
+			return true;
 		}
-		mctahead_changed_$js_id = false;
-		return true;
 	}
+	return true;
 });
 js
 	   );

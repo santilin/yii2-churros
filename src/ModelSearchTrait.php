@@ -133,7 +133,7 @@ trait ModelSearchTrait
 		}
 	}
 
-	protected function filterWhereRelated(&$query, $relation_name, $value)
+	protected function filterWhereRelated(&$query, $relation_name, $value, $is_and = true)
 	{
 		if ($value === null || $value === '') {
 			return;
@@ -193,11 +193,15 @@ trait ModelSearchTrait
 			$search_flds = $model->findCodeAndDescFields();
 			$rel_conds = [ 'OR' ];
 			foreach( $search_flds as $search_fld ) {
-				$rel_conds[] = [$value['op'], "$table_alias.$search_fld", $value['v'] ];
+				$rel_conds[] = [$value['op'], "$table_alias.$search_fld", $value['v']];
 			}
-			$query->andWhere( $rel_conds );
+			if ($is_and) {
+				$query->andWhere($rel_conds);
+			} else {
+				$query->orWhere($rel_conds);
+			}
 		} else if ($attribute == $model->primaryKey()[0] ) {
-			if( isset($relation['other']) ) {
+			if (isset($relation['other']) ) {
 				list($right_table, $right_fld ) = AppHelper::splitFieldName($relation['other']);
 			} else {
 				list($right_table, $right_fld ) = AppHelper::splitFieldName($relation['right']);
@@ -205,12 +209,24 @@ trait ModelSearchTrait
 			if ($value['v']=== 'true') {
 				$query->andWhere(["not", ["$table_alias.$right_fld" => null]]);
 			} else if ($value['v'] === 'false') {
-				$query->andWhere(["$table_alias.$right_fld" => null]);
+				if ($is_and) {
+					$query->andWhere(["$table_alias.$right_fld" => null]);
+				} else {
+					$query->orWhere(["$table_alias.$right_fld" => null]);
+				}
 			} else {
-				$query->andWhere(["$table_alias.$right_fld" => $value['v']]);
+				if ($is_and) {
+					$query->andWhere(["$table_alias.$right_fld" => $value['v']]);
+				} else {
+					$query->orWhere(["$table_alias.$right_fld" => $value['v']]);
+				}
 			}
 		} else {
-			$query->andWhere([$value['op'], "$table_alias.$attribute", $value['v'] ]);
+			if ($is_and) {
+				$query->andWhere([$value['op'], "$table_alias.$attribute", $value['v'] ]);
+			} else {
+				$query->orWhere([$value['op'], "$table_alias.$attribute", $value['v'] ]);
+ 			}
 		}
 	}
 

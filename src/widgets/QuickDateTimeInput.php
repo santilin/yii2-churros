@@ -140,7 +140,7 @@ class QuickDateTimeInput extends MaskedInput
 				$value = Html::getAttributeValue($this->model, $this->attribute);
 				if(!empty($value)) {
 					$parsed_date = DateTimeEx::createFromFormat($this->saveFormat, $value);
-					if( $parsed_date == null ) {
+					if ($parsed_date == null) {
 						switch ($this->datetype) {
 							case 'date':
 							case 'time':
@@ -152,7 +152,7 @@ class QuickDateTimeInput extends MaskedInput
 						}
 					}
 					if ($parsed_date != null) {
-						$value = $parsed_date->format(self::parseFormat(\Yii::$app->formatter->dateFormat, $this->datetype));
+						$value = $parsed_date->format($this->format);
 					}
 				}
 				$this->options['value'] = $value;
