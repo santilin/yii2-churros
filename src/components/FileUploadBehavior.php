@@ -154,7 +154,7 @@ class FileUploadBehavior extends \yii\base\Behavior
         $fileName = ArrayHelper::getValue($pi, 'filename');
         $extension = strtolower(ArrayHelper::getValue($pi, 'extension'));
 
-        return preg_replace_callback('|\[\[([\w\_/]+)\]\]|', function ($matches) use ($fileName, $extension) {
+        return str_replace('//','/', preg_replace_callback('|\[\[([\w\_/]+)\]\]|', function ($matches) use ($fileName, $extension) {
             $name = $matches[1];
             switch ($name) {
                 case 'extension':
@@ -190,7 +190,7 @@ class FileUploadBehavior extends \yii\base\Behavior
                 return md5($this->owner->{$attribute});
             }
             return '[[' . $name . ']]';
-        }, $path);
+        }, $path));
     }
 
     /**
