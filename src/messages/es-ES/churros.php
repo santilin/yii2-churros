@@ -124,7 +124,7 @@ return [
 	'Showing <b>{begin, number}-{end, number}</b> of <b>{totalCount, number}</b> {totalCount, plural, one{item} other{items}}.' => 'Mostrando <b>{begin, number}-{end, number}</b> de <b>{totalCount, number}</b> {totalCount, plural, one{item} other{items}}.',
 	'Total <b>{count, number}</b> {count, plural, one{item} other{items}}.' => 'Total <b>{count, number}</b> {count, plural, one{item} other{items}}.',
 	'Access denied to this {title}.' => 'Acceso denegado a est{a} {title}.',
-	'{Title} with primary key {id} not found.' => 'No se ha encontrado {la} {title}.',
+	'{Title} with primary key {id} not found.' => 'No se ha encontrado {la} {title} con clave {id}.',
 	'Data was not saved in order to maintain the database integrity' => 'Los datos no se han guardado para preservar la integridad de la base de datos',
 
 	'The value \'{0}\' does not exist in the category \'{1}\'' => 'El valor \'{0}\' no existe en la categoría \'{1}\'',

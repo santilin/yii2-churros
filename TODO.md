@@ -149,4 +149,4 @@ Test: CrudOfertaCest. Cuando redirige de update a view, no se borra la aplicaci√
 - https://github.com/jonmiles/bootstrap-treeview
 * Optimizacion sqlite3
 https://stackoverflow.com/questions/1711631/improve-insert-per-second-performance-of-sqlite
-
+* https://craftcms.com/blog/craft-5-beta-released?s=35
