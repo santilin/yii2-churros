@@ -33,7 +33,7 @@ class RadioImagesInput extends \yii\widgets\InputWidget
 		$radios = [];
 		$id = $this->options['id'];
 		$n = 0;
-		foreach( $this->items as $value => $item ) {
+		foreach ($this->items as $value => $item) {
 			$radio = '<li>' . Html::activeRadio($this->model, $this->attribute, [
 				'uncheck' => false, 'label' => false, 'id' => "{$id}-{$n}", 'value' => $value,
 			]);
