@@ -20,10 +20,10 @@ trait JsonModelableTrait
 			}
 			$ret = $this->_json_root->getJsonObjects('$' . str_replace('/','.',$path)
 				. "[?(@.$locator=='$id')]");
-			if (is_array($ret)) {
+			if (is_array($ret) && isset($ret[0])) {
 				return $ret[0];
 			} else {
-				return $ret;
+				return null;
 			}
 		} else {
 			$ret = $this->_json_root->getJsonObjects('$' . str_replace('/','.',$path) . ($id?('.' . $id):''));
