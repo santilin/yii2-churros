@@ -82,9 +82,8 @@ window.yii.churros = (function ($) {
 		},
 		dateParseFromFormat(datestr, format) {
 			// https://stackoverflow.com/questions/60759006/is-there-a-way-to-prevent-the-date-object-in-js-from-overflowing-days-months
-			console.log("Matching datestr `" + datestr + "` against regexp `/^" + format + "$/`");
+// 			console.log("Matching datestr `" + datestr + "` against regexp `/^" + format + "$/`");
 			matches = datestr.match('^' + format + '$');
-			console.log(matches);
 			if (matches === null) {
 				return false;
 			}
@@ -96,7 +95,9 @@ window.yii.churros = (function ($) {
 			} else {
 				year = today.getFullYear();;
 			}
-			if (year<100) {
+			if (isNaN(year)) {
+				year = today.getFullYear();
+			} else if (year<100) {
 				year += 2000;
 			}
 			if (matches.groups.month !== undefined) {
