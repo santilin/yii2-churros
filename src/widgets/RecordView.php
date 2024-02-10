@@ -303,9 +303,9 @@ html;
 			$type = $row_layout['type']??'fields';
 			switch ($type) {
 			case 'container':
-				$ret .= '<div class=row><div class="' . $this->columnClasses(1) . '">';
                 switch ($row_layout['style']??'row') {
                     case 'tabs':
+                        $ret .= '<div class=row><div class="' . $this->columnClasses(1) . '">';
                         $tab_items = [];
                         foreach ($row_layout['content'] as $kc => $content) {
                             if (!is_array($content)) {
@@ -321,17 +321,20 @@ html;
                             ];
                         }
                         $ret .= Tabs::widget([ 'items' => $tab_items ]);
+                        $ret .= '</div></div>';
                         break;
                     case 'row':
+                        $ret .= '<div class=row>';
                         foreach ($row_layout['content'] as $kc => $content) {
                             $ret .= '<div class="' . $this->columnClasses($cols) . '">';
                             $ret .= $this->layoutFields([$content], $view_fields,
                                 ['layout' => $layout_of_row, 'style' => $parent_style]);
-                            $ret .= "</div>\n";
+                            $ret .= "</div>";
                         }
+                        $ret .= '</div>';
                         break;
                 }
-				$ret .= "</div></div><!--container_[$lrk]-->";
+                $ret .= "<!--container_[$lrk]-->";
 				break;
 			case 'fields':
 			case 'fieldset':
