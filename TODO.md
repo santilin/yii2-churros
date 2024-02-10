@@ -1,5 +1,6 @@
-## QuickDateInput
-- SpanishDateInput. Definir campo date_es
+# Composer
+ kartik-v/yii2-markdown
+ edofre/yii2-fullcalendar
 
 # Sqlite3
 - Crear issue en github PRAGMA
@@ -48,7 +49,9 @@
 * Radio List: Ver cómo añadir el autofocus a cada item.
 * Añadir layout table recordview
 * Añadir showmore a form layout
-* Añadir inline a form layout
+
+## QuickDateInput
+- SpanishDateInput. Definir campo date_es
 
 ## Inactivatable date
 - Repensar el ActivatableInput
