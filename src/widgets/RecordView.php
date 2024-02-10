@@ -19,7 +19,7 @@ use yii\i18n\Formatter;
 use yii\bootstrap4\Tabs;
 use santilin\churros\ChurrosAsset;
 use santilin\churros\helpers\{AppHelper,FormHelper};
-use santilin\churros\widgets\ActiveForm;
+use santilin\churros\widgets\{ActiveForm,WidgetLayer};
 
 /**
  * RecordView displays the detail of a single data [[model]].
@@ -29,6 +29,7 @@ use santilin\churros\widgets\ActiveForm;
 class RecordView extends Widget
 {
     public $model;
+    public WidgetLayer $layer;
     public $attributes;
     public $template = '{header}{record}{footer}';
     public $headerTemplate = <<<html
@@ -459,19 +460,8 @@ html;
 
     protected function layoutAttributes()
 	{
-		if (empty($this->fieldsLayout) || is_string($this->fieldsLayout)) {
-			$this->fieldsLayout = [
-                [
-                    'type' => 'fields',
-                    'layout' => $this->fieldsLayout,
-                    'fields' => array_keys($this->attributes),
-                ]
-			];
-		}
- 		return $this->layoutFields($this->fieldsLayout, $this->attributes, [
-            'layout' => $this->layout == 'horizontal' ? '1col' : $this->layout,
-            'style' => $this->style,
-        ]);
+        $layer = new WidgetLayer($this->fieldsLayout, $this->attributes, [ $this, 'renderAttribute' ]);
+        return $layer->layout();
 	}
 
 	protected function columnClasses(int $cols): string

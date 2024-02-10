@@ -8,7 +8,195 @@ use santilin\churros\helpers\FormHelper;
 
 class WidgetLayer
 {
-	public $widgetsLayout;
+	public function __construct(protected array $fieldsLayout, protected array $widgets, protected callable $widget_painter)
+	{
+	}
+
+	protected function layout(string $layout = '1col', string $style = 'row'): string
+	{
+		if (empty($this->fieldsLayout) || is_string($this->fieldsLayout)) {
+			$this->fieldsLayout = [
+				[
+					'type' => 'fields',
+					'layout' => $this->fieldsLayout?:$layout
+					'fields' => array_keys($this->widgets),
+				]
+			];
+		}
+		return $this->layoutWidgets($this->fieldsLayout, [
+			'layout' => $layout == 'horizontal' ? '1col' : $this->layout,
+			'style' => $this->style,
+		]);
+	}
+
+
+		/**
+	 * Recursivelly lays out the fiels of a form
+	 */
+	protected function layoutWidgets(array $layout_rows, array $parent_options = []): string
+	{
+		$parent_layout = $parent_options['layout']??'1col';
+		$parent_style = $parent_options['style']??'grid';
+		$only_field_names = true;
+		foreach($layout_rows as $lrk => $row_layout ) {
+			if (is_array($row_layout)) {
+				$only_field_names = false;
+				break;
+			}
+		}
+		if ($only_field_names) {
+			$layout_rows = [ ['type' => 'widgets', 'widgets' => $layout_rows, 'layout' => $parent_layout] ];
+		}
+		$ret = '';
+		foreach($layout_rows as $lrk => $row_layout ) {
+			$layout_of_row = $row_layout['layout']??$parent_layout;
+			if ($layout_of_row == 'inline' ) {
+				$cols = 10000;
+			} else {
+				$cols = intval($layout_of_row)?:1;
+			}
+			$type = $row_layout['type']??'widgets';
+			switch ($type) {
+			case 'container':
+                switch ($row_layout['style']??'row') {
+                    case 'tabs':
+						$ret .= '<div class=row><div class="' . $this->columnClasses(1) . '">';
+                        $tab_items = [];
+                        foreach ($row_layout['content'] as $kc => $content) {
+                            if (!is_array($content)) {
+                                $content = [
+                                    'label' => $kc,
+                                    'content' => $content
+                                ];
+                            }
+                            $tab_items[] = [
+                                'label' => $content['title']??$kc,
+                                'content' => $this->layoutWidgets($content['widgets'],
+                                    ['layout' => $content['layout']??$layout_of_row, 'style' => $content['style']??$parent_style]),
+                            ];
+                        }
+                        $ret .= Tabs::widget([ 'items' => $tab_items ]);
+						$ret .= '</div></div>';
+                        break;
+                    case 'row':
+						$ret .= '<div class=row>';
+                        foreach ($row_layout['content'] as $kc => $content) {
+                            $ret .= '<div class="' . $this->columnClasses($cols) . '">';
+                            $ret .= $this->layoutWidgets([$content],
+                                ['layout' => $layout_of_row, 'style' => $parent_style]);
+                            $ret .= "</div>\n";
+                        }
+                        $ret .= '</div>';
+                        break;
+                }
+				$ret .= "<!--container_[$lrk]-->";
+				break;
+			case 'widgets':
+			case 'widgetset':
+                $nf = $indexf = 0;
+                $fs = '';
+                $only_field_names = true;
+                foreach($row_layout as $lrk => $rl) {
+                    if (is_array($rl)) {
+                        $only_field_names = false;
+                        break;
+                    }
+                }
+                if ($only_field_names) {
+                    $row_layout = ['type' => 'widgets', 'widgets' => $row_layout];
+                }
+                foreach ($row_layout['widgets'] as $attribute => $form_field ) {
+					if (!is_array($form_field)) {
+						$attribute = $form_field;
+					}
+					if (isset($this->widgets[$attribute])) {
+						$fld_layout=$this->widgets[$attribute]->layout??'large';
+                        if ($fld_layout == 'full' && $nf != 0) {
+                            while ($nf++%$cols != 0);
+                        }
+                        if( ($nf%$cols) == 0) {
+                            if( $nf != 0 ) {
+                                $fs .= '</div><!--row-->';
+                            }
+                            $fs .= "\n" . "<div class=\"row layout-$layout_of_row\">";
+                        }
+                        $row_style = $row_layout['style']??$parent_style;
+                        switch ($row_style) {
+                            case 'grid':
+                            case 'grid-nolabels':
+                                $ro = ['class' => "field-container"];
+                                if ('static' == ($fld_layout)) {
+                                    $classes = ActiveForm::FIELD_HORIZ_CLASSES['static']['horizontalCssClasses'];
+                                } else if ($layout_of_row == 'inline') {
+									$classes = [];
+								} else {
+                                    $classes = ActiveForm::FIELD_HORIZ_CLASSES[$layout_of_row][$fld_layout]['horizontalCssClasses'];
+                                }
+                                // if ($row_style == 'grid-nolabels') {
+                                //     $lo = false;
+                                // } else {
+                                //     $lo = ['class' => "label-$form_field " . implode(' ', $classes['label'])];
+                                // }
+                                // $co = [ 'class' => "field field-$form_field " . $classes['wrapper'] ];
+                                $col_classes = $this->columnClasses($fld_layout == 'full' ? 1 : $cols);
+                                if ($col_classes == 'col col-12') {
+									$fs .= $this->widgets[$form_field];
+                                } else {
+                                    $fs .= "<div class=\"$col_classes\">";
+									$fs .= $this->widgets[$form_field];
+									$fs .= '</div>';
+                                }
+                                break;
+                            case 'grid-cards':
+                                $col_classes = $this->columnClasses($fld_layout == 'full' ? 1 : $cols);
+                                $fs.= '<div class="col ' . $col_classes . '">';
+                                $ro = ['class' => "card field-container border-primary my-3 w-100"];
+                                $lo = ['class' => "card-header label-$form_field"];
+                                $co = ['class' => 'card-text'];
+                                $fs .= '<div' . Html::renderTagAttributes($ro) . '>';
+                                $fs .= $this->renderAttribute($form_field, $lo, $co, $indexf++);
+                                $fs .= "</div></div><!--$form_field-->";
+                                break;
+                        }
+                        $nf++;
+                    } else {
+                        throw new InvalidConfigException($form_field . ": 'widgets' not found in row layout");
+                    }
+                }
+                $fs .= '</div><!--row-->';
+				if( isset($row_layout['title']) && $type == 'widgetset' ) {
+					$legend = Html::tag('legend', $row_layout['title'], $row_layout['title_options']??[]);
+					$ret .= Html::tag('widgetset', $legend . $fs, array_merge( ['id' => $this->options['id'] . "_layout_$lrk" ], $row_layout['options']??[]) );
+				} else if( isset($row_layout['title'])  ) {
+					$legend = Html::tag('div', $row_layout['title'], $row_layout['title_options']??[]);
+					$ret .= Html::tag('div', $legend . $fs, array_merge( ['id' => $this->options['id'] . "_layout_$lrk" ], $row_layout['options']??[]) );
+				} else {
+					$ret .= $fs;
+				}
+				break;
+			case 'buttons':
+				$ret .= '<div class="mt-2 clearfix row">';
+				if ($layout_of_row != 'inline') {
+					$classes = static::FIELD_HORIZ_CLASSES[$layout_of_row??'1col']['large']['horizontalCssClasses']['offset'];
+					if (is_array($classes)) {
+						$s_classes = implode(' ', $classes);
+						$ret .= "<div class=\"$s_classes\">";
+					}
+				} else {
+					$ret .= "<div>";
+				}
+				$ret .= $this->layoutButtons($row_layout['buttons'], $layout_of_row??$this->layout, $row_layout['options']??[]);
+				$ret .= '</div><!--buttons -->' .  "\n";
+				$ret .= '</div><!--row-->';
+				break;
+			case 'subtitle':
+				$ret .= $this->layoutContent(null, $row_layout['title'], $row_layout['options']??[]);
+				break;
+			}
+		}
+		return $ret;
+	}
+
 
 	public function fixWidgetsLayout(array &$widgets_cfg, array $render_widgets, array $buttons = []): void
 	{
@@ -99,172 +287,6 @@ class WidgetLayer
 	}
 
 
-	/**
-	 * Recursivelly lays out the fiels of a form
-	 */
-	public function layoutwidgets(array $layout_rows, array $widgets, array $parent_options = []): string
-	{
-		$parent_layout = $parent_options['layout']??'1col';
-		$parent_style = $parent_options['style']??'grid';
-		$only_field_names = true;
-		foreach($layout_rows as $lrk => $row_layout ) {
-			if (is_array($row_layout)) {
-				$only_field_names = false;
-				break;
-			}
-		}
-		if ($only_field_names) {
-			$layout_rows = [ ['type' => 'widgets', 'widgets' => $layout_rows, 'layout' => $parent_layout] ];
-		}
-		$ret = '';
-		foreach($layout_rows as $lrk => $row_layout ) {
-			$layout_of_row = $row_layout['layout']??$parent_layout;
-			if ($layout_of_row == 'inline' ) {
-				$cols = 10000;
-			} else {
-				$cols = intval($layout_of_row)?:1;
-			}
-			$type = $row_layout['type']??'widgets';
-			switch ($type) {
-			case 'container':
-                switch ($row_layout['style']??'row') {
-                    case 'tabs':
-						$ret .= '<div class=row><div class="' . $this->columnClasses(1) . '">';
-                        $tab_items = [];
-                        foreach ($row_layout['content'] as $kc => $content) {
-                            if (!is_array($content)) {
-                                $content = [
-                                    'label' => $kc,
-                                    'content' => $content
-                                ];
-                            }
-                            $tab_items[] = [
-                                'label' => $content['title']??$kc,
-                                'content' => $this->layoutwidgets($content['widgets'], $widgets,
-                                    ['layout' => $content['layout']??$layout_of_row, 'style' => $content['style']??$parent_style]),
-                            ];
-                        }
-                        $ret .= Tabs::widget([ 'items' => $tab_items ]);
-						$ret .= '</div></div>';
-                        break;
-                    case 'row':
-						$ret .= '<div class=row>';
-                        foreach ($row_layout['content'] as $kc => $content) {
-                            $ret .= '<div class="' . $this->columnClasses($cols) . '">';
-                            $ret .= $this->layoutwidgets([$content], $widgets,
-                                ['layout' => $layout_of_row, 'style' => $parent_style]);
-                            $ret .= "</div>\n";
-                        }
-                        $ret .= '</div>';
-                        break;
-                }
-				$ret .= "<!--container_[$lrk]-->";
-				break;
-			case 'widgets':
-			case 'widgetset':
-                $nf = $indexf = 0;
-                $fs = '';
-                $only_field_names = true;
-                foreach($row_layout as $lrk => $rl) {
-                    if (is_array($rl)) {
-                        $only_field_names = false;
-                        break;
-                    }
-                }
-                if ($only_field_names) {
-                    $row_layout = ['type' => 'widgets', 'widgets' => $row_layout];
-                }
-                foreach ($row_layout['widgets'] as $attribute => $form_field ) {
-					if (!is_array($form_field)) {
-						$attribute = $form_field;
-					}
-					if (isset($widgets[$attribute])) {
-						$fld_layout=$widgets[$attribute]->layout??'large';
-                        if ($fld_layout == 'full' && $nf != 0) {
-                            while ($nf++%$cols != 0);
-                        }
-                        if( ($nf%$cols) == 0) {
-                            if( $nf != 0 ) {
-                                $fs .= '</div><!--row-->';
-                            }
-                            $fs .= "\n" . "<div class=\"row layout-$layout_of_row\">";
-                        }
-                        $row_style = $row_layout['style']??$parent_style;
-                        switch ($row_style) {
-                            case 'grid':
-                            case 'grid-nolabels':
-                                $ro = ['class' => "field-container"];
-                                if ('static' == ($fld_layout)) {
-                                    $classes = ActiveForm::FIELD_HORIZ_CLASSES['static']['horizontalCssClasses'];
-                                } else if ($layout_of_row == 'inline') {
-									$classes = [];
-								} else {
-                                    $classes = ActiveForm::FIELD_HORIZ_CLASSES[$layout_of_row][$fld_layout]['horizontalCssClasses'];
-                                }
-                                // if ($row_style == 'grid-nolabels') {
-                                //     $lo = false;
-                                // } else {
-                                //     $lo = ['class' => "label-$form_field " . implode(' ', $classes['label'])];
-                                // }
-                                // $co = [ 'class' => "field field-$form_field " . $classes['wrapper'] ];
-                                $col_classes = $this->columnClasses($fld_layout == 'full' ? 1 : $cols);
-                                if ($col_classes == 'col col-12') {
-									$fs .= $widgets[$form_field];
-                                } else {
-                                    $fs .= "<div class=\"$col_classes\">";
-									$fs .= $widgets[$form_field];
-									$fs .= '</div>';
-                                }
-                                break;
-                            case 'grid-cards':
-                                $col_classes = $this->columnClasses($fld_layout == 'full' ? 1 : $cols);
-                                $fs.= '<div class="col ' . $col_classes . '">';
-                                $ro = ['class' => "card field-container border-primary my-3 w-100"];
-                                $lo = ['class' => "card-header label-$form_field"];
-                                $co = ['class' => 'card-text'];
-                                $fs .= '<div' . Html::renderTagAttributes($ro) . '>';
-                                $fs .= $this->renderAttribute($form_field, $lo, $co, $indexf++);
-                                $fs .= "</div></div><!--$form_field-->";
-                                break;
-                        }
-                        $nf++;
-                    } else {
-                        throw new InvalidConfigException($form_field . ": 'widgets' not found in row layout");
-                    }
-                }
-                $fs .= '</div><!--row-->';
-				if( isset($row_layout['title']) && $type == 'widgetset' ) {
-					$legend = Html::tag('legend', $row_layout['title'], $row_layout['title_options']??[]);
-					$ret .= Html::tag('widgetset', $legend . $fs, array_merge( ['id' => $this->options['id'] . "_layout_$lrk" ], $row_layout['options']??[]) );
-				} else if( isset($row_layout['title'])  ) {
-					$legend = Html::tag('div', $row_layout['title'], $row_layout['title_options']??[]);
-					$ret .= Html::tag('div', $legend . $fs, array_merge( ['id' => $this->options['id'] . "_layout_$lrk" ], $row_layout['options']??[]) );
-				} else {
-					$ret .= $fs;
-				}
-				break;
-			case 'buttons':
-				$ret .= '<div class="mt-2 clearfix row">';
-				if ($layout_of_row != 'inline') {
-					$classes = static::FIELD_HORIZ_CLASSES[$layout_of_row??'1col']['large']['horizontalCssClasses']['offset'];
-					if (is_array($classes)) {
-						$s_classes = implode(' ', $classes);
-						$ret .= "<div class=\"$s_classes\">";
-					}
-				} else {
-					$ret .= "<div>";
-				}
-				$ret .= $this->layoutButtons($row_layout['buttons'], $layout_of_row??$this->layout, $row_layout['options']??[]);
-				$ret .= '</div><!--buttons -->' .  "\n";
-				$ret .= '</div><!--row-->';
-				break;
-			case 'subtitle':
-				$ret .= $this->layoutContent(null, $row_layout['title'], $row_layout['options']??[]);
-				break;
-			}
-		}
-		return $ret;
-	}
 
 	public function layoutContent(?string $label, string $content, array $options = []):string
 	{
