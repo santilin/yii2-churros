@@ -212,8 +212,7 @@ class ActiveForm extends Bs4ActiveForm
 	{
 		switch ($cols) {
 			case 1:
-				$col = $col_sm = $col_md = $col_lg = $col_xl = 12;
-				break;
+				return "col col-12";
 			case 2:
 				$col = $col_sm = 12;
 				$col_md = $col_lg = $col_xl = 6;
