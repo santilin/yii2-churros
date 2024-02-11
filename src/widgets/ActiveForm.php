@@ -23,7 +23,7 @@ class ActiveForm extends Bs4ActiveForm
 //
 	public $errorSummaryCssClass = 'error-summary alert alert-danger';
 
-	public const FIELD_HORIZ_CLASSES = [
+	public const FORM_FIELD_HORIZ_CLASSES = [
 		'1col' => [
 			'full' => [
 				'horizontalCssClasses' =>[

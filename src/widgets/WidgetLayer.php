@@ -11,7 +11,8 @@ class WidgetLayer
 	public function __construct(
 		protected array|string|null $widgetsLayout,
 		protected array $widgets,
-		protected $widget_painter)
+		protected $widget_painter,
+		protected array $widget_layout_horiz_config)
 	{
 	}
 
@@ -80,7 +81,7 @@ class WidgetLayer
                             }
                             $tab_items[] = [
                                 'label' => $content['title']??$kc,
-                                'content' => $this->layoutWidgets($content[$type]??$content['widgets']??$content['fields'],
+                                'content' => $this->layoutWidgets($content[$type]??$content['widgets']??$content['fields']??$content['buttons'],
                                     ['layout' => $content['layout']??$layout_of_row, 'style' => $content['style']??$parent_style]),
                             ];
                         }
@@ -139,11 +140,11 @@ class WidgetLayer
                             case 'grid':
                             case 'grid-nolabels':
                                 if ('static' == ($widget_layout)) {
-                                    $classes = ActiveForm::FIELD_HORIZ_CLASSES['static']['horizontalCssClasses'];
+                                    $classes = $this->widget_layout_horiz_config['static']['horizontalCssClasses'];
                                 } else if ($layout_of_row == 'inline') {
 									$classes = [];
 								} else {
-                                    $classes = ActiveForm::FIELD_HORIZ_CLASSES[$layout_of_row][$widget_layout]['horizontalCssClasses'];
+                                    $classes = $this->widget_layout_horiz_config[$layout_of_row][$widget_layout]['horizontalCssClasses'];
                                 }
                                 if ($row_style == 'grid-nolabels') {
 									$lo = false;
@@ -151,7 +152,11 @@ class WidgetLayer
 									$lo = ['class' => "label-$widget " . implode(' ', $classes['label'])];
 								}
 								$wo = [ 'class' => 'widget-container ' . $classes['wrapper'] ];
-								$fs .= call_user_func($this->widget_painter, $widget, $lo, $wo, $indexf++);
+								if ($this->widget_painter) {
+									$fs .= call_user_func($this->widget_painter, $widget, $lo, $wo, $indexf++);
+								} else {
+									$fs .= $this->widgets[$widget_name]->__toString();
+								}
                                 break;
                             case 'grid-cards':
                                 $col_classes = $this->columnClasses($widget_layout == 'full' ? 1 : $cols);
@@ -163,13 +168,15 @@ class WidgetLayer
                                 $fs .= $this->renderAttribute($widget, $lo, $co, $indexf++);
                                 $fs .= "</div></div><!--$widget-->";
                                 break;
+							default:
+								throw new InvalidConfigException($row_style . ": invalid style");
                         }
                         if ($col_classes != 'col col-12') {
 							$fs .= '</div>';
 						}
 						$nf++;
-                    } else {
-                        throw new InvalidConfigException($widget . ": 'widgets' not found in row layout");
+                    // } else {
+                    //     throw new InvalidConfigException($widget . ": 'widgets' not found in row layout");
                     }
                 }
                 $fs .= '</div><!--row-->';
@@ -186,7 +193,7 @@ class WidgetLayer
 			case 'buttons':
 				$ret .= '<div class="mt-2 clearfix row">';
 				if ($layout_of_row != 'inline') {
-					$classes = static::FIELD_HORIZ_CLASSES[$layout_of_row??'1col']['large']['horizontalCssClasses']['offset'];
+					$classes = $this->widget_layout_horiz_config[$layout_of_row??'1col']['large']['horizontalCssClasses']['offset'];
 					if (is_array($classes)) {
 						$s_classes = implode(' ', $classes);
 						$ret .= "<div class=\"$s_classes\">";
@@ -222,95 +229,7 @@ class WidgetLayer
 		}
 	}
 
-	public function fixWidgetsLayout(array &$widgets_cfg, array $render_widgets, array $buttons = []): void
-	{
-		$form_layout = $this->layout;
-		switch ($form_layout) {
-			case 'inline':
-				break;
-			case 'horizontal':
-				if (empty($this->widgetsLayout)) {
-					$form_layout = '1col';
-				} else if (is_string($this->widgetsLayout)) {
-					$form_layout = $this->widgetsLayout;
-					$this->widgetsLayout = null;
-				}
-				break;
-			default:
-				$this->layout = 'horizontal';
-				break;
-		}
-		if (empty($this->widgetsLayout)) {
-			$this->widgetsLayout = [];
-			$this->widgetsLayout[] = [
-				'type' => 'widgets',
-				'widgets' => $render_widgets,
-				'layout' => $form_layout,
-			];
-			$this->widgetsLayout[] = [
-				'type' => 'buttons',
-				'buttons' => $buttons,
-				'layout' => $form_layout,
-			];
-			if ($this->layout != 'inline') {
-				$this->addLayoutClasses($widgets_cfg, $this->widgetsLayout);
-			}
-		} else {
-			$this->addLayoutClasses($widgets_cfg, $this->widgetsLayout);
-		}
-		// check there are no render_widgets with incorrect settings
-		foreach ($widgets_cfg as $kf => $fldcfg_info) {
-			if (isset($widgets_cfg[$kf]['layout'])) {
-				unset($widgets_cfg[$kf]['layout']);
-			}
-		}
-	}
-
-	private function addLayoutClasses(array &$widgets_cfg, array $widgets_in_row, string $widgets_layout = '1col'): void
-	{
-		$ret = '';
-		foreach($widgets_in_row as $lrk => $layout_row ) {
-			$layout = $layout_row['layout']??$widgets_layout;
-			switch ($layout_row['type']) {
-			case 'container':
-				$this->addLayoutClasses($widgets_cfg, $layout_row['content'], $layout);
-				break;
-			case 'widgetset':
-			case 'widgets':
-				$nf = 0;
-				foreach ($layout_row['widgets'] as $fldname) {
-					if (!isset($widgets_cfg[$fldname])) {
-						$widgets_cfg[$fldname] = $this->fieldClasses($layout, 'large');
-					} else {
-						if (isset($widgets_cfg[$fldname]['layout'])) {
-							$widget_layout = $widgets_cfg[$fldname]['layout'];
-							unset($widgets_cfg[$fldname]['layout']);
-						} else {
-							$widget_layout = 'large';
-						}
-						$widgets_cfg[$fldname] = array_merge(
-							$this->fieldClasses($layout,$widget_layout),
-							$widgets_cfg[$fldname]);
-					}
-					switch($layout_row['labels']??null) {
-					case 'none':
-						$widgets_cfg[$fldname]['horizontalCssClasses']['label'][] = 'hidden';
-						break;
-					case 'vertical':
-						$widgets_cfg[$fldname]['horizontalCssClasses']['label']
-							= $widgets_cfg[$fldname]['horizontalCssClasses']['wrapper']
-							= 'col-lg-12 col-md-12 col-sm-12 col-12 col-12';
-					}
-					if ($nf == 0 && !empty($layout_row['hide_first_label']) ) {
-						$widgets_cfg[$fldname]['horizontalCssClasses']['label'] = "hidden";
-					}
-					$nf++;
-				}
-			}
-		}
-	}
-
-	public function layoutContent(?string $label, string $content, array $options = []):string
+	protected function layoutContent(?string $label, string $content, array $options = []):string
 	{
 		$ret = '';
 		$wrapper_options = [ 'class' => $this->fieldConfig['horizontalCssClasses']['wrapper'] ];
@@ -325,15 +244,6 @@ class WidgetLayer
 		$ret .= $content;
 		$ret .= Html::endTag($wrapper_tag);
 		return $ret;
-	}
-
-	public function getLayoutClasses($field_layout, $layout_row)
-	{
-		if( $field_layout == 'static' ) {
-			return self::FIELD_HORIZ_CLASSES['static'];
-		} else {
-			return self::FIELD_HORIZ_CLASSES[$field_layout][$layout_row];
-		}
 	}
 
 	public function layoutButtons(array $buttons, string $layout, array $options = []): string

@@ -16,10 +16,10 @@ use yii\helpers\ArrayHelper;
 use yii\helpers\Html;
 use yii\helpers\Inflector;
 use yii\i18n\Formatter;
-use yii\bootstrap4\Tabs;
 use santilin\churros\ChurrosAsset;
 use santilin\churros\helpers\{AppHelper,FormHelper};
-use santilin\churros\widgets\{ActiveForm,WidgetLayer};
+use santilin\churros\widgets\WidgetLayer;
+use santilin\churros\widgets\bs5\ActiveForm;
 
 /**
  * RecordView displays the detail of a single data [[model]].
@@ -161,7 +161,7 @@ html;
 		if ($this->style == 'table') {
 			return $this->renderAsTable();
 		} else {
-            $layer = new WidgetLayer($this->fieldsLayout, $this->attributes, [ $this, 'renderAttribute' ]);
+            $layer = new WidgetLayer($this->fieldsLayout, $this->attributes, [ $this, 'renderAttribute' ], ActiveForm::FORM_FIELD_HORIZ_CLASSES);
 			return '<div class="record-fields">'
                 . $layer->layout('fields', $this->layout, $this->style)
 				. '</div>';
