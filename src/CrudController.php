@@ -87,6 +87,9 @@ class CrudController extends \yii\web\Controller
 	{
 		$params = Yii::$app->request->queryParams;
 		$searchModel = $this->createSearchModel();
+		if (!$searchModel) {
+			throw new NotFoundHttpException("Unable to create a searchModel for $this->id crud controller");
+		}
 		$params['permissions'] = FormHelper::resolvePermissions($params['permissions']??[], $this->crudActions);
 		if ($this->getMasterModel()) {
 			$related_field = $searchModel->getRelatedFieldForModel($this->getMasterModel());
