@@ -168,16 +168,19 @@ html;
 		}
     }
 
-    public function layAttribute($attr_key, array $layoutOptions, int $index): string
-    {
-        return $this->renderAttribute($attr_key, $layoutOptions['label'], $layoutOptions['wrapper'], $index);
-    }
 
     public function renderButtons()
     {
 		$ret = '<div class="rv-btn-toolbar">';
 		return FormHelper::displayButtons($this->buttons);
 		return $ret . '</div>';
+    }
+
+    public function layAttribute($attr_key, array $widgetOptions, int $index): string
+    {
+        $labelOptions = $widgetOptions['label']??false;
+        $contentOptions = $widgetOptions['wrapper']??[];
+        return $this->renderAttribute($attr_key, $labelOptions, $contentOptions, $index);
     }
 
     /**
@@ -193,9 +196,6 @@ html;
         } else {
             $attribute = $attr_key;
         }
-        if ($labelOptions === false) {
-            $attribute['label'] = false;
-        }
 		$template = $attribute['template']??$this->fieldsTemplate;
         if (is_string($template)) {
             if ($labelOptions !== false) {
@@ -203,6 +203,8 @@ html;
                     $labelOptions,
                     $attribute['labelOptions']??[]);
                 $labelOptions = Html::renderTagAttributes($labelOptions);
+            } else {
+                $attribute['label'] = false;
             }
             $contentOptions = AppHelper::mergeAndConcat( ['class', 'style'],
                 [ 'class' => 'form-control-plaintext' ],

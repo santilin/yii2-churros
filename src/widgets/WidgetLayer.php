@@ -137,7 +137,6 @@ class WidgetLayer
 						} else {
 							$widget_layout = $widget['layout']??'large';
 						}
-						$col_classes = $this->columnClasses($widget_layout == 'full' ? 1 : $cols);
                         if ($widget_layout == 'full' && $nf != 0) {
                             while ($nf++%$cols != 0);
                         }
@@ -147,6 +146,7 @@ class WidgetLayer
                             }
                             $fs .= "<div class=\"row layout-$layout_of_row\">";
                         }
+						$col_classes = $this->columnClasses($widget_layout == 'full' ? 1 : $cols);
                         if ($col_classes != 'col col-12') {
 							$fs .=  "<div class=\"$col_classes\">";
 						}
@@ -162,13 +162,14 @@ class WidgetLayer
                                     $classes = $this->widget_layout_horiz_config[$layout_of_row][$widget_layout]['horizontalCssClasses'];
                                 }
                                 if ($row_style == 'grid-nolabels') {
-									$classes['label'] = false;
+									$widget_options['label'] = false;
                                 } else {
-									$classes['label'][] = " label-$widget_name";
+									$widget_options['label']['class'] = implode(' ', $classes['label']) . " label-$widget_name";
 								}
-								$classes['wrapper'][] = ' widget-container';
+								$widget_options['wrapper']['class'] = implode(' ', $classes['wrapper']) . ' widget-container';
+								$widget_options['horizontalCssClasses'] = $classes;
 								if ($this->widget_painter) {
-									$fs .= call_user_func($this->widget_painter, $widget, $classes, $indexf++);
+									$fs .= call_user_func($this->widget_painter, $widget, $widget_options, $indexf++);
 								} else {
 									$fs .= $widget->__toString();
 								}

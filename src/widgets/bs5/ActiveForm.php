@@ -70,9 +70,9 @@ class ActiveForm extends Bs5ActiveForm
 		'2cols' => [
 			'full' => [
 				'horizontalCssClasses' => [
-					'offset' => ['offset-xl-3 offset-lg-3 offset-md-3 offset-sm-3 offset-3'],
-					'label' =>  ['col-xl-3 col-lg-3 col-md-3 col-sm-12 col-12', 'col-form-label text-left text-md-right'],
-					'wrapper' => 'col-xl-9 col-lg-9 col-md-9 col-sm-12 col-12',
+					'offset' => 'offset-3',
+					'label' =>  ['col-md-3 col-12', 'col-form-label text-left text-md-right'],
+					'wrapper' => ['col-md-9 col-12'],
 					'error' => '',
 					'hint' => '',
 					'field' => 'form-group row',
@@ -80,9 +80,9 @@ class ActiveForm extends Bs5ActiveForm
 			],
 			'large' => [
 				'horizontalCssClasses' => [
-					'offset' => ['offset-xl-3 offset-lg-3 offset-md-3 offset-sm-3 offset-3'],
-					'label' =>  ['col-xl-3 col-lg-3 col-md-3 col-sm-12 col-12', 'col-form-label text-left text-md-right'],
-					'wrapper' => 'col-xl-9 col-lg-9 col-md-9 col-sm-12 col-12',
+					'offset' => 'offset-3',
+					'label' =>  ['col-md-3 col-12', 'col-form-label text-left text-md-right'],
+					'wrapper' => ['col-md-9 col-12'],
 					'error' => '',
 					'hint' => '',
 					'field' => 'form-group row',
@@ -90,9 +90,9 @@ class ActiveForm extends Bs5ActiveForm
 			],
 			'medium' => [
 				'horizontalCssClasses' =>[
-					'offset' => 'offset-xl-3 offset-lg-3 offset-md-3 offset-sm-4 offset-12',
-					'label' => ['col-xl-3 col-lg-3 col-md-3 col-sm-4 col-12', 'col-form-label text-left text-sm-right text-md-right text-lg-right'],
-					'wrapper' => 'col-lg-5 col-md-6 col-sm-7 col-8',
+					'offset' => 'offset-md-3 offset-sm-4 offset-12',
+					'label' => ['col-md-3 col-sm-4 col-12', 'col-form-label text-left text-sm-right'],
+					'wrapper' => ['col-lg-5 col-md-6 col-sm-7 col-8'],
 					'error' => '',
 					'hint' => '',
 					'field' => 'form-group row',
@@ -100,9 +100,9 @@ class ActiveForm extends Bs5ActiveForm
 			],
 			'short' => [
 				'horizontalCssClasses' => [
-					'offset' => ['col-lg-3 col-md-6 col-sm-9 col-12', 'offset-lg-2 offset-md-2 offset-sm-3'],
-					'label' => ['col-lg-3 col-md-6 col-sm-12 col-12', 'col-form-label text-left text-md-right'],
-					'wrapper' => 'col-lg-6 col-lg-6 col-md-6 col-sm-12 col-12',
+					'offset' => 'offset-md-2 offset-sm-3',
+					'label' => ['col-lg-3 col-md-6 col-12', 'col-form-label text-left text-md-right'],
+					'wrapper' => ['col-md-6 col-12'],
 					'error' => '',
 					'hint' => '',
 					'field' => 'form-group row',
