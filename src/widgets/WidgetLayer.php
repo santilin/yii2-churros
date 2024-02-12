@@ -29,7 +29,7 @@ class WidgetLayer
 				[
 					'type' => $type,
 					'layout' => $layout,
-					'fields' => array_keys($this->widgets),
+					'content' => array_keys($this->widgets),
 				]
 			];
 		}
@@ -55,7 +55,7 @@ class WidgetLayer
 			}
 		}
 		if ($only_widget_names) {
-			$layout_rows = [ ['type' => 'widgets', 'widgets' => $layout_rows, 'layout' => $parent_layout] ];
+			$layout_rows = [ ['type' => 'widgets', 'content' => $layout_rows, 'layout' => $parent_layout] ];
 		}
 		$ret = '';
 		foreach($layout_rows as $lrk => $layout_row ) {
@@ -81,7 +81,7 @@ class WidgetLayer
                             }
                             $tab_items[] = [
                                 'label' => $content['title']??$kc,
-                                'content' => $this->layoutWidgets($content[$type]??$content['widgets']??$content['fields']??$content['buttons'],
+                                'content' => $this->layoutWidgets($content['content'],
                                     ['layout' => $content['layout']??$layout_of_row, 'style' => $content['style']??$parent_style]),
                             ];
                         }
@@ -116,7 +116,11 @@ class WidgetLayer
                 if ($only_widget_names) {
                     $layout_row = ['type' => $type, $type => $layout_row];
                 }
-                foreach ($layout_row[$type] as $widget_name => $widget ) {
+                if (!isset($layout_row['content'])) {
+					$love = true;
+				}
+
+                foreach ($layout_row['content'] as $widget_name => $widget ) {
 					if (!is_array($widget)) {
 						$widget_name = $widget;
 					} else {
@@ -160,7 +164,7 @@ class WidgetLayer
                                 if ($row_style == 'grid-nolabels') {
 									$classes['label'] = false;
                                 } else {
-									$classes['label'][] = " label-$widget";
+									$classes['label'][] = " label-$widget_name";
 								}
 								$classes['wrapper'][] = ' widget-container';
 								if ($this->widget_painter) {

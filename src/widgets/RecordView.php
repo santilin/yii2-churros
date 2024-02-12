@@ -161,11 +161,16 @@ html;
 		if ($this->style == 'table') {
 			return $this->renderAsTable();
 		} else {
-            $layer = new WidgetLayer($this->fieldsLayout, $this->attributes, [ $this, 'renderAttribute' ], ActiveForm::FORM_FIELD_HORIZ_CLASSES);
+            $layer = new WidgetLayer($this->fieldsLayout, $this->attributes, [ $this, 'layAttribute' ], ActiveForm::FORM_FIELD_HORIZ_CLASSES);
 			return '<div class="record-fields">'
                 . $layer->layout('fields', $this->layout, $this->style)
 				. '</div>';
 		}
+    }
+
+    public function layAttribute($attr_key, array $layoutOptions, int $index): string
+    {
+        return $this->renderAttribute($attr_key, $layoutOptions['label'], $layoutOptions['wrapper'], $index);
     }
 
     public function renderButtons()
@@ -183,7 +188,11 @@ html;
      */
     public function renderAttribute($attr_key, $labelOptions, $contentOptions, $index)
     {
-		$attribute = $this->attributes[$attr_key];
+        if (is_string($attr_key)) {
+            $attribute = $this->attributes[$attr_key];
+        } else {
+            $attribute = $attr_key;
+        }
         if ($labelOptions === false) {
             $attribute['label'] = false;
         }
