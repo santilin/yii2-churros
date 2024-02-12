@@ -119,9 +119,20 @@ class WidgetLayer
                 foreach ($layout_row[$type] as $widget_name => $widget ) {
 					if (!is_array($widget)) {
 						$widget_name = $widget;
+					} else {
+						throw new \Exception('e');
 					}
-					if (isset($this->widgets[$widget_name])) {
-						$widget_layout=$this->widgets[$widget_name]->layout??'large';
+					if ($widget = $this->widgets[$widget_name]??false) {
+						// forms
+						if (is_object($widget)) {
+							if (isset($widget->horizontalCssClasses['layout'])) {
+								$widget_layout = ArrayHelper::remove($widget->horizontalCssClasses,'layout');
+							} else {
+								$widget_layout = $widget->layout??'large';
+							}
+						} else {
+							$widget_layout = $widget['layout']??'large';
+						}
 						$col_classes = $this->columnClasses($widget_layout == 'full' ? 1 : $cols);
                         if ($widget_layout == 'full' && $nf != 0) {
                             while ($nf++%$cols != 0);
@@ -147,19 +158,18 @@ class WidgetLayer
                                     $classes = $this->widget_layout_horiz_config[$layout_of_row][$widget_layout]['horizontalCssClasses'];
                                 }
                                 if ($row_style == 'grid-nolabels') {
-									$lo = false;
+									$classes['label'] = false;
                                 } else {
-									$lo = ['class' => "label-$widget " . implode(' ', $classes['label'])];
+									$classes['label'][] = " label-$widget";
 								}
-								$wo = [ 'class' => 'widget-container ' . $classes['wrapper'] ];
+								$classes['wrapper'][] = ' widget-container';
 								if ($this->widget_painter) {
-									$fs .= call_user_func($this->widget_painter, $widget, $lo, $wo, $indexf++);
+									$fs .= call_user_func($this->widget_painter, $widget, $classes, $indexf++);
 								} else {
-									$fs .= $this->widgets[$widget_name]->__toString();
+									$fs .= $widget->__toString();
 								}
                                 break;
                             case 'grid-cards':
-                                $col_classes = $this->columnClasses($widget_layout == 'full' ? 1 : $cols);
                                 $fs.= '<div class="col ' . $col_classes . '">';
                                 $ro = ['class' => "card field-container border-primary my-3 w-100"];
                                 $lo = ['class' => "card-header label-$widget"];

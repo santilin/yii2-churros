@@ -110,17 +110,14 @@ trait ActiveFormTrait
 	 */
 	public function layoutFields(array $form_fields, string $style = 'grid'): string
 	{
-		$layer = new WidgetLayer($this->fieldsLayout, $form_fields, null, self::FORM_FIELD_HORIZ_CLASSES);
+		$layer = new WidgetLayer($this->fieldsLayout, $form_fields, [$this, 'setLayoutClasses'], self::FORM_FIELD_HORIZ_CLASSES);
 		return $layer->layout('fields', $this->layout, $style);
 	}
 
-	public function getLayoutClasses($field_layout, $row_layout)
+	public function setLayoutClasses($widget, array $classes, int $index)
 	{
-		if( $field_layout == 'static' ) {
-			return self::FIELD_HORIZ_CLASSES['static'];
-		} else {
-			return self::FIELD_HORIZ_CLASSES[$field_layout][$row_layout];
-		}
+		$widget->horizontalCssClasses = $classes;
+		return $widget->render();
 	}
 
 } // form
