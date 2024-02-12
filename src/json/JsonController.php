@@ -518,7 +518,7 @@ class JsonController extends \yii\web\Controller
 					$pos_path = strpos($this->_path, "/$root_controller/");
 					if ($pos_path !== false) {
 						$pos_path += strlen("/$root_controller/") + 1;
-						while ($pos_path < strlen($this->_path && $this->_path[$pos_path] != '/')) {
+						while ($pos_path < strlen($this->_path) && $this->_path[$pos_path] != '/') {
 							$pos_path++;
 						}
 					}
