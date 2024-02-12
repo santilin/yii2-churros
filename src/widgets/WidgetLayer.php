@@ -33,10 +33,7 @@ class WidgetLayer
 				]
 			];
 		}
-		return $this->layoutWidgets($this->widgetsLayout, [
-			'layout' => $layout == 'horizontal' ? '1col' : $layout,
-			'style' => $style,
-		]);
+		return $this->layoutWidgets($this->widgetsLayout, ['layout' => $layout, 'style' => $style]);
 	}
 
 
@@ -114,12 +111,8 @@ class WidgetLayer
                     }
                 }
                 if ($only_widget_names) {
-                    $layout_row = ['type' => $type, $type => $layout_row];
+                    $layout_row = ['type' => $type, 'content' => $layout_row];
                 }
-                if (!isset($layout_row['content'])) {
-					$love = true;
-				}
-
                 foreach ($layout_row['content'] as $widget_name => $widget ) {
 					if (!is_array($widget)) {
 						$widget_name = $widget;
@@ -129,23 +122,26 @@ class WidgetLayer
 					if ($widget = $this->widgets[$widget_name]??false) {
 						// forms
 						if (is_object($widget)) {
-							if (isset($widget->horizontalCssClasses['layout'])) {
-								$widget_layout = ArrayHelper::remove($widget->horizontalCssClasses,'layout');
+							if ($widget->horizontalCssClasses['layout']??false) {
+								$widget_layout = ArrayHelper::remove($widget->horizontalCssClasses, 'layout');
 							} else {
 								$widget_layout = $widget->layout??'large';
 							}
+							if ($widget_layout == 'full' && $nf != 0) {
+								while ($nf++%$cols != 0);
+							}
 						} else {
 							$widget_layout = $widget['layout']??'large';
+							if ($widget_layout == 'full' && $nf != 0) {
+								while ($nf++%$cols != 0);
+							}
+							if( ($nf%$cols) == 0) {
+								if( $nf != 0 ) {
+									$fs .= "</div><!--row-->\n";
+								}
+								$fs .= "<div class=\"row layout-$layout_of_row\">";
+							}
 						}
-                        if ($widget_layout == 'full' && $nf != 0) {
-                            while ($nf++%$cols != 0);
-                        }
-                        if( ($nf%$cols) == 0) {
-                            if( $nf != 0 ) {
-                                $fs .= "</div><!--row-->\n";
-                            }
-                            $fs .= "<div class=\"row layout-$layout_of_row\">";
-                        }
 						$col_classes = $this->columnClasses($widget_layout == 'full' ? 1 : $cols);
                         if ($col_classes != 'col col-12') {
 							$fs .=  "<div class=\"$col_classes\">";
@@ -154,7 +150,7 @@ class WidgetLayer
                         switch ($row_style) {
                             case 'grid':
                             case 'grid-nolabels':
-                                if ('static' == ($widget_layout)) {
+                                if ('static' == $widget_layout) {
                                     $classes = $this->widget_layout_horiz_config['static']['horizontalCssClasses'];
                                 } else if ($layout_of_row == 'inline') {
 									$classes = [];
@@ -194,7 +190,9 @@ class WidgetLayer
                     //     throw new InvalidConfigException($widget . ": 'widgets' not found in row layout");
                     }
                 }
-                $fs .= '</div><!--row-->';
+                if (!is_object($widget)) {
+					$fs .= '</div><!--row-->';
+				}
 				if( isset($layout_row['title']) && $type == 'widgetset' ) {
 					$legend = Html::tag('legend', $layout_row['title'], $layout_row['title_options']??[]);
 					$ret .= Html::tag('widgetset', $legend . $fs, array_merge( ['id' => $this->options['id'] . "_layout_$lrk" ], $layout_row['options']??[]) );
@@ -212,11 +210,13 @@ class WidgetLayer
 					if (is_array($classes)) {
 						$s_classes = implode(' ', $classes);
 						$ret .= "<div class=\"$s_classes\">";
+					} else {
+						$ret .= "<div class=\"$classes\">";
 					}
 				} else {
 					$ret .= "<div>";
 				}
-				$ret .= $this->layoutButtons($layout_row['buttons'], $layout_of_row??$this->layout, $layout_row['options']??[]);
+				$ret .= $this->layoutButtons($layout_row['content'], $layout_of_row??$this->layout, $layout_row['options']??[]);
 				$ret .= '</div><!--buttons -->' .  "\n";
 				$ret .= '</div><!--row-->';
 				break;
