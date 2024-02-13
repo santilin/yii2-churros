@@ -45,9 +45,15 @@ trait ActiveFormTrait
 
 	public function renderFormField($widget, array $classes, int $index)
 	{
+		if (is_array($classes['horizontalCssClasses']['label']??false)) {
+			$classes['horizontalCssClasses']['label'] = implode(' ', $classes['horizontalCssClasses']['label']);
+		}
+		if (is_array($classes['horizontalCssClasses']['wrapper']['classes']??false)) {
+			$classes['horizontalCssClasses']['wrapper'] = implode(' ', $classes['horizontalCssClasses']['wrapper']);
+		}
 		$widget->horizontalCssClasses = $classes['horizontalCssClasses'];
-		$widget->wrapperOptions = $classes['horizontalCssClasses']['wrapper'];
-		$widget->labelOptions = $classes['horizontalCssClasses']['label'];
+		$widget->wrapperOptions['class'] = $classes['horizontalCssClasses']['wrapper'];
+		$widget->labelOptions['class'] = $classes['horizontalCssClasses']['label'];
 		return $widget->render();
 	}
 
