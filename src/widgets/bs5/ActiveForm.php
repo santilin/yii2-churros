@@ -211,8 +211,7 @@ class ActiveForm extends Bs5ActiveForm
 	{
 		switch ($cols) {
 			case 1:
-				$col = $col_sm = $col_md = $col_lg = $col_xl = 12;
-				break;
+				return "col col-12";
 			case 2:
 				$col = $col_sm = 12;
 				$col_md = $col_lg = $col_xl = 6;
@@ -226,39 +225,7 @@ class ActiveForm extends Bs5ActiveForm
 				$col = $col_sm = 3;
 				$col_md = $col_lg = $col_xl = 3;
 		}
-		return "col col-$col col-sm-$col_sm col-md-$col_md col-lg-$col_lg col-xl-$col_xl my-1";
-	}
-
-	protected function fieldClasses(string $row_layout, string $fld_layout = 'large'): array
-	{
-		$form_field_cfg = self::FIELD_HORIZ_CLASSES[$row_layout][$fld_layout];
-		if (YII_ENV_DEV) {
-			if (is_array($form_field_cfg['horizontalCssClasses']['wrapper'])) {
-				$form_field_cfg['horizontalCssClasses']['wrapper'] = array_merge(
-					[ "wrapper row-$row_layout fld-$fld_layout"],
-					$form_field_cfg['horizontalCssClasses']['wrapper']);
-			} else {
-				$form_field_cfg['horizontalCssClasses']['wrapper'] = "wrapper row-$row_layout fld-$fld_layout "
-					. $form_field_cfg['horizontalCssClasses']['wrapper'];
-			}
-			if (is_array($form_field_cfg['horizontalCssClasses']['label'])) {
-				$form_field_cfg['horizontalCssClasses']['label'] = array_merge(
-					[ "label row-$row_layout fld-$fld_layout"],
- 					$form_field_cfg['horizontalCssClasses']['label']);
-			} else {
-				$form_field_cfg['horizontalCssClasses']['label'] = "label row-$row_layout fld-$fld_layout "
-					. $form_field_cfg['horizontalCssClasses']['label'];
-			}
-			if (is_array($form_field_cfg['horizontalCssClasses']['offset'])) {
-				$form_field_cfg['horizontalCssClasses']['offset'] = array_merge(
-					[ "offset row-$row_layout fld-$fld_layout"],
-					$form_field_cfg['horizontalCssClasses']['offset']);
-			} else {
-				$form_field_cfg['horizontalCssClasses']['offset'] = "offset row-$row_layout fld-$fld_layout "
-					. $form_field_cfg['horizontalCssClasses']['offset'];
-			}
-		}
-		return $form_field_cfg;
+		return "col col-$col col-sm-$col_sm col-md-$col_md col-lg-$col_lg col-xl-$col_xl";
 	}
 
 }

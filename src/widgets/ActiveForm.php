@@ -229,36 +229,4 @@ class ActiveForm extends Bs4ActiveForm
 		return "col col-$col col-sm-$col_sm col-md-$col_md col-lg-$col_lg col-xl-$col_xl";
 	}
 
-	protected function fieldClasses(string $row_layout, string $fld_layout = 'large'): array
-	{
-		$form_field_cfg = self::FIELD_HORIZ_CLASSES[$row_layout][$fld_layout];
-		if (YII_ENV_DEV) {
-			if (is_array($form_field_cfg['horizontalCssClasses']['wrapper'])) {
-				$form_field_cfg['horizontalCssClasses']['wrapper'] = array_merge(
-					[ "wrapper row-$row_layout fld-$fld_layout"],
-					$form_field_cfg['horizontalCssClasses']['wrapper']);
-			} else {
-				$form_field_cfg['horizontalCssClasses']['wrapper'] = "wrapper row-$row_layout fld-$fld_layout "
-					. $form_field_cfg['horizontalCssClasses']['wrapper'];
-			}
-			if (is_array($form_field_cfg['horizontalCssClasses']['label'])) {
-				$form_field_cfg['horizontalCssClasses']['label'] = array_merge(
-					[ "label row-$row_layout fld-$fld_layout"],
- 					$form_field_cfg['horizontalCssClasses']['label']);
-			} else {
-				$form_field_cfg['horizontalCssClasses']['label'] = "label row-$row_layout fld-$fld_layout "
-					. $form_field_cfg['horizontalCssClasses']['label'];
-			}
-			if (is_array($form_field_cfg['horizontalCssClasses']['offset'])) {
-				$form_field_cfg['horizontalCssClasses']['offset'] = array_merge(
-					[ "offset row-$row_layout fld-$fld_layout"],
-					$form_field_cfg['horizontalCssClasses']['offset']);
-			} else {
-				$form_field_cfg['horizontalCssClasses']['offset'] = "offset row-$row_layout fld-$fld_layout "
-					. $form_field_cfg['horizontalCssClasses']['offset'];
-			}
-		}
-		return $form_field_cfg;
-	}
-
 }
