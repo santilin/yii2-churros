@@ -32,7 +32,7 @@ class ActiveForm extends Bs4ActiveForm
 					'wrapper' => ['col-12'],
 					'error' => '',
 					'hint' => '',
-					'field' => 'form-group row',
+					'field' => 'form-group',
 				]
 			],
 			'large' => [
@@ -42,7 +42,7 @@ class ActiveForm extends Bs4ActiveForm
 					'wrapper' => ['col-md-10 col-12'],
 					'error' => '',
 					'hint' => '',
-					'field' => 'form-group row',
+					'field' => 'form-group',
 				]
 			],
 			'medium' => [
@@ -52,7 +52,7 @@ class ActiveForm extends Bs4ActiveForm
 					'wrapper' => ['col-md-10 col-12'],
 					'error' => '',
 					'hint' => '',
-					'field' => 'form-group row',
+					'field' => 'form-group',
 				]
 			],
 			'short' => [
@@ -62,7 +62,7 @@ class ActiveForm extends Bs4ActiveForm
 					'wrapper' => ['col-sm-10 col-12'],
 					'error' => '',
 					'hint' => '',
-					'field' => 'form-group row',
+					'field' => 'form-group',
 				]
 			],
 		],
@@ -75,7 +75,7 @@ class ActiveForm extends Bs4ActiveForm
 					'wrapper' => ['col-md-9 col-12'],
 					'error' => '',
 					'hint' => '',
-					'field' => 'form-group row',
+					'field' => 'form-group',
 				]
 			],
 			'large' => [
@@ -85,7 +85,7 @@ class ActiveForm extends Bs4ActiveForm
 					'wrapper' => ['col-md-9 col-12'],
 					'error' => '',
 					'hint' => '',
-					'field' => 'form-group row',
+					'field' => 'form-group',
 				]
 			],
 			'medium' => [
@@ -95,7 +95,7 @@ class ActiveForm extends Bs4ActiveForm
 					'wrapper' => ['col-lg-5 col-md-6 col-sm-7 col-8'],
 					'error' => '',
 					'hint' => '',
-					'field' => 'form-group row',
+					'field' => 'form-group',
 				]
 			],
 			'short' => [
@@ -105,7 +105,7 @@ class ActiveForm extends Bs4ActiveForm
 					'wrapper' => ['col-md-6 col-12'],
 					'error' => '',
 					'hint' => '',
-					'field' => 'form-group row',
+					'field' => 'form-group',
 				]
 			],
 		],
@@ -118,7 +118,7 @@ class ActiveForm extends Bs4ActiveForm
 					'wrapper' => ['col-12'],
 					'error' => '',
 					'hint' => '',
-					'field' => 'form-group row',
+					'field' => 'form-group',
 				]
 			],
 			'large' => [
@@ -128,7 +128,7 @@ class ActiveForm extends Bs4ActiveForm
 					'wrapper' => ['col-md-9 col-12'],
 					'error' => '',
 					'hint' => '',
-					'field' => 'form-group row',
+					'field' => 'form-group',
 				]
 			],
 			'medium' => [
@@ -139,7 +139,7 @@ class ActiveForm extends Bs4ActiveForm
 					'wrapper' => ['col-lg-5 col-md-6 col-12'],
 					'error' => '',
 					'hint' => '',
-					'field' => 'form-group row',
+					'field' => 'form-group',
 				]
 			],
 			'short' => [
@@ -150,7 +150,7 @@ class ActiveForm extends Bs4ActiveForm
 					'wrapper' => ['col-lg-5 col-md-6 col-12'],
 					'error' => '',
 					'hint' => '',
-					'field' => 'form-group row',
+					'field' => 'form-group',
 				]
 			],
 		],
@@ -158,52 +158,53 @@ class ActiveForm extends Bs4ActiveForm
 		'4cols' => [
 			'full' => [
 				'horizontalCssClasses' => [
-					'offset' => ['col-lg-10 col-md-10 col-sm-9 col-12', 'offset-lg-2 offset-md-2 offset-sm-3'],
-					'label' => ['col-lg-12 col-md-12 col-sm-12 col-12', 'col-form-label text-left'],
-					'wrapper' => 'col-lg-12 col-md-12 col-sm-12 col-12',
+					'offset' => 'offset-md-2 offset-3',
+					'label' => ['col-12', 'col-form-label text-left'],
+					'wrapper' => 'col-12',
 					'error' => '',
 					'hint' => '',
-					'field' => 'form-group row',
+					'field' => 'form-group',
 				]
 			],
 			'large' => [
 				'horizontalCssClasses' => [
-					'offset' => ['col-lg-10 col-md-10 col-sm-9 col-12', 'offset-lg-2 offset-md-2 offset-sm-3'],
-					'label' => ['col-lg-12 col-md-12 col-sm-12 col-12', 'col-form-label text-left'],
-					'wrapper' => 'col-lg-12 col-md-12 col-sm-12 col-12',
+					'offset' => 'offset-md-2 offset-3',
+					'label' => ['col-12', 'col-form-label text-left'],
+					'wrapper' => ['col-12'],
 					'error' => '',
 					'hint' => '',
-					'field' => 'form-group row',
+					'field' => 'form-group',
 				]
 			],
 			'medium' => [
 				'horizontalCssClasses' => [
-					'label' => 'control-label',
-					'error' => 'col_sm_12',
-					'hint' => 'col_sm_12',
-					'wrapper' => '',
-				],
-				'options' => [ 'class' => 'control-group col-sm-2' ],
+					'offset' => 'offset-md-2 offset-3',
+					'label' => ['col-12', 'col-form-label text-left'],
+					'wrapper' => ['col-12'],
+					'error' => '',
+					'hint' => '',
+					'field' => 'form-group',
+				]
 			],
 			'short' => [
 				'horizontalCssClasses' => [
-					'offset' => ['col-lg-10 col-md-10 col-sm-9 col-12', 'offset-lg-2 offset-md-2 offset-sm-3'],
-					'label' => ['col-lg-12 col-md-12 col-sm-12 col-12', 'col-form-label text-left'],
-					'wrapper' => 'col-lg-12 col-md-12 col-sm-12 col-12',
+					'offset' => 'offset-md-2 offset-sm-3',
+					'label' => ['col-12', 'col-form-label text-left'],
+					'wrapper' => ['col-12'],
 					'error' => '',
 					'hint' => '',
-					'field' => 'form-group row',
+					'field' => 'form-group',
 				]
 			]
 		],
 		'static' => [
 			'horizontalCssClasses' => [
-				'offset' => ['col-lg-10 col-md-10 col-sm-9 col-12', 'offset-lg-2 offset-md-2 offset-sm-3'],
-				'label' => ['col-lg-12 col-md-12 col-sm-12 col-12', 'col-form-label text-left'],
-				'wrapper' => 'col-lg-12 col-md-12 col-sm-12 col-12',
+				'offset' => 'offset-md-2 offset-sm-3',
+				'label' => ['col-12', 'col-form-label text-left'],
+				'wrapper' => ['col-12'],
 				'error' => '',
 				'hint' => '',
-				'field' => 'form-group row',
+				'field' => 'form-group',
 			]
 		]
 	];
