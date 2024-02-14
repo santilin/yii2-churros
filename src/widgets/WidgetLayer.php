@@ -119,10 +119,15 @@ class WidgetLayer
 					} else {
 						throw new \Exception('e');
 					}
+					$add_row = false;
 					if ($widget = $this->widgets[$widget_name]??false) {
 						// forms
 						if ($widget instanceof \yii\bootstrap4\ActiveField ||
 							$widget instanceof \yii\bootstrap5\ActiveField ) {
+							// ActiveFields add a row container over the whole field
+							if ($widget instanceof \yii\bootstrap4\ActiveField) {
+								$add_row = true;
+							}
 							if ($widget->horizontalCssClasses['layout']??false) {
 								$widget_layout = ArrayHelper::remove($widget->horizontalCssClasses, 'layout');
 							} else {
@@ -136,10 +141,12 @@ class WidgetLayer
  									$fs .= "</div><!--row-->\n";
  								}
  								Html::addCssClass($widget->options, "layout-$layout_of_row");
- 								$fs .= '<div class=row>';
+ 								$fs .= '<div class="row w-100">';
 							}
 							$col_classes = $this->columnClasses($widget_layout == 'full' ? 1 : $cols);
 						} else {
+							$add_row = true;
+							// We must add a row like ActiveFields
 							$widget_layout = $widget['layout']??'large';
 							$widget_options = $widget['htmlOptions']??['class' => 'row'];
 							$col_classes = $this->columnClasses($widget_layout == 'full' ? 1 : $cols);
@@ -156,6 +163,9 @@ class WidgetLayer
 								Html::addCssClass($widget_options, "layout-$layout_of_row");
 								$fs .= '<div ' . Html::renderTagAttributes($widget_options) . '>';
 							}
+						}
+						if ($add_row) {
+							$fs .= "<div class=\"row w-100\">";
 						}
 						if ($col_classes) {
 							$fs .=  "<div class=\"$col_classes\">";
@@ -198,6 +208,9 @@ class WidgetLayer
 							default:
 								throw new InvalidConfigException($row_style . ": invalid style");
                         }
+						if ($add_row) {
+							$fs .= "</div>";
+						}
 						if ($col_classes) {
 							$fs .= '</div>';
 						}
