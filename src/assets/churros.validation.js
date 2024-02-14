@@ -136,11 +136,18 @@ window.yii.churros = (function ($) {
 				return d;
 			}
 		},
-		dateInputChange(date_input, orig_id, format, saveFormat, format_as_regex, err_message) {
+		dateInputChange(date_input, orig_id, format, saveFormat, format_as_regex, err_message, default_times) {
 			if ($.trim(date_input.val()) == '') {
 				var date_js = null;
 			} else {
-				var date_js = window.yii.churros.dateParseFromFormat(date_input.val(), format_as_regex);
+				let ds = date_input.val();
+				if (default_times !== undefined ) {
+					for (const prop in default_times) {
+						ds = ds.replace(prop, default_times[prop]);
+					}
+					ds = ds.replace('_', '0');
+				}
+				var date_js = window.yii.churros.dateParseFromFormat(ds, format_as_regex);
 			}
 			let error_el = date_input.next('.invalid-feedback');
 			let form_control = date_input.closest(".form-control");

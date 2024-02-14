@@ -9,7 +9,7 @@ namespace santilin\churros\widgets;
 
 use Yii;
 use yii\helpers\Html;
-use yii\base\InvalidArgumentException;
+use yii\base\InvalidConfigException;
 use yii\web\View;
 use yii\widgets\MaskedInput;
 use santilin\churros\helpers\DateTimeEx;
@@ -21,18 +21,30 @@ class QuickDateTimeInput extends MaskedInput
 	public $saveFormat;
 	public $errorMessage;
 	public $datetype;
+	public $defaultTimes = null;
 	private $js_error_message;
 	private $orig_id;
+
 
 	public function init()
     {
 		if (!$this->format) {
-			throw new InvalidArgumentException("`format` must be set");
+			throw new InvalidConfigException("`format` must be set");
 		}
 		if (empty($this->mask)) {
 			$this->mask = $this->formatToMask();
 		}
-        parent::init();
+		if ($this->defaultTimes) {
+			if (!is_array($this->defaultTimes)) {
+				throw new InvalidConfigException("`defaultTime` must be an array");
+			}
+			$dft = [];
+			foreach( $this->defaultTimes as $dtk => $dtv) {
+				$dft[$this->formatToPlaceHolder($dtk)] = $dtv;
+			}
+			$this->defaultTimes = $dft;
+		}
+		parent::init();
 		if (!$this->datetype) {
 			$this->datetype = DateTimeEx::guessTypeFromFormat($this->format);
 		}
@@ -78,12 +90,14 @@ class QuickDateTimeInput extends MaskedInput
  		DateFormatterAsset::register($this->view);
 		$this->js_error_message = addslashes($this->errorMessage);
         $this->clientOptions = array_merge([
-			"insertMode" => false,
+			'insertMode' => false,
+			'autoClear' => false,
+			'clearIncomplete' => false,
 // 			'positionCaretOnClick' => 'select',
 			'positionCaretOnTab' => 'select',
 			'placeHolder' => $this->formatToPlaceHolder(),
 		], $this->clientOptions);
-        $this->orig_id = $this->options['id'];
+		$this->orig_id = $this->options['id'];
         $this->options['id'] = $this->orig_id . "_date_disp";
 	}
 
@@ -91,13 +105,13 @@ class QuickDateTimeInput extends MaskedInput
 	protected function formatToMask()
 	{
 		$format = strtr($this->format, [
-			" H:i:s" => "[ H:i:s]",
-			" H:i" => "[ H:i]"
+// 			" H:i:s" => " H[:i:s]",
+//  			" H:i" => "[ H:i]"
 		]);
 		return strtr($format, [
 			'd' => '99',
 			'm' => '99',
-			'y' => '99[99]',
+			'y' => '99',
 			'Y' => '99[99]',
 			'H' => '99',
 			'i' => '99',
@@ -105,9 +119,9 @@ class QuickDateTimeInput extends MaskedInput
 		]);
 	}
 
-	protected function formatToPlaceHolder()
+	protected function formatToPlaceHolder($format = null)
 	{
-		return strtr($this->format, [
+		return strtr($format??$this->format, [
 			'd' => '__',
 			'm' => '__',
 			'y' => '__',
@@ -184,9 +198,14 @@ class QuickDateTimeInput extends MaskedInput
 		$id = $this->options['id'];
 		$orig_id = $this->orig_id;
 		$format_as_regex = $this->formatToRegex();
+		if ($this->defaultTimes) {
+			$s_default_time = ', ' . json_encode($this->defaultTimes);
+		} else {
+			$s_default_time = '';
+		}
 		$js = <<<EOF
 $('#$id').closest('form').submit(function(e) {
- 	if (!window.yii.churros.dateInputChange($('#$id'), '$orig_id', '$this->format', '$this->saveFormat', '$format_as_regex', '$this->js_error_message')) {
+ 	if (!window.yii.churros.dateInputChange($('#$id'), '$orig_id', '$this->format', '$this->saveFormat', '$format_as_regex', '$this->js_error_message'$s_default_time)) {
  		e.preventDefault();
  		return false;
  	} else {
@@ -194,7 +213,7 @@ $('#$id').closest('form').submit(function(e) {
  	}
 });
 $('#$id').change(function(e) {
-	if (!window.yii.churros.dateInputChange($(this), '$orig_id', '$this->format', '$this->saveFormat', '$format_as_regex', '$this->js_error_message')) {
+	if (!window.yii.churros.dateInputChange($(this), '$orig_id', '$this->format', '$this->saveFormat', '$format_as_regex', '$this->js_error_message'$s_default_time)) {
 		e.preventDefault();
 		return false;
 	} else {
@@ -202,7 +221,7 @@ $('#$id').change(function(e) {
 	}
 });
 $('#$id').blur(function(e) {
-	if (!window.yii.churros.dateInputChange($(this), '$orig_id', '$this->format', '$this->saveFormat', '$format_as_regex', '$this->js_error_message')) {
+	if (!window.yii.churros.dateInputChange($(this), '$orig_id', '$this->format', '$this->saveFormat', '$format_as_regex', '$this->js_error_message'$s_default_time)) {
 		e.preventDefault();
 		return false;
 	} else {
