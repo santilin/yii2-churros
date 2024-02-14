@@ -17,6 +17,7 @@ trait ActiveFormTrait
 
 	public function layoutFields(array $form_fields, array $buttons, string $style = 'grid'): string
 	{
+		$layout = $this->layout;
 		if (is_string($this->fieldsLayout)) {
 			$layout = $this->fieldsLayout;
 		}

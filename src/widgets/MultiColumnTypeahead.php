@@ -24,7 +24,6 @@ class MultiColumnTypeahead extends Typeahead
 	public $fieldsParam = 'fields';
 	public $perPageParam = 'pagesize';
 	public $searchParam = 'search';
-	public $concatToIdField = false;
 	public $createButton = false;
 	public $limit = 5;
 

@@ -433,7 +433,6 @@ class CrudController extends \yii\web\Controller
 	}
 
 
-
 	// Ajax
 	public function actionAutocomplete($q)
 	{
@@ -459,6 +458,31 @@ class CrudController extends \yii\web\Controller
 		if( $model ) {
             return json_encode($model->getAttributes());
         } /// @todo else
+	}
+
+	// Ajax for the MutiColumnTypeAhead control
+	public function actionMultiAutoComplete(string $search, string $fields, int $page = 1, int $per_page = 10)
+	{
+		\Yii::$app->response->format = \yii\web\Response::FORMAT_JSON;
+		$searchModel = $this->createSearchModel();
+		$conds = [];
+		$array_fields = explode(',',$fields);
+		foreach ($array_fields as $field) {
+			$conds[$field] = $search;
+		}
+		$indexParams = [
+			'or' => true,
+			 $searchModel->formName() => $conds
+		];
+		$dataProvider = $searchModel->search($indexParams);
+		$dataProvider->query
+				->select($array_fields)
+				->limit($page, $per_page);
+// 				->asArray();
+		if ($dataProvider->getTotalCount()) {
+			return $dataProvider->getModels();
+		}
+		return [];
 	}
 
 	public function getMasterModel()
