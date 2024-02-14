@@ -135,21 +135,17 @@ class WidgetLayer
  								if( $nf != 0 ) {
  									$fs .= "</div><!--row-->\n";
  								}
-// 								Html::removeCssClass($widget->options, 'row');
  								Html::addCssClass($widget->options, "layout-$layout_of_row");
  								$fs .= '<div class=row>';
 							}
 							$col_classes = $this->columnClasses($widget_layout == 'full' ? 1 : $cols);
-							if ($col_classes == 'col-12') {
-								$col_classes = null;
-							}
 						} else {
 							$widget_layout = $widget['layout']??'large';
 							$widget_options = $widget['htmlOptions']??['class' => 'row'];
 							$col_classes = $this->columnClasses($widget_layout == 'full' ? 1 : $cols);
-							if ($col_classes == 'col-12') {
-								$col_classes = null;
-							}
+ 							if ($col_classes == 'col-12') {
+ 								$col_classes = null;
+ 							}
 							if ($widget_layout == 'full' && $nf != 0) {
 								while ($nf++%$cols != 0);
 							}
@@ -202,7 +198,7 @@ class WidgetLayer
 							default:
 								throw new InvalidConfigException($row_style . ": invalid style");
                         }
-                        if ($col_classes) {
+						if ($col_classes) {
 							$fs .= '</div>';
 						}
 						$nf++;
