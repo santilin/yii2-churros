@@ -40,6 +40,7 @@ body.dark .record-view .rv-field, .record-view .rv-label {
 	font-size: inherit;
 	line-height: 1.5;
 }
+
 .record-view .cols-2 .rv-label {
 	font-weight:normal;
 	color: darkblue;
@@ -470,3 +471,4 @@ label.taxonomy {
 	font-style: italic;
 	font-size: smaller;
 }
+

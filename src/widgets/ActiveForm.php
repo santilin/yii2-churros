@@ -209,25 +209,4 @@ class ActiveForm extends Bs4ActiveForm
 		]
 	];
 
-	public function columnClasses(int $cols): string
-	{
-		switch ($cols) {
-			case 1:
-				return "col col-12";
-			case 2:
-				$col = $col_sm = 12;
-				$col_md = $col_lg = $col_xl = 6;
-				break;
-			case 3:
-				$col = $col_sm = 4;
-				$col_md = $col_lg = $col_xl = 4;
-				break;
-			case 4:
-			default:
-				$col = $col_sm = 3;
-				$col_md = $col_lg = $col_xl = 3;
-		}
-		return "col col-$col col-sm-$col_sm col-md-$col_md col-lg-$col_lg col-xl-$col_xl";
-	}
-
 }

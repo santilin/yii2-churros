@@ -121,7 +121,8 @@ class WidgetLayer
 					}
 					if ($widget = $this->widgets[$widget_name]??false) {
 						// forms
-						if (is_object($widget)) {
+						if ($widget instanceof \yii\bootstrap4\ActiveField ||
+							$widget instanceof \yii\bootstrap5\ActiveField ) {
 							if ($widget->horizontalCssClasses['layout']??false) {
 								$widget_layout = ArrayHelper::remove($widget->horizontalCssClasses, 'layout');
 							} else {
@@ -130,8 +131,25 @@ class WidgetLayer
 							if ($widget_layout == 'full' && $nf != 0) {
 								while ($nf++%$cols != 0);
 							}
+ 							if( ($nf%$cols) == 0) {
+ 								if( $nf != 0 ) {
+ 									$fs .= "</div><!--row-->\n";
+ 								}
+// 								Html::removeCssClass($widget->options, 'row');
+ 								Html::addCssClass($widget_options, "layout-$layout_of_row");
+ 								$fs .= '<div class=row>';
+							}
+							$col_classes = $this->columnClasses($widget_layout == 'full' ? 1 : $cols);
+							if ($col_classes == 'col-12') {
+								$col_classes = null;
+							}
 						} else {
 							$widget_layout = $widget['layout']??'large';
+							$widget_options = $widget['htmlOptions']??['class' => 'row'];
+							$col_classes = $this->columnClasses($widget_layout == 'full' ? 1 : $cols);
+							if ($col_classes == 'col-12') {
+								$col_classes = null;
+							}
 							if ($widget_layout == 'full' && $nf != 0) {
 								while ($nf++%$cols != 0);
 							}
@@ -139,11 +157,11 @@ class WidgetLayer
 								if( $nf != 0 ) {
 									$fs .= "</div><!--row-->\n";
 								}
-								$fs .= "<div class=\"row layout-$layout_of_row\">";
+								Html::addCssClass($widget_options, "layout-$layout_of_row");
+								$fs .= '<div ' . Html::renderTagAttributes($widget_options) . '>';
 							}
 						}
-						$col_classes = $this->columnClasses($widget_layout == 'full' ? 1 : $cols);
-                        if ($col_classes != 'col col-12') {
+						if ($col_classes) {
 							$fs .=  "<div class=\"$col_classes\">";
 						}
                         $row_style = $layout_row['style']??$parent_style;
@@ -160,7 +178,7 @@ class WidgetLayer
                                 if ($row_style == 'grid-nolabels') {
 									$widget_options['label'] = false;
                                 } else {
-									$widget_options['label']['class'] = implode(' ', $classes['label']) . " label-$widget_name";
+									$widget_options['label']['class'] = implode(' ', $classes['label']) . " fld-$widget_name";
 								}
 								$widget_options['wrapper']['class'] = implode(' ', $classes['wrapper']) . ' widget-container';
 								$widget_options['horizontalCssClasses'] = $classes;
@@ -171,18 +189,20 @@ class WidgetLayer
 								}
                                 break;
                             case 'grid-cards':
-                                $fs.= '<div class="col ' . $col_classes . '">';
-                                $ro = ['class' => "card field-container border-primary my-3 w-100"];
-                                $lo = ['class' => "card-header label-$widget"];
-                                $co = ['class' => 'card-text'];
+                                $ro = ['class' => "card border-primary my-3 w-100"];
+                                $lo = ['class' => "card-header fld-$widget_name"];
                                 $fs .= '<div' . Html::renderTagAttributes($ro) . '>';
-                                $fs .= $this->renderAttribute($widget, $lo, $co, $indexf++);
-                                $fs .= "</div></div><!--$widget-->";
+								if ($this->widget_painter) {
+									$fs .= call_user_func($this->widget_painter, $widget, ['label' => $lo, 'wrapper' => [ 'class' => "card-text fld-$widget_name" ]], $indexf++);
+								} else {
+									$fs .= $widget->__toString();
+								}
+                                $fs .= "</div><!--$widget_name-->";
                                 break;
 							default:
 								throw new InvalidConfigException($row_style . ": invalid style");
                         }
-                        if ($col_classes != 'col col-12') {
+                        if ($col_classes) {
 							$fs .= '</div>';
 						}
 						$nf++;
@@ -190,9 +210,7 @@ class WidgetLayer
                     //     throw new InvalidConfigException($widget . ": 'widgets' not found in row layout");
                     }
                 }
-                if (!is_object($widget)) {
-					$fs .= '</div><!--row-->';
-				}
+ 				$fs .= '</div><!--row-->';
 				if( isset($layout_row['title']) && $type == 'widgetset' ) {
 					$legend = Html::tag('legend', $layout_row['title'], $layout_row['title_options']??[]);
 					$ret .= Html::tag('widgetset', $legend . $fs, array_merge( ['id' => $this->options['id'] . "_layout_$lrk" ], $layout_row['options']??[]) );
@@ -228,22 +246,6 @@ class WidgetLayer
 		return $ret;
 	}
 
-	protected function columnClasses(int $cols): string
-	{
-		switch ($cols) {
-			case 1:
-				return "col col-12";
-			case 2:
-				return "col col-12 col-md-6";
-				break;
-			case 3:
-				return "col col-4";
-			case 4:
-			default:
-				return "col col-3";
-		}
-	}
-
 	protected function layoutContent(?string $label, string $content, array $options = []):string
 	{
 		$ret = '';
@@ -264,13 +266,29 @@ class WidgetLayer
 	public function layoutButtons(array $buttons, string $layout, array $options = []): string
 	{
 		$buttons = FormHelper::displayButtons($buttons);
-		Html::addCssClass($options, 'form-buttons-group');
+		Html::addCssClass($options, 'btn-group');
 		return <<<html
 <div class="{$options['class']}">
 $buttons
-</div><!--buttons form-group-->
+</div><!--buttons-->
 html;
 	}
 
+
+	public function columnClasses(int $cols): string
+	{
+		switch ($cols) {
+			case 1:
+				return "col-12";
+			case 2:
+				return "col-12 col-md-6";
+				break;
+			case 3:
+				return "col-4";
+			case 4:
+			default:
+				return "col-3";
+		}
+	}
 
 } // form

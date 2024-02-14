@@ -32,17 +32,17 @@ class ActiveForm extends Bs5ActiveForm
 					'wrapper' => ['col-12'],
 					'error' => '',
 					'hint' => '',
-					'field' => 'form-group row',
+					'field' => '',
 				]
 			],
 			'large' => [
 				'horizontalCssClasses' =>[
 					'offset' => 'offset-2',
 					'label' => ['col-md-2 col-12', 'col-form-label text-left text-md-right'],
-					'wrapper' => ['col-lg-10 col-12'],
+					'wrapper' => ['col-md-10 col-12'],
 					'error' => '',
 					'hint' => '',
-					'field' => 'form-group row',
+					'field' => '',
 				]
 			],
 			'medium' => [
@@ -52,7 +52,7 @@ class ActiveForm extends Bs5ActiveForm
 					'wrapper' => ['col-md-10 col-12'],
 					'error' => '',
 					'hint' => '',
-					'field' => 'form-group row',
+					'field' => '',
 				]
 			],
 			'short' => [
@@ -62,7 +62,7 @@ class ActiveForm extends Bs5ActiveForm
 					'wrapper' => ['col-sm-4 col-12'],
 					'error' => '',
 					'hint' => '',
-					'field' => 'form-group row',
+					'field' => '',
 				]
 			],
 		],
@@ -75,7 +75,7 @@ class ActiveForm extends Bs5ActiveForm
 					'wrapper' => ['col-md-9 col-12'],
 					'error' => '',
 					'hint' => '',
-					'field' => 'form-group row',
+					'field' => '',
 				]
 			],
 			'large' => [
@@ -85,7 +85,7 @@ class ActiveForm extends Bs5ActiveForm
 					'wrapper' => ['col-md-9 col-12'],
 					'error' => '',
 					'hint' => '',
-					'field' => 'form-group row',
+					'field' => '',
 				]
 			],
 			'medium' => [
@@ -95,7 +95,7 @@ class ActiveForm extends Bs5ActiveForm
 					'wrapper' => ['col-lg-5 col-md-6 col-sm-7 col-8'],
 					'error' => '',
 					'hint' => '',
-					'field' => 'form-group row',
+					'field' => '',
 				]
 			],
 			'short' => [
@@ -105,7 +105,7 @@ class ActiveForm extends Bs5ActiveForm
 					'wrapper' => ['col-md-6 col-12'],
 					'error' => '',
 					'hint' => '',
-					'field' => 'form-group row',
+					'field' => '',
 				]
 			],
 		],
@@ -118,7 +118,7 @@ class ActiveForm extends Bs5ActiveForm
 					'wrapper' => ['col-12'],
 					'error' => '',
 					'hint' => '',
-					'field' => 'form-group row',
+					'field' => '',
 				]
 			],
 			'large' => [
@@ -128,7 +128,7 @@ class ActiveForm extends Bs5ActiveForm
 					'wrapper' => ['col-md-9 col-12'],
 					'error' => '',
 					'hint' => '',
-					'field' => 'form-group row',
+					'field' => '',
 				]
 			],
 			'medium' => [
@@ -138,7 +138,7 @@ class ActiveForm extends Bs5ActiveForm
 					'wrapper' => ['col-lg-5 col-md-6 col-12'],
 					'error' => '',
 					'hint' => '',
-					'field' => 'form-group row',
+					'field' => '',
 				]
 			],
 			'short' => [
@@ -148,7 +148,7 @@ class ActiveForm extends Bs5ActiveForm
 					'wrapper' => ['col-lg-5 col-md-6 col-12'],
 					'error' => '',
 					'hint' => '',
-					'field' => 'form-group row',
+					'field' => '',
 				]
 			],
 		],
@@ -161,7 +161,7 @@ class ActiveForm extends Bs5ActiveForm
 					'wrapper' => ['col-12'],
 					'error' => '',
 					'hint' => '',
-					'field' => 'form-group row',
+					'field' => '',
 				]
 			],
 			'large' => [
@@ -171,7 +171,7 @@ class ActiveForm extends Bs5ActiveForm
 					'wrapper' => ['col-12'],
 					'error' => '',
 					'hint' => '',
-					'field' => 'form-group row',
+					'field' => '',
 				]
 			],
 			'medium' => [
@@ -181,7 +181,7 @@ class ActiveForm extends Bs5ActiveForm
 					'wrapper' => ['col-12'],
 					'error' => '',
 					'hint' => '',
-					'field' => 'form-group row',
+					'field' => '',
 				],
 			],
 			'short' => [
@@ -191,7 +191,7 @@ class ActiveForm extends Bs5ActiveForm
 					'wrapper' => ['col-12'],
 					'error' => '',
 					'hint' => '',
-					'field' => 'form-group row',
+					'field' => '',
 				]
 			]
 		],
@@ -202,30 +202,9 @@ class ActiveForm extends Bs5ActiveForm
 				'wrapper' => ['col-12'],
 				'error' => '',
 				'hint' => '',
-				'field' => 'form-group row',
+				'field' => '',
 			]
 		]
 	];
-
-	public function columnClasses(int $cols): string
-	{
-		switch ($cols) {
-			case 1:
-				return "col col-12";
-			case 2:
-				$col = $col_sm = 12;
-				$col_md = $col_lg = $col_xl = 6;
-				break;
-			case 3:
-				$col = $col_sm = 4;
-				$col_md = $col_lg = $col_xl = 4;
-				break;
-			case 4:
-			default:
-				$col = $col_sm = 3;
-				$col_md = $col_lg = $col_xl = 3;
-		}
-		return "col col-$col col-sm-$col_sm col-md-$col_md col-lg-$col_lg col-xl-$col_xl";
-	}
 
 }

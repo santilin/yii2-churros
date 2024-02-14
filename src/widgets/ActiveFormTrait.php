@@ -103,6 +103,4 @@ trait ActiveFormTrait
 		}
 	}
 
-
-
 } // form

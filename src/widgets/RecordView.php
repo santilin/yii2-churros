@@ -207,7 +207,7 @@ html;
                 $attribute['label'] = false;
             }
             $contentOptions = AppHelper::mergeAndConcat( ['class', 'style'],
-                [ 'class' => 'form-control-plaintext' ],
+                [ 'class' => "field" ],
 				$contentOptions,
 				$attribute['contentOptions']??[]);
 			switch( $attribute['format'] ) {
