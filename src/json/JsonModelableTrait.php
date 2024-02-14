@@ -14,10 +14,10 @@ trait JsonModelableTrait
 		if ($this->_json_root === false) {
 			$this->_json_root = $this->createJsonRoot();
 		}
+		if (AppHelper::lastWord($path, '/') == $id) {
+			$path = AppHelper::removeLastWord($path, '/');
+		}
 		if ($locator && $id) {
-			if (AppHelper::lastWord($path, '/') == $id) {
-				$path = AppHelper::removeLastWord($path, '/');
-			}
 			$ret = $this->_json_root->getJsonObjects('$' . str_replace('/','.',$path)
 				. "[?(@.$locator=='$id')]");
 			if (is_array($ret) && isset($ret[0])) {

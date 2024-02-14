@@ -136,7 +136,7 @@ class WidgetLayer
  									$fs .= "</div><!--row-->\n";
  								}
 // 								Html::removeCssClass($widget->options, 'row');
- 								Html::addCssClass($widget_options, "layout-$layout_of_row");
+ 								Html::addCssClass($widget->options, "layout-$layout_of_row");
  								$fs .= '<div class=row>';
 							}
 							$col_classes = $this->columnClasses($widget_layout == 'full' ? 1 : $cols);
