@@ -113,6 +113,9 @@ class WidgetLayer
                 if ($only_widget_names) {
                     $layout_row = ['type' => $type, 'content' => $layout_row];
                 }
+                if (!isset($layout_row['style'])) {
+					$layout_row['style'] = $parent_style;
+				}
                 foreach ($layout_row['content'] as $widget_name => $widget ) {
 					if (!is_array($widget)) {
 						$widget_name = $widget;
@@ -122,12 +125,7 @@ class WidgetLayer
 					$add_row = false;
 					if ($widget = $this->widgets[$widget_name]??false) {
 						// forms
-						if ($widget instanceof \yii\bootstrap4\ActiveField ||
-							$widget instanceof \yii\bootstrap5\ActiveField ) {
-							// ActiveFields add a row container over the whole field
-							if ($widget instanceof \yii\bootstrap4\ActiveField) {
-								$add_row = true;
-							}
+						if ($widget instanceof \yii\bootstrap4\ActiveField) {
 							if ($widget->horizontalCssClasses['layout']??false) {
 								$widget_layout = ArrayHelper::remove($widget->horizontalCssClasses, 'layout');
 							} else {
@@ -144,8 +142,41 @@ class WidgetLayer
  								$fs .= '<div class="row w-100">';
 							}
 							$col_classes = $this->columnClasses($widget_layout == 'full' ? 1 : $cols);
-						} else {
-							$add_row = true;
+							if ($col_classes) {
+								$fs .=  "<div class=\"$col_classes\">";
+							}
+							$fs .= $this->layoutOneWidget($widget_name, $widget, $layout_row, $widget_layout, $layout_of_row, [], $indexf++);
+							if ($col_classes) {
+								$fs .= '</div>';
+							}
+						} else if ($widget instanceof \yii\bootstrap5\ActiveField ) {
+							// bs5 ActiveFields add a row container over the whole field
+							if ($widget->horizontalCssClasses['layout']??false) {
+								$widget_layout = ArrayHelper::remove($widget->horizontalCssClasses, 'layout');
+							} else {
+								$widget_layout = $widget->layout??'large';
+							}
+							if ($widget_layout == 'full' && $nf != 0) {
+								while ($nf++%$cols != 0);
+							}
+ 							if( ($nf%$cols) == 0) {
+ 								if( $nf != 0 ) {
+ 									$fs .= "</div><!--row-->\n";
+ 								}
+ 								Html::addCssClass($widget->options, "layout-$layout_of_row");
+ 								$fs .= '<div class="row w-100">';
+							}
+							$col_classes = $this->columnClasses($widget_layout == 'full' ? 1 : $cols);
+							if ($col_classes) {
+								$fs .=  "<div class=\"$col_classes\">";
+							}
+							$fs .= "<div class=\"row w-100\">";
+							$fs .= $this->layoutOneWidget($widget_name, $widget, $layout_row, $widget_layout, $layout_of_row, [], $indexf++);
+							$fs .= "</div>";
+							if ($col_classes) {
+								$fs .= '</div>';
+							}
+						} else { // no activefield
 							// We must add a row like ActiveFields
 							$widget_layout = $widget['layout']??'large';
 							$widget_options = $widget['htmlOptions']??['class' => 'row'];
@@ -163,56 +194,15 @@ class WidgetLayer
 								Html::addCssClass($widget_options, "layout-$layout_of_row");
 								$fs .= '<div ' . Html::renderTagAttributes($widget_options) . '>';
 							}
-						}
-						if ($add_row) {
+							if ($col_classes) {
+								$fs .=  "<div class=\"$col_classes\">";
+							}
 							$fs .= "<div class=\"row w-100\">";
-						}
-						if ($col_classes) {
-							$fs .=  "<div class=\"$col_classes\">";
-						}
-                        $row_style = $layout_row['style']??$parent_style;
-                        switch ($row_style) {
-                            case 'grid':
-                            case 'grid-nolabels':
-                                if ('static' == $widget_layout) {
-                                    $classes = $this->widget_layout_horiz_config['static']['horizontalCssClasses'];
-                                } else if ($layout_of_row == 'inline') {
-									$classes = [];
-								} else {
-                                    $classes = $this->widget_layout_horiz_config[$layout_of_row][$widget_layout]['horizontalCssClasses'];
-                                }
-                                if ($row_style == 'grid-nolabels') {
-									$widget_options['label'] = false;
-                                } else {
-									$widget_options['label']['class'] = implode(' ', $classes['label']) . " fld-$widget_name";
-								}
-								$widget_options['wrapper']['class'] = implode(' ', $classes['wrapper']) . ' widget-container';
-								$widget_options['horizontalCssClasses'] = $classes;
-								if ($this->widget_painter) {
-									$fs .= call_user_func($this->widget_painter, $widget, $widget_options, $indexf++);
-								} else {
-									$fs .= $widget->__toString();
-								}
-                                break;
-                            case 'grid-cards':
-                                $ro = ['class' => "card border-primary my-3 w-100"];
-                                $lo = ['class' => "card-header fld-$widget_name"];
-                                $fs .= '<div' . Html::renderTagAttributes($ro) . '>';
-								if ($this->widget_painter) {
-									$fs .= call_user_func($this->widget_painter, $widget, ['label' => $lo, 'wrapper' => [ 'class' => "card-text fld-$widget_name" ]], $indexf++);
-								} else {
-									$fs .= $widget->__toString();
-								}
-                                $fs .= "</div><!--$widget_name-->";
-                                break;
-							default:
-								throw new InvalidConfigException($row_style . ": invalid style");
-                        }
-						if ($add_row) {
+							$fs .= $this->layoutOneWidget($widget_name, $widget, $layout_row, $widget_layout, $layout_of_row, $widget_options, $indexf++);
 							$fs .= "</div>";
-						}
-						if ($col_classes) {
-							$fs .= '</div>';
+							if ($col_classes) {
+								$fs .= '</div>';
+							}
 						}
 						$nf++;
                     // } else {
@@ -254,6 +244,53 @@ class WidgetLayer
 		}
 		return $ret;
 	}
+
+
+	protected function layoutOneWidget(string $widget_name, $widget, array $layout_row,
+		string $widget_layout, string $layout_of_row, array $widget_options, int $indexf): string
+	{
+		$fs = '';
+		$row_style = $layout_row['style'];
+		switch ($row_style) {
+			case 'grid':
+			case 'grid-nolabels':
+				if ('static' == $widget_layout) {
+					$classes = $this->widget_layout_horiz_config['static']['horizontalCssClasses'];
+				} else if ($layout_of_row == 'inline') {
+					$classes = [];
+				} else {
+					$classes = $this->widget_layout_horiz_config[$layout_of_row][$widget_layout]['horizontalCssClasses'];
+				}
+				if ($row_style == 'grid-nolabels') {
+					$widget_options['label'] = false;
+				} else {
+					$widget_options['label']['class'] = implode(' ', $classes['label']) . " fld-$widget_name";
+				}
+				$widget_options['wrapper']['class'] = implode(' ', $classes['wrapper']) . ' widget-container';
+				$widget_options['horizontalCssClasses'] = $classes;
+				if ($this->widget_painter) {
+					$fs .= call_user_func($this->widget_painter, $widget, $widget_options, $indexf++);
+				} else {
+					$fs .= $widget->__toString();
+				}
+				break;
+			case 'grid-cards':
+				$ro = ['class' => "card border-primary my-3 w-100"];
+				$lo = ['class' => "card-header fld-$widget_name"];
+				$fs .= '<div' . Html::renderTagAttributes($ro) . '>';
+				if ($this->widget_painter) {
+					$fs .= call_user_func($this->widget_painter, $widget, ['label' => $lo, 'wrapper' => [ 'class' => "card-text fld-$widget_name" ]], $indexf++);
+				} else {
+					$fs .= $widget->__toString();
+				}
+				$fs .= "</div><!--$widget_name-->";
+				break;
+			default:
+				throw new InvalidConfigException($row_style . ": invalid style");
+		}
+		return $fs;
+	}
+
 
 	protected function layoutContent(?string $label, string $content, array $options = []):string
 	{
