@@ -58,49 +58,4 @@ trait ActiveFormTrait
 		return $widget->render();
 	}
 
-	public function fixFieldsLayout(array &$fields_cfg, array $render_fields, array $buttons = []): void
-	{
-		return;
-		$form_layout = $this->layout;
-		switch ($form_layout) {
-			case 'inline':
-				break;
-			case 'horizontal':
-				if (empty($this->fieldsLayout)) {
-					$form_layout = '1col';
-				} else if (is_string($this->fieldsLayout)) {
-					$form_layout = $this->fieldsLayout;
-					$this->fieldsLayout = null;
-				}
-				break;
-			default:
-				$this->layout = 'horizontal';
-				break;
-		}
-		if (empty($this->fieldsLayout)) {
-			$this->fieldsLayout = [];
-			$this->fieldsLayout[] = [
-				'type' => 'fields',
-				'fields' => $render_fields,
-				'layout' => $form_layout,
-			];
-			$this->fieldsLayout[] = [
-				'type' => 'buttons',
-				'buttons' => $buttons,
-				'layout' => $form_layout,
-			];
-			if ($this->layout != 'inline') {
-				$this->addLayoutClasses($fields_cfg, $this->fieldsLayout);
-			}
-		} else {
-			$this->addLayoutClasses($fields_cfg, $this->fieldsLayout);
-		}
-		// check there are no render_fields with incorrect settings
-		foreach ($fields_cfg as $kf => $fldcfg_info) {
-			if (isset($fields_cfg[$kf]['layout'])) {
-				unset($fields_cfg[$kf]['layout']);
-			}
-		}
-	}
-
 } // form
