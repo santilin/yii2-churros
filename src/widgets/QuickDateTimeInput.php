@@ -48,42 +48,48 @@ class QuickDateTimeInput extends MaskedInput
 		if (!$this->datetype) {
 			$this->datetype = DateTimeEx::guessTypeFromFormat($this->format);
 		}
+		if ($this->errorMessage == null) {
+			switch ($this->datetype) {
+			case 'date':
+				$this->errorMessage = Yii::t('churros', "La fecha no es válida");
+				break;
+			case 'datetime':
+				$this->errorMessage = Yii::t('churros', "La fecha/hora no es válida");
+				break;
+			case 'time':
+				$this->errorMessage = Yii::t('churros', "La hora no es válida");
+				break;
+			default:
+				throw new InvalidConfigException("invalid datetype: $this->datetype");
+			}
+		}
 		if (!$this->saveFormat) {
 			$dcm = \Yii::$app->getModule('datecontrol');
 			switch ($this->datetype) {
-				case 'date':
-					if ($dcm) {
-						$this->saveFormat = $dcm->getSaveFormat('date');
-					}
-					if (!$this->saveFormat) {
-						$this->saveFormat = DateTimeEx::DATETIME_DATE_SQL_FORMAT;
-					}
-					if ($this->errorMessage == null) {
-						$this->errorMessage = Yii::t('churros', "La fecha no es válida");
-					}
-					break;
-				case 'datetime':
-					if ($dcm) {
-						$this->saveFormat = $dcm->getSaveFormat('datetime');
-					}
-					if (!$this->saveFormat) {
-						$this->saveFormat = DateTimeEx::DATETIME_DATETIME_SQL_FORMAT;
-					}
-					if ($this->errorMessage == null) {
-						$this->errorMessage = Yii::t('churros', "La fecha/hora no es válida");
-					}
-					break;
-				case 'time':
-					if ($dcm) {
-						$this->saveFormat = $dcm->getSaveFormat('date');
-					}
-					if (!$this->saveFormat) {
-						$this->saveFormat = DateTimeEx::DATETIME_TIME_SQL_FORMAT;
-					}
-					if ($this->errorMessage == null) {
-						$this->errorMessage = Yii::t('churros', "La hora no es válida");
-					}
-					break;
+			case 'date':
+				if ($dcm) {
+					$this->saveFormat = $dcm->getSaveFormat('date');
+				}
+				if (!$this->saveFormat) {
+					$this->saveFormat = DateTimeEx::DATETIME_DATE_SQL_FORMAT;
+				}
+				break;
+			case 'datetime':
+				if ($dcm) {
+					$this->saveFormat = $dcm->getSaveFormat('datetime');
+				}
+				if (!$this->saveFormat) {
+					$this->saveFormat = DateTimeEx::DATETIME_DATETIME_SQL_FORMAT;
+				}
+				break;
+			case 'time':
+				if ($dcm) {
+					$this->saveFormat = $dcm->getSaveFormat('date');
+				}
+				if (!$this->saveFormat) {
+					$this->saveFormat = DateTimeEx::DATETIME_TIME_SQL_FORMAT;
+				}
+				break;
 			}
 		}
         ChurrosAsset::register($this->view);
