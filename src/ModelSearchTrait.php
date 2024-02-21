@@ -31,9 +31,11 @@ trait ModelSearchTrait
 
 	public function __set($name, $value)
 	{
-		if ($this->hasAttribute($name) || property_exists($this,$name) ) {
+		if (property_exists($this,$name)) {
 			$this->$name = $value;
-		} else if( array_key_exists($name, $this->related_properties) ) {
+		} else if ($this->hasAttribute($name)) {
+			$this->setAttribute($name, $value);
+		} else if (array_key_exists($name, $this->related_properties)) {
 			$this->related_properties[$name] = $value;
 		}
 	}
