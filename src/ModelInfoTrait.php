@@ -104,6 +104,9 @@ trait ModelInfoTrait
 			$_format = self::getModelInfo('record_desc_format_medium');
 		} elseif( $format == 'long' ) {
 			$_format = self::getModelInfo('record_desc_format_long');
+		} elseif( $format == 'desc' ) {
+			$fields = static::findDescFields();
+			$_format = '{' . implode('}, {',array_filter($fields)) . '}';
 		} elseif( $format == 'code&desc' ) {
 			$fields = static::findCodeAndDescFields();
 			$_format = '{' . implode('}, {',array_filter($fields)) . '}';
@@ -447,6 +450,19 @@ trait ModelInfoTrait
 			$relmodelname = static::$relations[$relname]['modelClass'];
 			$relmodel = $relmodelname::instance();
 			return $relmodel::findCodeAndDescFields();
+		} else {
+			return [];
+		}
+	}
+
+	static public function findDescFields(string $relname = null): array
+	{
+		if( $relname == null ) {
+			return array_filter(explode(',',static::getModelInfo('desc_field')));
+		} else if (isset(static::$relations[$relname])) {
+			$relmodelname = static::$relations[$relname]['modelClass'];
+			$relmodel = $relmodelname::instance();
+			return $relmodel::findDescFields();
 		} else {
 			return [];
 		}

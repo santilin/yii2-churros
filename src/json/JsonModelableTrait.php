@@ -22,16 +22,20 @@ trait JsonModelableTrait
 				. "[?(@.$locator=='$id')]");
 			if (is_array($ret) && isset($ret[0])) {
 				return $ret[0];
-			} else {
-				return null;
 			}
+		}
+		if ($id) {
+			$ret = $this->_json_root->getJsonObjects('$' . str_replace('/','.',$path)
+				. "[?(@=='$id')]");
+			if ($ret && $ret[0]) {
+				return $ret[0];
+			}
+		}
+		$ret = $this->_json_root->getJsonObjects('$' . str_replace('/','.',$path) . ($id?('.' . $id):''));
+		if ($ret) {
+			return $ret;
 		} else {
-			$ret = $this->_json_root->getJsonObjects('$' . str_replace('/','.',$path) . ($id?('.' . $id):''));
-			if ($ret) {
-				return $ret;
-			} else {
-				return null;
-			}
+			return null;
 		}
 	}
 

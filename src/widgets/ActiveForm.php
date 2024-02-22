@@ -205,7 +205,18 @@ class ActiveForm extends Bs4ActiveForm
 					'hint' => '',
 					'field' => 'form-group',
 				]
-			]
+			],
+			'checkbox' => [
+				'horizontalCssClasses' =>[
+					'offset' => 'offset-0',
+					'label' => ['offset-0 col-12', 'custom-control-label text-left'],
+					'wrapper' => ['col-sm-10 col-12'],
+					'error' => '',
+					'hint' => '',
+					'field' => 'form-group',
+				]
+			],
+
 		],
 		'static' => [
 			'horizontalCssClasses' => [
