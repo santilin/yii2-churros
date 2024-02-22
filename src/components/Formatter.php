@@ -9,6 +9,11 @@ use santilin\churros\components\Taxonomy;
 /* https://www.yiiframework.com/doc/api/2.0/yii-i18n-formatter */
 class Formatter extends \yii\i18n\Formatter
 {
+	public function asJson($json)
+	{
+		return json_encode($json, JSON_PRETTY_PRINT);
+	}
+
 	public function asTruncatedText($text)
 	{
 		return trim(substr($text, 0, 100)) . "&hellip;";
