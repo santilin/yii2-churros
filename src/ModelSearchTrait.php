@@ -71,7 +71,7 @@ trait ModelSearchTrait
 				$table_alias = "as_$relation_name";
 				// Activequery removes duplicate joins
 				$provider->query->joinWith("$relation_name $table_alias");
-				$provider->query->distinct(); // Evitar duplicidades debido a las relaciones hasmany
+// 				$provider->query->distinct(); // Evitar duplicidades debido a las relaciones hasmany
 				if (!isset($provider->sort->attributes[$attribute])) {
 					$related_model_search_class = self::$relations[$relation_name]['searchClass']
 						?? str_replace('models\\', 'forms\\', $related_model_class) . '_Search';
@@ -100,8 +100,13 @@ trait ModelSearchTrait
 							$provider->sort->attributes[$attribute] = $new_related_sort ;
 						}
 					}
+				} else {
+// 					$k = array_key_first($provider->sort->attributes[$attribute]['asc']);
+// 					$v = $provider->sort->attributes[$attribute]['asc'][$k];
+//   					$provider->query->addSelect(['sort_'.str_replace('.','_',$k) => $k]);
 				}
 			}
+// 			$provider->query->addSelect('*');
 		}
     }
 
