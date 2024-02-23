@@ -127,7 +127,7 @@ class DbController extends Controller
      *
      * @param string $schemaName the schema name (optional)
      */
-    public function actionDumpSchema(array $tables = [], string $schemaName = '')
+    public function actionDumpSchema(string $schemaName = '', array $tables = [])
     {
 		if( $this->format != 'seeder' && $this->format != 'fixture' ) {
 			throw new InvalidConfigException("{$this->format}: formato no contemplado. Sólo se contempla 'seeder' y 'fixture'");
