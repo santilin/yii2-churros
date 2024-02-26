@@ -12,7 +12,38 @@ use Yii;
 class AppHelper
 {
 
-	public function removeDirRec(string $path): bool
+	static public function findKeyInArray($array, $key)
+	{
+		foreach ($array as $k => $value) {
+			if ($k === $key) {
+				return true;
+			}
+			if (is_array($value)) {
+				if (findKeyInNestedArray($value, $key)) {
+					return true;
+				}
+			}
+		}
+		return false;
+	}
+
+	static public function findKeyAndValueInArray($array, $key, $value)
+	{
+		foreach ($array as $k => $v) {
+			if ($k === $key && $v === $value) {
+				return true;
+			}
+			if (is_array($value)) {
+				if (findKeyInNestedArray($value, $key, $value)) {
+					return true;
+				}
+			}
+		}
+		return false;
+
+	}
+
+	static public function removeDirRec(string $path): bool
 	{
 		return exec('rm -rf ' . escapeshellarg($path));
 	}

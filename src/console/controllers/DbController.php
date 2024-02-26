@@ -117,6 +117,12 @@ class DbController extends Controller
 				} else {
 					return "'" . strtr($value, ["\\'" => "\\\\", "'" => "\\'"]) . "'";
 				}
+			case 'resource':
+				if( $value == null ) {
+					return "null";
+				} else {
+					return "'" . base64_encode($value) . "'";
+				}
 			default:
 				throw new \Exception( "Type $phptype not supported in Churros/DbController::getPhpValue" );
 		}
@@ -127,25 +133,30 @@ class DbController extends Controller
      *
      * @param string $schemaName the schema name (optional)
      */
-    public function actionDumpSchema(string $schemaName = '', array $tables = [])
+    public function actionDumpSchema(string $schemaName, array $tables = [])
     {
 		if( $this->format != 'seeder' && $this->format != 'fixture' ) {
 			throw new InvalidConfigException("{$this->format}: formato no contemplado. Sólo se contempla 'seeder' y 'fixture'");
 		}
 		if ($this->format == 'seeder') {
-			if (($preamble_schema = $schemaName) == '') {
-				$preamble_schema = $this->db->dsn;
-			}
-			$preamble = $this->getPreamble('dump-schema', $preamble_schema,
+			$preamble = $this->getPreamble('dump-schema', $schemaName,
 				count($tables) ? implode(',', $tables) : 'all-tables');
 			$runseeder = '';
-			$schema_tables = $this->db->schema->getTableSchemas($schemaName, true);
+			$table_names = $this->db->schema->getTableNames($schemaName, true);
+			$table_schemas = [];
+			foreach ($table_names as $table_name) {
+				$table_schema = $this->db->schema->getTableSchema($table_name);
+				if ($table_schema->isTable())  {
+					$table_schemas[] = $table_schema;
+				}
+			}
+			print_r($table_names);die;
 			$full_dump = $preamble;
-			foreach ($schema_tables as $table) {
+			foreach ($table_schemas as $table) {
 				if (!count($tables) || (count($tables) && in_array($table->name, $tables))) {
 					if( $table->name != 'migration' ) {
 						echo "Dumping {$table->name}\n";
-						$full_dump .= $this->dumpTable($table, $schemaName);
+						$full_dump .= $this->dumpTable($schemaName, $table);
 						$runseeder .= "\t\t\$s = new {$table->name}Seeder(); \$s->run(\$db);\n";
 					}
 				}
@@ -181,7 +192,7 @@ EOF;
 				$table_dump = '';
 				if( $table->name != 'migration' ) {
 					echo "Dumping {$table->name}\n";
-					$table_dump .= $this->dumpTable($table, $schemaName);
+					$table_dump .= $this->dumpTable($schemaName, $table);
 				}
 				if ($this->createFile ) {
 					$write_file = true;
@@ -207,7 +218,7 @@ EOF;
      * @param string $tableName the table to be dumped
      * @param string $schemaName the schema the table belongs to
      */
-    public function actionDumpTable(string $tableName, string $where = null, string $schemaName = null)
+    public function actionDumpTable(string $schemaName, string $tableName, string $where = null)
     {
 		if( $schemaName) {
 			$tableName = "$schemaName.$tableName";
@@ -275,13 +286,13 @@ EOF;
 		$s->run($this->db);
 	}
 
-	protected function dumpTable($tableSchema, string $where = null)
+	protected function dumpTable(string $schemaName, $tableSchema, string $where = null)
 	{
 		switch( $this->format ) {
 		case 'seeder':
-			return $this->dumpTableAsSeeder($tableSchema, $where);
+			return $this->dumpTableAsSeeder($schemaName, $tableSchema, $where);
 		case 'fixture':
-			return $this->dumpTableAsFixture($tableSchema, $where);
+			return $this->dumpTableAsFixture($schemaName, $tableSchema, $where);
 		default:
 			throw new InvalidArgumentException("dump-table: $this->format: no contemplado");
 		}
@@ -322,13 +333,14 @@ EOF;
 	}
 
 
-	protected function dumpTableAsSeeder($tableSchema, $where = null): string
+	protected function dumpTableAsSeeder(string $schemaName, $tableSchema, string $where = null): string
     {
 		$txt_data = '';
 		$php_types = [];
 		$columna_names = [];
 		$table_name = $tableSchema->name;
 
+		Yii::$app->db->createCommand("USE $schemaName")->execute();
 		$ret = "\nclass {$table_name}Seeder {\n";
 		$ret .= "\n";
 		$ret .= "\t/* columns */\n";
@@ -405,7 +417,7 @@ EOF;
 
 /**
  * Churros v $version
- * ./yii churros/db/$command --format {$this->format} $table $schema
+ * ./yii churros/db/$command --format {$this->format} $schema $table
  * Schema: $schema
  * Timestamp: $timestamp
  */
