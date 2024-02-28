@@ -142,15 +142,15 @@ class DbController extends Controller
 			$preamble = $this->getPreamble('dump-schema', $schemaName,
 				count($tables) ? implode(',', $tables) : 'all-tables');
 			$runseeder = '';
-			$table_names = $this->db->schema->getTableNames($schemaName, true);
-			$table_schemas = [];
-			foreach ($table_names as $table_name) {
-				$table_schema = $this->db->schema->getTableSchema($table_name);
-				if ($table_schema->isTable())  {
-					$table_schemas[] = $table_schema;
-				}
-			}
-			print_r($table_names);die;
+			$table_schemas = $this->db->schema->getTableSchemas($schemaName, true);
+			// $table_schemas = [];
+			// foreach ($table_names as $table_name) {
+			// 	$table_schema = $this->db->schema->getTableSchema($table_name);
+			// 	if ($table_schema->isTable())  {
+			// 		$table_schemas[] = $table_schema;
+			// 	}
+			// }
+			// print_r($table_names);die;
 			$full_dump = $preamble;
 			foreach ($table_schemas as $table) {
 				if (!count($tables) || (count($tables) && in_array($table->name, $tables))) {
