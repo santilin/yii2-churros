@@ -143,6 +143,7 @@ class CrudController extends \yii\web\Controller
 		$model = $this->findModel($id, $params);
 		$params['permissions'] = FormHelper::resolvePermissions($params['permissions']??[], $this->crudActions);
 		if (Yii::$app->request->getIsAjax()) {
+			$this->layout = 'empty';
 			return $this->render('_view', [
 				'model' => $model,
 				'viewForms' => [ '_view' => [ '', null, [], '' ] ],
