@@ -79,11 +79,11 @@ class FormHelper
 				}
 			}
 		} else {
-			if( isset($views[$_nv])	) {
-				return [ $_nv, $views[$_nv][0], $views[$_nv][1], $views[$_nv][2]??[], $views[$_nv][3]??''];
+			if (!isset($views[$_nv])) {
+				throw new InvalidConfigException("$_nv: view not found");
 			}
+			return [ $_nv, $views[$_nv][0], $views[$_nv][1], $views[$_nv][2]??[], $views[$_nv][3]??''];
 		}
-		return array_slice($views, 0, 1);
 	}
 
 	public static function setConfig(string $form_name, string $name, $value)
