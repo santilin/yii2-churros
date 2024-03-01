@@ -33,8 +33,8 @@ class AppHelper
 			if ($k === $key && $v === $value) {
 				return true;
 			}
-			if (is_array($value)) {
-				if (findKeyInNestedArray($value, $key, $value)) {
+			if (is_array($v)) {
+				if (self::findKeyAndValueInArray($v, $key, $value)) {
 					return true;
 				}
 			}

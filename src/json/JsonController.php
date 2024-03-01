@@ -548,6 +548,7 @@ class JsonController extends \yii\web\Controller
 	{
 		$breadcrumbs = [];
 		$master = $this->getMasterModel();
+		$path_parts = explode('/',$model->getPath());
 		if ($master) {
 			$prefix = $this->getBaseRoute() . '/' . $master->controllerName(). '/';
 			$breadcrumbs[] = [
@@ -555,10 +556,12 @@ class JsonController extends \yii\web\Controller
 				'url' => [ $prefix . 'index']
 			];
 			$keys = $master->getPrimaryKey(true);
-			$keys[0] = $prefix . 'jsedit';
+			$keys[0] = $prefix;
+			$master_keys = $keys;
+			$master_keys[0] .= 'jsedit';
 			$breadcrumbs[] = [
 				'label' => $master->recordDesc('short', 25),
-				'url' => $keys
+				'url' => $master_keys
 			];
 		} else {
 			if (FormHelper::hasPermission($permissions, 'index') && $action_id != 'index') {
@@ -572,13 +575,12 @@ class JsonController extends \yii\web\Controller
 				];
 			}
 		}
-		$path_parts = explode('/',$model->getPath());
 		$partial_path = Url::to($keys) . '/';
 		for ($p=1; $p<count($path_parts)-1; $p++) {
 			$partial_path .= $path_parts[$p] . '/';
 			$breadcrumbs[] = [
 				'label' => $path_parts[$p],
- 				'url' => $partial_path
+ 				'url' => $partial_path . ( ($p%2)? 'index' : 'view')
 			];
 		}
  		if ($action_id != 'index' && $action_id != 'create') {
