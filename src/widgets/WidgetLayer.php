@@ -116,14 +116,15 @@ class WidgetLayer
                 if (!isset($layout_row['style'])) {
 					$layout_row['style'] = $parent_style;
 				}
+				$has_widgets = false;
                 foreach ($layout_row['content'] as $widget_name => $widget ) {
 					if (!is_array($widget)) {
 						$widget_name = $widget;
 					} else {
 						throw new \Exception('e');
 					}
-					$add_row = false;
 					if ($widget = $this->widgets[$widget_name]??false) {
+						$has_widgets = true;
 						// forms
 						if ($widget instanceof \yii\bootstrap4\ActiveField) {
 							if ($widget->horizontalCssClasses['layout']??false) {
@@ -209,7 +210,9 @@ class WidgetLayer
                     //     throw new InvalidConfigException($widget . ": 'widgets' not found in row layout");
                     }
                 }
- 				$fs .= '</div><!--row-->';
+                if ($has_widgets) {
+					$fs .= '</div><!--row-->';
+				}
 				if( isset($layout_row['title']) && $type == 'widgetset' ) {
 					$legend = Html::tag('legend', $layout_row['title'], $layout_row['title_options']??[]);
 					$ret .= Html::tag('widgetset', $legend . $fs, array_merge( ['id' => $this->options['id'] . "_layout_$lrk" ], $layout_row['options']??[]) );
