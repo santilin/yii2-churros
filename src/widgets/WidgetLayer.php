@@ -180,7 +180,7 @@ class WidgetLayer
 						} else { // no activefield
 							// We must add a row like ActiveFields
 							$widget_layout = $widget['layout']??'large';
-							$widget_options = $widget['htmlOptions']??['class' => 'w-100'];
+							$widget_options = $widget['htmlOptions']??['class' => 'row w-100'];
 							$col_classes = $this->columnClasses($widget_layout == 'full' ? 1 : $cols);
  							if ($col_classes == 'col-12') {
  								$col_classes = null;
@@ -198,7 +198,7 @@ class WidgetLayer
 							if ($col_classes) {
 								$fs .=  "<div class=\"$col_classes\">";
 							}
-							$fs .= "<div class=\"row\">";
+							$fs .= "<div class=\"row w-100\">";
 							$fs .= $this->layoutOneWidget($widget_name, $widget, $layout_row, $widget_layout, $layout_of_row, $widget_options, $indexf++);
 							$fs .= "</div>";
 							if ($col_classes) {

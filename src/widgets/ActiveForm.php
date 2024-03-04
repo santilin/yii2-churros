@@ -118,6 +118,16 @@ class ActiveForm extends Bs4ActiveForm
 					'field' => 'form-group',
 				]
 			],
+			'checkbox' => [
+				'horizontalCssClasses' =>[
+					'offset' => 'offset-md-2 offset-3',
+					'label' => ['offset-md-2 offset-3 col-md-10 col-12', 'custom-control-label text-left'],
+					'wrapper' => ['col-sm-10 col-12'],
+					'error' => '',
+					'hint' => '',
+					'field' => 'form-group',
+				]
+			],
 		],
 
 		'3cols' => [
@@ -158,6 +168,16 @@ class ActiveForm extends Bs4ActiveForm
 					'label' => ['col-md-3 col-12',
 								'col-form-label text-left text-md-right'],
 					'wrapper' => ['col-lg-5 col-md-6 col-12'],
+					'error' => '',
+					'hint' => '',
+					'field' => 'form-group',
+				]
+			],
+			'checkbox' => [
+				'horizontalCssClasses' =>[
+					'offset' => 'offset-md-2 offset-3',
+					'label' => ['offset-md-2 offset-3 col-md-10 col-12', 'custom-control-label text-left'],
+					'wrapper' => ['col-sm-10 col-12'],
 					'error' => '',
 					'hint' => '',
 					'field' => 'form-group',
