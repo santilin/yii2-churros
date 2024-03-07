@@ -180,7 +180,7 @@ class WidgetLayer
 						} else { // no activefield
 							// We must add a row like ActiveFields
 							$widget_layout = $widget['layout']??'large';
-							$widget_options = $widget['htmlOptions']??['class' => 'row w-100'];
+							$widget_options = $widget['htmlOptions']??['class' => 'row'];
 							$col_classes = $this->columnClasses($widget_layout == 'full' ? 1 : $cols);
  							if ($col_classes == 'col-12') {
  								$col_classes = null;
@@ -198,9 +198,9 @@ class WidgetLayer
 							if ($col_classes) {
 								$fs .=  "<div class=\"$col_classes\">";
 							}
-							$fs .= "<div class=\"row w-100\">";
+ 							$fs .= "<div class=\"w-100\">";
 							$fs .= $this->layoutOneWidget($widget_name, $widget, $layout_row, $widget_layout, $layout_of_row, $widget_options, $indexf++);
-							$fs .= "</div>";
+ 							$fs .= "</div>";
 							if ($col_classes) {
 								$fs .= '</div>';
 							}
@@ -242,6 +242,13 @@ class WidgetLayer
 				break;
 			case 'subtitle':
 				$ret .= $this->layoutContent(null, $layout_row['title'], $layout_row['options']??[]);
+				break;
+			case 'html':
+				$ret .= '<div class=row>';
+					$ret .= '<div class="' . $this->columnClasses($cols) . '">';
+					$ret .= $layout_row['content'];
+					$ret .= "</div>\n";
+				$ret .= '</div>';
 				break;
 			}
 		}
