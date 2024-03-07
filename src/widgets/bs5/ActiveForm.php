@@ -38,8 +38,8 @@ class ActiveForm extends Bs5ActiveForm
 			'large' => [
 				'horizontalCssClasses' =>[
 					'offset' => 'offset-2',
-					'label' => ['col-md-2 col-12', 'col-form-label text-left text-md-right'],
-					'wrapper' => ['col-md-10 col-12'],
+					'label' => ['col-md-3 col-12', 'col-form-label text-nowrap text-left text-md-right'],
+					'wrapper' => ['col-md-9 col-12'],
 					'error' => '',
 					'hint' => '',
 					'field' => '',
@@ -48,8 +48,8 @@ class ActiveForm extends Bs5ActiveForm
 			'medium' => [
 				'horizontalCssClasses' =>[
 					'offset' => 'offset-md-2 offset-3',
-					'label' => ['col-md-2 col-12', 'col-form-label text-left text-md-right'],
-					'wrapper' => ['col-md-10 col-12'],
+					'label' => ['col-md-3 col-12', 'col-form-label text-nowrap  text-left text-md-right'],
+					'wrapper' => ['col-md-9 col-12'],
 					'error' => '',
 					'hint' => '',
 					'field' => '',

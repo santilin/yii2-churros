@@ -245,10 +245,15 @@ class WidgetLayer
 				break;
 			case 'html':
 				$ret .= '<div class=row>';
-					$ret .= '<div class="' . $this->columnClasses($cols) . '">';
-					$ret .= $layout_row['content'];
-					$ret .= "</div>\n";
+				$label = ArrayHelper::remove($layout_row, 'label', null);
+				$ret .= '<div class="' . $this->columnClasses($cols) . '">';
+				$classes = $this->widget_layout_horiz_config[$layout_of_row??'1col']['large']['horizontalCssClasses'];
+				if ($label) {
+					$ret .= Html::tag('label', $label, [ 'class' => implode(' ', (array)$classes['label'])] );
+				}
+				$ret .= Html::tag('div', $layout_row['content'], $classes['wrapper']);
 				$ret .= '</div>';
+				$ret .= "</div>\n";
 				break;
 			}
 		}
@@ -334,16 +339,16 @@ html;
 	public function columnClasses(int $cols): string
 	{
 		switch ($cols) {
-			case 1:
-				return "col-12";
 			case 2:
 				return "col-12 col-md-6";
 				break;
 			case 3:
-				return "col-4";
+				return "col-12 col-lg-6 col-xl-4";
 			case 4:
+				return "col-12 col-md-3";
+			case 1:
 			default:
-				return "col-3";
+				return "col-12";
 		}
 	}
 
