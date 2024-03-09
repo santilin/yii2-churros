@@ -58,8 +58,8 @@ class ActiveForm extends Bs5ActiveForm
 			'short' => [
 				'horizontalCssClasses' =>[
 					'offset' => 'offset-md-2 offset-3',
-					'label' => ['col-sm-2 col-12', 'col-form-label text-left text-md-right'],
-					'wrapper' => ['col-sm-4 col-12'],
+					'label' => ['col-md-3 col-12', 'col-form-label text-left text-md-right'],
+					'wrapper' => ['col-lg-2 col-md-3 col-sm-2 col-12'],
 					'error' => '',
 					'hint' => '',
 					'field' => '',
@@ -71,8 +71,8 @@ class ActiveForm extends Bs5ActiveForm
 			'full' => [
 				'horizontalCssClasses' => [
 					'offset' => 'offset-3',
-					'label' =>  ['col-md-3 col-12', 'col-form-label text-left text-md-right'],
-					'wrapper' => ['col-md-9 col-12'],
+					'label' =>  ['col-12', 'col-form-label text-left text-md-right'],
+					'wrapper' => ['col-12'],
 					'error' => '',
 					'hint' => '',
 					'field' => '',
@@ -89,23 +89,33 @@ class ActiveForm extends Bs5ActiveForm
 				]
 			],
 			'medium' => [
-				'horizontalCssClasses' =>[
-					'offset' => 'offset-md-3 offset-sm-4 offset-12',
-					'label' => ['col-md-3 col-sm-4 col-12', 'col-form-label text-left text-sm-right'],
-					'wrapper' => ['col-lg-5 col-md-6 col-sm-7 col-8'],
+				'horizontalCssClasses' => [
+					'offset' => 'offset-md-2 offset-sm-3',
+					'label' => ['col-lg-3 col-md-6 col-12', 'col-form-label text-left text-md-right'],
+					'wrapper' => ['col-lg-4 col-md-6 col-12'],
 					'error' => '',
 					'hint' => '',
-					'field' => '',
+					'field' => 'form-group',
 				]
 			],
 			'short' => [
 				'horizontalCssClasses' => [
 					'offset' => 'offset-md-2 offset-sm-3',
-					'label' => ['col-lg-3 col-md-6 col-12', 'col-form-label text-left text-md-right'],
-					'wrapper' => ['col-md-6 col-12'],
+					'label' => ['col-lg-3 col-md-4 col-6', 'col-form-label text-left text-md-right'],
+					'wrapper' => ['col-lg-3 col-md-4 col-6'],
 					'error' => '',
 					'hint' => '',
-					'field' => '',
+					'field' => 'form-group',
+				]
+			],
+			'checkbox' => [
+				'horizontalCssClasses' => [
+					'offset' => 'offset-md-2 offset-sm-3',
+					'label' => ['col-lg-3 col-md-4 col-6', 'col-form-label text-left text-md-right'],
+					'wrapper' => ['col-lg-3 col-md-4 col-6'],
+					'error' => '',
+					'hint' => '',
+					'field' => 'form-group',
 				]
 			],
 		],

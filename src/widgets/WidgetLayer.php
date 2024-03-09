@@ -133,7 +133,7 @@ class WidgetLayer
 								$widget_layout = $widget->layout??'large';
 							}
 							if ($widget_layout == 'full' && $nf != 0) {
-								while ($nf++%$cols != 0);
+								while (++$nf%$cols != 0);
 							}
  							if( ($nf%$cols) == 0) {
  								if( $nf != 0 ) {
@@ -158,7 +158,7 @@ class WidgetLayer
 								$widget_layout = $widget->layout??'large';
 							}
 							if ($widget_layout == 'full' && $nf != 0) {
-								while ($nf++%$cols != 0);
+								while (++$nf%$cols != 0);
 							}
  							if( ($nf%$cols) == 0) {
  								if( $nf != 0 ) {
@@ -180,28 +180,31 @@ class WidgetLayer
 						} else { // no activefield
 							// We must add a row like ActiveFields
 							$widget_layout = $widget['layout']??'large';
-							$widget_options = $widget['htmlOptions']??['class' => 'row'];
+							$widget_options = $widget['htmlOptions']??[];
 							$col_classes = $this->columnClasses($widget_layout == 'full' ? 1 : $cols);
- 							if ($col_classes == 'col-12') {
- 								$col_classes = null;
- 							}
 							if ($widget_layout == 'full' && $nf != 0) {
-								while ($nf++%$cols != 0);
+								while (++$nf%$cols != 0);
 							}
 							if( ($nf%$cols) == 0) {
-								if( $nf != 0 ) {
+								if ($nf != 0) {
 									$fs .= "</div><!--row-->\n";
 								}
-								Html::addCssClass($widget_options, "layout-$layout_of_row");
+								Html::addCssClass($widget_options, "row layout-$layout_of_row");
 								$fs .= '<div ' . Html::renderTagAttributes($widget_options) . '>';
 							}
-							if ($col_classes) {
+ 							if ($col_classes == 'col-12') {
+ 								$col_classes = null;
+ 							} else  {
 								$fs .=  "<div class=\"$col_classes\">";
+								if( ($nf%$cols) == 0 && $widget_layout != 'full' ) {
+									$fs .= "<div class=\"row w-100\">";
+								}
 							}
- 							$fs .= "<div class=\"w-100\">";
 							$fs .= $this->layoutOneWidget($widget_name, $widget, $layout_row, $widget_layout, $layout_of_row, $widget_options, $indexf++);
- 							$fs .= "</div>";
 							if ($col_classes) {
+								if( ($nf%$cols) == 0 && $widget_layout != 'full' ) {
+									$fs .= "</div>";
+								}
 								$fs .= '</div>';
 							}
 						}
@@ -280,8 +283,14 @@ class WidgetLayer
 					$widget_options['label'] = false;
 				} else {
 					$widget_options['label']['class'] = implode(' ', $classes['label']) . " fld-$widget_name";
+					if (YII_ENV_DEV) {
+						$widget_options['label']['class'] .= " {$layout_of_row}x$widget_layout";
+					}
 				}
 				$widget_options['wrapper']['class'] = implode(' ', $classes['wrapper']) . ' widget-container';
+				if (YII_ENV_DEV) {
+					$widget_options['wrapper']['class'] .= " {$layout_of_row}x$widget_layout";
+				}
 				$widget_options['horizontalCssClasses'] = $classes;
 				if ($this->widget_painter) {
 					$fs .= call_user_func($this->widget_painter, $widget, $widget_options, $indexf++);
