@@ -132,7 +132,7 @@ trait ControllerTrait
 	}
 
 
-	public function joinMany2ManyModels(string $glue, array $models, bool $make_links = false): string
+	public function joinMany2ManyModels(string $glue, array $models, string $record_format = 'long', bool $make_links = false): string
 	{
 		if( $models == null || count($models)==0 ) {
 			return "";
@@ -146,9 +146,9 @@ trait ControllerTrait
 			if( $model != null ) {
 				if( $make_links ) {
 					$url = $route . strval($model->getPrimaryKey());
-					$attrs[] = "<a href='$url'>" .  $model->recordDesc() . "</a>";
+					$attrs[] = "<a href='$url'>" .  $model->recordDesc($record_format) . "</a>";
 				} else {
-					$attrs[] = $model->recordDesc();
+					$attrs[] = $model->recordDesc($record_format);
 				}
 			}
 		}
