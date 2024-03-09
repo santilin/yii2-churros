@@ -142,17 +142,18 @@ class WidgetLayer
  								Html::addCssClass($widget->options, "layout-$layout_of_row");
  								$fs .= '<div class="row">';
 							}
+							$col_classes = $this->columnClasses($widget_layout == 'full' ? 1 : $cols);
 							if ($col_classes == 'col-12') {
 								$col_classes = null;
 							} else  {
 								$fs .=  "<div class=\"$col_classes\">";
-								if( ($nf%$cols) == 0 && $widget_layout != 'full' ) {
+								if ($widget_layout != 'full' ) {
 									$fs .= "<div class=\"row w-100\">";
 								}
 							}
 							$fs .= $this->layoutOneWidget($widget_name, $widget, $layout_row, $widget_layout, $layout_of_row, [], $indexf++);
 							if ($col_classes) {
-								if( ($nf%$cols) == 0 && $widget_layout != 'full' ) {
+								if ($widget_layout != 'full') {
 									$fs .= "</div>";
 								}
 								$fs .= '</div>';
@@ -174,17 +175,18 @@ class WidgetLayer
  								Html::addCssClass($widget->options, "layout-$layout_of_row");
  								$fs .= '<div class="row">';
 							}
+							$col_classes = $this->columnClasses($widget_layout == 'full' ? 1 : $cols);
  							if ($col_classes == 'col-12') {
  								$col_classes = null;
  							} else  {
 								$fs .=  "<div class=\"$col_classes\">";
-								if( ($nf%$cols) == 0 && $widget_layout != 'full' ) {
+								if ($widget_layout != 'full') {
 									$fs .= "<div class=\"row w-100\">";
 								}
 							}
 							$fs .= $this->layoutOneWidget($widget_name, $widget, $layout_row, $widget_layout, $layout_of_row, [], $indexf++);
 							if ($col_classes) {
-								if( ($nf%$cols) == 0 && $widget_layout != 'full' ) {
+								if ($widget_layout != 'full') {
 									$fs .= "</div>";
 								}
 								$fs .= '</div>';
@@ -193,7 +195,6 @@ class WidgetLayer
 							// We must add a row like ActiveFields
 							$widget_layout = $widget['layout']??'large';
 							$widget_options = $widget['htmlOptions']??[];
-							$col_classes = $this->columnClasses($widget_layout == 'full' ? 1 : $cols);
 							if ($widget_layout == 'full' && $nf != 0) {
 								while (++$nf%$cols != 0);
 							}
@@ -204,17 +205,16 @@ class WidgetLayer
 								Html::addCssClass($widget_options, "row layout-$layout_of_row");
 								$fs .= '<div ' . Html::renderTagAttributes($widget_options) . '>';
 							}
- 							if ($col_classes == 'col-12') {
- 								$col_classes = null;
- 							} else  {
-								$fs .=  "<div class=\"$col_classes\">";
-								if( ($nf%$cols) == 0 && $widget_layout != 'full' ) {
-									$fs .= "<div class=\"row w-100\">";
+							$col_classes = $this->columnClasses($widget_layout == 'full' ? 1 : $cols);
+ 							if ($col_classes) {
+ 								$fs .=  "<div class=\"$col_classes\">";
+								if ($widget_layout != 'full') {
+									$fs .= "<div class=\"w-100\">";
 								}
 							}
 							$fs .= $this->layoutOneWidget($widget_name, $widget, $layout_row, $widget_layout, $layout_of_row, $widget_options, $indexf++);
 							if ($col_classes) {
-								if( ($nf%$cols) == 0 && $widget_layout != 'full' ) {
+								if ($widget_layout != 'full') {
 									$fs .= "</div>";
 								}
 								$fs .= '</div>';

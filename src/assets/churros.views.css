@@ -8,7 +8,7 @@
 	max-width: 50% !important;
 }
 
-body.dark .record-view .rv-field, .record-view .rv-label {
+body.dark .record-view .field, .record-view label {
 	color: black;
 }
 
@@ -16,20 +16,11 @@ body.dark .record-view .rv-field, .record-view .rv-label {
 	display:flex; /* Evita que se baje field */
 }
 
-.record-view .rv-field, .record-view .rv-label {
-	display: block;
-	padding: 6px 12px;
-	font-size: 14px;
-	line-height: 1.43;
-	background-color: #fff;
-	background-image: none;
-	border: 1px solid #ccc;
-	margin: 0;
-}
-
 .record-view label {
 	font-weight:normal;
 	color: gray;
+	padding-right: 0;
+	margin-right: 0;
 }
 
 .record-view .field {
@@ -39,16 +30,6 @@ body.dark .record-view .rv-field, .record-view .rv-label {
 	margin-bottom: 0;
 	font-size: inherit;
 	line-height: 1.5;
-}
-
-.record-view .cols-2 .rv-label {
-	font-weight:normal;
-	color: darkblue;
-	flex: 3 0 15%;
-}
-.record-view .rv-field {
-	font-weight: bolder;
-	flex: 3 0 35%;
 }
 
 .record-view .panel-toolbar {
@@ -96,14 +77,14 @@ body.dark .record-view .rv-field, .record-view .rv-label {
 	flex-direction: row;
 	flex-wrap: wrap;
 }
-.record-view .rv-embedded-list label.rv-label {
+.record-view .rv-embedded-list label {
 	flex: 3 0 50%;
 }
 .record-view .rv-embedded-list .actions {
 	border: 1px solid #ccc;
 	flex: 3 0 50%;
 }
-.record-view .rv-embedded-list > .rv-field > .rv-label + div + div {
+.record-view .rv-embedded-list > .field > label + div + div {
 	flex: 3 0 100%;
 }
 
@@ -112,21 +93,21 @@ body.dark .record-view .rv-field, .record-view .rv-label {
 	border-color: gray;
 }
 
-.record-view .rv-embedded-form > .rv-field {
+.record-view .rv-embedded-form > .field {
 	flex: 3 0 100%;
 	display: flex;
 	flex-direction: row;
 	flex-wrap: wrap;
 }
-.record-view .rv-embedded-form > .rv-field .rv-label {
+.record-view .rv-embedded-form > .field label {
 	flex: 3 0 40%;
 }
-.record-view .rv-embedded-form > .rv-field .rv-field {
+.record-view .rv-embedded-form > .field .field {
 	border: 1px solid #ccc;
 	flex: 3 0 60%;
 }
 
-.record-view .rv-embedded-grid .rv-field {
+.record-view .rv-embedded-grid .field {
 	background-color: #d3ffff;
 	flex: 3 0 100%;
 	display: flex;
@@ -134,18 +115,18 @@ body.dark .record-view .rv-field, .record-view .rv-label {
 	flex-wrap: wrap;
 }
 
-.record-view .rv-embedded-grid .rv-field {
+.record-view .rv-embedded-grid .field {
 	padding: 0;
 }
 
-.record-view .rv-embedded-grid .rv-field > div {
+.record-view .rv-embedded-grid .field > div {
 	width: 100%;
 }
-.record-view .rv-embedded-grid .rv-field > div .pagination {
+.record-view .rv-embedded-grid .field > div .pagination {
 	margin:0;
 	padding:0;
 }
-.record-view .rv-embedded-grid .rv-field > div .kv-grid-container {
+.record-view .rv-embedded-grid .field > div .kv-grid-container {
 /* 	margin-left: -12px; */
 	margin-right: 0px;
 	margin-bottom: 0px;
@@ -154,14 +135,14 @@ body.dark .record-view .rv-field, .record-view .rv-label {
 }
 
 
-.record-view .rv-embedded-grid > .rv-field > .rv-label {
+.record-view .rv-embedded-grid > .field > label {
 	flex: 3 0 50%;
 }
-.record-view .rv-embedded-grid > .rv-field > .rv-label + div {
+.record-view .rv-embedded-grid > .field > label + div {
 	border: 1px solid #ccc;
 	flex: 3 0 50%;
 }
-.record-view .rv-embedded-grid > .rv-field > .rv-label + div + div {
+.record-view .rv-embedded-grid > .field > label + div + div {
 	flex: 3 0 100%;
 }
 
