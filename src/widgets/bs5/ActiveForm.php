@@ -24,6 +24,48 @@ class ActiveForm extends Bs5ActiveForm
 	public $errorSummaryCssClass = 'error-summary alert alert-danger';
 
 	public const FORM_FIELD_HORIZ_CLASSES = [
+		'vertical' => [
+			'full' => [
+				'horizontalCssClasses' => [
+					'offset' => 'offset-md-2 offset-3',
+					'label' => ['col-12', 'col-form-label text-start text-break'],
+					'wrapper' => ['col-12'],
+					'error' => '',
+					'hint' => '',
+					'field' => '',
+				]
+			],
+			'large' => [
+				'horizontalCssClasses' => [
+					'offset' => 'offset-md-2 offset-3',
+					'label' => ['col-12', 'col-form-label text-start text-break'],
+					'wrapper' => ['col-12'],
+					'error' => '',
+					'hint' => '',
+					'field' => '',
+				]
+			],
+			'medium' => [
+				'horizontalCssClasses' =>[
+					'offset' => 'offset-md-2 offset-3',
+					'label' => ['col-md-3 col-12', 'col-form-label text-start text-md-end'],
+					'wrapper' => ['col-md-5 col-8'],
+					'error' => '',
+					'hint' => '',
+					'field' => '',
+				]
+			],
+			'short' => [
+				'horizontalCssClasses' =>[
+					'offset' => 'offset-md-2 offset-3',
+					'label' => ['col-lg-3 col-md-3 col-12', 'col-form-label text-start text-md-end'],
+					'wrapper' => ['col-lg-2 col-sm-4 col-6'],
+					'error' => '',
+					'hint' => '',
+					'field' => '',
+				]
+			],
+		],
 		'1col' => [
 			'full' => [
 				'horizontalCssClasses' =>[
@@ -124,7 +166,7 @@ class ActiveForm extends Bs5ActiveForm
 			'full' => [
 				'horizontalCssClasses' => [
 					'offset' => 'offset-12',
-					'label' => ['col-12', 'col-form-label text-start'],
+					'label' => ['col-12', 'col-form-label text-start text-break'],
 					'wrapper' => ['col-12'],
 					'error' => '',
 					'hint' => '',
@@ -134,7 +176,7 @@ class ActiveForm extends Bs5ActiveForm
 			'large' => [
 				'horizontalCssClasses' => [
 					'offset' => 'offset-3',
-					'label' => ['col-md-3 col-12', 'col-form-label text-start text-md-end'],
+					'label' => ['col-md-3 col-12', 'col-form-label text-start text-md-end text-break'],
 					'wrapper' => ['col-md-9 col-12'],
 					'error' => '',
 					'hint' => '',
@@ -144,7 +186,7 @@ class ActiveForm extends Bs5ActiveForm
 			'medium' => [
 				'horizontalCssClasses' => [
 					'offset' => 'offset-3',
-					'label' => ['col-md-3 col-12', 'col-form-label text-start text-md-end'],
+					'label' => ['col-md-3 col-12', 'col-form-label text-start text-md-end text-break'],
 					'wrapper' => ['col-lg-5 col-md-6 col-12'],
 					'error' => '',
 					'hint' => '',
@@ -154,7 +196,7 @@ class ActiveForm extends Bs5ActiveForm
 			'short' => [
 				'horizontalCssClasses' => [
 					'offset' => 'offset-3',
-					'label' => ['col-md-3 col-12', 'col-form-label text-start text-md-end'],
+					'label' => ['col-md-3 col-12', 'col-form-label text-start text-md-end text-break'],
 					'wrapper' => ['col-lg-5 col-md-6 col-12'],
 					'error' => '',
 					'hint' => '',
@@ -167,7 +209,7 @@ class ActiveForm extends Bs5ActiveForm
 			'full' => [
 				'horizontalCssClasses' => [
 					'offset' => 'offset-md-2 offset-3',
-					'label' => ['col-12', 'col-form-label text-start'],
+					'label' => ['col-12', 'col-form-label text-start text-break'],
 					'wrapper' => ['col-12'],
 					'error' => '',
 					'hint' => '',
@@ -177,7 +219,7 @@ class ActiveForm extends Bs5ActiveForm
 			'large' => [
 				'horizontalCssClasses' => [
 					'offset' => 'offset-md-2 offset-3',
-					'label' => ['col-12', 'col-form-label text-start'],
+					'label' => ['col-12', 'col-form-label text-start text-break'],
 					'wrapper' => ['col-12'],
 					'error' => '',
 					'hint' => '',
@@ -197,7 +239,7 @@ class ActiveForm extends Bs5ActiveForm
 			'short' => [
 				'horizontalCssClasses' => [
 					'offset' => 'offset-md-2 offset-3',
-					'label' => ['col-12', 'col-form-label text-start'],
+					'label' => ['col-12', 'col-form-label text-start text-break'],
 					'wrapper' => ['col-12'],
 					'error' => '',
 					'hint' => '',
