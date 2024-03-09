@@ -101,7 +101,7 @@ class ActiveForm extends Bs4ActiveForm
 			'medium' => [
 				'horizontalCssClasses' =>[
 					'offset' => 'offset-md-3 offset-sm-4 offset-12',
-					'label' => ['col-md-3 col-sm-4 col-12', 'col-form-label text-left text-sm-right'],
+					'label' => ['g-0 col-md-3 col-sm-4 col-12', 'col-form-label text-left text-sm-right'],
 					'wrapper' => ['col-lg-5 col-md-6 col-sm-7 col-8'],
 					'error' => '',
 					'hint' => '',

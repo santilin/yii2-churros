@@ -142,12 +142,19 @@ class WidgetLayer
  								Html::addCssClass($widget->options, "layout-$layout_of_row");
  								$fs .= '<div class="row">';
 							}
-							$col_classes = $this->columnClasses($widget_layout == 'full' ? 1 : $cols);
-							if ($col_classes) {
+							if ($col_classes == 'col-12') {
+								$col_classes = null;
+							} else  {
 								$fs .=  "<div class=\"$col_classes\">";
+								if( ($nf%$cols) == 0 && $widget_layout != 'full' ) {
+									$fs .= "<div class=\"row w-100\">";
+								}
 							}
 							$fs .= $this->layoutOneWidget($widget_name, $widget, $layout_row, $widget_layout, $layout_of_row, [], $indexf++);
 							if ($col_classes) {
+								if( ($nf%$cols) == 0 && $widget_layout != 'full' ) {
+									$fs .= "</div>";
+								}
 								$fs .= '</div>';
 							}
 						} else if ($widget instanceof \yii\bootstrap5\ActiveField ) {
@@ -167,14 +174,19 @@ class WidgetLayer
  								Html::addCssClass($widget->options, "layout-$layout_of_row");
  								$fs .= '<div class="row">';
 							}
-							$col_classes = $this->columnClasses($widget_layout == 'full' ? 1 : $cols);
-							if ($col_classes) {
+ 							if ($col_classes == 'col-12') {
+ 								$col_classes = null;
+ 							} else  {
 								$fs .=  "<div class=\"$col_classes\">";
+								if( ($nf%$cols) == 0 && $widget_layout != 'full' ) {
+									$fs .= "<div class=\"row w-100\">";
+								}
 							}
-							$fs .= "<div class=\"row\">";
 							$fs .= $this->layoutOneWidget($widget_name, $widget, $layout_row, $widget_layout, $layout_of_row, [], $indexf++);
-							$fs .= "</div>";
 							if ($col_classes) {
+								if( ($nf%$cols) == 0 && $widget_layout != 'full' ) {
+									$fs .= "</div>";
+								}
 								$fs .= '</div>';
 							}
 						} else { // no activefield
