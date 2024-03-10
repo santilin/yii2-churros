@@ -453,3 +453,35 @@ label.taxonomy {
 	font-size: smaller;
 }
 
+/* add sorting icons to gridview sort links */
+[data-sort]:after, a.asc:after, a.desc:after {
+	position: relative;
+	top: 1px;
+	display: inline; /* Evitar que el icono de ordenación se quede en una sola linea abajo */
+	font-family: FontAwesome;
+	font-style: normal;
+	font-weight: normal;
+	line-height: 1;
+	padding-left: 5px;
+}
+[data-sort]:after {
+	content: "\f0dc";
+}
+a.asc:after {
+	content: "\f15e";
+}
+a.desc:after {
+	content: "\f15d";
+}
+a.sort-numerical.asc:after {
+	content: "\f163";
+}
+a.sort-numerical.desc:after {
+	content: "\f162";
+}
+.sort-ordinal a.asc:after {
+	content: "\f0df";
+}
+.sort-ordinal a.desc:after {
+	content: "\f0de";
+}
