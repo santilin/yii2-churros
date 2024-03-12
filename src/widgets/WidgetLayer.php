@@ -135,6 +135,11 @@ class WidgetLayer
 					$layout_row['style'] = $parent_style;
 				}
 				$has_widgets = false;
+				$must_add_row = false;
+				if ($type_of_row == 'fields') {
+					$must_add_row = true;
+					$ret .= '<div class=row>';
+				}
                 foreach ($layout_row['content'] as $widget_name ) {
 					$fs = '';
 					if ($widget = $this->widgets[$widget_name]??false) {
@@ -180,34 +185,35 @@ class WidgetLayer
 								for ( ; $open_divs>0; $open_divs--) {
 									$fs .= '</div>';
 								}
-								// if( ($nf%$cols) == 0) {
-								// 	if (!$parent_type) {
-								// 		$fs .= '</div>';
-								// 	}
-								// }
 							}
 							break;
 						case 'fields':
+							$open_divs = 0;
 							if ($parent_style == 'grid-cards') {
 								$widget_layout = $widget['layout']??'medium';
 								$widget_options = $widget['htmlOptions']??[];
 								$col_classes = $this->columnClasses($widget_layout == 'full' ? 1 : $cols);
 								if ($col_classes) {
 									$fs .=  "<div class=\"$col_classes\">";
+									$open_divs++;
 								} else if ($widget_layout != 'full') {
 									if ($parent_style != 'grid-cards') {
 										$fs .= "<div class=w-100>";
+										$open_divs++;
 									} else {
+										$open_divs++;
 										$fs .= "<div class=\"row w-100\">";
 									}
 								}
 								$fs .= $this->layoutOneField($widget_name, $widget, $layout_row, $widget_layout, $layout_of_row, $widget_options, $indexf++);
-								$fs .= '</div>';
 							} else {
 								$widget_layout = $widget['layout']??'medium';
 								$widget_options = $widget['htmlOptions']??[];
 								$fs .= "<div class=\"row w-100\">";
+								$open_divs++;
 								$fs .= $this->layoutOneField($widget_name, $widget, $layout_row, $widget_layout, $layout_of_row, $widget_options, $indexf++);
+							}
+							for ( ; $open_divs>0; $open_divs--) {
 								$fs .= '</div>';
 							}
 							break;
@@ -226,6 +232,9 @@ class WidgetLayer
 						// }
 						$ret .= $fs;
 					}
+				}
+				if ($must_add_row) {
+					$ret .= '</div>';
 				}
 				break;
 
@@ -306,11 +315,14 @@ class WidgetLayer
 				}
 				break;
 			case 'grid-cards':
-				$ro = ['class' => "card border-primary my-3 w-100"];
 				$lo = ['class' => "card-header fld-$widget_name"];
+				$ro = ['class' => "card border-primary my-3 w-100"];
 				$fs .= '<div' . Html::renderTagAttributes($ro) . '>';
 				if ($this->widget_painter) {
-					$fs .= call_user_func($this->widget_painter, $widget, ['label' => $lo, 'wrapper' => [ 'class' => "card-text fld-$widget_name" ]], $indexf++);
+					$fs .= call_user_func($this->widget_painter, $widget, [
+						'labelOptions' => $lo,
+						'wrapperOptions' => [ 'class' => "card-text fld-$widget_name" ]],
+						$indexf++);
 				} else {
 					$fs .= $widget->__toString();
 				}
@@ -330,12 +342,8 @@ class WidgetLayer
 		switch ($row_style) {
 			case 'grid':
 			case 'grid-nolabels':
-				$is_array = is_array($widget);
-				if ($is_array) {
-					if ($widget_layout == 'checkbox') {
-						$widget_layout = 'large';
-					}
-					$widget = (object)$widget;
+				if ($widget_layout == 'checkbox') {
+					$widget_layout = 'large';
 				}
 				if ('static' == $widget_layout) {
 					$classes = $this->widget_layout_horiz_config['static']['horizontalCssClasses'];
@@ -344,33 +352,29 @@ class WidgetLayer
 				} else {
 					$classes = $this->widget_layout_horiz_config[$layout_of_row][$widget_layout]['horizontalCssClasses'];
 					if ($row_style == 'grid-nolabels') {
-						$widget->labelOptions = false;
+						$classes['labelOptions'] = false;
 					} else {
-						$widget->labelOptions['class'] = implode(' ', $classes['label']) . " fld-$widget_name";
+						$classes['labelOptions']['class'] = implode(' ', $classes['label']) . " fld-$widget_name";
 						if (YII_ENV_DEV) {
-							$widget->labelOptions['class'] .= " {$layout_of_row}x$widget_layout";
+							$classes['labelOptions']['class'] .= " {$layout_of_row}x$widget_layout";
 						}
 					}
 				}
-				$widget->wrapperOptions['class'] = implode(' ', $classes['wrapper']) . ' widget-container';
+				$classes['wrapperOptions']['class'] = implode(' ', $classes['wrapper']) . ' widget-container';
 				if (YII_ENV_DEV) {
-					$widget->wrapperOptions['class'] .= " {$layout_of_row}x$widget_layout";
+					$classes['wrapperOptions']['class'] .= " {$layout_of_row}x$widget_layout";
 				}
-				if ($is_array) {
-					$widget = (array)$widget;
-				}
-				if ($this->widget_painter) {
-					$fs .= call_user_func($this->widget_painter, $widget, $classes, $indexf++);
-				} else {
-					$fs .= $widget->__toString();
-				}
+				$fs .= call_user_func($this->widget_painter, $widget, $classes, $indexf++);
 				break;
 			case 'grid-cards':
 				$ro = ['class' => "card border-primary my-3 w-100"];
-				$lo = ['class' => "card-header fld-$widget_name"];
 				$fs .= '<div' . Html::renderTagAttributes($ro) . '>';
+				$lo = ['class' => "card-header fld-$widget_name"];
 				if ($this->widget_painter) {
-					$fs .= call_user_func($this->widget_painter, $widget, ['label' => $lo, 'wrapper' => [ 'class' => "card-text fld-$widget_name" ]], $indexf++);
+					$fs .= call_user_func($this->widget_painter, $widget, [
+						'labelOptions' => $lo,
+						'wrapperOptions' => [ 'class' => "card-text fld-$widget_name" ]],
+						$indexf++);
 				} else {
 					$fs .= $widget->__toString();
 				}

@@ -178,8 +178,8 @@ html;
 
     public function layAttribute($attr_key, array $widgetOptions, int $index): string
     {
-        $labelOptions = ArrayHelper::remove($attr_key, 'labelOptions', []);
-        $contentOptions = ArrayHelper::remove($attr_key, 'wrapperOptions', []);
+        $labelOptions = ArrayHelper::remove($widgetOptions, 'labelOptions', []);
+        $contentOptions = ArrayHelper::remove($widgetOptions, 'wrapperOptions', []);
         return $this->renderAttribute($attr_key, $labelOptions, $contentOptions, $index);
     }
 
