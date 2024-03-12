@@ -35,7 +35,7 @@ trait ActiveFormTrait
 		if ($add_layout) {
 			$this->fieldsLayout = [
 				[
-					'type' => 'fields',
+					'type' => 'widgets',
 					'layout' => $layout,
 					'content' => array_keys($form_fields),
 				],
@@ -54,17 +54,8 @@ trait ActiveFormTrait
 		return $layer->layout('fields', $this->layout, $style);
 	}
 
-	public function renderFormField($widget, array $classes, int $index)
+	public function renderFormField($widget, array $options, int $index)
 	{
-		if (is_array($classes['horizontalCssClasses']['label']??false)) {
-			$classes['horizontalCssClasses']['label'] = implode(' ', $classes['horizontalCssClasses']['label']);
-		}
-		if (is_array($classes['horizontalCssClasses']['wrapper']['classes']??false)) {
-			$classes['horizontalCssClasses']['wrapper'] = implode(' ', $classes['horizontalCssClasses']['wrapper']);
-		}
-		$widget->horizontalCssClasses = $classes['horizontalCssClasses'];
-		$widget->wrapperOptions['class'] = $classes['horizontalCssClasses']['wrapper'];
-		$widget->labelOptions['class'] = $classes['horizontalCssClasses']['label'];
 		return $widget->render();
 	}
 

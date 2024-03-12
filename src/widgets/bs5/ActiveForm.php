@@ -65,6 +65,17 @@ class ActiveForm extends Bs5ActiveForm
 					'field' => '',
 				]
 			],
+			'checkbox' => [
+				'horizontalCssClasses' => [
+					'offset' => 'offset-md-2 offset-sm-3',
+					'label' => ['col-lg-3 col-md-4 col-6', 'col-form-label text-start text-md-end'],
+					'wrapper' => ['col-lg-3 col-md-4 col-6'],
+					'error' => '',
+					'hint' => '',
+					'field' => 'form-group',
+				]
+			],
+
 		],
 		'1col' => [
 			'full' => [
@@ -91,7 +102,7 @@ class ActiveForm extends Bs5ActiveForm
 				'horizontalCssClasses' =>[
 					'offset' => 'offset-md-2 offset-3',
 					'label' => ['col-md-3 col-12', 'col-form-label text-start text-md-end'],
-					'wrapper' => ['col-md-5 col-8'],
+					'wrapper' => ['col-lg-3 col-md-5 col-8'],
 					'error' => '',
 					'hint' => '',
 					'field' => '',
@@ -100,13 +111,24 @@ class ActiveForm extends Bs5ActiveForm
 			'short' => [
 				'horizontalCssClasses' =>[
 					'offset' => 'offset-md-2 offset-3',
-					'label' => ['col-lg-3 col-md-3 col-12', 'col-form-label text-start text-md-end'],
-					'wrapper' => ['col-lg-2 col-sm-4 col-6'],
+					'label' => ['col-lg-3 col-sm-3 col-12', 'col-form-label text-start text-md-end'],
+					'wrapper' => ['col-lg-2 col-sm-9 col-6'],
 					'error' => '',
 					'hint' => '',
 					'field' => '',
 				]
 			],
+			'checkbox' => [
+				'horizontalCssClasses' => [
+					'offset' => '',
+					'label' => ['col-lg-3 col-md-4 col-6', 'form-check-label text-start'],
+					'wrapper' => ['offset-lg-3 offset-md-4 offset-6 col-12'],
+					'error' => '',
+					'hint' => '',
+					'field' => 'form-group form-check-input',
+				]
+			],
+
 		],
 
 		'2cols' => [
@@ -152,12 +174,12 @@ class ActiveForm extends Bs5ActiveForm
 			],
 			'checkbox' => [
 				'horizontalCssClasses' => [
-					'offset' => 'offset-md-2 offset-sm-3',
-					'label' => ['col-lg-3 col-md-4 col-6', 'col-form-label text-start text-md-end'],
-					'wrapper' => ['col-lg-3 col-md-4 col-6'],
+					'offset' => '',
+					'label' => ['col-12', 'form-check-label text-start'],
+					'wrapper' => ['offset-lg-3 offset-md-2 offset-0 col-12'],
 					'error' => '',
 					'hint' => '',
-					'field' => 'form-group',
+					'field' => 'form-group form-check-input',
 				]
 			],
 		],
@@ -203,6 +225,17 @@ class ActiveForm extends Bs5ActiveForm
 					'field' => '',
 				]
 			],
+			'checkbox' => [
+				'horizontalCssClasses' => [
+					'offset' => 'offset-md-2 offset-sm-3',
+					'label' => ['col-lg-3 col-md-4 col-6', 'col-form-label text-start text-md-end'],
+					'wrapper' => ['col-lg-3 col-md-4 col-6'],
+					'error' => '',
+					'hint' => '',
+					'field' => 'form-group',
+				]
+			],
+
 		],
 
 		'4cols' => [
@@ -245,7 +278,18 @@ class ActiveForm extends Bs5ActiveForm
 					'hint' => '',
 					'field' => '',
 				]
-			]
+			],
+			'checkbox' => [
+				'horizontalCssClasses' => [
+					'offset' => 'offset-md-2 offset-sm-3',
+					'label' => ['col-lg-3 col-md-4 col-6', 'col-form-label text-start text-md-end'],
+					'wrapper' => ['col-lg-3 col-md-4 col-6'],
+					'error' => '',
+					'hint' => '',
+					'field' => 'form-group',
+				]
+			],
+
 		],
 		'static' => [
 			'horizontalCssClasses' => [
