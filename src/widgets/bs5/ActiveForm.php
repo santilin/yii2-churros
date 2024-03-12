@@ -90,7 +90,7 @@ class ActiveForm extends Bs5ActiveForm
 			],
 			'large' => [
 				'horizontalCssClasses' =>[
-					'offset' => 'offset-2',
+					'offset' => 'offset-3',
 					'label' => ['col-md-3 col-12', 'col-form-label text-start text-md-end'],
 					'wrapper' => ['col-md-9 col-12'],
 					'error' => '',

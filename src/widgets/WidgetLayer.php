@@ -129,17 +129,15 @@ class WidgetLayer
                     }
                 }
                 if ($only_widget_names) {
+					die ("imposible");
                     $layout_row = ['type' => $type_of_row, 'content' => $layout_row];
                 }
                 if (!isset($layout_row['style'])) {
 					$layout_row['style'] = $parent_style;
 				}
 				$has_widgets = false;
-				$must_add_row = false;
-				if ($type_of_row == 'fields') {
-					$must_add_row = true;
-					$ret .= '<div class=row>';
-				}
+				$must_add_row = true;
+				$ret .= '<div class=row>';
                 foreach ($layout_row['content'] as $widget_name ) {
 					$fs = '';
 					if ($widget = $this->widgets[$widget_name]??false) {
@@ -159,28 +157,14 @@ class WidgetLayer
 								if ($widget_layout == 'full' && $nf != 0) {
 									while (++$nf%$cols != 0);
 								}
-								if( $cols>1 && ($nf%$cols) == 0) {
-									Html::addCssClass($widget->options, "layout-$layout_of_row");
-									// if (!$parent_type) {
-										if( $nf != 0 ) {
-											$fs .= "</div><!--row-->\n";
-											$fs .= '<div class=row>';
-											$open_divs++;
-										}
-									// }
-								}
+								Html::addCssClass($widget->options, "layout-$layout_of_row");
 								$col_classes = $this->columnClasses($widget_layout == 'full' ? 1 : $cols);
-								if ($col_classes == 'col-12') {
-									$col_classes = null;
-								} else  {
-									$fs .=  "<div class=\"$col_classes\">";
+								$fs .=  "<div class=\"$col_classes\">";
+								$open_divs++;
+								if ($widget_layout != 'full') {
+									$fs .= "<div class=\"w-100\">"; // add here 'row' in bs4
 									$open_divs++;
-									if ($widget_layout != 'full') {
-										$fs .= "<div class=\"w-100\">"; // add here 'row' in bs4
-										$open_divs++;
-									}
 								}
-
 								$fs .= $this->layoutActiveField($widget_name, $widget, $layout_row, $widget_layout, $layout_of_row, $indexf++);
 								for ( ; $open_divs>0; $open_divs--) {
 									$fs .= '</div>';
@@ -233,21 +217,14 @@ class WidgetLayer
 						$ret .= $fs;
 					}
 				}
-				if ($must_add_row) {
-					$ret .= '</div>';
-				}
+				$ret .= '</div><!-- main row-->';
 				break;
 
 			case 'buttons':
 				$ret .= '<div class="mt-2 clearfix row">';
 				if ($layout_of_row != 'inline') {
 					$classes = $this->widget_layout_horiz_config[$layout_of_row]['large']['horizontalCssClasses']['offset'];
-					if (is_array($classes)) {
-						$s_classes = implode(' ', $classes);
-						$ret .= "<div class=\"$s_classes\">";
-					} else {
-						$ret .= "<div class=\"$classes\">";
-					}
+					$ret .= '<div class="' . implode(' ', (array)$classes) . '">';
 				} else {
 					$ret .= "<div>";
 				}
