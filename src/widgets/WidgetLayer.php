@@ -16,7 +16,7 @@ class WidgetLayer
 	{
 	}
 
-	public function layout($type = 'fields', string $layout = '1col', string $style = 'row'): string
+	public function layout($type = 'widgets', string $layout = '1col', string $style = 'row'): string
 	{
 		if (is_string($this->widgetsLayout)) {
 			$layout = $this->widgetsLayout;
@@ -145,9 +145,7 @@ class WidgetLayer
 						switch($type_of_row) {
 						case 'widgets':
 							$open_divs = 0;
-							if ($widget instanceof \yii\bootstrap4\ActiveField) {
-								// Se necesita añadir un row que bs5 sí añade
-							} else if ($widget instanceof \yii\bootstrap5\ActiveField ) {
+							if ($widget instanceof \yii\bootstrap5\ActiveField ) {
 								// bs5 ActiveFields add a row container over the whole field
 								if ($widget->horizontalCssClasses['layout']??false) {
 									$widget_layout = ArrayHelper::remove($widget->horizontalCssClasses, 'layout');
@@ -169,6 +167,8 @@ class WidgetLayer
 								for ( ; $open_divs>0; $open_divs--) {
 									$fs .= '</div>';
 								}
+							} else {
+								throw new \Exception(get_class($widget) . ': invalid widget class');
 							}
 							break;
 						case 'fields':

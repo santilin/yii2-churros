@@ -51,7 +51,7 @@ trait ActiveFormTrait
 			}
 		}
 		$layer = new WidgetLayer($this->fieldsLayout, $form_fields, [$this, 'renderFormField'], self::FORM_FIELD_HORIZ_CLASSES);
-		return $layer->layout('fields', $this->layout, $style);
+		return $layer->layout('widgets', $this->layout, $style);
 	}
 
 	public function renderFormField($widget, array $options, int $index)
