@@ -572,7 +572,7 @@ trait RelationTrait
      * @return bool
      * @throws Exception
      */
-    public function deleteWithRelated($relations = [])
+    public function deleteWithRelated(array $relations = []): bool
     {
         /* @var $this ActiveRecord */
         $db = $this->getDb();

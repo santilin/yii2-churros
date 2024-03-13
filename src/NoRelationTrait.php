@@ -53,7 +53,7 @@ trait NoRelationTrait
      * @return bool
      * @throws Exception
      */
-    public function deleteWithRelated($relations = [])
+    public function deleteWithRelated(array $relations = []): bool
     {
 		return $this->delete();
 	}
