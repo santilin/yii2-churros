@@ -15,7 +15,7 @@ trait ActiveFormTrait
 		return Html::getInputId($model, $attribute);
 	}
 
-	public function layoutFields(array $form_fields, array $buttons, string $style = 'grid'): string
+	public function layoutFields(array $form_fields, array $buttons, string $size = 'large', string $style = 'grid'): string
 	{
 		$layout = $this->layout;
 		$add_buttons = $add_layout = false;
@@ -51,7 +51,7 @@ trait ActiveFormTrait
 			}
 		}
 		$layer = new WidgetLayer($this->fieldsLayout, $form_fields, [$this, 'renderFormField'], self::FORM_FIELD_HORIZ_CLASSES);
-		return $layer->layout('widgets', $this->layout, $style);
+		return $layer->layout('widgets', $this->layout, $size, $style);
 	}
 
 	public function renderFormField($widget, array $options, int $index)
