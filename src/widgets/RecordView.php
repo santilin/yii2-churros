@@ -163,7 +163,7 @@ html;
 		} else {
             $layer = new WidgetLayer($this->fieldsLayout, $this->attributes, [ $this, 'layAttribute' ], ActiveForm::FORM_FIELD_HORIZ_CLASSES);
 			return '<div class="record-fields">'
-                . $layer->layout('fields', $this->layout, $this->style)
+                . $layer->layout('fields', $this->layout, 'large', $this->style)
 				. '</div>';
 		}
     }
