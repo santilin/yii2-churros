@@ -16,24 +16,37 @@ class WidgetLayer
 	{
 	}
 
-	public function layout($type = 'widgets', string $layout = '1col', string $style = 'row'): string
+	public function layout(string $type, string $layout = '1col',
+						   string $size = 'large', string $style = 'grid'): string
 	{
-		if (is_string($this->widgetsLayout)) {
-			$layout = $this->widgetsLayout;
-		}
-		if ($layout == 'horizontal') {
-			$layout = '1col';
-		}
-		if (empty($this->widgetsLayout) || is_string($this->widgetsLayout)) {
+		if (empty($this->widgetsLayout)) {
 			$this->widgetsLayout = [
 				[
 					'type' => $type,
 					'layout' => $layout,
+					'style' => $style,
 					'content' => array_keys($this->widgets),
 				]
 			];
-		}
-		return $this->layoutWidgets($this->widgetsLayout, ['layout' => $layout, 'style' => $style]);
+		} else if (is_string($this->widgetsLayout)) {
+			$this->widgetsLayout = [
+				[
+					'type' => $type,
+					'layout' => $this->widgetsLayout,
+					'style' => $style,
+					'content' => array_keys($this->widgets),
+				]
+			];
+		}/* else {
+			if (empty($this->widgetsLayout['type'])) {
+				$this->widgetsLayout['type'] = $type;
+			} else if (empty($this->widgetsLayout['style'])) {
+				$this->widgetsLayout['style'] = $style;
+			} else if (empty($this->widgetsLayout['layout'])) {
+				$this->widgetsLayout['layout'] = $layout;
+			}
+		}*/
+		return $this->layoutWidgets($this->widgetsLayout, ['size' => $size, 'style' => $style]);
 	}
 
 
@@ -42,9 +55,8 @@ class WidgetLayer
 	 */
 	protected function layoutWidgets(array $layout_rows, array $parent_options = []): string
 	{
-		$parent_layout = $parent_options['layout']??'1col';
+		$parent_size = $parent_options['size']??'large';
 		$parent_style = $parent_options['style']??'grid';
-		$parent_type = $parent_options['type']??null;
 		$only_widget_names = true;
 		foreach($layout_rows as $lrk => $layout_row ) {
 			if (empty($layout_row)) {
@@ -57,11 +69,12 @@ class WidgetLayer
 			}
 		}
 		if ($only_widget_names) {
-			$layout_rows = [ ['type' => 'widgets', 'content' => $layout_rows, 'layout' => $parent_layout] ];
+			die ("Invalid widget layout config");
+			$layout_rows = [ ['type' => 'widgets', 'content' => $layout_rows, 'size' => $parent_size] ];
 		}
 		$ret = '';
 		foreach ($layout_rows as $lrk => $layout_row) {
-			$layout_of_row = $layout_row['layout']??$parent_layout;
+			$layout_of_row = $layout_row['layout']??'1col';
 			if ($layout_of_row == 'inline') {
 				$cols = 10000;
 			} else {
@@ -117,9 +130,6 @@ class WidgetLayer
 				break;
 			case 'widgets':
 			case 'fields':
-				if ($parent_layout == '3cols') {
-					$layout_of_row = 'vertical';
-				}
 				$nf = $indexf = 0;
                 $only_widget_names = true;
                 foreach($layout_row as $lrk => $rl) {
@@ -151,6 +161,16 @@ class WidgetLayer
 									$widget_layout = ArrayHelper::remove($widget->horizontalCssClasses, 'layout');
 								} else {
 									$widget_layout = $widget->layout??'large';
+								}
+								if ($parent_size == 'small') {
+									switch ($widget_layout) {
+										case 'short':
+											$widget_layout = 'medium';
+											break;
+										case 'medium':
+											$widget_layout = 'large';
+											break;
+									}
 								}
 								if ($widget_layout == 'full' && $nf != 0) {
 									while (++$nf%$cols != 0);
@@ -237,7 +257,7 @@ class WidgetLayer
 				break;
 			case 'html':
 				$label = ArrayHelper::remove($layout_row, 'label', null);
-				if ($parent_layout == '3cols') {
+				if ($parent_size == '3cols') {
 					$layout_of_row = '1col';
 				}
 				$classes = $this->widget_layout_horiz_config[$layout_of_row]['large']['horizontalCssClasses'];
