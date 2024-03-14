@@ -171,6 +171,15 @@ class WidgetLayer
 											$widget_layout = 'large';
 											break;
 									}
+								} else if ($parent_size == 'medium') {
+									switch ($widget_layout) {
+										case 'short':
+											$widget_layout = 'medium';
+											break;
+ 										case 'medium':
+ 											$widget_layout = 'large';
+ 											break;
+									}
 								}
 								if ($widget_layout == 'full' && $nf != 0) {
 									while (++$nf%$cols != 0);

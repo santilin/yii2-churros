@@ -133,12 +133,13 @@ class YADTC extends \DateTime
 	static public function today($modify = null, DateTimeZone $timezone = NULL)
 	{
 		$dt = new \DateTime("now", $timezone);
-		if( $modify != '' ) {
+		if ($modify != null) {
 			$dt->modify($modify);
 		}
 		$ts = $dt->getTimestamp();
         $ext_dt = new static();
 		$ext_dt->setTimestamp($ts);
+		$ext_dt->resetTime();
 		return $ext_dt;
 
 	}

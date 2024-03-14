@@ -11,16 +11,6 @@ class ActiveForm extends Bs5ActiveForm
 {
 	use ActiveFormTrait;
 
-//     public $fieldConfig = [
-// 		'horizontalCssClasses' => [
-// 			'offset' => '',
-// 			'label' => '',
-// 			'wrapper' => '',
-// 			'error' => '',
-// 			'hint' => '',
-// 		]
-//     ];
-//
 	public $errorSummaryCssClass = 'error-summary alert alert-danger';
 
 	public const FORM_FIELD_HORIZ_CLASSES = [
@@ -102,7 +92,7 @@ class ActiveForm extends Bs5ActiveForm
 				'horizontalCssClasses' =>[
 					'offset' => 'offset-md-2 offset-3',
 					'label' => ['col-md-3 col-12', 'col-form-label text-start text-md-end'],
-					'wrapper' => ['col-lg-3 col-md-5 col-8'],
+					'wrapper' => ['col-lg-4 col-md-6 col-8'],
 					'error' => '',
 					'hint' => '',
 					'field' => '',
