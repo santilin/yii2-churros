@@ -25,7 +25,7 @@ trait NoRelationTrait
      * @param array $relations_in_form
      * @return bool
      */
-    public function loadAll($post, $relations_in_form = [], $formName = null): bool
+    public function loadAll(array $post, array $relations_in_form = [], ?string $formName = null): bool
     {
 		return $this->load($post, $formName);
     }
