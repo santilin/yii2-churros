@@ -175,7 +175,7 @@ class CrudController extends \yii\web\Controller
 		$model->scenario = 'create';
 
 		if (isset($_POST['_form_relations'])) $relations = explode(",", $_POST['_form_relations']); else $relations = [];
-		if ($model->loadAll($req->post(), $relations) ) { // ?? $req->post
+		if ($model->loadAll($params, $relations) ) {
 			if ($model->saveAll(true) ) {
 				if ($req->getIsAjax()) {
 					return json_encode($model->getAttributes());
@@ -183,6 +183,8 @@ class CrudController extends \yii\web\Controller
 				$this->addSuccessFlashes('create', $model);
 				return $this->redirect($this->whereToGoNow('create', $model));
 			}
+		} else {
+			$model->setDefaultValues(false);
 		}
 		return $this->render('create', [
 			'model' => $model,
@@ -252,7 +254,7 @@ class CrudController extends \yii\web\Controller
 		} else {
 			$relations = [];
 		}
-		if ($model->loadAll($params, $relations) && $req->isPost ) {
+		if ($model->loadAll($params, $relations)) {
 			if ($model->saveAll(true)) {
 				if ($req->getIsAjax()) {
 					\Yii::$app->response->format = \yii\web\Response::FORMAT_JSON;
@@ -264,6 +266,8 @@ class CrudController extends \yii\web\Controller
 				$this->addSuccessFlashes('update', $model);
 				return $this->redirect($this->whereToGoNow('update', $model));
 			}
+		} else {
+			$model->setDefaultValues(false);
 		}
 		return $this->render('update', [
 			'model' => $model,
