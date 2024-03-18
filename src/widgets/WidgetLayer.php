@@ -69,7 +69,6 @@ class WidgetLayer
 			}
 		}
 		if ($only_widget_names) {
-			die ("Invalid widget layout config");
 			$layout_rows = [ ['type' => 'widgets', 'content' => $layout_rows, 'size' => $parent_size] ];
 		}
 		$ret = '';
@@ -83,7 +82,7 @@ class WidgetLayer
 			$type_of_row = $layout_row['type']??'widgets';
 			switch ($type_of_row) {
 			case 'container':
-                switch ($layout_row['layout']??'rows') {
+                switch ($layout_row['style']??'rows') {
                     case 'tabs':
 						$ret .= '<div class=row><div class="' . $this->columnClasses(1) . '">';
                         $tab_items = [];
@@ -150,61 +149,71 @@ class WidgetLayer
 				$ret .= '<div class=row>';
                 foreach ($layout_row['content'] as $widget_name ) {
 					$fs = '';
+					$open_divs = 0;
 					if ($widget = $this->widgets[$widget_name]??false) {
 						$has_widgets = true;
-						switch($type_of_row) {
-						case 'widgets':
-							$open_divs = 0;
-							if ($widget instanceof \yii\bootstrap5\ActiveField ) {
-								// bs5 ActiveFields add a row container over the whole field
-								if ($widget->horizontalCssClasses['layout']??false) {
-									$widget_layout = ArrayHelper::remove($widget->horizontalCssClasses, 'layout');
-								} else {
-									$widget_layout = $widget->layout??'large';
-								}
-								if ($parent_size == 'small') {
-									switch ($widget_layout) {
-										case 'short':
-											$widget_layout = 'medium';
-											break;
-										case 'medium':
-											$widget_layout = 'large';
-											break;
-									}
-								} else if ($parent_size == 'medium') {
-									switch ($widget_layout) {
-										case 'short':
-											$widget_layout = 'medium';
-											break;
- 										case 'medium':
- 											$widget_layout = 'large';
- 											break;
-									}
-								}
-								if ($widget_layout == 'full' && $nf != 0) {
-									while (++$nf%$cols != 0);
-								}
-								Html::addCssClass($widget->options, "layout-$layout_of_row");
-								$col_classes = $this->columnClasses($widget_layout == 'full' ? 1 : $cols);
-								$fs .=  "<div class=\"$col_classes\">";
-								$open_divs++;
-								if ($widget_layout != 'full') {
-									$fs .= "<div class=\"w-100\">"; // add here 'row' in bs4
-									$open_divs++;
-								}
-								$fs .= $this->layoutActiveField($widget_name, $widget, $layout_row, $widget_layout, $layout_of_row, $indexf++);
-								for ( ; $open_divs>0; $open_divs--) {
-									$fs .= '</div>';
-								}
+						if ($widget instanceof \yii\bootstrap5\ActiveField ) {
+							// bs5 ActiveFields add a row container over the whole field
+							if ($widget->horizontalCssClasses['layout']??false) {
+								$widget_layout = ArrayHelper::remove($widget->horizontalCssClasses, 'layout');
 							} else {
-								throw new \Exception(get_class($widget) . ': invalid widget class');
+								$widget_layout = $widget->layout??'large';
 							}
-							break;
-						case 'fields':
-							$open_divs = 0;
+							if ($parent_size == 'small') {
+								switch ($widget_layout) {
+									case 'short':
+										$widget_layout = 'medium';
+										break;
+									case 'medium':
+										$widget_layout = 'large';
+										break;
+								}
+							} else if ($parent_size == 'medium') {
+								switch ($widget_layout) {
+									case 'short':
+										$widget_layout = 'medium';
+										break;
+									case 'medium':
+										$widget_layout = 'large';
+										break;
+								}
+							}
+							if ($widget_layout == 'full' && $nf != 0) {
+								while (++$nf%$cols != 0);
+							}
+							Html::addCssClass($widget->options, "layout-$layout_of_row");
+							$col_classes = $this->columnClasses($widget_layout == 'full' ? 1 : $cols);
+							$fs .=  "<div class=\"$col_classes\">";
+							$open_divs++;
+							if ($widget_layout != 'full') {
+								$fs .= "<div class=\"w-100\">"; // add here 'row' in bs4
+								$open_divs++;
+							}
+							$fs .= $this->layoutActiveField($widget_name, $widget, $layout_row, $widget_layout, $layout_of_row, $indexf++);
+						} else if (is_array($widget)) {
+							$widget_layout = $widget['layout']??'large';
+							/// @todo refactor
+							if ($parent_size == 'small') {
+								switch ($widget_layout) {
+									case 'short':
+										$widget_layout = 'medium';
+										break;
+									case 'medium':
+										$widget_layout = 'large';
+										break;
+								}
+							} else if ($parent_size == 'medium') {
+								switch ($widget_layout) {
+									case 'short':
+										$widget_layout = 'medium';
+										break;
+									case 'medium':
+										$widget_layout = 'large';
+										break;
+								}
+							}
+							$widget_options = $widget['htmlOptions']??[];
 							if ($parent_style == 'grid-cards') {
-								$widget_layout = $widget['layout']??'medium';
-								$widget_options = $widget['htmlOptions']??[];
 								$col_classes = $this->columnClasses($widget_layout == 'full' ? 1 : $cols);
 								if ($col_classes) {
 									$fs .=  "<div class=\"$col_classes\">";
@@ -220,18 +229,15 @@ class WidgetLayer
 								}
 								$fs .= $this->layoutOneField($widget_name, $widget, $layout_row, $widget_layout, $layout_of_row, $widget_options, $indexf++);
 							} else {
-								$widget_layout = $widget['layout']??'medium';
-								$widget_options = $widget['htmlOptions']??[];
 								$fs .= "<div class=\"row w-100\">";
 								$open_divs++;
 								$fs .= $this->layoutOneField($widget_name, $widget, $layout_row, $widget_layout, $layout_of_row, $widget_options, $indexf++);
 							}
-							for ( ; $open_divs>0; $open_divs--) {
-								$fs .= '</div>';
-							}
-							break;
-						default:
-							throw new InvalidConfigException($type_of_row. ": invalid type of row");
+						} else {
+							throw new \Exception(get_class($widget) . ': invalid widget class');
+						}
+						for ( ; $open_divs>0; $open_divs--) {
+							$fs .= '</div>';
 						}
 						$nf++;
 						// if (isset($layout_row['title']) && $type_of_row == 'widgetset' ) {

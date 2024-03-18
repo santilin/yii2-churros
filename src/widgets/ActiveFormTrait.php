@@ -58,6 +58,16 @@ trait ActiveFormTrait
 	{
 		if (!is_array($this->fieldsLayout)) {
 			$this->generateFieldsLayout($form_fields, $buttons, $size, $style);
+		} else {
+			if (!empty($buttons)) {
+				if (!AppHelper::findKeyAndValueInArray($this->fieldsLayout, 'type', 'buttons')) {
+					$this->fieldsLayout[] = [
+						'type' => 'buttons',
+						'layout' => '1col',
+						'content' => $buttons
+					];
+				}
+			}
 		}
 		$layer = new WidgetLayer($this->fieldsLayout, $form_fields, [$this, 'renderFormField'], self::FORM_FIELD_HORIZ_CLASSES);
 		return $layer->layout('widgets', $this->layout, $size, $style);
