@@ -303,8 +303,8 @@ class WidgetLayer
 			case 'grid-nolabels':
 				if ('static' == $widget_layout) {
 					$classes = $this->widget_layout_horiz_config['static']['horizontalCssClasses'];
-				} else if ($layout_of_row == 'inline') {
-					$classes = [];
+				} else if ('inline' == $layout_of_row) {
+					$classes = $this->widget_layout_horiz_config['inline']['horizontalCssClasses'];
 				} else {
 					$classes = $this->widget_layout_horiz_config[$layout_of_row][$widget_layout]['horizontalCssClasses'];
 					if ($row_style == 'grid-nolabels') {
