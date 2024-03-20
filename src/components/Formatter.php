@@ -58,6 +58,17 @@ class Formatter extends \yii\i18n\Formatter
 		}
 	}
 
+	public function asSeconds2HoursMinutes($seconds)
+	{
+		if (empty($seconds) ) {
+			return "00:00";
+		} else {
+			return str_pad(floor($seconds / 60 / 60), 2, "0", STR_PAD_LEFT)
+				. ":" . substr("00" . (floor($seconds / 60) % 60), -2);
+		}
+	}
+
+
 	public function asUploadedImage($images, $options = [])
 	{
 		if( !is_array($images) ) {

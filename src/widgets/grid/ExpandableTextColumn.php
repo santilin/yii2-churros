@@ -71,7 +71,6 @@ generateQuoteBtn_$key.addEventListener('click', () => {
 	textArea.select();
 	document.execCommand('copy');
 	document.body.removeChild(textArea);
-}
 });
 </script>
 modal;
