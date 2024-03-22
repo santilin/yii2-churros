@@ -204,45 +204,6 @@ body.dark .record-view .field, .record-view label {
 	display: inline-block
 }
 
-/* add sorting icons to gridview sort links */
-a.asc:after, a.desc:after {
-	position: relative;
-	top: 1px;
-	display: inline-block;
-	font-family: 'Glyphicons Halflings';
-	font-style: normal;
-	font-weight: normal;
-	line-height: 1;
-	padding-left: 5px;
-}
-
-.grid-view .toolbar {
-	margin-bottom: 0.5rem;
-}
-.grid-view a.asc:after {
-	content: /*"\e113"*/ "\e151";
-}
-
-.grid-view a.desc:after {
-	content: /*"\e114"*/ "\e152";
-}
-
-.grid-view .sort-numerical a.asc:after {
-	content: "\e153";
-}
-
-.grid-view .sort-numerical a.desc:after {
-	content: "\e154";
-}
-
-.grid-view .sort-ordinal a.asc:after {
-	content: "\e155";
-}
-
-.grid-view .sort-ordinal a.desc:after {
-	content: "\e156";
-}
-
 .grid-view th {
 	white-space: nowrap;
 }
@@ -458,30 +419,24 @@ label.taxonomy {
 	position: relative;
 	top: 1px;
 	display: inline; /* Evitar que el icono de ordenación se quede en una sola linea abajo */
-	font-family: FontAwesome;
+	font-family: bootstrap-icons;
 	font-style: normal;
 	font-weight: normal;
 	line-height: 1;
 	padding-left: 5px;
 }
 [data-sort]:after {
-	content: "\f0dc";
+	content: "\f127";
 }
-a.asc:after {
-	content: "\f15e";
+[data-sort].asc:after {
+	content: "\f571";
 }
-a.desc:after {
-	content: "\f15d";
+[data-sort].desc:after {
+	content: "\f570";
 }
-a.sort-numerical.asc:after {
-	content: "\f163";
+[data-sort].sort-numerical.asc:after {
+	content: "\f579";
 }
-a.sort-numerical.desc:after {
-	content: "\f162";
-}
-.sort-ordinal a.asc:after {
-	content: "\f0df";
-}
-.sort-ordinal a.desc:after {
-	content: "\f0de";
+[data-sort].sort-numerical.desc:after {
+	content: "\f577";
 }

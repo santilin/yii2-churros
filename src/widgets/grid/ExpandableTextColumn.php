@@ -39,22 +39,20 @@ class ExpandableTextColumn extends DataColumn
 		if( $this->length == 0 ) {// || strlen($text)<=$this->length) {
 			return $text;
 		} else {
-			/// @todo partir por el espacio más próximo
 			$truncated_text = trim(mb_substr(trim($text), 0, $this->length));
 			$encoded_text = Html::tag('p', Html::encode($text), $this->modalBodyOptions);
 			$modal = <<<modal
 <div class="modal fade" id="modalSeeMore_$key" tabindex="-1" aria-labelledby="modalSeeMore_$key" aria-hidden="true">
 	<div class="modal-dialog modal-dialog-centered modal-dialog-scrollable modal-md">
 		<div class="modal-content">
-			<div class="modal-header bg-primary text-white">
+			<div class="modal-header bg-secondary text-white">
+				<button type="button" class="btn btn-primary p-1" data-bs-dismiss="modal" id="modalCopyClipBoardBtn_$key"><i class="bi bi-clipboard-plus"></i></button>
+				&nbsp;
 				<h5 class="modal-title fs-5" id="modalSeeMoreTitle_$key">$this->modal_title</h5>
-				<button type="button" class="btn-close" data-dismiss="modal" aria-label="Close">&times;</button>
+				<button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
 			</div>
-			<div class="modal-body bg-secondary" id="modalSeeMoreContenido_$key">
+			<div class="modal-body" id="modalSeeMoreContenido_$key">
 $encoded_text
-			</div>
-			<div class="modal-footer">
-				<button type="button" class="btn btn-secondary" data-dismiss="modal" id="modalCopyClipBoardBtn_$key"><i class="fas fa-clipboard"></i></button>
 			</div>
 		</div>
 	</div>
@@ -75,14 +73,14 @@ generateQuoteBtn_$key.addEventListener('click', () => {
 </script>
 modal;
 
-			$text =  Html::tag('span', $truncated_text, $this->captionOptions) . Html::a('<i class="fa fa-external-link-alt"></i>', '#', [
+			$text =  Html::tag('span', $truncated_text, $this->captionOptions) . Html::a('<i class="bi bi-book"></i>', '#', [
 				'title' => 'Pincha para leer más',
-				'class' => "btn btn-outline-primary btn-sm",
+				'class' => "btn btn-outline-primary btn-sm py-0 px-1",
+				'style' => 'position: absolute; right: 0; font-size:xx-small',
 				'data' => [
-					'toggle' => 'modal',
-					'target' => '#modalSeeMore_' . $key,
+					'bs-toggle' => 'modal',
+					'bs-target' => '#modalSeeMore_' . $key,
 				],
-                                'style' => 'position: absolute; right: 0;',
 			]);
 			return $modal . $text;
 		}
