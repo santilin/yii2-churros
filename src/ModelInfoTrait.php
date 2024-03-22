@@ -100,14 +100,14 @@ trait ModelInfoTrait
 		$ret = '';
 		if( $format == null || $format == 'short' ) {
 			$_format = self::getModelInfo('record_desc_format_short');
-		} elseif( $format == 'medium' ) {
+		} elseif ($format == 'medium') {
 			$_format = self::getModelInfo('record_desc_format_medium');
-		} elseif( $format == 'long' ) {
+		} elseif ($format == 'long') {
 			$_format = self::getModelInfo('record_desc_format_long');
-		} elseif( $format == 'desc' ) {
+		} elseif ($format == 'desc') {
 			$fields = static::findDescFields();
 			$_format = '{' . implode('}, {',array_filter($fields)) . '}';
-		} elseif( $format == 'code&desc' ) {
+		} elseif ($format == 'code&desc') {
 			$fields = static::findCodeAndDescFields();
 			$_format = '{' . implode('}, {',array_filter($fields)) . '}';
 		} else {
@@ -178,10 +178,14 @@ trait ModelInfoTrait
 		return $ret;
 	}
 
-	public function linkToMe($base_route = '', $action = 'view')
+	public function linkToMe(string $format = 'long', string $action = 'view', string $base_route = null): string
 	{
-		$link = self::getModelInfo('controller_name') . "/$action/" . $this->getPrimaryKey();
-		return $base_route . $link;
+		if ($base_route == null) {
+			$base_route = Yii::$app->module?->id??'';
+		}
+		$link = self::getModelInfo('controller_name') . "/$action";
+		return \yii\helpers\Html::a($this->recordDesc($format, 0),
+				array_merge([$link], $this->getPrimaryKey(true)));
 	}
 
 	public function linkTo($action, $prefix = '', $format = 'short', $max_len = 0)
