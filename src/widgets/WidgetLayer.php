@@ -77,7 +77,7 @@ class WidgetLayer
 			if ($layout_of_row == 'inline') {
 				$cols = 10000;
 			} else {
-				$cols = intval($layout_of_row)?:1;
+				$cols = intval($layout_of_row)?:max(count($layout_row['content']), 4);
 			}
 			$type_of_row = $layout_row['type']??'widgets';
 			switch ($type_of_row) {
@@ -103,7 +103,6 @@ class WidgetLayer
 						$ret .= '</div></div>';
                         break;
                     case 'rows':
-						$cols = max(count($layout_row['content']), 4);
 						$ret .= "<div class=\"row $cols-cols-layout\">";
                         foreach ($layout_row['content'] as $kc => $content) {
                             $ret .= '<div class="' . $this->columnClasses($cols) . '">';
