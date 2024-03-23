@@ -129,7 +129,7 @@ class WidgetLayer
 				break;
 			case 'widgets':
 			case 'fields':
-				$nf = $indexf = 0;
+				$indexf = 0;
                 $only_widget_names = true;
                 foreach($layout_row as $lrk => $rl) {
                     if (is_array($rl)) {
@@ -144,14 +144,11 @@ class WidgetLayer
                 if (!isset($layout_row['style'])) {
 					$layout_row['style'] = $parent_style;
 				}
-				$has_widgets = false;
-				$must_add_row = true;
 				$ret .= '<div class=row>';
                 foreach ($layout_row['content'] as $widget_name ) {
 					$fs = '';
 					$open_divs = 0;
 					if ($widget = $this->widgets[$widget_name]??false) {
-						$has_widgets = true;
 						if ($widget instanceof \yii\bootstrap5\ActiveField ) {
 							// bs5 ActiveFields add a row container over the whole field
 							if ($widget->horizontalCssClasses['layout']??false) {
@@ -178,9 +175,6 @@ class WidgetLayer
 										break;
 								}
 							}
-							if ($widget_layout == 'full' && $nf != 0) {
-								while (++$nf%$cols != 0);
-							}
 							Html::addCssClass($widget->options, "layout-$layout_of_row");
 							$col_classes = $this->columnClasses($widget_layout == 'full' ? 1 : $cols);
 							$fs .=  "<div class=\"$col_classes\">";
@@ -190,7 +184,7 @@ class WidgetLayer
 								$open_divs++;
 							}
 							$fs .= $this->layoutActiveField($widget_name, $widget, $layout_row, $widget_layout, $layout_of_row, $indexf++);
-						} else if (is_array($widget)) {
+						} else if (is_array($widget)) { // Recordview attribute
 							$widget_layout = $widget['layout']??'large';
 							/// @todo refactor
 							if ($parent_size == 'small') {
@@ -212,26 +206,23 @@ class WidgetLayer
 										break;
 								}
 							}
-							$widget_options = $widget['htmlOptions']??[];
-							if ($parent_style == 'grid-cards') {
+							if ($parent_style == 'grid-cards' || $parent_style == 'grid') {
 								$col_classes = $this->columnClasses($widget_layout == 'full' ? 1 : $cols);
 								if ($col_classes) {
 									$fs .=  "<div class=\"$col_classes\">";
 									$open_divs++;
-								} else if ($widget_layout != 'full') {
-									if ($parent_style != 'grid-cards') {
-										$fs .= "<div class=w-100>";
-										$open_divs++;
-									} else {
-										$open_divs++;
-										$fs .= "<div class=\"row w-100\">";
-									}
 								}
-								$fs .= $this->layoutOneField($widget_name, $widget, $layout_row, $widget_layout, $layout_of_row, $widget_options, $indexf++);
+								if ($widget_layout != 'full') {
+									$open_divs++;
+									$fs .= "<div class=\"row w-100\">";
+								} else {
+									$widget['label'] = false;
+								}
+								$fs .= $this->layoutOneField($widget, $layout_row, $widget_layout, $indexf++);
 							} else {
 								$fs .= "<div class=\"row w-100\">";
 								$open_divs++;
-								$fs .= $this->layoutOneField($widget_name, $widget, $layout_row, $widget_layout, $layout_of_row, $widget_options, $indexf++);
+								$fs .= $this->layoutOneField($widget, $layout_row, $widget_layout, $indexf++);
 							}
 						} else {
 							throw new \Exception(get_class($widget) . ': invalid widget class');
@@ -239,7 +230,6 @@ class WidgetLayer
 						for ( ; $open_divs>0; $open_divs--) {
 							$fs .= '</div>';
 						}
-						$nf++;
 						// if (isset($layout_row['title']) && $type_of_row == 'widgetset' ) {
 						// 	$legend = Html::tag('legend', $layout_row['title'], $layout_row['title_options']??[]);
 						// 	$ret .= Html::tag('widgetset', $legend . $fs, array_merge( ['id' => $this->options['id'] . "_layout_$lrk" ], $layout_row['options']??[]) );
@@ -346,12 +336,13 @@ class WidgetLayer
 		return $fs;
 	}
 
-	protected function layoutOneField(string $widget_name, $widget, array $layout_row,
-		string $widget_layout, string $layout_of_row, array $widget_options, int $indexf): string
+	protected function layoutOneField(array $widget, array $layout_row,
+		string $widget_layout, int $indexf): string
 	{
 		$fs = '';
-		$row_style = $layout_row['style'];
-		switch ($row_style) {
+		$widget_name = $widget['attribute'];
+		$layout_of_row = $layout_row['layout']??'1col';
+		switch ($row_style = $layout_row['style']) {
 			case 'grid':
 			case 'grid-nolabels':
 				if ($widget_layout == 'checkbox') {

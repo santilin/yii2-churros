@@ -183,12 +183,11 @@ class JsonController extends \yii\web\Controller
 	}
 
 	/**
-		* Creates a new model by another data,
-		* so user don't need to input all field from scratch.
-		*
-		* @param mixed $id
-		* @return mixed
-		*/
+	 * Creates a new model by another data,so user don't need to input all field from scratch.
+	 *
+	 * @param mixed $id
+	 * @return mixed
+	 */
 	public function actionDuplicate($id)
 	{
 		$req = Yii::$app->request;
@@ -200,7 +199,7 @@ class JsonController extends \yii\web\Controller
 		$model->scenario = 'duplicate';
 		if ($model->loadAll($params, $relations) ) {
 			$model->setIsNewRecord(true);
-			if ($model->validate() && $model->saveAll(false)) {
+			if ($model->validate() && $model->save(false)) {
 				if ($req->getIsAjax()) {
 					return json_encode($model->getAttributes());
 				}
