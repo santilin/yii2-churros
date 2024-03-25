@@ -47,6 +47,9 @@ class YADTC extends \DateTime
 			if( is_string($datetime) ) {
 				$dt = self::createFromFormat($format, $datetime);
 				if( $dt !== false ) {
+					if (strpos(static::guessTypeFromFormat($format), "time") === FALSE) {
+						$dt->setTime(0,0,0);
+					}
 					return $dt;
 				}
 			}
@@ -561,7 +564,7 @@ class YADTC extends \DateTime
 		return $ret;
 	}
 
-	static public function guessTypeFromFormat($format)
+	static public function guessTypeFromFormat($format): string
 	{
 		$dateIndicators = ['d', 'j', 'D', 'l', 'N', 'S', 'w', 'z', 'W', 'F', 'm', 'M', 'n', 't', 'L', 'o', 'Y', 'y'];
 		$timeIndicators = ['a', 'A', 'B', 'g', 'G', 'h', 'H', 'i', 's', 'u', 'e', 'I', 'O', 'P', 'T', 'Z'];
