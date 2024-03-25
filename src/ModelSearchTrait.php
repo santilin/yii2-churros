@@ -59,7 +59,10 @@ trait ModelSearchTrait
 				|| array_key_exists($attribute, $this->attributes ) ) {
 				continue;
 			}
-			$attribute = $column_def['attribute'];
+			$attribute = $column_def['attribute']??null;
+			if ($attribute === null) {
+				continue;
+			}
 			if (strpos($attribute, '.') === FALSE) {
 				$relation_name = $attribute;
 				$sort_fldname = '';
