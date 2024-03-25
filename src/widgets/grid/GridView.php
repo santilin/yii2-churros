@@ -64,7 +64,7 @@ class GridView extends SimpleGridView
 			$has_filters = false;
 			$filter_attrs = $this->filterModel->activeAttributes();
 			foreach ($filter_attrs as $attr) {
-				if (property_exists($this->filterModel, $attr)) {
+				if (property_exists($this->filterModel, $attr) || $this->filterModel->hasAttribute($attr)) {
 					$has_filters = true;
 				}
 			}
