@@ -53,16 +53,16 @@ class FormHelper
 			foreach($views as $kv => $view_info ) {
 				if( $_nv-- == 0 ) {
 					// search_form, permissions
-					return [ $view_info[1], $view_info[2] ];
+					return [ $view_info[1], $view_info[2], $kv ];
 				}
 			}
 		} else {
 			if( isset($views[$_nv])	) {
-				return [ $views[$_nv][1], $views[$_nv][2] ];
+				return [ $views[$_nv][1], $views[$_nv][2], $vk ];
 			}
 		}
 		$index = reset(array_keys($views));
-		return [ $views[$index][1], $views[$index][2] ];
+		return [ $views[$index][1], $views[$index][2], $kv ];
 	}
 
 	/// @return [ view_name, title, $model, $permissions ]
