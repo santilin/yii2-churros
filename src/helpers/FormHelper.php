@@ -58,11 +58,11 @@ class FormHelper
 			}
 		} else {
 			if( isset($views[$_nv])	) {
-				return [ $views[$_nv][1], $views[$_nv][2], $vk ];
+				return [ $views[$_nv][1], $views[$_nv][2], $kv ];
 			}
 		}
-		$index = reset(array_keys($views));
-		return [ $views[$index][1], $views[$index][2], $kv ];
+		$index = array_key_first($views);
+		return [ $views[$index][1], $views[$index][2], $index ];
 	}
 
 	/// @return [ view_name, title, $model, $permissions ]

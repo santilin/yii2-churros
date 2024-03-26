@@ -104,8 +104,7 @@ class CrudController extends \yii\web\Controller
 		]);
 	}
 
-	public function indexDetails($master, string $view, string $search_model_class,
-								 array $index_params, $previous_context = null)
+	public function indexDetails($master, string $view, array $params, $previous_context = null, string $search_model_class = null)
 	{
 		$detail = $this->createSearchModel("$search_model_class{$view}_Search");
 		if (!$detail) {
@@ -115,17 +114,15 @@ class CrudController extends \yii\web\Controller
 			throw new \Exception("No {$search_model_class}_Search nor $search_model_class{$view}_Search class found in CrudController::indexDetails");
 		}
 		$related_field = $detail->getRelatedFieldForModel($master);
-		$index_params[$detail->formName()][$related_field] = $master->getPrimaryKey();
+		$params[$detail->formName()][$related_field] = $master->getPrimaryKey();
 		$detail->$related_field = $master->getPrimaryKey();
-		$index_params['master'] = $master;
-		$index_params['embedded'] = true;
-		$index_params['previous_context'] = $previous_context;
-		$related_field = $detail->getRelatedFieldForModel($master);
-		$index_params[$detail->formName()][$related_field] = $master->getPrimaryKey();
+		$params['master'] = $master;
+		$params['embedded'] = true;
+		$params['previous_context'] = $previous_context;
 		$this->layout = false;
 		return $this->render($view, [
 			'searchModel' => $detail,
-			'indexParams' => $this->changeActionParams($index_params, 'index', $detail),
+			'indexParams' => $this->changeActionParams($params, 'index', $detail),
 			'indexGrids' => [ '_grid' => [ '', null, [] ] ],
 			'gridName' => $view,
 		]);
@@ -143,7 +140,7 @@ class CrudController extends \yii\web\Controller
 		$model = $this->findModel($id, $params);
 		$params['permissions'] = FormHelper::resolvePermissions($params['permissions']??[], $this->crudActions);
 		if (Yii::$app->request->getIsAjax()) {
-			$this->layout = 'empty';
+			$this->layout = false;
 			return $this->render('_view', [
 				'model' => $model,
 				'viewForms' => [ '_view' => [ '', null, [], '' ] ],
