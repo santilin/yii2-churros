@@ -2,7 +2,6 @@
 
 namespace santilin\churros\widgets\grid;
 
-use yii\grid\DataColumn;
 use yii\helpers\Html;
 use yii\helpers\Url;
 /**
@@ -19,7 +18,7 @@ class ExpandableTextColumn extends DataColumn
 	public $captionOptions = ['class' => 'see-more-content'];
 	public $contentOptions = ['class' => 'see-more-container'];
 	public $modalBodyOptions = [];
-	public $modal_title = "Title";
+	public $modalTitle = null;
 
 
     /**
@@ -29,6 +28,9 @@ class ExpandableTextColumn extends DataColumn
      */
     protected function renderDataCellContent($model, $key, $index)
     {
+		if ($this->modalTitle === null) {
+			$this->modalTitle = $this->getHeaderCellLabel();
+		}
 		$text = $this->getDataCellValue($model, $key, $index);
 		if (!$text || !trim($text)) {
 			return '';
@@ -48,7 +50,7 @@ class ExpandableTextColumn extends DataColumn
 			<div class="modal-header bg-secondary text-white">
 				<button type="button" class="btn btn-primary p-1" data-bs-dismiss="modal" id="modalCopyClipBoardBtn_$key"><i class="bi bi-clipboard-plus"></i></button>
 				&nbsp;
-				<h5 class="modal-title fs-5" id="modalSeeMoreTitle_$key">$this->modal_title</h5>
+				<h5 class="modal-title fs-5" id="modalSeeMoreTitle_$key">$this->modalTitle</h5>
 				<button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
 			</div>
 			<div class="modal-body" id="modalSeeMoreContenido_$key">
