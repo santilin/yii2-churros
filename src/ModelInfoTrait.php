@@ -21,6 +21,7 @@ trait ModelInfoTrait
 		// crudScenarios is protected to avoid returning it in $model->attributes()
 		return $this->crudScenarios;
 	}
+	// For validators only
     static public function empty($value)
     {
 		return empty($value);

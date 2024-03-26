@@ -212,8 +212,10 @@ class WidgetLayer
 									$open_divs++;
 								}
 								if ($widget_layout != 'full') {
-									$open_divs++;
-									$fs .= "<div class=\"row w-100\">";
+									if ($parent_style != 'grid-cards') {
+										$open_divs++;
+										$fs .= "<div class=\"row w-100\">";
+									}
 								} else {
 									$widget['label'] = false;
 								}

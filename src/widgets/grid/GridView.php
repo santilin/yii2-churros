@@ -61,14 +61,20 @@ class GridView extends SimpleGridView
     public function renderItems()
     {
 		if ($this->filterModel && $this->dataProvider->getCount() == 0) {
+			// No mostrar la fila de filtro si no hay valores filtrados
+ 			$filter_attrs = $this->filterModel->activeAttributes();
 			$has_filters = false;
-			$filter_attrs = $this->filterModel->activeAttributes();
-			foreach ($filter_attrs as $attr) {
-				if (property_exists($this->filterModel, $attr) || $this->filterModel->hasAttribute($attr)) {
-					$has_filters = true;
+			foreach ($this->columns as $kc => $column) {
+				$attribute = $column->attribute??$kc;
+				if (in_array($attribute, $filter_attrs)) {
+					$v = $this->filterModel->$attribute;
+					if (!empty($v)) {
+						$has_filters = true;
+						break;
+					}
 				}
 			}
-			if (!$has_filters) {
+ 			if (!$has_filters) {
 				$this->showHeader = false;
 			}
 		}
