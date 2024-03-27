@@ -26,9 +26,9 @@ class YADTC extends \DateTime
 	 * el formato.
 	 * Si la fecha es incorrecta o ambigua, lanza una excepción.
 	 */
-	static public function fromString($datetime, $format = null)
+	static public function fromString($datetime, $format = null, $timezone = null)
 	{
-		if( $datetime === null || $datetime instanceof \DateTime || $datetime instanceof YADTC ) {
+		if( $datetime === null || $datetime instanceof YADTC ) {
 			return $datetime;
 		}
 		if( ($datetime instanceof \DateTime) ) {
@@ -40,18 +40,16 @@ class YADTC extends \DateTime
 		if( is_string($datetime) && $datetime == '' ) {
 			return null;
 		}
-		if( is_int($datetime) ) {
+		if (is_int($datetime)) {
 			return new YADTC('@$datetime');
 		}
-		if( $format !== null ) {
-			if( is_string($datetime) ) {
-				$dt = self::createFromFormat($format, $datetime);
-				if( $dt !== false ) {
-					if (strpos(static::guessTypeFromFormat($format), "time") === FALSE) {
-						$dt->setTime(0,0,0);
-					}
-					return $dt;
+		if ($format !== null && is_string($datetime)) {
+			$dt = self::createFromFormat($format, $datetime, $timezone);
+			if( $dt !== false ) {
+				if (strpos(static::guessTypeFromFormat($format), "time") === FALSE) {
+					$dt->setTime(0,0,0);
 				}
+				return $dt;
 			}
 		}
 		$sdate = trim((string)$datetime);
@@ -73,13 +71,16 @@ class YADTC extends \DateTime
 		];
 		foreach ($variations as $regexp => $format) {
 			if (preg_match ('|' . $regexp . '|', $sdate)) {
-				$datetime = self::createFromFormat($format, $sdate);
+				$datetime = self::createFromFormat($format, $sdate, $timezone);
 				if ($datetime !== false ) {
+					if (!str_contains($format, 'H')) {
+						$datetime->setTime(0,0,0);
+					}
 					return $datetime;
 				}
 			}
 		}
- 		throw new \Exception("No se reconoce el formato de la fecha '" . strval($sdate) . "'");
+ 		throw new \Exception("Invalid format of date '" . strval($sdate) . "'");
 	}
 
 	/**

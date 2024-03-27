@@ -404,12 +404,12 @@ trait ModelInfoTrait
 
 	public function addErrorsFrom(ActiveRecord $model, $key = null)
 	{
-		if( $key === null ) {
-			$key = static::bareTableName() . '_';
+		if ($key !== null) {
+			$key = $key . '.';
 		}
-		foreach( $model->getErrors() as $k => $error ) {
-			foreach( $error as $err_msg ) {
-				$this->addError(  $key . $k, $err_msg);
+		foreach ($model->getErrors() as $k => $error) {
+			foreach ($error as $err_msg) {
+				$this->addError($key . $k, $err_msg);
 			}
 		}
 	}
@@ -693,6 +693,19 @@ trait ModelInfoTrait
             }
         }
     }
+
+	public function addWarningsFrom(ActiveRecord $model, $key = null)
+	{
+		if ($key !== null) {
+			$key = $key . '.';
+		}
+		foreach ($model->getWarnings() as $k => $warning) {
+			foreach ($warning as $warn_msg ) {
+				$this->addWarning($key . $k, $warn_msg);
+			}
+		}
+	}
+
 
     /**
      * Removes warnings for all attributes or a single attribute.
