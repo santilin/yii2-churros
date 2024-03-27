@@ -251,7 +251,7 @@ class JsonController extends \yii\web\Controller
 	*/
 	public function actionDelete(string $id)
 	{
-		$model = $this->findModel($this->getPath(), $id);
+		$model = $this->findFormModel($this->getPath(), $id, null, 'delete');
 		try {
 			if ($model->delete()) {
 				if (Yii::$app->request->getIsAjax()) {
