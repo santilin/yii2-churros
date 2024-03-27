@@ -66,28 +66,31 @@ trait ControllerTrait
 		$this->addErrorFlashes($model);
 	}
 
-
 	protected function addErrorFlashes($model)
 	{
 		$errors = [];
-		foreach($model->getFirstErrors() as $error ) {
-			if( strpos($error, '{model_link}') !== FALSE ) {
-				$link_to_model = $this->linkToModel($model);
-				$errors[] = str_replace('{model_link}', $link_to_model, $error);
-			} else {
-				$errors[] = $error;
+		foreach($model->getErrors() as $error_fld => $error_msgs) {
+			foreach ($error_msgs as $error) {
+				if( strpos($error, '{model_link}') !== FALSE ) {
+					$link_to_model = $this->linkToModel($model);
+					$errors[] = str_replace('{model_link}', $link_to_model, $error);
+				} else {
+					$errors[] = $error;
+				}
 			}
 		}
 		if (count($errors)) {
 			Yii::$app->session->addFlash('error', implode("<br/>\n",$errors));
 		}
 		$warnings = [];
-		foreach($model->getFirstWarnings() as $warning ) {
-			if( strpos($warning, '{model_link}') !== FALSE ) {
-				$link_to_model = $this->linkToModel($model);
-				$warnings[] = str_replace('{model_link}', $link_to_model, $warning);
-			} else {
-				$warnings[] = $warning;
+		foreach($model->getWarnings() as $warning_fld => $warning_msgs) {
+			foreach ($warning_msgs as $warning) {
+				if( strpos($warning, '{model_link}') !== FALSE ) {
+					$link_to_model = $this->linkToModel($model);
+					$warnings[] = str_replace('{model_link}', $link_to_model, $warning);
+				} else {
+					$warnings[] = $warning;
+				}
 			}
 		}
 		if (count($warnings)) {
