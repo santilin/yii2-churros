@@ -106,8 +106,8 @@ class JsonController extends \yii\web\Controller
 		]);
 	}
 
-	public function indexDetails($master, string $view, string $search_model_class,
-								 array $index_params, $previous_context = null)
+	public function indexDetails($master, string $view, array $index_params,
+								 $previous_context = null, string $search_model_class = null)
 	{
 		$this->action = $this->createAction($previous_context->action->id);
 		$detail = $this->createSearchModel($master->fullPath(), "$search_model_class{$view}_Search");
@@ -121,26 +121,25 @@ class JsonController extends \yii\web\Controller
 			throw new \Exception("No {$search_model_class}_Search nor $search_model_class{$view}_Search class found in CrudController::indexDetails");
 		}
 		$related_field = $detail->getRelatedFieldForModel($master);
-		$index_params[$detail->formName()][$related_field] = $master->getPrimaryKey();
+		$params[$detail->formName()][$related_field] = $master->getPrimaryKey();
 		$detail->$related_field = $master->getPrimaryKey();
-		$index_params['master'] = $master;
-		$index_params['embedded'] = true;
-		$index_params['previous_context'] = $previous_context;
+		$params['master'] = $master;
+		$params['embedded'] = true;
+		$params['previous_context'] = $previous_context;
 		$this->layout = false;
 		return $this->render($view, [
 			'searchModel' => $detail,
-			'indexParams' => $this->changeActionParams($index_params, 'index', $detail),
+			'indexParams' => $this->changeActionParams($params, 'index', $detail),
 			'indexGrids' => [ '_grid' => [ '', null, [] ] ],
 			'gridName' => $view,
 		]);
 	}
 
-
 	/**
-		* Displays a single model.
-		* @param integer $id
-		* @return mixed
-		*/
+	 * Displays a single model.
+	 * @param integer $id
+	 * @return mixed
+	 */
 	public function actionView($id)
 	{
 		$params = Yii::$app->request->queryParams;
@@ -406,7 +405,7 @@ class JsonController extends \yii\web\Controller
 		return $redirect_params;
 	}
 
-	public function getActionRoute(?string $action_id, $model, $master_model = null): string
+	public function getActionRoute(string|array|null $action_id, $model, $master_model = null): string
 	{
 		if ($action_id) {
 			if (!$master_model) {
@@ -417,7 +416,7 @@ class JsonController extends \yii\web\Controller
 					. $model->getPath();
 			}
 // 			$route .= '/' . $model->getJsonId() ?: $model->getPrimaryKey();
-			$route .= '/' . $action_id;
+			$route .= '/' . Url::to($action_id);
 			return $route;
 		} else {
 			if (!$master_model) {
