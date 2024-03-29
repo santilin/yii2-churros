@@ -46,7 +46,7 @@ class JsonController extends \yii\web\Controller
 	/**
 	 * An array of extra params to pass to the views
 	 */
-	protected function changeActionParams(array $actionParams, string $action_id, $model)
+	protected function changeActionParams(array $actionParams, string $action_id, $model): array
 	{
 		return $actionParams;
 	}
@@ -106,7 +106,7 @@ class JsonController extends \yii\web\Controller
 		]);
 	}
 
-	public function indexDetails($master, string $view, array $index_params,
+	public function indexDetails($master, string $view, array $params,
 								 $previous_context = null, string $search_model_class = null)
 	{
 		$this->action = $this->createAction($previous_context->action->id);

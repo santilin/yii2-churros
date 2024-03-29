@@ -106,6 +106,7 @@ class CrudController extends \yii\web\Controller
 
 	public function indexDetails($master, string $view, array $params, $previous_context = null, string $search_model_class = null)
 	{
+		$this->action = $this->createAction($previous_context->action->id);
 		$detail = $this->createSearchModel("$search_model_class{$view}_Search");
 		if (!$detail) {
 			$detail = $this->createSearchModel("{$search_model_class}_Search");

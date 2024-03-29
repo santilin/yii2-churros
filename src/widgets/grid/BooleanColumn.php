@@ -9,18 +9,18 @@ namespace santilin\churros\widgets\grid;
 
 use Yii;
 use yii\base\Model;
-use yii\bootstrap4\Html;
+use yii\bootstrap5\Html;
 
 class BooleanColumn extends \yii\grid\DataColumn
 {
     /**
      * @var string $onTrue the contents to display when value is true.
      */
-    public $onTrue = '<span class="fa fa-check text-success"></span>';
+    public $onTrue = '<span class="bi bi-check text-success"></span>';
     /**
      * @var string $onFalse the contents to display when value is false.
      */
-    public $onFalse = '<span class="fa fa-times text-danger"></span>';
+    public $onFalse = '<span class="bi bi-x text-danger"></span>';
     /**
      * @inheritdoc
      */
