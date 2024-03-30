@@ -175,6 +175,7 @@ body.dark .record-view .field, .record-view label {
 	display: flex;
 	align-items: center;
 	justify-content: space-between;
+	margin-bottom: 3px;
 }
 
 .grid-view.isbs4 .grid-header {
