@@ -1,5 +1,5 @@
 <?php
-namespace santilin\churros\widgets\bs5;
+namespace santilin\churros\widgets;
 
 use yii\helpers\{ArrayHelper,Html};
 use yii\bootstrap5\ActiveForm as Bs5ActiveForm;

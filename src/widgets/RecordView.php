@@ -19,7 +19,7 @@ use yii\i18n\Formatter;
 use santilin\churros\ChurrosAsset;
 use santilin\churros\helpers\{AppHelper,FormHelper};
 use santilin\churros\widgets\WidgetLayer;
-use santilin\churros\widgets\bs5\ActiveForm;
+use santilin\churros\widgets\ActiveForm;
 
 /**
  * RecordView displays the detail of a single data [[model]].

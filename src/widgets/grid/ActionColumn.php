@@ -5,7 +5,7 @@
  * @license http://www.yiiframework.com/license/
  */
 
-namespace santilin\churros\widgets\bs5\grid;
+namespace santilin\churros\widgets\grid;
 
 use Yii;
 use yii\helpers\{Html,Url};

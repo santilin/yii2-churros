@@ -1,6 +1,6 @@
 <?php
 
-namespace santilin\churros\widgets\bs5;
+namespace santilin\churros\widgets;
 
 use Yii;
 
