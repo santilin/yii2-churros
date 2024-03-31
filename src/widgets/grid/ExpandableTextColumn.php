@@ -20,7 +20,6 @@ class ExpandableTextColumn extends DataColumn
 	public $modalBodyOptions = [];
 	public $modalTitle = null;
 
-
     /**
      * {@inheritdoc}
      * @todo Place the hellip instead of an space
@@ -41,28 +40,30 @@ class ExpandableTextColumn extends DataColumn
 		if( $this->length == 0 ) {// || strlen($text)<=$this->length) {
 			return $text;
 		} else {
+			$cell_key = $index . $this->attribute;
 			$truncated_text = trim(mb_substr(trim($text), 0, $this->length));
 			$encoded_text = Html::tag('p', Html::encode($text), $this->modalBodyOptions);
 			$modal = <<<modal
-<div class="modal fade" id="modalSeeMore_$key" tabindex="-1" aria-labelledby="modalSeeMore_$key" aria-hidden="true">
+<div class="modal fade" id="modalSeeMore_$cell_key" tabindex="-1" aria-labelledby="modalSeeMore_$cell_key" aria-hidden="true">
 	<div class="modal-dialog modal-dialog-centered modal-dialog-scrollable modal-md">
 		<div class="modal-content">
 			<div class="modal-header bg-secondary text-white">
-				<button type="button" class="btn btn-primary p-1" data-bs-dismiss="modal" id="modalCopyClipBoardBtn_$key"><i class="bi bi-clipboard-plus"></i></button>
+				<button type="button" class="btn btn-primary p-1" data-bs-dismiss="modal" id="modalCopyClipBoardBtn_$cell_key"><i class="bi bi-clipboard-plus"></i></button>
 				&nbsp;
-				<h5 class="modal-title fs-5" id="modalSeeMoreTitle_$key">$this->modalTitle</h5>
+				<h1 class="modal-title fs-5" id="modalSeeMoreTitle_$cell_key">$this->modalTitle</h5>
 				<button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
 			</div>
-			<div class="modal-body" id="modalSeeMoreContenido_$key">
+			<div class="modal-body" id="modalSeeMoreContent_$cell_key">
 $encoded_text
 			</div>
 		</div>
 	</div>
 </div>
 <script>
-let generateQuoteBtn_$key = document.querySelector('#modalCopyClipBoardBtn_$key');
-generateQuoteBtn_$key.addEventListener('click', () => {
-	let contenedor = document.getElementById('modalSeeMoreContenido_$key');
+/// todo: use class y data
+let generateQuoteBtn_$cell_key = document.querySelector('#modalCopyClipBoardBtn_$cell_key');
+generateQuoteBtn_$cell_key.addEventListener('click', () => {
+	let contenedor = document.getElementById('modalSeeMoreContent_$cell_key');
 	let text = contenedor.textContent;
 	text = text.trim();
 	var textArea = document.createElement("textarea");
@@ -81,7 +82,7 @@ modal;
 				'style' => 'position: absolute; right: 0; font-size:xx-small',
 				'data' => [
 					'bs-toggle' => 'modal',
-					'bs-target' => '#modalSeeMore_' . $key,
+					'bs-target' => "#modalSeeMore_$cell_key",
 				],
 			]);
 			return $modal . $text;

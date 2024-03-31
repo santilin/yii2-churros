@@ -92,9 +92,12 @@ class CrudController extends \yii\web\Controller
 		}
 		$params['permissions'] = FormHelper::resolvePermissions($params['permissions']??[], $this->crudActions);
 		if ($this->getMasterModel()) {
-			$related_field = $searchModel->getRelatedFieldForModel($this->getMasterModel());
-			$searchModel->setAttribute($related_field,
+			$related_field = $searchModel->relatedFieldForModel($this->getMasterModel());
+			if (is_array($related_field)) { // many2many
+			} else {
+				$searchModel->setAttribute($related_field,
 				$params[$searchModel->formName()][$related_field] = $this->getMasterModel()->getPrimaryKey());
+			}
 		}
 		$params = $this->changeActionParams($params, 'index', $searchModel);
 		return $this->render('index', [
@@ -114,9 +117,12 @@ class CrudController extends \yii\web\Controller
 		if (!$detail) {
 			throw new \Exception("No {$search_model_class}_Search nor $search_model_class{$view}_Search class found in CrudController::indexDetails");
 		}
-		$related_field = $detail->getRelatedFieldForModel($master);
-		$params[$detail->formName()][$related_field] = $master->getPrimaryKey();
-		$detail->$related_field = $master->getPrimaryKey();
+		$related_field = $detail->relatedFieldForModel($master);
+		if (is_array($related_field)) { // many2many
+		} else {
+			$params[$detail->formName()][$related_field] = $master->getPrimaryKey();
+			$detail->$related_field = $master->getPrimaryKey();
+		}
 		$params['master'] = $master;
 		$params['embedded'] = true;
 		$params['previous_context'] = $previous_context;
@@ -166,10 +172,6 @@ class CrudController extends \yii\web\Controller
 		$params = array_merge($req->get(), $req->post());
 		$params['permissions'] = FormHelper::resolvePermissions($params['permissions']??[], $this->crudActions);
 		$model = $this->findFormModel(null, null, 'create', $params);
-		if ($this->getMasterModel()) {
-			$related_field = $model->getRelatedFieldForModel($this->getMasterModel());
-			$model->setAttribute($related_field, $this->getMasterModel()->getPrimaryKey());
-		}
 		$model->scenario = 'create';
 
 		if (isset($_POST['_form_relations'])) $relations = explode(",", $_POST['_form_relations']); else $relations = [];

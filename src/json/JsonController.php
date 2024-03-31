@@ -120,7 +120,7 @@ class JsonController extends \yii\web\Controller
 		if (!$detail) {
 			throw new \Exception("No {$search_model_class}_Search nor $search_model_class{$view}_Search class found in CrudController::indexDetails");
 		}
-		$related_field = $detail->getRelatedFieldForModel($master);
+		$related_field = $detail->relatedFieldForModel($master);
 		$params[$detail->formName()][$related_field] = $master->getPrimaryKey();
 		$detail->$related_field = $master->getPrimaryKey();
 		$params['master'] = $master;

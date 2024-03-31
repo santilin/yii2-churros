@@ -370,20 +370,28 @@ trait ModelInfoTrait
 		return "$prefix$c/";
     }
 
-    public function getRelatedFieldForModel($related_model): ?string
+    public function relatedFieldForModel($related_model): string|array|null
     {
+		$cn = $related_model->className();
+		$relations = self::$relations;
 		foreach (self::$relations as $relname => $rel_info) {
-			$cn = $related_model->className();
-			if( $rel_info['modelClass'] == $cn ) {
+			if ($rel_info['modelClass'] == $cn) {
+				if ($rel_info['type'] == 'ManyToMany') {
+					/// @todo
+					return [$relname, $rel_info['right']];
+				}
 				$related_field = $rel_info['left'];
 				list($table, $field) = AppHelper::splitFieldName($related_field);
 				return $field;
 			}
 		}
 		// If it's a derived class like *Form, *Search, look up its parent
+		$cn = get_parent_class($related_model);
 		foreach (self::$relations as $relname => $rel_info) {
-			$cn = get_parent_class($related_model);
 			if( $rel_info['modelClass'] == $cn ) {
+				if ($rel_info['type'] == 'ManyToMany') {
+					continue;
+				}
 				$related_field = $rel_info['left'];
 				list($table, $field) = AppHelper::splitFieldName($related_field);
 				return $field;
@@ -391,16 +399,6 @@ trait ModelInfoTrait
 		}
 		return null;
     }
-
-    public function getRelatedModelClass($relation_name)
-    {
-		if( isset(self::$relations[$relation_name]) ) {
-			$rel_info = $this->relations[$relation_name];
-			return $rel_info['model'];
-		} else {
-			throw new \Exception( self::className() . ": not related to " . $related_model->className() );
-		}
-	}
 
 	public function addErrorsFrom(ActiveRecord $model, $key = null)
 	{
