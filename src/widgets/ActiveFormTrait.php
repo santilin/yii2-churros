@@ -3,7 +3,7 @@
 namespace santilin\churros\widgets;
 use yii\base\InvalidConfigException;
 use yii\helpers\{ArrayHelper,Html};
-use yii\bootstrap4\Tabs;
+use yii\bootstrap5\Tabs;
 use santilin\churros\helpers\{AppHelper,FormHelper};
 
 trait ActiveFormTrait

@@ -1,6 +1,6 @@
 <?php
 
-namespace santilin\churros\widgets;
+namespace santilin\churros\widgets\bs5;
 
 use Yii;
 
@@ -63,7 +63,7 @@ class SessionAlert extends \yii\base\Widget
 
             foreach ((array) $flash as $i => $message) {
                 if (!empty($message)) {
-                    echo \yii\bootstrap4\Alert::widget([
+                    echo \yii\bootstrap5\Alert::widget([
                         'body' => $message,
                         'closeButton' => $this->closeButton,
                         'options' => array_merge($this->htmlOptions, [
@@ -78,3 +78,4 @@ class SessionAlert extends \yii\base\Widget
         }
     }
 }
+

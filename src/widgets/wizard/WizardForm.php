@@ -4,7 +4,7 @@ namespace santilin\churros\widgets\wizard;
 use yii;
 use buttflattery\formwizard\FormWizard;
 use yii\helpers\{ArrayHelper,Html,Json};
-use yii\bootstrap4\ActiveForm;
+use yii\bootstrap5\ActiveForm;
 
 class WizardForm extends FormWizard
 {

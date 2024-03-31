@@ -5,7 +5,7 @@ use Yii;
 use yii\helpers\{ArrayHelper,Html};
 use santilin\churros\ModelSearchTrait;
 
-class SearchInput extends \yii\bootstrap4\InputWidget
+class SearchInput extends \yii\bootstrap5\InputWidget
 {
 	public $type = 'string';
 	public $searchOptions = [];
