@@ -498,7 +498,8 @@ trait ModelInfoTrait
 		return false;
 	}
 
-	public function defaultHandyFieldValues(string $field, string $format, string $model_format, ?string $scope)
+	public function handyFieldValues(string $field, string $format,
+		string $model_format = 'medium', array|string $scope=null, string $filter_fields = '')
 	{
 		throw new \Exception("field '$field' not supported in " . get_called_class() . "::handyFieldValues() ");
 	}
