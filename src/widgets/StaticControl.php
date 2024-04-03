@@ -8,6 +8,8 @@ use yii\helpers\Html;
 class StaticControl extends \yii\widgets\InputWidget
 {
 	public $value = null;
+	public $readonly = null;
+	public $tabindex = null;
 
 	public function run()
 	{
@@ -25,6 +27,9 @@ class StaticControl extends \yii\widgets\InputWidget
 			}
 		}
         Html::addCssClass($this->options, 'form-control-plaintext');
+		if (is_callable($value)) {
+			$value = call_user_func($value);
+		}
         $value = (string)$value;
 		return Html::tag('div', $value, $this->options);
 	}
