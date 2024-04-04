@@ -1,6 +1,3 @@
-## QuickDateInput
-- SpanishDateInput. Definir campo date_es
-
 # Sqlite3
 - Crear issue en github PRAGMA
 
@@ -10,6 +7,7 @@
 # CrudController
 * CrudController::pdf: Incluir css del módulo/modelo actual
 - Duplicar: imágenes, aparece el check para borrar la imagen.
+- update: Ya no aparece el check para elimiinar la imagen
 - Behaviors: access-control tiene que ejecutarse antes que verb, para que no dé error si no tiene acceso.
 
 # Reports:
@@ -25,7 +23,6 @@
 - yii2usuario: alert falla cuando se redirige de bs4 a bs3 porque no espera un array aquí: /home/santilin/devel/-yii2base/vendor/2amigos/yii2-usuario/src/User/resources/views/shared/_alert.php
 - Hay acceso a trivel.test/user/2
 - Añadir opción visible en profile en resources ... _menu.php: yiiparam('user_profile');
-- usuarios: grid: etiquetas salen en inglés.
 - Si no hay rbac, que no aparezcan los menús relacionados con roles, etc.
 
 # Adjuntos y subir ficheros
@@ -33,6 +30,7 @@
 	- tabla de adjuntos.
 	- behaviour
 	- behaviour con múltiple
+
 ## UploadBehavior
 * Fileuploadbehavior saveorigfname true
 - cuando da error otro campo que no es el file, se pierde el nombre del fichero original
@@ -48,7 +46,6 @@
 * Radio List: Ver cómo añadir el autofocus a cada item.
 * Añadir layout table recordview
 * Añadir showmore a form layout
-* Añadir inline a form layout
 
 ## Inactivatable date
 - Repensar el ActivatableInput
@@ -67,12 +64,10 @@
 
 ## GridView
 - layout admin, más compacto.
-- iconos de ordenar, en hasone si tiene código, icono numérico
 * GridView: Report : grupos: opciones para Mostrar encabezado, mostrar pie.
 * Grid Enlaces en el joinmodels: filtro en el grid por ese valor?
 * selectViews no funciona con pjax porque es un dropdown. Añadirlo dentro de un FORM
 * Grid: cuando se filtra, poner "Filtrando 1-1 de s"
-* Cuando sólo hay una página, no mostrar [1-3] de 3
 * BreadCrumbs: Index: Añadir el orden o el filtro ("filtrado") ("ordenado por")
 * 2 gridviews: https://www.yiiframework.com/doc/guide/2.0/en/output-data-widgets#multiple-gridviews
 
