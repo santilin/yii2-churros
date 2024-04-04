@@ -1,0 +1,16 @@
+.sortable-list {
+	list-style-type: none;
+	padding: 0;
+}
+
+.sortable-list li {
+	margin: 5px 0;
+	padding: 10px;
+	background-color: var(--bs-body-bg);
+	border: 1px solid #ccc;
+	cursor: move;
+}
+
+.sortable-list li:hover {
+	background-color: var(--bs-secondary-bg);
+}

@@ -3,7 +3,7 @@
 namespace santilin\churros;
 
 use Yii;
-use yii\helpers\Url;
+use yii\helpers\{Url,Html};
 use santilin\churros\helpers\{AppHelper,FormHelper};
 
 trait ControllerTrait
@@ -158,7 +158,8 @@ trait ControllerTrait
 		return join($glue, $attrs);
 	}
 
- 	public function joinHasManyModels($glue, $parent, $models, $record_format = 'long')
+ 	public function joinHasManyModels($parent, $models, $record_format = 'long',
+									  $tag = 'ul', $tag_options = [])
 	{
 		if( $models == null || count($models)==0 ) {
 			return "";
@@ -173,7 +174,14 @@ trait ControllerTrait
 				$attrs[] = "<a href='$url'>" .  $model->recordDesc($record_format) . "</a>";
 			}
 		}
-		return join($glue, $attrs);
+		switch ($tag) {
+			case 'ul':
+				return Html::tag($tag, '<li draggable="true">' . join('</li><li>', $attrs) . '</li>', $tag_options);
+			case 'raw':
+				return $attrs;
+			default:
+				return Html::tag($tag, join("</$tag><$tag>", $attrs), $tag_options);
+		}
 	}
 
 	public function addParamsToUrl($url, $params)
