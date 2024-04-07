@@ -19,7 +19,7 @@ class CardListView extends ListView
 {
 	public $options = [ 'class' => 'cardlistview'];
 	public $itemsOptions = [ 'class' => 'row mb-3' ];
-	public $cardOptions = [ 'class' => 'col col-md-6 col-lg-4 col-xxl-3 px-1 mb-1' ];
+	public $cardOptions = [ 'class' => 'col-12 col-sm-6 col-lg-4 col-xxl-3 px-1 mb-1' ];
 	public $layout = "{summarypager}\n{items}";
 	public $labelSingular = 'item';
 	public $labelPlural = 'items';
