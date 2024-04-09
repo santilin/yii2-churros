@@ -27,16 +27,22 @@ class ReorderableListInput extends \yii\widgets\InputWidget
 			$hid_options = [];
 		}
 		$ret = Html::activeHiddenInput($this->model, $this->attribute . '[]', $hid_options);
+		$hid_name = Html::getInputName($this->model, $this->attribute);
 		$lis = [];
 		$id = $this->options['id'] = $input_id . '_list';
 		$this->view->registerJs(<<<js
 $('#$id').sortable({
 	stop: function(event, ui) {
-		let ordered_values = [];
+		let frm = $('#$id').closest('form');
+		frm.find('input[name="{$this->attribute}[]"]').each( function(k,i) { console.log(i);});
 		$(this).find('li').each( function(k,li) {
-			ordered_values.push(li.dataset.id);
+			$('<input>').attr({
+				type: 'hidden',
+				name: '{$hid_name}[' + k + ']',
+				value: li.dataset.id
+			}).appendTo(frm);
+			console.log("Added hidden input " + $(li).data('id'));
 		});
-		$('#$input_id').val(ordered_values);
 	}
 });
 js

@@ -31,6 +31,9 @@ class ExpandableTextColumn extends DataColumn
 			$this->modalTitle = $this->getHeaderCellLabel();
 		}
 		$text = $this->getDataCellValue($model, $key, $index);
+		if (is_array($text)) {
+			$text = implode('<br/>', $text);
+		}
 		if (!$text || !trim($text)) {
 			return '';
 		}
