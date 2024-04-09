@@ -196,9 +196,9 @@ trait ModelInfoTrait
 			$url .= "/";
 		}
 		$url .= $this->controllerName();
-		if( $this->getIsNewRecord() ) {
+		if ($this->getIsNewRecord()) {
 			$url .= '/create';
-			return \yii\helpers\Html::a($this->t("Create {title}"), $url);
+			return \yii\helpers\Html::a($this->t('app', "Create {title}"), $url);
 		} else {
 			$url .= "/$action";
 			return \yii\helpers\Html::a($this->recordDesc($format, $max_len),
@@ -770,7 +770,7 @@ trait ModelInfoTrait
 	public function searchFilterWhere(&$query, string $fldname, $value, bool $is_and = true)
 	{
 		$value = static::toOpExpression($value, false );
-		if (!isset($value['v']) || $value['v'] === null || $value['v'] === '') {
+		if (!isset($value['v']) || $value['v'] === null || $value['v'] === '' || (is_array($value['v']) && empty($value['v'])) ) {
 			return;
 		}
  		$fullfldname = $this->tableName() . "." . $fldname;

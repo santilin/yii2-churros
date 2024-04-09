@@ -129,20 +129,26 @@ class FormHelper
 				$button['htmlOptions']['tabindex'] = static::ti();
 			}
 			$title = $button['title']??$name;
+			if( !isset($button['htmlOptions']['title']) ) {
+				$button['htmlOptions']['title'] = $title;
+			}
 			$icon = $button['icon']??null;
 			if( $icon ) {
 				if (substr($icon, 0, 1) == '/') {
 					$title = Html::img($icon, array_merge([
 						'class'=>'icon',
-						'aria' => [ 'hidden'=>'true' ],
+						'aria' => [ 'hidden'=>'true', 'label' => $title ],
 						'alt' => $title ], $button['iconOptions']??[]));
-				} elseif( strpos($icon, '<i') !== FALSE ) {
-					$title = "$icon $title";
 				} else {
-					$title = Html::tag('i', '', array_merge([
-						'class' => 'icon',
-						'aria' => [ 'hidden'=>'true' ],
-						'alt' => $title ], $button['iconOptions']??[])) . $title;
+					$hidable_title = "&nbsp;<span class=\"d-none d-lg-inline\">$title</span>";
+					if( strpos($icon, '<i') !== FALSE ) {
+						$title = $icon . $hidable_title;
+					} else {
+						$title = Html::tag('i', '', array_merge([
+							'class' => 'icon',
+							'aria' => [ 'hidden'=>'true', 'label' => $title ],
+							'alt' => $title ], $button['iconOptions']??[])) . $hidable_title;
+					}
 				}
 			}
 			switch( $button['type'] ) {
