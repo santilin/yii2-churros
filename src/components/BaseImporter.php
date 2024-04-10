@@ -93,7 +93,7 @@ abstract class BaseImporter
 
     public function __construct($options)
     {
-		foreach( $options as $option => $value ) {
+		foreach ($options as $option => $value) {
 			$this->$option = $value;
 		}
 		$this->record = $this->createModel();
@@ -243,7 +243,7 @@ abstract class BaseImporter
         return ($has_errors ? self::IMPORTED_WITH_ERRORS : self::OK);
     }
 
-    protected function importLine($import_fields_info, $csvheaders, $csvline): int
+    protected function importLine(array $import_fields_info, array $csvheaders, array $csvline): int
     {
 		if ($csvline === null) {
 			$this->add_error_get_last();
