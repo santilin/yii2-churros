@@ -132,7 +132,7 @@ class Base extends \Faker\Provider\Base
         return \str_random($max_digits);
     }
 
-    public function null(): null
+    public function null()
     {
 		return null;
 	}

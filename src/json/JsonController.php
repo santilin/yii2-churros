@@ -424,7 +424,7 @@ class JsonController extends \yii\web\Controller
 					. $model->getPath();
 			} else {
 				$route = $this->getRoutePrefix($this->getPath(), false)
-					. $model->getPath() . '/' . $model->jsonPath();
+					. $model->getPath();
 			}
 		}
 		return $route;
