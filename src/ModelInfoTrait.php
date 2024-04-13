@@ -372,6 +372,8 @@ trait ModelInfoTrait
 
     public function relatedFieldForModel($related_model): string|array|null
     {
+		$tc = get_class($this);
+		$oc = get_class($related_model);
 		$cn = $related_model->className();
 		$relations = self::$relations;
 		foreach (self::$relations as $relname => $rel_info) {
