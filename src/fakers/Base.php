@@ -27,7 +27,7 @@ class Base extends \Faker\Provider\Base
 		}
     }
 
-    public function integerUnsigned($max_digits = 18)
+    public function integerUnsigned($max_digits = 18): int
     {
 		if( $max_digits == 1 ) {
 			return $this->generator->randomDigit();
@@ -36,17 +36,17 @@ class Base extends \Faker\Provider\Base
 		}
     }
 
-    public function integerUnsignedOrNull($max_digits = 18)
+    public function integerUnsignedOrNull($max_digits = 18): ?int
     {
 		$n = $this->integerUnsigned($max_digits);
 		if( $n == 0 ) {
-			return 'null';
+			return null;
 		} else {
 			return $n;
 		}
 	}
 
-	public function integerUnsignedNonZero($max_digits = 18)
+	public function integerUnsignedNonZero($max_digits = 18): int
 	{
 		$n = $this->integerUnsigned($max_digits);
 		if( $n == 0 ) {
@@ -56,12 +56,12 @@ class Base extends \Faker\Provider\Base
 		}
 	}
 
-	public function smallInteger()
+	public function smallInteger(): int
     {
 		return $this->decimal(4);
     }
 
-	public function smallIntegerUnsigned()
+	public function smallIntegerUnsigned(): int
     {
 		return $this->decimalUnsigned(4);
     }
@@ -103,7 +103,7 @@ class Base extends \Faker\Provider\Base
 	/**
 	 * string of numbers with exactly $exact_digits chars
 	 */
-	public function integer_string($exact_digits = 16, $decimals = 0)
+	public function integer_string($exact_digits = 16, $decimals = 0): string
     {
 		assert($decimals < $exact_digits);
 		$ret = "";
@@ -122,17 +122,17 @@ class Base extends \Faker\Provider\Base
 		return $ret;
     }
 
-    public function bool()
+    public function bool(): bool
     {
 		return $this->generator->boolean();
 	}
 
-	public function str_random($max_digits)
+	public function str_random($max_digits): string
 	{
         return \str_random($max_digits);
     }
 
-    public function null()
+    public function null(): null
     {
 		return null;
 	}
@@ -160,7 +160,7 @@ class Base extends \Faker\Provider\Base
         return $contents;
 	}
 
-	public function hours()
+	public function hours(): string
 	{
 		return str_pad($this->generator->numberBetween(0,23), 2, '0', STR_PAD_LEFT)
 		. ':' . str_pad($this->generator->numberBetween(0,59), 2, '0', STR_PAD_LEFT);
