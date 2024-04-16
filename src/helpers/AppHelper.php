@@ -244,7 +244,16 @@ class AppHelper
 
     static public function userIsAdmin()
     {
-		return Yii::$app->user && Yii::$app->user->identity && Yii::$app->user->identity->isAdmin;
+		$m = Yii::$app->get('user');
+		if (!$m) {
+			return true;
+		}
+		if (Yii::$app->getAuthManager()) {
+			return $m->identity?->isAdmin;
+		} else {
+			$username = $m->identity->username;
+			return in_array($username, Yii::$app->getModule('user')->administrators);
+		}
 	}
 
 	static public function yiiparam($name, $default = null)
