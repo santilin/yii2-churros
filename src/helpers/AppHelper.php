@@ -245,11 +245,11 @@ class AppHelper
     static public function userIsAdmin()
     {
 		$m = Yii::$app->get('user');
-		if (!$m) {
+		if (!$m?->identity) {
 			return true;
 		}
 		if (Yii::$app->getAuthManager()) {
-			return $m->identity?->isAdmin;
+			return $m->identity->isAdmin;
 		} else {
 			$username = $m->identity->username;
 			return in_array($username, Yii::$app->getModule('user')->administrators);
