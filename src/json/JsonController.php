@@ -407,24 +407,13 @@ class JsonController extends \yii\web\Controller
 
 	public function getActionRoute(string|array|null $action_id, $model, $master_model = null): string
 	{
+		$route = $this->getRoutePrefix($this->getPath(), false)
+			. $model->getPath();
 		if ($action_id) {
-			if (!$master_model) {
-				$route = $this->getRoutePrefix($this->getPath(), false)
-					. $model->getPath();
+			if (is_array($action_id)) {
+				$route .= $action_id[0];
 			} else {
-				$route = $this->getRoutePrefix($this->getPath(), false)
-					. $model->getPath();
-			}
-// 			$route .= '/' . $model->getJsonId() ?: $model->getPrimaryKey();
-			$route .= '/' . Url::to($action_id);
-			return $route;
-		} else {
-			if (!$master_model) {
-				$route = $this->getRoutePrefix($this->getPath(), false)
-					. $model->getPath();
-			} else {
-				$route = $this->getRoutePrefix($this->getPath(), false)
-					. $model->getPath();
+				$route .= $action_id;
 			}
 		}
 		return $route;
