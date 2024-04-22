@@ -380,4 +380,23 @@ class AppHelper
 		}
 	}
 
+	static public function rmdirRecursive(string $dir)
+	{
+		if (is_dir($dir)) {
+			$objects = scandir($dir);
+			foreach ($objects as $object) {
+				if ($object != "." && $object != "..") {
+					if (filetype($dir . "/" . $object) == "dir") {
+						$this->rmdir_recursive($dir . "/" . $object);
+					} else {
+						unlink($dir . "/" . $object);
+					}
+				}
+			}
+			rmdir($dir);
+		}
+	}
+
+
+
 }
