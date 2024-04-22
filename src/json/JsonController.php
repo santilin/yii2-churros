@@ -375,6 +375,10 @@ class JsonController extends \yii\web\Controller
 		case 'index':
 		default:
 			$to = "index";
+			$new_model = $model->parentModel();
+			if ($new_model) {
+				$model = $new_model;
+			}
 			break;
 		case 'delete':
 			$to = 'view';
@@ -405,15 +409,16 @@ class JsonController extends \yii\web\Controller
 		return $redirect_params;
 	}
 
-	public function getActionRoute(string|array|null $action_id, $model, $master_model = null): string
+	public function getActionRoute(string|array|null $action_id, $model,
+	$json_root_model = null): string
 	{
 		$route = $this->getRoutePrefix($this->getPath(), false)
 			. $model->getPath();
 		if ($action_id) {
 			if (is_array($action_id)) {
-				$route .= $action_id[0];
+				$route .= '/' . $action_id[0];
 			} else {
-				$route .= $action_id;
+				$route .= "/$action_id";
 			}
 		}
 		return $route;
