@@ -387,7 +387,7 @@ class AppHelper
 			foreach ($objects as $object) {
 				if ($object != "." && $object != "..") {
 					if (filetype($dir . "/" . $object) == "dir") {
-						$this->rmdir_recursive($dir . "/" . $object);
+						static::rmdirRecursive($dir . "/" . $object);
 					} else {
 						unlink($dir . "/" . $object);
 					}
