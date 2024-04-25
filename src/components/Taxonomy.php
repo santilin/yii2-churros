@@ -57,4 +57,13 @@ class Taxonomy
 		return count($parts);
 	}
 
+	static public function findTitles(array $taxonomy): array
+	{
+		$ret = [];
+		foreach ($taxonomy['items']??[] as $k => $item) {
+			$ret[$k] = $item['title']??$k;
+		}
+		return $ret;
+	}
+
 } // class
