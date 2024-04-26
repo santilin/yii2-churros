@@ -502,8 +502,8 @@ class YADTC extends \DateTime
 	public function spanish($format = self::FORMAT_SPANISH)
 	{
 		$save_locale = setlocale(LC_TIME, 'es_ES');
- 		$format = str_replace('\\', '', self::date_format_to_strftime_format($format));
- 		$ret = strftime($format, $this->getTimeStamp());
+//  		$format = str_replace('\\', '', self::date_format_to_strftime_format($format));
+ 		$ret = date($format, $this->getTimeStamp());
  		$ret = strtr($ret, [
 			'January' => 'enero',
 			'February' => 'febrero',
