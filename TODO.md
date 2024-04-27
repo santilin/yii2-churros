@@ -1,3 +1,6 @@
+# Login yii2-usuario
+- Contraseña (recordar) no está bien el orden.
+
 # Sqlite3
 - Crear issue en github PRAGMA
 
@@ -128,7 +131,6 @@ Test: CrudOfertaCest. Cuando redirige de update a view, no se borra la aplicaci�
 
 
 # Third-party
-- https://wbraganca.com/yii2extensions/yii2-fancytree-widget/usage
 - Creación dinámica de etiquetas:
     - https://stackoverflow.com/questions/32731987/adding-new-list-options-refreshing-updated-list-dynamically
 * Full-text-search: https://www.sqlite.org/fts3.html#section_8_2
@@ -141,7 +143,6 @@ Test: CrudOfertaCest. Cuando redirige de update a view, no se borra la aplicaci�
 * Investigar estos widgets:
 - https://www.yiiframework.com/extension/yii2-sortable-behavior
 - https://www.yiiframework.com/extension/yii2-poll-widget
-- https://github.com/jonmiles/bootstrap-treeview
 * Optimizacion sqlite3
 https://stackoverflow.com/questions/1711631/improve-insert-per-second-performance-of-sqlite
 * https://craftcms.com/blog/craft-5-beta-released?s=35
