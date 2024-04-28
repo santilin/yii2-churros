@@ -186,15 +186,15 @@ trait ModelSearchTrait
 					throw new InvalidArgumentException($relation_name . ": relation not found in model " . self::class . ' (SearchModel::filterWhereRelated)');
 				}
 			}
-			if( $relation ) {
-				// Hay tres tipos de campos relacionados:
-				// 1. El nombre de la relación (attribute = '' )
-				// 2. Relación y campo: Productora.nombre
-				// 3. La clave foranea: productura_id
-				$table_alias = "as_$attribute";
-				// Activequery removes duplicate joins (added also in addSort)
-				$query->joinWith("$nested_relations $table_alias");
-			}
+			// if( $relation ) {
+			// 	// Hay tres tipos de campos relacionados:
+			// 	// 1. El nombre de la relación (attribute = '' )
+			// 	// 2. Relación y campo: Productora.nombre
+			// 	// 3. La clave foranea: productura_id
+			// 	$table_alias = "as_$attribute";
+			// 	// Activequery removes duplicate joins (added also in addSort)
+			// 	$query->joinWith("$nested_relations $table_alias");
+			// }
 		}
 
 		$value = static::toOpExpression($value, false );
@@ -225,10 +225,24 @@ trait ModelSearchTrait
 					$query->orWhere(["$table_alias.$right_fld" => null]);
 				}
 			} else {
-				if ($is_and) {
-					$query->andWhere(["$table_alias.$right_fld" => $value['v']]);
+				// Look for in code and desc fields also
+				$fields = array_unique(array_filter([$model->getModelInfo('code_field'), $model->getModelInfo('desc_field')]));
+				if (count($fields)==1) {
+					if ($is_and) {
+						$query->andWhere(["$table_alias.$right_fld" => $value['v']]);
+					} else {
+						$query->orWhere(["$table_alias.$right_fld" => $value['v']]);
+					}
 				} else {
-					$query->orWhere(["$table_alias.$right_fld" => $value['v']]);
+					$conds = ["or", [ "$table_alias.$right_fld" => $value['v']]];
+					foreach ($fields as $fld) {
+						$conds[] = [ "LIKE", "$table_alias.$fld", $value['v'] ];
+					}
+					if ($is_and) {
+						$query->andWhere($conds);
+					} else {
+						$query->orWhere("or", $conds);
+					}
 				}
 			}
 		} else {
