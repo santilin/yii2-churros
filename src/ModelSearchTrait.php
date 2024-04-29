@@ -197,7 +197,7 @@ trait ModelSearchTrait
 			// }
 		}
 
-		$value = static::toOpExpression($value, false );
+		$value = FormHelper::toOpExpression($value, false );
 		$search_flds = [];
 		if ($attribute == '') {
 			$search_flds = $model->findCodeAndDescFields();

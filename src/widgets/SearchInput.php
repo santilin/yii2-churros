@@ -3,7 +3,8 @@ namespace santilin\churros\widgets;
 
 use Yii;
 use yii\helpers\{ArrayHelper,Html};
-use santilin\churros\ModelSearchTrait;
+use santilin\churros\ModelInfoTrait;
+use santilin\churros\helpers\FormHelper;
 
 class SearchInput extends \yii\bootstrap5\InputWidget
 {
@@ -28,7 +29,7 @@ class SearchInput extends \yii\bootstrap5\InputWidget
 		$scope = $searchOptions['scope']??$this->model->formName();
 		// $this->model is a ModelSearchTrait
 		$value = $this->model->$attribute;
-		$value = ModelSearchTrait::toOpExpression($value, false);
+		$value = FormHelper::toOpExpression($value, false);
 		$ret .= "<div class='row form-inline'>";
 		$ret .= "<div class='operators control-form'>";
 		$ret .= Html::dropDownList("${scope}[$attribute][op]",

@@ -68,7 +68,7 @@ class FormHelper
 	/// @return [ view_name, title, $model, $permissions ]
 	static public function viewFromRequest(array $views, array $params): array
 	{
-		$_nv=$params[self::VIEWS_NVIEW_PARAM]??0;
+ 		$_nv=$params[self::VIEWS_NVIEW_PARAM]??0;
 		if( is_numeric($_nv) ) {
 			if ($_nv > (count($views)-1) ) {
 				$_nv = 0;
@@ -78,13 +78,42 @@ class FormHelper
 					return [ $kv, $view[0], $view[1], $view[2]??[], $view[3]??'' ];
 				}
 			}
+		} else if (empty($_nv)) {
+			return [ $_nv, $views[$_nv][0], $views[$_nv][1], $views[$_nv][2]??[], $views[$_nv][3]??''];
 		} else {
-			if (!isset($views[$_nv])) {
+			foreach ($views as $view => $view_info) {
+				if ($view == $_nv || AppHelper::lastWord($view,'/') == $_nv) {
+					return [ $view, $view_info[0], $view_info[1], $view_info[2]??[], $view_info[3]??''];
+				}
+			}
+			throw new InvalidConfigException("$_nv: view not found");
+		}
+	}
+
+	/// @return [ view_name, title, $model_name, $permissions ]
+	static public function reportFromRequest(array $views, array $params): array
+	{
+		$_nv=$params[self::VIEWS_NVIEW_PARAM]??false;
+		if ($_nv == false) {
+			return ['reports',null,null,[]];
+		}
+		if (is_numeric($_nv)) {
+			if ($_nv > (count($views)-1) ) {
+				$_nv = 0;
+			}
+			foreach($views as $kv => $view ) {
+				if( $_nv-- == 0 ) {
+					return [ $kv, $view[0], $view[1], $view[2]??[], $view[3]??'' ];
+				}
+			}
+		} else {
+			if (!isset($views[AppHelper::lastWord($_nv,'/')])) {
 				throw new InvalidConfigException("$_nv: view not found");
 			}
 			return [ $_nv, $views[$_nv][0], $views[$_nv][1], $views[$_nv][2]??[], $views[$_nv][3]??''];
 		}
 	}
+
 
 	public static function setConfig(string $form_name, string $name, $value)
 	{
@@ -398,6 +427,23 @@ ajax;
 	}
 
 
-
+	static public function toOpExpression($value, $strict)
+	{
+		if( isset($value['op']) ) {
+			if (isset($value['lft'])) {
+				return [ 'op' => $value['op'], 'v' => $value['lft'] ];
+			} else {
+				return $value;
+			}
+		}
+		if( is_string($value) && $value != '') {
+			if( substr($value,0,2) == '{"' && substr($value,-2) == '"}' ) {
+				return json_decode($value, true);
+			} else if( preg_match('/^(=|<>|<=|>=|>|<)(.*)$/', $value, $matches) ) {
+				return [ 'v' => $matches[2], 'op' => $matches[1] ];
+			}
+		}
+		return [ 'op' => $strict ? '=' : 'LIKE', 'v' => $value ];
+	}
 
 } // class

@@ -560,7 +560,7 @@ class CrudController extends \yii\web\Controller
 				'url' => $this->getActionRoute('index', $model)
 			];
 		} else {
-			if (FormHelper::hasPermission($permissions, 'index') && $action_id != 'index') {
+			if (FormHelper::hasPermission($permissions, 'index')) {
 				$breadcrumbs[] = [
 					'label' =>  $model->getModelInfo('title_plural'),
 					'url' => [ $this->id . '/index' ]

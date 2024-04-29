@@ -185,8 +185,11 @@ class AppHelper
 
 	static public function lastWord($sentence, $sep = ' ')
 	{
-		$last_word_start = strrpos($sentence, $sep) + 1; // +1 so we don't include the space in our result
-		$last_word = substr($sentence, $last_word_start);
+		$last_word_start = strrpos($sentence, $sep);
+		if ($last_word_start === false) {
+			return $sentence;
+		}
+		$last_word = substr($sentence, $last_word_start + 1); // +1 so we don't include the space in our result
 		return $last_word;
 	}
 
@@ -246,7 +249,7 @@ class AppHelper
     {
 		$m = Yii::$app->get('user');
 		if (!$m?->identity) {
-			return true;
+			return false;
 		}
 		if (Yii::$app->getAuthManager()) {
 			return $m->identity->isAdmin;

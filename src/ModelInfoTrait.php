@@ -4,7 +4,7 @@ use Yii;
 use yii\db\ActiveRecord;
 use yii\base\{InvalidConfigException,InvalidArgumentException};
 use yii\helpers\ArrayHelper;
-use santilin\churros\helpers\{YADTC,AppHelper};
+use santilin\churros\helpers\{YADTC,AppHelper,FormHelper};
 use santilin\churros\ModelSearchTrait;
 
 trait ModelInfoTrait
@@ -824,7 +824,7 @@ trait ModelInfoTrait
 
 	public function reportFilterWhere(&$query, $fldname, $value)
 	{
-		$value = static::toOpExpression($value, false );
+		$value = FormHelper::toOpExpression($value, false );
 		if (!isset($value['v']) || $value['v'] === null) {
 			return;
 		}
@@ -836,31 +836,12 @@ trait ModelInfoTrait
 	 */
 	public function searchFilterWhere(&$query, string $fldname, $value, bool $is_and = true)
 	{
-		$value = static::toOpExpression($value, false );
+		$value = FormHelper::toOpExpression($value, false );
 		if (!isset($value['v']) || $value['v'] === null || $value['v'] === '' || (is_array($value['v']) && empty($value['v'])) ) {
 			return;
 		}
  		$fullfldname = $this->tableName() . "." . $fldname;
 		$this->addFieldToFilterWhere($query, $fullfldname, $value, $is_and);
-	}
-
-	static public function toOpExpression($value, $strict)
-	{
-		if( isset($value['op']) ) {
-			if (isset($value['lft'])) {
-				return [ 'op' => $value['op'], 'v' => $value['lft'] ];
-			} else {
-				return $value;
-			}
-		}
-		if( is_string($value) && $value != '') {
-			if( substr($value,0,2) == '{"' && substr($value,-2) == '"}' ) {
-				return json_decode($value, true);
-			} else if( preg_match('/^(=|<>|<=|>=|>|<)(.*)$/', $value, $matches) ) {
-				return [ 'v' => $matches[2], 'op' => $matches[1] ];
-			}
-		}
-		return [ 'op' => $strict ? '=' : 'LIKE', 'v' => $value ];
 	}
 
 	public function addFieldToFilterWhere(&$query, string $fldname, array $value, bool $is_and = true)
