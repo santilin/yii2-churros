@@ -140,7 +140,7 @@ class TableListView extends ListView
     {
 		$col_contents = [];
 		foreach ($this->columns as $kc => $column) {
-			if (is_callable($column['value'])) {
+			if (is_callable($column['value']??null)) {
 				$col_value = call_user_func($column['value'], $model, $key, $index);
 			} else {
 				$col_value = $model->$kc;
