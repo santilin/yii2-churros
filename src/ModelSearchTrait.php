@@ -123,22 +123,39 @@ trait ModelSearchTrait
 		}
 	}
 
-	/*
-	 * Intenta poner un valor legible en el filtro del gridview
+	/**
+	 * Sets a value in the grid filter row that can be parsed afterwards
 	 */
 	public function transformGridFilterValues()
 	{
-		foreach( array_merge($this->normal_attrs, array_keys($this->related_properties)) as $attr ) {
+		foreach( array_merge(array_keys($this->normal_attrs), array_keys($this->related_properties)) as $attr ) {
 			$value = $this->$attr;
-			if( substr($value,0,2) == '{"' && substr($value,-2) == '"}' ) {
-				$value = json_decode($value, true);
+			if ($value === null || $value === '') {
+				continue;
 			}
-			if( isset($value['v']) ) {
-				if( in_array($value['op'], ['=','<','>','<=','>=','<>'] ) ) {
+			if (!is_array($value)) {
+				if( substr($value,0,2) == '{"' && substr($value,-2) == '"}' ) {
+					$value = json_decode($value, true);
+				} else {
+					$love = true;
+				}
+			}
+			if ($value['v']!=='') {
+				if ($value['op'] == '=') {
+					if (!is_array($value['v'])) {
+						$this->$attr = "=" . $value['v'];
+					} else if (count($value['v'])==1) {
+						$this->$attr = "=" . $value['v'][0];
+					} else {
+						$this->$attr = "IN('" . implode("','",$value['v']) . "')";
+					}
+				} else if (in_array($value['op'], ['<','>','<=','>=','<>'] ) ) {
 					$this->$attr = $value['op'] . $value['v'];
 				} else if( $value['op'] == 'LIKE' ) {
-					$this->$attr = $value['v'];
+					$this->$attr = "LIKE '%{$value['v']}%'";
 				}
+			} else {
+				$this->$attr = '';
 			}
 		}
 	}

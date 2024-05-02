@@ -8,17 +8,12 @@ use santilin\churros\helpers\FormHelper;
 
 class SearchInput extends \yii\bootstrap5\InputWidget
 {
-	public $type = 'string';
-	public $searchOptions = [];
+ 	public string $type = 'string';
+	public ?string $formName;
+	public array $dropDownValues = [];
 
 	public function run()
 	{
-		$searchOptions = $this->searchOptions;
-		if( array_key_exists( 'values', $searchOptions ) ) {
-			$dropdown_values = $searchOptions['values'];
-		} else {
-			$dropdown_values = null;
-		}
 		$attribute = $this->attribute;
 		$attr_class = str_replace('.','_',$attribute);
 		switch( $this->type ) {
@@ -26,34 +21,40 @@ class SearchInput extends \yii\bootstrap5\InputWidget
 			$control_type = 'text';
 		}
 		$ret = '';
-		$scope = $searchOptions['scope']??$this->model->formName();
+		$scope = $this->formName??$this->model->formName();
 		// $this->model is a ModelSearchTrait
 		$value = $this->model->$attribute;
-		$value = FormHelper::toOpExpression($value, false);
+		$value = FormHelper::toOpExpression($value, false, $this->model->operatorForAttr($attribute));
 		$ret .= "<div class='row form-inline'>";
-		$ret .= "<div class='operators control-form'>";
-		$ret .= Html::dropDownList("${scope}[$attribute][op]",
-			$value['op'], FormHelper::$operators, [
-			'id' => "drop-op-$attr_class", 'class' => 'search-dropdown',
-			'Prompt' => 'Operador']);
-		$ret .= "</div>";
+		$ret .= "<div class='left-field control-form'>";
 
-		if( is_array($dropdown_values) || is_array($value['v']) ) {
-			$ret .= "<div class='left-field control-form'>";
+		if ($this->type == 'dropdown') {
+			Html::addCssClass($this->options, 'form-select');
+			$ret .= Html::hiddenInput("${scope}[$attribute][op]", $value['op']);
+ 			foreach ($value['v'] as $k => $v) { // @todo se puede saber si es '' o no
+				if ($v && $v[0] == "'") {
+					$value['v'][$k] = intval(substr($v,1,-1));;
+				}
+			}
 			$ret .= Html::dropDownList("${scope}[$attribute][v]",
-				$value['v'], $dropdown_values,
-				array_merge($searchOptions['htmlOptions']??[], [ 'prompt' => Yii::t('churros', 'Cualquiera')]));
-			$ret .= "</div>";
+				(array)$value['v'], $this->dropDownValues, $this->options);
 		} else {
+			$ret .= "<div class='operators control-form'>";
+			$ret .= Html::dropDownList("${scope}[$attribute][op]",
+				$value['op'], FormHelper::$operators, [
+				'id' => "drop-op-$attr_class", 'class' => 'search-dropdown',
+				'Prompt' => 'Operador']);
 			$ret .= <<<EOF
 	<div class="input-group col-sm-5">
 EOF;
-			$ret .= Html::input($control_type, "${scope}[$attribute][v]", $value['v'],
-				array_merge($searchOptions['htmlOptions']??[], [ 'class' => 'form-control' ]));
+			Html::addCssClass($this->options, 'form-control');
+			$ret .= Html::input($control_type, "${scope}[$attribute][v]", $value['v'], $this->options);
 			$ret .= <<<EOF
     </div>
 EOF;
 		}
+		$ret .= "</div>";
+		$ret .= "</div>";
 		$ret .= "</div><!-- row -->";
 		return $ret;
 	}

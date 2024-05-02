@@ -262,6 +262,9 @@ ajax;
 			case 'submit':
 				$ret[] = Html::submitButton($title, $button['htmlOptions']);
 				break;
+			case 'reset':
+				$ret[] = Html::submitButton($title, $button['htmlOptions']);
+				break;
 			case 'button':
 				if( isset($button['url']) && !isset($button['htmlOptions']['onclick']) ) {
 					if( is_array($button['url']) ) {
@@ -427,23 +430,30 @@ ajax;
 	}
 
 
-	static public function toOpExpression($value, $strict)
+	static public function toOpExpression($value, bool $strict, string $def_operator = null): array
 	{
-		if( isset($value['op']) ) {
+		if( is_string($value) && $value != '') {
+			if( substr($value,0,2) == '{"' && substr($value,-2) == '"}' ) {
+				return json_decode($value, true);
+			} else if (preg_match('/^(=|<>|<=|>=|>|<)(.*)$/', $value, $matches)) {
+				return [ 'v' => $matches[2], 'op' => $matches[1] ];
+			} else if (preg_match("/^IN\((.*)\)$/", $value, $matches)) {
+				return [ 'v' => explode(',',$matches[1]), 'op' => '=' ];
+			}
+		}
+		if (isset($value['op']) ) {
 			if (isset($value['lft'])) {
 				return [ 'op' => $value['op'], 'v' => $value['lft'] ];
 			} else {
 				return $value;
 			}
 		}
-		if( is_string($value) && $value != '') {
-			if( substr($value,0,2) == '{"' && substr($value,-2) == '"}' ) {
-				return json_decode($value, true);
-			} else if( preg_match('/^(=|<>|<=|>=|>|<)(.*)$/', $value, $matches) ) {
-				return [ 'v' => $matches[2], 'op' => $matches[1] ];
-			}
+		if ($def_operator) {
+			return [ 'op' => $def_operator, 'v' => $value ];
+		} else {
+			return [ 'op' => $strict ? '=' : 'LIKE', 'v' => $value ];
 		}
-		return [ 'op' => $strict ? '=' : 'LIKE', 'v' => $value ];
 	}
+
 
 } // class
