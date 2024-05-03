@@ -201,14 +201,16 @@ class SimpleGridView extends \yii\grid\GridView
 	{
 		$this->current_level = 0; // details
 		$level = 1;
-		foreach( $this->groups as $kg => $group_def ) {
+ 		$orderby = [];
+		foreach ($this->groups as $kg => $group_def) {
             if (is_string($group_def)) {
-                $group = $this->createGroup($group_def);
+                $group = GridGroup::fromString($group_def);
 				$group->footer = true;
             } else {
                 $group = Yii::createObject(array_merge([
                     'class' => GridGroup::className(),
                     'grid' => $this,
+					'column' => $kg,
                 ], $group_def));
             }
             if (!$group->visible) {
@@ -217,7 +219,13 @@ class SimpleGridView extends \yii\grid\GridView
             }
             $group->level = $level++;
             $this->groups[$kg] = $group;
+			if (!$group->orderby) {
+				$group->orderby = $group->column;
+			}
+			$orderby[] = $group->orderby;
         }
+		$this->dataProvider->query->orderBy(join(',',$orderby) . ',' . $this->dataProvider->query->orderBy);
+
 	}
 
 	// override

@@ -24,27 +24,20 @@ class GridGroup extends BaseObject
 	 * @var string The column we are grouping by
 	 */
 	public $column;
-
-	public $header;
-
-	public $footer;
-
-	public $visible = true;
-
-	public $value;
-
-	public $group_change = false;
-
-
-	public $format;
+	public $header = true;
 	public $header_format;
-	public $footer_format;
-	public $label;
 	public $header_label;
+	public $footer = true;
+	public $footer_format;
 	public $footer_label;
+	public $visible = true;
+	public $value;
+	public $format;
+	public $label;
+	public $orderby;
 
 	public $level = 0;
-
+	protected $group_change = false;
 	protected $got_value = false;
 	protected $last_value = null, $current_value = null;
 	protected $summaryValues = [];
@@ -65,7 +58,7 @@ class GridGroup extends BaseObject
 			if( $this->value instanceOf \Closure ) {
 				$this->current_value = call_user_func($this->value, $model, $key, $index, $this->grid);
 			} else {
-				$this->current_value = ArrayHelper::getValue($model, $this->column);
+				$this->current_value = $this->grid->columns[$this->column]->getDataCellValue($model, $key, $index);
 			}
 		} else {
 			$this->got_value = false;
@@ -88,7 +81,7 @@ class GridGroup extends BaseObject
 		if( $this->value instanceOf \Closure ) {
 			$this->current_value = call_user_func($this->value, $model, $key, $index, $this->grid);
 		} else {
-			$this->current_value = ArrayHelper::getValue($model, $this->column);
+			$this->current_value = $this->grid->columns[$this->column]->getDataCellValue($model, $key, $index);
 		}
 		$this->got_value = true;
 		if( $this->last_value !== $this->current_value) {
@@ -104,11 +97,11 @@ class GridGroup extends BaseObject
 		if( $this->grid->onlySummary && $this->level < count($this->grid->groups) ) {
 			return '';
 		}
-		$hc = isset($this->header['content']) ? $this->header['content'] : $this->header;
+		$hc = $this->header['content']??$this->header;
 		if( $hc instanceOf \Closure ) {
 			return call_user_func($hc, $model, $key, $index, $this);
 		} else {
-			$format = isset($this->header_format) ? $this->header_format : (isset($this->format) ? $this->format : 'raw');
+			$format = $this->header_format?:$this->format?:'raw';
 			switch($format) {
 				case 'string':
 				case 'integer':
@@ -201,8 +194,11 @@ class GridGroup extends BaseObject
 	public function getSummaryContent($summary_columns, $content)
 	{
 		$colspan = 0;
-		foreach( $this->grid->columns as $column ) {
+		foreach ($this->grid->columns as $column) {
 			if( $column->visible ) {
+				if (!$column instanceof $this->grid->dataColumnClass) {
+					continue;
+				}
 				if( !isset($summary_columns[$column->attribute]) ) {
 					$colspan++;
 				} else {
@@ -217,6 +213,9 @@ class GridGroup extends BaseObject
 		$ret = Html::tag('td', Yii::t('churros', "Totals") . ' ' . $content, $tdoptions );
 		$nc = 0;
 		foreach( $this->grid->columns as $column ) {
+			if (!$column instanceof $this->grid->dataColumnClass) {
+				continue;
+			}
 			$kc = $column->attribute;
 			if( $nc++ < $colspan ) {
 				continue;

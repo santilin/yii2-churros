@@ -40,6 +40,21 @@ trait ModelSearchTrait
 		}
 	}
 
+    public function operatorForAttr(string $attr): string
+	{
+		if (array_key_exists($attr, $this->related_properties)) {
+			return '=';
+		} else {
+			if (array_key_exists($attr, $this->normal_attrs)) {
+				return $this->normal_attrs[$attr];
+			} else if ($attr == 'id') {
+				return '=';
+			} else {
+				return 'LIKE';
+			}
+		}
+	}
+
 	public function addScopes( $scopes, &$provider )
 	{
 		foreach( $scopes as $scope ) {
@@ -128,6 +143,7 @@ trait ModelSearchTrait
 	 */
 	public function transformGridFilterValues()
 	{
+		return;
 		foreach( array_merge(array_keys($this->normal_attrs), array_keys($this->related_properties)) as $attr ) {
 			$value = $this->$attr;
 			if ($value === null || $value === '') {
@@ -162,14 +178,14 @@ trait ModelSearchTrait
 
 	protected function filterWhereRelated(&$query, $relation_name, $value, $is_and = true)
 	{
-		if ($value === null || $value === '') {
+		if ($value === null || $value === '' || (is_array($value) && $value['v'] ==='')) {
 			return;
 		}
 		$model = $this;
 		$nested_relations = '';
 		if (strpos($relation_name, '.') === FALSE) {
 			$relation = $model::$relations[$relation_name]??null;
-			if( $relation ) {
+			if ($relation) {
 				// Hay tres tipos de campos relacionados:
 				// 1. El nombre de la relación (attribute = '' )
 				// 2. Relación y campo: Productora.nombre
@@ -214,13 +230,18 @@ trait ModelSearchTrait
 			// }
 		}
 
-		$value = FormHelper::toOpExpression($value, false );
+		$value = FormHelper::toOpExpression($value, false, $this->operatorForAttr($attribute?:$relation_name) );
 		$search_flds = [];
 		if ($attribute == '') {
 			$search_flds = $model->findCodeAndDescFields();
 			$rel_conds = [ 'OR' ];
 			foreach( $search_flds as $search_fld ) {
-				$rel_conds[] = [$value['op'], "$table_alias.$search_fld", $value['v']];
+				$fld_conds = [ 'OR' ];
+				$operator = $this->operatorForAttr($search_fld);
+				foreach ((array)$value['v'] as $v) {
+					$fld_conds[] = [ $operator, "$table_alias.$search_fld", $v];
+				}
+				$rel_conds[] = $fld_conds;
 			}
 			if ($is_and) {
 				$query->andWhere($rel_conds);

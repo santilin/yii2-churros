@@ -31,13 +31,17 @@ class SearchInput extends \yii\bootstrap5\InputWidget
 		if ($this->type == 'dropdown') {
 			Html::addCssClass($this->options, 'form-select');
 			$ret .= Html::hiddenInput("${scope}[$attribute][op]", $value['op']);
- 			foreach ($value['v'] as $k => $v) { // @todo se puede saber si es '' o no
-				if ($v && $v[0] == "'") {
-					$value['v'][$k] = intval(substr($v,1,-1));;
+			if (is_array($value['v'])) {
+				foreach ($value['v'] as $k => $v) { // @todo se puede saber si es '' o no
+					if ($v && $v[0] == "'") {
+						$value['v'][$k] = intval(substr($v,1,-1));;
+					}
 				}
+			} else {
+				$value['v'] = (array)$value['v'];
 			}
 			$ret .= Html::dropDownList("${scope}[$attribute][v]",
-				(array)$value['v'], $this->dropDownValues, $this->options);
+				$value['v'], $this->dropDownValues, $this->options);
 		} else {
 			$ret .= "<div class='operators control-form'>";
 			$ret .= Html::dropDownList("${scope}[$attribute][op]",
