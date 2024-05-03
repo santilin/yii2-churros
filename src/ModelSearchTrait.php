@@ -178,7 +178,8 @@ trait ModelSearchTrait
 
 	protected function filterWhereRelated(&$query, $relation_name, $value, $is_and = true)
 	{
-		if ($value === null || $value === '' || (is_array($value) && $value['v'] ==='')) {
+		if ($value === null || $value === '' ||
+			( is_array($value) && ($value['v']??''===''))) {
 			return;
 		}
 		$model = $this;
