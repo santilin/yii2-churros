@@ -252,10 +252,10 @@ class AppHelper
 			return false;
 		}
 		if (Yii::$app->getAuthManager()) {
-			return $m->identity->isAdmin;
+			return $m->identity->getIsAdmin();
 		} else {
 			$username = $m->identity->username;
-			return in_array($username, Yii::$app->getModule('user')->administrators);
+			return in_array($username, $m->administrators);
 		}
 	}
 
