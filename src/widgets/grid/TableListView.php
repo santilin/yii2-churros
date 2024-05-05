@@ -18,7 +18,7 @@ use santilin\churros\ChurrosAsset;
  */
 class TableListView extends ListView
 {
-	public $options = [ 'class' => 'table-list-view'];
+	public $options = [];
 	public $itemOptions = [ 'class' => 'tlv-row' ];
 	public $layout = "{summarypager}\n{header}\n{items}";
 	public $model = null;
@@ -50,6 +50,7 @@ class TableListView extends ListView
 		if( !isset($this->columns) ) {
 			throw new InvalidConfigException("TableListView: the property \$columns must be set");
 		}
+		$this->options = array_merge($this->options, [ 'class' => 'table-list-view' ]);
         if ($this->formatter === null) {
             $this->formatter = Yii::$app->getFormatter();
         } elseif (is_array($this->formatter)) {
