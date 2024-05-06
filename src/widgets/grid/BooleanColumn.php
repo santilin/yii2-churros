@@ -71,9 +71,9 @@ class BooleanColumn extends \yii\grid\DataColumn
     /**
      * @inheritdoc
      */
-    public function getDataCellValue($model, $key, $index)
+    protected function renderDataCellContent($model, $key, $index)
     {
-        $value = parent::getDataCellValue($model, $key, $index);
+        $value = $this->getDataCellValue($model, $key, $index);
         if( is_bool($value) ) {
             return $value ? $this->onTrue : $this->onFalse;
 		}

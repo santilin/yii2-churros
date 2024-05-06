@@ -19,6 +19,7 @@ class GridView extends SimpleGridView
 	public $condensed = false;
 	public $hover = false;
 	public $layout = "{summary}\n{selectViews}\n{items}\n{pager}";
+	public $savedColumnValues = [];
 
 
 	public function init()

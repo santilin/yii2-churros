@@ -35,11 +35,11 @@ class GridGroup extends BaseObject
 	public $format;
 	public $label;
 	public $orderby;
+	public $show_column = true;
 
 	public $level = 0;
 	protected $group_change = false;
-	protected $got_value = false;
-	protected $last_value = null, $current_value = null;
+	protected $got_value = false, $last_value = null, $current_value = null;
 	protected $summaryValues = [];
 	protected $last_group_changed = false;
 
@@ -57,8 +57,10 @@ class GridGroup extends BaseObject
 		if( $this->got_value == false ) {
 			if( $this->value instanceOf \Closure ) {
 				$this->current_value = call_user_func($this->value, $model, $key, $index, $this->grid);
+		} else if (ArrayHelper::KeyExists($this->value, $model)) {
+				$this->current_value = $model->{$this->value};
 			} else {
-				$this->current_value = $this->grid->columns[$this->column]->getDataCellValue($model, $key, $index);
+				$this->current_value = $this->grid->columns[$this->value]->getDataCellValue($model, $key, $index);
 			}
 		} else {
 			$this->got_value = false;
@@ -80,8 +82,10 @@ class GridGroup extends BaseObject
 	{
 		if( $this->value instanceOf \Closure ) {
 			$this->current_value = call_user_func($this->value, $model, $key, $index, $this->grid);
+		} else if (ArrayHelper::KeyExists($this->value, $model)) {
+			$this->current_value = $model->{$this->value};
 		} else {
-			$this->current_value = $this->grid->columns[$this->column]->getDataCellValue($model, $key, $index);
+			$this->current_value = $this->grid->columns[$this->value]->getDataCellValue($model, $key, $index);
 		}
 		$this->got_value = true;
 		if( $this->last_value !== $this->current_value) {

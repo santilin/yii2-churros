@@ -87,9 +87,12 @@ class SimpleGridView extends \yii\grid\GridView
 			if (is_array($column)) {
 				unset($column['name']);
 			}
+			if (isset($this->groups[$kc]) && !$this->groups[$kc]->show_column??false) {
+				$column['visible'] = false;
+			}
 		}
 		parent::init();
-		if( count($this->groups) != 0 || $this->totalsRow) {
+		if (count($this->groups) != 0 || $this->totalsRow) {
 			$this->beforeRow = function($model, $key, $index, $grid) {
 				return $grid->groupHeader($model, $key, $index, $grid);
 			};
@@ -201,31 +204,24 @@ class SimpleGridView extends \yii\grid\GridView
 	{
 		$this->current_level = 0; // details
 		$level = 1;
- 		$orderby = [];
+ 		$grid_orderby = [];
 		foreach ($this->groups as $kg => $group_def) {
-            if (is_string($group_def)) {
-                $group = GridGroup::fromString($group_def);
-				$group->footer = true;
-            } else {
-                $group = Yii::createObject(array_merge([
-                    'class' => GridGroup::className(),
-                    'grid' => $this,
-					'column' => $kg,
-                ], $group_def));
-            }
-            if (!$group->visible) {
-                unset($this->groups[$kg]);
-                continue;
-            }
+			$group = Yii::createObject(array_merge([
+				'class' => GridGroup::className(),
+				'grid' => $this,
+				'column' => $kg,
+			], $group_def));
             $group->level = $level++;
+			if ($group->value === null) {
+				$group->value = $this->columns[$kg]['value']??$this->columns[$kg]['attribute'];
+			}
             $this->groups[$kg] = $group;
 			if (!$group->orderby) {
 				$group->orderby = $group->column;
 			}
-			$orderby[] = $group->orderby;
+			$grid_orderby[] = $group->orderby;
         }
-		$this->dataProvider->query->orderBy(join(',',$orderby) . ',' . $this->dataProvider->query->orderBy);
-
+		$this->dataProvider->query->orderBy(join(',',$grid_orderby) . ',' . $this->dataProvider->query->orderBy);
 	}
 
 	// override
