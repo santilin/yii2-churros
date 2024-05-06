@@ -5,8 +5,10 @@
  */
 namespace santilin\churros\widgets\grid;
 use yii;
+use yii\helpers\Html;
 
-class ReportView extends SimpleGridView
+
+class ReportView extends GridView
 {
 	const PRE_SUMMARY_FUNCTIONS = [
 		'' => [ 'None', true ],
@@ -28,6 +30,7 @@ class ReportView extends SimpleGridView
             $this->grandTotalLabel = Yii::t('churros', 'Report totals');
         }
         parent::init();
+		Html::addCssClass($this->tableOptions, 'report');
 	}
 
 	static public function columnFormatOptions()

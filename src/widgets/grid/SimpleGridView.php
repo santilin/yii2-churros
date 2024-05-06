@@ -212,8 +212,14 @@ class SimpleGridView extends \yii\grid\GridView
 				'column' => $kg,
 			], $group_def));
             $group->level = $level++;
+			$group->labels = (array)$group->labels;
+			if (count($group->labels) >= 2) {
+				list($group->header_label, $group->footer_label) = $group->labels;
+			} else if (count($group->labels) == 1) {
+				$group->header_label = $group->footer_label = $group->labels[0];
+			}
 			if ($group->value === null) {
-				$group->value = $this->columns[$kg]['value']??$this->columns[$kg]['attribute'];
+				$group->value = $this->columns[$group->column]['value']??$this->columns[$group->column]['attribute']??$group->column;
 			}
             $this->groups[$kg] = $group;
 			if (!$group->orderby) {
@@ -255,7 +261,7 @@ class SimpleGridView extends \yii\grid\GridView
 		}
 		foreach( array_reverse($this->groups) as $kg => $group ) {
 			if( $updated_groups[$kg] ) {
-				if ($group->footer ) {
+				if ($group->footer !== false) {
 					$ret .= Html::tag('tr',
 						$group->getFooterContent($this->summaryColumns,
 						$this->previousModel, $key, $index, $tdoptions));
@@ -275,9 +281,9 @@ class SimpleGridView extends \yii\grid\GridView
 		foreach( $this->groups as $kg => $group ) {
 			if( $updated_groups[$kg] || $first_header_shown ) {
 				$first_header_shown = true;
-				if( $group->header ) {
+				if ($group->header!==false) {
 					if( ($this->onlySummary && $group->level < count($this->groups))
-						|| $group->level <= count($this->groups) ) {
+ 						|| $group->level <= count($this->groups) ) {
 						$ret .= Html::tag('tr',
 							$group->getHeaderContent($model, $key, $index, $tdoptions));
 					}

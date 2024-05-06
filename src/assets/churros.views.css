@@ -243,16 +243,10 @@ body.dark .record-view .field, .record-view label {
 	padding-top: 2px;
 	padding-bottom: 2px;
 	padding-right: 0px;
-	margin-left: 0px;
 	margin-right: 0px;
+	margin-left: 1rem;
 }
 
-.grid-group-foot-text-2::before {
-	content: '+'
-}
-.grid-group-head-2::before {
-	content: '+'
-}
 .grid-group-foot-text-3::before {
 	content: '++'
 }
@@ -320,11 +314,11 @@ body.dark .record-view .field, .record-view label {
 }
 
 /* REPORT VIEW */
-.reportview-currency, .reportview-integer, .reportview-decimal, .reportview-hours {
+.report .currency, .report .integer, .report .decimal, .report .hours {
 	text-align: right;
 }
 
-.reportview-grand-total td {
+.report .grand-total td {
 	border-top: 2px solid blue;
 	border-bottom: 2px solid blue;
 	color: black;
@@ -332,47 +326,40 @@ body.dark .record-view .field, .record-view label {
 	font-size: larger;
 }
 
-.reportview-total-label {
+.report .total-label {
 	text-align: right;
 }
 
-.reportview-group-total-label {
+.report .group-total-label {
 	text-align: right;
 	border-bottom: 1px solid blue;
 	color: black;
 	font-weight: bold;
 }
 
-.reportview-group-head-1 {
+.report .group-head-1 {
+	background-color: var(--bs-primary-bg);
+	color: var(--bs-primary-color);
 	border-bottom: 1px solid blue;
-	background-color: white;
-	color: blue;
+    padding-left: 0px;
+    padding-top: 0px;
+    padding-bottom: 2px;
+    padding-right: 0px;
 	font-weight: bold;
 }
 
-.reportview-group-foot-1 {
+.report .group-foot-1 {
 	border-top: 1px solid blue;
 	font-weight: bold;
 	color: blue;
 }
 
-.reportview-group-head-1, .reportview-group-foot-1 {
-/*	background-color: gray;
-    color: white;*/
+.report .group-head-2, .report .group-foot-2 {
+	background-color: var(--bs-primary-bg);
+	color: var(--bs-primary-color);
+	filter: brightness(150%);
     font-size: 1.1em;
-    padding-left: 10px;
-    padding-top: 2px;
-    padding-bottom: 2px;
-    padding-right: 0px;
-    margin-left: 0px;
-    margin-right: 0px;
-}
-
-.reportview-group-head-2, .reportview-group-foot-2 {
-    background-color: white;
-    color: black;
-    font-size: 1.1em;
-    padding-left: 10px;
+    padding-left: 1rem;
     padding-top: 2px;
     padding-bottom: 2px;
     padding-right: 0px;
@@ -381,31 +368,19 @@ body.dark .record-view .field, .record-view label {
 	font-style: italic;
 }
 
-.reportview-group-foot-2 {
+.report .group-foot-2 {
 	text-align: right;
 }
-.reportview-group-foot-text-2::before {
-       content: '+'
-}
-.reportview-group-head-2::before {
-       content: '+'
-}
-.reportview-group-foot-text-3::before {
-       content: '++'
-}
-.reportview-group-head-3::before {
-       content: '++'
-}
-.reportview-group-head-3, .reportview-group-foot-3 {
-    background-color: gray;
-    color: white;
+.report .group-head-3, .group-foot-3 {
+	background-color: var(--bs-primary-bg);
+	color: var(--bs-primary-color);
+	filter: brightness(150%);
     font-size: 1.1em;
-    padding-left: 10px;
-    padding-left: 5px;
+    padding-left: 2rem;
 	padding-top: 2px;
 	padding-bottom: 2px;
 	padding-right: 0px;
-    margin-left: -5px;
+    margin-left: 2rem;
 	margin-right: 0px;
 }
 

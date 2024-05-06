@@ -25,15 +25,14 @@ class GridGroup extends BaseObject
 	 */
 	public $column;
 	public $header = true;
+	public $labels = [];
 	public $header_format;
 	public $header_label;
 	public $footer = true;
 	public $footer_format;
 	public $footer_label;
-	public $visible = true;
 	public $value;
 	public $format;
-	public $label;
 	public $orderby;
 	public $show_column = true;
 
@@ -98,30 +97,35 @@ class GridGroup extends BaseObject
 
 	public function getHeaderContent($model, $key, $index, $tdoptions)
 	{
-		if( $this->grid->onlySummary && $this->level < count($this->grid->groups) ) {
+		if ($this->grid->onlySummary && $this->level < count($this->grid->groups)) {
 			return '';
 		}
-		$hc = $this->header['content']??$this->header;
-		if( $hc instanceOf \Closure ) {
-			return call_user_func($hc, $model, $key, $index, $this);
-		} else {
+		$content = $this->header;
+		if ($content instanceOf \Closure ) {
+			$content = call_user_func($content, $model, $key, $index, $this);
+		}
+		if ($content === true || $content === null) {
+			$content = $this->header_label . ' ';
 			$format = $this->header_format?:$this->format?:'raw';
 			switch($format) {
-				case 'string':
-				case 'integer':
-					$content = Yii::$app->formatter->format($this->current_value, $format);
-					break;
 				case 'raw':
-					$content = $this->current_value;
+					$content .= $this->current_value;
 					break;
 				default:
-					$content = strtr( $format, [
-						'{group_value}' => $this->current_value
-					]);
+					$content .= Yii::$app->formatter->format($this->current_value, $format);
 					break;
 			}
-			Html::addCssClass($tdoptions, 'reportview-group-head-' . strval($this->level) . ' w1');
+		}
+		if( $content !== false) {
+			$content = strtr($content, [
+				'{group_value}' => $this->current_value,
+				'{group_header_label}' => $this->header_label,
+				'{group_footer_label}' => $this->footer_label,
+			]);
+			Html::addCssClass($tdoptions, "report group-head-{$this->column} group-head-{$this->level}");
 			return Html::tag('td', $content, $tdoptions);
+		} else {
+			return '';
 		}
 	}
 
@@ -140,17 +144,12 @@ class GridGroup extends BaseObject
 		foreach( $this->grid->columns as $kc => $column ) {
 			if( !isset($summary_columns[$kc]) ) {
 				$value = $model[$kc];
-				$tdoptions = [];
 			} else {
 				$value = $this->summaryValues[$this->level][$kc];
 				if( $this->level == count($this->grid->groups) ) {
-					$tdoptions = [
-						'class' => 'reportview-detail w1',
-					];
+					Html::addCssClass($tdoptions, "report detail");
 				} else {
-					$tdoptions = [
-						'class' => 'reportview-group-foot-' . strval($this->level-1) . ' w1',
-					];
+					Html::addCssClass($tdoptions, "report group-foot-$column group-foot-{$this->level}");
 				}
 			}
 			$ret .= Html::tag('td',
@@ -163,33 +162,21 @@ class GridGroup extends BaseObject
 
 	protected function getStandardFooterContent($summary_columns, $model, $key, $index, $tdoptions)
 	{
-		$ret = '';
-		$fc = isset($this->footer['content']) ? $this->footer['content'] : $this->footer;
-		if( $fc === false ) {
-			return '';
-		} elseif( $fc instanceOf \Closure ) {
-			return call_user_func($hc, $model, $key, $index, $this);
-		} else {
-			$format = isset($this->footer_format) ? $this->footer_format : (isset($this->format) ? $this->format : 'raw');
-			switch($format) {
-				case 'string':
-				case 'integer':
-					$content = Yii::$app->formatter->format($this->last_value, $format);
-					break;
-				case 'raw':
-					$content = $this->last_value;
-					break;
-				default:
-					$content = strtr( $format, [
-						'{group_value}' => $this->last_value
-					]);
-					break;
-			}
+		$content = $this->footer;
+		if ($content instanceOf \Closure ) {
+			$content = call_user_func($content, $model, $key, $index, $this);
 		}
-		if( $fc == 1 /*'summary'*/ ) {
-			$ret .= $this->getSummaryContent($summary_columns, $content);
-		} else {
-			Html::addCssClass($tdoptions, 'reportview-group-foot-total-' . strval($this->level) . ' reportview-group-foot-' . strval($this->level) . ' w1');
+		if ($content === true || $content === null) {
+			return $this->getSummaryContent($summary_columns, $content);
+		}
+		$ret = '';
+		if( $content !== false) {
+			$content = strtr($content, [
+				'{group_value}' => $this->current_value,
+				'{group_header_label}' => $this->header_label,
+				'{group_footer_label}' => $this->footer_label,
+			]);
+			Html::addCssClass($tdoptions, "report group-foot-total-$column group-foot-total-{$this->level}");
 			$ret = Html::tag('td', $content, $tdoptions);
 		}
 		return $ret;
@@ -211,7 +198,7 @@ class GridGroup extends BaseObject
 			}
 		}
 		$tdoptions = [
-			'class' => 'reportview-group-total-label reportview-group-foot-' . strval($this->level) . ' w1',
+			'class' => 'report group-total-label group-foot-' . strval($this->level),
 			'colspan' => $colspan,
 		];
 		$ret = Html::tag('td', Yii::t('churros', "Totals") . ' ' . $content, $tdoptions );
@@ -228,10 +215,10 @@ class GridGroup extends BaseObject
 				'w1'
 			];
 			if( ($column->format?:'raw') != 'raw' ) {
-				$classes[] = "reportview-{$column->format}";
+				$classes[] = "report {$column->format}";
 			}
 			if( isset($summary_columns[$kc]) ) {
-				$classes[] = 'reportview-group-foot-' . strval($this->level);
+				$classes[] = 'report group-foot-' . strval($this->level);
 				$ret .= Html::tag('td',
 					$this->grid->formatter->format(
 						$this->summaryValues[$this->level][$kc], $column->format),
