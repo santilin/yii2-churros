@@ -39,6 +39,11 @@ class JsonModel extends \yii\base\Model
         return parent::__set($name, $value);
     }
 
+    public function setJsonModelable(JsonModel $other)
+    {
+        $this->_json_modelable = $other->_json_modelable;
+    }
+
     public function __get($name)
     {
         if (array_key_exists($name, $this->_attributes)) {
