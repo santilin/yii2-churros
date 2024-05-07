@@ -227,7 +227,9 @@ class SimpleGridView extends \yii\grid\GridView
 			}
 			$grid_orderby[] = $group->orderby;
         }
-		$this->dataProvider->query->orderBy(join(',',$grid_orderby) . ',' . $this->dataProvider->query->orderBy);
+        if (count($grid_orderby)){
+			$this->dataProvider->query->orderBy(join(',',$grid_orderby) . ',' . $this->dataProvider->query->orderBy);
+		}
 	}
 
 	// override

@@ -49,7 +49,7 @@ class JsonModel extends \yii\base\Model
             $rel_name = $rel_info['relatedTablename'];
             $rel_class = $rel_info['modelClass'];
             if ($rel_info['type'] == 'HasMany') {
-                $json_objects = $this->_json_object->get("$.$rel_name");
+                $json_objects = $this->_json_object->get("$.$rel_name")?:[];
                 $related_models = [];
                 foreach ($json_objects as $rm) {
                     if ($rm === null) {
