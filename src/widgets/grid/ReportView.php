@@ -24,6 +24,12 @@ class ReportView extends GridView
 		ReportView::F_DISTINCT_CONCAT => [ 'Concat (distinct)', false ],
 	];
 
+	const OUTPUT_HTML_PAGED = 0;
+	const OUTPUT_HTML_FULL = 1;
+	const OUTPUT_PDF = 2;
+	const OUTPUT_CSV = 3;
+	const OUTPUT_RTF = 4;
+
 	public function init()
     {
         if ($this->grandTotalLabel === null) {
