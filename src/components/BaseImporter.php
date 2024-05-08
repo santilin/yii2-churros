@@ -358,7 +358,13 @@ abstract class BaseImporter
 			$has_error = true;
 		}
 		if ($has_error) {
-			$this->addError($r->getOneError() . json_encode($r->getAttributes(),JSON_UNESCAPED_UNICODE) );
+			$ne = 0;
+			foreach ($r->getFirstErrors() as $k => $error) {
+				if ($ne == 0 ) {
+					$error .= json_encode($r->getAttributes(),JSON_UNESCAPED_UNICODE);
+				}
+				$this->addError($error);
+			}
 			if ($this->abort_on_error) {
 				return self::ABORTED_ON_ERROR;
 			}
