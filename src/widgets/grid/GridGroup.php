@@ -198,7 +198,7 @@ class GridGroup extends BaseObject
 			}
 		}
 		$tdoptions = [
-			'class' => 'report group-total-label group-foot-' . strval($this->level),
+			'class' => 'group-total-label group-foot-' . strval($this->level),
 			'colspan' => $colspan,
 		];
 		$ret = Html::tag('td', Yii::t('churros', "Totals") . ' ' . $content, $tdoptions );
@@ -215,10 +215,10 @@ class GridGroup extends BaseObject
 				'w1'
 			];
 			if( ($column->format?:'raw') != 'raw' ) {
-				$classes[] = "report {$column->format}";
+				$classes[] = "format-{$column->format}";
 			}
 			if( isset($summary_columns[$kc]) ) {
-				$classes[] = 'report group-foot-' . strval($this->level);
+				$classes[] = 'group-foot-' . strval($this->level);
 				$ret .= Html::tag('td',
 					$this->grid->formatter->format(
 						$this->summaryValues[$this->level][$kc], $column->format),

@@ -126,6 +126,9 @@ class SimpleGridView extends \yii\grid\GridView
 	protected function initSummaryColumns()
 	{
 		foreach ($this->columns as $kc => $column) {
+			if (!property_exists($column, 'summary')) {
+				continue;
+			}
 			if ($column->summary) {
 				$kc = $column->attribute;
 				$this->summaryColumns[$kc] = $column->summary;
@@ -156,39 +159,56 @@ class SimpleGridView extends \yii\grid\GridView
 		}
 	}
 
+	// totales del informe, aparte de los totales de los grupos
 	public function updateSummaryColumns($model)
 	{
 		// same in GridGroup::updateSummaries
 		foreach( $this->summaryColumns as $kc => $summary) {
 			switch( $summary ) {
-			case 'f_sum':
+			case 'sum':
 				$this->summaryValues[$kc] += $model[$kc];
 				break;
-			case 'f_count':
+			case 'distinct_sum':
+				if (!in_array($model[$kc], $this->summaryValues[$kc])) {
+					$this->summaryValues[$kc] += $model[$kc];
+				}
+				break;
+			case 'count':
 				$this->summaryValues[$kc] ++;
 				break;
-			case 'f_avg':
+			case 'distinct_count':
+				if (!in_array($model[$kc], $this->summaryValues[$kc])) {
+					$this->summaryValues[$kc] += $model[$kc];
+				}
+				break;
+			case 'avg':
 				$this->summaryValues[$kc][0] += $model[$kc];
 				$this->summaryValues[$kc][1] ++;
 				break;
-			case 'f_max':
+			case 'distinct_avg':
+				if (!in_array($model[$kc], $this->summaryValues[$kc])) {
+					$this->summaryValues[$kc][0] += $model[$kc];
+					$this->summaryValues[$kc][1] ++;
+				}
+				break;
+			case 'max':
 				if( $this->summaryValues[$kc] == null ) {
 					$this->summaryValues[$kc] = $model[$kc];
 				} else if( $this->summaryValues[$kc] < $model[$kc] ) {
 					$this->summaryValues[$kc] = $model[$kc];
 				}
 				break;
-			case 'f_min':
+			case 'min':
 				if( $this->summaryValues[$kc] == null ) {
 					$this->summaryValues[$kc] = $model[$kc];
 				} else if( $this->summaryValues[$kc] > $model[$kc] ) {
 					$this->summaryValues[$kc] = $model[$kc];
 				}
 				break;
-			case 'f_concat':
+			case 'concat':
 				$this->summaryValues[$kc][] = $model[$kc];
 				break;
-			case 'f_distinct_concat':
+			case 'distinct_concat':
 				if (!in_array($model[$kc], $this->summaryValues[$kc])) {
 					$this->summaryValues[$kc][] = $model[$kc];
 				}
@@ -317,7 +337,7 @@ class SimpleGridView extends \yii\grid\GridView
 		if( $this->totalsRow ) {
 			$fs = $this->getFooterSummary($this->summaryColumns, $tdoptions);
 			if ($fs) {
-				$ret .= Html::tag('tr', $fs, [ 'class' => 'reportview-grand-total']);
+				$ret .= Html::tag('tr', $fs, [ 'class' => 'grand-total']);
 			}
 		}
 		return $ret;
@@ -348,11 +368,11 @@ class SimpleGridView extends \yii\grid\GridView
 		if ($colspan==0) {
 			$ret = '</tr><tr>';
 			$ret .= Html::tag('td', $this->grandTotalLabel?:Yii::t('churros', "Totals") . ' ',
-				[ 'class' => 'reportview-total-label', 'colspan' => 42] );
+				[ 'class' => 'total-label', 'colspan' => 42] );
 			$ret .= '</tr><tr>';
 		} else {
 			$ret = Html::tag('td', $this->grandTotalLabel?:Yii::t('churros', "Totals") . ' ',
-				[ 'class' => 'reportview-total-label', 'colspan' => $colspan ] );
+				[ 'class' => 'total-label', 'colspan' => $colspan ] );
 		}
 		$nc = 0;
 		foreach ($this->columns as $column) {
@@ -360,11 +380,9 @@ class SimpleGridView extends \yii\grid\GridView
 				continue;
 			}
 			$kc = $column->attribute;
-			$classes = [
-				'w1'
-			];
+			$classes = [];
 			if( ($column->format?:'raw') != 'raw' ) {
-				$classes[] = "reportview-{$column->format}";
+				$classes[] = "format-{$column->format}";
 			}
 			if( isset($summary_columns[$kc]) ) {
 				$value = 0.0;

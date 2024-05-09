@@ -314,26 +314,27 @@ body.dark .record-view .field, .record-view label {
 }
 
 /* REPORT VIEW */
-.report .currency, .report .integer, .report .decimal, .report .hours {
+.report .format-currency, .report .format-integer, .report .format-decimal, .report .format-hours {
 	text-align: right;
 }
 
 .report .grand-total td {
 	border-top: 2px solid blue;
 	border-bottom: 2px solid blue;
-	color: black;
+	color: var(--bs-primary-color);
 	font-weight: bold;
 	font-size: larger;
 }
 
 .report .total-label {
+	color: var(--bs-primary-color);
 	text-align: right;
 }
 
 .report .group-total-label {
 	text-align: right;
 	border-bottom: 1px solid blue;
-	color: black;
+	color: var(--bs-secondary-color);
 	font-weight: bold;
 }
 
