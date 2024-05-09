@@ -17,7 +17,6 @@ class ActionColumn extends \yii\grid\ActionColumn
     public $template = '{view}&nbsp;{update}&nbsp;{delete}&nbsp;{duplicate}';
     public $customButtons = [];
     public $crudPerms = false;
-    public $hAlign = 'none';
     public $iconClassPrefix = 'bi bi';
 	public $icons = [
 		'view' => '<i class="bi bi-eye"></i>',
@@ -31,7 +30,6 @@ class ActionColumn extends \yii\grid\ActionColumn
      */
     protected function initDefaultButtons()
     {
-		$this->hAlign = 'left';
         if( $this->crudPerms === null ) {
 			$this->crudPerms = [ 'create', 'view', 'update', 'delete' ];
 		}
