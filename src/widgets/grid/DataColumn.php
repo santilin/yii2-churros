@@ -11,7 +11,7 @@ use yii\helpers\Inflector;
 
 class DataColumn extends \yii\grid\DataColumn
 {
-	public $pageSummaryFunc;
+    public $summary;
 	public $hAlign;
 
 	// Da preferencia a las labels del searchmodel

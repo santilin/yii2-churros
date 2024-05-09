@@ -238,22 +238,25 @@ class GridGroup extends BaseObject
 			}
 			foreach( $summary_columns as $kc => $summary) {
 				switch( $summary ) {
-				case 'f_sum':
-				case 'f_count':
+				case 'sum':
+				case 'count':
+				case 'distinct_sum':
+				case 'distinct_count':
 					$this->summaryValues[$l][$kc] = 0;
 					break;
-				case 'f_avg':
+				case 'avg':
+				case 'distinct_avg':
 					$this->summaryValues[$l][$kc][0] = 0;
 					$this->summaryValues[$l][$kc][1] = 0;
 					break;
-				case 'f_max':
+				case 'max':
 					$this->summaryValues[$l][$kc] = null;
 					break;
-				case 'f_min':
+				case 'min':
 					$this->summaryValues[$l][$kc] = null;
 					break;
-				case 'f_concat':
-				case 'f_distinct_concat':
+				case 'concat':
+				case 'distinct_concat':
 					$this->summaryValues[$l][$kc] = [];
 					break;
 				}
@@ -268,34 +271,50 @@ class GridGroup extends BaseObject
 			foreach( $summary_columns as $key => $summary) {
 				$kc = str_replace('.', '_', $key);
 				switch( $summary ) {
-				case 'f_sum':
+				case 'sum':
 					$this->summaryValues[$l][$key] += $row_values[$kc];
 					break;
-				case 'f_count':
+				case 'distinct_sum':
+					if (!in_array($row_values[$key], $this->summaryValues[$l][$kc])) {
+						$this->summaryValues[$l][$key] += $row_values[$kc];
+					}
+					break;
+				case 'count':
 					$this->summaryValues[$l][$key] ++;
 					break;
-				case 'f_avg':
+				case 'distinct_count':
+					if (!in_array($row_values[$key], $this->summaryValues[$l][$kc])) {
+						$this->summaryValues[$l][$key] ++;
+					}
+					break;
+				case 'avg':
 					$this->summaryValues[$l][$key][0] += $row_values[$kc];
 					$this->summaryValues[$l][$key][1] ++;
 					break;
-				case 'f_max':
+				case 'distinct_count':
+					if (!in_array($row_values[$key], $this->summaryValues[$l][$kc])) {
+						$this->summaryValues[$l][$key][0] += $row_values[$kc];
+						$this->summaryValues[$l][$key][1] ++;
+					}
+					break;
+				case 'max':
 					if( $this->summaryValues[$l][$key] == null ) {
 						$this->summaryValues[$l][$key] = $row_values[$kc];
 					} else if( $this->summaryValues[$l][$key] < $row_values[$kc] ) {
 						$this->summaryValues[$l][$key] = $row_values[$kc];
 					}
 					break;
-				case 'f_min':
+				case 'min':
 					if( $this->summaryValues[$l][$key] == null ) {
 						$this->summaryValues[$l][$key] = $row_values[$kc];
 					} else if( $this->summaryValues[$l][$key] > $row_values[$kc] ) {
 						$this->summaryValues[$l][$key] = $row_values[$kc];
 					}
 					break;
-				case 'f_concat':
+				case 'concat':
 					$this->summaryValues[$l][$key][] = $row_values[$kc];
 					break;
-				case 'f_distinct_concat':
+				case 'distinct_concat':
 					if (!in_array($row_values[$key], $this->summaryValues[$l][$kc])) {
 						$this->summaryValues[$l][$key][] = $row_values[$kc];
 					}

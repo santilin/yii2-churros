@@ -6,6 +6,7 @@
 namespace santilin\churros\widgets\grid;
 
 use Yii;
+use yii\base\InvalidConfigException;
 use yii\helpers\Json;
 use yii\web\JsExpression;
 use yii\data\Pagination;
@@ -16,16 +17,9 @@ use santilin\churros\ChurrosAsset;
 
 class SimpleGridView extends \yii\grid\GridView
 {
-    const F_COUNT = 'f_count';
-    const F_SUM = 'f_sum';
-    const F_AVG = 'f_avg';
-    const F_CONCAT = 'f_concat';
-    const F_MAX = 'f_max';
-    const F_MIN = 'f_min';
-    const F_DISTINCT_COUNT = 'f_distinct_count';
-    const F_DISTINCT_SUM = 'f_distinct_sum';
-    const F_DISTINCT_AVG = 'f_distinct_avg';
-    const F_DISTINCT_CONCAT = 'f_distinct_concat';
+	const SUMMARY_FUNCTIONS = [
+		'count', 'sum', 'avg', 'concat', 'max', 'min', 'distinct_count', 'distinct_sum', 'distinct_avg', 'distinct_concat'
+	];
 
     const FILTER_SELECT2 = 0;
 
@@ -90,6 +84,13 @@ class SimpleGridView extends \yii\grid\GridView
 			if (isset($this->groups[$kc]) && !$this->groups[$kc]->show_column??false) {
 				$column['visible'] = false;
 			}
+			if (empty($column['summary']) && !empty($column['pageSummaryFunc'])) {
+				$column['summary'] = $column['pageSummaryFunc'];
+				unset($column['pageSummaryFunc']);
+ 			}
+ 			if (!empty($column['summary']) &&  !in_array($column['summary'], self::SUMMARY_FUNCTIONS)) {
+				throw InvalidConfigException($column['summary'] . ': invalid summary function');
+			}
 		}
 		parent::init();
 		if (count($this->groups) != 0 || $this->totalsRow) {
@@ -124,27 +125,30 @@ class SimpleGridView extends \yii\grid\GridView
 	 */
 	protected function initSummaryColumns()
 	{
-		foreach( $this->columns as $kc => $column ) {
-			if( !empty($column->pageSummaryFunc) ) {
+		foreach ($this->columns as $kc => $column) {
+			if ($column->summary) {
 				$kc = $column->attribute;
-				$this->summaryColumns[$kc] = $column->pageSummaryFunc;
-				switch( $column->pageSummaryFunc) {
-					case 'f_sum':
-					case 'f_count':
+				$this->summaryColumns[$kc] = $column->summary;
+				switch ($column->summary) {
+					case 'sum':
+					case 'count':
+					case 'distinct_sum':
+					case 'distinct_count':
 						$this->summaryValues[$kc] = 0;
 						break;
-					case 'f_avg':
+					case 'avg':
+					case 'distinct_avg':
 						$this->summaryValues[$kc][0] = 0;
 						$this->summaryValues[$kc][1] = 0;
 						break;
-					case 'f_max':
+					case 'max':
 						$this->summaryValues[$kc] = null;
 						break;
-					case 'f_min':
+					case 'min':
 						$this->summaryValues[$kc] = null;
 						break;
-					case 'f_concat':
-					case 'f_distinct_concat':
+					case 'concat':
+					case 'distinct_concat':
 						$this->summaryValues[$kc] = [];
 						break;
 				}

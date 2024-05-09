@@ -149,9 +149,8 @@ trait ReportsModelTrait
 				if( empty($column['attribute']) ) {
 					$column['attribute'] = $colname;
 				}
-				$column['pageSummaryFunc'] = $column['summary']??'';
 			}
-			unset($column['summary']);
+			unset($column['pageSummaryFunc']);
 			if( empty($column['label']) ) {
 				$a = $colname;
 				if( ($dotpos=strpos($a, '.')) !== FALSE ) {
@@ -362,10 +361,6 @@ trait ReportsModelTrait
 				$column_to_add['attribute'] = "$pre_sum_func({$column_to_add['attribute']})";
 			}
 			unset($column_to_add['pre_summary']);
-			if( isset($column_to_add['summary']) ) {
-				$column_to_add['pageSummaryFunc'] = $column_to_add['summary'];
-				unset($column_to_add['summary']);
-			}
 			$columns[$colname] = $column_to_add;
 		}
 		// Añado también las columnas del report_sorting para que estén disponibles en el grid para los grupos
