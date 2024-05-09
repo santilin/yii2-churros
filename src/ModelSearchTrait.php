@@ -21,11 +21,9 @@ trait ModelSearchTrait
 	public function __get($name)
 	{
 		// GridView::renderFilter: needs activeAttribute when related property
-		if (!isset(static::$relations[$name])) {
-			if( property_exists($this, 'related_properties') ) {
-				if( array_key_exists($name, $this->related_properties) ) {
-					return $this->related_properties[$name];
-				}
+		if( property_exists($this, 'related_properties') ) {
+			if( array_key_exists($name, $this->related_properties) ) {
+				return $this->related_properties[$name];
 			}
 		}
 		return parent::__get($name);
