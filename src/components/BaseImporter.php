@@ -34,6 +34,7 @@ abstract class BaseImporter
 
 	protected $ignore_dups = false;
 	protected $update_dups = false;
+	protected $limit = -1;
 	protected $verbose = true;
 
     /**
@@ -236,6 +237,11 @@ abstract class BaseImporter
 				if( $this->abort_on_error ) {
 					fclose($file);
 					return self::ABORTED_ON_ERROR;
+				}
+			}
+			if ($this->limit > 0) {
+				if (--$this->limit == 0) {
+					break;
 				}
 			}
         }

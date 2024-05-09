@@ -400,6 +400,21 @@ class AppHelper
 		}
 	}
 
-
+	static public function implodeWithLastSep(array $values, string $sep, string $last_sep)
+	{
+		$values_display = '';
+		$count_values = count($values);
+		for ($nv = 0; $nv < $count_values; $nv++) {
+			if ($values_display != '') {
+				if ($nv == $count_values-1 ) {
+					$values_display .= ', ';
+				} else {
+					$values_display .= 'y ';
+				}
+			}
+			$values_display .= $values[$nv];
+		}
+		return $values_display;
+	}
 
 }
