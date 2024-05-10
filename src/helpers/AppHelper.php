@@ -407,9 +407,9 @@ class AppHelper
 		for ($nv = 0; $nv < $count_values; $nv++) {
 			if ($values_display != '') {
 				if ($nv == $count_values-1 ) {
-					$values_display .= ', ';
+					$values_display .= ' y ';
 				} else {
-					$values_display .= 'y ';
+					$values_display .= ', ';
 				}
 			}
 			$values_display .= $values[$nv];
