@@ -315,8 +315,14 @@ abstract class BaseImporter
 		$r = $this->createModel();
 		$r->setDefaultValues();
 		// no valida duplicados para poder hacer update_dups
-		if ($r->loadAll([$r->formName() => $record], array_keys($r::$relations)) && $r->validate() ) {
-			$model_dup = $this->modelExists($r);
+		$model_validated = $r->loadAll([$r->formName() => $record], array_keys($r::$relations)) && $r->validate();
+		$model_dup = $this->modelExists($r);
+		if (!$model_validated) {
+			if ($model_dup && count($r->getErrors()) == 1) {
+				$model_validated = true;
+			}
+		}
+		if ($model_validated) {
 			if ($model_dup) {
 				if ($this->update_dups) {
 					// $r se va a insertar pero ya existe $model_dup, por lo tanto, actualizamos $model_dup

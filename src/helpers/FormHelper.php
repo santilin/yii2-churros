@@ -184,6 +184,9 @@ class FormHelper
 			case 'a':
 				unset($button['htmlOptions']['name']);
 				Html::addCssClass($button['htmlOptions'], $name);
+				if (empty($htmlOptions['role'])) {
+					$button['htmlOptions']['role'] = 'button';
+				}
 				$ret[] = Html::a(
 					$title,
 					$button['url']??'javascript:void(0);',
