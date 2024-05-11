@@ -1,5 +1,6 @@
 # Login yii2-usuario
 - Contraseña (recordar) no está bien el orden.
+- forgot: forbiden si estoy logueado como admin
 
 # Sqlite3
 - Crear issue en github PRAGMA
