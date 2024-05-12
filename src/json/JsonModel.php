@@ -288,6 +288,19 @@ class JsonModel extends \yii\base\Model
         }
     }
 
-
+    public function createChild(string $rel_name)
+    {
+        if (isset(static::$relations[$rel_name])) {
+            $r = static::$relations[$rel_name];
+            $model_class = $r['modelClass'];
+            $child = new $model_class;
+            $child->parent_model = $this;
+            $child->setPath($this->getPath() . '/' . $child->jsonPath());
+            $child->setJsonModelable($this);
+            return $child;
+        } else {
+            return null;
+        }
+    }
 
 } // class

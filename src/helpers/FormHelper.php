@@ -42,7 +42,7 @@ class FormHelper
 		static::$tabindex = $reset;
 	}
 
-	/// @return [ view_name, search_model, permissions ]
+	/// @return [ view_name, title, search_model, scopes, permissions ]
 	static public function gridFromRequest(array $views, array $params): array
 	{
 		$_nv=$params[self::VIEWS_NVIEW_PARAM]??0;
@@ -52,17 +52,16 @@ class FormHelper
 			}
 			foreach($views as $kv => $view_info ) {
 				if( $_nv-- == 0 ) {
-					// search_form, permissions
-					return [ $view_info[1], $view_info[2], $kv ];
+					return $view_info;
 				}
 			}
 		} else {
 			if( isset($views[$_nv])	) {
-				return [ $views[$_nv][1], $views[$_nv][2], $kv ];
+				return $views[$_nv];
 			}
 		}
 		$index = array_key_first($views);
-		return [ $views[$index][1], $views[$index][2], $index ];
+		return $views[$index];
 	}
 
 	/// @return [ view_name, title, $model, $permissions ]
