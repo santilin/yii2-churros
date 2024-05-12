@@ -20,21 +20,12 @@ class CardListView extends ListView
 	public $options = [ 'class' => 'cardlistview'];
 	public $itemsOptions = [ 'class' => 'row mb-3' ];
 	public $cardOptions = [ 'class' => 'col-12 col-sm-6 col-lg-4 col-xxl-3 px-1 mb-1' ];
-	public $layout = "{summarypager}\n{items}";
 	public $labelSingular = 'item';
 	public $labelPlural = 'items';
 	public $itemOptions = [ 'class' => 'card shadow h-100' ];
 
 	public function __construct($config = [])
 	{
-		if (empty($config['pager']) ) {
-			$config['pager'] = [
-				'firstPageLabel' => '<<',
-				'lastPageLabel' => '>>',
-				'nextPageLabel' => '>',
-				'prevPageLabel' => '<',
-			];
-		}
 		parent::__construct($config);
 		if( empty($this->summary) ) {
 			if ($this->dataProvider->getPagination() !== false) {
