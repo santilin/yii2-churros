@@ -247,15 +247,15 @@ class AppHelper
 
     static public function userIsAdmin()
     {
-		$m = Yii::$app->get('user');
-		if (!$m?->identity) {
+		$user_component = Yii::$app->get('user');
+		if (!$user_component?->identity) {
 			return false;
 		}
 		if (Yii::$app->getAuthManager()) {
-			return $m->identity->getIsAdmin();
-		} else {
-			$username = $m->identity->username;
-			return in_array($username, $m->administrators);
+			return $user_component->identity->getIsAdmin();
+		} else { // yii2-usuario without authmanager
+			$user_module = Yii::$app->getModule('user');
+			return in_array($user_component->identity->username, $user_module->administrators, false);
 		}
 	}
 
