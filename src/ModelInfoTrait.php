@@ -130,9 +130,15 @@ trait ModelInfoTrait
 				} else if( $sprintf_part == '%D' ) {
 					$sprintf_part = '%s';
 					$value = Yii::$app->formatter->asDate($value);
+				} else if ($sprintf_part == '%_a') { // allowed_values
+					$sprintf_part = '%s';
+					$fname = $matches[1][$n];
+					$getter = "get" . "TipoParticipante" . "Label";
+					$value = call_user_func([$this, $getter]);
 				}
 				$_format = str_replace($match, $sprintf_part, $_format);
 				$values[] = $value;
+
 			}
 			$ret = sprintf($_format, ...$values);
 		} else {
