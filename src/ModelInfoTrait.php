@@ -834,9 +834,8 @@ trait ModelInfoTrait
 	/**
 	 * Función compartida por search y report
 	 */
-	public function searchFilterWhere(&$query, string $fldname, $operator, bool $is_and = true)
+	public function searchFilterWhere(&$query, string $fldname, $value, bool $is_and = true)
 	{
-		$value = FormHelper::toOpExpression($this->$fldname, false );
 		if (!isset($value['v']) || $value['v'] === null || $value['v'] === '' || (is_array($value['v']) && empty($value['v'])) ) {
 			return;
 		}
