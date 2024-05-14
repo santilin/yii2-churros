@@ -133,7 +133,7 @@ trait ModelInfoTrait
 				} else if ($sprintf_part == '%_a') { // allowed_values
 					$sprintf_part = '%s';
 					$fname = $matches[1][$n];
-					$getter = "get" . "TipoParticipante" . "Label";
+					$getter = "get" . AppHelper::modelize($fname) . "Label";
 					$value = call_user_func([$this, $getter]);
 				}
 				$_format = str_replace($match, $sprintf_part, $_format);

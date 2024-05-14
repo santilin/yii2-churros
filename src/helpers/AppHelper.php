@@ -417,4 +417,15 @@ class AppHelper
 		return $values_display;
 	}
 
+
+	static public function modelize(string $identifier): string
+	{
+		$parts = explode('_', $identifier);
+		$ret = '';
+		foreach ($parts as $part) {
+			$ret .= static::mb_ucfirst($part);
+		}
+		return $ret;
+	}
+
 }
