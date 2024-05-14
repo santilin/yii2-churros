@@ -327,7 +327,6 @@ abstract class BaseImporter
 				if ($this->update_dups) {
 					// $r se va a insertar pero ya existe $model_dup, por lo tanto, actualizamos $model_dup
 					$r = $model_dup;
-					unset($record['codigo']);
 					if ($r->loadAll([$r->formName()=>$record], array_keys($r::$relations)) && $r->validate()) {
 						$changes = $r->getDirtyAttributes();
 					} else {
