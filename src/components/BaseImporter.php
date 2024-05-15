@@ -35,7 +35,9 @@ abstract class BaseImporter
 	protected $ignore_dups = false;
 	protected $update_dups = false;
 	protected $limit = -1;
+	protected $start_line = -1;
 	protected $verbose = true;
+	protected $auto_commit = false;
 
     /**
      * @var string ruta y nombre del fichero a importar
@@ -157,18 +159,24 @@ abstract class BaseImporter
     {
         $this->filename = $filename;
         $this->errors = [];
-		$transaction = Yii::$app->db->beginTransaction();
+		if (!$this->auto_commit) {
+			$transaction = $this->record->getDb()->beginTransaction();
+		}
         $ret = $this->importCsvRecords($csvdelimiter, $csvquote);
 		if( $ret == self::OK ) {
 			$this->output("Insertados {$this->imported} registros");
 			$this->output("Actualizados {$this->updated} registros");
 			if (!$this->dry_run) {
-				$transaction->commit();
+				if (!$this->auto_commit) {
+					$transaction->commit();
+				}
 			} else {
 				$this->output("NO SE HAN GUARDADO LOS REGISTROS");
 			}
 		} else {
-			$transaction->rollBack();
+			if (!$this->auto_commit) {
+				$transaction->rollBack();
+			}
 			switch( $ret ) {
 			case self::ABORTED_ON_ERROR:
 				$this->output("Aborted on error");
@@ -229,8 +237,13 @@ abstract class BaseImporter
         $import_fields_info = $this->getImportFieldsInfo();
         $has_errors = false;
         while (($csvline = fgetcsv($file, 0, $csvdelimiter, $csvquote)) !== false) {
-			++$this->csvline;
-			$this->output("Leyendo línea CSV {$this->csvline}");
+			if ($this->start_line > 0 && $this->csvline < $this->start_line) {
+				$this->output("Saltando línea CSV {$this->csvline} hasta la {$this->start_line}");
+				++$this->csvline;
+				continue;
+			} else {
+				$this->output("Leyendo línea CSV {$this->csvline}");
+			}
 			$ret = $this->importLine($import_fields_info, $csvheaders, $csvline);
 			if( $ret != self::OK  && $ret != self::IGNORED_RECORD && $ret != self::EMPTY_RECORD ) {
 				$has_errors = true;
@@ -239,6 +252,7 @@ abstract class BaseImporter
 					return self::ABORTED_ON_ERROR;
 				}
 			}
+			++$this->csvline;
 			if ($this->limit > 0) {
 				if (--$this->limit == 0) {
 					break;
@@ -313,6 +327,9 @@ abstract class BaseImporter
 	{
 		$has_error = $ignored = false;
 		$r = $this->createModel();
+		if ($this->auto_commit) {
+			$transaction = $r->getDb()->beginTransaction();
+		}
 		$r->setDefaultValues();
 		// no valida duplicados para poder hacer update_dups
 		$model_validated = $r->loadAll([$r->formName() => $record], array_keys($r::$relations)) && $r->validate();
@@ -369,6 +386,9 @@ abstract class BaseImporter
 			$has_error = true;
 		}
 		if ($has_error) {
+			if ($this->auto_commit ) {
+				$transaction->rollBack();
+			}
 			$ne = 0;
 			foreach ($r->getFirstErrors() as $k => $error) {
 				if ($ne == 0 ) {
@@ -378,6 +398,10 @@ abstract class BaseImporter
 			}
 			if ($this->abort_on_error) {
 				return self::ABORTED_ON_ERROR;
+			}
+		} else {
+			if ($this->auto_commit && !$this->dry_run) {
+				$transaction->commit();
 			}
 		}
 		return $has_error ? self::RECORD_WITH_ERRORS : self::OK;
