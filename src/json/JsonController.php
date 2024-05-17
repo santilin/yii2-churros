@@ -102,7 +102,7 @@ class JsonController extends \yii\web\Controller
 		return $this->render('index', [
 			'searchModel' => $searchModel,
 			'indexParams' => $params,
-			'indexGrids' => [ '_grid' => [ '', null, [] ] ]
+			'indexGrids' => [ '_grid' => [ '_grid', '', null, [], [] ] ]
 		]);
 	}
 
