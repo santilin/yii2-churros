@@ -179,9 +179,9 @@ class WidgetLayer
 							$fs .=  "<div class=\"$col_classes\">";
 							$open_divs++;
 							if ($widget_layout != 'full') {
-								$fs .= "<div class=\"w-100\">"; // add here 'row' in bs4
-								$open_divs++;
+								Html::addCssClass($widget->options, 'w-100');
 							}
+							Html::addCssClass($widget->options, 'row');
 							$fs .= $this->layoutActiveField($widget_name, $widget, $layout_row, $widget_layout, $layout_of_row, $indexf++);
 						} else if (is_array($widget)) { // Recordview attribute
 							$widget_layout = $widget['layout']??'large';
@@ -299,7 +299,7 @@ class WidgetLayer
 				} else {
 					$classes = $this->widget_layout_horiz_config[$layout_of_row][$widget_layout]['horizontalCssClasses'];
 					if ($row_style == 'grid-nolabels') {
-						$widget->labelOptions = false;
+						$widget->enableLabel = false;
 					} else {
 						$widget->labelOptions['class'] = implode(' ', $classes['label']) . " fld-$widget_name";
 						if (YII_ENV_DEV) {
@@ -312,6 +312,7 @@ class WidgetLayer
 					$widget->wrapperOptions['class'] .= " {$layout_of_row}x$widget_layout";
 				}
 				if ($this->widget_painter) {
+// 					$widget->template ="{label}\n{beginWrapper}\n{input}\n{hint}\n{error}\n{endWrapper}";
 					$fs .= call_user_func($this->widget_painter, $widget, $classes, $indexf++);
 				} else {
 					$fs .= $widget->__toString();
@@ -332,7 +333,7 @@ class WidgetLayer
 				$fs .= "</div><!--$widget_name-->";
 				break;
 			default:
-				throw new InvalidConfigException($row_style . ": invalid style");
+				throw new InvalidConfigException($row_style . ": valid styles are: grid, grid-nolabels grid-cards");
 		}
 		return $fs;
 	}

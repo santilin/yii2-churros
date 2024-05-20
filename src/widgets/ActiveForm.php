@@ -11,6 +11,8 @@ class ActiveForm extends Bs5ActiveForm
 {
 	use ActiveFormTrait;
 
+	public $fieldConfig = [ 'template' => "{label}\n{beginWrapper}\n{input}\n{hint}\n{error}\n{endWrapper}", ];
+
 	public $errorSummaryCssClass = 'error-summary alert alert-danger';
 
 	public const FORM_FIELD_HORIZ_CLASSES = [

@@ -162,7 +162,7 @@ class JsonController extends \yii\web\Controller
 		$params = array_merge($req->get(), $req->post());
 		$params['permissions'] = FormHelper::resolvePermissions($params['permissions']??[], $this->crudActions);
 		$model = $this->findFormModel($this->getPath(), null, null, 'create', $params);
-		$relations = empty($params['_form.relations'])?[]:explode(",", $params['_form.relations']);
+		$relations = empty($params['_form_relations'])?[]:explode(",", $params['_form_relations']);
 		$model->scenario = 'create';
 		if ($model->loadAll($params, $relations) ) {
 			$model->setIsnewRecord(true);
@@ -194,8 +194,9 @@ class JsonController extends \yii\web\Controller
 		$params['permissions'] = FormHelper::resolvePermissions($params['permissions']??[], $this->crudActions);
 		$model = $this->findFormModel($this->getPath(), $id, null, 'duplicate', $params);
 		$model->setDefaultValues(true); // duplicating
-		$relations = empty($params['_form.relations'])?[]:explode(",", $params['_form.relations']);
+		$relations = empty($params['_form_relations'])?[]:explode(",", $params['_form_relations']);
 		$model->scenario = 'duplicate';
+		$mc = get_class($model);
 		if ($model->loadAll($params, $relations) ) {
 			$model->setIsNewRecord(true);
 			if ($model->validate() && $model->save(false)) {
@@ -225,7 +226,7 @@ class JsonController extends \yii\web\Controller
 		$params = array_merge($req->get(), $req->post());
 		$params['permissions'] = FormHelper::resolvePermissions($params['permissions']??[], $this->crudActions);
 		$model = $this->findFormModel($this->getPath(), $id, null, 'update', $params);
-		$relations = empty($params['_form.relations'])?[]:explode(",", $params['_form.relations']);
+		$relations = empty($params['_form_relations'])?[]:explode(",", $params['_form_relations']);
 
 		if ($model->loadAll($params, $relations) && $req->isPost ) {
 			if ($model->validate() && $model->save(false) ) {

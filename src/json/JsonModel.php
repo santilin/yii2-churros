@@ -19,6 +19,7 @@ class JsonModel extends \yii\base\Model
     protected $_id = null;
     protected $_json_object = null;
     protected $_locator = null;
+    protected $_related = null;
 
     public function __set($name, $value)
     {
@@ -288,12 +289,19 @@ class JsonModel extends \yii\base\Model
         }
     }
 
-    public function createChild(string $rel_name)
+    public function createChild(string $rel_name, string $form_class_name = null)
     {
         if (isset(static::$relations[$rel_name])) {
             $r = static::$relations[$rel_name];
-            $model_class = $r['modelClass'];
-            $child = new $model_class;
+            $rel_model_class = $r['modelClass'];
+            if ($form_class_name != null) {
+                $child = new $form_class_name;
+                if (!($child instanceof $rel_model_class)) {
+                    throw new InvalidConfigException("$form_class_name is not derived from $rel_model_class");
+                }
+            } else {
+                $child = new $rel_class_name;
+            }
             $child->parent_model = $this;
             $child->setPath($this->getPath() . '/' . $child->jsonPath());
             $child->setJsonModelable($this);
@@ -301,6 +309,113 @@ class JsonModel extends \yii\base\Model
         } else {
             return null;
         }
+    }
+
+    /**
+     * Load all attributes including related attributes
+     * @param $post
+     * @param array $relations_in_form
+     * @return bool
+     */
+    public function loadAll(array $post, array $relations_in_form = [], ?string $formName = null): bool
+    {
+        if( $formName === null ) {
+			$formName = $this->formName();
+		}
+        if ($this->load($post, $formName)) {
+			if (count($relations_in_form)==0) {
+				return true;
+			}
+            $relations_in_model = static::$relations;
+            foreach($relations_in_model as $rel_name => $model_relation ) {
+				if( !in_array($rel_name, $relations_in_form) ) {
+					continue;
+				}
+				if( $model_relation['type'] == 'HasOne' || $model_relation['type'] == "OneToOne" ) {
+					// Look for embedded relations data in the main form
+					$post_data = null;
+					if( isset($post[$formName][$rel_name]) && is_array($post[$formName][$rel_name]) ) {
+						$post_data = $post[$formName][$rel_name];
+					} else if( isset($post[$formName][$model_relation['model']]) && is_array($post[$formName][$model_relation['model']]) ) {
+						$post_data = $post[$formName][$model_relation['model']];
+					} else if( isset($post[$model_relation['model']]) && is_array($post[$model_relation['model']]) ) {
+						$post_data = $post[$model_relation['model']];
+					}
+					if( $post_data ) {
+						$rel_model = new $model_relation['modelClass'];
+						$rel_model->setAttributes( $post_data );
+						$this->populateRelation($rel_name, $rel_model);
+					}
+				} else {
+                    // HasMany or Many2Many outside of formName
+					$post_data = (isset($post[$rel_name]) && is_array($post[$rel_name]))
+						? $post[$rel_name] : null;
+					if( $post_data === null ) {
+						$post_data = (isset($post[$formName][$rel_name]) && is_array($post[$formName][$rel_name])) ? $post[$formName][$rel_name] : null ;
+					}
+					if( $post_data === null ) {
+						$post_data = (isset($post[$model_relation['model']]) && is_array($post[$model_relation['model']])) ? $post[$model_relation['model']] : null ;
+					}
+					if( $post_data ) {
+                        $this->loadToRelation($rel_name, $post_data);
+                    }
+                }
+            }
+            return true;
+        }
+        return false;
+    }
+
+
+    /**
+     * Refactored from loadAll() function
+     * @param $relation skimmed relation data
+     * @param $rel_name
+     * @param $v form values
+     * @return bool
+     */
+    public function loadToRelation($rel_name, $v)
+    {
+        /* @var $this ActiveRecord */
+        /* @var $relObj ActiveRecord */
+        /* @var $relModelClass ActiveRecord */
+        $relation = static::$relations[$rel_name];
+		$relModelClass = $relation['modelClass'];
+		$container = [];
+        $relPKAttr = [ $this->_locator ?? 'id' ];
+        if ($relation['type'] == 'HasMany') {
+            foreach ($v as $relPost) {
+                if (is_array($relPost) ) {
+                    if( array_filter($relPost) ) {
+                        /* @var $relObj ActiveRecord */
+//                         $relObj = (empty($relPost[$relPKAttr[0]])) ? new $relModelClass() : $relModelClass::findOne($relPost[$relPKAttr[0]]);
+//                         if (is_null($relObj)) {
+                            $relObj = new $relModelClass();
+//                         }
+                        $relObj->load($relPost, '');
+                        $container[] = $relObj;
+                    }
+                } else {
+                    // Just primary key of records, just one field in primary key
+                    $container[] = [ $relPKAttr[0] => $relPost ];
+                }
+            }
+        } else if ($relation['type'] == 'ManyToMany') {
+			foreach( $v as $relPost ) {
+				if( is_array($relPost) ) {
+					$id = $relPost[$relPKAttr[0]];
+					$relObj = empty($id) ? new $relModelClass : $relModelClass::findOne($id);
+					$relObj->load($relPost);
+				} else {
+					$id = $relPost;
+					$relObj = [ $relPKAttr[0] => $id ];
+				}
+				$container[] = $relObj;
+			}
+        }
+// 		$this->populateRelation($rel_name, $container);
+        $this->_related[$rel_name] = $container;
+        return true;
     }
 
 } // class
