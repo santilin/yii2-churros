@@ -31,7 +31,12 @@ class JsonModel extends \yii\base\Model
             $rel_info = static::$relations[$name];
             $rel_name = $rel_info['relatedTablename'];
             if ($rel_info['type'] == 'HasMany') {
-                $this->_json_object->set('$.' . $rel_info['relatedTablename'], $value);
+                if ($this->_json_object) {
+                    $this->_json_object->set("$.{$rel_info['relatedTablename']}", $value);
+                } else {
+                    $this->_json_modelable->setJsonObject('$' . $this->_path, $value??[],
+                                                          $this->_id ?: $this->{$this->_locator}, null);
+                }
             } else {
                 throw new \Exception("error en tipo de relación en __set");
             }
@@ -55,7 +60,7 @@ class JsonModel extends \yii\base\Model
             $rel_name = $rel_info['relatedTablename'];
             $rel_class = $rel_info['modelClass'];
             if ($rel_info['type'] == 'HasMany') {
-                $json_objects = $this->_json_object->get("$.$rel_name")?:[];
+                $json_objects = $this->_json_object?->get("$.$rel_name")?:[];
                 $related_models = [];
                 foreach ($json_objects as $rm) {
                     if ($rm === null) {
@@ -300,7 +305,7 @@ class JsonModel extends \yii\base\Model
                     throw new InvalidConfigException("$form_class_name is not derived from $rel_model_class");
                 }
             } else {
-                $child = new $rel_class_name;
+                $child = new $rel_model_class;
             }
             $child->parent_model = $this;
             $child->setPath($this->getPath() . '/' . $child->jsonPath());

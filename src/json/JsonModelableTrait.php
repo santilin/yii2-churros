@@ -39,6 +39,25 @@ trait JsonModelableTrait
 		}
 	}
 
+	public function setJsonObject(string $path, mixed $value, ?string $id, ?string $locator=null)
+	{
+		if ($this->_json_root === false) {
+			$this->_json_root = $this->createJsonRoot();
+		}
+		if (AppHelper::lastWord($path, '/') == $id) {
+			$path = AppHelper::removeLastWord($path, '/');
+		}
+		$path = str_replace('/', '.', $path);
+		if ($locator && $id) {
+			$set_path = $path . "[?(@.{$locator}=='$id')]";
+		} else if ($locator) {
+			$set_path = $path . "[?(@.{$locator}=='" . $this->$locator . "')]";
+		} else if ($id) {
+			$set_path = $path . '.'. $id;
+		}
+		$this->_json_root->set($set_path, $value);
+	}
+
 	public function getJsonArray(string $path, ?string $id, ?string $locator=null): array
 	{
 		if ($this->_json_root === false) {

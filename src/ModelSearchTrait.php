@@ -5,7 +5,7 @@ use Yii;
 use yii\helpers\Html;
 use yii\helpers\ArrayHelper;
 use yii\base\InvalidArgumentException;
-use santilin\churros\Helpers\{AppHelper,FormHelper};
+use santilin\churros\helpers\{AppHelper,FormHelper};
 
 /**
  * Eases the definition of filters and sorts in grids for search models
