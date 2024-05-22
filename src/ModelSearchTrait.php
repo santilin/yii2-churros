@@ -63,9 +63,9 @@ trait ModelSearchTrait
 	}
 
 	/**
-	 * Adds related sorts and filters to dataproviders for grids
+	 * Adds related sorts to dataproviders for grids
 	*/
-    public function addRelatedSortsToProvider($gridColumns, &$provider)
+    public function addRelatedSortsToProvider(array $gridColumns, $provider)
     {
 		foreach ($gridColumns as $attribute => $column_def) {
 			if ( $column_def === null
@@ -78,20 +78,13 @@ trait ModelSearchTrait
 			if ($attribute === null) {
 				continue;
 			}
-			if (strpos($attribute, '.') === FALSE) {
+			list($sort_fldname, $table_alias, $model, $relation) = $this->addRelatedFieldToJoin($attribute, $provider->query);
+			if ($sort_fldname != $attribute) {
 				$relation_name = $attribute;
-				$sort_fldname = '';
-			} else {
-				list($relation_name, $sort_fldname) = AppHelper::splitFieldName($attribute);
-			}
-			if (isset(self::$relations[$relation_name]) ) {
-				$related_model_class = self::$relations[$relation_name]['modelClass'];
-				$table_alias = "as_$relation_name";
-				// Activequery removes duplicate joins
-				$provider->query->joinWith("$relation_name $table_alias");
+				$related_model_class = $relation['modelClass'];
 // 				$provider->query->distinct(); // Evitar duplicidades debido a las relaciones hasmany
 				if (!isset($provider->sort->attributes[$attribute])) {
-					$related_model_search_class = self::$relations[$relation_name]['searchClass']
+					$related_model_search_class = $relation['searchClass']
 						?? str_replace('models\\', 'forms\\', $related_model_class) . '_Search';
 					if( class_exists($related_model_search_class) ) {
 						if ($sort_fldname == '' ) { /// @todo junction tables
@@ -117,16 +110,155 @@ trait ModelSearchTrait
 							}
 							$provider->sort->attributes[$attribute] = $new_related_sort ;
 						}
+					} else {
+						$provider->sort->attributes[$attribute] = [
+							'asc' => [$table_alias.'.'.$sort_fldname => SORT_ASC ],
+							'desc' => [$table_alias.'.'.$sort_fldname => SORT_DESC ]
+						];
 					}
-				} else {
-// 					$k = array_key_first($provider->sort->attributes[$attribute]['asc']);
-// 					$v = $provider->sort->attributes[$attribute]['asc'][$k];
-//   					$provider->query->addSelect(['sort_'.str_replace('.','_',$k) => $k]);
 				}
 			}
-// 			$provider->query->addSelect('*');
 		}
     }
+
+	/**
+	 * Adds related filters to dataproviders for grids
+	*/
+    public function addRelatedFiltersToProvider($gridColumns, &$provider)
+    {
+		foreach ($gridColumns as $column_def) {
+			if ( $column_def === null || empty($column_def['filterAttribute']) ) {
+				continue;
+			}
+			if (is_string($column_def['filterAttribute'])) {
+				$this->addRelatedFieldToJoin($column_def['filterAttribute']);
+			}
+		}
+	}
+
+	protected function filterWhereRelated($query, $relation_name, $value, $is_and = true)
+	{
+		if ($value === null || $value === '' ||
+			(is_array($value) && (!isset($value['v']) || (isset($value['v']) && $value['v']==='')))) {
+			return;
+		}
+		list($attribute, $table_alias, $model, $relation) = $this->addRelatedFieldToJoin($relation_name, $query);
+
+		$value = FormHelper::toOpExpression($value, false, $this->operatorForAttr($attribute?:$relation_name) );
+		$search_flds = [];
+		if ($attribute == '') {
+			$search_flds = $model->findCodeAndDescFields();
+			$rel_conds = [ 'OR' ];
+			foreach( $search_flds as $search_fld ) {
+				$fld_conds = [ 'OR' ];
+				$operator = $this->operatorForAttr($search_fld);
+				foreach ((array)$value['v'] as $v) {
+					$fld_conds[] = [ $operator, "$table_alias.$search_fld", $v];
+				}
+				$rel_conds[] = $fld_conds;
+			}
+			if ($is_and) {
+				$query->andWhere($rel_conds);
+			} else {
+				$query->orWhere($rel_conds);
+			}
+		} else if ($attribute == $model->primaryKey()[0] ) {
+			if (isset($relation['other']) ) {
+				list($right_table, $right_fld ) = AppHelper::splitFieldName($relation['other']);
+			} else {
+				list($right_table, $right_fld ) = AppHelper::splitFieldName($relation['right']);
+			}
+			if ($value['v']=== 'true') {
+				$query->andWhere(["not", ["$table_alias.$right_fld" => null]]);
+			} else if ($value['v'] === 'false') {
+				if ($is_and) {
+					$query->andWhere(["$table_alias.$right_fld" => null]);
+				} else {
+					$query->orWhere(["$table_alias.$right_fld" => null]);
+				}
+			} else {
+				// Look for in code and desc fields also
+				$fields = array_unique(array_filter([$model->getModelInfo('code_field'), $model->getModelInfo('desc_field')]));
+				if (count($fields)==1) {
+					if ($is_and) {
+						$query->andWhere(["$table_alias.$right_fld" => $value['v']]);
+					} else {
+						$query->orWhere(["$table_alias.$right_fld" => $value['v']]);
+					}
+				} else {
+					$conds = ["or", [ "$table_alias.$right_fld" => $value['v']]];
+					foreach ($fields as $fld) {
+						if ($fld != $right_fld && $value['op'] != 'LIKE') {
+							$conds[] = [ "LIKE", "$table_alias.$fld", $value['v'] ];
+						}
+					}
+					if ($is_and) {
+						$query->andWhere($conds);
+					} else {
+						$query->orWhere("or", $conds);
+					}
+				}
+			}
+		} else {
+			if ($is_and) {
+				$query->andWhere([$value['op'], "$table_alias.$attribute", $value['v'] ]);
+			} else {
+				$query->orWhere([$value['op'], "$table_alias.$attribute", $value['v'] ]);
+ 			}
+		}
+	}
+
+	/**
+	 * Adds a related field to the joins of a query
+	 * @return the name of the attribute to be used in the query
+	 */
+	protected function addRelatedFieldToJoin(string $field_name, $query): array
+	{
+		$model = $this;
+		$nested_relations = '';
+		$attribute = $field_name;
+		$nested_relations = '';
+		$model = $this;
+		$table_alias = 'as';
+		$relation = null;
+		while (strpos($field_name, '.') !== FALSE) {
+			list($field_name, $attribute) = AppHelper::splitFieldName($field_name);
+			if ($nested_relations != '') {
+				$nested_relations .= '.';
+			}
+			$nested_relations .= $field_name;
+			$relation = $model::$relations[$field_name]??null;
+			if ($relation) {
+				// Hay tres tipos de campos relacionados:
+				// 1. El nombre de la relación (attribute = '' )
+				// 2. Relación y campo: Productora.nombre
+				// 3. La clave foranea: productura_id
+				$table_alias .= "_$field_name";
+				// Activequery removes duplicate joins (added also in addSort)
+				$query->joinWith("$nested_relations $table_alias");
+				$modelClass = $relation['modelClass'];
+				$model = $modelClass::instance();
+			} else {
+				throw new InvalidArgumentException($field_name . ": relation not found in model " . self::class . ' (SearchModel::filterWhereRelated)');
+			}
+		}
+		if (isset($model::$relations[$attribute])) {
+			$relation = $model::$relations[$attribute];
+			// Hay tres tipos de campos relacionados:
+			// 1. El nombre de la relación (attribute = '' )
+			// 2. Relación y campo: Productora.nombre
+			// 3. La clave foranea: productura_id
+			$table_alias .= "_$attribute";
+			if ($nested_relations) {
+				$nested_relations .= '.';
+			}
+			// Activequery removes duplicate joins (added also in addSort)
+			$query->joinWith("$nested_relations$attribute $table_alias");
+			$attribute = $model->primaryKey()[0];
+		}
+		return [$attribute,$table_alias,$model,$relation];
+	}
+
 
     // Advanced search with operators
 	protected function makeSearchParam($values)
@@ -173,123 +305,6 @@ trait ModelSearchTrait
 			} else {
 				$this->$attr = '';
 			}
-		}
-	}
-
-	protected function filterWhereRelated(&$query, $relation_name, $value, $is_and = true)
-	{
-		if ($value === null || $value === '' ||
-			(is_array($value) && (!isset($value['v']) || (isset($value['v']) && $value['v']==='')))) {
-			return;
-		}
-		$model = $this;
-		$nested_relations = '';
-		if (strpos($relation_name, '.') === FALSE) {
-			$relation = $model::$relations[$relation_name]??null;
-			if ($relation) {
-				// Hay tres tipos de campos relacionados:
-				// 1. El nombre de la relación (attribute = '' )
-				// 2. Relación y campo: Productora.nombre
-				// 3. La clave foranea: productura_id
-				$table_alias = "as_$relation_name";
-				// Activequery removes duplicate joins (added also in addSort)
-				$query->joinWith("$relation_name $table_alias");
-				$attribute = '';
-				$modelClass = $relation['modelClass'];
-				$model = $modelClass::instance();
-			}
-		} else {
-			while (strpos($relation_name, '.') !== FALSE) {
-				list($relation_name, $attribute) = AppHelper::splitFieldName($relation_name);
-				$relation = $model::$relations[$relation_name]??null;
-				if ($nested_relations!='') {
-					$nested_relations .= '.';
-				}
-				$nested_relations .= $relation_name;
-				if( $relation ) {
-					// Hay tres tipos de campos relacionados:
-					// 1. El nombre de la relación (attribute = '' )
-					// 2. Relación y campo: Productora.nombre
-					// 3. La clave foranea: productura_id
-					$table_alias = "as_$relation_name";
-					// Activequery removes duplicate joins (added also in addSort)
-					$query->joinWith("$nested_relations $table_alias");
-					$modelClass = $relation['modelClass'];
-					$model = $modelClass::instance();
-				} else {
-					throw new InvalidArgumentException($relation_name . ": relation not found in model " . self::class . ' (SearchModel::filterWhereRelated)');
-				}
-			}
-			// if( $relation ) {
-			// 	// Hay tres tipos de campos relacionados:
-			// 	// 1. El nombre de la relación (attribute = '' )
-			// 	// 2. Relación y campo: Productora.nombre
-			// 	// 3. La clave foranea: productura_id
-			// 	$table_alias = "as_$attribute";
-			// 	// Activequery removes duplicate joins (added also in addSort)
-			// 	$query->joinWith("$nested_relations $table_alias");
-			// }
-		}
-
-		$value = FormHelper::toOpExpression($value, false, $this->operatorForAttr($attribute?:$relation_name) );
-		$search_flds = [];
-		if ($attribute == '') {
-			$search_flds = $model->findCodeAndDescFields();
-			$rel_conds = [ 'OR' ];
-			foreach( $search_flds as $search_fld ) {
-				$fld_conds = [ 'OR' ];
-				$operator = $this->operatorForAttr($search_fld);
-				foreach ((array)$value['v'] as $v) {
-					$fld_conds[] = [ $operator, "$table_alias.$search_fld", $v];
-				}
-				$rel_conds[] = $fld_conds;
-			}
-			if ($is_and) {
-				$query->andWhere($rel_conds);
-			} else {
-				$query->orWhere($rel_conds);
-			}
-		} else if ($attribute == $model->primaryKey()[0] ) {
-			if (isset($relation['other']) ) {
-				list($right_table, $right_fld ) = AppHelper::splitFieldName($relation['other']);
-			} else {
-				list($right_table, $right_fld ) = AppHelper::splitFieldName($relation['right']);
-			}
-			if ($value['v']=== 'true') {
-				$query->andWhere(["not", ["$table_alias.$right_fld" => null]]);
-			} else if ($value['v'] === 'false') {
-				if ($is_and) {
-					$query->andWhere(["$table_alias.$right_fld" => null]);
-				} else {
-					$query->orWhere(["$table_alias.$right_fld" => null]);
-				}
-			} else {
-				// Look for in code and desc fields also
-				$fields = array_unique(array_filter([$model->getModelInfo('code_field'), $model->getModelInfo('desc_field')]));
-				if (count($fields)==1) {
-					if ($is_and) {
-						$query->andWhere(["$table_alias.$right_fld" => $value['v']]);
-					} else {
-						$query->orWhere(["$table_alias.$right_fld" => $value['v']]);
-					}
-				} else {
-					$conds = ["or", [ "$table_alias.$right_fld" => $value['v']]];
-					foreach ($fields as $fld) {
-						$conds[] = [ "LIKE", "$table_alias.$fld", $value['v'] ];
-					}
-					if ($is_and) {
-						$query->andWhere($conds);
-					} else {
-						$query->orWhere("or", $conds);
-					}
-				}
-			}
-		} else {
-			if ($is_and) {
-				$query->andWhere([$value['op'], "$table_alias.$attribute", $value['v'] ]);
-			} else {
-				$query->orWhere([$value['op'], "$table_alias.$attribute", $value['v'] ]);
- 			}
 		}
 	}
 
