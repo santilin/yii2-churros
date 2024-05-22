@@ -56,34 +56,58 @@ class JsonModel extends \yii\base\Model
             return $this->_attributes[$name];
         }
         if (isset(static::$relations[$name])) {
-            $rel_info = static::$relations[$name];
-            $rel_name = $rel_info['relatedTablename'];
-            $rel_class = $rel_info['modelClass'];
-            if ($rel_info['type'] == 'HasMany') {
-                $json_objects = $this->_json_object?->get("$.$rel_name")?:[];
-                $related_models = [];
-                foreach ($json_objects as $rm) {
-                    if ($rm === null) {
-                        continue;
-                    }
-                    $rel_model = new $rel_class;
-                    if (is_string($rm)) {
-                        $rel_model->setPrimaryKey($rm);
-                    } else foreach ($rm as $fldname => $fldvalue) {
-                        if ($rel_model->hasAttribute($fldname)) {
-                            $rel_model->$fldname = $fldvalue;
-                        }
-                    }
-                    $related_models[] = $rel_model;
-                }
-                return $related_models;
-            } else {
-                $rel_model = new $rel_class;
-                $rel_model->loadJson($this->_json_modelable, $this->_path . "/$rel_name");
-                return $rel_model;
-            }
+            return $this->findRelatedModels($name);
         }
         return parent::__get($name);
+    }
+
+    public function findRelatedModels(string $relation_name, string $form_class_name = null): array
+    {
+        $rel_info = static::$relations[$relation_name];
+        $rel_name = $rel_info['relatedTablename'];
+        $rel_model_class = $rel_info['modelClass'];
+        if ($rel_info['type'] == 'HasMany') {
+            $json_objects = $this->_json_object?->get("$.$rel_name")?:[];
+            $related_models = [];
+            foreach ($json_objects as $rm) {
+                if ($rm === null) {
+                    continue;
+                }
+                if ($form_class_name != null) {
+                    $child = new $form_class_name;
+                    if (!($child instanceof $rel_model_class)) {
+                        throw new InvalidConfigException("$form_class_name is not derived from $rel_model_class");
+                    }
+                } else {
+                    $child = new $rel_model_class;
+                }
+                $child->parent_model = $this;
+                $child->setPath($this->getPath() . '/' . $child->jsonPath());
+                $child->setJsonModelable($this);
+                if (is_string($rm)) {
+                    $child->setPrimaryKey($rm);
+                } else foreach ($rm as $fldname => $fldvalue) {
+                    if ($child->hasAttribute($fldname)) {
+                        $child->$fldname = $fldvalue;
+                    }
+                }
+                $related_models[] = $child;
+            }
+            return $related_models;
+        } else {
+            if ($form_class_name != null) {
+                $child = new $form_class_name;
+                if (!($child instanceof $rel_model_class)) {
+                    throw new InvalidConfigException("$form_class_name is not derived from $rel_model_class");
+                }
+            } else {
+                $child = new $rel_model_class;
+            }
+            $child->parent_model = $this;
+            $child->setPath($this->getPath() . '/' . $child->jsonPath());
+            $child->loadJson($this->_json_modelable, $this->_path . "/$rel_name");
+            return $child;
+        }
     }
 
     public function locator(): string
