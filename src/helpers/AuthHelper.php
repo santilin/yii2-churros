@@ -152,7 +152,7 @@ class AuthHelper
 			$user_name = $user_id_or_name;
 		}
 		$msgs = [];
-		foreach( $perms as $perm_name ) {
+		foreach ($perms as $perm_name) {
 			if ($perm_name instanceof Role) {
 				$perm_name = $perm_name->name;
 			}

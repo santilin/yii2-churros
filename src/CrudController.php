@@ -269,8 +269,6 @@ class CrudController extends \yii\web\Controller
 				$this->addSuccessFlashes('update', $model);
 				return $this->redirect($this->whereToGoNow('update', $model));
 			}
-		} else {
-			$model->setDefaultValues(false);
 		}
 		return $this->render('update', [
 			'model' => $model,

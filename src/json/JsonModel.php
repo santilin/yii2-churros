@@ -245,6 +245,7 @@ class JsonModel extends \yii\base\Model
             $this->_is_new_record = false;
             $v = $this->_json_object->getValue();
             if ($v === null) {
+            } else if (is_bool($v)) {
             } else if (is_string($v)) {
                 if ($v != $id) {
                     throw new InvalidConfigException("$v != $id");
