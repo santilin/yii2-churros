@@ -5,11 +5,12 @@ namespace santilin\churros\json;
 use JsonPath\JsonObject;
 use yii\base\{InvalidArgumentException,InvalidConfigException};
 use santilin\churros\json\JsonModelable;
+use santilin\churros\helpers\AppHelper;
 
 class JsonModel extends \yii\base\Model
 // implements \yii\db\ActiveRecordInterface
 {
-    static $_parent_model_class;
+    static public $parent_model_class;
     protected $parent_model;
     protected $_attributes = [];
     /** @var bool whether this is a new record */
@@ -61,7 +62,7 @@ class JsonModel extends \yii\base\Model
         return parent::__get($name);
     }
 
-    public function findRelatedModels(string $relation_name, string $form_class_name = null): array
+    public function findRelatedModels(string $relation_name, string $form_class_name = null): array|JsonModel
     {
         $rel_info = static::$relations[$relation_name];
         $rel_name = $rel_info['relatedTablename'];
@@ -225,7 +226,11 @@ class JsonModel extends \yii\base\Model
     public function loadSearchModel(JsonModelable $json_modelable, string $json_path)
     {
         $this->_json_modelable = $json_modelable;
-        $this->_path = $json_path . '/' . static::jsonPath();
+        if (AppHelper::endsWith($json_path, '/'. static::jsonPath())) {
+            $this->_path = $json_path;
+        } else {
+            $this->_path = $json_path . '/'. static::jsonPath();
+        }
     }
 
 	public function loadJson(JsonModelable $json_modelable, string $json_path = null, string $id = null, string $locator = null):?JsonObject

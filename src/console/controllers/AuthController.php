@@ -10,7 +10,7 @@ use Yii;
 use yii\di\Instance;
 use yii\base\InvalidConfigException;
 use yii\db\Connection;
-use yii\rbac\{BaseManager,Item};
+use yii\rbac\{BaseManager,Item,Role};
 use yii\console\Controller;
 use santilin\churros\helpers\AuthHelper;
 
@@ -65,76 +65,44 @@ class AuthController extends Controller
         return true;
     }
 
-
 	/**
 	 * Creates the permissions for a model inside a module
 	 */
-	public function createReportsPermissions($module_id)
+	public function createControllerPermissions(string $module_id, string $model_name, array $controller,
+												Role $visora, Role $editora, $auth = null)
 	{
-		$auth = $this->authManager;
-		$visora = AuthHelper::createOrUpdateRole("$module_id.Reports.visor",
-			Yii::t('churros', "View all $module_id reports"), $auth);
-		AuthHelper::echoLastMessage();
-		$editora = AuthHelper::createOrUpdateRole("$module_id.Reports.editor",
-			Yii::t('churros', "Edit all $module_id reports"), $auth);
-		AuthHelper::echoLastMessage();
-		foreach( [ 'index' => 'Index' ] as $perm_name => $perm_desc ) {
-			$permission = AuthHelper::createOrUpdatePermission(
-				$module_id . ".Reports.$perm_name",
-				$perm_desc . ' Reports', $auth);
-				AuthHelper::echoLastMessage();
-			if( !$auth->hasChild($visora, $permission) ) {
-				$auth->addChild($visora, $permission);
-				echo "permission '$perm_name' added to role '{$visora->name}'\n";
-			}
+		if (!$auth) {
+			$auth = $this->authManager;
 		}
-	}
-
-	/**
-	 * Creates the permissions for a model inside a module
-	 */
-	public function createModelPermissions($module_id, $model_name, $model_class)
-	{
-		$auth = $this->authManager;
-
-		$visora = AuthHelper::createOrUpdateRole("$module_id.visor",
-			Yii::t('churros', "View all $module_id records"), $auth);
-		AuthHelper::echoLastMessage();
-		$editora = AuthHelper::createOrUpdateRole("$module_id.editor",
-			Yii::t('churros', "Edit all $module_id records"), $auth);
-		AuthHelper::echoLastMessage();
-
+		$model_class = $controller['class'];
 		$model = $model_class::instance();
 		$model_title = $model->t('app', "{title_plural}");
 		$model_perm_name = $module_id . '.' . $model_name;
+
 		$model_editora = AuthHelper::createOrUpdateRole(
 			$model_perm_name . '.editor',
 			Yii::t('churros', '{model} editor', ['model' => $model_title]), $auth);
 		AuthHelper::echoLastMessage();
-
 		$model_visora = AuthHelper::createOrUpdateRole(
-			$model_perm_name . '.visor',
-			Yii::t('churros', '{model} visor', ['model' => $model_title]), $auth);
+			$model_perm_name . '.viewer',
+			Yii::t('churros', '{model} viewer', ['model' => $model_title]), $auth);
 		AuthHelper::echoLastMessage();
 
-		$model_editora_own = AuthHelper::createOrUpdateRole(
-			$model_perm_name . '.editor.own',
-			Yii::t('churros', 'Their own {model} editor', ['model' => $model_title]), $auth);
-		AuthHelper::echoLastMessage();
+		if( !$auth->hasChild($visora, $model_visora) ) {
+			$auth->addChild($visora, $model_visora);
+			echo "role '{$model_visora->name}' added to role '{$visora->name}'\n";
+// 				} else {
+// 					echo "Warning: permission {$permission->name} already exists in role {$visora->name}\n";
+		}
+		if( !$auth->hasChild($editora, $model_editora) ) {
+				$auth->addChild($editora, $model_editora);
+				echo "role '{$model_editora->name}' added to role '{$editora->name}'\n";
+// 			} else {
+// 				echo "Warning: permission {$permission->name} already exists in role {$editora->name}\n";
+			}
 
-		$model_visora_own = AuthHelper::createOrUpdateRole(
-			$model_perm_name . '.visor.own',
-			Yii::t('churros', 'Their own {model} viewer', ['model' => $model_title]), $auth);
-		AuthHelper::echoLastMessage();
-
-
-		foreach( [ 'create' => Yii::t('churros', 'Create'),
-					'view' => Yii::t('churros', 'View'),
-					'edit' => Yii::t('churros', 'Edit'),
-					'delete' => Yii::t('churros', 'Delete'),
-					'index' => Yii::t('churros', 'List'),
-					'menu' => Yii::t('churros', 'Menu')
-				  ] as $perm_name => $perm_desc) {
+		foreach ($controller['perms'] as $perm_name) {
+			$perm_desc = Yii::t('churros', ucfirst($perm_name));
 			$permission = AuthHelper::createOrUpdatePermission(
 				$model_perm_name . ".$perm_name",
 				$perm_desc . ' ' . $model_title, $auth);
@@ -142,12 +110,6 @@ class AuthController extends Controller
 
 			$add_to_visora = ($perm_name == 'view' || $perm_name == 'index' || $perm_name == 'menu' );
 			if( $add_to_visora ) {
-				if( !$auth->hasChild($visora, $permission) ) {
-					$auth->addChild($visora, $permission);
-					echo "permission '{$permission->name}' added to role '{$visora->name}'\n";
-// 				} else {
-// 					echo "Warning: permission {$permission->name} already exists in role {$visora->name}\n";
-				}
 				if( !$auth->hasChild($model_visora, $permission) ) {
 					$auth->addChild($model_visora, $permission);
 					echo "permission '{$permission->name}' added to role '{$model_visora->name}'\n";
@@ -161,77 +123,70 @@ class AuthController extends Controller
 // 			} else {
 // 				echo "Warning: permission {$permission->name} already exists in role {$model_editora->name}\n";
 			}
-			if( !$auth->hasChild($editora, $permission) ) {
-				$auth->addChild($editora, $permission);
-				echo "permission '{$permission->name}' added to role '{$editora->name}'\n";
-// 			} else {
-// 				echo "Warning: permission {$permission->name} already exists in role {$editora->name}\n";
-			}
-			if( $perm_name != 'menu' ) {
-				$own_perm_name = "$model_perm_name.$perm_name" . ($perm_name == 'create'?'':'.own');
-				$permission_own = AuthHelper::createOrUpdatePermission( $own_perm_name,
-					$perm_desc .' ' . $model->t('churros', 'their own {title_plural}'), $auth);
-				AuthHelper::echoLastMessage();
-				if( !$auth->hasChild($model_editora_own, $permission_own) ) {
-					$auth->addChild($model_editora_own, $permission_own);
-					echo "permission '{$permission_own->name}' added to role '{$model_editora_own->name}'\n";
-				}
-				if( $add_to_visora ) {
-					if( !$auth->hasChild($model_visora_own, $permission_own) ) {
-						$auth->addChild($model_visora_own, $permission_own);
-						echo "permission '{$permission_own->name}' added to role '{$model_editora_own->name}'\n";
-					}
-				}
-			}
+// 		$model_editora_own = AuthHelper::createOrUpdateRole(
+// 			$model_perm_name . '.editor.own',
+// 			Yii::t('churros', 'Their own {model} editor', ['model' => $model_title]), $auth);
+// 		AuthHelper::echoLastMessage();
+// 		$model_visora_own = AuthHelper::createOrUpdateRole(
+// 			$model_perm_name . '.viewer.own',
+// 			Yii::t('churros', 'Their own {model} viewer', ['model' => $model_title]), $auth);
+// 		AuthHelper::echoLastMessage();
 
-			if( $perm_name == 'menu' ) {
-				$permission_menu = $auth->getPermission($model_perm_name . ".menu");
-				if( !$auth->hasChild($model_editora, $permission_menu ) ) {
-					$auth->addChild($model_editora, $permission_menu);
-					echo "permission '{$permission_menu->name}' added to role '{$model_editora->name}'\n";
-				}
-				if( !$auth->hasChild($model_visora, $permission_menu) ) {
-					$auth->addChild($model_visora, $permission_menu);
-					echo "permission '{$permission_menu->name}' added to role '{$model_editora->name}'\n";
-				}
-				if( !$auth->hasChild($model_editora_own, $permission_menu ) ) {
-					$auth->addChild($model_editora_own, $permission_menu);
-					echo "permission '{$permission_menu->name}' added to role '{$model_editora_own->name}'\n";
-				}
-				if( !$auth->hasChild($model_visora_own, $permission_menu) ) {
-					$auth->addChild($model_visora_own, $permission_menu);
-					echo "permission '{$permission_menu->name}' added to role '{$model_editora_own->name}'\n";
-				}
-			}
+// 			$own_perm_name = "$model_perm_name.$perm_name" . ($perm_name == 'create'?'':'.own');
+// 			$permission_own = AuthHelper::createOrUpdatePermission( $own_perm_name,
+// 				$perm_desc .' ' . $model->t('churros', 'their own {title_plural}'), $auth);
+// 			AuthHelper::echoLastMessage();
+// 			if( !$auth->hasChild($model_editora_own, $permission_own) ) {
+// 				$auth->addChild($model_editora_own, $permission_own);
+// 				echo "permission '{$permission_own->name}' added to role '{$model_editora_own->name}'\n";
+// 			}
+// 			if( $add_to_visora ) {
+// 				if( !$auth->hasChild($model_visora_own, $permission_own) ) {
+// 					$auth->addChild($model_visora_own, $permission_own);
+// 					echo "permission '{$permission_own->name}' added to role '{$model_editora_own->name}'\n";
+// 				}
+// 			}
 		}
 	}
 
 	/**
 	 * Creates the permissions for a module
 	 */
-	public function createModulePermissions($module_id, $module_title = null)
+	public function createModulePermissions(string $module_id, array $module_info, $auth = null)
 	{
-		$auth = $this->authManager;
-		AuthHelper::createOrUpdatePermission("$module_id.menu",
-			Yii::t('churros', 'Access to \'{module}\' module menu',
-			[ 'module' => $module_title?:$module_id ]), $auth);
+		if (!$auth) {
+			$auth = $this->authManager;
+		}
+		$visora = AuthHelper::createOrUpdateRole("$module_id.viewer",
+			Yii::t('churros', "View all $module_id records"), $auth);
 		AuthHelper::echoLastMessage();
-		$role_all_name = "$module_id.all.menu";
-		$role_all = AuthHelper::createOrUpdateRole($role_all_name,
-			Yii::t('churros', 'Access to all models of module {module}', [ 'module' => $module_id ]), $auth);
+		$editora = AuthHelper::createOrUpdateRole("$module_id.editor",
+			Yii::t('churros', "Edit all $module_id records"), $auth);
 		AuthHelper::echoLastMessage();
-		AuthHelper::createOrUpdatePermission("$module_id.site.index",
-			Yii::t('churros', 'Access to \'{module}\' site index',
-			[ 'module' => $module_title?:$module_id ]), $auth);
-		AuthHelper::echoLastMessage();
-		AuthHelper::createOrUpdatePermission("$module_id.site.about",
-			Yii::t('churros', 'Access to \'{module}\' site about',
-			[ 'module' => $module_title?:$module_id ]), $auth);
-		AuthHelper::echoLastMessage();
-		AuthHelper::createOrUpdatePermission("$module_id.reports",
-			Yii::t('churros', 'Access to \'{module}\' reports',
-			[ 'module' => $module_title?:$module_id ]), $auth);
-		AuthHelper::echoLastMessage();
+		foreach ($module_info['controllers']??[] as $cname => $controller) {
+			$this->createControllerPermissions($module_id, $cname, $controller, $visora, $editora);
+		}
+// 		$auth = $this->authManager;
+// 		AuthHelper::createOrUpdatePermission("$module_id.menu",
+// 			Yii::t('churros', 'Access to \'{module}\' module menu',
+// 			[ 'module' => $module_title?:$module_id ]), $auth);
+// 		AuthHelper::echoLastMessage();
+// 		$role_all_name = "$module_id.all.menu";
+// 		$role_all = AuthHelper::createOrUpdateRole($role_all_name,
+// 			Yii::t('churros', 'Access to all menus of module {module}', [ 'module' => $module_id ]), $auth);
+// 		AuthHelper::echoLastMessage();
+// 		AuthHelper::createOrUpdatePermission("$module_id.site.index",
+// 			Yii::t('churros', 'Access to \'{module}\' site index',
+// 			[ 'module' => $module_title?:$module_id ]), $auth);
+// 		AuthHelper::echoLastMessage();
+// 		AuthHelper::createOrUpdatePermission("$module_id.site.about",
+// 			Yii::t('churros', 'Access to \'{module}\' site about',
+// 			[ 'module' => $module_title?:$module_id ]), $auth);
+// 		AuthHelper::echoLastMessage();
+// 		AuthHelper::createOrUpdatePermission("$module_id.reports",
+// 			Yii::t('churros', 'Access to \'{module}\' reports',
+// 			[ 'module' => $module_title?:$module_id ]), $auth);
+// 		AuthHelper::echoLastMessage();
 	}
 
 	/**
