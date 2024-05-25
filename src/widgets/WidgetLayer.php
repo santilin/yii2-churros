@@ -69,7 +69,14 @@ class WidgetLayer
 			}
 		}
 		if ($only_widget_names) {
-			$layout_rows = [ ['type' => 'widgets', 'content' => $layout_rows, 'size' => $parent_size] ];
+			$layout_rows = [
+				[
+					'type' => 'widgets',
+					'content' => $layout_rows,
+					'size' => $parent_size,
+					'layout' => $parent_options['layout']??'1col',
+					'style' => $parent_options['style']??'rows',
+				] ];
 		}
 		$ret = '';
 		foreach ($layout_rows as $lrk => $layout_row) {
@@ -95,8 +102,10 @@ class WidgetLayer
                             }
                             $tab_items[] = [
                                 'label' => $content['title']??$kc,
-                                'content' => $this->layoutWidgets($content['content'],
-                                    ['layout' => $content['layout']??$layout_of_row, 'style' => $content['style']??$parent_style, 'type' => $type_of_row ]),
+                                'content' => $this->layoutWidgets($content['content'], [
+									'layout' => $content['layout']??$layout_of_row,
+									'style' => $content['style']??$parent_style,
+									'type' => $type_of_row ]),
                             ];
                         }
                         $ret .= Tabs::widget([ 'items' => $tab_items ]);
