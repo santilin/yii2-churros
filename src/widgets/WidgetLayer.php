@@ -102,7 +102,9 @@ class WidgetLayer
                             }
                             $tab_items[] = [
                                 'label' => $content['title']??$kc,
-                                'content' => $this->layoutWidgets($content['content'], [
+								'options' => $content['htmlOptions']??[],
+								'headerOptions' => $content['headerOptions']??[],
+								'content' => $this->layoutWidgets($content['content'], [
 									'layout' => $content['layout']??$layout_of_row,
 									'style' => $content['style']??$parent_style,
 									'type' => $type_of_row ]),
@@ -152,7 +154,7 @@ class WidgetLayer
                 if (!isset($layout_row['style'])) {
 					$layout_row['style'] = $parent_style;
 				}
-				$ret .= '<div class=row>';
+				$row_html = '<div class=row>';
                 foreach ($layout_row['content'] as $widget_name ) {
 					$fs = '';
 					$open_divs = 0;
@@ -240,19 +242,16 @@ class WidgetLayer
 						for ( ; $open_divs>0; $open_divs--) {
 							$fs .= '</div>';
 						}
-						// if (isset($layout_row['title']) && $type_of_row == 'widgetset' ) {
-						// 	$legend = Html::tag('legend', $layout_row['title'], $layout_row['title_options']??[]);
-						// 	$ret .= Html::tag('widgetset', $legend . $fs, array_merge( ['id' => $this->options['id'] . "_layout_$lrk" ], $layout_row['options']??[]) );
-						// } else if( isset($layout_row['title'])  ) {
-						// 	$legend = Html::tag('div', $layout_row['title'], $layout_row['title_options']??[]);
-						// 	$ret .= Html::tag('div', $legend . $fs, array_merge( ['id' => $this->options['id'] . "_layout_$lrk" ], $layout_row['options']??[]) );
-						// } else {
-						// 	$ret .= $fs;
-						// }
-						$ret .= $fs;
+						$row_html .= $fs;
 					}
 				}
-				$ret .= '</div><!-- main row-->';
+				$row_html .= '</div><!-- main row-->';
+				if (($title = $layout_row['title']??false) != false) {
+					$legend = Html::tag('legend', $title, $layout_row['title_options']??[]);
+					$ret .= Html::tag('fieldset', "$legend<hr/>$row_html", $layout_row['htmlOptions']??[]);
+				} else {
+					$ret .= $row_html;
+				}
 				break;
 
 			case 'buttons':
