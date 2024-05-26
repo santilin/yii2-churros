@@ -84,7 +84,7 @@ class WidgetLayer
 			if ($layout_of_row == 'inline') {
 				$cols = 10000;
 			} else {
-				$cols = intval($layout_of_row)?:max(count($layout_row['content']), 4);
+				$cols = intval($layout_of_row); // ?:max(count($layout_row['content']), 4);
 			}
 			$type_of_row = $layout_row['type']??'widgets';
 			switch ($type_of_row) {
@@ -308,6 +308,10 @@ class WidgetLayer
 					$classes = $this->widget_layout_horiz_config[$layout_of_row][$widget_layout]['horizontalCssClasses'];
 					if ($row_style == 'grid-nolabels') {
 						$widget->enableLabel = false;
+					// } elseif ($row_style == 'grid-full-labels') {
+					// 	echo "<pre>"; print_r($this->widget_layout_horiz_config); die;
+					// 	$label_classes = $this->widget_layout_horiz_config['vertical']['horizontalCssClasses'];
+					// 	$classes['label'] = $label_classes['label'];
 					} else {
 						$widget->labelOptions['class'] = implode(' ', $classes['label']) . " fld-$widget_name";
 						if (YII_ENV_DEV) {
