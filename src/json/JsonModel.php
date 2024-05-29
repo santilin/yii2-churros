@@ -128,24 +128,24 @@ class JsonModel extends \yii\base\Model
 
     public function parentModel($parent_id = null): ?JsonModel
     {
-        if (!$this->_json_modelable) {
-            throw new InvalidConfigException("Json model has no _json_modelable defined");
+        if ($this->parent_model === null) {
+            if (!$this->_json_modelable) {
+                throw new InvalidConfigException("Json model has no _json_modelable defined");
+            }
+            if (!$this->_path) {
+                return null;
+            }
+            $parts = explode('/', $this->_path);
+            if (count($parts)<1) {
+                return null;
+            }
+            array_pop($parts);
+            $this->parent_model = new static::$parent_model_class;
+            if ($this->parent_model->loadJson($this->_json_modelable, implode('/', $parts), $parent_id)) {
+                $this->parent_model = null;
+            }
         }
-        if (!$this->_path) {
-            return null;
-        }
-        $parts = explode('/', $this->_path);
-        if (count($parts)<1) {
-            return null;
-        }
-        array_pop($parts);
-        $this->parent_model = new static::$parent_model_class;
-        if ($this->parent_model->loadJson($this->_json_modelable, implode('/', $parts), $parent_id)) {
-            return $this->parent_model;
-        } else {
-            return null;
-        }
-
+        return $this->parent_model;
     }
 
     public function setPath(string $path)
