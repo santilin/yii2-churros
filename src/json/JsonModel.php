@@ -136,12 +136,15 @@ class JsonModel extends \yii\base\Model
                 return null;
             }
             $parts = explode('/', $this->_path);
-            if (count($parts)<1) {
+            if (count($parts)<2) {
                 return null;
             }
             array_pop($parts);
+            if ($parent_id == null) {
+                $parent_id = $parts[count($parts)-1];
+            }
             $this->parent_model = new static::$parent_model_class;
-            if ($this->parent_model->loadJson($this->_json_modelable, implode('/', $parts), $parent_id)) {
+            if (!$this->parent_model->loadJson($this->_json_modelable, implode('/', $parts), $parent_id)) {
                 $this->parent_model = null;
             }
         }
@@ -160,7 +163,11 @@ class JsonModel extends \yii\base\Model
 
     public function fullPath(): string
     {
-        return $this->_path;
+        if ($this->_id) {
+            return $this->_path . '/' . $this->_id;
+        } else {
+            return $this->_path;
+        }
     }
 
     public function getJsonObject(): ?JsonObject

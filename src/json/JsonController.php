@@ -414,7 +414,7 @@ class JsonController extends \yii\web\Controller
 	$json_root_model = null): string
 	{
 		$route = $this->getRoutePrefix($this->getPath(), false)
-			. $model->getPath();
+			. $model->fullPath();
 		if ($action_id) {
 			if (is_array($action_id)) {
 				$route .= '/' . $action_id[0];
