@@ -110,12 +110,12 @@ class JsonController extends \yii\web\Controller
 								 $previous_context = null, string $search_model_class = null)
 	{
 		$this->action = $this->createAction($previous_context->action->id);
-		$detail = $this->createSearchModel($master->fullPath(), "$search_model_class{$view}_Search");
+		$detail = $this->createSearchModel($master->getPath(), "$search_model_class{$view}_Search");
 		if (!$detail) {
-			$detail = $this->createSearchModel($master->fullPath(), "{$search_model_class}_Search");
+			$detail = $this->createSearchModel($master->getPath(), "{$search_model_class}_Search");
 		}
 		if (!$detail) {
-			$detail = $this->createSearchModel($master->fullPath());
+			$detail = $this->createSearchModel($master->getPath());
 		}
 		if (!$detail) {
 			throw new \Exception("No {$search_model_class}_Search nor $search_model_class{$view}_Search class found in CrudController::indexDetails");
@@ -414,7 +414,7 @@ class JsonController extends \yii\web\Controller
 	$json_root_model = null): string
 	{
 		$route = $this->getRoutePrefix($this->getPath(), false)
-			. $model->fullPath();
+			. $model->getPath();
 		if ($action_id) {
 			if (is_array($action_id)) {
 				$route .= '/' . $action_id[0];
