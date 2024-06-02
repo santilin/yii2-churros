@@ -13,7 +13,7 @@ use yii\rbac\{Item,Role};
 
 class AuthHelper
 {
-	static public $lastMessage = '';
+	static protected $lastMessage = '';
 
 	static public function echoLastMessage($eol = "\n")
 	{
@@ -84,7 +84,7 @@ class AuthHelper
 		if( !$role ) {
 			throw new \Exception( "$role_name: role not found" );
 		}
-		foreach( $perm_names as $perm_name ) {
+		foreach ($perm_names as $perm_name) {
 			$perm = $auth->getItem($perm_name);
 			if( !$perm ) {
 				throw new \Exception( "$perm_name: permission or role not found" );

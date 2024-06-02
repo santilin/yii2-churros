@@ -22,8 +22,6 @@ class CrudController extends \yii\web\Controller
 	protected $masterModel = false;
 	protected $masterController = null;
 
-	public $accessOnlyMine = false;
-
 	const MSG_DEFAULT = 'The action on {la} {title} <a href="{model_link}">{record_medium}</a> has been successful.';
 	const MSG_NO_ACTION = 'The action on {La} {title} <a href="{model_link}">{record_medium}</a> has been successful.';
 	const MSG_CREATED = '{La} {title} <a href="{model_link}">{record_medium}</a> has been successfully created.';

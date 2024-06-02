@@ -20,7 +20,6 @@ class JsonController extends \yii\web\Controller
 {
 	use \santilin\churros\ControllerTrait;
 
-	public $accessOnlyMine = false;
 	protected $crudActions = [];
 	protected $root_model = false;
 	protected $_root_id = null;

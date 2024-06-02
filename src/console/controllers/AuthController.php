@@ -69,11 +69,9 @@ class AuthController extends Controller
 	 * Creates the permissions for a model inside a module
 	 */
 	public function createControllerPermissions(string $module_id, string $model_name, array $controller,
-												Role $visora, Role $editora, $auth = null)
+												Role $visora, Role $editora)
 	{
-		if (!$auth) {
-			$auth = $this->authManager;
-		}
+		$auth = $this->authManager;
 		$model_class = $controller['class'];
 		$model = $model_class::instance();
 		$model_title = $model->t('app', "{title_plural}");
@@ -123,40 +121,15 @@ class AuthController extends Controller
 // 			} else {
 // 				echo "Warning: permission {$permission->name} already exists in role {$model_editora->name}\n";
 			}
-// 		$model_editora_own = AuthHelper::createOrUpdateRole(
-// 			$model_perm_name . '.editor.own',
-// 			Yii::t('churros', 'Their own {model} editor', ['model' => $model_title]), $auth);
-// 		AuthHelper::echoLastMessage();
-// 		$model_visora_own = AuthHelper::createOrUpdateRole(
-// 			$model_perm_name . '.viewer.own',
-// 			Yii::t('churros', 'Their own {model} viewer', ['model' => $model_title]), $auth);
-// 		AuthHelper::echoLastMessage();
-
-// 			$own_perm_name = "$model_perm_name.$perm_name" . ($perm_name == 'create'?'':'.own');
-// 			$permission_own = AuthHelper::createOrUpdatePermission( $own_perm_name,
-// 				$perm_desc .' ' . $model->t('churros', 'their own {title_plural}'), $auth);
-// 			AuthHelper::echoLastMessage();
-// 			if( !$auth->hasChild($model_editora_own, $permission_own) ) {
-// 				$auth->addChild($model_editora_own, $permission_own);
-// 				echo "permission '{$permission_own->name}' added to role '{$model_editora_own->name}'\n";
-// 			}
-// 			if( $add_to_visora ) {
-// 				if( !$auth->hasChild($model_visora_own, $permission_own) ) {
-// 					$auth->addChild($model_visora_own, $permission_own);
-// 					echo "permission '{$permission_own->name}' added to role '{$model_editora_own->name}'\n";
-// 				}
-// 			}
 		}
 	}
 
 	/**
 	 * Creates the permissions for a module
 	 */
-	public function createModulePermissions(string $module_id, array $module_info, $auth = null)
+	public function createModulePermissions(string $module_id, array $module_info)
 	{
-		if (!$auth) {
-			$auth = $this->authManager;
-		}
+		$auth = $this->authManager;
 		$visora = AuthHelper::createOrUpdateRole("$module_id.viewer",
 			Yii::t('churros', "View all $module_id records"), $auth);
 		AuthHelper::echoLastMessage();
@@ -166,7 +139,6 @@ class AuthController extends Controller
 		foreach ($module_info['controllers']??[] as $cname => $controller) {
 			$this->createControllerPermissions($module_id, $cname, $controller, $visora, $editora);
 		}
-// 		$auth = $this->authManager;
 // 		AuthHelper::createOrUpdatePermission("$module_id.menu",
 // 			Yii::t('churros', 'Access to \'{module}\' module menu',
 // 			[ 'module' => $module_title?:$module_id ]), $auth);
@@ -195,12 +167,13 @@ class AuthController extends Controller
 	public function actionListAll($type = null)
 	{
 		$perms = $this->authManager->getItems(Item::TYPE_PERMISSION);
+		asort($perms);
 		$no_model_perms = [];
 		$prev_model = null;
 		$this->stdout("== PERMISSIONS == \n");
-		foreach( $perms as $perm ) {
+		foreach ($perms as $perm ) {
 			$name = $perm->name;
-			if( preg_match( '/([A-Za-z_][A-Za-z_0-9]*).(index.own|index|create|view.own|edit.own|delete.own|report.own|view|edit|delete|report)/', $name, $m ) ) {
+			if( preg_match( '/([A-Za-z_][A-Za-z_0-9]*).(index|create|view|edit|delete|update|report|duplicate)/', $name, $m ) ) {
 				if( $m[1] == "Reports" ) {
 					continue;
 				}
@@ -227,6 +200,7 @@ class AuthController extends Controller
 			$this->stdout($perm->name . "\n");
 		}
 		$roles = $this->authManager->getItems(Item::TYPE_ROLE);
+		asort($roles);
 		$this->stdout("\n== ROLES == \n");
 		foreach( $roles as $role ) {
 			$subroles = $this->authManager->getChildRoles($role->name);
@@ -312,7 +286,7 @@ class AuthController extends Controller
 	{
 		$permission = $this->authManager->getItem($perm_name);
 		if( $permission == null ) {
-			return false;
+			throw new \Exception( "$perm_name: perm not found" );
 		}
 		$role = $this->authManager->getRole($role_name);
 		if( !$role ) {
@@ -321,6 +295,17 @@ class AuthController extends Controller
 		$this->authManager->addChild($role, $permission);
 	}
 
+	public function actionCreatePermission($perm_name, $perm_desc)
+	{
+		$permission = AuthHelper::createOrUpdatePermission(
+			$perm_name, $perm_desc, $auth);
+	}
+
+	public function actionCreateRole($perm_name, $perm_desc)
+	{
+		$permission = AuthHelper::createOrUpdateRole(
+			$perm_name, $perm_desc, $auth);
+	}
 
 	public function actionRemovePermFromRole($perm_name, $role_name)
 	{

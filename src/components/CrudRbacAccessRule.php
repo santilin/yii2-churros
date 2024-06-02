@@ -69,19 +69,7 @@ class CrudRbacAccessRule extends AccessRule
 		if( $this->module ) {
 			$perm = $this->module . ".$perm";
 		}
-		if( $user->can("$perm.own") ) {
-			if( $action->controller->hasProperty('accessOnlyMine') ) {
-				$action->controller->accessOnlyMine = true;
-			}
-			return true;
-		}
-		if( $user->can($perm) ) {
-			if( $action->controller->hasProperty('accessOnlyMine') ) {
-				$action->controller->accessOnlyMine = false;
-			}
-			return true;
-		}
-		return false;
+		return $user->can($perm);
     }
 
 } // class
