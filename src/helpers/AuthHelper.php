@@ -211,11 +211,9 @@ class AuthHelper
 		foreach( $role_names as $role_name ) {
 			$role = $auth->getItem($role_name);
 			if( $role == null ) {
-				static::$lastMessage = "= $role_name not found";
-				return;
-			}
-			if ($auth->remove($role)) {
-				static::$lastMessage = "- $role_name removed";
+				static::$lastMessage = "= `$role_name` role not found";
+			} else if ($auth->remove($role)) {
+				static::$lastMessage = "- `$role_name` role removed";
 			}
 		}
 	}

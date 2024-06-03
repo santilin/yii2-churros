@@ -97,6 +97,7 @@ class DbController extends Controller
 		}
 		switch($phptype) {
 			case "integer":
+			case "smallint":
 			case "float":
 			case "double":
 			case "bool":
@@ -110,6 +111,7 @@ class DbController extends Controller
 			case 'timestamp':
 			case 'date':
 			case "mediumtext":
+			case 'blob':
 			case 'mediumblob':
 			case 'text':
 				if( $value == null ) {
@@ -218,9 +220,9 @@ EOF;
      * @param string $tableName the table to be dumped
      * @param string $schemaName the schema the table belongs to
      */
-    public function actionDumpTable(string $schemaName, string $tableName, string $where = null)
+    public function actionDumpTable(string $tableName, string $schemaName = null, string $where = null)
     {
-		if( $schemaName) {
+		if ($schemaName) {
 			$tableName = "$schemaName.$tableName";
 		} else {
 			$schemaName = $this->db->dsn; // only for preamble
@@ -241,7 +243,7 @@ EOF;
 				$write_file = false;
 			}
 			if ($write_file) {
-				\file_put_contents($filename, $preamble . $this->dumpTable($tableSchema, $where));
+				\file_put_contents($filename, $preamble . $this->dumpTable($schemaName, $tableSchema, $where));
 				echo "Created seeder for table $tableName in $filename\n";
 			}
 		} else {
@@ -298,7 +300,7 @@ EOF;
 		}
 	}
 
-	protected function dumpTableAsFixture($tableSchema, string $where = null): string
+	protected function dumpTableAsFixture(string $schemaName, $tableSchema, string $where = null): string
     {
 		$txt_data = "return [\n";
 		$php_types = [];
@@ -340,7 +342,7 @@ EOF;
 		$columna_names = [];
 		$table_name = $tableSchema->name;
 
-		Yii::$app->db->createCommand("USE $schemaName")->execute();
+// 		Yii::$app->db->createCommand("USE $schemaName")->execute();
 		$ret = "\nclass {$table_name}Seeder {\n";
 		$ret .= "\n";
 		$ret .= "\t/* columns */\n";
