@@ -173,7 +173,7 @@ class AuthController extends Controller
 		$this->stdout("== PERMISSIONS == \n");
 		foreach ($perms as $perm ) {
 			$name = $perm->name;
-			if( preg_match( '/([A-Za-z_][A-Za-z_0-9]*).(index|create|view|edit|delete|update|report|duplicate)/', $name, $m ) ) {
+			if( preg_match( '/([A-Za-z_][A-Za-z_0-9]*).(index|create|view|update|delete|update|report|duplicate)/', $name, $m ) ) {
 				if( $m[1] == "Reports" ) {
 					continue;
 				}

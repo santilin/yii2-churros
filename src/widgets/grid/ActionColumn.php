@@ -55,7 +55,7 @@ class ActionColumn extends \yii\grid\ActionColumn
 					]));
 			}
 		}
-        if( $this->crudPerms === false || FormHelper::hasAllPermissions($this->crudPerms, ['create','view']) ) {
+        if ($this->crudPerms === false || FormHelper::hasAllPermissions($this->crudPerms, ['duplicate'])) {
 			if( !isset($this->customButtons['duplicate']) ) {
 				$this->initDefaultButton('duplicate', 'duplicate', array_merge(
 					[ 'title' => Yii::t('churros', 'Duplicate')]));

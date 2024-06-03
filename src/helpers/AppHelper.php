@@ -418,10 +418,13 @@ class AppHelper
 	}
 
 
-	static public function modelize(string $identifier): string
+	static public function modelize(string $identifier, bool $nochangefirst = false): string
 	{
-		$parts = explode('_', $identifier);
+		$parts = explode('_', str_replace('-','_',$identifier));
 		$ret = '';
+		if ($nochangefirst) {
+			$ret = array_shift($parts);
+		}
 		foreach ($parts as $part) {
 			$ret .= static::mb_ucfirst($part);
 		}
