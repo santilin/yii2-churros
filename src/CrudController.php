@@ -402,7 +402,12 @@ class CrudController extends \yii\web\Controller
 		case 'view':
 		case 'index':
 		default:
-			$to = "index";
+			if ($from) {
+				$to = $from;
+				$redirect_params = array_merge($redirect_params, [ 'id' => $model->getPrimaryKey()]);
+			} else {
+				$to = 'index';
+			}
 		}
 		switch($to) {
 		case 'view':
