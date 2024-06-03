@@ -401,6 +401,8 @@ class CrudController extends \yii\web\Controller
 		case 'delete':
 		case 'view':
 		case 'index':
+			$to = 'index';
+			break;
 		default:
 			if ($from) {
 				$to = $from;
