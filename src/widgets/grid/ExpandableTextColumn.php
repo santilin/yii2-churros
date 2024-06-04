@@ -32,7 +32,7 @@ class ExpandableTextColumn extends DataColumn
 		}
 		$text = $this->getDataCellValue($model, $key, $index);
 		if (is_array($text)) {
-			$text = implode('<br/>', $text);
+			$text = json_encode($text);
 		}
 		if (!$text || !trim($text)) {
 			return '';
