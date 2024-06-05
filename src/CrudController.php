@@ -182,7 +182,7 @@ class CrudController extends \yii\web\Controller
 					return json_encode($model->getAttributes());
 				}
 				$this->addSuccessFlashes('create', $model);
-				return $this->redirect($this->whereToGoNow('create', $model));
+				return $this->redirect($this->returnTo(null, 'create', $model));
 			}
 		} else {
 			$model->setDefaultValues(false);
@@ -223,7 +223,7 @@ class CrudController extends \yii\web\Controller
 					return json_encode($model->getAttributes());
 				}
 				$this->addSuccessFlashes('duplicate', $model);
-				return $this->redirect($this->whereToGoNow('duplicate', $model));
+				return $this->redirect($this->returnTo(null, 'duplicate', $model));
 			}
 		}
 		return $this->render('duplicate', [
@@ -265,7 +265,7 @@ class CrudController extends \yii\web\Controller
 					];
 				}
 				$this->addSuccessFlashes('update', $model);
-				return $this->redirect($this->whereToGoNow('update', $model));
+				return $this->redirect($this->returnTo(null, 'update', $model));
 			}
 		}
 		return $this->render('update', [
@@ -293,7 +293,7 @@ class CrudController extends \yii\web\Controller
 				return json_encode($id);
 			}
 			$this->addSuccessFlashes('delete', $model);
-			return $this->redirect($this->whereToGoNow('delete', $model));
+			return $this->redirect($this->returnTo(null, 'delete', $model));
 		} catch( ForbiddenHttpException $e ) {
 			Yii::$app->session->addFlash('error', $e->getMessage());
 			return $this->redirect(Yii::$app->request->referrer?:Yii::$app->homeUrl);
@@ -304,7 +304,7 @@ class CrudController extends \yii\web\Controller
 			Yii::$app->session->addFlash('error', $model->t('churros',
 				$this->getResultMessage('error_delete')));
 		}
-		return $this->redirect($this->whereToGoNow('delete', $model));
+		return $this->redirect($this->returnTo(null, 'delete', $model));
 	}
 
 	/**
@@ -362,6 +362,78 @@ class CrudController extends \yii\web\Controller
 		return $pdf->render();
 	}
 
+	protected function returnTo(?string $to, string $from, $model): string|array
+	{
+		$returnTo = Yii::$app->request->post('returnTo');
+		if( !$returnTo ) {
+			$returnTo = Yii::$app->request->queryParams['returnTo']??null;
+		}
+		if( $returnTo ) {
+			return $returnTo;
+		}
+		$redirect_params = [];
+		if( !empty($_REQUEST['sort']) ) {
+			$redirect_params['sort'] = $_REQUEST['sort'];
+		}
+		if (empty($to)) {
+			switch ($from) {
+				case 'create':
+					if (Yii::$app->request->post('_and_create') == '1') {
+						$to = 'create';
+					} else {
+						$master = $this->getMasterModel();
+						if ($master) {
+							$prefix = $this->getBaseRoute() . '/' . $master->controllerName(). '/';
+							$keys = $master->getPrimaryKey(true);
+							$keys[0] = $prefix . 'view';
+							return $keys;
+						}
+						$to = 'view';
+					}
+					break;
+				case 'duplicate':
+					if (Yii::$app->request->post('_and_create') == '1') {
+						$to = 'duplicate';
+					} else {
+						$to = 'view';
+					}
+					break;
+				case 'update':
+				case 'delete':
+				case 'view':
+				case 'index':
+					$to = 'index';
+					break;
+				default:
+					if ($from) {
+						$to = $from;
+						$redirect_params = array_merge($redirect_params, [ 'id' => $model->getPrimaryKey()]);
+					} else {
+						$to = 'index';
+					}
+			}
+		}
+		switch($to) {
+			case 'view':
+			case 'update':
+			case 'duplicate':
+				$redirect_params = array_merge($redirect_params, [ 'id' => $model->getPrimaryKey()]);
+				// no break
+			case 'create':
+				if( isset($_REQUEST['_form_cancelUrl']) ) {
+					$redirect_params['_form_cancelUrl'] = $_REQUEST['_form_cancelUrl'];
+				}
+				break;
+			default:
+		}
+		$redirect_params[0] = $this->getActionRoute($to, $model);
+		return $redirect_params;
+	}
+
+
+	/**
+	 * @deprecated
+	 */
 	protected function whereToGoNow(string $from, $model)
 	{
 		$returnTo = Yii::$app->request->post('returnTo');
