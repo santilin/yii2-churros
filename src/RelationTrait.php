@@ -698,5 +698,26 @@ trait RelationTrait
 		}
     }
 
+    public function createChild(string $rel_name, string $form_class_name = null)
+    {
+        if (isset(static::$relations[$rel_name])) {
+            $r = static::$relations[$rel_name];
+            $rel_model_class = $r['modelClass'];
+            if ($form_class_name != null) {
+                $child = new $form_class_name;
+                if (!($child instanceof $rel_model_class)) {
+                    throw new InvalidConfigException("$form_class_name is not derived from $rel_model_class");
+                }
+            } else {
+                $child = new $rel_model_class;
+            }
+//             $child->proyectotareas_id = $this->id;
+//             $child->parent_model = $this;
+            return $child;
+        } else {
+            return null;
+        }
+    }
+
 
 }
