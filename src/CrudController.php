@@ -525,11 +525,9 @@ class CrudController extends \yii\web\Controller
 
 
 	// Ajax
-	public function actionAutocomplete($q)
+	public function actionAutocomplete(string $search)
 	{
 		$ret = [];
-		static $clientIdGetParamName = 'search';
-		$value = $_GET[$clientIdGetParamName];
 		$searchModel = $this->createSearchModel();
 		$query = $searchModel->find();
 		foreach( (array)$fields as $field ) {
