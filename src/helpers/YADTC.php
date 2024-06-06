@@ -145,8 +145,21 @@ class YADTC extends \DateTime
 		$ext_dt->setTimestamp($ts);
 		$ext_dt->resetTime();
 		return $ext_dt;
-
 	}
+
+	static public function now(string|\DateTimeZone $timezone = '')
+	{
+		if (is_string($timezone)) {
+			if ($timezone=='') {
+				$timezone = 'Europe/Madrid'; // date_default_timezone_get();
+			}
+			$timezone = new \DateTimeZone($timezone);
+		}
+		$dt = new \DateTime("now", $timezone);
+		return $dt;
+	}
+
+
 	public function year()
 	{
 		return intval($this->format('Y'));
