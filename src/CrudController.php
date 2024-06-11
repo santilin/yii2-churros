@@ -425,6 +425,8 @@ class CrudController extends \yii\web\Controller
 				}
 				break;
 			default:
+				$redirect_params = array_merge($redirect_params, [ 'id' => $model->getPrimaryKey()]);
+
 		}
 		$redirect_params[0] = $this->getActionRoute($to, $model);
 		return $redirect_params;
@@ -525,18 +527,24 @@ class CrudController extends \yii\web\Controller
 
 
 	// Ajax
-	public function actionAutocomplete(string $search)
+	public function actionAutocomplete(string $search, string $result, array $fields = [], string $format = 'long')
 	{
 		$ret = [];
 		$searchModel = $this->createSearchModel();
-		$query = $searchModel->find();
-		foreach( (array)$fields as $field ) {
-			$query->orWhere( [ "like", $field, $value  ] );
+		if (empty($fields)) {
+			$fields = $searchModel->findCodeAndDescFields();
 		}
-		foreach( $query->all() as $record) {
-			$ret[] = [ 'id' => $record->id, 'value' => $record->recordDesc('long') ];
+		$fld_values = [];
+		foreach ($fields as $field) {
+			$fld_values[$field] = $search;
 		}
-		echo json_encode($ret);
+		$dataProvider = $searchModel->search([$searchModel->formName() => $fld_values, 'or' => true ]);
+		if ($result == 'select2') {
+			foreach ($dataProvider->getModels() as $record) {
+				$ret[] = [ 'id' => $record->getPrimaryKey(), 'text' => $record->recordDesc($format) ];
+			}
+			echo json_encode([ 'results' => $ret ]);
+		}
 	}
 
 	// Ajax
@@ -550,7 +558,7 @@ class CrudController extends \yii\web\Controller
 	}
 
 	// Ajax for the MutiColumnTypeAhead control
-	public function actionMultiAutoComplete(string $search, string $fields, int $page = 1, int $per_page = 10)
+	public function actionMultiAutocomplete(string $search, string $fields, int $page = 1, int $per_page = 10)
 	{
 		\Yii::$app->response->format = \yii\web\Response::FORMAT_JSON;
 		$searchModel = $this->createSearchModel();
