@@ -138,7 +138,10 @@ trait RelationTrait
 								$condition[$relAttr] = $relAttrVal;
 							}
 						}
-						$relObj = $relModelClass::findOne($condition);
+						$relOjb = null;
+						if (!empty($this->primaryKey)) {
+							$relObj = $relModelClass::findOne($condition);
+						}
 						if (is_null($relObj)) {
 							$relObj = new $relModelClass;
 						}
@@ -152,7 +155,7 @@ trait RelationTrait
 						if( $pk == $this_pk ) {
 							$m2mkeys[$pk] = $this->primaryKey;
 						} else {
-							$m2mkeys[$pk] = intval($relPost);
+							$m2mkeys[$pk] = $relPost;
 						}
 					}
 					$container[] = $m2mkeys;
