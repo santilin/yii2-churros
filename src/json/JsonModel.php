@@ -224,9 +224,9 @@ class JsonModel extends \yii\base\Model
     public function setPrimaryKey($id)
     {
         $this->_id = $id;
-        $code_fld = static::getModelInfo('code_field');
-        if ($code_fld) {
-            $this->$code_fld = $id;
+        if (!empty($this->_locator)) {
+            $values = [ $this->_locator => $id ];
+            $this->setAttributes($values);
         }
     }
 
@@ -248,8 +248,9 @@ class JsonModel extends \yii\base\Model
             $locator = $this->_locator;
         }
         $this->_json_object = $json_modelable->getJsonObject($json_path, $id, $locator);
-        if ($this->_json_object) {
+        if ($this->_json_object !== null) {
             $this->_is_new_record = false;
+            $this->setPrimaryKey($id);
             $v = $this->_json_object->getValue();
             if ($v === null) {
             } else if (is_bool($v)) {
@@ -257,12 +258,13 @@ class JsonModel extends \yii\base\Model
                 if ($v != $id) {
                     throw new InvalidConfigException("$v != $id");
                 }
-            } else foreach ($v as $fldname => $fldvalue) {
-                if ($this->hasAttribute($fldname)) {
-                    $this->$fldname = $fldvalue;
+            } else {
+                foreach ($v as $fldname => $fldvalue) {
+                    if ($this->hasAttribute($fldname)) {
+                        $this->$fldname = $fldvalue;
+                    }
                 }
             }
-            $this->setPrimaryKey($id);
         }
         return $this->_json_object;
     }
