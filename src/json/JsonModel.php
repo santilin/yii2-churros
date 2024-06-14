@@ -4,6 +4,7 @@ namespace santilin\churros\json;
 
 use JsonPath\JsonObject;
 use yii\base\{InvalidArgumentException,InvalidConfigException};
+use yii\helpers\ArrayHelper;
 use santilin\churros\json\JsonModelable;
 use santilin\churros\helpers\AppHelper;
 
@@ -62,7 +63,9 @@ class JsonModel extends \yii\base\Model
         return parent::__get($name);
     }
 
-    public function findRelatedModels(string $relation_name, string $form_class_name = null): array|JsonModel
+    public function findRelatedModels(string $relation_name,
+                                      array $current_values = [],
+                                      string $form_class_name = null): array|JsonModel
     {
         $rel_info = static::$relations[$relation_name];
         $rel_name = $rel_info['relatedTablename'];
@@ -93,6 +96,13 @@ class JsonModel extends \yii\base\Model
                     }
                 }
                 $related_models[] = $child;
+            }
+            if (!empty($current_values)) {
+                foreach ($related_models as $nr => $rm) {
+                    if (isset($current_values[$nr])) {
+                        $related_models[$nr]->setAttributes($current_values[$nr]);
+                    }
+                }
             }
             return $related_models;
         } else {
