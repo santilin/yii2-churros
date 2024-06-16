@@ -362,7 +362,7 @@ class CrudController extends \yii\web\Controller
 		return $pdf->render();
 	}
 
-	protected function returnTo(?string $to, string $from, $model): string|array
+	protected function returnTo(?string $to, string $from, $model, array $redirect_params = []): string|array
 	{
 		$returnTo = Yii::$app->request->post('returnTo');
 		if( !$returnTo ) {
@@ -371,7 +371,6 @@ class CrudController extends \yii\web\Controller
 		if( $returnTo ) {
 			return $returnTo;
 		}
-		$redirect_params = [];
 		if( !empty($_REQUEST['sort']) ) {
 			$redirect_params['sort'] = $_REQUEST['sort'];
 		}

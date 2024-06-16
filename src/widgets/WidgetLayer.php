@@ -103,6 +103,7 @@ class WidgetLayer
                             $tab_items[] = [
                                 'label' => $content['title']??$kc,
 								'options' => $content['htmlOptions']??[],
+								'active' => $content['active']??true,
 								'headerOptions' => $content['headerOptions']??[],
 								'content' => $this->layoutWidgets($content['content'], [
 									'layout' => $content['layout']??$layout_of_row,
