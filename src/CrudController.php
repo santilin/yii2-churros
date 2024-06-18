@@ -76,6 +76,11 @@ class CrudController extends \yii\web\Controller
         return parent::beforeAction($action);
 	}
 
+	public function userPermissions(): array
+	{
+		return $this->crudActions;
+	}
+
 	/**
 	 * Lists all models.
 	 * @todo Revisar, no es exactamente MVC
@@ -88,7 +93,7 @@ class CrudController extends \yii\web\Controller
 		if (!$searchModel) {
 			throw new NotFoundHttpException("Unable to create a searchModel for $this->id crud controller");
 		}
-		$params['permissions'] = FormHelper::resolvePermissions($params['permissions']??[], $this->crudActions);
+		$params['permissions'] = FormHelper::resolvePermissions($params['permissions']??[], $this->userPermissions());
 		if ($this->getMasterModel()) {
 			$related_field = $searchModel->relatedFieldForModel($this->getMasterModel());
 			if (is_array($related_field)) { // many2many
@@ -115,6 +120,7 @@ class CrudController extends \yii\web\Controller
 		if (!$detail) {
 			throw new \Exception("No {$search_model_class}_Search nor $search_model_class{$view}_Search class found in CrudController::indexDetails");
 		}
+		$params['permissions'] = FormHelper::resolvePermissions($params['permissions']??[], $this->userPermissions());
 		$related_field = $detail->relatedFieldForModel($master);
 		if (is_array($related_field)) { // many2many
 			$params['_search_relations'] = [ $related_field[0] ];
@@ -146,7 +152,7 @@ class CrudController extends \yii\web\Controller
 	{
 		$params = Yii::$app->request->queryParams;
 		$model = $this->findModel($id, $params);
-		$params['permissions'] = FormHelper::resolvePermissions($params['permissions']??[], $this->crudActions);
+		$params['permissions'] = FormHelper::resolvePermissions($params['permissions']??[], $this->userPermissions());
 		if (Yii::$app->request->getIsAjax()) {
 			$this->layout = false;
 			return $this->render('_view', [
@@ -171,7 +177,7 @@ class CrudController extends \yii\web\Controller
 	{
 		$req = Yii::$app->request;
 		$params = array_merge($req->get(), $req->post());
-		$params['permissions'] = FormHelper::resolvePermissions($params['permissions']??[], $this->crudActions);
+		$params['permissions'] = FormHelper::resolvePermissions($params['permissions']??[], $this->userPermissions());
 		$model = $this->findFormModel(null, null, 'create', $params);
 		$model->scenario = 'create';
 
@@ -205,7 +211,7 @@ class CrudController extends \yii\web\Controller
 	{
 		$req = Yii::$app->request;
 		$params = array_merge($req->get(), $req->post());
-		$params['permissions'] = FormHelper::resolvePermissions($params['permissions']??[], $this->crudActions);
+		$params['permissions'] = FormHelper::resolvePermissions($params['permissions']??[], $this->userPermissions());
 		$model = $this->findFormModel($id, null, 'duplicate', $params);
 		$model->setDefaultValues(true); // duplicating
 		$model->scenario = 'duplicate';
@@ -243,7 +249,7 @@ class CrudController extends \yii\web\Controller
 	{
 		$req = Yii::$app->request;
 		$params = array_merge($req->get(), $req->post());
-		$params['permissions'] = FormHelper::resolvePermissions($params['permissions']??[], $this->crudActions);
+		$params['permissions'] = FormHelper::resolvePermissions($params['permissions']??[], $this->userPermissions());
 		$model = $this->findFormModel($id, null, 'update', $params);
  		if ($model === null && FormHelper::hasPermission($params['permissions'], 'create')) {
 			return $this->redirect(array_merge(['create'], $params));

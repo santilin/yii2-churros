@@ -92,7 +92,8 @@ class AuthHelper
 		foreach ($perm_names as $perm_name) {
 			$perm = $auth->getItem($perm_name);
 			if( !$perm ) {
-				throw new \Exception( "$perm_name: permission or role not found" );
+				$msgs[] = '= ' . "$perm_name: permission doesn't exist";
+				continue;
 			}
 			if( !$auth->hasChild($role, $perm) ) {
 				$auth->addChild($role, $perm);
@@ -217,6 +218,21 @@ class AuthHelper
 				static::$lastMessage = "= `$role_name` role not found";
 			} else if ($auth->remove($role)) {
 				static::$lastMessage = "- `$role_name` role removed";
+			}
+		}
+	}
+
+	static public function removePerms(array $perm_names, $auth = null)
+    {
+		if( $auth == null ) {
+			$auth = \Yii::$app->authManager;
+		}
+		foreach( $perm_names as $perm_name ) {
+			$role = $auth->getItem($perm_name);
+			if( $role == null ) {
+				static::$lastMessage = "= `$perm_name` permission not found";
+			} else if ($auth->remove($role)) {
+				static::$lastMessage = "- `$perm_name` permission removed";
 			}
 		}
 	}
