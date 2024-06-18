@@ -34,19 +34,19 @@ class ActionColumn extends \yii\grid\ActionColumn
 			$this->crudPerms = [ 'create', 'view', 'update', 'delete' ];
 		}
 		$options = $this->buttonOptions;
-        if( $this->crudPerms === false || FormHelper::hasPermission($this->crudPerms, 'view') ) {
+        if( FormHelper::hasPermission($this->crudPerms, 'view') ) {
 			if( !isset($this->buttons['view']) ) {
 				$this->initDefaultButton('view', 'view', array_merge(
 					[ 'title' => Yii::t('churros', 'View') ]));
 			}
 		}
-        if( $this->crudPerms === false || FormHelper::hasPermission($this->crudPerms, 'update') ) {
+        if( FormHelper::hasPermission($this->crudPerms, 'update') ) {
 			if( !isset($this->customButtons['update']) ) {
 				$this->initDefaultButton('update', 'update', array_merge(
 					[ 'title' => Yii::t('churros', 'Update') ]));
 			}
 		}
-        if( $this->crudPerms === false || FormHelper::hasPermission($this->crudPerms, 'delete') ) {
+        if( FormHelper::hasPermission($this->crudPerms, 'delete') ) {
 			if( !isset($this->customButtons['delete']) ) {
 				$this->initDefaultButton('delete', 'delete', array_merge(
 					[ 'title' => Yii::t('churros', 'Delete'),
@@ -55,7 +55,7 @@ class ActionColumn extends \yii\grid\ActionColumn
 					]));
 			}
 		}
-        if ($this->crudPerms === false || FormHelper::hasAllPermissions($this->crudPerms, ['duplicate'])) {
+        if (FormHelper::hasAllPermissions($this->crudPerms, ['duplicate'])) {
 			if( !isset($this->customButtons['duplicate']) ) {
 				$this->initDefaultButton('duplicate', 'duplicate', array_merge(
 					[ 'title' => Yii::t('churros', 'Duplicate')]));

@@ -294,10 +294,10 @@ ajax;
 		return implode($sep, $ret);
 	}
 
-	static public function hasPermission(?array $perms, string $perm): bool
+	static public function hasPermission(bool|array|null $perms, string $perm): bool
 	{
-		if( $perms === false ) {
-			return false;
+		if( is_bool($perms) ) {
+			return $perms;
 		}
 		if( $perm == '' ) {
 			return true;
@@ -374,8 +374,11 @@ ajax;
 		return $final_perms;
 	}
 
-	static public function resolvePermissions($all_disabled, array $available, array $granted = []): array
+	static public function resolvePermissions(array|bool $all_disabled, array|bool $available, array|bool $granted = []): array|false
 	{
+		if ($available === false) {
+			return false;
+		}
 		if ($all_disabled === false || $granted === false) {
 			return [];
 		}

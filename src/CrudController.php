@@ -76,7 +76,7 @@ class CrudController extends \yii\web\Controller
         return parent::beforeAction($action);
 	}
 
-	public function userPermissions(): array
+	public function userPermissions(): bool|array
 	{
 		return $this->crudActions;
 	}
@@ -138,7 +138,7 @@ class CrudController extends \yii\web\Controller
 			'indexParams' => $this->changeActionParams($params, 'index', $detail),
 			'indexGrids' => [ '_grid' => [ '_grid', '', null, [], [], [] ] ],
 			'gridName' => $view,
-			'gridPerms' => $this->crudActions,
+			'gridPerms' => $params['permissions'],
 		]);
 	}
 
