@@ -15,7 +15,6 @@ trait ModelInfoTrait
     private $_warnings = null, $_successes = null;
     protected $crudScenarios = [ 'default', 'create', 'duplicate', 'update' ];
 
-
 	public function getCrudScenarios(): array
 	{
 		// crudScenarios is protected to avoid returning it in $model->attributes()
@@ -422,9 +421,21 @@ trait ModelInfoTrait
 
 	public function addErrorFromException(\Throwable $e)
 	{
-		$devel_info = YII_ENV_PROD ? '' : "\n" . $e->getMessage();
-		$this->addError(get_class($e), Yii::t('churros',
-			"Data was not saved in order to maintain the database integrity.") . $devel_info);
+		$message = $e->getMessage();
+		$devel_info = YII_ENV_PROD ? '' : "\n$message";
+		$error = "Data was not saved in order to maintain the database integrity.";
+		$error_data = [ 'offending' => '' ];
+		if  ($e instanceof \yii\db\IntegrityException) {
+			switch (intval($e->getCode())) {
+				case 23000:
+					if (preg_match('/UNIQUE constraint failed:\s*(.*)/i', $message, $matches)) {
+						$error = "The '{offending}' data is duplicated";
+						$error_data = [ 'offending' => $matches[1] ];
+					}
+					break;
+			}
+		}
+		$this->addError(get_class($e), Yii::t('churros', $error, $error_data) . $devel_info);
 	}
 
 	public function getOneError():string
@@ -911,6 +922,39 @@ trait ModelInfoTrait
 				}
 				break;
 		}
+	}
+
+	/**
+	 * Saves the record handling calculated fields
+	 */
+	public function save($runValidation = true, $validateFields = null)
+	{
+		if (property_exists($this, '_calculated_fields') && count($this->_calculated_fields)) {
+			$scf = [];
+			foreach ($this->_calculated_fields as $cf) {
+				$scf[$cf] = $this->$cf;
+				unset($this->$cf);
+			}
+			try {
+				if (parent::save($runValidation, $validateFields)) {
+					$this->refresh();
+					return true;
+				} else {
+					foreach ($scf as $kcf => $cf) {
+						$this->$kcf = $cf;
+					}
+					return false;
+				}
+			} catch (\Exception $e) {
+				foreach ($scf as $kcf => $cf) {
+					$this->$kcf = $cf;
+				}
+				throw $e;
+			}
+		} else {
+			return parent::save($runValidation, $validateFields);
+		}
+
 	}
 
 

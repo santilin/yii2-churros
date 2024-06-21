@@ -94,6 +94,7 @@ return [
 	'{Esta} {title} is used in other files' => '{Esta} {title} se usa en algún otro fichero',
 	'Create {title}' => 'Crear {title}',
 	"The value '{value}' is not valid for {attribute}" => "El valor '{value}' no es válido para el campo {attribute}",
+	"The '{offending}' data is duplicated" => "Los datos de {offending} están duplicados",
 
 	'Report totals' => 'Totales del informe',
     'Totals' => 'Totales',
