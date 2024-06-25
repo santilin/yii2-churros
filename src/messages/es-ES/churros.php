@@ -74,6 +74,7 @@ return [
 		=> '{La} {title} <strong>{record_long}</strong> se ha borrado correctamente.',
     '{La} {title} <a href="{model_link}">{record_medium}</a> has been successfully duplicated.'
 		=> '{La} {title} <a href="{model_link}">{record_medium}</a> se ha duplicado correctamente.',
+	'The action {action} on {la} {title} <a href="{model_link}">{record_medium}</a> has been successful.' => 'La acción {action} sobre {la} {title} <a href="{model_link}">{record_medium}</a> se ha realizado correctamente.',
 	'The action on {la} {title} <a href="{model_link}">{record_medium}</a> has been successful.' => 'La acción sobre {la} {title} <a href="{model_link}">{record_medium}</a> se ha realizado correctamente.',
 	'There has been an error deleting {la} {title} <a href="{model_link}">{record_medium}</a>' => 'Se ha producido un error al borrar {la} {title} <a href="{model_link}">{record_medium}</a>',
 	'Unable to delete {la} {title} <a href="{model_link}">{record_medium}</a> because it has related data.' => 'No se ha podido borrar {la} {title} <a href="{model_link}">{record_medium}</a> porque tiene datos relacionados.',
