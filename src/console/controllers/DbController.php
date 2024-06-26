@@ -235,8 +235,10 @@ EOF;
 		if ($this->createFile ) {
 			$write_file = true;
 			if ($this->format == 'seeder') {
+				@mkdir(Yii::getAlias($this->seedersPath), 0777, true);
 				$filename = Yii::getAlias($this->seedersPath) . "/{$tableName}Seeder.php";
 			} else {
+				@mkdir(Yii::getAlias($this->fixturesPath), 0777, true);
 				$filename = Yii::getAlias($this->fixturesPath) . "/{$tableName}.php";
 			}
 			if (\file_exists($filename) && !$this->confirm("The file $filename already exists. Do you want to overwrite it?") ) {

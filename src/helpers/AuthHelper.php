@@ -92,7 +92,7 @@ class AuthHelper
 		foreach ($perm_names as $perm_name) {
 			$perm = $auth->getItem($perm_name);
 			if( !$perm ) {
-				$msgs[] = '= ' . "$perm_name: permission doesn't exist";
+				$msgs[] = 'x ' . "$perm_name: permission not found";
 				continue;
 			}
 			if( !$auth->hasChild($role, $perm) ) {
@@ -230,7 +230,7 @@ class AuthHelper
 		foreach( $perm_names as $perm_name ) {
 			$role = $auth->getItem($perm_name);
 			if( $role == null ) {
-				static::$lastMessage = "= `$perm_name` permission not found";
+				static::$lastMessage = "x $perm_name: permission not found";
 			} else if ($auth->remove($role)) {
 				static::$lastMessage = "- `$perm_name` permission removed";
 			}

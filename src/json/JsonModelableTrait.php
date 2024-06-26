@@ -27,6 +27,9 @@ trait JsonModelableTrait
 		if ($id) {
 			$ret = $this->_json_root->getJsonObjects('$' . str_replace('/','.',$path)
 				. ".$id");
+			if ($ret === false) {
+				return null;
+			}
 			return $ret;
 		}
 		$ret = $this->_json_root->getJsonObjects('$' . str_replace('/','.',$path) . ($id?('.' . $id):''));
