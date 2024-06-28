@@ -223,7 +223,7 @@ class JsonModel extends \yii\base\Model
 
     public function primaryKey()
     {
-        $code_fld = static::$_model_info['code_field'];
+        $code_fld = $this->_locator??static::$_model_info['code_field'];
         if ($code_fld) {
             return [ $code_fld ];
         } else {
