@@ -93,6 +93,7 @@ class WidgetLayer
                     case 'tabs':
 						$ret .= '<div class=row><div class="' . $this->columnClasses(1) . '">';
                         $tab_items = [];
+						$has_active = false;
                         foreach ($layout_row['content'] as $kc => $content) {
                             if (!is_array($content)) {
                                 $content = [
@@ -100,10 +101,13 @@ class WidgetLayer
                                     'content' => $content
                                 ];
                             }
+                            if ($content['active']??false == true) {
+								$has_active = true;
+							}
                             $tab_items[] = [
                                 'label' => $content['title']??$kc,
 								'options' => $content['htmlOptions']??[],
-								'active' => $content['active']??true,
+								'active' => $content['active']??false,
 								'headerOptions' => $content['headerOptions']??[],
 								'content' => $this->layoutWidgets($content['content'], [
 									'layout' => $content['layout']??$layout_of_row,
@@ -111,6 +115,9 @@ class WidgetLayer
 									'type' => $type_of_row ]),
                             ];
                         }
+                        if (!$has_active && count($tab_items)) {
+							$tab_items[0]['active'] = true;
+						}
                         $ret .= Tabs::widget([ 'items' => $tab_items ]);
 						$ret .= '</div></div>';
                         break;

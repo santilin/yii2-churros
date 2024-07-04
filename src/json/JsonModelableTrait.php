@@ -20,6 +20,10 @@ trait JsonModelableTrait
 		if ($locator && $id) {
 			$ret = $this->_json_root->getJsonObjects('$' . str_replace('/','.',$path)
 				. "[?(@.$locator=='$id')]");
+			if ($ret === false) {
+				$ret = $this->_json_root->getJsonObjects('$' . str_replace('/','.',$path)
+				. "[?(@=='$id')]");
+			}
 			if (is_array($ret) && isset($ret[0])) {
 				return $ret[0];
 			}
@@ -28,11 +32,14 @@ trait JsonModelableTrait
 			$ret = $this->_json_root->getJsonObjects('$' . str_replace('/','.',$path)
 				. ".$id");
 			if ($ret === false) {
-				return null;
+				$ret = $this->_json_root->getJsonObjects('$' . str_replace('/','.',$path)
+				. "[?(@=='$id')]");
 			}
-			return $ret;
+			if (is_array($ret) && isset($ret[0])) {
+				return $ret[0];
+			}
 		}
-		$ret = $this->_json_root->getJsonObjects('$' . str_replace('/','.',$path) . ($id?('.' . $id):''));
+		$ret = $this->_json_root->getJsonObjects('$' . str_replace('/','.',$path));
 		if ($ret) {
 			return $ret;
 		} else {
