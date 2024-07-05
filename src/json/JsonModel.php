@@ -4,9 +4,8 @@ namespace santilin\churros\json;
 
 use JsonPath\JsonObject;
 use yii\base\{InvalidArgumentException,InvalidConfigException};
-use yii\helpers\ArrayHelper;
+use yii\helpers\{ArrayHelper,StringHelper};
 use santilin\churros\json\JsonModelable;
-use santilin\churros\helpers\AppHelper;
 
 class JsonModel extends \yii\base\Model
 // implements \yii\db\ActiveRecordInterface
@@ -243,7 +242,7 @@ class JsonModel extends \yii\base\Model
     public function loadSearchModel(JsonModelable $json_modelable, string $json_path)
     {
         $this->_json_modelable = $json_modelable;
-        if (AppHelper::endsWith($json_path, '/'. static::jsonPath())) {
+        if (StringHelper::endsWith($json_path, '/'. static::jsonPath())) {
             $this->_path = $json_path;
         } else {
             $this->_path = $json_path . '/'. static::jsonPath();

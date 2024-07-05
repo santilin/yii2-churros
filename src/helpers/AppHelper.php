@@ -106,16 +106,6 @@ class AppHelper
 		return empty($value);
 	}
 
-	static public function endsWith(string $stack, string $needle)
-	{
-		return substr($stack, -strlen($needle)) == $needle;
-	}
-
-	static public function startsWith(string $stack, string $needle): string
-	{
-		return substr($stack, 0, strlen($needle)) == $needle;
-	}
-
 	static public function removeFirstWord(string $stack, string $sep = ' '): string
 	{
 		$pos_sep = strpos($stack, $sep);
@@ -226,12 +216,7 @@ class AppHelper
 		return $ret;
 	}
 
-    static public function mb_ucfirst($str, $encoding = 'UTF-8')
-    {
-        return mb_strtoupper( mb_substr($str, 0, 1, $encoding), $encoding)
-        . mb_substr($str, 1, mb_strlen($str), $encoding);
-    }
-
+	// for mb_ucfirst use StringHelper::mb_ucfirst
     static public function mb_lcfirst($str, $encoding = 'UTF-8')
     {
         return mb_strtolower( mb_substr($str, 0, 1, $encoding), $encoding)
