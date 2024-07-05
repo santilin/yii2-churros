@@ -3,8 +3,8 @@
 namespace santilin\churros;
 
 use Yii;
-use yii\helpers\{Url,Html};
-use santilin\churros\helpers\{AppHelper,FormHelper};
+use yii\helpers\{StringHelper,Url,Html};
+use santilin\churros\helpers\FormHelper;
 
 trait ControllerTrait
 {
@@ -218,7 +218,7 @@ trait ControllerTrait
 		}
 		$prefix .= $model->controllerName(). '/';
 		$index_bc = [
-			'label' => AppHelper::mb_ucfirst($model->getModelInfo('title_plural')),
+			'label' => StringHelper::mb_ucfirst($model->getModelInfo('title_plural')),
 		];
 		if (FormHelper::hasPermission($permissions, 'index') && $action_id != 'index') {
 			$index_bc['url'] = [ $prefix . 'index'];

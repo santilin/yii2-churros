@@ -3,7 +3,7 @@
 namespace santilin\churros\json;
 
 use Yii;
-use yii\helpers\Url;
+use yii\helpers\{StringHelper,Url};
 use yii\filters\VerbFilter;
 use yii\web\{HttpException,NotFoundHttpException};
 use yii\base\{InvalidArgumentException,ErrorException};
@@ -549,7 +549,7 @@ class JsonController extends \yii\web\Controller
 		if ($master) {
 			$prefix = $this->getBaseRoute() . '/' . $master->controllerName(). '/';
 			$breadcrumbs[] = [
-				'label' => AppHelper::mb_ucfirst($master->getModelInfo('title_plural')),
+				'label' => StringHelper::mb_ucfirst($master->getModelInfo('title_plural')),
 				'url' => [ $prefix . 'index']
 			];
 			$keys = $master->getPrimaryKey(true);

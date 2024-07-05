@@ -3,7 +3,7 @@
 namespace santilin\churros;
 
 use Yii;
-use yii\helpers\Url;
+use yii\helpers\{Url,StringHelper};
 use yii\filters\VerbFilter;
 use yii\web\NotFoundHttpException;
 use yii\web\HttpException;
@@ -637,7 +637,7 @@ class CrudController extends \yii\web\Controller
 		if ($master) {
 			$prefix = $this->getBaseRoute() . '/' . $master->controllerName(). '/';
 			$breadcrumbs[] = [
-				'label' => AppHelper::mb_ucfirst($master->getModelInfo('title_plural')),
+				'label' => StringHelper::mb_ucfirst($master->getModelInfo('title_plural')),
 				'url' => [ $prefix . 'index']
 			];
 			$keys = $master->getPrimaryKey(true);
@@ -647,7 +647,7 @@ class CrudController extends \yii\web\Controller
 				'url' => $keys
 			];
 			$breadcrumbs[] = [
-				'label' => AppHelper::mb_ucfirst($model->getModelInfo('title_plural')),
+				'label' => StringHelper::mb_ucfirst($model->getModelInfo('title_plural')),
 				'url' => $this->getActionRoute('index', $model)
 			];
 		} else {
