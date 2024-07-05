@@ -253,6 +253,9 @@ class JsonModel extends \yii\base\Model
     {
         $this->_json_modelable = $json_modelable;
         $this->_path = $json_path;
+        if ($id && !StringHelper::endsWith($this->_path, $id)) {
+            $this->_path .= "/$id";
+        }
         if ($locator === null) {
             $locator = $this->_locator;
         }

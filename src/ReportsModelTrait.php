@@ -342,7 +342,7 @@ trait ReportsModelTrait
 					// format => [ 'label', $label_values ]
 					$column_def['format'] = $allColumns[$colname]['format'];
 				}
-			} else if (substr($column_def_format, 0, 6) == 'class:')) {
+			} else if (substr($column_def_format, 0, 6) == 'class:') {
 				if (!isset($column_def['contentOptions'])) { // Ojo, sum_expedientes_gastos_minutos tiene contradicción de clases
 					$column_def['contentOptions'] = [];
 				}
