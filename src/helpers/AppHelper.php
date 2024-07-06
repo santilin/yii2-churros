@@ -8,6 +8,7 @@
 namespace santilin\churros\helpers;
 
 use Yii;
+use yii\helpers\StringHelper;
 
 class AppHelper
 {
@@ -411,7 +412,7 @@ class AppHelper
 			$ret = array_shift($parts);
 		}
 		foreach ($parts as $part) {
-			$ret .= static::mb_ucfirst($part);
+			$ret .= StringHelper::mb_ucfirst($part);
 		}
 		return $ret;
 	}

@@ -79,6 +79,23 @@ Trait ModelVirtualAttributesTrait
 		}
 	}
 
+	public function beforeSave($insert)
+	{
+		// $this->encuestada = $this->email;
+		$this->resultado = json_encode($this->getVirtualAttributes());
+		$this->nedicion = $this->encuestaDef->nedicion;
+		return parent::beforeSave($insert);
+	}
+
+	public function afterFind()
+	{
+		$this->resetVirtualAttributes();
+		$values = (array)json_decode($this->resultado);
+		if ($values) {
+			$this->setVirtualAttributes($values);
+		}
+		return parent::afterFind();
+	}
 }
 
 

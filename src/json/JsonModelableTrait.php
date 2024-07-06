@@ -31,10 +31,11 @@ trait JsonModelableTrait
 		if ($id) {
 			$ret = $this->_json_root->getJsonObjects('$' . str_replace('/','.',$path)
 				. ".$id");
-			if ($ret === false) {
-				$ret = $this->_json_root->getJsonObjects('$' . str_replace('/','.',$path)
-				. "[?(@=='$id')]");
+			if ($ret !== false) {
+				return $ret;
 			}
+			$ret = $this->_json_root->getJsonObjects('$' . str_replace('/','.',$path)
+				. "[?(@=='$id')]");
 			if (is_array($ret) && isset($ret[0])) {
 				return $ret[0];
 			}

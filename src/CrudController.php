@@ -194,8 +194,6 @@ class CrudController extends \yii\web\Controller
 				$this->addSuccessFlashes('create', $model);
 				return $this->redirect($this->returnTo(null, 'create', $model));
 			}
-		} else {
-			$model->setDefaultValues(false);
 		}
 		return $this->render('create', [
 			'model' => $model,
