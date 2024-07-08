@@ -174,7 +174,7 @@ class JsonController extends \yii\web\Controller
 					return json_encode($model->getAttributes());
 				}
 				$this->addSuccessFlashes('create', $model);
-				return $this->redirect($this->whereToGoNow('create', $model));
+				return $this->redirect($this->returnTo('create', $model));
 			}
 		}
 		return $this->render('create', [
@@ -207,7 +207,7 @@ class JsonController extends \yii\web\Controller
 					return json_encode($model->getAttributes());
 				}
 				$this->addSuccessFlashes('duplicate', $model);
-				return $this->redirect($this->whereTogoNow('duplicate', $model));
+				return $this->redirect($this->returnTo('duplicate', $model));
 			}
 		}
 		return $this->render('duplicate', [
@@ -237,7 +237,7 @@ class JsonController extends \yii\web\Controller
 					return json_encode($model->getAttributes());
 				}
 				$this->addSuccessFlashes('update', $model);
-				return $this->redirect($this->whereTogoNow('update', $model));
+				return $this->redirect($this->returnTo('update', $model));
 			}
 		}
 		return $this->render('update', [
@@ -261,7 +261,7 @@ class JsonController extends \yii\web\Controller
 					return json_encode($path);
 				}
 				$this->addSuccessFlashes('delete', $model);
-				return $this->redirect($this->whereTogoNow('delete', $model));
+				return $this->redirect($this->returnTo('delete', $model));
 			} else {
 				Yii::$app->session->addFlash('error', $model->t('churros', $this->getResultMessage('error_delete')));
 				$this->addErrorFlashes($model);
@@ -272,7 +272,7 @@ class JsonController extends \yii\web\Controller
 			if (YII_ENV_DEV) {
 				$this->addErrorFlashes($model);
 			}
-			return $this->redirect($this->whereTogoNow('delete_error', null));
+			return $this->redirect($this->returnTo('delete_error', null));
 		} catch( \yii\web\ForbiddenHttpException $e ) {
 			Yii::$app->session->addFlash('error', $model->t('churros',
 				$this->getResultMessage('access_denied')));
@@ -280,7 +280,7 @@ class JsonController extends \yii\web\Controller
 				$this->addErrorFlashes($model);
 			}
 		}
-		return $this->redirect($this->whereTogoNow('delete_error', null));
+		return $this->redirect($this->returnTo('delete_error', null));
 	}
 
 	/**
@@ -338,7 +338,7 @@ class JsonController extends \yii\web\Controller
 		return $pdf->render();
 	}
 
-	protected function whereToGoNow(string $from, $model)
+	protected function returnTo(string $from, $model)
 	{
 		$returnTo = Yii::$app->request->post('returnTo');
 		if( !$returnTo ) {

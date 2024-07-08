@@ -704,8 +704,10 @@ trait ModelInfoTrait
 		if (property_exists($this, '_calculated_fields') && count($this->_calculated_fields)) {
 			$scf = [];
 			foreach ($this->_calculated_fields as $cf) {
-				$scf[$cf] = $this->$cf;
-				unset($this->$cf);
+				if (property_exists($this, $cf)) {
+					$scf[$cf] = $this->$cf;
+					unset($this->$cf);
+				}
 			}
 			try {
 				if (parent::save($runValidation, $validateFields)) {
