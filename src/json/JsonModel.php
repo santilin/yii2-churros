@@ -150,7 +150,7 @@ class JsonModel extends \yii\base\Model
             }
             array_pop($parts);
             if ($parent_id == null) {
-                $parent_id = $parts[count($parts)-1];
+                $parent_id = $parts[count($parts)-2];
             }
             $this->parent_model = new static::$parent_model_class;
             if (!$this->parent_model->loadJson($this->_json_modelable, implode('/', $parts), $parent_id)) {

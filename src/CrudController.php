@@ -379,7 +379,7 @@ class CrudController extends \yii\web\Controller
 		if( $returnTo ) {
 			return $returnTo;
 		}
-		if( !empty($_REQUEST['sort']) ) {
+		if (!array_key_exists('sort', $redirect_params) && !empty($_REQUEST['sort'])) {
 			$redirect_params['sort'] = $_REQUEST['sort'];
 		}
 		if (empty($to)) {
@@ -433,7 +433,6 @@ class CrudController extends \yii\web\Controller
 				break;
 			default:
 				$redirect_params = array_merge($redirect_params, [ 'id' => $model->getPrimaryKey()]);
-
 		}
 		$redirect_params[0] = $this->getActionRoute($to, $model);
 		return $redirect_params;

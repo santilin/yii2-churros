@@ -174,7 +174,7 @@ class JsonController extends \yii\web\Controller
 					return json_encode($model->getAttributes());
 				}
 				$this->addSuccessFlashes('create', $model);
-				return $this->redirect($this->returnTo('create', $model));
+				return $this->redirect($this->returnTo(null, 'create', $model));
 			}
 		}
 		return $this->render('create', [
@@ -207,7 +207,7 @@ class JsonController extends \yii\web\Controller
 					return json_encode($model->getAttributes());
 				}
 				$this->addSuccessFlashes('duplicate', $model);
-				return $this->redirect($this->returnTo('duplicate', $model));
+				return $this->redirect($this->returnTo(null, 'duplicate', $model));
 			}
 		}
 		return $this->render('duplicate', [
@@ -237,7 +237,7 @@ class JsonController extends \yii\web\Controller
 					return json_encode($model->getAttributes());
 				}
 				$this->addSuccessFlashes('update', $model);
-				return $this->redirect($this->returnTo('update', $model));
+				return $this->redirect($this->returnTo(null, 'update', $model));
 			}
 		}
 		return $this->render('update', [
@@ -261,7 +261,7 @@ class JsonController extends \yii\web\Controller
 					return json_encode($path);
 				}
 				$this->addSuccessFlashes('delete', $model);
-				return $this->redirect($this->returnTo('delete', $model));
+				return $this->redirect($this->returnTo(null, 'delete', $model));
 			} else {
 				Yii::$app->session->addFlash('error', $model->t('churros', $this->getResultMessage('error_delete')));
 				$this->addErrorFlashes($model);
@@ -272,7 +272,7 @@ class JsonController extends \yii\web\Controller
 			if (YII_ENV_DEV) {
 				$this->addErrorFlashes($model);
 			}
-			return $this->redirect($this->returnTo('delete_error', null));
+			return $this->redirect($this->returnTo(null, 'delete_error', null));
 		} catch( \yii\web\ForbiddenHttpException $e ) {
 			Yii::$app->session->addFlash('error', $model->t('churros',
 				$this->getResultMessage('access_denied')));
@@ -280,7 +280,7 @@ class JsonController extends \yii\web\Controller
 				$this->addErrorFlashes($model);
 			}
 		}
-		return $this->redirect($this->returnTo('delete_error', null));
+		return $this->redirect($this->returnTo(null, 'delete_error', null));
 	}
 
 	/**
@@ -338,74 +338,73 @@ class JsonController extends \yii\web\Controller
 		return $pdf->render();
 	}
 
-	protected function returnTo(string $from, $model)
+	protected function returnTo(?string $to, string $from, $model, array $redirect_params = []): string|array
 	{
 		$returnTo = Yii::$app->request->post('returnTo');
 		if( !$returnTo ) {
 			$returnTo = Yii::$app->request->queryParams['returnTo']??null;
 		}
-		if( !$returnTo ) {
-			$returnTo = Yii::$app->request->post('_form_returnTo');
-		}
 		if( $returnTo ) {
 			return $returnTo;
 		}
-		if ($from == 'delete_error') {
-			return Yii::$app->request->referrer;
-		}
-		$redirect_params = [];
-		if (!empty($_REQUEST['sort']) ) {
+		if (!array_key_exists('sort', $redirect_params) && !empty($_REQUEST['sort'])) {
 			$redirect_params['sort'] = $_REQUEST['sort'];
 		}
-		switch ($from) {
-		case 'create':
-			if (Yii::$app->request->post('_and_create') == '1') {
-				$to = 'create';
-			} else {
-				$to = 'view';
-			}
-			break;
-		case 'duplicate':
-			if (Yii::$app->request->post('_and_create') == '1') {
-				$to = 'duplicate';
-			} else {
-				$to = 'view';
-			}
-			break;
-		case 'update':
-			$to = 'view';
-			break;
-		case 'view':
-		case 'index':
-		default:
-			$to = "index";
-			$new_model = $model->parentModel();
-			if ($new_model) {
-				$model = $new_model;
-			}
-			break;
-		case 'delete':
-			$to = 'view';
-			$new_model = $model->parentModel();
-			if ($new_model) {
-				$model = $new_model;
+		if (empty($to)) {
+			switch ($from) {
+				case 'create':
+					if (Yii::$app->request->post('_and_create') == '1') {
+						$to = 'create';
+					} else {
+						$master = $this->getMasterModel();
+						if ($master) {
+							$prefix = $this->getBaseRoute() . '/' . $master->controllerName(). '/';
+							$keys = $master->getPrimaryKey(true);
+							$keys[0] = $prefix . 'view';
+							return $keys;
+						}
+						$to = 'view';
+					}
+					break;
+				case 'duplicate':
+					if (Yii::$app->request->post('_and_create') == '1') {
+						$to = 'duplicate';
+					} else {
+						$to = 'view';
+					}
+					break;
+				case 'update':
+				case 'delete':
+				case 'view':
+				case 'index':
+					$to = 'index';
+					break;
+				default:
+					if ($from) {
+						$to = $from;
+						$redirect_params = array_merge($redirect_params, [ 'id' => $model->getPrimaryKey()]);
+					} else {
+						$to = 'index';
+					}
 			}
 		}
 		switch($to) {
-		case 'view':
-		case 'update':
-		case 'duplicate':
-			$redirect_params = array_merge($redirect_params, [ 'id' => $model->getPrimaryKey()]);
-			// no break
-		case 'create':
-			if( isset($_REQUEST['_form_cancelUrl']) ) {
-				$redirect_params['_form_cancelUrl'] = $_REQUEST['_form_cancelUrl'];
-			}
-			break;
-		default:
+			case 'view':
+			case 'update':
+			case 'duplicate':
+				$redirect_params = array_merge($redirect_params, [ 'id' => $model->getPrimaryKey()]);
+				// no break
+			case 'create':
+				if( isset($_REQUEST['_form_cancelUrl']) ) {
+					$redirect_params['_form_cancelUrl'] = $_REQUEST['_form_cancelUrl'];
+				}
+				break;
+			default:
+				$redirect_params = array_merge($redirect_params, [ 'id' => $model->getPrimaryKey()]);
+
 		}
-		$redirect_params[0] = $this->getActionRoute($to, $model, $this->getRootModel());
-		if ($this->getRootModel()) {
+		$redirect_params[0] = $this->getActionRoute($to, $model);
+		if ($this->getRootModel()) { // Hasta aquí, idéntica a CrudController::returnTo.
 			$redirect_params['root_model'] = basename(str_replace('\\', '/', get_class($this->getRootModel())));
 			$redirect_params['root_id'] = $this->getRootModel()->getPrimaryKey();
 			$redirect_params['root_field'] = $this->root_json_field;
