@@ -42,6 +42,22 @@ class FormHelper
 		static::$tabindex = $reset;
 	}
 
+	static public function extractFormName(array $views, int $_nv): string
+	{
+		if ($_nv > (count($views)-1) ) {
+			$_nv = 0;
+		}
+		foreach($views as $kv => $view_info ) {
+			if( $_nv-- == 0 ) {
+				$form_class = $view_info[1];
+				$form = new $form_class;
+				return $form->formName();
+			}
+		}
+		return '';
+	}
+
+
 	/// @return [ view_name, title, search_model, scopes, permissions ]
 	static public function gridFromRequest(array $views, array $params): array
 	{

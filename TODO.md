@@ -2,6 +2,9 @@
 - Contraseña (recordar) no está bien el orden.
 - forgot: forbiden si estoy logueado como admin
 
+# Telegram
+- En modo desarrollo, enviar las notificaciones a otro grupo
+
 # Sqlite3
 - Crear issue en github PRAGMA
 

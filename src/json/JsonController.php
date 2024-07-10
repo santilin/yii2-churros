@@ -356,13 +356,14 @@ class JsonController extends \yii\web\Controller
 					if (Yii::$app->request->post('_and_create') == '1') {
 						$to = 'create';
 					} else {
-						$master = $this->getMasterModel();
-						if ($master) {
-							$prefix = $this->getBaseRoute() . '/' . $master->controllerName(). '/';
-							$keys = $master->getPrimaryKey(true);
-							$keys[0] = $prefix . 'view';
-							return $keys;
-						}
+							// $to
+							// $master = $this->getMasterModel();
+							// if ($master) {
+							// 	$prefix = $this->getBaseRoute() . '/' . $master->controllerName(). '/';
+							// 	$keys = $master->getPrimaryKey(true);
+							// 	$keys[0] = $prefix . 'view';
+							// 	return $keys;
+							// }
 						$to = 'view';
 					}
 					break;
