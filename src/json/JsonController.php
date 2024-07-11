@@ -375,18 +375,16 @@ class JsonController extends \yii\web\Controller
 					}
 					break;
 				case 'update':
+					$to = 'view';
+					break;
 				case 'delete':
 				case 'view':
 				case 'index':
+				case '':
 					$to = 'index';
 					break;
 				default:
-					if ($from) {
-						$to = $from;
-						$redirect_params = array_merge($redirect_params, [ 'id' => $model->getPrimaryKey()]);
-					} else {
-						$to = 'index';
-					}
+					$to = $from;
 			}
 		}
 		switch($to) {

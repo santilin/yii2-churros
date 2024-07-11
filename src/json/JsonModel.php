@@ -138,6 +138,9 @@ class JsonModel extends \yii\base\Model
     public function parentModel($parent_id = null): ?JsonModel
     {
         if ($this->parent_model === null) {
+            if (empty(static::$parent_model_class)) {
+                throw new InvalidConfigException( get_class($this) . ': no parent_model_class defined');
+            }
             if (!$this->_json_modelable) {
                 throw new InvalidConfigException("Json model has no _json_modelable defined");
             }
@@ -295,7 +298,7 @@ class JsonModel extends \yii\base\Model
 
     public function jsonGet(string $path)
     {
-        return $this->_json_modelable->get($path);
+        return $this->_json_modelable->getJsonValue($path);
     }
 
 	public function beginTransaction()
