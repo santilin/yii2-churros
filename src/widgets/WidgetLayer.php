@@ -162,7 +162,12 @@ class WidgetLayer
                 if (!isset($layout_row['style'])) {
 					$layout_row['style'] = $parent_style;
 				}
+				$subtitle = $layout_row['subtitle']??null;
 				$row_html = '<div class=row>';
+				if ($subtitle) {
+					$row_html .= "<div class=col12><div class=\"subtitle mb-3 alert alert-warning\">$subtitle</div></div></div>";
+				}
+				$row_html .= '<div class=row>';
                 foreach ($layout_row['content'] as $widget_name ) {
 					$fs = '';
 					$open_divs = 0;
