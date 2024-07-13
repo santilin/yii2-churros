@@ -173,9 +173,6 @@ class FormHelper
 				$button['htmlOptions']['tabindex'] = static::ti();
 			}
 			$title = $button['title']??$name;
-			if( !isset($button['htmlOptions']['title']) ) {
-				$button['htmlOptions']['title'] = $title;
-			}
 			$icon = $button['icon']??null;
 			if( $icon ) {
 				if (substr($icon, 0, 1) == '/') {
@@ -195,20 +192,25 @@ class FormHelper
 					}
 				}
 			}
+			$url_return_to = ArrayHelper::remove($button, 'returnTo', null);
 			switch( $button['type'] ) {
 			case 'a':
 				unset($button['htmlOptions']['name']);
+				if( !isset($button['htmlOptions']['title']) ) {
+					$button['htmlOptions']['title'] = $title;
+				}
 				Html::addCssClass($button['htmlOptions'], $name);
 				if (empty($htmlOptions['role'])) {
 					$button['htmlOptions']['role'] = 'button';
 				}
+				$full_url = self::prepareButtonUrl($button['url'], $url_return_to);
 				$ret[] = Html::a(
 					$title,
-					$button['url']??'javascript:void(0);',
+					$full_url??'javascript:void(0);',
 					$button['htmlOptions']);
 				break;
 			case 'ajax':
-				$request_url = Url::to((array)$button['url']);
+				$request_url = Url::to($button['url']);
 				$ajax_options = $button['ajaxOptions']??[];
 // 				if (!YII_ENV_PROD) {
 // 					$ajax_success = $ajax_options['success']??'console.log("Success: ", data)';
@@ -285,20 +287,21 @@ ajax;
 				break;
 			case 'button':
 				if( isset($button['url']) && !isset($button['htmlOptions']['onclick']) ) {
-					if( is_array($button['url']) ) {
-						$button['htmlOptions']['onclick'] = "location.href='" . Url::to($button['url']) . "'";
-					} else {
-						$button['htmlOptions']['onclick'] = "location.href='" . $button['url'] . "'";
-					}
+					$full_url = self::prepareButtonUrl($button['url'], $url_return_to);
+					$button['htmlOptions']['onclick'] = "window.location.href='$full_url'";
 				}
 				$ret[] = Html::button($title, $button['htmlOptions']);
 				break;
 			case 'select':
+				if( isset($button['url']) && !isset($button['htmlOptions']['onchange']) ) {
+					$full_url = self::prepareButtonUrl($button['url'], $url_return_to);
+					$button['htmlOptions']['onchange'] = "window.location.href='$full_url'";
+				}
 				$ret[] = Html::dropDownList( $name, $button['selections']??null,
 					$button['options'], $button['htmlOptions']);
 				break;
 			case "submitPostForm":
-				$post_form = Html::beginForm(Url::to($button['url']), 'post', $button['formOptions']??[]);
+				$post_form = Html::beginForm(self::prepareButtonUrl($button['url'], $url_return_to), 'post', $button['formOptions']??[]);
 				foreach ($button['hiddenInputs'] as $hidden_name => $hidden_value) {
 					$post_form .= Html::hiddenInput($hidden_name, $hidden_value);
 				}
@@ -308,6 +311,34 @@ ajax;
 			}
 		}
 		return implode($sep, $ret);
+	}
+
+	static private function prepareButtonUrl(string|array $url, ?string $url_return_to): string
+	{
+		switch ($url_return_to) {
+			case 'current':
+				$url_return_to = Url::current();
+				break;
+			case 'home':
+				$url_return_to = Url::home();
+				break;
+			case 'previous':
+				$url_return_to = Url::previous();
+				break;
+			case 'referrer':
+				$url_return_to = Yii::$app->request->referrer;
+				break;
+		}
+		$full_url = Url::to($url);
+		if ($url_return_to) {
+			if (strpos($full_url, '?') !== FALSE) {
+				$full_url .= '&';
+			} else {
+				$full_url .= '?';
+			}
+			$full_url .= "returnTo=$url_return_to";
+		}
+		return $full_url;
 	}
 
 	static public function hasPermission(bool|array|null $perms, string $perm): bool
