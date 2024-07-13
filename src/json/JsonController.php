@@ -261,7 +261,7 @@ class JsonController extends \yii\web\Controller
 					return json_encode($path);
 				}
 				$this->addSuccessFlashes('delete', $model);
-				return $this->redirect($this->returnTo(null, 'delete', $model));
+				return $this->redirect($this->returnTo(null, 'delete', $model->parentModel()?:$model));
 			} else {
 				Yii::$app->session->addFlash('error', $model->t('churros', $this->getResultMessage('error_delete')));
 				$this->addErrorFlashes($model);
@@ -347,23 +347,12 @@ class JsonController extends \yii\web\Controller
 		if( $returnTo ) {
 			return $returnTo;
 		}
-		if (!array_key_exists('sort', $redirect_params) && !empty($_REQUEST['sort'])) {
-			$redirect_params['sort'] = $_REQUEST['sort'];
-		}
 		if (empty($to)) {
 			switch ($from) {
 				case 'create':
 					if (Yii::$app->request->post('_and_create') == '1') {
 						$to = 'create';
 					} else {
-							// $to
-							// $master = $this->getMasterModel();
-							// if ($master) {
-							// 	$prefix = $this->getBaseRoute() . '/' . $master->controllerName(). '/';
-							// 	$keys = $master->getPrimaryKey(true);
-							// 	$keys[0] = $prefix . 'view';
-							// 	return $keys;
-							// }
 						$to = 'view';
 					}
 					break;
@@ -387,22 +376,30 @@ class JsonController extends \yii\web\Controller
 					$to = $from;
 			}
 		}
-		switch($to) {
-			case 'view':
-			case 'update':
-			case 'duplicate':
-				$redirect_params = array_merge($redirect_params, [ 'id' => $model->getPrimaryKey()]);
-				// no break
-			case 'create':
-				if( isset($_REQUEST['_form_cancelUrl']) ) {
-					$redirect_params['_form_cancelUrl'] = $_REQUEST['_form_cancelUrl'];
-				}
-				break;
-			default:
-				$redirect_params = array_merge($redirect_params, [ 'id' => $model->getPrimaryKey()]);
-
+		if ($to != 'index') {
+			switch($to) {
+				case 'view':
+				case 'update':
+				case 'duplicate':
+					$redirect_params = array_merge($redirect_params, [ 'id' => $model->getPrimaryKey()]);
+					// no break
+				case 'create':
+					if( isset($_REQUEST['_form_cancelUrl']) ) {
+						$redirect_params['_form_cancelUrl'] = $_REQUEST['_form_cancelUrl'];
+					}
+					break;
+				case 'index':
+					break;
+				default:
+					$redirect_params = array_merge($redirect_params, [ 'id' => $model->getPrimaryKey()]);
+			}
+			$redirect_params[0] = $this->getActionRoute($to, $model);
+		} else {
+			$redirect_params[0] = $this->getActionRoute(null, $model);
 		}
-		$redirect_params[0] = $this->getActionRoute($to, $model);
+		if (!array_key_exists('sort', $redirect_params) && !empty($_REQUEST['sort'])) {
+			$redirect_params['sort'] = $_REQUEST['sort'];
+		}
 		if ($this->getRootModel()) { // Hasta aquí, idéntica a CrudController::returnTo.
 			$redirect_params['root_model'] = basename(str_replace('\\', '/', get_class($this->getRootModel())));
 			$redirect_params['root_id'] = $this->getRootModel()->getPrimaryKey();

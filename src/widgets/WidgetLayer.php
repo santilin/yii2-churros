@@ -156,7 +156,6 @@ class WidgetLayer
                     }
                 }
                 if ($only_widget_names) {
-					die ("imposible");
                     $layout_row = ['type' => $type_of_row, 'content' => $layout_row];
                 }
                 if (!isset($layout_row['style'])) {
