@@ -148,16 +148,17 @@ class JsonModel extends \yii\base\Model
                 return null;
             }
             if (!StringHelper::endsWith($this->_path, $this->_id)) {
-                $parts = explode('/', $this->_path);
-            } else {
                 $parts = explode('/', $this->_path . '/' . $this->_id);
+            } else {
+                $parts = explode('/', $this->_path);
             }
             if (count($parts)<2) {
                 return null;
             }
             array_pop($parts);
+            array_pop($parts);
             if ($parent_id == null) {
-                $parent_id = $parts[count($parts)-2];
+                $parent_id = $parts[count($parts)-1];
             }
             $this->parent_model = new static::$parent_model_class;
             if (!$this->parent_model->loadJson($this->_json_modelable, implode('/', $parts), $parent_id)) {
