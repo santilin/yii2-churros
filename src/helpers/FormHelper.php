@@ -203,11 +203,15 @@ class FormHelper
 				if (empty($htmlOptions['role'])) {
 					$button['htmlOptions']['role'] = 'button';
 				}
-				$full_url = self::prepareButtonUrl($button['url'], $url_return_to);
-				$ret[] = Html::a(
-					$title,
-					$full_url??'javascript:void(0);',
-					$button['htmlOptions']);
+				if (!empty($button['url'])) {
+					$full_url = self::prepareButtonUrl($button['url'], $url_return_to);
+					$ret[] = Html::a(
+						$title,
+						$full_url??'javascript:void(0);',
+						$button['htmlOptions']);
+				} else {
+					$ret[] = Html::a($title, 'javascript:void(0);', $button['htmlOptions']);
+				}
 				break;
 			case 'ajax':
 				$request_url = Url::to($button['url']);

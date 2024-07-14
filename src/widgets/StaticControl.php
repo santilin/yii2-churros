@@ -16,13 +16,14 @@ class StaticControl extends \yii\widgets\InputWidget
 		if ($this->value !== null) {
 			$value = $this->value;
 		} else {
-			if (isset($this->options['value'])) {
+			if (array_key_exists('value', $this->options)) {
 				$value = $this->options['value'];
 				if (is_callable($value)) {
 					$value = call_user_func($value);
 				}
 				unset($this->options['value']);
 			} else {
+				$a = $this->field->attribute;
 				$value = Html::getAttributeValue($this->model, $this->field->attribute);
 			}
 		}
