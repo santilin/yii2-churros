@@ -155,7 +155,9 @@ class JsonModel extends \yii\base\Model
             if (count($parts)<2) {
                 return null;
             }
-            array_pop($parts);
+            if (!in_array($parts[count($parts)-1], ['fields'])) {
+                array_pop($parts);
+            }
             array_pop($parts);
             if ($parent_id == null) {
                 $parent_id = $parts[count($parts)-1];

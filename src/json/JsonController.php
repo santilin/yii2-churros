@@ -364,9 +364,9 @@ class JsonController extends \yii\web\Controller
 					}
 					break;
 				case 'update':
+				case 'delete':
 					$to = 'view';
 					break;
-				case 'delete':
 				case 'view':
 				case 'index':
 				case '':
