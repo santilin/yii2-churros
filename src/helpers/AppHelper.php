@@ -373,8 +373,8 @@ class AppHelper
 	{
 		$pos = strpos($s, $sep);
 		if( $pos !== FALSE ) {
-			$first = substr($s, $pos + 1);
-			$last = substr($s, 0, $pos);
+			$last = substr($s, $pos + 1);
+			$first = substr($s, 0, $pos);
 			return [ $first, $last];
 		} else {
 			return [ "", $s ];

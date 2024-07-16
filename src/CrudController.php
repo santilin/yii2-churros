@@ -290,29 +290,31 @@ class CrudController extends \yii\web\Controller
 	*/
 	public function actionDelete($id)
 	{
+		$model = $this->findModel($id);
 		if (!in_array('delete', $this->crudActions)) {
-			throw new ForbiddenHttpException($model_form_class::instance()->t('churros',
+			throw new ForbiddenHttpException($model->t('churros',
 				$this->getResultMessage('access_denied')));
 		}
 		try {
-			$model = $this->findModel($id);
-			$model->deleteWithRelated();
-			if (Yii::$app->request->getIsAjax()) {
-				return json_encode($id);
+			if ($model->deleteWithRelated()) {
+				if (Yii::$app->request->getIsAjax()) {
+					return json_encode($id);
+				}
+				$this->addSuccessFlashes('delete', $model);
+				return $this->redirect($this->returnTo(null, 'delete', $model));
+			} else {
+				Yii::$app->session->addFlash('error', $model->t('churros', $this->getResultMessage('error_delete')));
+				$this->addErrorFlashes($model);
 			}
-			$this->addSuccessFlashes('delete', $model);
-			return $this->redirect($this->returnTo(null, 'delete', $model));
-		} catch( ForbiddenHttpException $e ) {
-			Yii::$app->session->addFlash('error', $e->getMessage());
-			return $this->redirect(Yii::$app->request->referrer?:Yii::$app->homeUrl);
-		} catch (\yii\db\IntegrityException $e ) {
-			Yii::$app->session->addFlash('error', $model->t('churros',
+		} catch (\yii\db\IntegrityException $e) {
+			$model->addError('delete', $model->t('churros',
 				$this->getResultMessage('error_delete_integrity')));
 		} catch (\yii\web\ForbiddenHttpException $e ) {
-			Yii::$app->session->addFlash('error', $model->t('churros',
+			$model->addError('delete', $model->t('churros',
 				$this->getResultMessage('error_delete')));
 		}
-		return $this->redirect($this->returnTo(null, 'delete', $model));
+		$this->addErrorFlashes($model);
+		return $this->redirect($this->returnTo(null, 'delete_error', $model));
 	}
 
 	/**
@@ -372,58 +374,56 @@ class CrudController extends \yii\web\Controller
 
 	protected function returnTo(?string $to, string $from, $model, array $redirect_params = []): string|array
 	{
-		$returnTo = Yii::$app->request->queryParams['returnTo']??null;
+		$returnTo = Yii::$app->request->post('returnTo');
 		if( !$returnTo ) {
-			$returnTo = Yii::$app->request->post('returnTo')?:null;
-		}
-		if( !$returnTo ) {
-			$returnTo = Yii::$app->request->post('formSuccessUrl')?:null;
+			$returnTo = Yii::$app->request->queryParams['returnTo']??null;
 		}
 		if( $returnTo ) {
 			return $returnTo;
 		}
-		if (!array_key_exists('sort', $redirect_params) && !empty($_REQUEST['sort'])) {
-			$redirect_params['sort'] = $_REQUEST['sort'];
-		}
 		if (empty($to)) {
+			$to_model = null;
 			switch ($from) {
 				case 'create':
 					if (Yii::$app->request->post('_and_create') == '1') {
-						$to = 'create';
+						$to_action = 'create';
 					} else {
-						$master = $this->getMasterModel();
-						if ($master) {
-							$prefix = $this->getBaseRoute() . '/' . $master->controllerName(). '/';
-							$keys = $master->getPrimaryKey(true);
-							$keys[0] = $prefix . 'view';
-							return $keys;
-						}
-						$to = 'view';
+						$to_action = 'view';
 					}
 					break;
 				case 'duplicate':
 					if (Yii::$app->request->post('_and_create') == '1') {
-						$to = 'duplicate';
+						$to_action = 'duplicate';
 					} else {
-						$to = 'view';
+						$to_action = 'view';
 					}
 					break;
 				case 'update':
+					$to_action = 'view';
+					break;
 				case 'delete':
 				case 'view':
 				case 'index':
-					$to = 'index';
+				case '':
+					$to_action = 'index';
 					break;
 				default:
-					if ($from) {
-						$to = $from;
-						$redirect_params = array_merge($redirect_params, [ 'id' => $model->getPrimaryKey()]);
-					} else {
-						$to = 'index';
-					}
+					$to_action = $from;
+			}
+		} else {
+			list($to_model, $to_action) = AppHelper::splitString($to, '.');
+		}
+		if ($to_model) {
+			if ($to_model == 'parent') {
+				if ($model->getParentModel()) {
+					$model = $model->getParentModel();
+				}
+			} else if ($to_model == 'model') {
+			} else {
+				$model =$$to_model;
 			}
 		}
-		switch($to) {
+		switch($to_action) {
 			case 'view':
 			case 'update':
 			case 'duplicate':
@@ -434,10 +434,15 @@ class CrudController extends \yii\web\Controller
 					$redirect_params['_form_cancelUrl'] = $_REQUEST['_form_cancelUrl'];
 				}
 				break;
+			case 'index':
+				break;
 			default:
 				$redirect_params = array_merge($redirect_params, [ 'id' => $model->getPrimaryKey()]);
 		}
-		$redirect_params[0] = $this->getActionRoute($to, $model);
+		$redirect_params[0] = $this->getActionRoute($to_action, $model);
+		if (!array_key_exists('sort', $redirect_params) && !empty($_REQUEST['sort'])) {
+			$redirect_params['sort'] = $_REQUEST['sort'];
+		}
 		return $redirect_params;
 	}
 
@@ -447,68 +452,7 @@ class CrudController extends \yii\web\Controller
 	 */
 	protected function whereToGoNow(string $from, $model)
 	{
-		$returnTo = Yii::$app->request->post('returnTo');
-		if( !$returnTo ) {
-			$returnTo = Yii::$app->request->queryParams['returnTo']??null;
-		}
-		if( $returnTo ) {
-			return $returnTo;
-		}
-		$redirect_params = [];
-		if( !empty($_REQUEST['sort']) ) {
-			$redirect_params['sort'] = $_REQUEST['sort'];
-		}
-		switch ($from) {
-		case 'create':
-			if (Yii::$app->request->post('_and_create') == '1') {
-				$to = 'create';
-			} else {
-				$master = $this->getMasterModel();
-				if ($master) {
-					$prefix = $this->getBaseRoute() . '/' . $master->controllerName(). '/';
-					$keys = $master->getPrimaryKey(true);
-					$keys[0] = $prefix . 'view';
-					return $keys;
-				}
-				$to = 'view';
-			}
-			break;
-		case 'duplicate':
-			if (Yii::$app->request->post('_and_create') == '1') {
-				$to = 'duplicate';
-			} else {
-				$to = 'view';
-			}
-			break;
-		case 'update':
-		case 'delete':
-		case 'view':
-		case 'index':
-			$to = 'index';
-			break;
-		default:
-			if ($from) {
-				$to = $from;
-				$redirect_params = array_merge($redirect_params, [ 'id' => $model->getPrimaryKey()]);
-			} else {
-				$to = 'index';
-			}
-		}
-		switch($to) {
-		case 'view':
-		case 'update':
-		case 'duplicate':
-			$redirect_params = array_merge($redirect_params, [ 'id' => $model->getPrimaryKey()]);
-			// no break
-		case 'create':
-			if( isset($_REQUEST['_form_cancelUrl']) ) {
-				$redirect_params['_form_cancelUrl'] = $_REQUEST['_form_cancelUrl'];
-			}
-			break;
-		default:
-		}
-		$redirect_params[0] = $this->getActionRoute($to, $model);
-		return $redirect_params;
+		die(__FUNCTION__ . "Deprecated");
 	}
 
   	public function getActionRoute($action_id = null, $model = null, $master_model = null): string

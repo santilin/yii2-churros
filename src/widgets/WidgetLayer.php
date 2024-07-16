@@ -1,6 +1,7 @@
 <?php
 
 namespace santilin\churros\widgets;
+use Yii;
 use yii\base\InvalidConfigException;
 use yii\helpers\{ArrayHelper,Html};
 use yii\bootstrap5\Tabs;
@@ -46,7 +47,19 @@ class WidgetLayer
 				$this->widgetsLayout['layout'] = $layout;
 			}
 		}*/
-		return $this->layoutWidgets($this->widgetsLayout, ['size' => $size, 'style' => $style]);
+		if (YII_ENV_DEV) {
+			global $widgets_used;
+			$widgets_used = [];
+		}
+		$ret = $this->layoutWidgets($this->widgetsLayout, ['size' => $size, 'style' => $style]);
+		if (YII_ENV_DEV) {
+			$not_used = array_diff($widgets_used, array_keys($this->widgets));
+			if (!empty($not_used)) {
+				Yii::error("Widgets not used: " . json_encode($not_used));
+			}
+			unset($widgets_used);
+		}
+		return $ret;
 	}
 
 
@@ -171,6 +184,10 @@ class WidgetLayer
 					$fs = '';
 					$open_divs = 0;
 					if ($widget = $this->widgets[$widget_name]??false) {
+						if (YII_ENV_DEV) {
+							global $widgets_used;
+							$widgets_used[] = $widget_name;
+						}
 						if ($widget instanceof \yii\bootstrap5\ActiveField ) {
 							// bs5 ActiveFields add a row container over the whole field
 							if ($widget->horizontalCssClasses['layout']??false) {
@@ -255,7 +272,12 @@ class WidgetLayer
 							$fs .= '</div>';
 						}
 						$row_html .= $fs;
+					} else {
+						if (YII_ENV_DEV) {
+							Yii::error("$widget_name: widget not found in WidgetLayer");
+						}
 					}
+
 				}
 				$row_html .= '</div><!-- main row-->';
 				if (($title = $layout_row['title']??false) != false) {

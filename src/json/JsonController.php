@@ -255,32 +255,30 @@ class JsonController extends \yii\web\Controller
 	public function actionDelete(string $id)
 	{
 		$model = $this->findFormModel($this->getPath(), $id, null, 'delete');
+		if (!in_array('delete', $this->crudActions)) {
+			throw new ForbiddenHttpException($model->t('churros',
+				$this->getResultMessage('access_denied')));
+		}
 		try {
 			if ($model->delete()) {
 				if (Yii::$app->request->getIsAjax()) {
 					return json_encode($path);
 				}
 				$this->addSuccessFlashes('delete', $model);
-				return $this->redirect($this->returnTo(null, 'delete', $model->parentModel()?:$model));
+				return $this->redirect($this->returnTo(null, 'delete', $model));
 			} else {
 				Yii::$app->session->addFlash('error', $model->t('churros', $this->getResultMessage('error_delete')));
 				$this->addErrorFlashes($model);
 			}
-		} catch (\yii\db\IntegrityException $e ) {
-			Yii::$app->session->addFlash('error', $model->t('churros',
+		} catch (\yii\db\IntegrityException $e) {
+			$model->addError('delete', $model->t('churros',
 				$this->getResultMessage('error_delete_integrity')));
-			if (YII_ENV_DEV) {
-				$this->addErrorFlashes($model);
-			}
-			return $this->redirect($this->returnTo(null, 'delete_error', null));
-		} catch( \yii\web\ForbiddenHttpException $e ) {
-			Yii::$app->session->addFlash('error', $model->t('churros',
-				$this->getResultMessage('access_denied')));
-			if (YII_ENV_DEV) {
-				$this->addErrorFlashes($model);
-			}
+		} catch (\yii\web\ForbiddenHttpException $e ) {
+			$model->addError('delete', $model->t('churros',
+				$this->getResultMessage('error_delete')));
 		}
-		return $this->redirect($this->returnTo(null, 'delete_error', null));
+		$this->addErrorFlashes($model);
+		return $this->redirect($this->returnTo(null, 'delete_error', $model));
 	}
 
 	/**
@@ -338,6 +336,9 @@ class JsonController extends \yii\web\Controller
 		return $pdf->render();
 	}
 
+	/**
+	 * @param string $to can be parent.action or action
+	 */
 	protected function returnTo(?string $to, string $from, $model, array $redirect_params = []): string|array
 	{
 		$returnTo = Yii::$app->request->post('returnTo');
@@ -365,7 +366,7 @@ class JsonController extends \yii\web\Controller
 					break;
 				case 'update':
 				case 'delete':
-					$to = 'view';
+					$to = 'parent.view';
 					break;
 				case 'view':
 				case 'index':
@@ -376,27 +377,34 @@ class JsonController extends \yii\web\Controller
 					$to = $from;
 			}
 		}
-		if ($to != 'index') {
-			switch($to) {
-				case 'view':
-				case 'update':
-				case 'duplicate':
-					$redirect_params = array_merge($redirect_params, [ 'id' => $model->getPrimaryKey()]);
-					// no break
-				case 'create':
-					if( isset($_REQUEST['_form_cancelUrl']) ) {
-						$redirect_params['_form_cancelUrl'] = $_REQUEST['_form_cancelUrl'];
-					}
-					break;
-				case 'index':
-					break;
-				default:
-					$redirect_params = array_merge($redirect_params, [ 'id' => $model->getPrimaryKey()]);
+		list($to_model, $to_action) = AppHelper::splitString($to, '.');
+		if ($to_model) {
+			if ($to_model == 'parent') {
+				if ($model->parentModel()) {
+					$model = $model->parentModel();
+				}
+			} else if ($to_model == 'model') {
+			} else {
+				$model =$$to_model;
 			}
-			$redirect_params[0] = $this->getActionRoute($to, $model);
-		} else {
-			$redirect_params[0] = $this->getActionRoute(null, $model);
 		}
+		switch($to_action) {
+			case 'view':
+			case 'update':
+			case 'duplicate':
+				$redirect_params = array_merge($redirect_params, [ 'id' => $model->getPrimaryKey()]);
+				// no break
+			case 'create':
+				if( isset($_REQUEST['_form_cancelUrl']) ) {
+					$redirect_params['_form_cancelUrl'] = $_REQUEST['_form_cancelUrl'];
+				}
+				break;
+			case 'index':
+				break;
+			default:
+				$redirect_params = array_merge($redirect_params, [ 'id' => $model->getPrimaryKey()]);
+		}
+		$redirect_params[0] = $this->getActionRoute($to_action, $model);
 		if (!array_key_exists('sort', $redirect_params) && !empty($_REQUEST['sort'])) {
 			$redirect_params['sort'] = $_REQUEST['sort'];
 		}
