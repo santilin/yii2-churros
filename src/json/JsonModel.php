@@ -73,7 +73,7 @@ class JsonModel extends \yii\base\Model
             $json_objects = $this->_json_object?->get("$.$rel_name")?:[];
             $related_models = [];
             foreach ($json_objects as $rm) {
-                if ($rm === null) {
+                if ($rm === null || $rm === false) {
                     continue;
                 }
                 if ($form_class_name != null) {
