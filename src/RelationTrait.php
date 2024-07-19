@@ -10,13 +10,9 @@
 namespace santilin\churros;
 
 use Yii;
-use yii\db\ActiveQuery;
-use yii\db\ActiveRecord;
-use yii\db\Exception;
-use yii\db\IntegrityException;
-use yii\helpers\Inflector;
-use yii\helpers\StringHelper;
-use yii\helpers\ArrayHelper;
+use yii\base\InvalidConfigException;
+use yii\db\{ActiveQuery,ActiveRecord,Exception,IntegrityException};
+use yii\helpers\{Inflector,StringHelper,ArrayHelper};
 
 /*
  *  add this line to your Model to enable soft delete
@@ -719,6 +715,41 @@ trait RelationTrait
             return $child;
         } else {
             return null;
+        }
+    }
+
+    public function createRelatedModels(string $relation_name, array $current_values = [],
+                                      string $form_class_name = null): array|JsonModel
+    {
+        $rel_info = static::$relations[$relation_name];
+        $rel_name = $rel_info['relatedTablename'];
+        $rel_model_class = $rel_info['modelClass'];
+        if ($form_class_name != null) {
+            $child = new $form_class_name;
+            if (!($child instanceof $rel_model_class)) {
+                throw new InvalidConfigException("$form_class_name is not derived from $rel_model_class");
+            }
+        }
+        if ($rel_info['type'] == 'HasMany') {
+            $related_models = $this->$relation_name;
+            if (!empty($current_values)) {
+                foreach ($related_models as $nr => $rm) {
+                    if (isset($current_values[$nr])) {
+                        $related_models[$nr]->setAttributes($current_values[$nr]);
+                    }
+                }
+            }
+            return $related_models;
+        } else {
+            if ($form_class_name != null) {
+                $child = new $form_class_name;
+                if (!($child instanceof $rel_model_class)) {
+                    throw new InvalidConfigException("$form_class_name is not derived from $rel_model_class");
+                }
+            } else {
+                $child = new $rel_model_class;
+            }
+            return $child;
         }
     }
 

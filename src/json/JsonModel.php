@@ -57,7 +57,7 @@ class JsonModel extends \yii\base\Model
             return $this->_attributes[$name];
         }
         if (isset(static::$relations[$name])) {
-            return $this->findRelatedModels($name);
+            return $this->createRelatedModels($name);
         }
         return parent::__get($name);
     }
@@ -94,7 +94,7 @@ class JsonModel extends \yii\base\Model
         return $models;
     }
 
-    public function findRelatedModels(string $relation_name, array $current_values = [],
+    public function createRelatedModels(string $relation_name, array $current_values = [],
                                       string $form_class_name = null): array|JsonModel
     {
         $rel_info = static::$relations[$relation_name];
