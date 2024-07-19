@@ -108,6 +108,9 @@ class WidgetLayer
                         $tab_items = [];
 						$has_active = false;
                         foreach ($layout_row['content'] as $kc => $content) {
+							if ($content === null) {
+								continue;
+							}
                             if (!is_array($content)) {
                                 $content = [
                                     'label' => $kc,

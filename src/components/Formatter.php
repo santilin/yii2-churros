@@ -25,7 +25,7 @@ class Formatter extends \yii\i18n\Formatter
 // 			return  Html::tag('span', '&nbsp;', ['class' => 'glyphicon glyphicon-phone-alt']) .
 			return Html::a($text, "tel://$text");
 		} else {
-			return '';
+            return $this->nullDisplay;
 		}
 	}
 
@@ -122,7 +122,7 @@ class Formatter extends \yii\i18n\Formatter
 		if ($value) {
 			return Taxonomy::format($value, $taxonomy, $sep);
 		} else {
-			return '';
+            return $this->nullDisplay;
 		}
 	}
 

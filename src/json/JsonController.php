@@ -432,18 +432,6 @@ class JsonController extends \yii\web\Controller
 		return $route;
 	}
 
-	public function getRoutePrefix($route = null, bool $add_slash = true): string
-	{
-		$request_url = '/' . Yii::$app->request->getPathInfo();
-		$route_pos = strpos($request_url, $route);
-		$prefix = substr($request_url, 0, $route_pos);
-		if ($add_slash) {
-			if( substr($prefix, -1) != '/' ) {
-				$prefix .= '/';
-			}
-		}
-		return $prefix;
-	}
 
 	// Ajax
 	public function actionAutocomplete(array $fields)
@@ -583,12 +571,15 @@ class JsonController extends \yii\web\Controller
  				'url' => $partial_path . ( ($p%2)? 'index' : 'view')
 			];
 		}
- 		if ($action_id != 'index' && $action_id != 'create') {
- 			$breadcrumbs[] = [
- 				'label' => $model->getJsonId(),
- 				'url' => $action_id!='view' ? array_merge([$this->getActionRoute('view', $model)], $model->getPrimaryKey(true)) : null,
- 			];
- 		}
+		$breadcrumbs[] = [
+			'label' => $path_parts[$p],
+		];
+//  		if ($action_id != 'index' && $action_id != 'create') {
+//  			$breadcrumbs[] = [
+//  				'label' => $model->getJsonId(),
+//  				'url' => $action_id!='view' ? array_merge([$this->getActionRoute('view', $model)], $model->getPrimaryKey(true)) : null,
+//  			];
+//  		}
 		return $breadcrumbs;
 	}
 
