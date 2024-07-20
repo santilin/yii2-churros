@@ -2,8 +2,8 @@
 - Contraseña (recordar) no está bien el orden.
 - forgot: forbiden si estoy logueado como admin
 
-# Telegram
-- En modo desarrollo, enviar las notificaciones a otro grupo
+# Breadcrumbs
+- http://cappel.test/app/application/3/models/JsonController/update?returnTo=/app/application/jsedit/3
 
 # Sqlite3
 - Crear issue en github PRAGMA

@@ -268,6 +268,8 @@ class WidgetLayer
 								$open_divs++;
 								$fs .= $this->layoutOneField($widget, $layout_row, $widget_layout, $indexf++);
 							}
+						} else if (is_string($widget)) {
+							throw new \Exception($widget . ': invalid widget');
 						} else {
 							throw new \Exception(get_class($widget) . ': invalid widget class');
 						}
