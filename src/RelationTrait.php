@@ -710,8 +710,6 @@ trait RelationTrait
             } else {
                 $child = new $rel_model_class;
             }
-//             $child->proyectotareas_id = $this->id;
-//             $child->parent_model = $this;
             return $child;
         } else {
             return null;

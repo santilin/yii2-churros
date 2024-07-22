@@ -67,7 +67,58 @@ class ActiveForm extends Bs5ActiveForm
 					'field' => 'form-group',
 				]
 			],
-
+		],
+		'2cols-vertical' => [
+			'full' => [
+				'horizontalCssClasses' => [
+					'offset' => 'offset-md-2 offset-3',
+					'label' => ['col-12', 'col-form-label text-start text-break'],
+					'wrapper' => ['col-12'],
+					'error' => '',
+					'hint' => '',
+					'field' => '',
+				]
+			],
+			'large' => [
+				'horizontalCssClasses' => [
+					'offset' => 'offset-md-2 offset-3',
+					'label' => ['col-12', 'col-form-label text-start text-break'],
+					'wrapper' => ['col-12'],
+					'error' => '',
+					'hint' => '',
+					'field' => '',
+				]
+			],
+			'medium' => [
+				'horizontalCssClasses' =>[
+					'offset' => 'offset-md-2 offset-3',
+					'label' => ['col-12', 'col-form-label text-start'],
+					'wrapper' => ['col-md-5 col-8'],
+					'error' => '',
+					'hint' => 'col-12',
+					'field' => ['mi-clase'],
+				]
+			],
+			'short' => [
+				'horizontalCssClasses' =>[
+					'offset' => 'offset-md-3 offset-3',
+					'label' => ['col-12', 'col-form-label text-start'],
+					'wrapper' => ['col-lg-3 col-sm-4 col-12'],
+					'error' => '',
+					'hint' => '',
+					'field' => '',
+				]
+			],
+			'checkbox' => [
+				'horizontalCssClasses' => [
+					'offset' => 'offset-md-2 offset-sm-3',
+					'label' => ['col-12', 'col-form-label text-start'],
+					'wrapper' => ['col-6'],
+					'error' => '',
+					'hint' => '',
+					'field' => 'form-group',
+				]
+			],
 		],
 		'1col' => [
 			'full' => [

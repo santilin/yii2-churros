@@ -11,7 +11,7 @@ class JsonModel extends \yii\base\Model
 // implements \yii\db\ActiveRecordInterface
 {
     static public $parent_model_class;
-    protected $parent_model;
+    protected $parent_model = null;
     protected $_attributes = [];
     /** @var bool whether this is a new record */
     protected $_is_new_record = true;
@@ -150,10 +150,11 @@ class JsonModel extends \yii\base\Model
 
     public function parentModel($parent_id = null): ?JsonModel
     {
+        if (empty(static::$parent_model_class)) {
+            $this->parent_model = null;
+            return null;
+        }
         if ($this->parent_model === null) {
-            if (empty(static::$parent_model_class)) {
-                throw new InvalidConfigException( get_class($this) . ': no parent_model_class defined');
-            }
             if (!$this->_json_modelable) {
                 throw new InvalidConfigException("Json model has no _json_modelable defined");
             }

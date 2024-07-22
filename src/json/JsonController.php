@@ -539,7 +539,7 @@ class JsonController extends \yii\web\Controller
 		$path_parts = explode('/',$model->getPath());
 		if ($master) {
 			$prefix = $this->getBaseRoute() . '/' . $master->controllerName(). '/';
-			$breadcrumbs[] = [
+			$breadcrumbs['root'] = [
 				'label' => StringHelper::mb_ucfirst($master->getModelInfo('title_plural')),
 				'url' => [ $prefix . 'index']
 			];
@@ -547,7 +547,7 @@ class JsonController extends \yii\web\Controller
 			$keys[0] = $prefix;
 			$master_keys = $keys;
 			$master_keys[0] .= 'jsedit';
-			$breadcrumbs[] = [
+			$breadcrumbs['app'] = [
 				'label' => $master->recordDesc('short', 25),
 				'url' => $master_keys
 			];
@@ -571,15 +571,16 @@ class JsonController extends \yii\web\Controller
  				'url' => $partial_path . ( ($p%2)? 'index' : 'view')
 			];
 		}
-		$breadcrumbs[] = [
-			'label' => $path_parts[$p],
-		];
-//  		if ($action_id != 'index' && $action_id != 'create') {
-//  			$breadcrumbs[] = [
-//  				'label' => $model->getJsonId(),
-//  				'url' => $action_id!='view' ? array_merge([$this->getActionRoute('view', $model)], $model->getPrimaryKey(true)) : null,
-//  			];
-//  		}
+ 		if ($action_id != 'index' && $action_id != 'create') {
+ 			$breadcrumbs[] = [
+ 				'label' => $model->getJsonId(),
+ 				'url' => $action_id!='view' ? array_merge([$this->getActionRoute('view', $model)], $model->getPrimaryKey(true)) : null,
+ 			];
+ 		} else {
+			$breadcrumbs[] = [
+				'label' => $path_parts[$p],
+			];
+		}
 		return $breadcrumbs;
 	}
 
