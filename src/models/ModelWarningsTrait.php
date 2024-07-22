@@ -2,6 +2,8 @@
 
 namespace santilin\churros\models;
 
+use yii\db\ActiveRecord;
+
 Trait ModelWarningsTrait
 {
 	/**
