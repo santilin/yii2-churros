@@ -2,8 +2,7 @@
 
 namespace santilin\churros\widgets\grid;
 
-use yii\helpers\Html;
-use yii\helpers\Url;
+use yii\helpers\{Html,Url,StringHelper};
 /**
  * @todo botón copiar al portapapeles
  */
@@ -31,20 +30,28 @@ class ExpandableTextColumn extends DataColumn
 			$this->modalTitle = $this->getHeaderCellLabel();
 		}
 		$text = $this->getDataCellValue($model, $key, $index);
-		if (is_array($text)) {
-			$text = json_encode($text);
-		}
-		if (!$text || !trim($text)) {
+		if ( $text === null || (is_string($text) && !trim($text)) || (is_array($text) && count($text) == 0) ) {
 			return '';
 		}
-		if( $this->format == 'html' ) {
-			$text = html_entity_decode(strip_tags($text));
+		if ($this->format == 'html') {
+			if (is_array($text)) {
+				$text = html_entity_decode(strip_tags(print_r($text,true)));
+			}
+		} else {
+			if (is_array($text)) {
+				$text = print_r($text, true);
+			}
 		}
+		$text = trim($text);
 		if( $this->length == 0 ) {// || strlen($text)<=$this->length) {
 			return $text;
 		} else {
 			$cell_key = $index . $this->attribute;
-			$truncated_text = trim(mb_substr(trim($text), 0, $this->length));
+			if ($this->length) {
+				$truncated_text = StringHelper::truncate($text, $this->length, '', null, true);
+			} else {
+				$truncated_text = $text;
+			}
 			$encoded_text = Html::tag('p', Html::encode($text), $this->modalBodyOptions);
 			$modal = <<<modal
 <div class="modal fade" id="modalSeeMore_$cell_key" tabindex="-1" aria-labelledby="modalSeeMore_$cell_key" aria-hidden="true">

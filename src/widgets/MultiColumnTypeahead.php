@@ -1,6 +1,6 @@
 <?php
 
-namespace santilin\churros\widgets;
+namespace app\widgets;
 
 use Yii;
 use yii\helpers\Html;
@@ -26,6 +26,7 @@ class MultiColumnTypeahead extends Typeahead
 	public $searchParam = 'search';
 	public $createButton = false;
 	public $limit = 5;
+	public $exactMatch = false;
 
     /**
      * Initializes the widget
@@ -123,8 +124,9 @@ jsexpr
 			],
 //  		'datumTokenizer' => "Bloodhound.tokenizers.obj.whitespace('value')",
 			'templates' => [
-				'notFound' => '<div class="text-danger" style="padding:0 8px">' .
-					Yii::t('churros', 'No results found') . '</div>',
+				'notFound' => ($this->exactMatch
+					? '<div class="text-danger" style="padding:0 8px">' .Yii::t('churros', 'No results found') . '</div>'
+					: ''),
 				// The items in the dropdown
 				'suggestion' => new \yii\web\JsExpression($this->suggestionsDisplay)
 			],
@@ -146,18 +148,34 @@ js
 		$id = $this->options['id'];
 
 		// Cuando se pulsa INTRO y está desplegado el menú de sugerencias, se selecciona la primera
-		$set_dest_fields_values = [];
+		$set_dest_fields_values = $reset_dest_fields_values = [];
+		$nf = 0;
 		foreach ($this->formFields as $formField => $dbField) {
 			$fld_id = Html::getInputId($this->model, $formField);
 			$set_dest_fields_values[] = <<<js
 			if (datumParts.$dbField !== undefined && datumParts.$dbField != '') { $('#$fld_id').val(datumParts.$dbField) };
 js;
+			if ($nf++>0) {
+				$reset_dest_fields_values[] = <<<js
+			$('#$fld_id').val('');
+js;
+			} else {
+				$js_exact_match_field = "'$dbField'";
+			}
 		}
 		$js_set_fields_values = implode("\n", $set_dest_fields_values);
+		$js_reset_fields_values = implode("\n", $reset_dest_fields_values);
 		$js_id = str_replace('-','_',$id);
 		/// @todo make a module and refactor change an blur event handlers
 		$view->registerJS(<<<js
+let mctahead_exact_match_field_$js_id = $js_exact_match_field;
 let mctahead_changed_$js_id = false;
+$('#$id').change(function(e) {
+ 	mctahead_changed_$js_id = false;
+});
+$('#$id').focusin(function(e) {
+ 	mctahead_changed_$js_id = false;
+});
 $('#$id').blur(function(e) {
 	if (mctahead_changed_$js_id) {
 		mctahead_changed_$js_id = false;
@@ -167,27 +185,28 @@ $('#$id').blur(function(e) {
 		}
 		if (selectedDatum) {
 			const datumParts = $(selectedDatum[0]).data('ttSelectableObject');
-			$js_set_fields_values
+			if (datumParts[mctahead_exact_match_field_$js_id] == $(this).val()) {
+				$js_set_fields_values
+			}
 		}
 	}
 	return true;
 });
 $('#$id').keydown(function(e) {
-	if (e.key.length === 1) {
-		mctahead_changed_$js_id = true;
-	}
-	if (e.keyCode === 13 && mctahead_changed_$js_id) {
-		mctahead_changed_$js_id = false;
+	mctahead_changed_$js_id = true;
+	if ((e.keyCode === 13 || e.keyCode == 8 || e.key == "Delete") && mctahead_changed_$js_id) {
 		let selectedDatum = $(this).data('ttTypeahead').menu.getActiveSelectable();
-		if (!selectedDatum) {
-			selectedDatum = $(this).data('ttTypeahead').menu.getTopSelectable();
-		}
+ 		if (!selectedDatum) {
+ 			selectedDatum = $(this).data('ttTypeahead').menu.getTopSelectable();
+ 		}
+		$js_reset_fields_values
 		if (selectedDatum) {
 			const datumParts = $(selectedDatum[0]).data('ttSelectableObject');
-			$js_set_fields_values
-			$('#$id').trigger("change");
-			return true;
+			if (datumParts[mctahead_exact_match_field_$js_id] == $(this).val()) {
+				$js_set_fields_values
+			}
 		}
+		mctahead_changed_$js_id = false;
 	}
 	return true;
 });
@@ -213,9 +232,5 @@ js
 			  "typeahead:asynccancel" => new \yii\web\JsExpression("function() {console.log('typeahead:asynccancel'); }"),
 			  "typeahead:asyncreceive" => new \yii\web\JsExpression("function() {console.log('typeahead:asyncreceive'); }"),
 // 		],
-
-
-
-
 
 */
