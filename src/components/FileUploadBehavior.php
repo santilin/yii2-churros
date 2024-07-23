@@ -99,10 +99,11 @@ class FileUploadBehavior extends \yii\base\Behavior
                     $behavior->cleanFiles();
                 }
 			}
+			// Replaces the UploadedFile object into the path to the final file
 			$this->owner->{$this->attribute} = implode('.',
 					array_filter([$this->file->baseName, $this->file->extension]));
 		} else {
-			if( $this->owner->{$this->attribute} === '1' ) {
+			if( $this->owner->{$this->attribute} === '1' ) { /// Deleting the file
 				$oldvalue = ArrayHelper::getValue($this->owner->oldAttributes, $this->attribute, null);
 				$this->oldPath = $this->resolvePath($oldvalue);
 				$this->owner->{$this->attribute} = null;
@@ -148,14 +149,14 @@ class FileUploadBehavior extends \yii\base\Behavior
      */
     public function resolvePath($path)
     {
-        $path = Yii::getAlias($path);
-
         if (!$this->owner->{$this->attribute}) {
             return '';
         }
+        $path = Yii::getAlias($path);
+
         $pi = pathinfo($this->owner->{$this->attribute});
         $fileName = ArrayHelper::getValue($pi, 'filename');
-        $extension = strtolower(ArrayHelper::getValue($pi, 'extension'));
+        $extension = strtolower(ArrayHelper::getValue($pi, 'extension', ''));
 
         return str_replace('//','/', preg_replace_callback('|\[\[([\w\_/]+)\]\]|', function ($matches) use ($fileName, $extension) {
             $name = $matches[1];
@@ -220,7 +221,7 @@ class FileUploadBehavior extends \yii\base\Behavior
     public function afterSave()
     {
         if ($this->file instanceof UploadedFile !== true) {
-			if( $this->oldPath !== null ) {
+			if( $this->oldPath !== null ) { // Deleting the file
 				$this->owner->{$this->attribute} = $this->oldPath;
 				$path = $this->resolvePath($this->privateFilePath . $this->fileAttrValue);
 				@unlink($path);
