@@ -374,7 +374,11 @@ class CrudController extends \yii\web\Controller
 			return $returnTo;
 		}
 		if (empty($to)) {
-			$to_model = null;
+			if ($this->isJunctionModel) {
+				$to_model = 'parent';
+			} else {
+				$to_model = null;
+			}
 			switch ($from) {
 				case 'create':
 					if (Yii::$app->request->post('_and_create') == '1') {
@@ -416,25 +420,28 @@ class CrudController extends \yii\web\Controller
 			}
 		}
 		$pk = $model->getPrimaryKey();
+		if (!is_array($pk)) {
+			$pk = [ 'id' => $pk ];
+		}
 		switch($to_action) {
 			case 'view':
 			case 'update':
 			case 'duplicate':
-				$redirect_params = array_merge($redirect_params, [ 'id' => $pk ]);
+				$redirect_params = array_merge($redirect_params, $pk);
 				// no break
 			case 'create':
-				if( isset($_REQUEST['_form_cancelUrl']) ) {
-					$redirect_params['_form_cancelUrl'] = $_REQUEST['_form_cancelUrl'];
-				}
+// 				if( isset($_REQUEST['_form_cancelUrl']) ) {
+// 					$redirect_params['_form_cancelUrl'] = $_REQUEST['_form_cancelUrl'];
+// 				}
 				break;
 			case 'index':
 				break;
 			default:
-				$redirect_params = array_merge($redirect_params, [ 'id' => $pk ]);
+				$redirect_params = array_merge($redirect_params, $pk);
 		}
 		if ($to_model) {
 			$redirect_params[0] = Url::to('/' . $this->getBaseRoute() . '/' . $model->controllerName()
-				. '/' . $to_action, [ 'id' => $pk]);
+				. '/' . $to_action, $pk);
 		} else {
 			$redirect_params[0] = $this->getActionRoute($to_action);
 		}
