@@ -416,11 +416,12 @@ class JsonController extends \yii\web\Controller
 		return $redirect_params;
 	}
 
-	public function getActionRoute(string|array|null $action_id, $model,
-	$json_root_model = null): string
+	/**
+	 * @param $master_model not used, for compatibility with CrudController
+	 */
+	public function getActionRoute(string|array|null $action_id, $model, $master_model = null): string
 	{
-		$route = $this->getRoutePrefix($this->getPath(), false)
-			. $model->getPath();
+		$route = $this->getRoutePrefix($this->getPath(), false) . $model->getPath();
 		if ($action_id) {
 			if (is_array($action_id)) {
 				$action = array_shift($action_id);
@@ -583,5 +584,17 @@ class JsonController extends \yii\web\Controller
 		}
 		return $breadcrumbs;
 	}
+
+	protected function linkToModel($model)
+	{
+		$pk = $model->getPrimaryKey();
+		if( is_array($pk) ) {
+			$link = Url::to(array_merge([$this->getActionRoute('view', $model)], $pk));
+		} else {
+			$link = Url::to([$this->getActionRoute('view', $model), 'id' => $pk]);
+		}
+		return $link;
+	}
+
 
 }

@@ -185,7 +185,7 @@ class CrudController extends \yii\web\Controller
 		$model = $this->findFormModel(null, null, 'create', $params);
 		$model->scenario = 'create';
 
-		if (isset($_POST['_form_relations'])) $relations = explode(",", $_POST['_form_relations']); else $relations = [];
+		$relations = empty($params['_form_relations'])?[]:explode(",", $params['_form_relations']);
 		if ($model->loadAll($params, $relations) ) {
 			if ($model->saveAll(true) ) {
 				if ($req->getIsAjax()) {
@@ -218,11 +218,7 @@ class CrudController extends \yii\web\Controller
 		$model->setDefaultValues(true); // duplicating
 		$model->scenario = 'duplicate';
 
-		if (isset($_POST['_form_relations']) ) {
-			$relations = explode(",", $_POST['_form_relations']);
-		} else {
-			$relations = [];
-		}
+		$relations = empty($params['_form_relations'])?[]:explode(",", $params['_form_relations']);
 		if ($model->loadAll($req->post(), $relations) ) {
 			$model->setIsNewRecord(true);
 			$model->resetPrimaryKeys();
@@ -258,11 +254,7 @@ class CrudController extends \yii\web\Controller
 		}
 		$model->scenario = 'update';
 
-		if (isset($_POST['_form_relations']) ) {
-			$relations = explode(",", $_POST['_form_relations']);
-		} else {
-			$relations = [];
-		}
+		$relations = empty($params['_form_relations'])?[]:explode(",", $params['_form_relations']);
 		if ($model->loadAll($params, $relations)) {
 			if ($model->saveAll(true)) {
 				if ($req->getIsAjax()) {
@@ -415,19 +407,20 @@ class CrudController extends \yii\web\Controller
 		}
 		if ($to_model) {
 			if ($to_model == 'parent') {
-				if ($model->getParentModel()) {
-					$model = $model->getParentModel();
+				if ($this->masterModel) {
+					$model = $this->masterModel;
 				}
 			} else if ($to_model == 'model') {
 			} else {
 				$model =$$to_model;
 			}
 		}
+		$pk = $model->getPrimaryKey();
 		switch($to_action) {
 			case 'view':
 			case 'update':
 			case 'duplicate':
-				$redirect_params = array_merge($redirect_params, [ 'id' => $model->getPrimaryKey()]);
+				$redirect_params = array_merge($redirect_params, [ 'id' => $pk ]);
 				// no break
 			case 'create':
 				if( isset($_REQUEST['_form_cancelUrl']) ) {
@@ -437,9 +430,14 @@ class CrudController extends \yii\web\Controller
 			case 'index':
 				break;
 			default:
-				$redirect_params = array_merge($redirect_params, [ 'id' => $model->getPrimaryKey()]);
+				$redirect_params = array_merge($redirect_params, [ 'id' => $pk ]);
 		}
-		$redirect_params[0] = $this->getActionRoute($to_action, $model);
+		if ($to_model) {
+			$redirect_params[0] = Url::to('/' . $this->getBaseRoute() . '/' . $model->controllerName()
+				. '/' . $to_action, [ 'id' => $pk]);
+		} else {
+			$redirect_params[0] = $this->getActionRoute($to_action);
+		}
 		if (!array_key_exists('sort', $redirect_params) && !empty($_REQUEST['sort'])) {
 			$redirect_params['sort'] = $_REQUEST['sort'];
 		}
@@ -455,9 +453,12 @@ class CrudController extends \yii\web\Controller
 		die(__FUNCTION__ . "Deprecated");
 	}
 
+	/**
+	 * @param $model not used, for compatibility with JsonController
+	 */
   	public function getActionRoute($action_id = null, $model = null, $master_model = null): string
 	{
-		if (!$master_model) {
+		if ($master_model == null) {
 			$master_model = $this->getMasterModel();
 		}
 		if ($master_model) {
@@ -592,7 +593,7 @@ class CrudController extends \yii\web\Controller
 			];
 			$breadcrumbs[] = [
 				'label' => StringHelper::mb_ucfirst($model->getModelInfo('title_plural')),
-				'url' => $this->getActionRoute('index', $model)
+				'url' => $this->getActionRoute('index')
 			];
 		} else {
 			if (FormHelper::hasPermission($permissions, 'index')) {
@@ -609,7 +610,7 @@ class CrudController extends \yii\web\Controller
 		if ($action_id != 'index' && $action_id != 'create') {
 			$breadcrumbs[] = [
 				'label' => $model->recordDesc('short', 25),
-				'url' => $action_id!='view' ? array_merge([$this->getActionRoute('view', $model)], $model->getPrimaryKey(true)) : null,
+				'url' => $action_id!='view' ? array_merge([$this->getActionRoute('view')], $model->getPrimaryKey(true)) : null,
 			];
 		}
 		return $breadcrumbs;
@@ -659,6 +660,17 @@ class CrudController extends \yii\web\Controller
 			}
 		}
 		return $breadcrumbs;
+	}
+
+	protected function linkToModel($model)
+	{
+		$pk = $model->getPrimaryKey();
+		if( is_array($pk) ) {
+			$link = Url::to(array_merge([$this->getActionRoute('view')], $pk));
+		} else {
+			$link = Url::to([$this->getActionRoute('view'), 'id' => $pk]);
+		}
+		return $link;
 	}
 
 

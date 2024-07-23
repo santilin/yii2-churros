@@ -56,14 +56,12 @@ trait RelationTrait
 			$formName = $this->formName();
 		}
         if ($this->load($post, $formName)) {
-			if (count($relations_in_form)==0) {
-				return true;
-			}
             $relations_in_model = static::$relations;
-            foreach($relations_in_model as $rel_name => $model_relation ) {
-				if( !in_array($rel_name, $relations_in_form) ) {
+			foreach ($relations_in_form as $rel_name) {
+				if (!isset($relations_in_model[$rel_name])) {
 					continue;
 				}
+				$model_relation = $relations_in_model[$rel_name];
 				if( $model_relation['type'] == 'HasOne' || $model_relation['type'] == "OneToOne" ) {
 					// Look for embedded relations data in the main form
 					$post_data = null;
@@ -87,7 +85,9 @@ trait RelationTrait
 						$post_data = (isset($post[$formName][$rel_name]) && is_array($post[$formName][$rel_name])) ? $post[$formName][$rel_name] : null ;
 					}
 					if( $post_data === null ) {
-						$post_data = (isset($post[$model_relation['model']]) && is_array($post[$model_relation['model']])) ? $post[$model_relation['model']] : null ;
+						$post_data = (isset($post[$model_relation['model']])
+							&& 	is_array($post[$model_relation['model']]))
+								? $post[$model_relation['model']] : null ;
 					}
 					if( $post_data ) {
                         $this->loadToRelation($rel_name, $post_data);
