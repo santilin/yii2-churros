@@ -1,6 +1,6 @@
 <?php
 
-namespace app\widgets;
+namespace santilin\churros\widgets;
 
 use Yii;
 use yii\helpers\Html;
