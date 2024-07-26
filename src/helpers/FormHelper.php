@@ -172,7 +172,7 @@ class FormHelper
 			if( isset($button['htmlOptions']['autofocus']) ) {
 				$button['htmlOptions']['tabindex'] = static::ti();
 			}
-			$title = $button['title']??$name;
+			$caption = $title = $button['title']??$name;
 			$icon = $button['icon']??null;
 			if( $icon ) {
 				if (substr($icon, 0, 1) == '/') {
@@ -197,7 +197,7 @@ class FormHelper
 			case 'a':
 				unset($button['htmlOptions']['name']);
 				if( !isset($button['htmlOptions']['title']) ) {
-					$button['htmlOptions']['title'] = $title;
+					$button['htmlOptions']['title'] = $caption;
 				}
 				Html::addCssClass($button['htmlOptions'], $name);
 				if (empty($htmlOptions['role'])) {

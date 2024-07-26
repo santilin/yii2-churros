@@ -134,7 +134,7 @@ trait RelationTrait
 								$condition[$relAttr] = $relAttrVal;
 							}
 						}
-						$relOjb = null;
+						$relObj = null;
 						if (!empty($this->primaryKey)) {
 							$relObj = $relModelClass::findOne($condition);
 						}
