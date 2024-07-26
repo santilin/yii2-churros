@@ -1,4 +1,6 @@
-<?php namespace santilin\churros;
+<?php
+
+namespace santilin\churros;
 
 use Yii;
 use yii\db\ActiveRecord;
@@ -516,25 +518,27 @@ trait ModelInfoTrait
 	}
 
 	public function handyFieldValues(string $field, string $format,
-		string $model_format = 'medium', array|string $scope=null, string $filter_fields = '')
+		string $model_format = 'medium', array|string $scope=null, ?string $filter_fields = null)
 	{
 		throw new \Exception("field '$field' not supported in " . get_called_class() . "::handyFieldValues() ");
 	}
 
 	public function formatHandyFieldValues($field, $values, $format)
 	{
-		if( $format == 'selectize' ) {
-			$ret = [];
-			foreach( $values as $k => $v ) {
-				$ret[] = [ 'value' => $k, 'text' => $v ];
-			}
-			return $ret;
-		} else if( $format == 'ids' ) {
+		if( $format == 'ids' ) {
 			return array_keys($values);
 		} else if( $format == 'values' ) {
 			return array_values($values);
 		} else if( $format == 'value' ) {
 			return $values[$this->$field]??null;
+		} else if( $format == 'select2' || $format == 'group' ) {
+			return ArrayHelper::map($values, 1,2,0);
+		} else if( $format == 'selectize' ) {
+			$ret = [];
+			foreach( $values as $k => $v ) {
+				$ret[] = [ 'value' => $k, 'text' => $v ];
+			}
+			return $ret;
 		} else {
 			return $values;
 		}
