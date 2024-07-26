@@ -233,7 +233,7 @@ class AppHelper
 
     static public function userIsAdmin()
     {
-		$user_component = Yii::$app->get('user');
+		$user_component = Yii::$app->get('user', false);
 		if (!$user_component?->identity) {
 			return false;
 		}
