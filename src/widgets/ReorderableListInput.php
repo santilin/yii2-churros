@@ -1,6 +1,7 @@
 <?php
 namespace santilin\churros\widgets;
 
+use Yii;
 use yii\helpers\Html;
 use santilin\churros\widgets\ReorderableListAsset;
 
@@ -8,6 +9,7 @@ class ReorderableListInput extends \yii\widgets\InputWidget
 {
 	public $items = [];
 	public $itemOptions = [];
+	public $deletable = false;
 
 	public function init()
 	{
@@ -49,9 +51,22 @@ js
 		);
 		Html::addCssClass($this->options, 'sortable-list');
 		$li_options = array_merge( [ 'data' => [ 'id' => null ]], $this->itemOptions);
+		if ($this->deletable) {
+			$this->view->registerJs("
+    $(document).on('click', '.remove-button', function() {
+        $(this).closest('li').remove();
+    });
+");
+		}
 		foreach ($this->items as $value => $item) {
 			$li_options['data']['id'] = $value;
-			$lis[] = Html::tag('li', '<i class="bi bi-arrows-move"></i>&nbsp;' . $item, $li_options);
+			if ($this->deletable) {
+				$lis[] = Html::tag('li',
+					Html::button(Yii::t('churros','<i class="bi bi-trash"></i>'), ['class' => 'btn btn-danger btn-xs remove-button'])
+					. '&nbsp;&nbsp;<i class="bi bi-arrows-move"></i>&nbsp;' . $item, $li_options);
+			} else {
+				$lis[] = Html::tag('li', '<i class="bi bi-arrows-move"></i>&nbsp;' . $item, $li_options);
+			}
 		}
 		return $ret . Html::tag('ul', implode('', $lis), $this->options);
 	}
