@@ -21,9 +21,13 @@ class UserNameAccessRule extends AccessRule
 		if( in_array($user->getIdentity()->username, $items) ) {
 			return true;
 		}
-		if( parent::matchRole($user) ) {
-			return true;
+		try {
+			if( parent::matchRole($user) ) {
+				return true;
+			}
+		} catch (\yii\db\Exception $e) {
 		}
+		return false;
 	}
 
 }

@@ -230,21 +230,6 @@ class AppHelper
 		return strcmp(mb_strtoupper($str1, $encoding), mb_strtoupper($str2, $encoding));
 	}
 
-
-    static public function userIsAdmin()
-    {
-		$user_component = Yii::$app->get('user', false);
-		if (!$user_component?->identity) {
-			return false;
-		}
-		if (Yii::$app->getAuthManager()) {
-			return $user_component->identity->getIsAdmin();
-		} else { // yii2-usuario without authmanager
-			$user_module = Yii::$app->getModule('user');
-			return in_array($user_component->identity->username, $user_module->administrators, false);
-		}
-	}
-
 	static public function yiiparam($name, $default = null)
 	{
 		if ( isset(Yii::$app->params[$name]) ) {

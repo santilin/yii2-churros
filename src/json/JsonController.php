@@ -366,6 +366,7 @@ class JsonController extends \yii\web\Controller
 					break;
 				case 'update':
 				case 'delete':
+				case 'delete_error':
 					$to = 'parent.view';
 					break;
 				case 'view':
