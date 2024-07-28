@@ -62,9 +62,9 @@ trait RelationTrait
 					continue;
 				}
 				$model_relation = $relations_in_model[$rel_name];
+				// Look for embedded relations data in the main form
+				$post_data = null;
 				if( $model_relation['type'] == 'HasOne' || $model_relation['type'] == "OneToOne" ) {
-					// Look for embedded relations data in the main form
-					$post_data = null;
 					if( isset($post[$formName][$rel_name]) && is_array($post[$formName][$rel_name]) ) {
 						$post_data = $post[$formName][$rel_name];
 					} else if( isset($post[$formName][$model_relation['model']]) && is_array($post[$formName][$model_relation['model']]) ) {
@@ -79,17 +79,20 @@ trait RelationTrait
 					}
 				} else {
                     // HasMany or Many2Many outside of formName
-					$post_data = (isset($post[$rel_name]) && is_array($post[$rel_name]))
-						? $post[$rel_name] : null;
-					if( $post_data === null ) {
-						$post_data = (isset($post[$formName][$rel_name]) && is_array($post[$formName][$rel_name])) ? $post[$formName][$rel_name] : null ;
+					if (array_key_exists($rel_name, $post)) {
+						$post_data = $post[$rel_name]?:[];
 					}
 					if( $post_data === null ) {
-						$post_data = (isset($post[$model_relation['model']])
-							&& 	is_array($post[$model_relation['model']]))
-								? $post[$model_relation['model']] : null ;
+						if (array_key_exists($formName, $post) && array_key_exists($rel_name, $post[$formName])) {
+							$post_data = $post[$formName][$rel_name]?:[];
+						}
 					}
-					if( $post_data ) {
+					if( $post_data === null ) {
+						if (array_key_exists($model_relation['model'], $post)) {
+							$post_data = $post[$model_relation['model']]?:[];
+						}
+					}
+					if ($post_data !== null) {
                         $this->loadToRelation($rel_name, $post_data);
                     }
                 }
@@ -269,13 +272,11 @@ trait RelationTrait
 			} else if ($records instanceof \yii\db\BaseActiveRecord) {
 				$records = (array)$records;
 			}
-			if (count($records)>0) {
-				$justUpdateIds = !($records[0] instanceof \yii\db\BaseActiveRecord);
-				if( $justUpdateIds ) {
-					$success = $this->updateIds($wasNewRecord, $rel_name, $records);
-				} else {
-					$success = $this->updateRecords($wasNewRecord, $rel_name, $records);
-				}
+			$justUpdateIds = count($records)== 0 || !($records[0] instanceof \yii\db\BaseActiveRecord);
+			if( $justUpdateIds ) {
+				$success = $this->updateIds($wasNewRecord, $rel_name, $records);
+			} else {
+				$success = $this->updateRecords($wasNewRecord, $rel_name, $records);
 			}
 		}
 		return $success;

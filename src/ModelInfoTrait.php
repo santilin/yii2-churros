@@ -688,7 +688,8 @@ trait ModelInfoTrait
 			}
 			try {
 				if (parent::save($runValidation, $validateFields)) {
-					$this->refresh();
+					$values = self::find()->where($this->getPrimaryKey(true))->select(array_keys($scf))->asArray();
+					$this->setAttributes($values);
 					return true;
 				} else {
 					foreach ($scf as $kcf => $cf) {
