@@ -15,7 +15,6 @@ use santilin\churros\helpers\FormHelper;
 class ActionColumn extends \yii\grid\ActionColumn
 {
     public $template = '{view}&nbsp;{update}&nbsp;{delete}&nbsp;{duplicate}';
-    public $customButtons = [];
     public $crudPerms = [];
     public $iconClassPrefix = 'bi bi';
 	public $icons = [
