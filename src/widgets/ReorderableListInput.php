@@ -9,7 +9,7 @@ class ReorderableListInput extends \yii\widgets\InputWidget
 {
 	public $items = [];
 	public $itemOptions = [];
-	public $deletable = false;
+	public $removable = false;
 
 	public function init()
 	{
@@ -31,36 +31,40 @@ class ReorderableListInput extends \yii\widgets\InputWidget
 		$ret = Html::activeHiddenInput($this->model, $this->attribute . '[]', $hid_options);
 		$hid_name = Html::getInputName($this->model, $this->attribute);
 		$lis = [];
-		$id = $this->options['id'] = $input_id . '_list';
+		$id = $this->options['id'] = str_replace('-','_',$input_id) . '_list';
 		$this->view->registerJs(<<<js
+function {$id}_update_order_input(element, frm) {
+	frm.find('input[name^="$hid_name"]').remove();
+	element.find('li').each( function(k,li) {
+		$('<input>').attr({
+			type: 'hidden',
+			name: '{$hid_name}[' + k + ']',
+			value: li.dataset.id
+		}).appendTo(frm);
+	});
+}
 $('#$id').sortable({
 	stop: function(event, ui) {
 		let frm = $('#$id').closest('form');
-		frm.find('input[name="{$this->attribute}[]"]').each( function(k,i) { console.log(i);});
-		$(this).find('li').each( function(k,li) {
-			$('<input>').attr({
-				type: 'hidden',
-				name: '{$hid_name}[' + k + ']',
-				value: li.dataset.id
-			}).appendTo(frm);
-			console.log("Added hidden input " + $(li).data('id'));
-		});
+		{$id}_update_order_input($(this), frm);
 	}
 });
 js
 		);
 		Html::addCssClass($this->options, 'sortable-list');
 		$li_options = array_merge( [ 'data' => [ 'id' => null ]], $this->itemOptions);
-		if ($this->deletable) {
+		if ($this->removable) {
 			$this->view->registerJs("
     $(document).on('click', '.remove-button', function() {
         $(this).closest('li').remove();
+		let frm = $(this).closest('form');
+		{$id}_update_order_input($('#$id'), frm);
     });
 ");
 		}
 		foreach ($this->items as $value => $item) {
 			$li_options['data']['id'] = $value;
-			if ($this->deletable) {
+			if ($this->removable) {
 				$lis[] = Html::tag('li',
 					Html::button(Yii::t('churros','<i class="bi bi-trash"></i>'), ['class' => 'btn btn-danger btn-xs remove-button'])
 					. '&nbsp;&nbsp;<i class="bi bi-arrows-move"></i>&nbsp;' . $item, $li_options);

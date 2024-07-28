@@ -73,11 +73,12 @@ class JsonModel extends \yii\base\Model
             $child->parent_model = $this;
             $child->setPath($this->getPath() . '/' . $child->jsonPath());
             $child->setJsonModelable($this);
-            if (is_string($rm)) {
-                $child->setPrimaryKey($rm);
-            } else if (!is_array($rm)) {
+            if (is_string($rk)) {
                 $child->setPrimaryKey($rk);
-            } else {
+            } else if (is_string($rm)) {
+                $child->setPrimaryKey($rm);
+            }
+            if (is_array($rm)) {
                 $child->setPrimaryKey($rk);
                 foreach ($rm as $fldname => $fldvalue) {
                     if ($child->hasAttribute($fldname)) {
@@ -88,6 +89,8 @@ class JsonModel extends \yii\base\Model
                         }
                     }
                 }
+            } else {
+                $child->setAttributesFromNoArray($rm);
             }
             $models[] = $child;
         }
@@ -505,5 +508,8 @@ class JsonModel extends \yii\base\Model
 		throw new \Exception("field '$field' not supported in " . get_called_class() . "::handyFieldValues() ");
 	}
 
+	public function setAttributesFromNoArray($any)
+    {
+    }
 
 } // class

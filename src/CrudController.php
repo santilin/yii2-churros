@@ -18,6 +18,7 @@ class CrudController extends \yii\web\Controller
 {
 	use ControllerTrait;
 
+	protected $prefix = null;
 	protected $crudActions = [];
 	protected $isJunctionModel = false;
 	protected $masterModel = false;
@@ -40,7 +41,7 @@ class CrudController extends \yii\web\Controller
 	 */
 	protected function changeActionParams(array $actionParams, string $action_id, $model)
 	{
-		if ($this->getMasterModel() && !array_key_exists('master', $actionParams)) {
+		if (!array_key_exists('master', $actionParams) && $this->getMasterModel() ) {
 			$actionParams['master'] = $this->getMasterModel();
 		}
 		return $actionParams;
@@ -609,10 +610,10 @@ class CrudController extends \yii\web\Controller
 					'label' =>  $model->getModelInfo('title_plural'),
 					'url' => [ $this->id . '/index' ]
 				];
-			} else {
-				$breadcrumbs[] = [
-					'label' =>  $model->getModelInfo('title_plural'),
-				];
+			// } else {
+			// 	$breadcrumbs[] = [
+			// 		'label' =>  $model->getModelInfo('title_plural'),
+			// 	];
 			}
 		}
 		if ($action_id != 'index' && $action_id != 'create') {

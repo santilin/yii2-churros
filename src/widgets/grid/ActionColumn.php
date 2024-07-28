@@ -41,13 +41,13 @@ class ActionColumn extends \yii\grid\ActionColumn
 			}
 		}
         if( FormHelper::hasPermission($this->crudPerms, 'update') ) {
-			if( !isset($this->customButtons['update']) ) {
+			if( !isset($this->buttons['update']) ) {
 				$this->initDefaultButton('update', 'update', array_merge(
 					[ 'title' => Yii::t('churros', 'Update') ]));
 			}
 		}
         if( FormHelper::hasPermission($this->crudPerms, 'delete') ) {
-			if( !isset($this->customButtons['delete']) ) {
+			if( !isset($this->buttons['delete']) ) {
 				$this->initDefaultButton('delete', 'delete', array_merge(
 					[ 'title' => Yii::t('churros', 'Delete'),
 					  'data-confirm' => Yii::t('yii', 'Are you sure you want to delete this item?'),
@@ -56,7 +56,7 @@ class ActionColumn extends \yii\grid\ActionColumn
 			}
 		}
         if (FormHelper::hasAllPermissions($this->crudPerms, ['duplicate'])) {
-			if( !isset($this->customButtons['duplicate']) ) {
+			if( !isset($this->buttons['duplicate']) ) {
 				$this->initDefaultButton('duplicate', 'duplicate', array_merge(
 					[ 'title' => Yii::t('churros', 'Duplicate')]));
 			}
