@@ -503,7 +503,7 @@ class JsonModel extends \yii\base\Model
     }
 
 	public function handyFieldValues(string $field, string $format,
-		string $model_format = 'medium', array|string $scope=null, string $filter_fields = '')
+		string $model_format = 'medium', array|string $scope=null, ?string $filter_fields = null)
 	{
 		throw new \Exception("field '$field' not supported in " . get_called_class() . "::handyFieldValues() ");
 	}

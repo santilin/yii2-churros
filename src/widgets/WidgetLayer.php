@@ -53,7 +53,7 @@ class WidgetLayer
 		}
 		$ret = $this->layoutWidgets($this->widgetsLayout, ['size' => $size, 'style' => $style]);
 		if (YII_ENV_DEV) {
-			$not_used = array_diff($widgets_used, array_keys($this->widgets));
+			$not_used = array_diff(array_keys($this->widgets), $widgets_used);
 			if (!empty($not_used)) {
 				Yii::error("Widgets not used: " . json_encode($not_used));
 			}
