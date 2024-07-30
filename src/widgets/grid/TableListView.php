@@ -70,10 +70,10 @@ class TableListView extends ListView
 	{
 		foreach ($this->columns as $key => $column) {
 			if ($this->model) {
-				$header_columns[] = '<div class="tlv-th tlv-date">'
+				$header_columns[] = '<div class="tlv-th">'
 					. ($column['title']??$this->model->attributeLabels()[$key]??$key) . '</div>';
 			} else {
-				$header_columns[] = '<div class="tlv-th tlv-date">'
+				$header_columns[] = '<div class="tlv-th">'
 					. ($column['title']??$key) . '</div>';
 			}
 		}
@@ -137,9 +137,9 @@ class TableListView extends ListView
 			. '</div>';
     }
 
-    public function renderColumns($model, $key, $index)
+    public function renderItem($model, $key, $index)
     {
-		$col_contents = [];
+		$col_contents = [ '<div class=tlv-row>' ];
 		foreach ($this->columns as $kc => $column) {
 			if (is_callable($column['value']??null)) {
 				$col_value = call_user_func($column['value'], $model, $key, $index);
@@ -150,6 +150,7 @@ class TableListView extends ListView
 				. $this->formatter->format($col_value, $column['format']??'raw')
 				. '</div>';
 		}
+		$col_contents[] = '</div>';
 		return implode('', $col_contents);
     }
 
