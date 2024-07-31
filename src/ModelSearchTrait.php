@@ -80,6 +80,7 @@ trait ModelSearchTrait
 			}
 			list($sort_fldname, $table_alias, $model, $relation) = $this->addRelatedFieldToJoin($attribute, $provider->query);
 			if ($sort_fldname != $attribute) {
+				/// @todo recursive tarea.paqueteTrabajo.proyecto.id
 				$relation_name = $attribute;
 				$related_model_class = $relation['modelClass'];
 // 				$provider->query->distinct(); // Evitar duplicidades debido a las relaciones hasmany
@@ -222,7 +223,7 @@ trait ModelSearchTrait
 		$table_alias = 'as';
 		$relation = null;
 		while (strpos($field_name, '.') !== FALSE) {
-			list($field_name, $attribute) = AppHelper::splitFieldName($field_name);
+			list($field_name, $attribute) = AppHelper::splitString($field_name, '.');
 			if ($nested_relations != '') {
 				$nested_relations .= '.';
 			}

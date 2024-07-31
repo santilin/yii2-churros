@@ -338,6 +338,9 @@ class AppHelper
 		"Otras" => "Otras",
 	];
 
+	/**
+	 * @warning Use only for tablename.field_name. For more nested fldnames, use splitString
+	 */
 	static public function splitFieldName($fieldname, $reverse = true): array
 	{
 		if( $reverse ) {
