@@ -106,4 +106,25 @@ class ActionColumn extends \yii\grid\ActionColumn
 			['id'=>'_grid_view_pageSize']);
     }
 
+    /**
+	 * Creates a URL for the given action and model.
+	 * This method is called for each button and each row.
+	 * @param string $action the button name (or action ID)
+	 * @param \yii\db\ActiveRecordInterface $model the data model
+	 * @param mixed $key the key associated with the data model
+	 * @param int $index the current row index
+	 * @return string the created URL
+	 */
+	public function createUrl($action, $model, $key, $index)
+	{
+		if (is_callable($this->urlCreator, true)) { // Added true so that an array can be passed
+			return call_user_func($this->urlCreator, $action, $model, $key, $index, $this);
+		}
+
+		$params = is_array($key) ? $key : ['id' => (string) $key];
+		$params[0] = $this->controller ? $this->controller . '/' . $action : $action;
+
+		return Url::toRoute($params);
+	}
+
 }
