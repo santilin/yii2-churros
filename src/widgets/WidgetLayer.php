@@ -358,12 +358,11 @@ class WidgetLayer
 						}
 					}
 				}
-				$widget->wrapperOptions['class'] = implode(' ', $classes['wrapper']) . ' widget-container';
+				$widget->wrapperOptions['class'] = implode(' ', $classes['wrapper']);
 				if (YII_ENV_DEV) {
 					$widget->wrapperOptions['class'] .= " {$layout_of_row}x$widget_layout";
 				}
 				if ($this->widget_painter) {
-// 					$widget->template ="{label}\n{beginWrapper}\n{input}\n{hint}\n{error}\n{endWrapper}";
 					$fs .= call_user_func($this->widget_painter, $widget, $classes, $indexf++);
 				} else {
 					$fs .= $widget->__toString();
@@ -416,7 +415,8 @@ class WidgetLayer
 						}
 					}
 				}
-				$classes['wrapperOptions']['class'] = implode(' ', $classes['wrapper']) . ' widget-container';
+				$classes['wrapperOptions']['class'] = implode(' ', $classes['wrapper']) . ' fld-' . $widget_name;
+				$classes['field'] = ['love'];
 				if (YII_ENV_DEV) {
 					$classes['wrapperOptions']['class'] .= " {$layout_of_row}x$widget_layout";
 				}

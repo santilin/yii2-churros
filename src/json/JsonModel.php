@@ -472,19 +472,16 @@ class JsonModel extends \yii\base\Model
         $relPKAttr = [ $this->_locator ?? 'id' ];
         if ($relation['type'] == 'HasMany') {
             foreach ($v as $relPost) {
+                $relObj = new $relModelClass();
                 if (is_array($relPost) ) {
-                    if( array_filter($relPost) ) {
-                        /* @var $relObj ActiveRecord */
-//                         $relObj = (empty($relPost[$relPKAttr[0]])) ? new $relModelClass() : $relModelClass::findOne($relPost[$relPKAttr[0]]);
-//                         if (is_null($relObj)) {
-                            $relObj = new $relModelClass();
-//                         }
+                    if (array_filter($relPost)) {
                         $relObj->load($relPost, '');
                         $container[] = $relObj;
                     }
                 } else {
                     // Just primary key of records, just one field in primary key
-                    $container[] = [ $relPKAttr[0] => $relPost ];
+                    $relObj->load([ $relPKAttr[0] => $relPost ], '');
+                    $container[] = $relObj;
                 }
             }
         } else if ($relation['type'] == 'ManyToMany') {
