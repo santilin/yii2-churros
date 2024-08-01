@@ -67,6 +67,7 @@ trait ModelSearchTrait
 	*/
     public function addRelatedSortsToProvider(array $gridColumns, $provider)
     {
+		return;
 		foreach ($gridColumns as $attribute => $column_def) {
 			if ( $column_def === null
 				|| is_int($attribute)

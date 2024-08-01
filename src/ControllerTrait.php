@@ -159,7 +159,7 @@ trait ControllerTrait
 		$attrs = [];
 		foreach((array)$models as $model) {
 			if( $model != null ) {
-				$url = $parent_route . '/'.  $model->controllerName() . '/' . strval($model->getPrimaryKey());
+				$url = Url::to(array_merge([$parent_route . '/'.  $model->controllerName()],  $model->getPrimaryKey(true)));
 				$attrs[] = "<a href='$url'>" .  $model->recordDesc($record_format) . "</a>";
 			}
 		}

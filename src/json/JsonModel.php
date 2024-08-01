@@ -56,6 +56,9 @@ class JsonModel extends \yii\base\Model
         if (array_key_exists($name, $this->_attributes)) {
             return $this->_attributes[$name];
         }
+        if ($this->_related && array_key_exists($name, $this->_related) && $this->_related[$name] !== null) {
+            return $this->_related[$name];
+        }
         if (isset(static::$relations[$name])) {
             return $this->createRelatedModels($name);
         }
