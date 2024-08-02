@@ -55,9 +55,14 @@ trait ModelSearchTrait
 		}
 	}
 
-	public function addScopes( $scopes, &$provider )
+	public function addScope(&$provider, string $scope, array $scopes_arguments)
 	{
-		foreach( $scopes as $scope ) {
+		$provider->query->$scope(...$scopes_arguments);
+	}
+
+	public function addScopes(&$provider, array $scopes)
+	{
+		foreach ($scopes as $scope) {
 			$provider->query->$scope();
 		}
 	}
@@ -67,7 +72,6 @@ trait ModelSearchTrait
 	*/
     public function addRelatedSortsToProvider(array $gridColumns, $provider)
     {
-		return;
 		foreach ($gridColumns as $attribute => $column_def) {
 			if ( $column_def === null
 				|| is_int($attribute)
