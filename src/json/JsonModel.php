@@ -175,7 +175,7 @@ class JsonModel extends \yii\base\Model
             if (count($parts)<2) {
                 return null;
             }
-            if (!in_array($parts[count($parts)-1], ['fields'])) {
+            if (!in_array($parts[count($parts)-1], ['fields','behaviors'])) {
                 array_pop($parts);
             }
             array_pop($parts);
