@@ -678,9 +678,9 @@ trait ModelInfoTrait
 	 */
 	public function save($runValidation = true, $validateFields = null)
 	{
-		if (property_exists($this, '_calculated_fields') && count($this->_calculated_fields)) {
+		if (property_exists($this, '_calculated_fields') && count(static::$_calculated_fields)) {
 			$scf = [];
-			foreach ($this->_calculated_fields as $cf) {
+			foreach (static::$_calculated_fields as $cf) {
 				if (property_exists($this, $cf)) {
 					$scf[$cf] = $this->$cf;
 					unset($this->$cf);
