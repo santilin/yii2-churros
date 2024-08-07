@@ -418,4 +418,24 @@ class AppHelper
 		return $ret;
 	}
 
+	static public function getFirstLines(string $string, int $nlines): string
+	{
+		$lines = [];
+		$count = 0;
+		$offset = 0;
+
+		while ($count < $nlines && ($pos = strpos($string, "\n", $offset)) !== false) {
+			$lines[] = substr($string, $offset, $pos - $offset);
+			$offset = $pos + 1;
+			$count++;
+		}
+
+		// Add the last line if there are fewer than $nlines lines
+		if ($count < $nlines && $offset < strlen($string)) {
+			$lines[] = substr($string, $offset);
+		}
+
+		return implode("\n", $lines);
+	}
+
 }

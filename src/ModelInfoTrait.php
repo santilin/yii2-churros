@@ -253,7 +253,7 @@ trait ModelInfoTrait
 //     }
     }
 
-	public function setDefaultValues(bool $duplicating = false)
+	public function setDefaultValues($context = null, bool $duplicating = false)
 	{
 	}
 

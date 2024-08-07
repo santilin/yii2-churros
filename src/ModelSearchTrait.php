@@ -2,9 +2,9 @@
 namespace santilin\churros;
 
 use Yii;
-use yii\helpers\Html;
-use yii\helpers\ArrayHelper;
 use yii\base\InvalidArgumentException;
+use yii\helpers\{Html,ArrayHelper,StringHelper};
+use yii\data\BaseDataProvider;
 use santilin\churros\helpers\{AppHelper,FormHelper};
 
 /**
@@ -68,22 +68,31 @@ trait ModelSearchTrait
 	}
 
 	/**
-	 * Adds related sorts to dataproviders for grids
+	 * Adds related filters and sorts to dataproviders for grids
 	*/
-    public function addRelatedSortsToProvider(array $gridColumns, $provider)
+    public function addRelatedFieldsToProvider(array $gridColumns, BaseDataProvider $provider)
     {
-		foreach ($gridColumns as $attribute => $column_def) {
-			if ( $column_def === null
-				|| is_int($attribute)
-				|| $attribute == '__actions__'
-				|| array_key_exists($attribute, $this->attributes ) ) {
+		foreach ($gridColumns as $col_attribute => $column_def) {
+			if ( $column_def === null // Allows for conditional definition of columns
+// 				|| is_int($attribute)
+				|| StringHelper::endsWith($column_def['class']??'','ActionColumn') ) {
+				continue;
+			}
+			if (!empty($column_def['filterAttribute'])) {
+				$this->addRelatedFieldToJoin($column_def['filterAttribute']);
+			}
+			if (array_key_exists($col_attribute, $this->attributes)) { // for sorting
 				continue;
 			}
 			$attribute = $column_def['attribute']??null;
 			if ($attribute === null) {
 				continue;
 			}
+			if ($col_attribute != $attribute) {
+				throw new \Exception("$col_attribute != " . ($column_def['attribute']??null));
+			}
 			list($sort_fldname, $table_alias, $model, $relation) = $this->addRelatedFieldToJoin($attribute, $provider->query);
+			continue;
 			if ($sort_fldname != $attribute) {
 				/// @todo recursive tarea.paqueteTrabajo.proyecto.id
 				$relation_name = $attribute;
@@ -98,9 +107,9 @@ trait ModelSearchTrait
 							$sort_fldname = $code_field;
 						}
 						// Set orders from the related search model
-						$related_model = new $related_model_search_class;
+						$related_model = $related_model_search_class::instance();
 						$related_model_provider = $related_model->search([]);
-						if (isset( $related_model_provider->sort->attributes[$sort_fldname]) ) {
+						if (isset($related_model_provider->sort->attributes[$sort_fldname]) ) {
 							$related_sort = $related_model_provider->sort->attributes[$sort_fldname];
 							if (isset($related_sort['label'])) {
 								$new_related_sort = [ 'label' => $related_sort['label']];
@@ -126,6 +135,53 @@ trait ModelSearchTrait
 			}
 		}
     }
+
+	/**
+	 * Adds a related field to the joins of a query
+	 * @return the name of the attribute to be used in the query
+	 */
+	protected function addRelatedFieldToJoin(string $field_name, $query): array
+	{
+		$model = $this;
+		$attribute = $field_name;
+		$nested_relations = [];
+		$model = $this;
+		$table_alias = 'as';
+		$relation = null;
+		while (strpos($attribute, '.') !== FALSE) {
+			list($field_name, $attribute) = AppHelper::splitString($attribute, '.');
+			$relation = $model::$relations[$field_name]??null;
+			if ($relation) {
+				// Hay tres tipos de campos relacionados:
+				// 1. El nombre de la relación (attribute = '' )
+				// 2. Relación y campo: Productora.nombre
+				// 3. La clave foranea: productura_id
+				$table_alias .= "_$field_name";
+				// Activequery removes duplicate joins (added also in addSort)
+				$modelClass = $relation['modelClass'];
+				$model = $modelClass::instance();
+				$nested_relations[$table_alias] = $relation['relatedTablename'];
+				$this->addJoinIfNotExists($query, $nested_relations, "INNER JOIN", [ $table_alias => $model->tableName()], $relation['join']);
+			} else {
+				throw new InvalidArgumentException($field_name . ": relation not found in model " . self::class . ' (SearchModel::filterWhereRelated)');
+			}
+		}
+		if (isset($model::$relations[$attribute])) {
+			$relation = $model::$relations[$attribute];
+			$modelClass = $relation['modelClass'];
+			$model = $modelClass::instance();
+			// Hay tres tipos de campos relacionados:
+			// 1. El nombre de la relación (attribute = '' )
+			// 2. Relación y campo: Productora.nombre
+			// 3. La clave foranea: productura_id
+			$table_alias .= "_$attribute";
+			$nested_relations[$table_alias] = $relation['relatedTablename'];
+			$this->addJoinIfNotExists($query, $nested_relations, "INNER JOIN", [ $table_alias => $model->tableName()], $relation['join']);
+			$attribute = $model->primaryKey()[0];
+		}
+		return [$attribute,$table_alias,$model,$relation];
+	}
+
 
 	/**
 	 * Adds related filters to dataproviders for grids
@@ -183,7 +239,7 @@ trait ModelSearchTrait
 					$query->orWhere(["$table_alias.$right_fld" => null]);
 				}
 			} else {
-				// Look for in code and desc fields also
+				// Look for code and desc fields also
 				$fields = array_unique(array_filter([$model->getModelInfo('code_field'), $model->getModelInfo('desc_field')]));
 				if (count($fields)==1) {
 					if ($is_and) {
@@ -212,57 +268,6 @@ trait ModelSearchTrait
 				$query->orWhere([$value['op'], "$table_alias.$attribute", $value['v'] ]);
  			}
 		}
-	}
-
-	/**
-	 * Adds a related field to the joins of a query
-	 * @return the name of the attribute to be used in the query
-	 */
-	protected function addRelatedFieldToJoin(string $field_name, $query): array
-	{
-		$model = $this;
-		$nested_relations = '';
-		$attribute = $field_name;
-		$nested_relations = '';
-		$model = $this;
-		$table_alias = 'as';
-		$relation = null;
-		while (strpos($field_name, '.') !== FALSE) {
-			list($field_name, $attribute) = AppHelper::splitString($field_name, '.');
-			if ($nested_relations != '') {
-				$nested_relations .= '.';
-			}
-			$nested_relations .= $field_name;
-			$relation = $model::$relations[$field_name]??null;
-			if ($relation) {
-				// Hay tres tipos de campos relacionados:
-				// 1. El nombre de la relación (attribute = '' )
-				// 2. Relación y campo: Productora.nombre
-				// 3. La clave foranea: productura_id
-				$table_alias .= "_$field_name";
-				// Activequery removes duplicate joins (added also in addSort)
-				$query->joinWith("$nested_relations $table_alias");
-				$modelClass = $relation['modelClass'];
-				$model = $modelClass::instance();
-			} else {
-				throw new InvalidArgumentException($field_name . ": relation not found in model " . self::class . ' (SearchModel::filterWhereRelated)');
-			}
-		}
-		if (isset($model::$relations[$attribute])) {
-			$relation = $model::$relations[$attribute];
-			// Hay tres tipos de campos relacionados:
-			// 1. El nombre de la relación (attribute = '' )
-			// 2. Relación y campo: Productora.nombre
-			// 3. La clave foranea: productura_id
-			$table_alias .= "_$attribute";
-			if ($nested_relations) {
-				$nested_relations .= '.';
-			}
-			// Activequery removes duplicate joins (added also in addSort)
-			$query->joinWith("$nested_relations$attribute $table_alias");
-			$attribute = $model->primaryKey()[0];
-		}
-		return [$attribute,$table_alias,$model,$relation];
 	}
 
 
@@ -313,7 +318,6 @@ trait ModelSearchTrait
 			}
 		}
 	}
-
 
 	protected function filterGlobal(&$query, array $attributes, string $value, $inclusiva = false)
 	{
@@ -378,6 +382,21 @@ trait ModelSearchTrait
 				$query->andWhere($or_conds);
 			}
 		}
+	}
+
+	private function addJoinIfNotExists($query, $aliases, $join_type, $tablename, $on)
+	{
+		if (!empty($query->join)) {
+			foreach ($query->join as $join_def) {
+				if ($join_def[1] == $tablename) {
+					return;
+				}
+			}
+		}
+		foreach ($aliases as $alias => $tbl) {
+			$on = preg_replace('/\b' . $tbl. '\./', $alias . '.', $on);
+		}
+		$query->join($join_type, $tablename, $on);
 	}
 
 } // class
