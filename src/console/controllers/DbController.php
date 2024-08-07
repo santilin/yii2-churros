@@ -10,6 +10,7 @@ use Yii;
 use yii\di\Instance;
 use yii\base\InvalidConfigException;
 use yii\db\Connection;
+use yii\helpers\ArrayHelper;
 use yii\console\Controller;
 
 /**
@@ -78,7 +79,7 @@ class DbController extends Controller
     {
         if (parent::beforeAction($action)) {
 			if( !in_array($this->format, self::FORMATS) ) {
-                throw new InvalidConfigException("{$this->format}: formato desconocido. Elige uno de " . join(self::$formats,","));
+                throw new InvalidConfigException("{$this->format}: formato desconocido. Elige uno de " . join(",",self::FORMATS));
 			}
 			$this->db = Instance::ensure($this->db, Connection::className());
             return true;
@@ -92,17 +93,20 @@ class DbController extends Controller
 			$phptype = 'integer';
 		} else if (substr($phptype,0,7) == 'decimal') {
 			$phptype = 'double';
-		} else if (substr($phptype,0,7) == 'varchar') {
+		} else if (substr($phptype,0,7) == 'varchar' || substr($phptype,0,6) == 'string') {
 			$phptype = 'string';
 		}
 		switch($phptype) {
 			case "integer":
 			case "smallint":
+			case "bigint unsigned":
 			case "float":
 			case "double":
 			case "bool":
 			case "boolean":
-				if ( $value == null ) {
+				if (strpos($value, ':') !== false) { // date in string format
+					return "'" . strtr($value, ["\\'" => "\\\\", "'" => "\\'"]) . "'";
+				} else if ($value == null) {
 					return "null";
 				} else {
 					return $value;
@@ -126,7 +130,7 @@ class DbController extends Controller
 					return "'" . base64_encode($value) . "'";
 				}
 			default:
-				throw new \Exception( "Type $phptype not supported in Churros/DbController::getPhpValue" );
+				throw new \Exception( "Type '$phptype' not supported in Churros/DbController::getPhpValue" );
 		}
     }
 
@@ -306,14 +310,27 @@ EOF;
     {
 		$txt_data = "return [\n";
 		$php_types = [];
-		$columna_names = [];
+		$column_names = [];
+		$db_columns = [];
 		$table_name = $tableSchema->name;
 
+		if (Yii::$app->db->driverName == "sqlite") {
+			$show_create_table = "SELECT * FROM pragma_table_xinfo('{$tableSchema->name}') WHERE hidden=0";
+			$db_columns = ArrayHelper::index($this->db->createCommand($show_create_table)->queryAll(), 'name');
+		} /// @todo mysql
 		foreach($tableSchema->columns as $column) {
+			if (count($db_columns) && !isset($db_columns[$column->name])) {
+				continue;
+			}
 			$php_types[] = $column->dbType;
 			$column_names[] = $column->name;
 		}
-		$sql = "SELECT * FROM {{{$table_name}}}";
+		/**
+		 * @todo quote column names
+		 * $sql = "SELECT " . implode(',', array_map(function($col) {
+    return '[' . str_replace(']', ']]', $col) . ']';
+		*/
+		$sql = "SELECT " . implode(',',$column_names) . " FROM {{{$table_name}}}";
 		if ($where) {
 			$sql .= " WHERE $where";
 		}
@@ -322,7 +339,7 @@ EOF;
 		}
 		$raw_data = $this->db->createCommand($sql)->queryAll();
 		$nrow = 0;
-		foreach( $raw_data as $row ) {
+		foreach ($raw_data as $row) {
 			$ncolumn = 0;
 			$txt_data .= "\t'{$table_name}{$nrow}' => [\n";
 			foreach($row as $column) {
