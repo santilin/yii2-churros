@@ -209,7 +209,7 @@ EOF;
 					}
 					if ($write_file) {
 						\file_put_contents($filename, $table_dump);
-						echo "Created seeder for schema in $filename\n";
+						echo "Created fixture for schema in $filename\n";
 					}
 				} else {
 					echo $table_dump;
@@ -250,7 +250,7 @@ EOF;
 			}
 			if ($write_file) {
 				\file_put_contents($filename, $preamble . $this->dumpTable($schemaName, $tableSchema, $where));
-				echo "Created seeder for table $tableName in $filename\n";
+				echo "Created $this->format for table $tableName in $filename\n";
 			}
 		} else {
 			echo $preamble . $this->dumpTable($tableSchema, $where);

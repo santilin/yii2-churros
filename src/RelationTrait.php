@@ -13,6 +13,7 @@ use Yii;
 use yii\base\InvalidConfigException;
 use yii\db\{ActiveQuery,ActiveRecord,Exception,IntegrityException};
 use yii\helpers\{Inflector,StringHelper,ArrayHelper};
+use santilin\churros\json\JsonModel;
 
 /*
  *  add this line to your Model to enable soft delete

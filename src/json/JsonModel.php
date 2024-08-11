@@ -10,7 +10,8 @@ use santilin\churros\json\JsonModelable;
 class JsonModel extends \yii\base\Model
 // implements \yii\db\ActiveRecordInterface
 {
-    static public $parent_model_class;
+    static protected $parent_model_class;
+    static protected $_locator = null;
     protected $parent_model = null;
     protected $_attributes = [];
     /** @var bool whether this is a new record */
@@ -19,7 +20,6 @@ class JsonModel extends \yii\base\Model
     protected $_json_modelable = null;
     protected $_id = null;
     protected $_json_object = null;
-    protected $_locator = null;
     protected $_related = null;
 
     public function __set($name, $value)
@@ -36,7 +36,7 @@ class JsonModel extends \yii\base\Model
                     $this->_json_object->set("$.{$rel_info['relatedTablename']}", $value);
                 } else {
                     $this->_json_modelable->setJsonObject('$' . $this->_path, $value??[],
-                                                          $this->_id ?: $this->{$this->_locator}, null);
+                                                          $this->_id ?: $this->{static::$_locator}, null);
                 }
             } else {
                 throw new \Exception("error en tipo de relación en __set");
@@ -85,7 +85,7 @@ class JsonModel extends \yii\base\Model
                 $child->setPrimaryKey($rk);
                 foreach ($rm as $fldname => $fldvalue) {
                     if ($child->hasAttribute($fldname)) {
-                        if ($fldname == $this->locator()) {
+                        if ($fldname == static::$_locator) {
                             $child->setPrimaryKey($fldvalue);
                         } else {
                             $child->$fldname = $fldvalue;
@@ -141,7 +141,7 @@ class JsonModel extends \yii\base\Model
 
     public function locator(): string
     {
-        return $this->_locator;
+        return static::$_locator;
     }
 
     public function getIsNewRecord(): bool
@@ -236,7 +236,7 @@ class JsonModel extends \yii\base\Model
 
     public function getPrimaryKey($asArray = false)
     {
-        $code_fld = $this->_locator??static::$_model_info['code_field'];
+        $code_fld = static::$_locator??static::$_model_info['code_field'];
         if ($code_fld) {
             if ($asArray) {
                 return [ $code_fld => $this->$code_fld ];
@@ -252,7 +252,7 @@ class JsonModel extends \yii\base\Model
 
     public function primaryKey()
     {
-        $code_fld = $this->_locator??static::$_model_info['code_field'];
+        $code_fld = static::$_locator??static::$_model_info['code_field'];
         if ($code_fld) {
             return [ $code_fld ];
         } else {
@@ -263,8 +263,8 @@ class JsonModel extends \yii\base\Model
     public function setPrimaryKey($id)
     {
         $this->_id = $id;
-        if (!empty($this->_locator)) {
-            $values = [ $this->_locator => $id ];
+        if (!empty(static::$_locator)) {
+            $values = [ static::$_locator => $id ];
             $this->setAttributes($values);
         }
     }
@@ -287,7 +287,7 @@ class JsonModel extends \yii\base\Model
             $this->_path .= "/$id";
         }
         if ($locator === null) {
-            $locator = $this->_locator;
+            $locator = static::$_locator;
         }
         $this->_json_object = $json_modelable->getJsonObject($json_path, $id, $locator);
         if ($this->_json_object !== null) {
@@ -469,7 +469,7 @@ class JsonModel extends \yii\base\Model
         $relation = static::$relations[$rel_name];
 		$relModelClass = $relation['modelClass'];
 		$container = [];
-        $relPKAttr = [ $this->_locator ?? 'id' ];
+        $relPKAttr = [ $relModelClass::$_locator ?? 'id' ];
         if ($relation['type'] == 'HasMany') {
             foreach ($v as $relPost) {
                 $relObj = new $relModelClass();
