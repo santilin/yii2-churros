@@ -303,6 +303,9 @@ class CrudController extends \yii\web\Controller
 		} catch (\yii\db\IntegrityException $e) {
 			$model->addError('delete', $model->t('churros',
 				$this->getResultMessage('error_delete_integrity')));
+			if (YII_ENV_DEV) {
+				$model->addError('delete_integrity', $e->getMessage());
+			}
 		} catch (\yii\web\ForbiddenHttpException $e ) {
 			$model->addError('delete', $model->t('churros',
 				$this->getResultMessage('error_delete')));

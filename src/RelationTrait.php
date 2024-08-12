@@ -620,9 +620,9 @@ trait RelationTrait
                     $trans->rollBack();
                 }
             }
-        } catch (Exception $exc) {
+        } catch (Exception $e) {
             $trans->rollBack();
-            throw $exc;
+            throw $e;
         }
     }
 
