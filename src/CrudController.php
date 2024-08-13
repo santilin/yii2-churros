@@ -380,7 +380,7 @@ class CrudController extends \yii\web\Controller
 		}
 		$to_model = null;
 		if (empty($to)) {
-			if ($this->isJunctionModel) {
+			if ($this->isJunctionModel && $this->getMasterModel()) {
 				$to_model = 'parent';
 				$to_action = 'view';
 			} else {
@@ -420,7 +420,7 @@ class CrudController extends \yii\web\Controller
 		}
 		if ($to_model) {
 			if ($to_model == 'parent') {
-				if ($this->masterModel) {
+				if ($this->getMasterModel()) {
 					$model = $this->masterModel;
 				}
 			} else if ($to_model == 'model') {
