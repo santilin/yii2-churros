@@ -378,40 +378,42 @@ class CrudController extends \yii\web\Controller
 		if( $returnTo ) {
 			return $returnTo;
 		}
+		$to_model = null;
 		if (empty($to)) {
 			if ($this->isJunctionModel) {
 				$to_model = 'parent';
+				$to_action = 'view';
 			} else {
 				$to_model = null;
-			}
-			switch ($from) {
-				case 'create':
-					if (Yii::$app->request->post('_and_create') == '1') {
-						$to_action = 'create';
-					} else {
+				switch ($from) {
+					case 'create':
+						if (Yii::$app->request->post('_and_create') == '1') {
+							$to_action = 'create';
+						} else {
+							$to_action = 'view';
+						}
+						break;
+					case 'duplicate':
+						if (Yii::$app->request->post('_and_create') == '1') {
+							$to_action = 'duplicate';
+						} else {
+							$to_action = 'view';
+						}
+						break;
+					case 'update':
+					case 'delete_error':
 						$to_action = 'view';
-					}
-					break;
-				case 'duplicate':
-					if (Yii::$app->request->post('_and_create') == '1') {
-						$to_action = 'duplicate';
-					} else {
-						$to_action = 'view';
-					}
-					break;
-				case 'update':
-				case 'delete_error':
-					$to_action = 'view';
-					break;
-				case 'delete':
+						break;
+					case 'delete':
 
-				case 'view':
-				case 'index':
-				case '':
-					$to_action = 'index';
-					break;
-				default:
-					$to_action = $from;
+					case 'view':
+					case 'index':
+					case '':
+						$to_action = 'index';
+						break;
+					default:
+						$to_action = $from;
+				}
 			}
 		} else {
 			list($to_model, $to_action) = AppHelper::splitString($to, '.');
