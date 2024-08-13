@@ -1,3 +1,6 @@
+# translations
+- Ampliar malewords a más idiomas.
+
 # Login yii2-usuario
 - Contraseña (recordar) no está bien el orden.
 - forgot: forbiden si estoy logueado como admin
