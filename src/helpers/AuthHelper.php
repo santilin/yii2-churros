@@ -184,25 +184,27 @@ class AuthHelper
 		static::$lastMessage = join("\n", $msgs);
     }
 
-    static public function removeFromRole($role_name, array|string $perm_names, $auth = null)
+    static public function removePermFromRole($role_name, array|string $perm_names, $auth = null)
     {
 		if( $auth == null ) {
 			$auth = \Yii::$app->authManager;
 		}
 		$perm_names = (array)$perm_names;
+		$parent = $auth->getItem($role_name);
+		if( $parent == null ) {
+			static::$lastMessage = "= Role $role_name not found";
+			return;
+		}
 		foreach ($perm_names as $perm_name) {
 			$child = $auth->getItem($perm_name);
 			if( $child == null ) {
-				continue;
-			}
-			$parent = $auth->getItem($role_name);
-			if( $parent == null ) {
+				static::$lastMessage = "= Permission $perm_name not found in role $role_name";
 				continue;
 			}
 			if ($auth->removeChild($parent, $child)) {
-				static::$lastMessage = "- $perm_name removed from role $role_name";
+				static::$lastMessage = "- Permission $perm_name removed from role $role_name";
 			} else {
-				static::$lastMessage = "= $perm_name not found in role $role_name";
+				static::$lastMessage = "= Permission $perm_name not found in role $role_name";
 			}
 		}
 	}

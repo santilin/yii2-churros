@@ -317,6 +317,7 @@ class AuthController extends Controller
 	public function actionRemovePermFromRole($perm_name, $role_name)
 	{
 		AuthHelper::removePermFromRole($perm_name, $role_name, $this->authManager);
+		AuthHelper::echoLastMessage();
 	}
 
 	public function actionRemoveRole($role_name)
