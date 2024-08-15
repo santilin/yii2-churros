@@ -232,4 +232,16 @@ trait ControllerTrait
 	}
 
 
+	public function resolvePermissions(...$arrays): array
+	{
+		// If there is no user component, userPermissions must return crudActions
+		$ret = array_intersect($this->crudActions, $this->userPermissions());
+		foreach ($arrays as $array) {
+			if (!empty($array) && is_array($array)) {
+				$ret = array_intersect($ret, $array);
+			}
+		}
+		return $ret;
+	}
+
 } // trait
