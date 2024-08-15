@@ -475,7 +475,13 @@ class JsonModel extends \yii\base\Model
                 $relObj = new $relModelClass();
                 if (is_array($relPost) ) {
                     if (array_filter($relPost)) {
-                        $relObj->load($relPost, '');
+                        foreach ($relObj->_attributes as $ka => $av) {
+                            if (!array_key_exists($ka, $relPost)) {
+                                unset($relObj->_attributes[$ka]);
+                            } else {
+                                $relObj->_attributes[$ka] = $relPost[$ka];
+                            }
+                        }
                         $container[] = $relObj;
                     }
                 } else {
