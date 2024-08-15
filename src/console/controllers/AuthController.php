@@ -299,7 +299,9 @@ class AuthController extends Controller
 		if( !$role ) {
 			throw new \Exception( "$role_name: role not found" );
 		}
-		$this->authManager->addChild($role, $permission);
+		if (!$this->authManager->hasChild($role, $permission)) {
+			$this->authManager->addChild($role, $permission);
+		}
 	}
 
 	public function actionCreatePermission($perm_name, $perm_desc)

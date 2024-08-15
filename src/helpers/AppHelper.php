@@ -180,8 +180,8 @@ class AppHelper
 		if ($last_word_start === false) {
 			return $sentence;
 		}
-		$last_word = substr($sentence, $last_word_start + 1); // +1 so we don't include the space in our result
-		return $last_word;
+		// +1 so we don't include the space in our result
+		return substr($sentence, $last_word_start + 1);
 	}
 
 	public static function camelCase($str, array $noStrip = [])

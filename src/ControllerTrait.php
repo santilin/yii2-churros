@@ -231,6 +231,10 @@ trait ControllerTrait
 		return $breadcrumbs;
 	}
 
+	public function userPermissions(): array
+	{
+		return $this->crudActions;
+	}
 
 	public function resolvePermissions(...$arrays): array
 	{
