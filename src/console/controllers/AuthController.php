@@ -9,7 +9,7 @@ namespace santilin\churros\console\controllers;
 use Yii;
 use yii\di\Instance;
 use yii\base\InvalidConfigException;
-use yii\helpers\StringHelper;
+use yii\helpers\{Console,StringHelper};
 use yii\db\Connection;
 use yii\rbac\{BaseManager,Item,Role};
 use yii\console\Controller;
@@ -305,18 +305,18 @@ class AuthController extends Controller
 	public function actionCreatePermission($perm_name, $perm_desc)
 	{
 		$permission = AuthHelper::createOrUpdatePermission(
-			$perm_name, $perm_desc, $auth);
+			$perm_name, $perm_desc, $this->authManager);
 	}
 
 	public function actionCreateRole($perm_name, $perm_desc)
 	{
 		$permission = AuthHelper::createOrUpdateRole(
-			$perm_name, $perm_desc, $auth);
+			$perm_name, $perm_desc, $this->authManager);
 	}
 
 	public function actionRemovePermFromRole($perm_name, $role_name)
 	{
-		AuthHelper::removePermFromRole($perm_name, $role_name, $this->authManager);
+		AuthHelper::removePermFromRole($role_name, $perm_name, $this->authManager);
 		AuthHelper::echoLastMessage();
 	}
 
@@ -329,6 +329,38 @@ class AuthController extends Controller
 	{
 		$this->authManager->removeAll();
 	}
+
+	public function actionListTree()
+	{
+		$authManager = Yii::$app->authManager;
+
+		// Get all roles and permissions
+		$roles = $authManager->getRoles();
+		$permissions = $authManager->getPermissions();
+
+		// Display roles and their permissions
+		foreach ($roles as $role) {
+			$this->stdout("Role: " . $role->name . "\n", Console::FG_YELLOW);
+
+			$children = $authManager->getChildren($role->name);
+			foreach ($children as $child) {
+				if (isset($permissions[$child->name])) {
+					$this->stdout("  └─ Permission: " . $child->name . "\n", Console::FG_GREEN);
+				} else {
+					$this->stdout("  └─ Role: " . $child->name . "\n", Console::FG_BLUE);
+				}
+			}
+		}
+
+		// Display standalone permissions
+		$this->stdout("\nStandalone Permissions:\n", Console::FG_YELLOW);
+		foreach ($permissions as $permission) {
+			if (!isset($roles[$permission->name])) {
+				$this->stdout("  └─ Permission: " . $permission->name . "\n", Console::FG_GREEN);
+			}
+		}
+	}
+
 
 } // class
 
