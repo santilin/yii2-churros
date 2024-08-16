@@ -289,6 +289,9 @@ ajax;
 			case 'reset':
 				$ret[] = Html::submitButton($title, $button['htmlOptions']);
 				break;
+			case 'button-post':
+				$button['htmlOptions']['data']['method'] = 'post';
+				// no break
 			case 'button':
 				if( isset($button['url']) && !isset($button['htmlOptions']['onclick']) ) {
 					$full_url = self::prepareButtonUrl($button['url'], $url_return_to);
@@ -306,7 +309,7 @@ ajax;
 				break;
 			case "submitPostForm":
 				$post_form = Html::beginForm(self::prepareButtonUrl($button['url'], $url_return_to), 'post', $button['formOptions']??[]);
-				foreach ($button['hiddenInputs'] as $hidden_name => $hidden_value) {
+				foreach ($button['hiddenInputs']??[] as $hidden_name => $hidden_value) {
 					$post_form .= Html::hiddenInput($hidden_name, $hidden_value);
 				}
 				$post_form .= Html::submitButton($title, $button['htmlOptions']);
