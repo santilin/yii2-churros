@@ -152,16 +152,20 @@ trait ModelSearchTrait
 			list($field_name, $attribute) = AppHelper::splitString($attribute, '.');
 			$relation = $model::$relations[$field_name]??null;
 			if ($relation) {
-				// Hay tres tipos de campos relacionados:
-				// 1. El nombre de la relación (attribute = '' )
-				// 2. Relación y campo: Productora.nombre
-				// 3. La clave foranea: productura_id
-				$table_alias .= "_$field_name";
-				// Activequery removes duplicate joins (added also in addSort)
-				$modelClass = $relation['modelClass'];
-				$model = $modelClass::instance();
-				$nested_relations[$table_alias] = $relation['relatedTablename'];
-				$this->addJoinIfNotExists($query, $nested_relations, "INNER JOIN", [ $table_alias => $model->tableName()], $relation['join']);
+				if ($relation['type'] == 'ManyToMany') {
+					$junction_relation = $model::$relations[$relation['join']];
+					$junction_modelClass = $junction_relation['modelClass'];
+					$junction_model = $junction_modelClass::instance();
+					$junction_table_alias = $table_alias . '_join_' . $field_name;
+					$nested_relations[$junction_table_alias] = $junction_relation['relatedTablename'];
+					$this->addJoinIfNotExists($query, $nested_relations, "INNER JOIN", [ $junction_table_alias => $junction_model->tableName()], $junction_relation['join']);
+				} else {
+					$table_alias .= "_$field_name";
+					$modelClass = $relation['modelClass'];
+					$model = $modelClass::instance();
+					$nested_relations[$table_alias] = $relation['relatedTablename'];
+					$this->addJoinIfNotExists($query, $nested_relations, "INNER JOIN", [ $table_alias => $model->tableName()], $relation['join']);
+				}
 			} else {
 				throw new InvalidArgumentException($field_name . ": relation not found in model " . self::class . ' (SearchModel::filterWhereRelated)');
 			}

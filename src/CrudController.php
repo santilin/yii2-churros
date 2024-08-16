@@ -378,7 +378,6 @@ class CrudController extends \yii\web\Controller
 		if( $returnTo ) {
 			return $returnTo;
 		}
-		$to_model = null;
 		if (empty($to)) {
 			if ($this->isJunctionModel && $this->getMasterModel()) {
 				$to_model = 'parent';
@@ -405,7 +404,6 @@ class CrudController extends \yii\web\Controller
 						$to_action = 'view';
 						break;
 					case 'delete':
-
 					case 'view':
 					case 'index':
 					case '':
@@ -428,10 +426,7 @@ class CrudController extends \yii\web\Controller
 				$model =$$to_model;
 			}
 		}
-		$pk = $model->getPrimaryKey();
-		if (!is_array($pk)) {
-			$pk = [ 'id' => $pk ];
-		}
+		$pk = $model->getPrimaryKey(true);
 		switch($to_action) {
 			case 'view':
 			case 'update':
