@@ -193,7 +193,10 @@ class FormHelper
 				}
 			}
 			$url_return_to = ArrayHelper::remove($button, 'returnTo', null);
-			switch( $button['type'] ) {
+			switch ($button['type']) {
+			case 'a-post':
+				$button['htmlOptions']['data']['method'] = 'post';
+				// no break
 			case 'a':
 				unset($button['htmlOptions']['name']);
 				if( !isset($button['htmlOptions']['title']) ) {

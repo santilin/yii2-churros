@@ -89,16 +89,16 @@ class AuthController extends Controller
 
 		if( !$auth->hasChild($visora, $model_visora) ) {
 			$auth->addChild($visora, $model_visora);
-			echo "role '{$model_visora->name}' added to role '{$visora->name}'\n";
-// 				} else {
-// 					echo "Warning: permission {$permission->name} already exists in role {$visora->name}\n";
+			echo " + Role '{$model_visora->name}' added to role '{$visora->name}'\n";
+		} else {
+			echo "= Role '{$model_visora->name}' already exists in role {$visora->name}\n";
 		}
 		if( !$auth->hasChild($editora, $model_editora) ) {
-				$auth->addChild($editora, $model_editora);
-				echo "role '{$model_editora->name}' added to role '{$editora->name}'\n";
-// 			} else {
-// 				echo "Warning: permission {$permission->name} already exists in role {$editora->name}\n";
-			}
+			$auth->addChild($editora, $model_editora);
+			echo "+ Role '{$model_editora->name}' added to role '{$editora->name}'\n";
+		} else {
+			echo "+ Role '{$model_editora->name}' already exists in role {$editora->name}\n";
+		}
 
 		foreach ($controller['perms'] as $perm_name) {
 			$perm_desc = Yii::t('churros', ucfirst($perm_name));
@@ -111,16 +111,16 @@ class AuthController extends Controller
 			if( $add_to_visora ) {
 				if( !$auth->hasChild($model_visora, $permission) ) {
 					$auth->addChild($model_visora, $permission);
-					echo "permission '{$permission->name}' added to role '{$model_visora->name}'\n";
-// 				} else {
-// 					echo "Warning: permission {$permission->name} already exists in role {$model_visora->name}\n";
+					echo "+ Permission '{$permission->name}' added to role '{$model_visora->name}'\n";
+ 				} else {
+ 					echo "= Permission '{$permission->name}' already exists in role {$model_visora->name}\n";
 				}
 			}
 			if( !$auth->hasChild($model_editora, $permission) ) {
 				$auth->addChild($model_editora, $permission);
-				echo "permission '{$permission->name}' added to role '{$model_editora->name}'\n";
-// 			} else {
-// 				echo "Warning: permission {$permission->name} already exists in role {$model_editora->name}\n";
+				echo "+ Permission '{$permission->name}' added to role '{$model_editora->name}'\n";
+ 			} else {
+ 				echo "= Permission '{$permission->name}' already exists in role '{$model_editora->name}'\n";
 			}
 		}
 	}

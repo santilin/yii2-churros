@@ -75,7 +75,7 @@ class AuthHelper
 		return $role;
 	}
 
-    static public function addToRole($role_name, array $perm_names, $auth = null)
+    static public function addToRole($role_name, array|string $perm_names, $auth = null)
     {
 		if( $auth == null ) {
 			$auth = \Yii::$app->authManager;
@@ -89,7 +89,7 @@ class AuthHelper
 		if( !$role ) {
 			throw new \Exception( "$role_name: role not found" );
 		}
-		foreach ($perm_names as $perm_name) {
+		foreach ((array)$perm_names as $perm_name) {
 			$perm = $auth->getItem($perm_name);
 			if( !$perm ) {
 				$msgs[] = 'x ' . "$perm_name: permission not found";
@@ -184,17 +184,17 @@ class AuthHelper
 		static::$lastMessage = join("\n", $msgs);
     }
 
-    static public function removePermFromRole($role_name, array|string $perm_names, $auth = null)
+    static public function removeFromRole($role_name, array|string $perm_names, $auth = null)
     {
 		if( $auth == null ) {
 			$auth = \Yii::$app->authManager;
 		}
-		$perm_names = (array)$perm_names;
 		$parent = $auth->getItem($role_name);
 		if( $parent == null ) {
 			static::$lastMessage = "= Role $role_name not found";
 			return;
 		}
+		$perm_names = (array)$perm_names;
 		foreach ($perm_names as $perm_name) {
 			$child = $auth->getItem($perm_name);
 			if( $child == null ) {
