@@ -341,7 +341,7 @@ class JsonModel extends \yii\base\Model
     {
     }
 
-    public function save(bool $runValidation)
+    public function save($runValidation = true, $validateFields = null)
     {
         throw new \Exception("Nothing to save from here");
     }

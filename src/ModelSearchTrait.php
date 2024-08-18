@@ -158,13 +158,20 @@ trait ModelSearchTrait
 					$junction_model = $junction_modelClass::instance();
 					$junction_table_alias = $table_alias . '_join_' . $field_name;
 					$nested_relations[$junction_table_alias] = $junction_relation['relatedTablename'];
-					$this->addJoinIfNotExists($query, $nested_relations, "INNER JOIN", [ $junction_table_alias => $junction_model->tableName()], $junction_relation['join']);
+					/// @todo $final_attribute when nested
+					if ($this->addJoinIfNotExists($query, $nested_relations, "INNER JOIN", [ $junction_table_alias => $junction_model->tableName()], $junction_relation['join'])) {
+						$final_attribute = $junction_table_alias . '.' . $attribute;
+					} else {
+						$final_attribute = $relation['other'];
+						$table_alias = $junction_model->tableName();
+					}
 				} else {
 					$table_alias .= "_$field_name";
 					$modelClass = $relation['modelClass'];
 					$model = $modelClass::instance();
 					$nested_relations[$table_alias] = $relation['relatedTablename'];
 					$this->addJoinIfNotExists($query, $nested_relations, "INNER JOIN", [ $table_alias => $model->tableName()], $relation['join']);
+					$final_attribute = $attribute;
 				}
 			} else {
 				throw new InvalidArgumentException($field_name . ": relation not found in model " . self::class . ' (SearchModel::filterWhereRelated)');
@@ -181,9 +188,9 @@ trait ModelSearchTrait
 			$table_alias .= "_$attribute";
 			$nested_relations[$table_alias] = $relation['relatedTablename'];
 			$this->addJoinIfNotExists($query, $nested_relations, "INNER JOIN", [ $table_alias => $model->tableName()], $relation['join']);
-			$attribute = $model->primaryKey()[0];
+			$final_attribute = $model->primaryKey()[0];
 		}
-		return [$attribute,$table_alias,$model,$relation];
+		return [$final_attribute,$table_alias,$model,$relation];
 	}
 
 
@@ -388,12 +395,19 @@ trait ModelSearchTrait
 		}
 	}
 
-	private function addJoinIfNotExists($query, $aliases, $join_type, $tablename, $on)
+	private function addJoinIfNotExists($query, $aliases, $join_type, $tablename, $on): bool
 	{
 		if (!empty($query->join)) {
 			foreach ($query->join as $join_def) {
 				if ($join_def[1] == $tablename) {
-					return;
+					return false;
+				}
+			}
+		}
+		if (!empty($query->joinWith)) {
+			foreach ($query->joinWith as $join_def) {
+				if ($join_def[1] == $tablename) {
+					return false;
 				}
 			}
 		}
@@ -401,6 +415,7 @@ trait ModelSearchTrait
 			$on = preg_replace('/\b' . $tbl. '\./', $alias . '.', $on);
 		}
 		$query->join($join_type, $tablename, $on);
+		return true;
 	}
 
 } // class

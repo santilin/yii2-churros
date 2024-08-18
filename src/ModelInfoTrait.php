@@ -384,8 +384,8 @@ trait ModelInfoTrait
 		foreach (self::$relations as $relname => $rel_info) {
 			if ($rel_info['modelClass'] == $cn) {
 				if ($rel_info['type'] == 'ManyToMany') {
-					/// @todo
-					return [$relname, $rel_info['right']];
+					/// @todo $rel_info['right'] ??
+					return [$rel_info['join'], $rel_info['right']];
 				}
 				$related_field = $rel_info['left'];
 				list($table, $field) = AppHelper::splitFieldName($related_field);

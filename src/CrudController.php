@@ -113,20 +113,23 @@ class CrudController extends \yii\web\Controller
 	}
 
 	/**
-	 * @param array $params 'permissions' => parent permissions
+	 * @param array $params 'parentPermissions' => parent permissions
 	 */
 	public function indexDetails($master, string $view, array $params, $previous_context = null, string $search_model_class = null)
 	{
-		unset($params['permissions']);
-		$this->action = $this->createAction($previous_context->action->id);
-		$detail = $this->createSearchModel("$search_model_class{$view}_Search");
-		if (!$detail) {
+		$this->action = $this->createAction('index');
+		// Tiene preferencia la clase más específica
+		if ($search_model_class && class_exists("$search_model_class{$view}_Search")) {
+			$detail = $this->createSearchModel("$search_model_class{$view}_Search");
+		} else if ($search_model_class && class_exists("{$search_model_class}_Search")) {
 			$detail = $this->createSearchModel("{$search_model_class}_Search");
+		} else {
+			$detail = $this->createSearchModel($search_model_class);
 		}
 		if (!$detail) {
 			throw new \Exception("No {$search_model_class}_Search nor $search_model_class{$view}_Search class found in CrudController::indexDetails");
 		}
-		$params['permissions'] = $this->resolvePermissions($params['permissions']??[], $this->userPermissions());
+		$params['permissions'] = $this->resolvePermissions([], $this->userPermissions());
 		$related_field = $detail->relatedFieldForModel($master);
 		if (is_array($related_field)) { // many2many
 			$params['_search_relations'] = [ $related_field[0] ];
