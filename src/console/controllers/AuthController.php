@@ -89,7 +89,7 @@ class AuthController extends Controller
 
 		if( !$auth->hasChild($visora, $model_visora) ) {
 			$auth->addChild($visora, $model_visora);
-			echo " + Role '{$model_visora->name}' added to role '{$visora->name}'\n";
+			echo "+ Role '{$model_visora->name}' added to role '{$visora->name}'\n";
 		} else {
 			echo "= Role '{$model_visora->name}' already exists in role {$visora->name}\n";
 		}
