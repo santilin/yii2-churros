@@ -97,7 +97,7 @@ class AuthController extends Controller
 			$auth->addChild($editora, $model_editora);
 			echo "+ Role '{$model_editora->name}' added to role '{$editora->name}'\n";
 		} else {
-			echo "+ Role '{$model_editora->name}' already exists in role {$editora->name}\n";
+			echo "= Role '{$model_editora->name}' already exists in role {$editora->name}\n";
 		}
 
 		foreach ($controller['perms'] as $perm_name) {
