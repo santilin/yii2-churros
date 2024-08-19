@@ -519,8 +519,9 @@ trait ModelInfoTrait
 
 	public function asDate($fldname): ?YADTC
 	{
-		return YADTC::fromSql( $this->$fldname );
+		return YADTC::fromSql($this->$fldname);
 	}
+
 
 	public function asCurrency($fldname, $currency = null, $options = [], $textOptions = []): string
 	{

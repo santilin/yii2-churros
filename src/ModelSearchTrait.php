@@ -190,7 +190,7 @@ trait ModelSearchTrait
 			$this->addJoinIfNotExists($query, $nested_relations, "INNER JOIN", [ $table_alias => $model->tableName()], $relation['join']);
 			$final_attribute = $model->primaryKey()[0];
 		}
-		return [$final_attribute,$table_alias,$model,$relation];
+		return [$final_attribute??$attribute,$table_alias,$model,$relation];
 	}
 
 
