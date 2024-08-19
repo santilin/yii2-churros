@@ -332,29 +332,39 @@ class AuthController extends Controller
 		$this->authManager->removeAll();
 	}
 
+
+	// Display roles and their permissions recursively
+	protected function rolesTree(array $roles, string $pre, $authManager)
+	{
+		foreach ($roles as $role) {
+			if ($pre == '') {
+				$this->stdout("+ Role: " . $role->name . "\n", Console::FG_YELLOW);
+			}
+
+			foreach ($authManager->getChildRoles($role->name) as $child_role) {
+				if ($child_role->name == $role->name) {
+					continue;
+				}
+				$this->stdout("$pre  └─ Role: " . $child_role->name . "\n", Console::FG_YELLOW);
+				$this->rolesTree([$child_role], "  $pre", $authManager);
+			}
+			foreach ($authManager->getPermissionsByRole($role->name) as $child_perm) {
+				$this->stdout("$pre  └─ Permission: " . $child_perm->name . "\n", Console::FG_GREEN);
+			}
+		}
+	}
+
 	public function actionListTree()
 	{
 		$authManager = Yii::$app->authManager;
 
 		// Get all roles and permissions
 		$roles = $authManager->getRoles();
-		$permissions = $authManager->getPermissions();
-
-		// Display roles and their permissions
-		foreach ($roles as $role) {
-			$this->stdout("Role: " . $role->name . "\n", Console::FG_YELLOW);
-
-			$children = $authManager->getChildren($role->name);
-			foreach ($children as $child) {
-				if (isset($permissions[$child->name])) {
-					$this->stdout("  └─ Permission: " . $child->name . "\n", Console::FG_GREEN);
-				} else {
-					$this->stdout("  └─ Role: " . $child->name . "\n", Console::FG_BLUE);
-				}
-			}
-		}
+		$this->stdout("\nRoles:\n", Console::FG_YELLOW);
+		$this->rolesTree($roles, '', $authManager);
 
 		// Display standalone permissions
+		$permissions = $authManager->getPermissions();
 		$this->stdout("\nStandalone Permissions:\n", Console::FG_YELLOW);
 		foreach ($permissions as $permission) {
 			if (!isset($roles[$permission->name])) {
