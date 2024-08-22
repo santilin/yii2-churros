@@ -60,7 +60,7 @@ class JsonModel extends \yii\base\Model
             return $this->_related[$name];
         }
         if (isset(static::$relations[$name])) {
-            return $this->createRelatedModels($name);
+            return $this->loadRelatedModels($name);
         }
         return parent::__get($name);
     }
@@ -100,38 +100,17 @@ class JsonModel extends \yii\base\Model
         return $models;
     }
 
-    public function createRelatedModels(string $relation_name, array $current_values = [],
-                                      string $form_class_name = null): array|JsonModel
+    public function loadRelatedModels(string $relation_name): array|JsonModel
     {
         $rel_info = static::$relations[$relation_name];
         $rel_name = $rel_info['relatedTablename'];
         $rel_model_class = $rel_info['modelClass'];
-        if ($form_class_name != null) {
-            $child = new $form_class_name;
-            if (!($child instanceof $rel_model_class)) {
-                throw new InvalidConfigException("$form_class_name is not derived from $rel_model_class");
-            }
-        }
         if ($rel_info['type'] == 'HasMany') {
             $json_objects = $this->_json_object?->get("$.$rel_name")?:[];
-            $related_models = $this->jsonArrayToModels($json_objects, $form_class_name?:$rel_model_class);
-            if (!empty($current_values)) {
-                foreach ($related_models as $nr => $rm) {
-                    if (isset($current_values[$nr])) {
-                        $related_models[$nr]->setAttributes($current_values[$nr]);
-                    }
-                }
-            }
+            $related_models = $this->jsonArrayToModels($json_objects, $rel_model_class);
             return $related_models;
         } else {
-            if ($form_class_name != null) {
-                $child = new $form_class_name;
-                if (!($child instanceof $rel_model_class)) {
-                    throw new InvalidConfigException("$form_class_name is not derived from $rel_model_class");
-                }
-            } else {
-                $child = new $rel_model_class;
-            }
+            $child = new $rel_model_class;
             $child->parent_model = $this;
             $child->setPath($this->getPath() . '/' . $child->jsonPath());
             $child->loadJson($this->_json_modelable, $this->_path . "/$rel_name");
@@ -139,9 +118,39 @@ class JsonModel extends \yii\base\Model
         }
     }
 
+
+    public function createRelatedModels(string $relation_name,
+        array $current_values = [], string $form_class_name = null): array|JsonModel
+    {
+        $rel_info = static::$relations[$relation_name];
+        $rel_model_class = $rel_info['modelClass'];
+        if (!$form_class_name || $rel_model_class == $form_class_name) {
+            return $this->$relation_name;
+        }
+        $child = new $rel_model_class;
+        if (!($child instanceof $rel_model_class)) {
+            throw new InvalidConfigException("$form_class_name is not derived from $rel_model_class");
+        }
+        if ($rel_info['type'] == 'HasMany') {
+            $related_models = [];
+            foreach ($this->$relation_name as $kr => $rel_model) {
+                $child = new $form_class_name;
+                $child->parent_model = $this;
+                $child->setPath($this->getPath() . '/' . $child->jsonPath());
+                $child->copy($rel_model);
+                $related_models[$kr] = $child;
+            }
+            return $related_models;
+        } else {
+            $child->setPath($this->getPath() . '/' . $child->jsonPath());
+            $child->copy($this->$relation_name);
+            return $child;
+        }
+    }
+
     public function locator(): string
     {
-        return static::$_locator;
+        return static::$_locator??'_id';
     }
 
     public function getIsNewRecord(): bool
@@ -236,7 +245,7 @@ class JsonModel extends \yii\base\Model
 
     public function getPrimaryKey($asArray = false)
     {
-        $code_fld = static::$_locator??static::$_model_info['code_field'];
+        $code_fld = static::$_locator??static::$_model_info['code_field']??null;
         if ($code_fld) {
             if ($asArray) {
                 return [ $code_fld => $this->$code_fld ];
@@ -244,7 +253,7 @@ class JsonModel extends \yii\base\Model
                 return $this->$code_fld;
             }
         } else if ($asArray) {
-            return [ 'id' => $this->_id ];
+            return [ '_id' => $this->_id ];
         } else {
             return $this->_id;
         }
@@ -262,10 +271,21 @@ class JsonModel extends \yii\base\Model
 
     public function setPrimaryKey($id)
     {
-        $this->_id = $id;
-        if (!empty(static::$_locator)) {
-            $values = [ static::$_locator => $id ];
-            $this->setAttributes($values);
+        if (is_array($id)) {
+            foreach ($id as $id_k => $id_v) {
+                $this->$id_k = $id_v;
+                if (!empty(static::$_locator)) {
+                    if ($id_k == static::$_locator) {
+                        $this->$id_k = $id_v;
+                    }
+                }
+            }
+        } else {
+            $this->_id = $id;
+            if (!empty(static::$_locator)) {
+                $values = [ static::$_locator => $id ];
+                $this->setAttributes($values);
+            }
         }
     }
 

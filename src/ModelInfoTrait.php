@@ -755,5 +755,12 @@ trait ModelInfoTrait
 		return $filteredProperties;
 	}
 
+	public function copy($other)
+	{
+		$this->setAttributes($other->getAttributes());
+		$this->setIsNewRecord($other->getIsNewRecord());
+		$this->setPrimarykey($other->getPrimaryKey(true));
+	}
+
 } // trait ModelInfoTrait
 
