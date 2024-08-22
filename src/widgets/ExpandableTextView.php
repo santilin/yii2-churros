@@ -50,7 +50,7 @@ class ExpandableTextView extends Component
 		}
 		$encoded_text = str_replace("\n", "<br/>", $text);
 		if ($this->format == 'html') {
-			$text = html_entity_decode(strip_tags($text));
+			$text = \yii\helpers\HtmlPurifier::process($text);
 		} else if ($this->format == 'markdown') {
 			$text = \yii\helpers\Markdown::process($text, $this->markdown_flavor);
 		}
@@ -61,12 +61,20 @@ class ExpandableTextView extends Component
 			$cell_key = strtr(get_class($this->model) . '.' . $this->model->getPrimaryKey() . '.' . $this->attribute, ['\\' => '_', '.' => '_']);
 			if ($this->rows) {
 				$truncated_text = AppHelper::getFirstLines($text, $this->rows);
+				if ($this->format == 'html' || $this->format == 'markdown') {
+					$tuncated_text = \yii\helpers\HtmlPurifier::process($truncated_text, function($config) {
+						$config->set('AutoFormat.AutoParagraph', true);
+						$config->set('HTML.TidyLevel', 'heavy');
+					});
+				}
+				$truncated_text .= '</code>'; /// @ojo
 			} else {
 				$truncated_text = $text;
 			}
 			if ($truncated_text == $text) { // cabe perfectamente, no mostrar botón
 				return $text;
 			}
+// 			$truncated_text = $text;
 			$modal = <<<modal
 <div class="modal fade" id="modalSeeMore_$cell_key" tabindex="-1" aria-labelledby="modalSeeMore_$cell_key" aria-hidden="true">
 	<div class="modal-dialog modal-dialog-centered modal-dialog-scrollable modal-md">
@@ -112,16 +120,17 @@ if (el_copy_clipboard_$cell_key) {
 </script>
 modal;
 
-			$text =  Html::tag('span', $truncated_text, $this->captionOptions) . Html::a('<i class="bi bi-book"></i>', '#', [
+			$text = Html::tag('span', $truncated_text, $this->captionOptions)
+				. '<br/>' . Html::a('<i class="bi bi-book"></i>', '#', [
 				'title' => $this->button_title,
 				'class' => "btn btn-outline-primary btn-sm py-0 px-1 me-1",
-				'style' => 'position: absolute; right: 0; font-size:xx-small',
+// 				'style' => 'position: absolute; right: 0; font-size:xx-small',
 				'data' => [
 					'bs-toggle' => 'modal',
 					'bs-target' => "#modalSeeMore_$cell_key",
 				],
 			]);
-			return $modal . $text;
+ 			return $modal . $text;
 		}
     }
 
