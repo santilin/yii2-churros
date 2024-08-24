@@ -124,6 +124,9 @@ trait RelationTrait
 			$link = $relation['link'];
 			$link_keys = array_keys($link);
 			$this_pk = reset($link_keys);
+			if (is_string($v) && str_contains($v, ',')) {
+				$v = explode(',', $v); // treeWidget
+			}
             foreach ($v as $relPost) {
 				if( $relPost == null ) {
 					continue;

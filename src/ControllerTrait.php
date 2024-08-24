@@ -130,13 +130,12 @@ trait ControllerTrait
 			return "";
 		}
 		$attrs = [];
-		$route = null;
-		foreach((array)$models as $model) {
-			if( $route == null ) {
-				$route = $this->getRoutePrefix() . $model->controllerName() . '/';
-			}
-			if( $model != null ) {
-				if( $make_links ) {
+		if ($make_links) {
+			$route = $this->getRoutePrefix() . $model->controllerName() . '/';
+		}
+		foreach ($models as $model) {
+			if ($model != null) {
+				if ($make_links) {
 					$url = $route . strval($model->getPrimaryKey());
 					$attrs[] = "<a href='$url'>" .  $model->recordDesc($record_format) . "</a>";
 				} else {
