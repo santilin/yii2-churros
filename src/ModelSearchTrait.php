@@ -170,7 +170,7 @@ trait ModelSearchTrait
 					$modelClass = $relation['modelClass'];
 					$model = $modelClass::instance();
 					$nested_relations[$table_alias] = $relation['relatedTablename'];
-					$this->addJoinIfNotExists($query, $nested_relations, "INNER JOIN", [ $table_alias => $model->tableName()], $relation['join']);
+					$this->addJoinIfNotExists($query, $nested_relations, "LEFT JOIN", [ $table_alias => $model->tableName()], $relation['join']);
 					$final_attribute = $attribute;
 				}
 			} else {
@@ -187,7 +187,7 @@ trait ModelSearchTrait
 			// 3. La clave foranea: productura_id
 			$table_alias .= "_$attribute";
 			$nested_relations[$table_alias] = $relation['relatedTablename'];
-			$this->addJoinIfNotExists($query, $nested_relations, "INNER JOIN", [ $table_alias => $model->tableName()], $relation['join']);
+			$this->addJoinIfNotExists($query, $nested_relations, "LEFT JOIN", [ $table_alias => $model->tableName()], $relation['join']);
 			$final_attribute = $model->primaryKey()[0];
 		}
 		return [$final_attribute??$attribute,$table_alias,$model,$relation];
