@@ -76,17 +76,13 @@ class JsonModel extends \yii\base\Model
             $child->parent_model = $this;
             $child->setPath($this->getPath() . '/' . $child->jsonPath());
             $child->setJsonModelable($this);
-            if (is_string($rk)) {
-                $child->setPrimaryKey($rk);
-            } else if (is_string($rm)) {
-                $child->setPrimaryKey($rm);
-            }
+            $primary_key_set = false;
             if (is_array($rm)) {
-                $child->setPrimaryKey($rk);
                 foreach ($rm as $fldname => $fldvalue) {
                     if ($child->hasAttribute($fldname)) {
                         if ($fldname == static::$_locator) {
                             $child->setPrimaryKey($fldvalue);
+                            $primary_key_set = true;
                         } else {
                             $child->$fldname = $fldvalue;
                         }
@@ -94,6 +90,13 @@ class JsonModel extends \yii\base\Model
                 }
             } else {
                 $child->setAttributesFromNoArray($rm);
+            }
+            if (!$primary_key_set) {
+                if (is_string($rk)) {
+                    $child->setPrimaryKey($rk);
+                } else if (is_string($rm)) {
+                    $child->setPrimaryKey($rm);
+                }
             }
             $models[] = $child;
         }
