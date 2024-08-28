@@ -76,6 +76,10 @@
 - Paginador no sale bien el layout/css. Añadir el pager como en simplelistview
 
 ## GridView
+- Restyling de grid:
+	- Número de filas por página, integrarlo en el summary
+	- Poner botones aplicar filtros y borrar filtros en su lugar
+	- Template sin columnas de acciones, si tiene un main column.
 - layout admin, más compacto.
 * GridView: Report : grupos: opciones para Mostrar encabezado, mostrar pie.
 * Grid Enlaces en el joinmodels: filtro en el grid por ese valor?
