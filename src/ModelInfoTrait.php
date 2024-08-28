@@ -682,15 +682,17 @@ trait ModelInfoTrait
 		if (property_exists($this, '_calculated_fields') && count(static::$_calculated_fields)) {
 			$scf = [];
 			foreach (static::$_calculated_fields as $cf) {
-				if (property_exists($this, $cf)) {
+				if (property_exists($this, $cf) || $this->hasAttribute($cf)) {
 					$scf[$cf] = $this->$cf;
 					unset($this->$cf);
 				}
 			}
 			try {
 				if (parent::save($runValidation, $validateFields)) {
-					$values = self::find()->where($this->getPrimaryKey(true))->select(array_keys($scf))->asArray();
-					$this->setAttributes($values);
+					$values = self::find()->where($this->getPrimaryKey(true))->select(array_keys($scf))->asArray()->one();
+					foreach ($values as $k => $v) {
+						$this->$k = $v; // Don't use setAttributes that requires rules
+					}
 					return true;
 				} else {
 					foreach ($scf as $kcf => $cf) {

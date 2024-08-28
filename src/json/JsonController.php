@@ -91,7 +91,7 @@ class JsonController extends \yii\web\Controller
 		$params = Yii::$app->request->queryParams;
 		$searchModel = $this->createSearchModel($this->getPath());
 		if ($searchModel === null) {
-			$searchModel = $this->createSearchModel($this->getPath(), $this->_model_name . '_Search');
+			$searchModel = $this->createSearchModel($this->getPath(), static::$_model_name . '_Search');
 		}
 		if (!$searchModel) {
 			throw new InvalidArgumentException("No searchModel found for " . $this->id . " controller");

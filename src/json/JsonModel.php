@@ -121,36 +121,6 @@ class JsonModel extends \yii\base\Model
         }
     }
 
-
-    public function createRelatedModels(string $relation_name,
-        array $current_values = [], string $form_class_name = null): array|JsonModel
-    {
-        $rel_info = static::$relations[$relation_name];
-        $rel_model_class = $rel_info['modelClass'];
-        if (!$form_class_name || $rel_model_class == $form_class_name) {
-            return $this->$relation_name;
-        }
-        $child = new $rel_model_class;
-        if (!($child instanceof $rel_model_class)) {
-            throw new InvalidConfigException("$form_class_name is not derived from $rel_model_class");
-        }
-        if ($rel_info['type'] == 'HasMany') {
-            $related_models = [];
-            foreach ($this->$relation_name as $kr => $rel_model) {
-                $child = new $form_class_name;
-                $child->parent_model = $this;
-                $child->setPath($this->getPath() . '/' . $child->jsonPath());
-                $child->copy($rel_model);
-                $related_models[$kr] = $child;
-            }
-            return $related_models;
-        } else {
-            $child->setPath($this->getPath() . '/' . $child->jsonPath());
-            $child->copy($this->$relation_name);
-            return $child;
-        }
-    }
-
     public function locator(): string
     {
         return static::$_locator??'_id';
@@ -420,6 +390,38 @@ class JsonModel extends \yii\base\Model
             return null;
         }
     }
+
+    public function createRelatedModels(string $relation_name,
+        array $current_values = [], string $form_class_name = null): array|JsonModel
+    {
+        $rel_info = static::$relations[$relation_name];
+        $rel_model_class = $rel_info['modelClass'];
+        if (!$form_class_name || $rel_model_class == $form_class_name) {
+            return $this->$relation_name;
+        }
+        $child = new $rel_model_class;
+        if (!($child instanceof $rel_model_class)) {
+            throw new InvalidConfigException("$form_class_name is not derived from $rel_model_class");
+        }
+        if ($rel_info['type'] == 'HasMany') {
+            $related_models = [];
+            foreach ($this->$relation_name as $kr => $rel_model) {
+                $child = new $form_class_name;
+                $child->parent_model = $this;
+                $child->setPath($this->getPath() . '/' . $child->jsonPath());
+                $child->setJsonModelable($this);
+                $child->copy($rel_model);
+                $related_models[$kr] = $child;
+            }
+            return $related_models;
+        } else {
+            $child->setPath($this->getPath() . '/' . $child->jsonPath());
+            $child->setJsonModelable($this);
+            $child->copy($this->$relation_name);
+            return $child;
+        }
+    }
+
 
     /**
      * Load all attributes including related attributes

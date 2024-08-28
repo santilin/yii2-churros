@@ -68,7 +68,7 @@ class CrudController extends \yii\web\Controller
 			if( $this->request->getMethod() === 'POST' && isset($_SERVER['CONTENT_LENGTH']) ) {
 				if( intval($_SERVER['CONTENT_LENGTH'])>0 ) {
 					Yii::$app->session->addFlash('error', strtr(Yii::t('churros', 'PHP discarded POST data because of request exceeding either post_max_size={post_size} or upload_max_filesize={upload_size}'), ['{post_size}' => ini_get('post_max_size'), '{upload_size}' => ini_get('upload_max_filesize')]));
-					$this->redirect(Yii::$app->request->referrer ?: Yii::$app->homeUrl);
+					$this->redirect($this->request->referrer ?: Yii::$app->homeUrl);
 					return false;
 				}
 			}
@@ -91,7 +91,7 @@ class CrudController extends \yii\web\Controller
 	 */
 	public function actionIndex()
 	{
-		$params = Yii::$app->request->queryParams;
+		$params = $this->request->queryParams;
 		$searchModel = $this->createSearchModel();
 		if (!$searchModel) {
 			throw new NotFoundHttpException("Unable to create a searchModel for $this->id crud controller");
@@ -160,10 +160,10 @@ class CrudController extends \yii\web\Controller
 	 */
 	public function actionView($id)
 	{
-		$params = Yii::$app->request->queryParams;
+		$params = $this->request->queryParams;
 		$model = $this->findModel($id, $params);
 		$params['permissions'] = $this->resolvePermissions($params['permissions']??[], $this->userPermissions());
-		if (Yii::$app->request->getIsAjax()) {
+		if ($this->request->getIsAjax()) {
 			$this->layout = false;
 			return $this->render('_view', [
 				'model' => $model,
@@ -185,8 +185,7 @@ class CrudController extends \yii\web\Controller
 	 */
 	public function actionCreate()
 	{
-		$req = Yii::$app->request;
-		$params = array_merge($req->get(), $req->post());
+		$params = array_merge($this->request->get(), $this->request->post());
 		$params['permissions'] = $this->resolvePermissions($params['permissions']??[], $this->userPermissions());
 		$model = $this->findFormModel(null, null, 'create', $params);
 		$model->scenario = 'create';
@@ -194,7 +193,7 @@ class CrudController extends \yii\web\Controller
 		$relations = empty($params['_form_relations'])?[]:explode(",", $params['_form_relations']);
 		if ($model->loadAll($params, $relations) ) {
 			if ($model->saveAll(true) ) {
-				if ($req->getIsAjax()) {
+				if ($this->request->getIsAjax()) {
 					return json_encode($model->getAttributes());
 				}
 				$this->addSuccessFlashes('create', $model);
@@ -217,19 +216,18 @@ class CrudController extends \yii\web\Controller
 		*/
 	public function actionDuplicate($id)
 	{
-		$req = Yii::$app->request;
-		$params = array_merge($req->get(), $req->post());
+		$params = array_merge($this->request->get(), $this->request->post());
 		$params['permissions'] = $this->resolvePermissions($params['permissions']??[], $this->userPermissions());
 		$model = $this->findFormModel($id, null, 'duplicate', $params);
 		$model->setDefaultValues(true); // duplicating
 		$model->scenario = 'duplicate';
 
 		$relations = empty($params['_form_relations'])?[]:explode(",", $params['_form_relations']);
-		if ($model->loadAll($req->post(), $relations) ) {
+		if ($model->loadAll($this->request->post(), $relations) ) {
 			$model->setIsNewRecord(true);
 			$model->resetPrimaryKeys();
 			if( $model->saveAll(true) ) {
-				if ($req->getIsAjax()) {
+				if ($this->request->getIsAjax()) {
 					return json_encode($model->getAttributes());
 				}
 				$this->addSuccessFlashes('duplicate', $model);
@@ -251,8 +249,7 @@ class CrudController extends \yii\web\Controller
 	 */
 	public function actionUpdate($id)
 	{
-		$req = Yii::$app->request;
-		$params = array_merge($req->get(), $req->post());
+		$params = array_merge($this->request->get(), $this->request->post());
 		$params['permissions'] = $this->resolvePermissions($params['permissions']??[], $this->userPermissions());
 		$model = $this->findFormModel($id, null, 'update', $params);
  		if ($model === null && FormHelper::hasPermission($params['permissions'], 'create')) {
@@ -263,7 +260,7 @@ class CrudController extends \yii\web\Controller
 		$relations = empty($params['_form_relations'])?[]:explode(",", $params['_form_relations']);
 		if ($model->loadAll($params, $relations)) {
 			if ($model->saveAll(true)) {
-				if ($req->getIsAjax()) {
+				if ($this->request->getIsAjax()) {
 					\Yii::$app->response->format = \yii\web\Response::FORMAT_JSON;
 					return [
 						'data' => $model->getAttributes(),
@@ -295,7 +292,7 @@ class CrudController extends \yii\web\Controller
 		}
 		try {
 			if ($model->deleteWithRelated()) {
-				if (Yii::$app->request->getIsAjax()) {
+				if ($this->request->getIsAjax()) {
 					return json_encode($id);
 				}
 				$this->addSuccessFlashes('delete', $model);
@@ -325,7 +322,7 @@ class CrudController extends \yii\web\Controller
 	 */
 	public function actionPdf($id)
 	{
-		$params = Yii::$app->request->queryParams;
+		$params = $this->request->queryParams;
 		$model = $this->findModel($id, $params);
 		if( YII_DEBUG ) {
             Yii::$app->getModule('debug')->instance->allowedIPs = [];
@@ -375,9 +372,9 @@ class CrudController extends \yii\web\Controller
 
 	protected function returnTo(?string $to, string $from, $model, array $redirect_params = []): string|array
 	{
-		$returnTo = Yii::$app->request->post('returnTo');
+		$returnTo = $this->request->post('returnTo');
 		if( !$returnTo ) {
-			$returnTo = Yii::$app->request->queryParams['returnTo']??null;
+			$returnTo = $this->request->queryParams['returnTo']??null;
 		}
 		if( $returnTo ) {
 			return $returnTo;
@@ -390,14 +387,14 @@ class CrudController extends \yii\web\Controller
 				$to_model = null;
 				switch ($from) {
 					case 'create':
-						if (Yii::$app->request->post('_and_create') == '1') {
+						if ($this->request->post('_and_create') == '1') {
 							$to_action = 'create';
 						} else {
 							$to_action = 'view';
 						}
 						break;
 					case 'duplicate':
-						if (Yii::$app->request->post('_and_create') == '1') {
+						if ($this->request->post('_and_create') == '1') {
 							$to_action = 'duplicate';
 						} else {
 							$to_action = 'view';
@@ -519,7 +516,7 @@ class CrudController extends \yii\web\Controller
 	// Ajax
 	public function actionRawModel($id)
 	{
-		$params = Yii::$app->request->queryParams;
+		$params = $this->request->queryParams;
 		$model = $this->findModel($id, $params);
 		if( $model ) {
             return json_encode($model->getAttributes());
@@ -554,9 +551,9 @@ class CrudController extends \yii\web\Controller
 	public function getMasterModel()
 	{
 		if ($this->masterModel === false) {
-			$master_id = intval(Yii::$app->request->get('parent_id', 0));
+			$master_id = intval($this->request->get('parent_id', 0));
 			if ($master_id !== 0) {
-				$this->masterController = Yii::$app->request->get('parent_controller');
+				$this->masterController = $this->request->get('parent_controller');
 				assert($this->masterController != '');
 				$master_model_name = 'app\\models\\'. AppHelper::camelCase($this->masterController);
 				$this->masterModel = $master_model_name::findOne($master_id);

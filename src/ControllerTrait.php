@@ -187,8 +187,8 @@ trait ControllerTrait
 	{
 		if ($this->module instanceof \yii\base\Application) {
 			return '';
-		} else if ($this->_prefix) {
-			return '/' . $this->_prefix;
+		} else if (static::$_prefix) {
+			return '/' . static::$_prefix;
 		} else {
 			return '/' . $this->module->getUniqueId();
 		}
