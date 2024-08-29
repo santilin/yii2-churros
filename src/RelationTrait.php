@@ -115,13 +115,13 @@ trait RelationTrait
         /* @var $this ActiveRecord */
         /* @var $relObj ActiveRecord */
         /* @var $relModelClass ActiveRecord */
-        $relation = $this->getRelationData($rel_name);
-		$relModelClass = $relation['modelClass'];
+        $relation = $this->getRelation($rel_name);
+		$relModelClass = $relation->modelClass;
         $relPKAttr = $relModelClass::primaryKey();
 
 		$container = [];
 		if (count($relPKAttr) > 1) { // Many to many with junction model
-			$link = $relation['link'];
+			$link = $relation->link;
 			$link_keys = array_keys($link);
 			$this_pk = reset($link_keys);
 			if (is_string($v) && str_contains($v, ',')) {
@@ -164,7 +164,7 @@ trait RelationTrait
 					$container[] = $m2mkeys;
                 }
             }
-        } else if ($relation['via'] == null) {
+        } else if ($relation->via == null) {
 			if (count($relPKAttr)) { // Has Many with primary key
 				foreach ($v as $relPost) {
 					if (is_array($relPost) ) {
@@ -584,21 +584,21 @@ trait RelationTrait
         $isSoftDelete = isset($this->_rt_softdelete);
         try {
             $error = false;
-            $relData = $this->getRelationData($relations);
-            foreach ($relData as $data) {
+            foreach ($relations as $relation_name) {
+				$relation = $this->getRelation($relation_name);
                 $array = [];
-                if ($data['ismultiple']) {
-                    $link = $data['link'];
-                    if (count($this->{$data['name']})) {
+                if ($relation->ismultiple) {
+                    $link = $relation->link;
+                    if (count($this->$relation_name)) {
                         foreach ($link as $key => $value) {
                             if (isset($this->$value)) {
                                 $array[$key] = $this->$value;
                             }
                         }
                         if ($isSoftDelete) {
-                            $error = !$this->{$data['name']}[0]->updateAll($this->_rt_softdelete, ['and', $array]);
+                            $error = !$this->{$relation_name}[0]->updateAll($this->_rt_softdelete, ['and', $array]);
                         } else {
-                            $error = !$this->{$data['name']}[0]->deleteAll(['and', $array]);
+                            $error = !$this->{$relation->name}[0]->deleteAll(['and', $array]);
                         }
                     }
                 }
@@ -646,18 +646,18 @@ trait RelationTrait
         $trans = $db->beginTransaction();
         try {
             $error = false;
-            $relData = $this->getRelationData($relations);
-            foreach ($relData as $data) {
+			foreach ($relations as $relation_name) {
+				$relation = $this->getRelation($relation_name);
                 $array = [];
-                if ($data['ismultiple']) {
-                    $link = $data['link'];
-                    if (count($this->{$data['name']})) {
+                if ($relation->ismultiple) {
+                    $link = $relation->link;
+                    if (count($this->$relation_name)) {
                         foreach ($link as $key => $value) {
                             if (isset($this->$value)) {
                                 $array[$key] = $this->$value;
                             }
                         }
-                        $error = !$this->{$data['name']}[0]->updateAll($this->_rt_softrestore, ['and', $array]);
+                        $error = !$this->{$relation->name}[0]->updateAll($this->_rt_softrestore, ['and', $array]);
                     }
                 }
             }
@@ -676,30 +676,6 @@ trait RelationTrait
             $trans->rollBack();
             throw $exc;
         }
-    }
-
-    public function getRelationData($relations)
-    {
-        $stack = [];
-        $is_array = is_array($relations);
-        if( !$is_array ) {
-			$relations = [ $relations ];
-		}
-		foreach ($relations as $name) {
-			/* @var $rel ActiveQuery */
-			$rel = $this->getRelation($name);
-			$stack[$name]['name'] = $name;
-			$stack[$name]['method'] = 'get' . ucfirst($name);
-			$stack[$name]['ismultiple'] = $rel->multiple;
-			$stack[$name]['modelClass'] = $rel->modelClass;
-			$stack[$name]['link'] = $rel->link;
-			$stack[$name]['via'] = $rel->via;
-		}
-		if( !$is_array) {
-			return $stack[$name];
-		} else {
-			return $stack;
-		}
     }
 
     public function createChild(string $rel_name, string $form_class_name = null)
