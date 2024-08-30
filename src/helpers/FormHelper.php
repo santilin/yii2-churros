@@ -42,7 +42,7 @@ class FormHelper
 		static::$tabindex = $reset;
 	}
 
-	static public function extractFormName(array $views, int $_nv): string
+	static public function extractFormName(array $views, int|string $_nv): string
 	{
 		if ($_nv > (count($views)-1) ) {
 			$_nv = 0;
@@ -84,7 +84,8 @@ class FormHelper
 	static public function viewFromRequest(array $views, array $params): array
 	{
  		$_nv=$params[self::VIEWS_NVIEW_PARAM]??0;
-		if( is_numeric($_nv) ) {
+		assert(!is_bool($_nv));
+		if (is_numeric($_nv)) {
 			if ($_nv > (count($views)-1) ) {
 				$_nv = 0;
 			}
