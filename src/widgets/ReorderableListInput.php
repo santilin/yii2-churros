@@ -43,24 +43,27 @@ function {$id}_update_order_input(element, frm) {
 		}).appendTo(frm);
 	});
 }
-$('#$id').sortable({
+let {$id}_sortable = $('#$id');
+let {$id}_sortable_frm = {$id}_sortable.closest('form');
+{$id}_sortable.sortable({
 	stop: function(event, ui) {
-		let frm = $('#$id').closest('form');
-		{$id}_update_order_input($(this), frm);
+		{$id}_update_order_input($(this), {$id}_sortable_frm);
 	}
 });
+{$id}_update_order_input({$id}_sortable, {$id}_sortable_frm);~
 js
 		);
 		Html::addCssClass($this->options, 'sortable-list');
 		$li_options = array_merge( [ 'data' => [ 'id' => null ]], $this->itemOptions);
 		if ($this->removable) {
-			$this->view->registerJs("
-    $(document).on('click', '.remove-button', function() {
-        $(this).closest('li').remove();
-		let frm = $(this).closest('form');
-		{$id}_update_order_input($('#$id'), frm);
-    });
-");
+			$this->view->registerJs(<<<js
+$(document).on('click', '.remove-button', function() {
+	$(this).closest('li').remove();
+	let frm = $(this).closest('form');
+	{$id}_update_order_input($('#$id'), frm);
+});
+js
+			);
 		}
 		foreach ($this->items as $value => $item) {
 			$li_options['data']['id'] = $value;

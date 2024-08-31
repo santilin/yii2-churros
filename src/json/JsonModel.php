@@ -227,12 +227,12 @@ class JsonModel extends \yii\base\Model
 
     public function getPrimaryKey($asArray = false)
     {
-        $code_fld = static::$_locator??static::$_model_info['code_field']??null;
-        if ($code_fld) {
+        $pk_fld = static::$_locator??static::$_model_info['code_field']??null;
+        if ($pk_fld) {
             if ($asArray) {
-                return [ $code_fld => $this->$code_fld ];
+                return [ $pk_fld => $this->$pk_fld ];
             } else {
-                return $this->$code_fld;
+                return $this->$pk_fld;
             }
         } else if ($asArray) {
             return [ '_id' => $this->_id ];
@@ -243,9 +243,9 @@ class JsonModel extends \yii\base\Model
 
     public function primaryKey()
     {
-        $code_fld = static::$_locator??static::$_model_info['code_field'];
-        if ($code_fld) {
-            return [ $code_fld ];
+        $pk_fld = static::$_locator??static::$_model_info['code_field']??null;
+        if ($pk_fld) {
+            return [ $pk_fld ];
         } else {
             return [];
         }
