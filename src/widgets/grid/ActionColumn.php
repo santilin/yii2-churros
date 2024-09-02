@@ -102,7 +102,7 @@ class ActionColumn extends \yii\grid\ActionColumn
             return '';
         }
 		return Html::activeDropDownList($this->grid->filterModel, '_gridPageSize',
-			[1=>1, 5=>5, 10 => 10, 20 => 20, 50 => 50, 100 => 100, 0 => 'Todo'],
+			[1=>1, 5=>5, 12=> 12, 24 => 24, 60 => 60, 120 => 120, 0 => 'Todo'],
 			['id'=>'_grid_view_pageSize']);
     }
 

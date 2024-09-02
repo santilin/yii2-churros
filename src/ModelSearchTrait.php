@@ -79,7 +79,7 @@ trait ModelSearchTrait
 				continue;
 			}
 			if (!empty($column_def['filterAttribute'])) {
-				$this->addRelatedFieldToJoin($column_def['filterAttribute']);
+				$this->addRelatedFieldToJoin($column_def['filterAttribute'], $provider->query);
 			}
 			if (array_key_exists($col_attribute, $this->attributes)) { // for sorting
 				continue;
@@ -92,20 +92,15 @@ trait ModelSearchTrait
 				throw new \Exception("$col_attribute != " . ($column_def['attribute']??null));
 			}
 			list($sort_fldname, $table_alias, $model, $relation) = $this->addRelatedFieldToJoin($attribute, $provider->query);
-			continue;
+			// continue;
 			if ($sort_fldname != $attribute) {
 				/// @todo recursive tarea.paqueteTrabajo.proyecto.id
-				$relation_name = $attribute;
 				$related_model_class = $relation['modelClass'];
 // 				$provider->query->distinct(); // Evitar duplicidades debido a las relaciones hasmany
 				if (!isset($provider->sort->attributes[$attribute])) {
 					$related_model_search_class = $relation['searchClass']
 						?? str_replace('models\\', 'forms\\', $related_model_class) . '_Search';
-					if( class_exists($related_model_search_class) ) {
-						if ($sort_fldname == '' ) { /// @todo junction tables
-							$code_field = $related_model_class::instance()->findCodeField();
-							$sort_fldname = $code_field;
-						}
+					if (class_exists($related_model_search_class)) {
 						// Set orders from the related search model
 						$related_model = $related_model_search_class::instance();
 						$related_model_provider = $related_model->search([]);
@@ -123,7 +118,9 @@ trait ModelSearchTrait
 									= [ $table_alias.".".$key => $value ];
 								}
 							}
-							$provider->sort->attributes[$attribute] = $new_related_sort ;
+							$provider->sort->attributes[$attribute] = $new_related_sort;
+						} else {
+							$provider->sort->attributes[$attribute] = $related_model_provider->sort->defaultOrder;
 						}
 					} else {
 						$provider->sort->attributes[$attribute] = [
@@ -154,21 +151,31 @@ trait ModelSearchTrait
 			if ($relation) {
 				if ($relation['type'] == 'ManyToMany') {
 					$junction_relation = $model::$relations[$relation['join']];
-					$junction_modelClass = $junction_relation['modelClass'];
-					$junction_model = $junction_modelClass::instance();
+					$junction_model_class = $junction_relation['modelClass'];
+					$junction_model = $junction_model_class::instance();
 					$junction_table_alias = $table_alias . '_join_' . $field_name;
 					$nested_relations[$junction_table_alias] = $junction_relation['relatedTablename'];
 					/// @todo $final_attribute when nested
-					if ($this->addJoinIfNotExists($query, $nested_relations, "INNER JOIN", [ $junction_table_alias => $junction_model->tableName()], $junction_relation['join'])) {
-						$final_attribute = $junction_table_alias . '.' . $attribute;
+					$this->addJoinIfNotExists($query, $nested_relations, "LEFT JOIN", [ $junction_table_alias => $junction_model->tableName()], $junction_relation['join']);
+					$related_table_alias = $junction_table_alias . '_' . $field_name;
+					$nested_relations[$related_table_alias] = $relation['relatedTablename'];
+					$model_class = $relation['modelClass'];
+					$model = $model_class::instance();
+					foreach ($junction_model::$relations as $nr => $related_relation) {
+						if ($related_relation['modelClass'] == $model_class) {
+							break;
+						}
+					}
+					if ($this->addJoinIfNotExists($query, $nested_relations, "LEFT JOIN", [ $related_table_alias => $model->tableName()], $related_relation['join'])) {
+						$final_attribute = $related_table_alias . '.' . $attribute;
 					} else {
 						$final_attribute = $relation['other'];
 						$table_alias = $junction_model->tableName();
 					}
 				} else {
 					$table_alias .= "_$field_name";
-					$modelClass = $relation['modelClass'];
-					$model = $modelClass::instance();
+					$model_class = $relation['modelClass'];
+					$model = $model_class::instance();
 					$nested_relations[$table_alias] = $relation['relatedTablename'];
 					$this->addJoinIfNotExists($query, $nested_relations, "LEFT JOIN", [ $table_alias => $model->tableName()], $relation['join']);
 					$final_attribute = $attribute;
@@ -179,8 +186,8 @@ trait ModelSearchTrait
 		}
 		if (isset($model::$relations[$attribute])) {
 			$relation = $model::$relations[$attribute];
-			$modelClass = $relation['modelClass'];
-			$model = $modelClass::instance();
+			$model_class = $relation['modelClass'];
+			$model = $model_class::instance();
 			// Hay tres tipos de campos relacionados:
 			// 1. El nombre de la relación (attribute = '' )
 			// 2. Relación y campo: Productora.nombre
@@ -193,21 +200,6 @@ trait ModelSearchTrait
 		return [$final_attribute??$attribute,$table_alias,$model,$relation];
 	}
 
-
-	/**
-	 * Adds related filters to dataproviders for grids
-	*/
-    public function addRelatedFiltersToProvider($gridColumns, &$provider)
-    {
-		foreach ($gridColumns as $column_def) {
-			if ( $column_def === null || empty($column_def['filterAttribute']) ) {
-				continue;
-			}
-			if (is_string($column_def['filterAttribute'])) {
-				$this->addRelatedFieldToJoin($column_def['filterAttribute']);
-			}
-		}
-	}
 
 	protected function filterWhereRelated($query, $relation_name, $value, $is_and = true)
 	{
@@ -336,19 +328,28 @@ trait ModelSearchTrait
 			return;
 		}
 		$or_conds = [ 'OR' ];
-		foreach( $attributes as $name ) {
-			if( $name == 'globalSearch' ) {
+		foreach( $attributes as $name => $operator) {
+			if ($operator == null) {
 				continue;
 			}
-			if( strpos($name, '.') === FALSE) {
+			if (strpos($name, '.') === FALSE) {
 				$relation = self::$relations[$name]??null;
-				if( !$relation ) {
+				if (!$relation) {
 					$fullfldname = $this->tableName() . "." . $name;
-					$or_conds[] = [ 'LIKE', $fullfldname, $value ];
+					if ($operator == "bool") {
+						if (is_bool($value)) {
+							$or_conds[] = [ $fullfldname => boolval($value) ];
+						} else {
+							continue;
+						}
+					} else {
+						$or_conds[] = [ $operator, $fullfldname, $value ];
+					}
 					continue;
 				} else {
-					$relation_name = $name;
 					$attribute = '';
+					$relation_name = $name;
+					$relation = self::$relations[$relation_name]??null;
 				}
 			} else {
 				list($relation_name, $attribute) = AppHelper::splitFieldName($name);
@@ -362,8 +363,8 @@ trait ModelSearchTrait
 				$table_alias = "as_$relation_name";
 				// Activequery removes duplicate joins (added also in addSort)
 				$query->joinWith("$relation_name $table_alias");
-				$modelClass = $relation['modelClass'];
-				$model = $modelClass::instance();
+				$model_class = $relation['modelClass'];
+				$model = $model_class::instance();
 				$search_flds = [];
 				if( $attribute == '' ) {
 					$search_flds = $model->findCodeAndDescFields();

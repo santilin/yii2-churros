@@ -1,5 +1,3 @@
-- ReorderableListInput: no está inicializado el hidden input con los valores de la lista
-
 # translations
 - Ampliar malewords a más idiomas.
 

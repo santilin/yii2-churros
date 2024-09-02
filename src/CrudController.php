@@ -524,7 +524,7 @@ class CrudController extends \yii\web\Controller
 	}
 
 	// Ajax for the MutiColumnTypeAhead control
-	public function actionMultiAutocomplete(string $search, string $fields, int $page = 1, int $per_page = 10)
+	public function actionMultiAutocomplete(string $search, string $fields, int $page = 1, int $per_page = 12)
 	{
 		\Yii::$app->response->format = \yii\web\Response::FORMAT_JSON;
 		$searchModel = $this->createSearchModel();

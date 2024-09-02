@@ -180,7 +180,7 @@ trait ReportsModelTrait
         $provider = new ActiveDataProvider([
             'query' => $query->from($model->tableName()),
             'pagination' => [
-				'pagesize' => $_GET['per-page']??10,
+				'pagesize' => $_GET['per-page']??12,
 				'page' => $_GET['page']??0,
 			],
 		]);

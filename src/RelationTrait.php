@@ -124,8 +124,14 @@ trait RelationTrait
 			$link = $relation->link;
 			$link_keys = array_keys($link);
 			$this_pk = reset($link_keys);
-			if (is_string($v) && str_contains($v, ',')) {
-				$v = explode(',', $v); // treeWidget
+			if (is_string($v)) {
+				if (str_contains($v, ',')) {
+					// TreeWidget: No array is passed, a comma separated string instead
+					$v = explode(',', $v);
+				} else {
+					// TreeWidget: If there is only one selected item, no array is posted
+					$v = [ $v ];
+				}
 			}
             foreach ($v as $relPost) {
 				if( $relPost == null ) {
