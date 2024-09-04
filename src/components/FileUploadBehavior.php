@@ -257,7 +257,7 @@ class FileUploadBehavior extends \yii\base\Behavior
 			}
 			return 'data:image/png;base64,' . $raw_image;
 		} else {
-			return $this->getUploadedFilePath($attribute);
+			return $this->getUploadedFileUrl($attribute);
 		}
     }
 
