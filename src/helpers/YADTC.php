@@ -2,6 +2,8 @@
 
 namespace santilin\churros\helpers;
 
+use Yii;
+
 class YADTC extends \DateTime
 {
 	const SQL_DATE_FORMAT = 'Y-m-d';
@@ -514,25 +516,7 @@ class YADTC extends \DateTime
 	const FORMAT_SPANISH = 'j \d\e F \d\e Y';
 	public function spanish($format = self::FORMAT_SPANISH)
 	{
-		$save_locale = setlocale(LC_TIME, 'es_ES');
-//  		$format = str_replace('\\', '', self::date_format_to_strftime_format($format));
- 		$ret = date($format, $this->getTimeStamp());
- 		$ret = strtr($ret, [
-			'January' => 'enero',
-			'February' => 'febrero',
-			'March' => 'marzo',
-			'April' => 'abril',
-			'May' => 'mayo',
-			'June' => 'junio',
-			'July' => 'julio',
-			'August' => 'agosto',
-			'September' => 'septiembre',
-			'October' => 'octubre',
-			'November' => 'noviembre',
-			'December' => 'diciembre'
-		]);
-		setlocale(LC_TIME, $save_locale);
-		return $ret;
+		return Yii::$app->formatter->asDate($this, $format);
 	}
 
 
