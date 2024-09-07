@@ -145,8 +145,12 @@ trait ModelSearchTrait
 		$model = $this;
 		$table_alias = 'as';
 		$relation = null;
-		while (strpos($attribute, '.') !== FALSE) {
-			list($field_name, $attribute) = AppHelper::splitString($attribute, '.');
+		while (strpos($attribute, '.') !== FALSE || isset($model::$relations[$attribute])) {
+			if (strpos($attribute, '.') === FALSE) {
+				$field_name = $attribute;
+			} else {
+				list($field_name, $attribute) = AppHelper::splitString($attribute, '.');
+			}
 			$relation = $model::$relations[$field_name]??null;
 			if ($relation) {
 				if ($relation['type'] == 'ManyToMany') {
@@ -167,7 +171,13 @@ trait ModelSearchTrait
 						}
 					}
 					if ($this->addJoinIfNotExists($query, $nested_relations, "LEFT JOIN", [ $related_table_alias => $model->tableName()], $related_relation['join'])) {
-						$final_attribute = $related_table_alias . '.' . $attribute;
+						if ($attribute == $field_name) { // no related field set
+							/// @todo findCodeAndDescFields
+							$final_attribute = $related_table_alias . '.' . $model->findCodeField();
+						} else {
+							$final_attribute = $attribute;
+							$table_alias = $related_table_alias;
+						}
 					} else {
 						$final_attribute = $relation['other'];
 						$table_alias = $junction_model->tableName();
@@ -183,19 +193,6 @@ trait ModelSearchTrait
 			} else {
 				throw new InvalidArgumentException($field_name . ": relation not found in model " . self::class . ' (SearchModel::filterWhereRelated)');
 			}
-		}
-		if (isset($model::$relations[$attribute])) {
-			$relation = $model::$relations[$attribute];
-			$model_class = $relation['modelClass'];
-			$model = $model_class::instance();
-			// Hay tres tipos de campos relacionados:
-			// 1. El nombre de la relación (attribute = '' )
-			// 2. Relación y campo: Productora.nombre
-			// 3. La clave foranea: productura_id
-			$table_alias .= "_$attribute";
-			$nested_relations[$table_alias] = $relation['relatedTablename'];
-			$this->addJoinIfNotExists($query, $nested_relations, "LEFT JOIN", [ $table_alias => $model->tableName()], $relation['join']);
-			$final_attribute = $model->primaryKey()[0];
 		}
 		return [$final_attribute??$attribute,$table_alias,$model,$relation];
 	}
@@ -228,42 +225,44 @@ trait ModelSearchTrait
 				$query->orWhere($rel_conds);
 			}
 		} else if ($attribute == $model->primaryKey()[0] ) {
-			if (isset($relation['other']) ) {
-				list($right_table, $right_fld ) = AppHelper::splitFieldName($relation['other']);
-			} else {
-				list($right_table, $right_fld ) = AppHelper::splitFieldName($relation['right']);
-			}
-			if ($value['v']=== 'true') {
-				$query->andWhere(["not", ["$table_alias.$right_fld" => null]]);
-			} else if ($value['v'] === 'false') {
-				if ($is_and) {
-					$query->andWhere(["$table_alias.$right_fld" => null]);
-				} else {
-					$query->orWhere(["$table_alias.$right_fld" => null]);
-				}
-			} else {
-				// Look for code and desc fields also
-				$fields = array_unique(array_filter([$model->getModelInfo('code_field'), $model->getModelInfo('desc_field')]));
-				if (count($fields)==1) {
-					if ($is_and) {
-						$query->andWhere(["$table_alias.$right_fld" => $value['v']]);
-					} else {
-						$query->orWhere(["$table_alias.$right_fld" => $value['v']]);
-					}
-				} else {
-					$conds = ["or", [ "$table_alias.$right_fld" => $value['v']]];
-					foreach ($fields as $fld) {
-						if ($fld != $right_fld && $value['op'] != 'LIKE') {
-							$conds[] = [ "LIKE", "$table_alias.$fld", $value['v'] ];
-						}
-					}
-					if ($is_and) {
-						$query->andWhere($conds);
-					} else {
-						$query->orWhere("or", $conds);
-					}
-				}
-			}
+			$query->andWhere(["$table_alias.$attribute" => $value['v']]);
+		// } else {
+		// 	if (isset($relation['other']) ) {
+		// 		list($right_table, $right_fld ) = AppHelper::splitFieldName($relation['other']);
+		// 	} else {
+		// 		list($right_table, $right_fld ) = AppHelper::splitFieldName($relation['right']);
+		// 	}
+		// 	if ($value['v']=== 'true') {
+		// 		$query->andWhere(["not", ["$table_alias.$right_fld" => null]]);
+		// 	} else if ($value['v'] === 'false') {
+		// 		if ($is_and) {
+		// 			$query->andWhere(["$table_alias.$right_fld" => null]);
+		// 		} else {
+		// 			$query->orWhere(["$table_alias.$right_fld" => null]);
+		// 		}
+		// 	} else {
+		// 		// Look for code and desc fields also
+		// 		$fields = array_unique(array_filter([$model->getModelInfo('code_field'), $model->getModelInfo('desc_field')]));
+		// 		if (count($fields)==1) {
+		// 			if ($is_and) {
+		// 				$query->andWhere(["$table_alias.$right_fld" => $value['v']]);
+		// 			} else {
+		// 				$query->orWhere(["$table_alias.$right_fld" => $value['v']]);
+		// 			}
+		// 		} else {
+		// 			$conds = ["or", [ "$table_alias.$right_fld" => $value['v']]];
+		// 			foreach ($fields as $fld) {
+		// 				if ($fld != $right_fld && $value['op'] != 'LIKE') {
+		// 					$conds[] = [ "LIKE", "$table_alias.$fld", $value['v'] ];
+		// 				}
+		// 			}
+		// 			if ($is_and) {
+		// 				$query->andWhere($conds);
+		// 			} else {
+		// 				$query->orWhere("or", $conds);
+		// 			}
+		// 		}
+		// 	}
 		} else {
 			if ($is_and) {
 				$query->andWhere([$value['op'], "$table_alias.$attribute", $value['v'] ]);
