@@ -513,7 +513,7 @@ class YADTC extends \DateTime
         }
     }
 
-	const FORMAT_SPANISH = 'j \d\e F \d\e Y';
+    const FORMAT_SPANISH = "d 'de' MMMM 'de' yyyy";
 	public function spanish($format = self::FORMAT_SPANISH)
 	{
 		return Yii::$app->formatter->asDate($this, $format);
