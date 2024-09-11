@@ -10,6 +10,7 @@ namespace santilin\churros\helpers;
 use Yii;
 use yii\helpers\{ArrayHelper,Html,Url};
 use yii\base\InvalidConfigException;
+use yii\bootstrap5\Modal;
 
 class FormHelper
 {
@@ -517,6 +518,17 @@ ajax;
 			return [ 'op' => $strict ? '=' : 'LIKE', 'v' => $value ];
 		}
 	}
-
+	static public function modalSize(string $size = null): string
+	{
+		if ($size == "small") {
+			return Modal::SIZE_SMALL;
+		} else if ($size == "large") {
+			return Modal::SIZE_LARGE;
+		} else if ($size == "extra_large") {
+			return Modal::SIZE_EXTRA_LARGE;
+		} else {
+			return Modal::SIZE_DEFAULT;
+		}
+	}
 
 } // class
