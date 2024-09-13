@@ -9,6 +9,7 @@ use yii;
 use yii\helpers\{ArrayHelper,Html};
 use santilin\churros\helpers\FormHelper;
 use santilin\churros\widgets\grid\SimpleGridView;
+use yii\bootstrap5\ActiveForm;
 
 class GridView extends SimpleGridView
 {
@@ -18,7 +19,7 @@ class GridView extends SimpleGridView
 	public $toolbarButtonsOptions = [];
 	public $condensed = false;
 	public $hover = false;
-	public $layout = "{summary}\n{selectViews}\n{items}\n{pager}";
+	public $layout = "{summary}\n{selectViews}\n{items}\n{pager}{filterCount}";
 	public $savedColumnValues = [];
 
 
@@ -49,6 +50,8 @@ class GridView extends SimpleGridView
             case '{toolbar}':
             case '{toolbarContainer}':
                 return $this->renderToolbar();
+			case '{filterCount}':
+				return $this->renderFilterCount();
 			case '{selectViews}':
 				return $this->renderSelectViews();
 			case '{summaryWithSelectViews}':
@@ -56,6 +59,26 @@ class GridView extends SimpleGridView
             default:
                 return parent::renderSection($name);
         }
+    }
+
+    public function renderFilterCount()
+    {
+		$pagination = $this->dataProvider->getPagination();
+        if ($pagination === false || $this->dataProvider->getCount() <= 0) {
+            return '';
+        }
+        $urls = [];
+		$html = "<ul class=grid-items-per-page><li>" . Yii::t('churros', 'Items per page') . '</li>';
+        foreach ([6 => '6', 12 => '12',24 => '24', 60 => '60', -1 => Yii::t('churros', 'All')] as $page_size => $label) {
+			if ($page_size == -1) {
+				$pagination_url = $pagination->createUrl(0, 999999999);
+			} else {
+				$pagination_url = $pagination->createUrl($pagination->page, $page_size);
+			}
+			$html.= '<li>' . Html::a($label, $pagination_url, ['data' => ['pjax' => '1']]) . '</li>';
+		}
+		$html .= '</ul>';
+		return $html;
     }
 
     // Dont show emptyText here, emptyText is managed in the summary section.

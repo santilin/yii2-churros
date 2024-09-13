@@ -42,6 +42,7 @@ return [
 	'Delete this image' => 'Borrar esta imagen',
 
 	'All' => 'Todo',
+	'Items per page' => 'Filas por página',
     'Show all' => 'Mostrar todo',
     'Paginate' => 'Paginar',
     'Summarize' => 'Sólo totales',

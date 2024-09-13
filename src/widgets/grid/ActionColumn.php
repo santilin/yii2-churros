@@ -95,17 +95,6 @@ class ActionColumn extends \yii\grid\ActionColumn
 		}
 	}
 
-    protected function renderFilterCellContent()
-    {
-		$pagination = $this->grid->dataProvider->getPagination();
-        if ($pagination === false || $this->grid->dataProvider->getCount() <= 0) {
-            return '';
-        }
-		return Html::activeDropDownList($this->grid->filterModel, '_gridPageSize',
-			[1=>1, 5=>5, 12=> 12, 24 => 24, 60 => 60, 120 => 120, 0 => 'Todo'],
-			['id'=>'_grid_view_pageSize']);
-    }
-
     /**
 	 * Creates a URL for the given action and model.
 	 * This method is called for each button and each row.

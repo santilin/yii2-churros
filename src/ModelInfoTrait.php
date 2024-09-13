@@ -375,6 +375,21 @@ trait ModelInfoTrait
 		return "$prefix$c/";
     }
 
+
+	function getLastTwoParts($string) {
+		$lastDotPosition = strrpos($string, '.');
+		if ($lastDotPosition === false) {
+			return $string;
+		}
+
+		$secondLastDotPosition = strrpos($string, '.', $lastDotPosition - strlen($string) - 1);
+		if ($secondLastDotPosition === false) {
+			return $string;
+		}
+
+		return substr($string, $secondLastDotPosition + 1);
+	}
+
     public function relatedFieldForModel($related_model): string|array|null
     {
 		$tc = get_class($this);
@@ -384,8 +399,8 @@ trait ModelInfoTrait
 		foreach (self::$relations as $relname => $rel_info) {
 			if ($rel_info['modelClass'] == $cn) {
 				if ($rel_info['type'] == 'ManyToMany') {
-					/// @todo $rel_info['right'] ??
-					return [$rel_info['join'], $rel_info['right']];
+					$rel_field = $this->getLastTwoParts($rel_info['right']);
+					return [$rel_info['join'], $rel_field];
 				}
 				$related_field = $rel_info['left'];
 				list($table, $field) = AppHelper::splitFieldName($related_field);
