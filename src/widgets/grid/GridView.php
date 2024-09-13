@@ -70,12 +70,17 @@ class GridView extends SimpleGridView
         $urls = [];
 		$html = "<ul class=grid-items-per-page><li>" . Yii::t('churros', 'Items per page') . '</li>';
         foreach ([6 => '6', 12 => '12',24 => '24', 60 => '60', -1 => Yii::t('churros', 'All')] as $page_size => $label) {
+			if ($pagination->pageSize == $page_size) {
+				$li_class = ' class=current';
+			} else {
+				$li_class = '';
+			}
 			if ($page_size == -1) {
 				$pagination_url = $pagination->createUrl(0, 999999999);
 			} else {
 				$pagination_url = $pagination->createUrl($pagination->page, $page_size);
 			}
-			$html.= '<li>' . Html::a($label, $pagination_url, ['data' => ['pjax' => '1']]) . '</li>';
+			$html.= "<li$li_class>" . Html::a($label, $pagination_url, ['data' => ['pjax' => '1']]) . '</li>';
 		}
 		$html .= '</ul>';
 		return $html;
