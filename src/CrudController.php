@@ -587,8 +587,9 @@ class CrudController extends \yii\web\Controller
 		return $ret;
 	}
 
-    public function genBaseBreadCrumbs(string $action_id, $model, array $permissions = []): array
+    public function genBaseBreadCrumbs(string $action_id, $model, array $view_params= []): array
 	{
+		$permissions = $view_params['permissions']??[];
 		$breadcrumbs = [];
 		$master = $this->getMasterModel();
 		if ($master) {
@@ -619,10 +620,16 @@ class CrudController extends \yii\web\Controller
 			// 	];
 			}
 		}
-		if ($action_id != 'index' && $action_id != 'create') {
+		$prim_keys = [];
+		if (empty($model->getPrimaryKey())) { // create, index or duplicate
+			foreach ($model->getPrimaryKey(true) as $k => $kv) {
+				$prim_keys[$k] = $view_params[$k]??null;
+			}
+		}
+		if (!empty($prim_keys)) {
 			$breadcrumbs[] = [
 				'label' => $model->recordDesc('short', 25),
-				'url' => $action_id!='view' ? array_merge([$this->getActionRoute('view')], $model->getPrimaryKey(true)) : null,
+				'url' => $action_id!='view' ? array_merge([$this->getActionRoute('view')], $prim_keys) : null,
 			];
 		}
 		return $breadcrumbs;
