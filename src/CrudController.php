@@ -620,10 +620,17 @@ class CrudController extends \yii\web\Controller
 			// 	];
 			}
 		}
-		$prim_keys = [];
+		$prim_keys = $model->getPrimaryKey(true);
 		if (empty($model->getPrimaryKey())) { // create, index or duplicate
-			foreach ($model->getPrimaryKey(true) as $k => $kv) {
-				$prim_keys[$k] = $view_params[$k]??null;
+			$has_prim_keys = false;
+			foreach ($prim_keys as $k => $kv) {
+				if (!empty($view_params[$k])) {
+					$has_prim_keys = true;
+					$prim_keys[$k] = $view_params[$k];
+				}
+			}
+			if (!$has_prim_keys) {
+				$prim_keys = [];
 			}
 		}
 		if (!empty($prim_keys)) {
