@@ -6,12 +6,26 @@ use yii\base\Model;
 use yii\data\ActiveDataProvider;
 use yii\data\ArrayDataProvider;
 use yii\db\ActiveQueryInterface;
-use yii\helpers\Inflector;
+use yii\helpers\{Html,Inflector};
 
 
 class DataColumn extends \yii\grid\DataColumn
 {
     public $summary;
+
+
+    /**
+     * @inheritdoc
+     * @throws InvalidConfigException
+     */
+    public function init()
+    {
+        if (is_array($this->filter)) {
+            Html::removeCssClass($this->filterInputOptions, 'form-control');
+            Html::addCssClass($this->filterInputOptions, 'form-select');
+        }
+        parent::init();
+    }
 
 	// Da preferencia a las labels del searchmodel
     protected function getHeaderCellLabel()
