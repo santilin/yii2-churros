@@ -690,44 +690,6 @@ trait ModelInfoTrait
 	}
 
 	/**
-	 * Saves the record handling calculated fields
-	 */
-	public function save($runValidation = true, $validateFields = null)
-	{
-		if (property_exists($this, '_calculated_fields') && count(static::$_calculated_fields)) {
-			$scf = [];
-			foreach (static::$_calculated_fields as $cf) {
-				if (property_exists($this, $cf) || $this->hasAttribute($cf)) {
-					$scf[$cf] = $this->$cf;
-					unset($this->$cf);
-				}
-			}
-			try {
-				if (parent::save($runValidation, $validateFields)) {
-					$values = self::find()->where($this->getPrimaryKey(true))->select(array_keys($scf))->asArray()->one();
-					foreach ($values as $k => $v) {
-						$this->$k = $v; // Don't use setAttributes that requires rules
-					}
-					return true;
-				} else {
-					foreach ($scf as $kcf => $cf) {
-						$this->$kcf = $cf;
-					}
-					return false;
-				}
-			} catch (\Exception $e) {
-				foreach ($scf as $kcf => $cf) {
-					$this->$kcf = $cf;
-				}
-				throw $e;
-			}
-		} else {
-			return parent::save($runValidation, $validateFields);
-		}
-
-	}
-
-	/**
 	 * Get all properties that start with a given prefix.
 	 *
 	 * @param string $prefix The prefix to filter properties by.
@@ -772,6 +734,17 @@ trait ModelInfoTrait
 		return $filteredProperties;
 	}
 
+	public function getRefreshableAttributes(): array
+	{
+		$ret = [];
+		foreach ($this->getAttributes() as $k => $v) {
+			if ($v instanceof \yii\db\ExpressionInterface) {
+				$ret[] = $k;
+			}
+		}
+		return $ret;
+	}
+
 	public function copy($other)
 	{
 		$this->setAttributes($other->getAttributes());
@@ -780,4 +753,3 @@ trait ModelInfoTrait
 	}
 
 } // trait ModelInfoTrait
-
