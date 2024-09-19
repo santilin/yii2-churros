@@ -777,7 +777,6 @@ trait RelationTrait
 			}
 		}
 		return $ret;
-
 	}
 
 }

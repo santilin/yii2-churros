@@ -745,6 +745,21 @@ trait ModelInfoTrait
 		return $ret;
 	}
 
+	static public function refreshAttributes($event)
+	{
+		$model = $event->sender;
+		$ra = $model->getRefreshableAttributes();
+		if (count($ra)) {
+			$values = $model::find()
+				->where($model->getPrimaryKey(true))
+				->select($ra)->asArray()->one();
+			foreach ($values as $k => $v) {
+				$model->$k = $v;
+				$model->setOldAttribute($k,$v);
+			}
+		}
+
+
 	public function copy($other)
 	{
 		$this->setAttributes($other->getAttributes());
