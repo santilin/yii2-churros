@@ -14,6 +14,7 @@ use yii\base\InvalidConfigException;
 use yii\db\{ActiveQuery,ActiveRecord,Exception,IntegrityException};
 use yii\helpers\{Inflector,StringHelper,ArrayHelper};
 use santilin\churros\json\JsonModel;
+use santilin\churros\helpers\AppHelper;
 
 /*
  *  add this line to your Model to enable soft delete
@@ -738,5 +739,45 @@ trait RelationTrait
         }
     }
 
+    protected function findRelationByModel(string $model_name): ?array
+	{
+		foreach ($this::$relations as $rel_name => $rel_info) {
+			if ($rel_info['model'] == $model_name) {
+				$rel_info['name'] = $rel_name;
+				return $rel_info;
+			}
+		}
+		return null;
+	}
+
+	public function modelsToRelations(string $model_name): string
+	{
+		$model = $this;
+		$relation = null;
+		$ret = '';
+		while (true) {
+			if (strpos($model_name, '.') === FALSE) {
+				$relation = $this->findRelationByModel($model_name);
+				$rest = '';
+			} else {
+				list($model_name, $rest) = AppHelper::splitString($model_name, '.');
+				$relation = $this->findRelationByModel($model_name);
+			}
+			if ($ret) {
+				$ret .= '.';
+			}
+			if ($relation) {
+				$ret .= $relation['name'];
+				$model_name = $rest;
+			} else if ($rest) {
+				$ret .= $rest;
+			} else {
+				$ret .= $model_name;
+				break;
+			}
+		}
+		return $ret;
+
+	}
 
 }
