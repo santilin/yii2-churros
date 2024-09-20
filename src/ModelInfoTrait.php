@@ -734,7 +734,7 @@ trait ModelInfoTrait
 		return $filteredProperties;
 	}
 
-	public function getRefreshableAttributes(): array
+	public function refreshableAttributes(): array
 	{
 		$ret = [];
 		foreach ($this->getAttributes() as $k => $v) {
@@ -748,7 +748,7 @@ trait ModelInfoTrait
 	static public function refreshAttributes($event)
 	{
 		$model = $event->sender;
-		$ra = $model->getRefreshableAttributes();
+		$ra = $model->refreshableAttributes();
 		if (count($ra)) {
 			$values = $model::find()
 				->where($model->getPrimaryKey(true))
@@ -758,6 +758,7 @@ trait ModelInfoTrait
 				$model->setOldAttribute($k,$v);
 			}
 		}
+	}
 
 
 	public function copy($other)
