@@ -12,7 +12,7 @@ trait ModelChangesLogTrait
 	/**
 	 * Only enable loggin changes when needed
 	 */
-	public function enableChangesLog(bool $enabled)
+	public function enableChangesLog(bool $enabled = true)
 	{
 		$this->_model_changes_log = $enabled;
 	}
