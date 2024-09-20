@@ -8,7 +8,6 @@ trait ModelChangesLogTrait
 {
 	protected $_model_changes_log = false;
 	protected $_model_changes_soft_delete;
-	protected $_model_changes_relation = 'participanteCambios';
 
 	/**
 	 * Only enable loggin changes when needed
