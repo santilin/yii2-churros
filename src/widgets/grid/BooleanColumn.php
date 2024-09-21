@@ -11,7 +11,7 @@ use Yii;
 use yii\base\Model;
 use yii\bootstrap5\Html;
 
-class BooleanColumn extends \yii\grid\DataColumn
+class BooleanColumn extends DataColumn
 {
     /**
      * @var string $onTrue the contents to display when value is true.
@@ -30,7 +30,18 @@ class BooleanColumn extends \yii\grid\DataColumn
      */
     public $treatEmptyAsFalse = true;
 
-        /**
+    /**
+     * @inheritdoc
+     * @throws InvalidConfigException
+     */
+    public function init()
+    {
+        parent::init();
+        Html::removeCssClass($this->filterInputOptions, 'form-control');
+        Html::addCssClass($this->filterInputOptions, 'form-select form-select-sm w-auto');
+    }
+
+    /**
      * {@inheritdoc}
      */
     protected function renderFilterCellContent()
