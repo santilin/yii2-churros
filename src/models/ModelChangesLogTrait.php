@@ -1,8 +1,9 @@
 <?php
 
-namespace santilin\churros;
+namespace santilin\churros\models;
 
 use santilin\churros\helpers\AppHelper;
+use santilin\churros\models\ModelChangesEvent;
 
 trait ModelChangesLogTrait
 {
@@ -14,54 +15,53 @@ trait ModelChangesLogTrait
 	 */
 	public function enableChangesLog(bool $enabled = true)
 	{
-		$this->_model_changes_log = $enabled;
+		if ($this->_model_changes_log = $enabled) {
+			$this->on(self::EVENT_AFTER_INSERT, [$this, 'handleModelChanges']);
+			$this->on(self::EVENT_AFTER_UPDATE, [$this, 'handleModelChanges']);
+			$this->on(self::EVENT_AFTER_DELETE, [$this, 'handleModelChanges']);
+		} else {
+			$this->off(self::EVENT_AFTER_INSERT);
+			$this->off(self::EVENT_AFTER_UPDATE);
+			$this->off(self::EVENT_AFTER_DELETE);
+		}
 	}
 
 	// Logs the changes after the model is saved or deleted
 	public function handleModelChanges($event)
 	{
-		if (!$this->_model_changes_log) {
-			return;
-		}
+		$must_trigger = false;
 		if ($event->name == self::EVENT_AFTER_DELETE) {
 			// 			$pc = new participanteChange;
 			// 			$pc->participantes_id = $this->id;
 			// 			$pc->type = participanteChange::V_TYPE_DELETE;
 			// 			$pc->saveOrFail();
 		} else {
-			$model_name = $event->sender->getModelInfo('model_name');
+			$model_name = get_class($event->sender);
 			$_model_changes_relation_info = static::$relations[$this->_model_changes_relation];
-			$record_id = count($this->primaryKey())==1 ? $this->getPrimaryKey() : json_encode($this->getPrimaryKey(true));
+			$record_id = strval(count($this->primaryKey())==1 ? $this->getPrimaryKey() : json_encode($this->getPrimaryKey(true)));
 			$pc = new $_model_changes_relation_info['modelClass'];
- 			$left_field = AppHelper::lastWord($_model_changes_relation_info['right'], '.');
-			if (get_class($this) == get_class($event->sender)) {
-				$left_value = $this->getPrimaryKey();
-			} else {
-				$left_value = $event->sender->$left_field;
-			}
 			if ($event->name == self::EVENT_AFTER_INSERT) {
-				$pc->$left_field = $left_value;
-				$pc->field = null;
+				$pc->record_id = $record_id;
+				$pc->field = $pc::findChangeableFieldIndex($model_name);
 				$pc->changed_at = $this->created_at;
 				$pc->changed_by = $this->created_by;
 				$pc->type = $pc::V_TYPE_CREATE;
-				$pc->value = $record_id;
-				$pc->record_id = $this->recordDesc('short');
+				$pc->value = $this->recordDesc('short');
 				$pc->saveOrFail();
+				$must_trigger = true;
 			} else if ($event->name == self::EVENT_AFTER_UPDATE) {
 				foreach ($event->changedAttributes as $fld => $old_value) {
-					if ($nfield = $pc::findChangeableFieldIndex($model_name.'.'.$fld)) {
-						if ($this->$fld == $old_value) {
-							continue;
-						}
+					if ($this->$fld == $old_value) {
+						continue;
+					}
+					if ($nfield = $pc::findChangeableFieldIndex($model_name, $fld)) {
 						if (!$pc->getIsNewRecord()) {
 							$pc->resetPrimaryKeys();
 							$pc->setIsNewRecord(true);
 						}
 						$pc = new $_model_changes_relation_info['modelClass'];
-						$pc->$left_field = $left_value;
+						$pc->record_id = $record_id;
 						$pc->field = $nfield;
-						$pc->record_id = strval($record_id);
 						$pc->value = $this->$fld;
 						$pc->changed_by = $this->updated_by;
 						$pc->changed_at = new \yii\db\Expression("NOW()");
@@ -85,14 +85,17 @@ trait ModelChangesLogTrait
 							$pc->subtype = $pc::V_SUBTYPE_CHANGE;
 						}
 						$pc->saveOrFail();
+						$must_trigger = false;
 					}
 				}
 			} else {
 				throw new \yii\db\IntegrityException($event->name . ": invalid event name");
 			}
+			if ($must_trigger) {
+				$this->trigger(ModelChangesEvent::EVENT_CHANGES_SAVED,
+							   new ModelChangesEvent($this));
+			}
 		}
 	}
-
-
 
 }
