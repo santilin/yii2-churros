@@ -295,7 +295,6 @@ class JsonModel extends \yii\base\Model
         if ($this->_json_object !== null) {
             $this->_is_new_record = false;
             $this->setPrimaryKey($id);
-            $this->setDefaultValues(false);
             $v = $this->_json_object->getValue();
             if ($v === null) {
             } else if (is_bool($v)) {
