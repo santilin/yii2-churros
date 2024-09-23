@@ -47,7 +47,7 @@ trait ModelChangesLogTrait
 			// 			$pc->type = participanteChange::V_TYPE_DELETE;
 			// 			$pc->saveOrFail();
 		} else {
-			$model_name = get_class($event->sender);
+			$model_name = $event->sender->getModelInfo('model_name');
 			$_model_changes_relation_info = static::$relations[$this->_model_changes_relation];
 			$record_id = strval(count($this->primaryKey())==1 ? $this->getPrimaryKey() : json_encode($this->getPrimaryKey(true)));
 			$pc = new $_model_changes_relation_info['modelClass'];
