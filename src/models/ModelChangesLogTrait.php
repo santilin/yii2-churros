@@ -13,7 +13,7 @@ trait ModelChangesLogTrait
 	/**
 	 * Only enable loggin changes when needed
 	 */
-	public function enableChangesLog(bool $enabled = true)
+	public function enableRecordChanges(bool $enabled = true)
 	{
 		if ($this->_model_changes_log = $enabled) {
 			$this->on(self::EVENT_AFTER_INSERT, [$this, 'handleModelChanges']);
@@ -25,6 +25,17 @@ trait ModelChangesLogTrait
 			$this->off(self::EVENT_AFTER_DELETE);
 		}
 	}
+
+	protected $_model_changes_notifications = false;
+	public function enableRecordChangesNotifications(bool $enabled = true)
+	{
+		if ($this->_model_changes_notifications = $enabled) {
+			$this->on(ModelChangesEvent::EVENT_CHANGES_SAVED, [$this, 'sendModelChangesNotification']);
+		} else {
+			$this->off(ModelChangesEvent::EVENT_CHANGES_SAVED);
+		}
+	}
+
 
 	// Logs the changes after the model is saved or deleted
 	public function handleModelChanges($event)
@@ -85,7 +96,7 @@ trait ModelChangesLogTrait
 							$pc->subtype = $pc::V_SUBTYPE_CHANGE;
 						}
 						$pc->saveOrFail();
-						$must_trigger = false;
+						$must_trigger = true;
 					}
 				}
 			} else {
@@ -93,9 +104,15 @@ trait ModelChangesLogTrait
 			}
 			if ($must_trigger) {
 				$this->trigger(ModelChangesEvent::EVENT_CHANGES_SAVED,
-							   new ModelChangesEvent($this));
+							   new ModelChangesEvent($pc));
 			}
 		}
+	}
+
+	public function sendModelChangesNotification(ModelChangesEvent $e)
+	{
+		$changes_record = $e->getChangesRecord();
+		$changes_record->sendModelChangesNotification();
 	}
 
 }
