@@ -438,4 +438,19 @@ class AppHelper
 		return implode("\n", $lines);
 	}
 
+	static public function arrayToShellArgs($array) {
+		$args = [];
+		foreach ($array as $key => $value) {
+			if (is_bool($value)) {
+				if ($value) {
+					$args[] = escapeshellarg("--$key");
+				}
+			} else {
+				$args[] = escapeshellarg("--$key=" . $value);
+			}
+		}
+		return implode(' ', $args);
+	}
+
+
 }
