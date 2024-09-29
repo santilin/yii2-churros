@@ -104,7 +104,7 @@ trait ModelSearchTrait
 						// Set orders from the related search model
 						$related_model = $related_model_search_class::instance();
 						$related_model_provider = $related_model->search([]);
-						if (isset($related_model_provider->sort->attributes[$sort_fldname]) ) {
+						if ($sort_fldname != 'id' && isset($related_model_provider->sort->attributes[$sort_fldname]) ) {
 							$related_sort = $related_model_provider->sort->attributes[$sort_fldname];
 							if (isset($related_sort['label'])) {
 								$new_related_sort = [ 'label' => $related_sort['label']];
@@ -112,7 +112,7 @@ trait ModelSearchTrait
 							} else {
 								$new_related_sort = [];
 							}
-							foreach( $related_sort as $asc_desc => $sort_def) {
+							foreach ($related_sort as $asc_desc => $sort_def) {
 								foreach( $sort_def as $key => $value ) {
 									$new_related_sort[$asc_desc]
 									= [ $table_alias.".".$key => $value ];
@@ -120,7 +120,21 @@ trait ModelSearchTrait
 							}
 							$provider->sort->attributes[$attribute] = $new_related_sort;
 						} else {
-							$provider->sort->attributes[$attribute] = $related_model_provider->sort->defaultOrder;
+							$related_default_order = $related_model_provider->sort->defaultOrder;
+							if (!$related_default_order) {
+								$related_default_order = [ $related_model->findCodeField() => SORT_ASC ];
+							}
+							$sort_attributes = [];
+							foreach ($related_default_order as $sort_attribute => $sort_direction) {
+								if (isset($related_model_provider->sort->attributes[$sort_attribute])) {
+									foreach ($related_model_provider->sort->attributes[$sort_attribute]['asc'] as $fld_asc => $fld_asc_direction) {
+										$provider->sort->attributes[$attribute]['asc'][$fld_asc] = $fld_asc_direction;
+									}
+									foreach ($related_model_provider->sort->attributes[$sort_attribute]['desc'] as $fld_desc => $fld_desc_direction) {
+										$provider->sort->attributes[$attribute]['desc'][$fld_desc] = $fld_desc_direction;
+									}
+								}
+							}
 						}
 					} else {
 						$provider->sort->attributes[$attribute] = [
