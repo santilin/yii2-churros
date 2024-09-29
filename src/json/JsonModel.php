@@ -153,7 +153,7 @@ class JsonModel extends \yii\base\Model
         }
         if ($this->parent_model === null) {
             if (!$this->_json_modelable) {
-                throw new InvalidConfigException("Json model has no _json_modelable defined");
+                throw new InvalidConfigException("Json model has no _json_modelable set");
             }
             if (!$this->_path) {
                 return null;
@@ -166,7 +166,7 @@ class JsonModel extends \yii\base\Model
             if (count($parts)<2) {
                 return null;
             }
-            if (!in_array($parts[count($parts)-1], ['fields','behaviors'])) {
+            if (!in_array($parts[count($parts)-1], ['fields','behaviors','models'])) {
                 array_pop($parts);
             }
             array_pop($parts);

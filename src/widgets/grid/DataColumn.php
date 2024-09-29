@@ -23,6 +23,8 @@ class DataColumn extends \yii\grid\DataColumn
         if (is_array($this->filter)) {
             Html::removeCssClass($this->filterInputOptions, 'form-control');
             Html::addCssClass($this->filterInputOptions, 'form-select form-select-sm');
+        } else {
+            Html::addCssClass($this->filterInputOptions, 'form-control-sm');
         }
         parent::init();
     }
