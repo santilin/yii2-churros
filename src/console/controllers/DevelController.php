@@ -48,5 +48,27 @@ class DevelController extends Controller
 	}
 
 
+	public function actionPrintConfig(string $what)
+	{
+		switch($what) {
+			case 'db.dsn':
+				echo Yii::$app->db->dsn;
+				break;
+			case 'db.username':
+				echo Yii::$app->db->username;
+				break;
+			case 'db.password':
+				echo Yii::$app->db->password;
+				break;
+			case 'db.charset':
+				echo Yii::$app->db->charset;
+				break;
+			case 'db.collation':
+				echo Yii::$app->db->charset . '_spanish_ci';
+				break;
+		}
+	}
+
+
 } // class
 
