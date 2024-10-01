@@ -13,7 +13,7 @@ use yii\helpers\{Console,StringHelper};
 use yii\db\Connection;
 use yii\rbac\{BaseManager,Item,Role};
 use yii\console\Controller;
-use santilin\churros\helpers\AuthHelper;
+use santilin\churros\helpers\{AppHelper,AuthHelper};
 
 /**
  * Churros auth controller
@@ -69,6 +69,81 @@ class AuthController extends Controller
 	/**
 	 * Creates the permissions for a model inside a module
 	 */
+	public function createModelsPermissions(array $model_classes, string $viewer_desc = 'viewer', string $editor_desc = 'editor')
+	{
+		$auth = $this->authManager;
+		$visora = AuthHelper::createOrUpdateRole($viewer_desc,
+			Yii::t('churros', "View all"), $auth);
+		AuthHelper::echoLastMessage();
+		$editora = AuthHelper::createOrUpdateRole($editor_desc,
+			Yii::t('churros', "Edit all"), $auth);
+		foreach ($model_classes as $model_class) {
+			$this->createModelPermissions($model_class, $visora, $editora);
+		}
+	}
+
+
+	/**
+	 * Creates the permissions for a model inside a module
+	 */
+	public function createModelPermissions(string $model_class, Role $visora, Role $editora)
+	{
+		$auth = $this->authManager;
+		$model = $model_class::instance();
+		$model_title = $model->t('app', "{title_plural}");
+		$model_perm_name = AppHelper::lastWord($model_class, '\\');
+
+		$model_editora = AuthHelper::createOrUpdateRole(
+			$model_perm_name . '.' . $editora->name,
+			Yii::t('churros', '{model} editor', ['model' => $model_title]), $auth);
+		AuthHelper::echoLastMessage();
+		$model_visora = AuthHelper::createOrUpdateRole(
+			$model_perm_name . '.' . $visora->name,
+			Yii::t('churros', '{model} viewer', ['model' => $model_title]), $auth);
+		AuthHelper::echoLastMessage();
+
+		if( !$auth->hasChild($visora, $model_visora) ) {
+			$auth->addChild($visora, $model_visora);
+			echo "+ Role '{$model_visora->name}' added to role '{$visora->name}'\n";
+		} else {
+			echo "= Role '{$model_visora->name}' already exists in role {$visora->name}\n";
+		}
+		if( !$auth->hasChild($editora, $model_editora) ) {
+			$auth->addChild($editora, $model_editora);
+			echo "+ Role '{$model_editora->name}' added to role '{$editora->name}'\n";
+		} else {
+			echo "= Role '{$model_editora->name}' already exists in role {$editora->name}\n";
+		}
+
+		foreach (['index','view','create','update','duplicate','delete','print'] as $perm_name) {
+			$perm_desc = Yii::t('churros', ucfirst($perm_name));
+			$permission = AuthHelper::createOrUpdatePermission(
+				$model_perm_name . ".$perm_name",
+				$perm_desc . ' ' . $model_title, $auth);
+			AuthHelper::echoLastMessage();
+
+			$add_to_visora = ($perm_name == 'view' || $perm_name == 'index' || $perm_name == 'menu' );
+			if( $add_to_visora ) {
+				if( !$auth->hasChild($model_visora, $permission) ) {
+					$auth->addChild($model_visora, $permission);
+					echo "+ Permission '{$permission->name}' added to role '{$model_visora->name}'\n";
+				} else {
+					echo "= Permission '{$permission->name}' already exists in role {$model_visora->name}\n";
+				}
+			}
+			if( !$auth->hasChild($model_editora, $permission) ) {
+				$auth->addChild($model_editora, $permission);
+				echo "+ Permission '{$permission->name}' added to role '{$model_editora->name}'\n";
+			} else {
+				echo "= Permission '{$permission->name}' already exists in role '{$model_editora->name}'\n";
+			}
+		}
+	}
+
+
+	/**
+	 * Creates the permissions for a model inside a module
+	 */
 	public function createControllerPermissions(string $module_id, string $model_name, array $controller,
 												Role $visora, Role $editora)
 	{
@@ -79,11 +154,11 @@ class AuthController extends Controller
 		$model_perm_name = $module_id . '.' . $model_name;
 
 		$model_editora = AuthHelper::createOrUpdateRole(
-			$model_perm_name . '.editor',
+			$model_perm_name . '.' . $editora->name,
 			Yii::t('churros', '{model} editor', ['model' => $model_title]), $auth);
 		AuthHelper::echoLastMessage();
 		$model_visora = AuthHelper::createOrUpdateRole(
-			$model_perm_name . '.viewer',
+			$model_perm_name . '.' . $visora->name,
 			Yii::t('churros', '{model} viewer', ['model' => $model_title]), $auth);
 		AuthHelper::echoLastMessage();
 

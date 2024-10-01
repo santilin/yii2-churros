@@ -42,60 +42,59 @@ trait ModelChangesLogTrait
 	{
 		$must_trigger = false;
 		if ($event->name == self::EVENT_AFTER_DELETE) {
-			// 			$pc = new participanteChange;
-			// 			$pc->participantes_id = $this->id;
-			// 			$pc->type = participanteChange::V_TYPE_DELETE;
-			// 			$pc->saveOrFail();
+			// 			$model_change = new participanteChange;
+			// 			$model_change->participantes_id = $this->id;
+			// 			$model_change->type = participanteChange::V_TYPE_DELETE;
+			// 			$model_change->saveOrFail();
 		} else {
 			$model_name = $event->sender->getModelInfo('model_name');
 			$_model_changes_relation_info = static::$relations[$this->_model_changes_relation];
 			$record_id = strval(count($this->primaryKey())==1 ? $this->getPrimaryKey() : json_encode($this->getPrimaryKey(true)));
-			$pc = new $_model_changes_relation_info['modelClass'];
+			$model_change = new $_model_changes_relation_info['modelClass'];
 			if ($event->name == self::EVENT_AFTER_INSERT) {
-				$pc->record_id = $record_id;
-				$pc->field = $pc::findChangeableFieldIndex($model_name);
-				$pc->changed_at = $this->created_at;
-				$pc->changed_by = $this->created_by;
-				$pc->type = $pc::V_TYPE_CREATE;
-				$pc->value = $this->recordDesc('short');
-				$pc->saveOrFail();
+				$model_change->record_id = $record_id;
+				$model_change->field = $model_change::findChangeableFieldIndex($model_name);
+				$model_change->changed_at = $this->created_at;
+				$model_change->changed_by = $this->created_by;
+				$model_change->type = $model_change::V_TYPE_CREATE;
+				$model_change->value = $this->recordDesc('short');
+				$model_change->saveOrFail();
 				$must_trigger = true;
 			} else if ($event->name == self::EVENT_AFTER_UPDATE) {
 				foreach ($event->changedAttributes as $fld => $old_value) {
 					if ($this->$fld == $old_value) {
 						continue;
 					}
-					if ($nfield = $pc::findChangeableFieldIndex($model_name, $fld)) {
-						if (!$pc->getIsNewRecord()) {
-							$pc->resetPrimaryKeys();
-							$pc->setIsNewRecord(true);
+					if ($nfield = $model_change::findChangeableFieldIndex($model_name, $fld)) {
+						if (!$model_change->getIsNewRecord()) {
+							$model_change->resetPrimaryKeys();
+							$model_change->setIsNewRecord(true);
 						}
-						$pc = new $_model_changes_relation_info['modelClass'];
-						$pc->record_id = $record_id;
-						$pc->field = $nfield;
-						$pc->value = $this->$fld;
-						$pc->changed_by = $this->updated_by;
-						$pc->changed_at = new \yii\db\Expression("NOW()");
-						$pc->type = $pc::V_TYPE_UPDATE;
+						$model_change->record_id = $record_id;
+						$model_change->field = $nfield;
+						$model_change->value = $this->$fld;
+						$model_change->changed_by = $this->updated_by;
+						$model_change->changed_at = new \yii\db\Expression("NOW()");
+						$model_change->type = $model_change::V_TYPE_UPDATE;
 						if (is_bool($old_value)) {
 							if ($old_value) {
-								$pc->subtype = $pc::V_SUBTYPE_SETFALSE;
+								$model_change->subtype = $model_change::V_SUBTYPE_SETFALSE;
 							} else {
-								$pc->subtype = $pc::V_SUBTYPE_SETTRUE;
+								$model_change->subtype = $model_change::V_SUBTYPE_SETTRUE;
 							}
 						} else if ($old_value == '') {
-							$pc->subtype = $pc::V_SUBTYPE_UNEMPTY;
-						} else if ($pc->value == '') {
-							$pc->subtype = $pc::V_SUBTYPE_EMPTY;
-						} else if (AppHelper::mb_strcasecmp($pc->value, $old_value, 'UTF-8') == 0) {
-							$pc->subtype = $pc::V_SUBTYPE_CHANGECASE;
+							$model_change->subtype = $model_change::V_SUBTYPE_UNEMPTY;
+						} else if ($model_change->value == '') {
+							$model_change->subtype = $model_change::V_SUBTYPE_EMPTY;
+						} else if (AppHelper::mb_strcasecmp($model_change->value, $old_value, 'UTF-8') == 0) {
+							$model_change->subtype = $model_change::V_SUBTYPE_CHANGECASE;
 						} else if (str_replace([' ',"\t","\n","\r"], '', $old_value) ==
-							str_replace([' ',"\t","\n","\r"], '', $pc->value)) {
-							$pc->subtype = $pc::V_SUBTYPE_CHANGESPACES;
+							str_replace([' ',"\t","\n","\r"], '', $model_change->value)) {
+							$model_change->subtype = $model_change::V_SUBTYPE_CHANGESPACES;
 						} else {
-							$pc->subtype = $pc::V_SUBTYPE_CHANGE;
+							$model_change->subtype = $model_change::V_SUBTYPE_CHANGE;
 						}
-						$pc->saveOrFail();
+						$model_change->saveOrFail();
 						$must_trigger = true;
 					}
 				}
@@ -104,7 +103,7 @@ trait ModelChangesLogTrait
 			}
 			if ($must_trigger) {
 				$this->trigger(ModelChangesEvent::EVENT_CHANGES_SAVED,
-							   new ModelChangesEvent($pc));
+							   new ModelChangesEvent($model_change));
 			}
 		}
 	}
