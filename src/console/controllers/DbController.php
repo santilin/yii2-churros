@@ -93,17 +93,18 @@ class DbController extends Controller
 			$phptype = 'integer';
 		} else if (substr($phptype,0,7) == 'decimal') {
 			$phptype = 'double';
-		} else if (substr($phptype,0,7) == 'varchar' || substr($phptype,0,6) == 'string') {
+		} else if (substr($phptype,0,7) == 'varchar' || substr($phptype,0,6) == 'string' || substr($phptype,0,5) == 'char(') {
 			$phptype = 'string';
 		}
 		switch($phptype) {
-			case "integer":
-			case "smallint":
-			case "bigint unsigned":
-			case "float":
-			case "double":
-			case "bool":
-			case "boolean":
+			case 'integer':
+			case 'smallint':
+			case 'bigint unsigned':
+			case 'float':
+			case 'double':
+			case 'bool':
+			case 'char':
+			case 'boolean':
 				if (strpos($value, ':') !== false) { // date in string format
 					return "'" . strtr($value, ["\\'" => "\\\\", "'" => "\\'"]) . "'";
 				} else if ($value == null) {
@@ -224,17 +225,13 @@ EOF;
      * @param string $tableName the table to be dumped
      * @param string $schemaName the schema the table belongs to
      */
-    public function actionDumpTable(string $tableName, string $schemaName = null, string $where = null)
+    public function actionDumpTable(string $tableName, string $where = null)
     {
-		if ($schemaName) {
-			$tableName = "$schemaName.$tableName";
-		} else {
-			$schemaName = $this->db->dsn; // only for preamble
-		}
 		$tableSchema = $this->db->schema->getTableSchema($tableName, true /*refresh*/);
 		if ($tableSchema == null) {
-			throw new \Exception("$tableName not found in schema $schemaName");
+			throw new \Exception("$tableName not found in database");
 		}
+		$schemaName = $tableSchema->schemaName;
 		$preamble = $this->getPreamble('dump-table', $tableName, $schemaName);
 		if ($this->createFile ) {
 			$write_file = true;
@@ -330,7 +327,11 @@ EOF;
 		 * $sql = "SELECT " . implode(',', array_map(function($col) {
     return '[' . str_replace(']', ']]', $col) . ']';
 		*/
-		$sql = "SELECT " . implode(',',$column_names) . " FROM {{{$table_name}}}";
+		$sql = "SELECT " . implode(',',$column_names) . " FROM ";
+		if ($schemaName) {
+			$sql .= $schemaName . '.';
+		}
+		$sql .= "{{{$table_name}}}";
 		if ($where) {
 			$sql .= " WHERE $where";
 		}
