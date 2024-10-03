@@ -1,3 +1,6 @@
+# save relations:
+- Si es hasone y solo es la foreign key, no generar la relación en el formulario
+
 # translations
 - Ampliar malewords a más idiomas.
 
