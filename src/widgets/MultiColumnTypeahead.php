@@ -52,9 +52,9 @@ class MultiColumnTypeahead extends Typeahead
 		$item_fields = [];
 		foreach ($this->formFields as $formField => $dbField) {
 			$fld_id = Html::getInputId($this->model, $formField);
- 			$item_fields[] = "item.$dbField";
+ 			$item_fields[] = "item.$formField";
 			$set_dest_fields_values[] = <<<js
-	if (item.$dbField != '') $('#$fld_id').val(item.$dbField);
+	if (item.$formField != '') $('#$fld_id').val(item.$formField);
 js;
 		}
 		$s_item_fields = implode(',',$item_fields);
@@ -126,7 +126,8 @@ jsexpr
 			'templates' => [
 				'notFound' => ($this->exactMatch
 					? '<div class="text-danger" style="padding:0 8px">' .Yii::t('churros', 'No results found') . '</div>'
-					: ''),
+					: '<div class="text-danger" style="padding:0 8px">' .Yii::t('churros', 'No suggestions found') . '</div>'
+),
 				// The items in the dropdown
 				'suggestion' => new \yii\web\JsExpression($this->suggestionsDisplay)
 			],
@@ -153,7 +154,7 @@ js
 		foreach ($this->formFields as $formField => $dbField) {
 			$fld_id = Html::getInputId($this->model, $formField);
 			$set_dest_fields_values[] = <<<js
-			if (datumParts.$dbField !== undefined && datumParts.$dbField != '') { $('#$fld_id').val(datumParts.$dbField) };
+			if (datumParts.$formField !== undefined && datumParts.$formField != '') { $('#$fld_id').val(datumParts.$formField) };
 js;
 			if ($nf++>0) {
 				$reset_dest_fields_values[] = <<<js
@@ -185,7 +186,7 @@ $('#$id').blur(function(e) {
 		}
 		if (selectedDatum) {
 			const datumParts = $(selectedDatum[0]).data('ttSelectableObject');
-			if (datumParts[mctahead_exact_match_field_$js_id] == $(this).val()) {
+			if (datumParts[mctaqhead_exact_match_field_$js_id] == $(this).val()) {
 				$js_set_fields_values
 			}
 		}

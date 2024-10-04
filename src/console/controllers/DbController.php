@@ -89,11 +89,13 @@ class DbController extends Controller
 
     protected function getPhpValue($value, string $phptype)
     {
-		if (substr($phptype,0,3) == 'int' || substr($phptype,0,7) == 'tinyint') {
+		if (substr($phptype,0,3) == 'int' || substr($phptype,0,7) == 'tinyint' || substr($phptype,0,8) == 'smallint') {
 			$phptype = 'integer';
 		} else if (substr($phptype,0,7) == 'decimal') {
 			$phptype = 'double';
-		} else if (substr($phptype,0,7) == 'varchar' || substr($phptype,0,6) == 'string' || substr($phptype,0,5) == 'char(') {
+		} else if (substr($phptype,0,7) == 'varchar' || substr($phptype,0,6) == 'string'
+			|| substr($phptype,0,5) == 'char(' || substr($phptype,0,5) == 'enum('
+			|| substr($phptype,0,4) == 'set(') {
 			$phptype = 'string';
 		}
 		switch($phptype) {

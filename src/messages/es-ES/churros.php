@@ -120,6 +120,8 @@ return [
 	'Label' => 'Etiqueta',
 	'One line only' => 'Una sola línea',
 
+	'No results found' => 'No se han encontrado resultados',
+	'No suggestions found' => 'No se han encontrado sugerencias',
 	'Showing <b>{totalCount, number}</b> {totalCount, plural, one{{item}} other{{items}}}.'
 		=> 'Mostrando <b>{totalCount, number}</b> {totalCount, plural, one{{item}} other{{items}}}.',
 	'{model.title}: you have not access to this report' => '{model.title}: no tienes acceso a este informe',
