@@ -34,12 +34,12 @@ class RecordView extends Widget
     public $template = '{header}{record}{footer}';
     public $headerTemplate = <<<html
 <div class="panel panel-primary mb-2">
-	<div class="panel-heading panel-primary">
+	<div class="panel-heading panel-primary d-flex justify-content-between">
 		<div class="panel-title">
-		{title}
-		</div>
-		<div class="panel-toolbar">
-		{buttons}
+{title}
+		</div>&nbsp;
+		<div class="panel-toolbar d-flex justify-content-end">
+{buttons}
 		</div>
 	</div>
 </div>
@@ -58,6 +58,9 @@ html;
     public $fieldsLayout;
 
 	public $title = null;
+    public $subtitle = null;
+    public $supertitle = null;
+    public $embedded = false;
 	public $buttons = [];
 
     /**
@@ -88,6 +91,7 @@ html;
                 $this->fieldsTemplate = '<label{labelOptions}>{label}</label><div{contentOptions}>{value}</div>';
             }
         }
+
         $this->normalizeAttributes();
 
         if (!isset($this->options['id'])) {
@@ -149,10 +153,30 @@ html;
 
 	public function renderTitle()
 	{
-		$ret = '';
-		if( $this->title != null ) {
-			$ret = $this->title;
-		}
+        $parts = [];
+        if ($this->supertitle) {
+            if (!$this->title && !$this->subtitle) {
+                $parts['title'] = "<div class=supertitle>$this->supertitle</div>";
+            } else {
+                $parts['supertitle'] = "<div class=supertitle>$this->supertitle</div>";
+            }
+        }
+        if ($this->title) {
+            $parts['title'] = "<div class=title>$this->title</div>";
+        }
+        if ($this->subtitle) {
+            if (!$this->title && !$this->supertitle) {
+                $parts['title'] = "<div class=subtitle>$this->subtitle</div>";
+            } else  {
+                $parts['subtitle'] = "<div class=subtitle>$this->subtitle</div>";
+            }
+        }
+        if (count($parts)) {
+            if (!$this->embedded) {
+                $parts['title'] = Html::tag('h1', $parts['title']);
+            }
+            $ret = implode('', $parts);
+        }
 		return $ret;
 	}
 
@@ -162,9 +186,9 @@ html;
 			return $this->renderAsTable();
 		} else {
             $layer = new WidgetLayer($this->fieldsLayout, $this->attributes, [ $this, 'layAttribute' ], ActiveForm::FORM_FIELD_HORIZ_CLASSES);
-			return '<div class="record-fields">'
+			return '<fieldset class="record-fields">'
                 . $layer->layout('fields', $this->layout, 'large', $this->style)
-				. '</div>';
+				. '</fieldset>';
 		}
     }
 

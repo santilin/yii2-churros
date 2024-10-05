@@ -36,3 +36,75 @@
       .grid-footer .grid-items-per-page li.current {
         background-color: rgba(156, 10, 125, 0.25);
         color: #f8f8ff; }
+.app-subtitle {
+	/* Styles from .badge */
+	display: inline-block;
+	padding: 0.25em 1em;
+	font-weight: 500;
+	line-height: 1;
+	text-align: center;
+	white-space: nowrap;
+	vertical-align: baseline;
+	border-radius: 0.25rem;
+
+	/* Styles from .badge-alert */
+	color: #fff;
+	background-color: #dc3545;
+}
+
+div.app-subtitle {
+	width: auto;
+	margin-left: 10px;
+	padding: 0.em 0.4em;
+}
+
+
+fieldset {
+	border: 2px solid #3498db;
+	border-radius: 8px;
+	padding: 20px;
+	margin-bottom: 20px;
+	background-color: #f8f9fa;
+	box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+legend {
+	background-color: #3498db;
+	color: white;
+	padding: 5px 10px;
+	border-radius: 4px;
+	font-weight: bold;
+	font-size: 1.1em;
+}
+
+.panel-title .panel-toolbar {
+  justify-content: flex-end;
+}
+
+.panel-title h1 {
+  font-size: 2rem;
+  max-width: 50ch;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+
+.panel-title .title {
+  font-variant: small-caps;
+  font-weight: bold;
+  font-size: 0.9em;
+  margin-bottom: 2px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  flex: 0 1 auto;
+}
+
+.panel-title .subtitle, .panel-title .supertitle {
+  font-size: small;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  flex: 0 1 auto;
+}
