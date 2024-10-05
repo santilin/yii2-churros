@@ -5,7 +5,7 @@ namespace santilin\churros\models;
 use santilin\churros\helpers\AppHelper;
 use santilin\churros\models\ModelChangesEvent;
 
-trait ModelChangesLogTrait
+trait ModelChangesLoggableTrait
 {
 	protected $_model_changes_log = false;
 	protected $_model_changes_soft_delete;
