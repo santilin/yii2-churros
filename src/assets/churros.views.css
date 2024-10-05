@@ -77,24 +77,17 @@ legend {
 	font-size: 1.1em;
 }
 
-.panel-title .panel-toolbar {
-  justify-content: flex-end;
+.panel-toolbar {
+/*   justify-content: flex-end; */
+  align-items: end;
 }
 
-.panel-title h1 {
-  font-size: 2rem;
-  max-width: 50ch;
+.panel-title .title {
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
-}
-
-
-.panel-title .title {
-  font-variant: small-caps;
-  font-weight: bold;
+  max-width: 50ch;
   font-size: 0.9em;
-  margin-bottom: 2px;
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
@@ -102,6 +95,7 @@ legend {
 }
 
 .panel-title .subtitle, .panel-title .supertitle {
+  font-variant: small-caps;
   font-size: small;
   white-space: nowrap;
   overflow: hidden;

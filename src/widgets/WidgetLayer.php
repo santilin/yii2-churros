@@ -259,8 +259,8 @@ class WidgetLayer
 										$open_divs++;
 										$fs .= "<div class=\"row w-100\">";
 									}
-								} else {
-									$widget['label'] = false;
+// 								} else {
+// 									$widget['label'] = false;
 								}
 								$fs .= $this->layoutOneField($widget, $layout_row, $widget_layout, $indexf++);
 							} else {

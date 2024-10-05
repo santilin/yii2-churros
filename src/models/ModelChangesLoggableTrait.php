@@ -7,6 +7,14 @@ use santilin\churros\models\ModelChangesEvent;
 
 trait ModelChangesLoggableTrait
 {
+	public static $V_SUBTYPE_CHANGE = 1;
+	public static $V_SUBTYPE_EMPTY = 2;
+	public static $V_SUBTYPE_CHANGECASE = 3;
+	public static $V_SUBTYPE_CHANGESPACES = 4;
+	public static $V_SUBTYPE_UNEMPTY = 5;
+	public static $V_SUBTYPE_SETTRUE = 6;
+	public static $V_SUBTYPE_SETFALSE = 7;
+
 	protected $_model_changes_log = false;
 	protected $_model_changes_soft_delete;
 
@@ -107,6 +115,29 @@ trait ModelChangesLoggableTrait
 			}
 		}
 	}
+
+	public function formatRecordChange(string $subtype, string $changed_field, string $changed_label, mixed $new_value): string
+	{
+		switch ($subtype) {
+			case self::$V_SUBTYPE_EMPTY:
+				return  " vació `" . $changed_label . '`';
+			case self::$V_SUBTYPE_CHANGECASE:
+				return  " retocó las mayúsculas de `" . $changed_label . '`';
+			case self::$V_SUBTYPE_CHANGESPACES:
+				return  " retocó los espacios de `" . $changed_label;
+			case self::$V_SUBTYPE_UNEMPTY:
+				return  " rellenó `" . $changed_label
+				. '` con `' . strval($new_value) . '`';
+			case self::$V_SUBTYPE_SETTRUE:
+				return  " cambió `" . $changed_label . '` a verdadero';
+			case self::$V_SUBTYPE_SETFALSE:
+				return  " cambió `" . $changed_label . '` a falso';
+			default:
+				return  " cambió `" . $changed_label
+				. '` a `' . strval($new_value) . '`';
+		}
+	}
+
 
 	public function sendModelChangesNotification(ModelChangesEvent $e)
 	{
