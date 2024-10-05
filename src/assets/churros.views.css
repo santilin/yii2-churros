@@ -121,3 +121,9 @@ legend {
 .record-fields .field {
   font-weight: bold;
 }
+
+
+.grid-view .grid-header {
+  display: flex;
+  justify-content: space-between;
+}
