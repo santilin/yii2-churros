@@ -78,8 +78,14 @@ legend {
 }
 
 .panel-toolbar {
-/*   justify-content: flex-end; */
-  align-items: end;
+  align-items: middle;
+  align-self: center;
+  flex: 0 0 auto; /* Don't grow or shrink */
+}
+
+.panel-title {
+  flex: 0 1 auto; /* Don't grow, allow shrinking, auto basis */
+  min-width: 0; /* Allow shrinking below content size */
 }
 
 .panel-title .title {

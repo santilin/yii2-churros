@@ -33,15 +33,13 @@ class RecordView extends Widget
     public $attributes;
     public $template = '{header}{record}{footer}';
     public $headerTemplate = <<<html
-<div class="panel panel-primary mb-2">
-	<div class="panel-heading panel-primary d-flex justify-content-between">
-		<div class="panel-title">
+<div class="panel-heading panel-primary d-flex justify-content-between">
+    <div class="panel-title">
 {title}
-		</div>&nbsp;
-		<div class="panel-toolbar d-flex justify-content-end">
+    </div>
+    <div class="panel-toolbar">
 {buttons}
-		</div>
-	</div>
+    </div>
 </div>
 html;
     public $fieldsTemplate = null;

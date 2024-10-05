@@ -176,19 +176,22 @@ class FormHelper
 			}
 			$caption = $title = $button['title']??$name;
 			$icon = $button['icon']??null;
-			if( $icon ) {
+			if ($icon) {
+				if ($name == 'create') {
+					$love = true;
+				}
 				if (substr($icon, 0, 1) == '/') {
 					$title = Html::img($icon, array_merge([
-						'class'=>'icon',
+						'class'=>'icon d-lg-none d-inline-block',
 						'aria' => [ 'hidden'=>'true', 'label' => $title ],
 						'alt' => $title ], $button['iconOptions']??[]));
 				} else {
 					$hidable_title = "&nbsp;<span class=\"d-none d-lg-inline\">$title</span>";
-					if( strpos($icon, '<i') !== FALSE ) {
+					if( strpos($icon, '<') !== FALSE ) {
 						$title = $icon . $hidable_title;
 					} else {
 						$title = Html::tag('i', '', array_merge([
-							'class' => 'icon',
+							'class' => "$icon d-inline-block",
 							'aria' => [ 'hidden'=>'true', 'label' => $title ],
 							'alt' => $title ], $button['iconOptions']??[])) . $hidable_title;
 					}
