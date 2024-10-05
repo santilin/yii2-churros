@@ -13,7 +13,7 @@ trait ModelChangesLogTrait
 	/**
 	 * Only enable loggin changes when needed
 	 */
-	public function enableModelRecordChanges(bool $enabled = true)
+	public function enableModelChangesLog(bool $enabled = true)
 	{
 		if ($this->_model_changes_log = $enabled) {
 			$this->on(self::EVENT_AFTER_INSERT, [$this, 'handleModelChanges']);
@@ -27,7 +27,7 @@ trait ModelChangesLogTrait
 	}
 
 	protected $_model_changes_notifications = false;
-	public function enableModelRecordChangesNotifications(bool $enabled = true)
+	public function enableModelChangesNotifications(bool $enabled = true)
 	{
 		if ($this->_model_changes_notifications = $enabled) {
 			$this->on(ModelChangesEvent::EVENT_CHANGES_SAVED, [$this, 'sendModelChangesNotification']);
