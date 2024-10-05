@@ -102,3 +102,16 @@ legend {
   text-overflow: ellipsis;
   flex: 0 1 auto;
 }
+
+.record-fields > div.row > div > div.row {
+  padding-top: 2px;
+  padding-bottom: 2px;
+}
+
+.record-fields label {
+  font-variant: small-caps;
+}
+
+.record-fields .field {
+  font-weight: bold;
+}

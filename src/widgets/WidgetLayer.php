@@ -352,7 +352,7 @@ class WidgetLayer
 					// 	$label_classes = $this->widget_layout_horiz_config['vertical']['horizontalCssClasses'];
 					// 	$classes['label'] = $label_classes['label'];
 					} else {
-						$widget->labelOptions['class'] = implode(' ', $classes['label']) . " fld-$widget_name";
+						$widget->labelOptions['class'] = implode(' ', $classes['label']) . " fld-$widget_name col-form-label";
 						if (YII_ENV_DEV) {
 							$widget->labelOptions['class'] .= " {$layout_of_row}x$widget_layout";
 						}
