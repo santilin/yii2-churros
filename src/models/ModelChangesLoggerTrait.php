@@ -4,7 +4,7 @@ namespace santilin\churros\models;
 
 trait ModelChangesLoggerTrait
 {
-	public function changedRecord()
+	private function _changedModelRelationName(): string
 	{
 		$nfield = $this->field??null;
 		if (!$nfield) {
@@ -12,11 +12,24 @@ trait ModelChangesLoggerTrait
 		}
 		$field = $this->getStaticFieldLabel($nfield);
 		if (($pos=strpos($field, '.')) === FALSE) {
-			$relation = $field;
+			return $field;
 		} else {
-			$relation = substr($field,0,$pos);
+			return substr($field,0,$pos);
 		}
-		return $this->$relation;
+	}
+
+	public function getChangedModelTitle(): string
+	{
+		$relation_name = $this->_changedModelRelationName();
+		$relation = static::$relations[$relation_name];
+		return $relation_name;
+	}
+
+	public function getChangedModel()
+	{
+		$relation_name = mb_ucfirst($this->_changedModelRelationName());
+		$getter = "get$relation_name";
+		return call_user_func([$this, $getter]);
 	}
 
 }
