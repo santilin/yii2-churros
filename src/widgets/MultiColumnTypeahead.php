@@ -17,6 +17,7 @@ use kartik\typeahead\Typeahead;
 class MultiColumnTypeahead extends Typeahead
 {
 	public $formFields = [];
+	public $dbFields = [];
 	public $suggestionsDisplay;
 	public $display;
 	public $remoteUrl;
@@ -38,23 +39,16 @@ class MultiColumnTypeahead extends Typeahead
 		if (count($this->formFields)==0) {
             throw new InvalidConfigException("You must define al least one formField");
 		}
-		// Create
-		$ordered_form_fields = [];
-		foreach ($this->formFields as $formField => $dbField) {
-			if (is_array($dbField)) {
-				$ordered_form_fields += $dbField;
-			} else {
-				$ordered_form_fields[$formField] = $dbField;
-			}
+		if (!empty($this->dbFields)) {
+			$this->formFields = array_combine($this->formFields, $this->dbFields);
 		}
-		$this->formFields = $ordered_form_fields;
 		$set_dest_fields_values = [];
 		$item_fields = [];
 		foreach ($this->formFields as $formField => $dbField) {
 			$fld_id = Html::getInputId($this->model, $formField);
  			$item_fields[] = "item.$formField";
 			$set_dest_fields_values[] = <<<js
-	if (item.$formField != '') $('#$fld_id').val(item.$formField);
+	if (item.$dbField != '') $('#$fld_id').val(item.$dbField);
 js;
 		}
 		$s_item_fields = implode(',',$item_fields);
