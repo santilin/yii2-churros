@@ -225,7 +225,7 @@ EOF;
      * Dumps a table from a schema
      *
      * @param string $tableName the table to be dumped
-     * @param string $schemaName the schema the table belongs to
+     * @param string $where query filter
      */
     public function actionDumpTable(string $tableName, string $where = null)
     {
@@ -252,7 +252,7 @@ EOF;
 				echo "Created $this->format for table $tableName in $filename\n";
 			}
 		} else {
-			echo $preamble . $this->dumpTable($tableSchema, $where);
+			echo $preamble . $this->dumpTable($schemaName, $tableSchema, $where);
 		}
 	}
 
@@ -293,13 +293,13 @@ EOF;
 		$s->run($this->db);
 	}
 
-	protected function dumpTable(string $schemaName, $tableSchema, string $where = null)
+	protected function dumpTable(string $schemaName, $tableSchema, string $where = '')
 	{
 		switch( $this->format ) {
 		case 'seeder':
-			return $this->dumpTableAsSeeder($schemaName, $tableSchema, $where);
+			return $this->dumpTableAsSeeder($schemaName, $tableSchema, trim($where));
 		case 'fixture':
-			return $this->dumpTableAsFixture($schemaName, $tableSchema, $where);
+			return $this->dumpTableAsFixture($schemaName, $tableSchema, trim($where));
 		default:
 			throw new InvalidArgumentException("dump-table: $this->format: no contemplado");
 		}

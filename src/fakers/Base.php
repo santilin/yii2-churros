@@ -8,6 +8,11 @@ class Base extends \Faker\Provider\Base
 		return substr($this->generator->text(20), 0, $nchars);
     }
 
+    public function char($nchars = 1)
+	{
+		return $this->string($nchars);
+	}
+
     public function string($nchars)
     {
 		$nchars = $this->generator->numberBetween($nchars/3, $nchars);
