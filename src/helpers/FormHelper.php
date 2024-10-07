@@ -534,4 +534,34 @@ ajax;
 		}
 	}
 
+	public static function renderTitle(string $supertitle, string $title, string $subtitle, bool $embedded = false): string
+	{
+        $parts = [];
+        if ($supertitle) {
+            if (!$title && !$subtitle) {
+                $parts['title'] = "<div class=supertitle>$supertitle</div>";
+            } else {
+                $parts['supertitle'] = "<div class=supertitle>$supertitle</div>";
+            }
+        }
+        if ($title) {
+            $parts['title'] = "<div class=title>$title</div>";
+        }
+        if ($subtitle) {
+            if (!$title && !$supertitle) {
+                $parts['title'] = "<div class=subtitle>$subtitle</div>";
+            } else  {
+                $parts['subtitle'] = "<div class=subtitle>$subtitle</div>";
+            }
+        }
+        if (count($parts)) {
+            if (!$embedded) {
+                $parts['title'] = Html::tag('h1', $parts['title']);
+            }
+            $ret = implode('', $parts);
+        }
+		return $ret;
+	}
+
+
 } // class

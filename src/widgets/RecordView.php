@@ -107,7 +107,7 @@ html;
         $view = $this->getView();
         ChurrosAsset::register($view);
 
-        $title = $this->renderTitle();
+        $title = FormHelper::renderTitle($this->supertitle, $this->title, $this->subtitle);
         $record = $this->renderRecord();
         $buttons = $this->renderButtons();
         $header = strtr( $this->headerTemplate,
@@ -149,35 +149,6 @@ html;
         return call_user_func($this->template, $attribute, $index, $this);
     }
 
-	public function renderTitle()
-	{
-        $parts = [];
-        if ($this->supertitle) {
-            if (!$this->title && !$this->subtitle) {
-                $parts['title'] = "<div class=supertitle>$this->supertitle</div>";
-            } else {
-                $parts['supertitle'] = "<div class=supertitle>$this->supertitle</div>";
-            }
-        }
-        if ($this->title) {
-            $parts['title'] = "<div class=title>$this->title</div>";
-        }
-        if ($this->subtitle) {
-            if (!$this->title && !$this->supertitle) {
-                $parts['title'] = "<div class=subtitle>$this->subtitle</div>";
-            } else  {
-                $parts['subtitle'] = "<div class=subtitle>$this->subtitle</div>";
-            }
-        }
-        if (count($parts)) {
-            if (!$this->embedded) {
-                $parts['title'] = Html::tag('h1', $parts['title']);
-            }
-            $ret = implode('', $parts);
-        }
-		return $ret;
-	}
-
 	public function renderRecord()
 	{
 		if ($this->style == 'table') {
@@ -189,7 +160,6 @@ html;
 				. '</fieldset>';
 		}
     }
-
 
     public function renderButtons()
     {
