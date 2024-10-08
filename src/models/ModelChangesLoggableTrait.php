@@ -5,8 +5,20 @@ namespace santilin\churros\models;
 use santilin\churros\helpers\AppHelper;
 use santilin\churros\models\ModelChangesEvent;
 
+/**
+ * A model that logs its creation, updates and deletion to a log model
+ *
+ * The using model must define these properties and methods:
+ * @var string _log_model_changes_relation The name of the relation that links the using model with the log model
+ * @todo
+ * 	Interface:
+ * 		function _log_changed_at_callback()
+ * 		function _log_changed_by_callback()
+ */
 trait ModelChangesLoggableTrait
 {
+	// As of php8.1 there is not support for trait constants
+	// These constants must be in sync with the `subtype` field of the using class
 	public static $V_SUBTYPE_CHANGE = 1;
 	public static $V_SUBTYPE_EMPTY = 2;
 	public static $V_SUBTYPE_CHANGECASE = 3;
@@ -15,12 +27,19 @@ trait ModelChangesLoggableTrait
 	public static $V_SUBTYPE_SETTRUE = 6;
 	public static $V_SUBTYPE_SETFALSE = 7;
 
-	protected $_model_changes_log = false;
-	protected $_model_changes_soft_delete;
 
 	/**
-	 * Only enable loggin changes when needed
+	 * Whether to log changes upon save or deleted
 	 */
+	protected $_model_changes_log = false;
+
+	/**
+	 * Whether to send notifications when a change is logged via ModelChangesEvent
+	 */
+	protected $_model_changes_notifications = false;
+
+	///@todo protected $_model_changes_soft_delete;
+
 	public function enableModelChangesLog(bool $enabled = true)
 	{
 		if ($this->_model_changes_log = $enabled) {
@@ -34,7 +53,6 @@ trait ModelChangesLoggableTrait
 		}
 	}
 
-	protected $_model_changes_notifications = false;
 	public function enableModelChangesNotifications(bool $enabled = true)
 	{
 		if ($this->_model_changes_notifications = $enabled) {
@@ -56,9 +74,9 @@ trait ModelChangesLoggableTrait
 			// 			$model_change->saveOrFail();
 		} else {
 			$model_name = $event->sender->getModelInfo('model_name');
-			$_model_changes_relation_info = static::$relations[$this->_model_changes_relation];
+			$_log_model_changes_relation_info = static::$relations[$this->_log_model_changes_relation];
 			$record_id = strval(count($this->primaryKey())==1 ? $this->getPrimaryKey() : json_encode($this->getPrimaryKey(true)));
-			$model_change = new $_model_changes_relation_info['modelClass'];
+			$model_change = new $_log_model_changes_relation_info['modelClass'];
 			if ($event->name == self::EVENT_AFTER_INSERT) {
 				$model_change->record_id = $record_id;
 				$model_change->field = $model_change::findChangeableFieldIndex($model_name);

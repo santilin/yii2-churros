@@ -1,5 +1,5 @@
 <?php
-namespace santilin\churros;
+namespace santilin\churros\models;
 
 use Yii;
 use yii\base\InvalidArgumentException;

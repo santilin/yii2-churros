@@ -5,7 +5,7 @@ use yii;
 use yii\helpers\{Html,ArrayHelper};
 use yii\db\Query;
 use yii\data\ActiveDataProvider;
-use santilin\churros\ModelSearchTrait;
+use santilin\churros\models\ModelSearchTrait;
 use santilin\churros\widgets\grid\ReportView;
 use santilin\churros\helpers\{AppHelper,FormHelper};
 

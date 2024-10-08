@@ -1,6 +1,6 @@
 <?php
 
-namespace santilin\churros;
+namespace santilin\churros\models;
 
 use Yii;
 use yii\db\ActiveRecord;
@@ -8,7 +8,6 @@ use yii\base\{InvalidConfigException,InvalidArgumentException};
 use yii\helpers\ArrayHelper;
 use santilin\churros\helpers\{YADTC,AppHelper,FormHelper};
 use santilin\churros\ModelSearchTrait;
-use santilin\churros\models\{ModelSuccessesTrait,ModelWarningsTrait};
 
 trait ModelInfoTrait
 {

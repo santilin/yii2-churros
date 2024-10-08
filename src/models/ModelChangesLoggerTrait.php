@@ -4,6 +4,9 @@ namespace santilin\churros\models;
 
 trait ModelChangesLoggerTrait
 {
+	/**
+	 * Finds the relation name that links to the changed model
+	 */
 	private function _changedModelRelationName(): string
 	{
 		$nfield = $this->field??null;
@@ -18,6 +21,9 @@ trait ModelChangesLoggerTrait
 		}
 	}
 
+	/**
+	 * Directly gets the relation name of the changed model
+	 */
 	public function getChangedModelTitle(): string
 	{
 		$relation_name = $this->_changedModelRelationName();
@@ -25,6 +31,9 @@ trait ModelChangesLoggerTrait
 		return $relation_name;
 	}
 
+	/**
+	 * Relation that returns a relation query to the changed model
+	 */
 	public function getChangedModel()
 	{
 		$relation_name = mb_ucfirst($this->_changedModelRelationName());
