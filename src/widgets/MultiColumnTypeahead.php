@@ -17,7 +17,6 @@ use kartik\typeahead\Typeahead;
 class MultiColumnTypeahead extends Typeahead
 {
 	public $formFields = [];
-	public $dbFields = [];
 	public $suggestionsDisplay;
 	public $display;
 	public $remoteUrl;
@@ -38,9 +37,6 @@ class MultiColumnTypeahead extends Typeahead
 	{
 		if (count($this->formFields)==0) {
             throw new InvalidConfigException("You must define al least one formField");
-		}
-		if (!empty($this->dbFields)) {
-			$this->formFields = array_combine($this->formFields, $this->dbFields);
 		}
 		$set_dest_fields_values = [];
 		$item_fields = [];
