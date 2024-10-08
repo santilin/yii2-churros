@@ -81,7 +81,7 @@ trait ModelChangesLoggableTrait
 						$model_change->record_id = $record_id;
 						$model_change->field = $nfield;
 						$model_change->value = $this->$fld;
-						$model_change->changed_by = $this->updated_by;
+						$model_change->changed_by = \Yii::$app->user->identity->id;
 						$model_change->changed_at = new \yii\db\Expression("NOW()");
 						$model_change->type = $model_change::V_TYPE_UPDATE;
 						if (is_bool($old_value)) {
