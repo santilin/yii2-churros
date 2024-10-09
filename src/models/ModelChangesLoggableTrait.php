@@ -38,7 +38,8 @@ trait ModelChangesLoggableTrait
 	 */
 	protected $_model_changes_notifications = false;
 
-	///@todo protected $_model_changes_soft_delete;
+	///@todo
+	protected $_model_changes_soft_delete;
 
 	public function enableModelChangesLog(bool $enabled = true)
 	{

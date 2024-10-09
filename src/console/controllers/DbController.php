@@ -109,7 +109,7 @@ class DbController extends Controller
 			case 'boolean':
 				if (strpos($value, ':') !== false) { // date in string format
 					return "'" . strtr($value, ["\\'" => "\\\\", "'" => "\\'"]) . "'";
-				} else if ($value == null) {
+				} else if ($value === null) {
 					return "null";
 				} else {
 					return $value;
@@ -227,7 +227,7 @@ EOF;
      * @param string $tableName the table to be dumped
      * @param string $where query filter
      */
-    public function actionDumpTable(string $tableName, string $where = null)
+    public function actionDumpTable(string $tableName, string $where = '')
     {
 		$tableSchema = $this->db->schema->getTableSchema($tableName, true /*refresh*/);
 		if ($tableSchema == null) {
@@ -441,7 +441,8 @@ EOF;
 
 /**
  * Churros v $version
- * ./yii churros/db/$command --format {$this->format} $schema $table
+ * ./yii churros/db/$command --format={$this->format} --fixturesPath={$this->fixturesPath}
+ * DB DSN: $schema
  * Schema: $schema
  * Timestamp: $timestamp
  */
