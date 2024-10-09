@@ -44,7 +44,7 @@ class MultiColumnTypeahead extends Typeahead
 			$fld_id = Html::getInputId($this->model, $formField);
  			$item_fields[] = "item.$formField";
 			$set_dest_fields_values[] = <<<js
-	if (item.$dbField != '') $('#$fld_id').val(item.$dbField);
+	if (item.$formField != '') $('#$fld_id').val(item.$formField);
 js;
 		}
 		$s_item_fields = implode(',',$item_fields);
