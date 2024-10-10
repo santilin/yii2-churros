@@ -196,7 +196,7 @@ class JsonController extends \yii\web\Controller
 		$params = array_merge($req->get(), $req->post());
 		$params['permissions'] = FormHelper::resolvePermissions($params['permissions']??[], $this->crudActions);
 		$model = $this->findFormModel($this->getPath(), $id, null, 'duplicate', $params);
-		$model->setDefaultValues(true); // duplicating
+		$model->setDefaultValues($this, true); // duplicating
 		$relations = empty($params['_form_relations'])?[]:explode(",", $params['_form_relations']);
 		$model->scenario = 'duplicate';
 		$mc = get_class($model);
@@ -533,7 +533,9 @@ class JsonController extends \yii\web\Controller
 		}
 		return $this->root_model;
 	}
-
+	/**
+	 * @todo @param $context
+	 */
 	public function genBaseBreadCrumbs(string $action_id, $model, array $permissions = []): array
 	{
 		$breadcrumbs = [];
@@ -573,16 +575,16 @@ class JsonController extends \yii\web\Controller
  				'url' => $partial_path . ( ($p%2)? 'index' : 'view')
 			];
 		}
- 		if ($action_id != 'index' && $action_id != 'create') {
- 			$breadcrumbs[] = [
- 				'label' => $model->getJsonId(),
- 				'url' => $action_id!='view' ? array_merge([$this->getActionRoute('view', $model)], $model->getPrimaryKey(true)) : null,
- 			];
- 		} else {
+ 		// if ($action_id != 'index' && $action_id != 'create' && $action_id != 'duplicate') {
+ 		// 	$breadcrumbs[] = [
+ 		// 		'label' => $model->getJsonId(),
+ 		// 		'url' => $action_id!='view' ? array_merge([$this->getActionRoute('view', $model)], $model->getPrimaryKey(true)) : null,
+ 		// 	];
+ 		// } else {
 			$breadcrumbs[] = [
 				'label' => $path_parts[$p],
 			];
-		}
+		// }
 		return $breadcrumbs;
 	}
 
