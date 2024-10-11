@@ -177,4 +177,23 @@ class Base extends \Faker\Provider\Base
 		return ++$last_value;
 	}
 
+	public function dateStart(): string
+	{
+		return $this->generator->dateTimeBetween("-2 years", "now")->format('Y-m-d');
+	}
+
+	public function dateEnd(): string
+	{
+		return $this->generator->dateTimeBetween("now", "+2 years")->format('Y-m-d');;
+	}
+
+	public function dateTimeStart(): string
+	{
+		return $this->generator->dateTimeBetween("-2 years", "now")->format('Y-m-d H:i:s');
+	}
+
+	public function dateTimeEnd(): string
+	{
+		return $this->generator->dateTimeBetween("now", "+2 years")->format('Y-m-d H:i:s');;
+	}
 }
