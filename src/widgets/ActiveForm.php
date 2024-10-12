@@ -1,6 +1,7 @@
 <?php
 namespace santilin\churros\widgets;
 
+use Yii;
 use yii\helpers\{ArrayHelper,Html};
 use yii\bootstrap5\ActiveForm as Bs5ActiveForm;
 use santilin\churros\widgets\ActiveFormTrait;
@@ -355,5 +356,82 @@ class ActiveForm extends Bs5ActiveForm
 			]
 		]
 	];
+
+	#[Override]
+	public function errorSummary($models, $options = [])
+	{
+		Html::addCssClass($options, $this->errorSummaryCssClass);
+		$options['encode'] = $this->encodeErrorSummary;
+		$showWarnings = ArrayHelper::remove($options, 'showWarnings');
+		$ret = Html::errorSummary($models, $options);
+		if ($showWarnings) {
+			$ret .= self::warningSummary($models, $options);
+		}
+		return $ret;
+	}
+
+
+	/**
+	 * Based on Html::errorSummary
+	 */
+	static protected function warningSummary($models, $options = [])
+	{
+		$header = ArrayHelper::remove($options, 'warningsHeader', '<p>' . Yii::t('yii', 'Warnings:') . '</p>');
+		$footer = ArrayHelper::remove($options, 'footer', '');
+		$encode = ArrayHelper::remove($options, 'encode', true);
+		$showAllErrors = ArrayHelper::remove($options, 'showAllErrors', false);
+		$emptyClass = ArrayHelper::remove($options, 'emptyClass', null);
+		$lines = self::collectWarnings($models, $encode, $showAllErrors);
+		if (empty($lines)) {
+			// still render the placeholder for client-side validation use
+			$content = '<ul></ul>';
+			if ($emptyClass !== null) {
+				$options['class'] = $emptyClass;
+			} else {
+				$options['style'] = isset($options['style']) ? rtrim($options['style'], ';') . '; display:none' : 'display:none';
+			}
+		} else {
+			$content = '<ul><li>' . implode("</li>\n<li>", $lines) . '</li></ul>';
+		}
+
+		return Html::tag('div', $header . $content . $footer, $options);
+	}
+
+
+	/**
+	 * Return array of the validation errors
+	 * @param Model|Model[] $models the model(s) whose validation errors are to be displayed.
+	 * @param $encode boolean, if set to false then the error messages won't be encoded.
+	 * @param $showAllErrors boolean, if set to true every error message for each attribute will be shown otherwise
+	 * only the first error message for each attribute will be shown.
+	 * @return array of the validation errors
+	 * @since 2.0.14
+	 *
+	 * Based on Html::collectErrors
+	 */
+	static protected function collectWarnings($models, $encode, $showAllErrors)
+	{
+		$lines = [];
+		if (!is_array($models)) {
+			$models = [$models];
+		}
+
+		foreach ($models as $model) {
+			$lines = array_unique(array_merge($lines, $model->getWarningSummary($showAllErrors)));
+		}
+
+		// If there are the same error messages for different attributes, array_unique will leave gaps
+		// between sequential keys. Applying array_values to reorder array keys.
+		$lines = array_values($lines);
+
+		if ($encode) {
+			foreach ($lines as &$line) {
+				$line = Html::encode($line);
+			}
+		}
+
+		return $lines;
+	}
+
 
 }
