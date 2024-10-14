@@ -16,12 +16,12 @@ class ActionColumn extends \yii\grid\ActionColumn
 {
     public $template = '{view}&nbsp;{update}&nbsp;{delete}&nbsp;{duplicate}';
     public $crudPerms = [];
-    public $iconClassPrefix = 'bi bi';
+    public $iconClassPrefix = 'fas fa';
 	public $icons = [
-		'view' => '<i class="bi bi-eye"></i>',
-		'update' => '<i class="bi bi-pencil"></i>',
-		'delete' => '<i class="bi bi-trash"></i>',
-		'duplicate' => '<i class="bi bi-copy"></i>',
+		'view' => '<i class="fas fa-eye"></i>',
+		'update' => '<i class="fas fa-pencil-alt"></i>',
+		'delete' => '<i class="fas fa-trash"></i>',
+		'duplicate' => '<i class="fas fa-copy"></i>',
 	];
 
     /**
