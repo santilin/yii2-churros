@@ -41,4 +41,22 @@ trait ModelChangesLoggerTrait
 		return call_user_func([$this, $getter]);
 	}
 
+
+	static public function extractChangesForNotifications(string $value)
+	{
+		$ret = [];
+		if (preg_match_all('/(([0-9]+):([0-9]+):([0-9]+){#([^,]*)#}),*/', $value??'', $changes, PREG_SET_ORDER)) {
+			$c = [];
+			foreach ($changes as $change) {
+				$c['id'] = $change[2];
+				$c['field'] = $change[3];
+				$c['subtype'] = $change[4];
+				$c['value'] = $change[5];
+				$ret[] = $c;
+			}
+		}
+		return $ret;
+	}
+
+
 }
