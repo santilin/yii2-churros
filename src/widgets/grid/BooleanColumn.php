@@ -16,11 +16,11 @@ class BooleanColumn extends DataColumn
     /**
      * @var string $onTrue the contents to display when value is true.
      */
-    public $onTrue = '<span class="bi bi-check text-success"></span>';
+    public $onTrue = '<span class="fas fa-check text-success"></span>';
     /**
      * @var string $onFalse the contents to display when value is false.
      */
-    public $onFalse = '<span class="bi bi-x text-danger"></span>';
+    public $onFalse = '<span class="fas fa-times text-danger"></span>';
     /**
      * @inheritdoc
      */

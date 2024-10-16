@@ -58,7 +58,7 @@ class ExpandableTextColumn extends DataColumn
 	<div class="modal-dialog modal-dialog-centered modal-dialog-scrollable modal-md">
 		<div class="modal-content">
 			<div class="modal-header bg-secondary text-white">
-				<button type="button" class="btn btn-primary p-1" data-bs-dismiss="modal" id="modalCopyClipBoardBtn_$cell_key"><i class="bi bi-clipboard-plus"></i></button>
+				<button type="button" class="btn btn-primary p-1" data-bs-dismiss="modal" id="modalCopyClipBoardBtn_$cell_key"><i class="far fa-clipboard"></i></button>
 				&nbsp;
 				<h1 class="modal-title fs-5" id="modalSeeMoreTitle_$cell_key">$this->modalTitle</h5>
 				<button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
@@ -86,7 +86,7 @@ generateQuoteBtn_$cell_key.addEventListener('click', () => {
 </script>
 modal;
 
-			$text =  Html::tag('span', $truncated_text, $this->captionOptions) . Html::a('<i class="bi bi-book"></i>', '#', [
+			$text =  Html::tag('span', $truncated_text, $this->captionOptions) . Html::a('<i class="fas ba-book-open"></i>', '#', [
 				'title' => 'Pincha para leer más',
 				'class' => "btn btn-outline-primary btn-sm py-0 px-1",
 				'style' => 'position: absolute; right: 0; font-size:xx-small',

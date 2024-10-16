@@ -64,11 +64,11 @@ class GridView extends SimpleGridView
     public function renderFilterCount()
     {
 		$pagination = $this->dataProvider->getPagination();
-        if ($pagination === false || $this->dataProvider->getCount() <= 0) {
+        if ($pagination === false || $pagination->totalCount < 6) {
             return '';
         }
         $urls = [];
-		$html = "<ul class=grid-items-per-page><li>" . Yii::t('churros', 'Items per page') . '</li>';
+		$html = "<ul class=grid-items-per-page><li>" . Yii::t('churros', 'Rows per page') . '</li>';
         foreach ([6 => '6', 12 => '12',24 => '24', 60 => '60', -1 => Yii::t('churros', 'All')] as $page_size => $label) {
 			if ($pagination->pageSize == $page_size) {
 				$li_class = ' class=current';

@@ -54,25 +54,25 @@ let {$id}_sortable_frm = {$id}_sortable.closest('form');
 js
 		);
 		Html::addCssClass($this->options, 'sortable-list');
-		$li_options = array_merge( [ 'data' => [ 'id' => null ]], $this->itemOptions);
 		if ($this->removable) {
 			$this->view->registerJs(<<<js
-$(document).on('click', '.remove-button', function() {
-	$(this).closest('li').remove();
+$('.remove-button').on('click', function() {
 	let frm = $(this).closest('form');
+	$(this).closest('li').remove();
 	{$id}_update_order_input($('#$id'), frm);
 });
 js
 			);
 		}
+		$li_options = array_merge( [ 'data' => [ 'id' => null ]], $this->itemOptions);
 		foreach ($this->items as $value => $item) {
 			$li_options['data']['id'] = $value;
 			if ($this->removable) {
 				$lis[] = Html::tag('li',
-					Html::button(Yii::t('churros','<i class="bi bi-trash"></i>'), ['class' => 'btn btn-danger btn-xs remove-button'])
-					. '&nbsp;&nbsp;<i class="bi bi-arrows-move"></i>&nbsp;' . $item, $li_options);
+					Html::button(Yii::t('churros','<i class="fas fa-trash-alt"></i>'), ['class' => 'btn btn-danger btn-xs remove-button'])
+					. '&nbsp;&nbsp;<i class="fas fa-arrows-alt"></i>&nbsp;' . $item, $li_options);
 			} else {
-				$lis[] = Html::tag('li', '<i class="bi bi-arrows-move"></i>&nbsp;' . $item, $li_options);
+				$lis[] = Html::tag('li', '<i class="fas fa-arrows-alt"></i>&nbsp;' . $item, $li_options);
 			}
 		}
 		return $ret . Html::tag('ul', implode('', $lis), $this->options);
