@@ -589,6 +589,7 @@ class CrudController extends \yii\web\Controller
 
     public function genBaseBreadCrumbs(string $action_id, $model, array $view_params= []): array
 	{
+		$scenario = $model->scenario?:$action_id;
 		$permissions = $view_params['permissions']??[];
 		$breadcrumbs = [];
 		$master = $this->getMasterModel();
@@ -636,7 +637,7 @@ class CrudController extends \yii\web\Controller
 		if (!empty($prim_keys)) {
 			$breadcrumbs[] = [
 				'label' => $model->recordDesc('short', 25),
-				'url' => $action_id!='view' ? array_merge([$this->getActionRoute('view')], $prim_keys) : null,
+				'url' => $scenario!='view' ? array_merge([$this->getActionRoute('view')], $prim_keys) : null,
 			];
 		}
 		return $breadcrumbs;
@@ -645,9 +646,10 @@ class CrudController extends \yii\web\Controller
 	public function genBreadCrumbs(string $action_id, $model, array $permissions = []): array
 	{
 		$breadcrumbs = $this->genBaseBreadCrumbs($action_id, $model, $permissions);
+		$scenario = $model->scenario?:$action_id;
 		$master = $this->getMasterModel();
 		if ($master) {
-			switch( $action_id ) {
+			switch( $scenario ) {
 				case 'update':
 					$breadcrumbs[] = [
 						'label' => $model->recordDesc('short', 25),
@@ -661,7 +663,7 @@ class CrudController extends \yii\web\Controller
 			}
 		} else {
 			$prefix = $this->getBaseRoute();
-			switch( $action_id ) {
+			switch( $scenario ) {
 				case 'update':
 					$breadcrumbs[] = [
 						'label' => $model->t('churros', 'Updating {record_short}'),
@@ -682,7 +684,7 @@ class CrudController extends \yii\web\Controller
 				case 'index':
 					break;
 				default:
-					throw new \Exception($action_id);
+					throw new \Exception($scenario);
 			}
 		}
 		return $breadcrumbs;
