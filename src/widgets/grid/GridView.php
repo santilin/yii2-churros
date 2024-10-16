@@ -128,7 +128,7 @@ class GridView extends SimpleGridView
 
     public function renderToolbar()
     {
-		if( count( $this->toolbarButtons) ) {
+		if( count($this->toolbarButtons) ) {
 			$toolbarButtonsOptions = $this->toolbarButtonsOptions;
 			Html::addCssClass($toolbarButtonsOptions, 'toolbar');
 			$tag = ArrayHelper::remove($toolbarButtonsOptions, 'tag', 'div');
