@@ -89,7 +89,7 @@ trait ModelChangesLoggableTrait
 				$must_trigger = true;
 			} else if ($event->name == self::EVENT_AFTER_UPDATE) {
 				foreach ($event->changedAttributes as $fld => $old_value) {
-					if ($this->$fld == $old_value) {
+					if (($current_value=$this->$fld) == $old_value) {
 						continue;
 					}
 					if ($nfield = $model_change::findChangeableFieldIndex($model_name, $fld)) {
@@ -99,25 +99,25 @@ trait ModelChangesLoggableTrait
 						}
 						$model_change->record_id = $record_id;
 						$model_change->field = $nfield;
-						$model_change->value = $this->$fld;
+						$model_change->value = $old_value;
 						$model_change->changed_by = \Yii::$app->user->identity->id;
 						$model_change->changed_at = new \yii\db\Expression("NOW()");
 						$model_change->type = $model_change::V_TYPE_UPDATE;
-						if (is_bool($old_value)) {
-							if ($old_value) {
+						if (is_bool($current_value)) {
+							if ($current_value) {
 								$model_change->subtype = $model_change::V_SUBTYPE_SETFALSE;
 							} else {
 								$model_change->subtype = $model_change::V_SUBTYPE_SETTRUE;
 							}
-						} else if ($old_value == '') {
-							$model_change->subtype = $model_change::V_SUBTYPE_UNEMPTY;
-						} else if ($model_change->value == '') {
-							$model_change->subtype = $model_change::V_SUBTYPE_EMPTY;
-						} else if (AppHelper::mb_strcasecmp($model_change->value, $old_value, 'UTF-8') == 0) {
+						} else if (AppHelper::mb_strcasecmp($current_value, $old_value, 'UTF-8') == 0) {
 							$model_change->subtype = $model_change::V_SUBTYPE_CHANGECASE;
 						} else if (str_replace([' ',"\t","\n","\r"], '', $old_value) ==
-							str_replace([' ',"\t","\n","\r"], '', $model_change->value)) {
+							str_replace([' ',"\t","\n","\r"], '', $current_value)) {
 							$model_change->subtype = $model_change::V_SUBTYPE_CHANGESPACES;
+						} else if ($current_value == '') {
+							$model_change->subtype = $model_change::V_SUBTYPE_EMPTY;
+						} else if ($current_value != '' && $old_value == '') {
+							$model_change->subtype = $model_change::V_SUBTYPE_UNEMPTY;
 						} else {
 							$model_change->subtype = $model_change::V_SUBTYPE_CHANGE;
 						}

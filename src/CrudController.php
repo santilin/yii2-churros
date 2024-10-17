@@ -219,7 +219,6 @@ class CrudController extends \yii\web\Controller
 		$params = array_merge($this->request->get(), $this->request->post());
 		$params['permissions'] = $this->resolvePermissions($params['permissions']??[], $this->userPermissions());
 		$model = $this->findFormModel($id, null, 'duplicate', $params);
-		$model->setDefaultValues($this, true); // duplicating
 		$model->scenario = 'duplicate';
 
 		$relations = empty($params['_form_relations'])?[]:explode(",", $params['_form_relations']);
