@@ -208,12 +208,12 @@ class CrudController extends \yii\web\Controller
 	}
 
 	/**
-		* Creates a new model by another data,
-		* so user don't need to input all field from scratch.
-		*
-		* @param mixed $id
-		* @return mixed
-		*/
+	 * Creates a new model by another data,
+	 * so user don't need to input all field from scratch.
+	 *
+	 * @param mixed $id
+	 * @return mixed
+	 */
 	public function actionDuplicate($id)
 	{
 		$params = array_merge($this->request->get(), $this->request->post());
@@ -281,7 +281,7 @@ class CrudController extends \yii\web\Controller
 	 * Deletes an existing model.
 	 * @param integer $id
 	 * @return mixed
-	*/
+	 */
 	public function actionDelete($id)
 	{
 		$model = $this->findModel($id);
