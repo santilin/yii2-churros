@@ -2,6 +2,8 @@
 
 namespace santilin\churros\models;
 
+use santilin\churros\helpers\AppHelper;
+
 trait ModelChangesLoggerTrait
 {
 	/**
@@ -41,6 +43,21 @@ trait ModelChangesLoggerTrait
 		return call_user_func([$this, $getter]);
 	}
 
+	public function findNextValue($changed_model, string $changed_field): string
+	{
+		$next_model = static::find()->select('value')
+			->andWhere(['>', 'id', $this->id])
+			->andWhere(['field' => $this->field])
+			->andWhere(['record_id' => $this->record_id])
+			->orderBy('id')
+			->one();
+		$field = AppHelper::lastWord($changed_field, '.');
+		if ($next_model) {
+			return $next_model->$field;
+		} else {
+			return $changed_model->$field;
+		}
+	}
 
 	static public function extractChangesForNotifications(string $value)
 	{
