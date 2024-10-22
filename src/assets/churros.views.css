@@ -127,3 +127,13 @@ legend {
   display: flex;
   justify-content: space-between;
 }
+
+
+.grid-header .subtitle, .grid-header .supertitle {
+  font-variant: small-caps;
+  font-size: small;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  flex: 0 1 auto;
+}

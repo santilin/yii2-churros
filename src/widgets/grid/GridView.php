@@ -13,14 +13,15 @@ use yii\bootstrap5\ActiveForm;
 
 class GridView extends SimpleGridView
 {
-	public $selectViews = [];
-	public $selectViewsOptions = [];
-	public $toolbarButtons = [];
-	public $toolbarButtonsOptions = [];
-	public $condensed = false;
-	public $hover = false;
+	public bool $embedded = false;
+	public ?string $title;
+	public array $selectViews = [];
+	public array $selectViewsOptions = [];
+	public array $toolbarButtons = [];
+	public array $toolbarButtonsOptions = [];
+	public bool $condensed = false;
+	public bool $hover = false;
 	public $layout = "{summary}\n{selectViews}\n{items}\n{pager}{filterCount}";
-	public $savedColumnValues = [];
 
 
 	public function init()
@@ -141,6 +142,8 @@ class GridView extends SimpleGridView
 
     public function renderSummaryWithSelectViews()
     {
+		$embedded = $this->embedded;
+		$title = $this->title;
 		$selectViewsContent = $this->renderSelectViews();
         $count = $this->dataProvider->getCount(); // records in current page
 		$summaryOptions = $this->summaryOptions;
@@ -186,6 +189,9 @@ class GridView extends SimpleGridView
 					}
 					if( $selectViewsContent ) {
 						$counts .= ' ' . $selectViewsContent;
+					}
+					if ($embedded && $title) {
+						$counts = Html::tag('div', $counts, ['class' => 'supertitle']) . $title;
 					}
 					return Html::tag($tag, $counts, $summaryOptions);
 				}
