@@ -14,7 +14,7 @@ use yii\bootstrap5\ActiveForm;
 class GridView extends SimpleGridView
 {
 	public bool $embedded = false;
-	public ?string $title;
+	public ?string $title = null;
 	public array $selectViews = [];
 	public array $selectViewsOptions = [];
 	public array $toolbarButtons = [];

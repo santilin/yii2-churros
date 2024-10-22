@@ -495,6 +495,7 @@ class CrudController extends \yii\web\Controller
 	// Ajax
 	public function actionAutocomplete(string $search, string $result, array $fields = [], string $format = 'long')
 	{
+		\Yii::$app->response->format = \yii\web\Response::FORMAT_JSON;
 		$ret = [];
 		$searchModel = $this->createSearchModel();
 		if (empty($fields)) {
@@ -509,7 +510,7 @@ class CrudController extends \yii\web\Controller
 			foreach ($dataProvider->getModels() as $record) {
 				$ret[] = [ 'id' => $record->getPrimaryKey(), 'text' => $record->recordDesc($format) ];
 			}
-			echo json_encode([ 'results' => $ret ]);
+			return json_encode([ 'results' => $ret ]);
 		}
 	}
 
