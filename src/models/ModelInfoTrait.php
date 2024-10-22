@@ -101,7 +101,7 @@ trait ModelInfoTrait
 			$_format = self::getModelInfo('record_desc_format_short');
 		} elseif ($format == 'medium') {
 			$_format = self::getModelInfo('record_desc_format_medium');
-		} elseif ($format == 'long') {
+		} elseif ($format == 'long' || $format == 'large' || $format == 'full') {
 			$_format = self::getModelInfo('record_desc_format_long');
 		} elseif ($format == 'desc') {
 			$fields = static::findDescFields();
