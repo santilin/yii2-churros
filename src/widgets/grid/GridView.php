@@ -51,6 +51,8 @@ class GridView extends SimpleGridView
             case '{toolbar}':
             case '{toolbarContainer}':
                 return $this->renderToolbar();
+			case '{title}':
+				return $this->renderTitle();
 			case '{filterCount}':
 				return $this->renderFilterCount();
 			case '{selectViews}':
@@ -129,7 +131,7 @@ class GridView extends SimpleGridView
 
     public function renderToolbar()
     {
-		if( count($this->toolbarButtons) ) {
+		if (count($this->toolbarButtons)) {
 			$toolbarButtonsOptions = $this->toolbarButtonsOptions;
 			Html::addCssClass($toolbarButtonsOptions, 'toolbar');
 			$tag = ArrayHelper::remove($toolbarButtonsOptions, 'tag', 'div');
@@ -216,6 +218,19 @@ class GridView extends SimpleGridView
 			return $selectViewsContent . ' ' .  Yii::$app->getI18n()->format($summaryContent, $configSummary, Yii::$app->language);
 		}
     }
+
+    public function renderTitle()
+	{
+		if ($this->title) {
+			if (!$this->embedded) {
+				return Html::tag('h1', $this->title, ['class' => 'title']);
+			} else {
+				return Html::tag('div', $this->title, ['class' => 'title']);
+			}
+		} else {
+			return '';
+		}
+	}
 
     /**
      * @inheritdoc
