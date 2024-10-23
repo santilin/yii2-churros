@@ -122,10 +122,15 @@ legend {
   font-weight: bold;
 }
 
+.grid-view .title-container {
+
+}
+
 
 .grid-view .grid-header {
   display: flex;
   justify-content: space-between;
+  align-items: center;
 }
 
 
