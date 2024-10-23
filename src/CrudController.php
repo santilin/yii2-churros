@@ -510,7 +510,7 @@ class CrudController extends \yii\web\Controller
 			foreach ($dataProvider->getModels() as $record) {
 				$ret[] = [ 'id' => $record->getPrimaryKey(), 'text' => $record->recordDesc($format) ];
 			}
-			return json_encode([ 'results' => $ret ]);
+			return [ 'results' => $ret ];
 		}
 	}
 
