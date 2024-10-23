@@ -181,6 +181,61 @@ window.yii.churros = (function ($) {
 				}
 				return true;
 			}
+		},
+		fnGridExcelExport(id, nombre, excluded_rows, excluded_cols) {
+			if (typeof(excluded_rows)==='undefined') excluded_rows = null;
+			if (typeof(excluded_cols)==='undefined') excluded_cols = null;
+			var uri = 'data:application/vnd.ms-excel;base64,';
+			base64 = function(s) { return window.btoa(unescape(encodeURIComponent(s))) }
+			format = function(s, c) { return s.replace(/{(\w+)}/g, function(m, p) { return c[p]; }) }
+			var tab_text="<html xmlns:o='urn:schemas-microsoft-com:office:office' xmlns:x='urn:schemas-microsoft-com:office:excel' xmlns='http://www.w3.org/TR/REC-html40'><meta http-equiv='content-type' content='application/vnd.ms-excel; charset=UTF-8'><head><!--[if gte mso 9]><xml><x:ExcelWorkbook><x:ExcelWorksheets><x:ExcelWorksheet><x:Name>Resumen</x:Name><x:WorksheetOptions><x:DisplayGridlines/></x:WorksheetOptions></x:ExcelWorksheet></x:ExcelWorksheets></x:ExcelWorkbook></xml><![endif]--></head><body><table>";
+
+			var textRange; var j=0, i=0;
+			var tab = document.getElementById(id); // id of table
+			if(excluded_rows !== null || excluded_cols !== null){
+				for(j = 0 ; j < tab.rows.length ; j++){
+					if(excluded_rows.includes(j) == false){//Si el valor de j no está incluido en el array pasado como parámetro
+						tab_text = tab_text + "\n<tr>";
+						let row = tab.rows[j];
+						if( !row.classList.contains('no-export') ) {
+							for(i = 0 ; i < row.cells.length ; i++) {
+								if(excluded_cols.includes(i) == false){//Si el valor de i no está incluido en el array pasado como parámetro
+									tab_text=tab_text + "\n<td>" + row.cells[i].innerHTML.replace(/(<a.*?>)|(<\/a>)/ig, "") + "</td>";
+								}
+							}
+						}
+						tab_text = tab_text + "</tr>";
+					}
+				}
+			} else {
+				for(j = 0 ; j < tab.rows.length ; j++) {
+					let row = tab.rows[j];
+					if( !row.classList.contains('no-export') ) {
+						tab_text=tab_text + "\n<tr>" + row.innerHTML.replace(/(<a.*?>)|(<\/a>)/ig, "") + "</tr>";
+					}
+				}
+			}
+
+			tab_text=tab_text+"\n</table></body></html>";
+
+			var table = document.getElementById(id)
+
+			var ua = window.navigator.userAgent;
+			var msie = ua.indexOf('MSIE ');
+			if (msie > 0 || !!navigator.userAgent.match(/Trident.*rv\:11\./))      // If Internet Explorer
+			{
+				txtArea1.document.open('txt/html','replace');
+				txtArea1.document.write(tab_text);
+				txtArea1.document.close();
+				txtArea1.focus();
+				sa=txtArea1.document.execCommand('SaveAs',true,nombre+'.xls');
+			} else {           //other browser not tested on IE 11
+				var ctx = {worksheet: nombre || 'Worksheet', table: table.innerHTML}
+				var btn = document.getElementById("btn-"+id);
+				btn.href = uri + base64(format(tab_text, ctx));
+				btn.download = nombre+".xls";
+				return true;
+			}
 		}
 
 	}
