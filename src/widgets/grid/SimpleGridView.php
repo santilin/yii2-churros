@@ -88,8 +88,8 @@ class SimpleGridView extends \yii\grid\GridView
 				$column['summary'] = $column['pageSummaryFunc'];
 				unset($column['pageSummaryFunc']);
  			}
- 			if (!empty($column['summary']) &&  !in_array($column['summary'], self::SUMMARY_FUNCTIONS)) {
-				throw InvalidConfigException($column['summary'] . ': invalid summary function');
+ 			if (!empty($column['summary']) && !in_array(strtolower($column['summary']), self::SUMMARY_FUNCTIONS)) {
+				throw new InvalidConfigException($column['summary'] . ': invalid summary function');
 			}
 		}
 		parent::init();
@@ -382,7 +382,11 @@ class SimpleGridView extends \yii\grid\GridView
 			$kc = $column->attribute;
 			$classes = [];
 			if( ($column->format?:'raw') != 'raw' ) {
-				$classes[] = "format-{$column->format}";
+				if (is_array($column->format)) {
+					$classes[] = "format-" . reset($column->format);
+				} else {
+					$classes[] = "format-$column->format";
+				}
 			}
 			if( isset($summary_columns[$kc]) ) {
 				$value = 0.0;
