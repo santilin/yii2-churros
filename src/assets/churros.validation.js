@@ -182,60 +182,66 @@ window.yii.churros = (function ($) {
 				return true;
 			}
 		},
-		fnGridExcelExport(id, nombre, excluded_rows, excluded_cols) {
-			if (typeof(excluded_rows)==='undefined') excluded_rows = null;
-			if (typeof(excluded_cols)==='undefined') excluded_cols = null;
-			var uri = 'data:application/vnd.ms-excel;base64,';
-			base64 = function(s) { return window.btoa(unescape(encodeURIComponent(s))) }
-			format = function(s, c) { return s.replace(/{(\w+)}/g, function(m, p) { return c[p]; }) }
-			var tab_text="<html xmlns:o='urn:schemas-microsoft-com:office:office' xmlns:x='urn:schemas-microsoft-com:office:excel' xmlns='http://www.w3.org/TR/REC-html40'><meta http-equiv='content-type' content='application/vnd.ms-excel; charset=UTF-8'><head><!--[if gte mso 9]><xml><x:ExcelWorkbook><x:ExcelWorksheets><x:ExcelWorksheet><x:Name>Resumen</x:Name><x:WorksheetOptions><x:DisplayGridlines/></x:WorksheetOptions></x:ExcelWorksheet></x:ExcelWorksheets></x:ExcelWorkbook></xml><![endif]--></head><body><table>";
+		createODSFile(id, fileName, excludedClasses = [], excludedRows = [], excludedCols = []) {
+			const table = document.getElementById(id);
+			const content = this.generateContentXML(table, excludedClasses, excludedRows, excludedCols);
+			const manifest = this.generateManifestXML();
+			const styles = this.generateStylesXML();
 
-			var textRange; var j=0, i=0;
-			var tab = document.getElementById(id); // id of table
-			if(excluded_rows !== null || excluded_cols !== null){
-				for(j = 0 ; j < tab.rows.length ; j++){
-					if(excluded_rows.includes(j) == false){//Si el valor de j no está incluido en el array pasado como parámetro
-						tab_text = tab_text + "\n<tr>";
-						let row = tab.rows[j];
-						if( !row.classList.contains('no-export') ) {
-							for(i = 0 ; i < row.cells.length ; i++) {
-								if(excluded_cols.includes(i) == false){//Si el valor de i no está incluido en el array pasado como parámetro
-									tab_text=tab_text + "\n<td>" + row.cells[i].innerHTML.replace(/(<a.*?>)|(<\/a>)/ig, "") + "</td>";
-								}
-							}
-						}
-						tab_text = tab_text + "</tr>";
-					}
+			const zip = new JSZip();
+			zip.file("content.xml", content);
+			zip.file("META-INF/manifest.xml", manifest);
+			zip.file("styles.xml", styles);
+			zip.file("mimetype", "application/vnd.oasis.opendocument.spreadsheet");
+			zip.generateAsync({type: "blob"})
+			.then(function(content) {
+				saveAs(content, `${fileName}.ods`);
+			});
+		},
+		generateContentXML(table, excludedClasses, excludedRows, excludedCols) {
+			let content = `<?xml version="1.0" encoding="UTF-8"?>
+			<office:document-content
+			xmlns:office="urn:oasis:names:tc:opendocument:xmlns:office:1.0"
+			xmlns:table="urn:oasis:names:tc:opendocument:xmlns:table:1.0"
+			xmlns:text="urn:oasis:names:tc:opendocument:xmlns:text:1.0">
+			<office:body>
+			<office:spreadsheet>
+			<table:table table:name="Sheet1">`;
+
+			for (let i = 0; i < table.rows.length; i++) {
+				if (excludedRows.includes(i)) continue;
+				if (excludedClasses.some(className => table.rows[i].classList.contains(className))) continue;
+				content += '<table:table-row>';
+				for (let j = 0; j < table.rows[i].cells.length; j++) {
+					if (excludedCols.includes(j)) continue;
+					const cellContent = table.rows[i].cells[j].textContent;
+					content += `<table:table-cell office:value-type="string">
+					<text:p>${cellContent}</text:p>
+					</table:table-cell>`;
 				}
-			} else {
-				for(j = 0 ; j < tab.rows.length ; j++) {
-					let row = tab.rows[j];
-					if( !row.classList.contains('no-export') ) {
-						tab_text=tab_text + "\n<tr>" + row.innerHTML.replace(/(<a.*?>)|(<\/a>)/ig, "") + "</tr>";
-					}
-				}
+				content += '</table:table-row>';
 			}
 
-			tab_text=tab_text+"\n</table></body></html>";
+			content += `
+			</table:table>
+			</office:spreadsheet>
+			</office:body>
+			</office:document-content>`;
 
-			var table = document.getElementById(id)
-
-			var ua = window.navigator.userAgent;
-			var msie = ua.indexOf('MSIE ');
-			if (msie > 0 || !!navigator.userAgent.match(/Trident.*rv\:11\./))      // If Internet Explorer
-			{
-				txtArea1.document.open('txt/html','replace');
-				txtArea1.document.write(tab_text);
-				txtArea1.document.close();
-				txtArea1.focus();
-				sa=txtArea1.document.execCommand('SaveAs',true,nombre+'.xls');
-			} else {           //other browser not tested on IE 11
-				var ctx = {worksheet: nombre || 'Worksheet', table: table.innerHTML}
-				var btn = document.getElementById("btn-"+id);
-				btn.href = uri + base64(format(tab_text, ctx));
-				btn.download = nombre+".xls";
-				return true;
-			}
+			return content;
+		},
+		generateManifestXML() {
+			return `<?xml version="1.0" encoding="UTF-8"?>
+			<manifest:manifest xmlns:manifest="urn:oasis:names:tc:opendocument:xmlns:manifest:1.0">
+			<manifest:file-entry manifest:full-path="/" manifest:media-type="application/vnd.oasis.opendocument.spreadsheet"/>
+			<manifest:file-entry manifest:full-path="content.xml" manifest:media-type="text/xml"/>
+			<manifest:file-entry manifest:full-path="styles.xml" manifest:media-type="text/xml"/>
+			</manifest:manifest>`;
+		},
+		generateStylesXML() {
+			return `<?xml version="1.0" encoding="UTF-8"?>
+			<office:document-styles xmlns:office="urn:oasis:names:tc:opendocument:xmlns:office:1.0">
+			</office:document-styles>`;
 		}
 
 	}

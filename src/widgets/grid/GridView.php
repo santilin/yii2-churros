@@ -9,6 +9,7 @@ use yii;
 use yii\helpers\{ArrayHelper,Html};
 use santilin\churros\helpers\FormHelper;
 use santilin\churros\widgets\grid\SimpleGridView;
+use santilin\churros\widgets\JSZipAsset;
 use yii\bootstrap5\ActiveForm;
 
 class GridView extends SimpleGridView
@@ -134,6 +135,7 @@ class GridView extends SimpleGridView
     public function renderToolbar()
     {
 		if (count($this->toolbarButtons)) {
+			JSZipAsset::register($this->getView());
 			$toolbarButtonsOptions = $this->toolbarButtonsOptions;
 			Html::addCssClass($toolbarButtonsOptions, 'toolbar');
 			$tag = ArrayHelper::remove($toolbarButtonsOptions, 'tag', 'div');
