@@ -116,4 +116,10 @@ class ActionColumn extends \yii\grid\ActionColumn
 		return Url::toRoute($params);
 	}
 
+	public function renderFilterCell()
+	{
+		return Html::tag('td', "Mis fitros", $this->filterOptions);
+	}
+
+
 }

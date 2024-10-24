@@ -43,7 +43,7 @@ trait ModelChangesLoggerTrait
 		return call_user_func([$this, $getter]);
 	}
 
-	public function findNextValue($changed_model, string $changed_field): string
+	public function findNextValue($changed_model, string $changed_field)
 	{
 		$next_model = static::find()->select('value')
 			->andWhere(['>', 'id', $this->id])

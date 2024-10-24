@@ -48,7 +48,7 @@ class MultiColumnTypeahead extends Typeahead
 js;
 		}
 		$s_item_fields = implode(',',$item_fields);
-		if (empty($this->suggestionsDisplay)) {
+		if (empty($this->suggestionsDisplay)) { // Shows each suggestion
 			$this->suggestionsDisplay = <<<js
 function(item) {
 	const props = [$s_item_fields];
@@ -66,7 +66,7 @@ function(item) {
 js;
 		}
 		$s_item_fields = $item_fields[0];
- 		if (empty($this->display)) {
+ 		if (empty($this->display)) { // Shows the selected texts
 			$this->display = <<<js
 function(item) {
 	const props = [$s_item_fields];
