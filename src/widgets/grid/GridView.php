@@ -277,7 +277,7 @@ class GridView extends SimpleGridView
 				];
 				if (($summaryContent = $this->summary) === null) {
 					if ($pageCount <= 1) {
-						$counts = Yii::t('churros', 'Showing <b>{totalCount}, number}</b> ', $configSummary + $configItems);
+						$counts = Yii::t('churros', 'Showing <b>{totalCount, number}</b>', $configSummary + $configItems);
 					} else {
 						$counts = Yii::t('churros', 'Showing <b>{begin, number}-{end, number}</b> of <b>{totalCount, number}</b>', $configSummary + $configItems);
 					}
