@@ -160,13 +160,7 @@ js;
 		$js_id = str_replace('-','_',$id);
 		/// @todo make a module and refactor change an blur event handlers
 		$view->registerJS(<<<js
-if (typeof mctahead_exact_match_field_$js_id === 'undefined') {
-	let mctahead_exact_match_field_$js_id;
-}
 mctahead_exact_match_field_$js_id = $js_exact_match_field;
-if (typeof mctahead_changed_$js_id === 'undefined') {
-	let mctahead_changed_$js_id;
-}
 mctahead_changed_$js_id = false;
 $('#$id').change(function(e) {
 	mctahead_changed_$js_id = false;
