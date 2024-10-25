@@ -279,7 +279,7 @@ class WidgetLayer
 						$row_html .= $fs;
 					} else {
 						if (YII_ENV_DEV) {
-							Yii::error("$widget_name: widget not found in WidgetLayer");
+							Yii::error("$widget_name: widget WidgetLayer not found in form field definitions");
 						}
 					}
 
