@@ -16,7 +16,7 @@ use kartik\typeahead\Typeahead;
 
 class MultiColumnTypeahead extends Typeahead
 {
-	public $formFields = [];
+	public array $formFields = []; // $formField => $dbField
 	public $suggestionsDisplay;
 	public $display;
 	public $remoteUrl;
@@ -28,27 +28,27 @@ class MultiColumnTypeahead extends Typeahead
 	public $limit = 5;
 	public $exactMatch = false;
 
-    /**
-     * Initializes the widget
-     *
-     * @throws \yii\base\InvalidConfigException
-     */
-    public function init()
+	/**
+	 * Initializes the widget
+	 *
+	 * @throws \yii\base\InvalidConfigException
+	 */
+	public function init()
 	{
 		if (count($this->formFields)==0) {
-            throw new InvalidConfigException("You must define al least one formField");
+			throw new InvalidConfigException("You must define al least one formField");
 		}
 		$set_dest_fields_values = [];
 		$item_fields = [];
 		foreach ($this->formFields as $formField => $dbField) {
-			$fld_id = Html::getInputId($this->model, $formField);
- 			$item_fields[] = "item.$formField";
+			$form_field_id = Html::getInputId($this->model, $formField);
+			$item_fields[] = "item.$dbField";
 			$set_dest_fields_values[] = <<<js
-	if (item.$formField != '') $('#$fld_id').val(item.$formField);
+if (item.$dbField != '') $('#$form_field_id').val(item.$dbField);
 js;
 		}
 		$s_item_fields = implode(',',$item_fields);
-		if (empty($this->suggestionsDisplay)) { // Shows each suggestion
+		if (empty($this->suggestionsDisplay)) {
 			$this->suggestionsDisplay = <<<js
 function(item) {
 	const props = [$s_item_fields];
@@ -66,7 +66,7 @@ function(item) {
 js;
 		}
 		$s_item_fields = $item_fields[0];
- 		if (empty($this->display)) { // Shows the selected texts
+		if (empty($this->display)) {
 			$this->display = <<<js
 function(item) {
 	const props = [$s_item_fields];
@@ -83,26 +83,27 @@ function(item) {
 }
 js;
 		}
+
 		$s_fields = implode(",",$this->formFields);
 		$this->dataset = [[
 			'limit' => $this->limit,
 			'remote' => [
 				'url' => $this->remoteUrl . '?'
-					. $this->searchParam . '=&' . $this->fieldsParam . '=&'
-					. $this->pageParam . '=&' . $this->perPageParam . '=',
+				. $this->searchParam . '=&' . $this->fieldsParam . '=&'
+				. $this->pageParam . '=&' . $this->perPageParam . '=',
 				'replace' => new \yii\web\JsExpression(<<<jsexpr
 function(url, query) {
 	const urlParams = new URLSearchParams(url);
 	let fields = urlParams.get('{$this->fieldsParam}');
 	let page = urlParams.get('{$this->pageParam}');
 	let perpage = urlParams.get('{$this->perPageParam}');
-	if (fields === undefined || fields == '' ) {
+	if (fields == '' ) {
 		fields = '$s_fields';
 	}
-	if (page === undefined || page == '' ) {
+	if (page == '' ) {
 		page = '1';
 	}
-	if (perpage === undefined || perpage == '' ) {
+	if (perpage == '' ) {
 		perpage = '{$this->limit}';
 	}
 	return url.split("?")[0] + "?{$this->searchParam}=" + query
@@ -112,16 +113,16 @@ function(url, query) {
 jsexpr
 				),
 			],
-//  		'datumTokenizer' => "Bloodhound.tokenizers.obj.whitespace('value')",
+			//  		'datumTokenizer' => "Bloodhound.tokenizers.obj.whitespace('value')",
 			'templates' => [
 				'notFound' => ($this->exactMatch
-					? '<div class="text-danger" style="padding:0 8px">' .Yii::t('churros', 'No results found') . '</div>'
-					: '<div class="text-danger" style="padding:0 8px">' .Yii::t('churros', 'No suggestions found') . '</div>'
-),
+				? '<div class="text-danger" style="padding:0 8px">' .Yii::t('churros', 'No results found') . '</div>'
+				: '<div class="text-danger" style="padding:0 8px">' .Yii::t('churros', 'No suggestions found') . '</div>'
+				),
 				// The items in the dropdown
 				'suggestion' => new \yii\web\JsExpression($this->suggestionsDisplay)
 			],
- 			'display' => new \yii\web\JsExpression($this->display),
+			'display' => new \yii\web\JsExpression($this->display),
 		]];
 		$js_set_fields_values = implode("\n", $set_dest_fields_values);
 		$this->pluginEvents["typeahead:select"] = new \yii\web\JsExpression(<<<js
@@ -133,8 +134,8 @@ js
 		parent::init();
 	}
 
-    public function registerAssets()
-    {
+	public function registerAssets()
+	{
 		$view = $this->getView();
 		$id = $this->options['id'];
 
@@ -142,13 +143,13 @@ js
 		$set_dest_fields_values = $reset_dest_fields_values = [];
 		$nf = 0;
 		foreach ($this->formFields as $formField => $dbField) {
-			$fld_id = Html::getInputId($this->model, $formField);
+			$form_field_id = Html::getInputId($this->model, $formField);
 			$set_dest_fields_values[] = <<<js
-			if (datumParts.$formField !== undefined && datumParts.$formField != '') { $('#$fld_id').val(datumParts.$formField) };
+if (datumParts.$formField !== undefined && datumParts.$formField != '') { $('#$form_field_id').val(datumParts.$formField) };
 js;
 			if ($nf++>0) {
 				$reset_dest_fields_values[] = <<<js
-			$('#$fld_id').val('');
+$('#$form_field_id').val('');
 js;
 			} else {
 				$js_exact_match_field = "'$dbField'";
@@ -159,13 +160,19 @@ js;
 		$js_id = str_replace('-','_',$id);
 		/// @todo make a module and refactor change an blur event handlers
 		$view->registerJS(<<<js
-let mctahead_exact_match_field_$js_id = $js_exact_match_field;
-let mctahead_changed_$js_id = false;
+if (typeof mctahead_exact_match_field_$js_id === 'undefined') {
+	let mctahead_exact_match_field_$js_id;
+}
+mctahead_exact_match_field_$js_id = $js_exact_match_field;
+if (typeof mctahead_changed_$js_id === 'undefined') {
+	let mctahead_changed_$js_id;
+}
+mctahead_changed_$js_id = false;
 $('#$id').change(function(e) {
- 	mctahead_changed_$js_id = false;
+	mctahead_changed_$js_id = false;
 });
 $('#$id').focusin(function(e) {
- 	mctahead_changed_$js_id = false;
+	mctahead_changed_$js_id = false;
 });
 $('#$id').blur(function(e) {
 	if (mctahead_changed_$js_id) {
@@ -187,9 +194,9 @@ $('#$id').keydown(function(e) {
 	mctahead_changed_$js_id = true;
 	if ((e.keyCode === 13 || e.keyCode == 8 || e.key == "Delete") && mctahead_changed_$js_id) {
 		let selectedDatum = $(this).data('ttTypeahead').menu.getActiveSelectable();
- 		if (!selectedDatum) {
- 			selectedDatum = $(this).data('ttTypeahead').menu.getTopSelectable();
- 		}
+		if (!selectedDatum) {
+			selectedDatum = $(this).data('ttTypeahead').menu.getTopSelectable();
+		}
 		$js_reset_fields_values
 		if (selectedDatum) {
 			const datumParts = $(selectedDatum[0]).data('ttSelectableObject');
@@ -202,26 +209,25 @@ $('#$id').keydown(function(e) {
 	return true;
 });
 js
-	   );
-	   parent::registerAssets();
-    }
+		);
+		parent::registerAssets();
+	}
 
 }
-/*
-?search=&page=
-// 		'pluginEvents' => [
-// 			"typeahead:active" => new \yii\web\JsExpression("function() {console.log('typeahead:active'); }"),
-// 			  "typeahead:idle" => new \yii\web\JsExpression("function() {console.log('typeahead:idle'); }"),
-// 			  "typeahead:open" => new \yii\web\JsExpression("function() {console.log('typeahead:open'); }"),
-// 			  "typeahead:close" => new \yii\web\JsExpression("function() {console.log('typeahead:close'); }"),
-// 			  "typeahead:change" => new \yii\web\JsExpression("function() {console.log('typeahead:change'); }"),
-// 			  "typeahead:render" => new \yii\web\JsExpression("function() {console.log('typeahead:render'); }"),
-// 			  "typeahead:select" => new \yii\web\JsExpression("function(event, item) { console.log(event); console.log(event.target.value); event.target.value = item.id; }"),
-/*			  "typeahead:autocomplete" => new \yii\web\JsExpression("function() {console.log('typeahead:autocomplete'); }"),
-			  "typeahead:cursorchange" => new \yii\web\JsExpression("function() {console.log('typeahead:cursorchange'); }"),
-			  "typeahead:asyncrequest" => new \yii\web\JsExpression("function() {console.log('typeahead:asyncrequest'); }"),
-			  "typeahead:asynccancel" => new \yii\web\JsExpression("function() {console.log('typeahead:asynccancel'); }"),
-			  "typeahead:asyncreceive" => new \yii\web\JsExpression("function() {console.log('typeahead:asyncreceive'); }"),
-// 		],
 
+/*
+	'pluginEvents' => [
+		"typeahead:active" => new \yii\web\JsExpression("function() {console.log('typeahead:active'); }"),
+		"typeahead:idle" => new \yii\web\JsExpression("function() {console.log('typeahead:idle'); }"),
+		"typeahead:open" => new \yii\web\JsExpression("function() {console.log('typeahead:open'); }"),
+		"typeahead:close" => new \yii\web\JsExpression("function() {console.log('typeahead:close'); }"),
+		"typeahead:change" => new \yii\web\JsExpression("function() {console.log('typeahead:change'); }"),
+		"typeahead:render" => new \yii\web\JsExpression("function() {console.log('typeahead:render'); }"),
+		"typeahead:select" => new \yii\web\JsExpression("function(event, item) { console.log(event); console.log(event.target.value); event.target.value = item.id; }"),
+		"typeahead:autocomplete" => new \yii\web\JsExpression("function() {console.log('typeahead:autocomplete'); }"),
+		"typeahead:cursorchange" => new \yii\web\JsExpression("function() {console.log('typeahead:cursorchange'); }"),
+		"typeahead:asyncrequest" => new \yii\web\JsExpression("function() {console.log('typeahead:asyncrequest'); }"),
+		"typeahead:asynccancel" => new \yii\web\JsExpression("function() {console.log('typeahead:asynccancel'); }"),
+		"typeahead:asyncreceive" => new \yii\web\JsExpression("function() {console.log('typeahead:asyncreceive'); }"),
+	],
 */

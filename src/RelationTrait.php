@@ -95,7 +95,7 @@ trait RelationTrait
 						}
 					}
 					if ($post_data !== null) {
-                        $this->loadToRelation($rel_name, $post_data);
+                        $this->loadToRelation($rel_name, (array)$post_data);
                     }
                 }
             }
@@ -404,6 +404,7 @@ trait RelationTrait
 				}
 			}
 		} else {
+			// throw new \Exception("Non-multiple relations not supported");
 // 			//Has One
 // 			foreach ($link as $key => $value) {
 // 				$records->$key = $this->$value;
