@@ -55,7 +55,7 @@ class WidgetLayer
 		if (YII_ENV_DEV) {
 			$not_used = array_diff(array_keys($this->widgets), $widgets_used);
 			if (!empty($not_used)) {
-				Yii::error("Widgets not used: " . json_encode($not_used));
+				Yii::error("Widgets in form not used in layout: " . json_encode($not_used));
 			}
 			unset($widgets_used);
 		}
@@ -279,7 +279,7 @@ class WidgetLayer
 						$row_html .= $fs;
 					} else {
 						if (YII_ENV_DEV) {
-							Yii::error("$widget_name: widget WidgetLayer not found in form field definitions");
+							Yii::error("$widget_name: widget in fieldsLayout not found in form field definitions");
 						}
 					}
 

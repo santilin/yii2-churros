@@ -683,6 +683,7 @@ class CrudController extends \yii\web\Controller
 					$breadcrumbs[] = $model->t('churros', 'Creating {title}');
 					break;
 				case 'index':
+				case 'default':
 					break;
 				default:
 					throw new \Exception($scenario);

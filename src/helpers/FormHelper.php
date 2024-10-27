@@ -8,7 +8,7 @@
 namespace santilin\churros\helpers;
 
 use Yii;
-use yii\helpers\{ArrayHelper,Html,Url};
+use yii\helpers\{ArrayHelper,Html,StringHelper,Url};
 use yii\base\InvalidConfigException;
 use yii\bootstrap5\Modal;
 
@@ -307,7 +307,11 @@ ajax;
 			case 'button':
 				if( isset($button['url']) && !isset($button['htmlOptions']['onclick']) ) {
 					$full_url = self::prepareButtonUrl($button['url'], $url_return_to);
-					$button['htmlOptions']['onclick'] = "window.location.href='$full_url'";
+					if (StringHelper::startsWith($full_url, 'javascript:')) {
+						$button['htmlOptions']['onclick'] = substr($full_url, 11);
+					} else {
+						$button['htmlOptions']['onclick'] = "window.location.href='$full_url'";
+					}
 				}
 				$ret[] = Html::button($title, $button['htmlOptions']);
 				break;
@@ -349,13 +353,15 @@ ajax;
 				break;
 		}
 		$full_url = Url::to($url);
-		if ($url_return_to) {
-			if (strpos($full_url, '?') !== FALSE) {
-				$full_url .= '&';
-			} else {
-				$full_url .= '?';
+		if (!StringHelper::startsWith($full_url, 'javascript:')) {
+			if ($url_return_to) {
+				if (strpos($full_url, '?') !== FALSE) {
+					$full_url .= '&';
+				} else {
+					$full_url .= '?';
+				}
+				$full_url .= "returnTo=$url_return_to";
 			}
-			$full_url .= "returnTo=$url_return_to";
 		}
 		return $full_url;
 	}
