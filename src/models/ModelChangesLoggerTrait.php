@@ -53,7 +53,7 @@ trait ModelChangesLoggerTrait
 			->one();
 		$field = AppHelper::lastWord($changed_field, '.');
 		if ($next_model) {
-			return $next_model->$field;
+			return $next_model->value;
 		} else {
 			return $changed_model->$field;
 		}

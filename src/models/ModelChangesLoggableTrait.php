@@ -105,9 +105,11 @@ trait ModelChangesLoggableTrait
 						$model_change->type = $model_change::V_TYPE_UPDATE;
 						if (is_bool($current_value)) {
 							if ($current_value) {
-								$model_change->subtype = $model_change::V_SUBTYPE_SETFALSE;
-							} else {
 								$model_change->subtype = $model_change::V_SUBTYPE_SETTRUE;
+								$model_change->value = 0;
+							} else {
+								$model_change->value = 1;
+								$model_change->subtype = $model_change::V_SUBTYPE_SETFALSE;
 							}
 						} else if (AppHelper::mb_strcasecmp($current_value, $old_value, 'UTF-8') == 0) {
 							$model_change->subtype = $model_change::V_SUBTYPE_CHANGECASE;

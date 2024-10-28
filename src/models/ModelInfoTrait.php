@@ -30,6 +30,16 @@ trait ModelInfoTrait
 		return strtr( self::tableName(), [ '{' => '', '}' => '', '%' => '' ] );
 	}
 
+	public function get__title()
+	{
+		return static::getModelInfo('title');
+	}
+
+	public function get__recordDesc()
+	{
+		return $this->recordDesc();
+	}
+
 	public function t($category, $message, $params = [], $language = null )
 	{
 		$t_params = array_filter($params, function($value) { return is_string($value); });
