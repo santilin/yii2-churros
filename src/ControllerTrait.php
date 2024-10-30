@@ -199,7 +199,7 @@ trait ControllerTrait
 	 * a) the parent on a hiearchy
 	 * b) the parent in a master/detail
 	 */
- 	public function modelBreadCrumbs($model, string $action_id, string $prefix, array $permissions = [],
+ 	public function modelBreadCrumbs($model, string $scenario, string $prefix, array $permissions = [],
 									 bool $last_one = false): array
 	{
 		$breadcrumbs = [];
@@ -210,7 +210,7 @@ trait ControllerTrait
 		$index_bc = [
 			'label' => StringHelper::mb_ucfirst($model->getModelInfo('title_plural')),
 		];
-		if (FormHelper::hasPermission($permissions, 'index') && $action_id != 'index') {
+		if (FormHelper::hasPermission($permissions, 'index')) {
 			$index_bc['url'] = [ $prefix . 'index'];
 		}
 		$breadcrumbs[] = $index_bc;
@@ -222,7 +222,7 @@ trait ControllerTrait
 			];
 			if (!$last_one) {
 				$view_bc['url'] = $keys;
-			} else if ($action_id != 'view' && FormHelper::hasPermission($permissions, 'view')) {
+			} else if ($scenario != 'view' && FormHelper::hasPermission($permissions, 'view')) {
 				$view_bc['url'] = $keys;
 			}
 			$breadcrumbs[] = $view_bc;

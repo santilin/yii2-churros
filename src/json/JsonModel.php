@@ -158,8 +158,10 @@ class JsonModel extends \yii\base\Model
             if (!$this->_path) {
                 return null;
             }
-            if (!StringHelper::endsWith($this->_path, $this->_id)) {
-                $parts = explode('/', $this->_path . '/' . $this->_id);
+            $locator = static::$_locator;
+            $id = $locator ? $this->$locator : $this->_id;
+            if ($id && !StringHelper::endsWith($this->_path, $id)) {
+                $parts = explode('/', $this->_path . '/' . $id);
             } else {
                 $parts = explode('/', $this->_path);
             }

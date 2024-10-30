@@ -17,18 +17,7 @@ trait JsonModelableTrait
 		if (AppHelper::lastWord($path, '/') == $id) {
 			$path = AppHelper::removeLastWord($path, '/');
 		}
-		if ($locator && $id) {
-			$ret = $this->_json_root->getJsonObjects('$' . str_replace('/','.',$path)
-				. "[?(@.$locator=='$id')]");
-			if ($ret === false) {
-				$ret = $this->_json_root->getJsonObjects('$' . str_replace('/','.',$path)
-				. "[?(@=='$id')]");
-			}
-			if (is_array($ret) && isset($ret[0])) {
-				return $ret[0];
-			}
-		}
-		if ($id) {
+		if ($id) { // The id takes precedence over the locator
 			$ret = $this->_json_root->getJsonObjects('$' . str_replace('/','.',$path)
 				. ".$id");
 			if ($ret !== false) {
@@ -36,6 +25,17 @@ trait JsonModelableTrait
 			}
 			$ret = $this->_json_root->getJsonObjects('$' . str_replace('/','.',$path)
 				. "[?(@=='$id')]");
+			if (is_array($ret) && isset($ret[0])) {
+				return $ret[0];
+			}
+		}
+		if ($locator && $id) {
+			$ret = $this->_json_root->getJsonObjects('$' . str_replace('/','.',$path)
+				. "[?(@.$locator=='$id')]");
+			if ($ret === false) {
+				$ret = $this->_json_root->getJsonObjects('$' . str_replace('/','.',$path)
+				. "[?(@=='$id')]");
+			}
 			if (is_array($ret) && isset($ret[0])) {
 				return $ret[0];
 			}
