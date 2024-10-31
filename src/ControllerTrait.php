@@ -123,55 +123,6 @@ trait ControllerTrait
 		}
 	}
 
-
-	public function joinMany2ManyModels(string $glue, array $models, string $record_format = 'long', bool $make_links = false): string
-	{
-		if( $models == null || count($models)==0 ) {
-			return "";
-		}
-		$attrs = [];
-		if ($make_links) {
-			$route = $this->getRoutePrefix() . $model->controllerName() . '/';
-		}
-		foreach ($models as $model) {
-			if ($model != null) {
-				if ($make_links) {
-					$url = $route . strval($model->getPrimaryKey());
-					$attrs[] = "<a href='$url'>" .  $model->recordDesc($record_format) . "</a>";
-				} else {
-					$attrs[] = $model->recordDesc($record_format);
-				}
-			}
-		}
-		return join($glue, $attrs);
-	}
-
- 	public function joinHasManyModels($parent, $models, $record_format = 'long',
-									  $tag = 'ul', $tag_options = [])
-	{
-		if( $models == null || count($models)==0 ) {
-			return "";
-		}
-		$keys = $parent->getPrimaryKey(true);
-		$keys[0] = 'view';
-		$parent_route = Url::toRoute($keys);
-		$attrs = [];
-		foreach((array)$models as $model) {
-			if( $model != null ) {
-				$url = Url::to(array_merge([$parent_route . '/'.  $model->controllerName()],  $model->getPrimaryKey(true)));
-				$attrs[] = "<a href='$url'>" .  $model->recordDesc($record_format) . "</a>";
-			}
-		}
-		switch ($tag) {
-			case 'ul':
-				return Html::tag($tag, '<li draggable="true">' . join('</li><li>', $attrs) . '</li>', $tag_options);
-			case 'raw':
-				return $attrs;
-			default:
-				return Html::tag($tag, join("</$tag><$tag>", $attrs), $tag_options);
-		}
-	}
-
 	public function addParamsToUrl($url, $params)
     {
         if ($params === null) {

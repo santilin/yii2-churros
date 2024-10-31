@@ -569,8 +569,62 @@ ajax;
                 $parts['title'] = Html::tag('h1', $parts['title']);
             }
             $ret = implode('', $parts);
-        }
-		return $ret;
+			return $ret;
+        } else {
+			return '';
+		}
+	}
+
+	static public function joinMany2ManyModels(string $glue, array $models, string $record_format = 'long', bool $make_links = false, $context = null): string
+	{
+		if( $models == null || count($models)==0 ) {
+			return "";
+		}
+		$attrs = [];
+		if ($make_links) {
+			if ($context) {
+				$route = Yii::$app->controller?->getRoutePrefix() . $model->controllerName() . '/';
+			} else {
+				$route = $context->getRoutePrefix() . $model->controllerName() . '/';
+			}
+		}
+		foreach ($models as $model) {
+			if ($model != null) {
+				if ($make_links) {
+					$url = $route . strval($model->getPrimaryKey());
+					$attrs[] = "<a href='$url'>" .  $model->recordDesc($record_format) . "</a>";
+				} else {
+					$attrs[] = $model->recordDesc($record_format);
+				}
+			}
+		}
+		return join($glue, $attrs);
+	}
+
+	static public function joinHasManyModels($parent, array $models,
+		string $record_format = 'long', string $tag = 'ul', array $tag_options = []): string
+	{
+		if( $models == null || count($models)==0 ) {
+			return "";
+		}
+		$keys = $parent->getPrimaryKey(true);
+		$keys[0] = 'view';
+		$parent_route = Url::toRoute($keys);
+		$attrs = [];
+		foreach((array)$models as $model) {
+			if( $model != null ) {
+				$url = Url::to(array_merge([$parent_route . '/'.  $model->controllerName()],  $model->getPrimaryKey(true)));
+				$attrs[] = "<a href='$url'>" .  $model->recordDesc($record_format) . "</a>";
+			}
+		}
+		switch ($tag) {
+			case 'ul':
+				return Html::tag($tag, '<li draggable="true">' . join('</li><li>', $attrs) . '</li>', $tag_options);
+			case 'raw':
+				return $attrs;
+			default:
+				return Html::tag($tag, join("</$tag><$tag>", $attrs), $tag_options);
+		}
 	}
 
 
