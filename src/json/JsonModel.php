@@ -507,21 +507,20 @@ class JsonModel extends \yii\base\Model
         $relPKAttr = [ $relModelClass::$_locator ?? 'id' ];
         if ($relation['type'] == 'HasMany') {
             foreach ($v as $relPost) {
-                $relObj = new $relModelClass();
-                if (is_array($relPost) ) {
-                    if (array_filter($relPost)) {
-                        foreach ($relObj->_attributes as $ka => $av) {
-                            if (!array_key_exists($ka, $relPost)) {
-                                unset($relObj->_attributes[$ka]);
-                            } else {
-                                $relObj->_attributes[$ka] = $relPost[$ka];
-                            }
-                        }
-                        $container[] = $relObj;
-                    }
+                $relObj = new $relModelClass;
+                if (!is_array($relPost) ) {
+                    $relPost = [$relPKAttr[0] => $relPost];
                 } else {
-                    // Just primary key of records, just one field in primary key
-                    $relObj->load([ $relPKAttr[0] => $relPost ], '');
+                    $relPost = array_filter($relPost);
+                }
+                if (count($relPost)) {
+                    foreach ($relObj->_attributes as $ka => $av) {
+                        if (!array_key_exists($ka, $relPost)) {
+                            unset($relObj->_attributes[$ka]);
+                        } else {
+                            $relObj->_attributes[$ka] = $relPost[$ka];
+                        }
+                    }
                     $container[] = $relObj;
                 }
             }
