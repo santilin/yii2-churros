@@ -195,7 +195,7 @@ trait ModelInfoTrait
 
 	public function linkToMe(string $format = 'long', string $action = 'view', bool $global = false, string $base_route = null): string
 	{
-		if ($base_route == null) {
+		if ($base_route === null) {
 			$base_route = Yii::$app->module?->id;
 			if ($base_route) {
 				$base_route .= '/';
