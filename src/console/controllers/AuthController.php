@@ -364,7 +364,7 @@ class AuthController extends Controller
 		$this->authManager->assign($permission, $user_id);
 	}
 
-	public function actionAssignPermToRole($perm_name, $role_name)
+	public function actionAssignToRole($perm_name, $role_name)
 	{
 		$permission = $this->authManager->getItem($perm_name);
 		if( $permission == null ) {
@@ -376,6 +376,7 @@ class AuthController extends Controller
 		}
 		if (!$this->authManager->hasChild($role, $permission)) {
 			$this->authManager->addChild($role, $permission);
+			AuthHelper::echoLastMessage();
 		}
 	}
 
@@ -383,12 +384,14 @@ class AuthController extends Controller
 	{
 		$permission = AuthHelper::createOrUpdatePermission(
 			$perm_name, $perm_desc, $this->authManager);
+		AuthHelper::echoLastMessage();
 	}
 
 	public function actionCreateRole($perm_name, $perm_desc)
 	{
 		$permission = AuthHelper::createOrUpdateRole(
 			$perm_name, $perm_desc, $this->authManager);
+		AuthHelper::echoLastMessage();
 	}
 
 	public function actionRemovePermFromRole($perm_name, $role_name)
