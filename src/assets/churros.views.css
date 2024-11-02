@@ -79,7 +79,6 @@ legend {
 .panel-toolbar {
   align-items: middle;
   align-self: center;
-  flex: 0 0 auto; /* Don't grow or shrink */
 }
 
 .panel-title {

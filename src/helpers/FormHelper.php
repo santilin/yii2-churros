@@ -90,24 +90,24 @@ class FormHelper
 	{
  		$_nv=$params[self::VIEWS_NVIEW_PARAM]??0;
 		assert(!is_bool($_nv));
-		if (is_numeric($_nv)) {
-			if ($_nv > (count($views)-1) ) {
-				$_nv = 0;
-			}
-			foreach($views as $kv => $view ) {
-				if( $_nv-- == 0 ) {
-					return [ $kv, $view[0], $view[1], $view[2]??[], $view[3]??'' ];
-				}
-			}
-		} else if (empty($_nv)) {
-			return [ $_nv, $views[$_nv][0], $views[$_nv][1], $views[$_nv][2]??[], $views[$_nv][3]??''];
-		} else {
+		if (empty($_nv)) {
+			$_nv = 0;
+		}
+		if (is_string($_nv)) {
 			foreach ($views as $view => $view_info) {
 				if ($view == $_nv || AppHelper::lastWord($view,'/') == $_nv) {
 					return [ $view, $view_info[0], $view_info[1], $view_info[2]??[], $view_info[3]??''];
 				}
 			}
-			throw new InvalidConfigException("$_nv: view not found");
+			$_nv = 0;
+		}
+		if ($_nv > (count($views)-1) ) {
+			$_nv = 0;
+		}
+		foreach($views as $kv => $view ) {
+			if( $_nv-- == 0 ) {
+				return [ $kv, $view[0], $view[1], $view[2]??[], $view[3]??'' ];
+			}
 		}
 	}
 
@@ -368,14 +368,14 @@ ajax;
 
 	static public function hasPermission(bool|array|null $perms, string $perm): bool
 	{
-		if( is_bool($perms) ) {
+		if (is_bool($perms)) {
 			return $perms;
 		}
-		if( $perm == '' ) {
+		if( $perm == '' || $perms == null) {
 			return true;
 		}
-		if( $perms === [] || $perms === null) {
-			return true;
+		if ($perms === []) {
+			return false;
 		}
 		return in_array($perm, $perms);
 	}
@@ -555,7 +555,7 @@ ajax;
             }
         }
         if ($title) {
-            $parts['title'] = "<div class=title>$title</div>";
+            $parts['title'] = $title;
         }
         if ($subtitle) {
             if (!$title && !$supertitle) {
@@ -568,7 +568,7 @@ ajax;
             if (!$embedded) {
                 $parts['title'] = Html::tag('h1', $parts['title']);
             }
-            $ret = implode('', $parts);
+            $ret = "<div class=title>" . implode('', $parts) . '</div>';
 			return $ret;
         } else {
 			return '';

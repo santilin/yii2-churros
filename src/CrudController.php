@@ -450,8 +450,10 @@ class CrudController extends \yii\web\Controller
 		} else {
 			$redirect_params[0] = $this->getActionRoute($to_action);
 		}
-		if (!array_key_exists('sort', $redirect_params) && !empty($_REQUEST['sort'])) {
-			$redirect_params['sort'] = $_REQUEST['sort'];
+		if ($to_action == 'grid') {
+			if (!array_key_exists('sort', $redirect_params) && !empty($_REQUEST['sort'])) {
+				$redirect_params['sort'] = $_REQUEST['sort'];
+			}
 		}
 		return $redirect_params;
 	}
