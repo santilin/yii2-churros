@@ -9,6 +9,7 @@ namespace santilin\churros\helpers;
 
 use Yii;
 use yii\helpers\StringHelper;
+use League\HTMLToMarkdown\HtmlConverter;
 
 class AppHelper
 {
@@ -452,5 +453,10 @@ class AppHelper
 		return implode(' ', $args);
 	}
 
+	static public function htmlToMarkDown(string $html): string
+	{
+		$converter = new HtmlConverter();
+		return $converter->convert($html);
+	}
 
 }

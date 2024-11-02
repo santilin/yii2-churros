@@ -5,7 +5,7 @@ namespace santilin\churros\models;
 use Yii;
 use yii\db\ActiveRecord;
 use yii\base\{InvalidConfigException,InvalidArgumentException};
-use yii\helpers\ArrayHelper;
+use yii\helpers\{ArrayHelper,Url};
 use santilin\churros\helpers\{YADTC,AppHelper,FormHelper};
 use santilin\churros\ModelSearchTrait;
 
@@ -193,16 +193,24 @@ trait ModelInfoTrait
 		return $ret;
 	}
 
-	public function linkToMe(string $format = 'long', string $action = 'view', string $base_route = null): string
+	public function linkToMe(string $format = 'long', string $action = 'view', bool $global = false, string $base_route = null): string
 	{
 		if ($base_route == null) {
-			$base_route = Yii::$app->module?->id??'';
+			$base_route = Yii::$app->module?->id;
+			if ($base_route) {
+				$base_route .= '/';
+			}
 		}
-		$link = self::getModelInfo('controller_name') . "/$action";
-		return \yii\helpers\Html::a($this->recordDesc($format, 0),
-				array_merge([$link], $this->getPrimaryKey(true)));
+		$link = $base_route . self::getModelInfo('controller_name') . "/$action";
+		if ($format == false) {
+			return Url::to(array_merge([$link], $this->getPrimaryKey(true)), $global);
+		} else {
+			return \yii\helpers\Html::a($this->recordDesc($format, 0),
+				Url::to(array_merge([$link], $this->getPrimaryKey(true)),$global));
+		}
 	}
 
+	// Used in grids
 	public function linkTo($action, $prefix = '', $format = 'short', $max_len = 0)
 	{
 		$url = $prefix;
