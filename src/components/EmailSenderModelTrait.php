@@ -48,9 +48,9 @@ trait EmailSenderModelTrait
 		}
 		if( !$sent ) {
 			if( count($to) > 1 ) {
-				$error_message = Yii::t('churros', 'Unable to send email to {email} and other {ndest} recipients', ['email' => array_pop($to), 'ndest' => count($to)]);
+				$error_message = Yii::t('churros', 'Unable to send email to {email} and other {ndest} recipients from {from}', ['email' => array_pop($to), 'ndest' => count($to)], 'from' => $from);
 			} else {
-				$error_message = Yii::t('churros', 'Unable to send email to {email}', ['email' => array_pop($to) ]);
+				$error_message = Yii::t('churros', 'Unable to send email to {email} from {from}', ['email' => array_pop($to), 'from' => $from ]);
 			}
 			if (strpos($mailer_error, 'php_network_getaddresses: getaddrinfo failed') !== FALSE) {
 				$this->addError('sendmail_network_error', $error_message);

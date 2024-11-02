@@ -111,8 +111,8 @@ return [
 		'No se muestran los totales porque no se están mostrando todos los registros',
 	'The report <a href="{model_link}">{record_medium}</a> has been successfully updated.'
 		=> 'El informe <a href="{model_link}">{record_medium}</a> se ha guardado correctamente..',
-	'Unable to send email to {email}' => 'No se ha podido enviar el email a {email}',
-	'Unable to send email to {email} and other {ndest} recipients' => 'No se ha podido enviar el email a {email} y a otros {ndest} destinatarios',
+	'Unable to send email to {email} from {from}' => 'No se ha podido enviar el email a {email} desde {from}',
+	'Unable to send email to {email} and other {ndest} recipients from {from}' => 'No se ha podido enviar el email a {email} y a otros {ndest} destinatarios desde {from}',
 
 	'As it is' => 'Tal cual',
 	'Currency' => 'Moneda',
