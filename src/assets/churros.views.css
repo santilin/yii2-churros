@@ -36,7 +36,7 @@
       .grid-footer .grid-items-per-page li.current {
         background-color: rgba(156, 10, 125, 0.25);
         color: #f8f8ff; }
-.app-subtitle {
+.string-danger, .app-subtitle {
 	/* Styles from .badge */
 	display: inline-block;
 	padding: 0.25em 1em;
@@ -50,6 +50,22 @@
 	color: #fff;
 	background-color: #dc3545;
 }
+
+.string-warning {
+  /* Styles from .badge */
+  display: inline-block;
+  padding: 0.25em 1em;
+  font-weight: 500;
+  line-height: 1;
+  text-align: center;
+  vertical-align: baseline;
+  border-radius: 0.25rem;
+
+  /* Styles from .badge-alert */
+    color: #fff !important;
+    background-color: RGBA(var(--bs-warning-rgb), var(--bs-bg-opacity, 1)) !important;
+}
+
 
 div.app-subtitle {
 	width: auto;
