@@ -148,7 +148,10 @@ trait ModelInfoTrait
 				$values[] = $value;
 
 			}
-			$ret = sprintf($_format, ...$values);
+			$ret = trim(sprintf($_format, ...$values));
+			if (substr($ret,-1) === ',') {
+				$ret = rtrim($ret, ',');
+			}
 		} else {
 			$ret = $_format;
 		}
