@@ -104,10 +104,10 @@ trait ModelInfoTrait
 		return strtr($translated, $placeholders);
 	}
 
-	public function recordDesc(string $format=null, int $max_len = 0): string
+	public function recordDesc(string $format='', int $max_len = 0): string
 	{
 		$ret = '';
-		if( $format == null || $format == 'short' ) {
+		if( !$format || $format == 'short' ) {
 			$_format = self::getModelInfo('record_desc_format_short');
 		} elseif ($format == 'medium') {
 			$_format = self::getModelInfo('record_desc_format_medium');
