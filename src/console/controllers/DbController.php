@@ -115,8 +115,9 @@ class DbController extends Controller
 					return $value;
 				}
 			case "string":
-			case 'timestamp':
 			case 'date':
+			case 'timestamp':
+			case 'datetime':
 			case "mediumtext":
 			case 'blob':
 			case 'mediumblob':
@@ -233,15 +234,23 @@ EOF;
 		if ($tableSchema == null) {
 			throw new \Exception("$tableName not found in database");
 		}
-		$schemaName = $tableSchema->schemaName;
+		$schemaName = $tableSchema->schemaName??'';
 		$preamble = $this->getPreamble('dump-table', $tableName, $schemaName);
 		if ($this->createFile ) {
 			$write_file = true;
 			if ($this->format == 'seeder') {
-				@mkdir(Yii::getAlias($this->seedersPath), 0777, true);
+				if (!is_dir(Yii::getAlias($this->seedersPath))) {
+					mkdir(Yii::getAlias($this->seedersPath), 0777, true);
+				}
 				$filename = Yii::getAlias($this->seedersPath) . "/{$tableName}Seeder.php";
 			} else {
-				@mkdir(Yii::getAlias($this->fixturesPath), 0777, true);
+
+				if (!is_dir(Yii::getAlias($this->fixturesPath))) {
+					mkdir(Yii::getAlias($this->fixturesPath), 0777, true);
+				}
+				if (!is_writable(Yii::getAlias($this->fixturesPath))) {
+					throw new \Exception(Yii::getAlias($this->fixturesPath) . ": not writable");
+				}
 				$filename = Yii::getAlias($this->fixturesPath) . "/{$tableName}.php";
 			}
 			if (\file_exists($filename) && !$this->confirm("The file $filename already exists. Do you want to overwrite it?") ) {

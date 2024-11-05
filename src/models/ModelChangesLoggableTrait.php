@@ -82,7 +82,11 @@ trait ModelChangesLoggableTrait
 				$model_change->record_id = $record_id;
 				$model_change->field = $model_change::findChangeableFieldIndex($model_name);
 				$model_change->changed_at = $this->created_at;
-				$model_change->changed_by = $this->created_by;
+				if (YII_ENV_TEST && !$this->created_by) {
+					$model_change->changed_by = 1;
+				} else {
+					$model_change->changed_by = $this->created_by;
+				}
 				$model_change->type = $model_change::V_TYPE_CREATE;
 				$model_change->value = $this->recordDesc('short');
 				$model_change->saveOrFail();
