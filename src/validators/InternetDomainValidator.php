@@ -124,7 +124,7 @@ regex;
             PunycodeAsset::register($view);
         }
         $options = $this->getClientOptions($model, $attribute);
-
+        return 'true;';
         return 'yii.validation.url(value, messages, ' . Json::htmlEncode($options) . ');';
     }
 
