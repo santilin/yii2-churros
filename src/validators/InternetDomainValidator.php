@@ -79,11 +79,20 @@ regex;
         if (is_string($value) && strlen($value) < 2000) {
 
             if($this->clean === true) {
-                $value = preg_replace("/(^(http(s)?:\/\/|www\.))?(www\.)?([a-z-\.0-9]+)/","$5", trim($value));
-                if(preg_match("/^(((?:(?:25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\\.){3}(?:25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?))|([a-z0-9]+([\-\.]{1}[a-z0-9]+)*\.[a-z]{2,6}))/", $value, $domain)){
-                    $value = $domain[1];
+                if (strncasecmp($value, 'mailto://', 9) == 0 ) {
+                    $value = substr($value, 9);
+                    if (preg_match('/^[^@]+@([^@]+)$/', $value, $matches)) {
+                        $value = $matches[1];
+                    } else {
+                        return [$this->message, []];
+                    }
                 } else {
-                    return [$this->message, []];
+                    $value = preg_replace("/(^(http(s)?:\/\/|www\.))?(www\.)?([a-z-\.0-9]+)/","$5", trim($value));
+                    if(preg_match("/^(((?:(?:25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\\.){3}(?:25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?))|([a-z0-9]+([\-\.]{1}[a-z0-9]+)*\.[a-z]{2,6}))/", $value, $domain)){
+                        $value = $domain[1];
+                    } else {
+                        return [$this->message, []];
+                    }
                 }
             }
 

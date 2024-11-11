@@ -255,9 +255,20 @@ window.yii.churros = (function ($) {
 			}
 
 			if (options.clean) {
-				value = value.replace(/^(https?:\/\/)?(www\.)?/, '');
-				var match = value.match(/^(((?:(?:25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\.){3}(?:25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?))|([a-z0-9]+([\-\.]{1}[a-z0-9]+)*\.[a-z]{2,6}))/);
-				value = match ? match[1] : value;
+				if (value.toLowerCase().indexOf('mailto://') === 0) {
+					value = value.substr(9);
+					var emailParts = value.split('@');
+					if (emailParts.length === 2) {
+						value = emailParts[1];
+					} else {
+						messages.push(options.message);
+						return;
+					}
+				} else {
+					value = value.replace(/^(https?:\/\/)?(www\.)?/, '');
+					var match = value.match(/^(((?:(?:25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\.){3}(?:25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?))|([a-z0-9]+([\-\.]{1}[a-z0-9]+)*\.[a-z]{2,6}))/);
+					value = match ? match[1] : value;
+				}
 			}
 
 			if (!pattern.test(value)) {
