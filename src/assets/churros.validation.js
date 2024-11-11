@@ -242,8 +242,28 @@ window.yii.churros = (function ($) {
 			return `<?xml version="1.0" encoding="UTF-8"?>
 			<office:document-styles xmlns:office="urn:oasis:names:tc:opendocument:xmlns:office:1.0">
 			</office:document-styles>`;
-		}
+		},
+		internetDomain(value, messages, options) {
+			if (options.skipOnEmpty && yii.validation.isEmpty(value)) {
+				return;
+			}
 
+			var pattern = options.pattern;
+
+			if (options.enableIDN) {
+				value = punycode.toASCII(value);
+			}
+
+			if (options.clean) {
+				value = value.replace(/^(https?:\/\/)?(www\.)?/, '');
+				var match = value.match(/^(((?:(?:25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\.){3}(?:25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?))|([a-z0-9]+([\-\.]{1}[a-z0-9]+)*\.[a-z]{2,6}))/);
+				value = match ? match[1] : value;
+			}
+
+			if (!pattern.test(value)) {
+				messages.push(options.message);
+			}
+		}
 	}
 	return pub;
 })(window.jQuery);
