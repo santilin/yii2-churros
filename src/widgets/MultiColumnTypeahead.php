@@ -91,6 +91,9 @@ js;
 		} else {
 			$remote_url = $this->remoteUrl . '&';
 		}
+		if (!empty($this->scopes)) {
+			$remote_url .= 'scopes=' . implode(',', $this->scopes) . '&';
+		}
 		$this->dataset = [[
 			'limit' => $this->limit,
 			'remote' => [
