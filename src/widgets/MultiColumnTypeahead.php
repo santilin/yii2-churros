@@ -20,6 +20,7 @@ class MultiColumnTypeahead extends Typeahead
 	public $suggestionsDisplay;
 	public $display;
 	public $remoteUrl;
+	public array $scopes = [];
 	public $pageParam = 'page';
 	public $fieldsParam = 'fields';
 	public $perPageParam = 'pagesize';
@@ -85,12 +86,17 @@ js;
 		}
 
 		$s_fields = implode(",",$this->formFields);
+		if (!str_contains($this->remoteUrl, '?')) {
+			$remote_url = $this->remoteUrl . '?';
+		} else {
+			$remote_url = $this->remoteUrl . '&';
+		}
 		$this->dataset = [[
 			'limit' => $this->limit,
 			'remote' => [
-				'url' => $this->remoteUrl . '?'
-				. $this->searchParam . '=&' . $this->fieldsParam . '=&'
-				. $this->pageParam . '=&' . $this->perPageParam . '=',
+				'url' => $remote_url
+					. $this->searchParam . '=&' . $this->fieldsParam . '=&'
+					. $this->pageParam . '=&' . $this->perPageParam . '=',
 				'replace' => new \yii\web\JsExpression(<<<jsexpr
 function(url, query) {
 	const urlParams = new URLSearchParams(url);
@@ -106,7 +112,7 @@ function(url, query) {
 	if (perpage == '' ) {
 		perpage = '{$this->limit}';
 	}
-	return url.split("?")[0] + "?{$this->searchParam}=" + query
+	return url.split("{$this->searchParam}=")[0] + "{$this->searchParam}=" + query
 		+ "&{$this->fieldsParam}=" + fields
 		+ "&{$this->pageParam}=" + page + "&{$this->perPageParam}=" + perpage;
 }

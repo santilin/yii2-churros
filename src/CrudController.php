@@ -493,9 +493,48 @@ class CrudController extends \yii\web\Controller
 		}
 	}
 
+	// Ajax
+	public function actionRawModel($id)
+	{
+		$params = $this->request->queryParams;
+		$model = $this->findModel($id, $params);
+		if( $model ) {
+            return json_encode($model->getAttributes());
+        } /// @todo else
+	}
+
+	// Ajax for the MutiColumnTypeAhead control
+	public function actionMultiAutocomplete(string $search, string $fields, int $page = 1, int $per_page = 12, string $scopes = '')
+	{
+		\Yii::$app->response->format = \yii\web\Response::FORMAT_JSON;
+		$searchModel = $this->createSearchModel();
+		$conds = [];
+		$array_fields = explode(',',$fields);
+		foreach ($array_fields as $field) {
+			$conds[$field] = $search;
+		}
+		$indexParams = [
+			'or' => true,
+			 $searchModel->formName() => $conds
+		];
+		if (!empty($scopes)) {
+			$indexParams['_search_scopes'] = explode(',', $scopes);
+		}
+		$dataProvider = $searchModel->search($indexParams);
+		$dataProvider->query
+				->select($array_fields)
+				->limit($page, $per_page);
+// 				->asArray();
+		if ($dataProvider->getTotalCount()) {
+			return $dataProvider->getModels();
+		}
+		return [];
+	}
+
+
 
 	// Ajax
-	public function actionAutocomplete(string $search, string $result, array $fields = [], string $format = 'long')
+	public function actionAutocomplete(string $search, string $result, array $fields = [], string $scopes = '', string $format = 'long')
 	{
 		\Yii::$app->response->format = \yii\web\Response::FORMAT_JSON;
 		$ret = [];
@@ -516,40 +555,7 @@ class CrudController extends \yii\web\Controller
 		}
 	}
 
-	// Ajax
-	public function actionRawModel($id)
-	{
-		$params = $this->request->queryParams;
-		$model = $this->findModel($id, $params);
-		if( $model ) {
-            return json_encode($model->getAttributes());
-        } /// @todo else
-	}
 
-	// Ajax for the MutiColumnTypeAhead control
-	public function actionMultiAutocomplete(string $search, string $fields, int $page = 1, int $per_page = 12)
-	{
-		\Yii::$app->response->format = \yii\web\Response::FORMAT_JSON;
-		$searchModel = $this->createSearchModel();
-		$conds = [];
-		$array_fields = explode(',',$fields);
-		foreach ($array_fields as $field) {
-			$conds[$field] = $search;
-		}
-		$indexParams = [
-			'or' => true,
-			 $searchModel->formName() => $conds
-		];
-		$dataProvider = $searchModel->search($indexParams);
-		$dataProvider->query
-				->select($array_fields)
-				->limit($page, $per_page);
-// 				->asArray();
-		if ($dataProvider->getTotalCount()) {
-			return $dataProvider->getModels();
-		}
-		return [];
-	}
 
 	public function getMasterModel()
 	{
