@@ -624,45 +624,41 @@ trait ModelInfoTrait
 		}
 	}
 
-	public function reportFilterWhere(&$query, $fldname, $value)
+	public function reportFilterWhere($fldname, $value): array
 	{
-		$value = FormHelper::toOpExpression($value, false );
+		$value = FormHelper::toOpExpression($value, false);
 		if (!isset($value['v']) || $value['v'] === null) {
-			return;
+			return [];
 		}
-		$this->addFieldToFilterWhere($query, $fldname, $value);
+		return $this->addFieldToFilterWhere($fldname, $value);
 	}
 
 	/**
-	 * Función compartida por search y report
+	 * Function shared by search and report
 	 */
-	public function searchFilterWhere(&$query, string $fldname, $value, bool $is_and = true)
+	public function searchFilterWhere(string $fldname, $value): array
 	{
-		if (!isset($value['v']) || $value['v'] === null || $value['v'] === '' || (is_array($value['v']) && empty($value['v'])) ) {
-			return;
+		if (!isset($value['v']) || $value['v'] === null || $value['v'] === '' || (is_array($value['v']) && empty($value['v']))) {
+			return [];
 		}
- 		$fullfldname = $this->tableName() . "." . $fldname;
-		$this->addFieldToFilterWhere($query, $fullfldname, $value, $is_and);
+		$fullfldname = $this->tableName() . "." . $fldname;
+		return $this->addFieldToFilterWhere($fullfldname, $value);
 	}
 
-	public function addFieldToFilterWhere(&$query, string $fldname, array $value, bool $is_and = true)
+	public function addFieldToFilterWhere(string $fldname, array $value): array
 	{
-		return $this->baseAddFieldToFilterWhere($query, $fldname, $value, $is_and);
+		return $this->baseAddFieldToFilterWhere($fldname, $value);
 	}
 
-
-	public function baseAddFieldToFilterWhere(&$query, string $fldname, array $value, bool $is_and = true)
+	public function baseAddFieldToFilterWhere(string $fldname, array $value): array
 	{
-		if( is_array($value['v']) ) {
- 			$query->andWhere([ 'in', $fldname, $value['v']]);
-		} else switch( $value['op'] ) {
+		if (is_array($value['v'])) {
+			return ['in', $fldname, $value['v']];
+		}
+
+		switch ($value['op']) {
 			case "=":
-				if ($is_and) {
-					$query->andWhere([$fldname => $value['v']]);
-				} else {
-					$query->andWhere([$fldname => $value['v']]);
-				}
-				break;
+				return [$fldname => $value['v']];
 			case "<>":
 			case ">=":
 			case "<=":
@@ -670,42 +666,19 @@ trait ModelInfoTrait
 			case "<":
 			case "NOT LIKE":
 			case "LIKE":
-				if ($is_and) {
-					$query->andWhere([ $value['op'], $fldname, $value['v'] ]);
-				} else {
-					$query->orWhere([ $value['op'], $fldname, $value['v'] ]);
-				}
-
-				break;
+				return [$value['op'], $fldname, $value['v']];
 			case "START":
-				if ($is_and) {
-					$query->andWhere([ 'LIKE', $fldname, $value['v'] . '%', false]);
-				} else {
-					$query->orWhere([ 'LIKE', $fldname, $value['v'] . '%', false]);
-				}
-				break;
+				return ['LIKE', $fldname, $value['v'] . '%', false];
 			case "NOT START":
-				if ($is_and) {
-					$query->andWhere([ 'NOT LIKE', $fldname, $value['v'] . '%', false]);
-				} else {
-					$query->orWhere([ 'NOT LIKE', $fldname, $value['v'] . '%', false]);
-				}
-				break;
+				return ['NOT LIKE', $fldname, $value['v'] . '%', false];
 			case "BETWEEN":
 			case "NOT BETWEEN":
-				if ($is_and) {
-					$query->andWhere([ $value['op'], $fldname, explode(',',$value['v']) ]);
-				} else {
-					$query->orWhere([ $value['op'], $fldname, explode(',',$value['v']) ]);
-				}
-				break;
+				return [$value['op'], $fldname, explode(',', $value['v'])];
 			case "bool":
-				if ($is_and) {
-					$query->andWhere([$fldname => ($value['v'] == 'true') ? 1 : ($value['v'] == 'false' ? 0 : boolval($value['v']))]);
-				} else {
-					$query->orWhere([ $value['op'], $fldname, explode(',',$value['v']) ]);
-				}
-				break;
+				$boolValue = ($value['v'] == 'true') ? 1 : ($value['v'] == 'false' ? 0 : boolval($value['v']));
+				return [$fldname => $boolValue];
+			default:
+				return [];
 		}
 	}
 
