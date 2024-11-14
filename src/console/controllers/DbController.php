@@ -89,7 +89,9 @@ class DbController extends Controller
 
     protected function getPhpValue($value, string $phptype)
     {
-		if (substr($phptype,0,3) == 'int' || substr($phptype,0,7) == 'tinyint' || substr($phptype,0,8) == 'smallint') {
+		if (substr($phptype,0,3) == 'int' || substr($phptype,0,7) == 'tinyint'
+			|| substr($phptype,0,9) == 'mediumint'
+			|| substr($phptype,0,8) == 'smallint') {
 			$phptype = 'integer';
 		} else if (substr($phptype,0,7) == 'decimal') {
 			$phptype = 'double';
