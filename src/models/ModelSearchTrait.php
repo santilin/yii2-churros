@@ -212,16 +212,16 @@ trait ModelSearchTrait
 	}
 
 
-	protected function filterWhereRelated($query, $relation_name, $value, $is_and = true)
+	protected function filterWhereRelated($query, $relation_name, $value): array
 	{
 		if ($value === null || $value === '' ||
 			(is_array($value) && (!isset($value['v']) || (isset($value['v']) && $value['v']==='')))) {
-			return;
+			return [];
 		}
+		$conds = [];
 		list($attribute, $table_alias, $model, $relation) = $this->addRelatedFieldToJoin($relation_name, $query);
 
 		$value = FormHelper::toOpExpression($value, false, $this->operatorForAttr($attribute?:$relation_name) );
-		$search_flds = [];
 		if ($attribute == '') {
 			$search_flds = $model->findCodeAndDescFields();
 			$rel_conds = [ 'OR' ];
@@ -233,56 +233,11 @@ trait ModelSearchTrait
 				}
 				$rel_conds[] = $fld_conds;
 			}
-			if ($is_and) {
-				$query->andWhere($rel_conds);
-			} else {
-				$query->orWhere($rel_conds);
-			}
+			return $rel_conds;
 		} else if ($attribute == $model->primaryKey()[0] ) {
-			$query->andWhere(["$table_alias.$attribute" => $value['v']]);
-		// } else {
-		// 	if (isset($relation['other']) ) {
-		// 		list($right_table, $right_fld ) = AppHelper::splitFieldName($relation['other']);
-		// 	} else {
-		// 		list($right_table, $right_fld ) = AppHelper::splitFieldName($relation['right']);
-		// 	}
-		// 	if ($value['v']=== 'true') {
-		// 		$query->andWhere(["not", ["$table_alias.$right_fld" => null]]);
-		// 	} else if ($value['v'] === 'false') {
-		// 		if ($is_and) {
-		// 			$query->andWhere(["$table_alias.$right_fld" => null]);
-		// 		} else {
-		// 			$query->orWhere(["$table_alias.$right_fld" => null]);
-		// 		}
-		// 	} else {
-		// 		// Look for code and desc fields also
-		// 		$fields = array_unique(array_filter([$model->getModelInfo('code_field'), $model->getModelInfo('desc_field')]));
-		// 		if (count($fields)==1) {
-		// 			if ($is_and) {
-		// 				$query->andWhere(["$table_alias.$right_fld" => $value['v']]);
-		// 			} else {
-		// 				$query->orWhere(["$table_alias.$right_fld" => $value['v']]);
-		// 			}
-		// 		} else {
-		// 			$conds = ["or", [ "$table_alias.$right_fld" => $value['v']]];
-		// 			foreach ($fields as $fld) {
-		// 				if ($fld != $right_fld && $value['op'] != 'LIKE') {
-		// 					$conds[] = [ "LIKE", "$table_alias.$fld", $value['v'] ];
-		// 				}
-		// 			}
-		// 			if ($is_and) {
-		// 				$query->andWhere($conds);
-		// 			} else {
-		// 				$query->orWhere("or", $conds);
-		// 			}
-		// 		}
-		// 	}
+			return ["$table_alias.$attribute" => $value['v']];
 		} else {
-			if ($is_and) {
-				$query->andWhere([$value['op'], "$table_alias.$attribute", $value['v'] ]);
-			} else {
-				$query->orWhere([$value['op'], "$table_alias.$attribute", $value['v'] ]);
- 			}
+			return [$value['op'], "$table_alias.$attribute", $value['v'] ];
 		}
 	}
 

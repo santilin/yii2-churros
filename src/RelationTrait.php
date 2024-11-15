@@ -108,10 +108,10 @@ trait RelationTrait
      * Refactored from loadAll() function
      * @param $relation skimmed relation data
      * @param $rel_name
-     * @param $v form values
+     * @param $form_values form values
      * @return bool
      */
-    public function loadToRelation($rel_name, $v)
+    public function loadToRelation($rel_name, $form_values)
     {
         /* @var $this ActiveRecord */
         /* @var $relObj ActiveRecord */
@@ -125,16 +125,16 @@ trait RelationTrait
 			$link = $relation->link;
 			$link_keys = array_keys($link);
 			$this_pk = reset($link_keys);
-			if (is_string($v)) {
-				if (str_contains($v, ',')) {
+			if (is_string($form_values)) {
+				if (str_contains($form_values, ',')) {
 					// TreeWidget: No array is passed, a comma separated string instead
-					$v = explode(',', $v);
+					$form_values = explode(',', $form_values);
 				} else {
 					// TreeWidget: If there is only one selected item, no array is posted
-					$v = [ $v ];
+					$form_values = [ $form_values ];
 				}
 			}
-            foreach ($v as $relPost) {
+            foreach ($form_values as $relPost) {
 				if( $relPost == null ) {
 					continue;
 				}
@@ -173,7 +173,7 @@ trait RelationTrait
             }
         } else if ($relation->via == null) {
 			if (count($relPKAttr)) { // Has Many with primary key
-				foreach ($v as $relPost) {
+				foreach ($form_values as $relPost) {
 					if (is_array($relPost) ) {
 						if( array_filter($relPost) ) {
 							/* @var $relObj ActiveRecord */
@@ -190,7 +190,7 @@ trait RelationTrait
 					}
 				}
 			} else { // Has Many without primary key
-				foreach ($v as $relPost) {
+				foreach ($form_values as $relPost) {
 					if (is_array($relPost) ) {
 						if( array_filter($relPost) ) {
 							/* @var $relObj ActiveRecord */
@@ -204,14 +204,13 @@ trait RelationTrait
 				}
 			}
 		} else { // Many2Many
-			foreach( $v as $relPost ) {
+			$other_fk = reset($relation->link);
+			foreach ($form_values as $relPost) {
 				if( is_array($relPost) ) {
-					$id = $relPost[$relPKAttr[0]];
-					$relObj = empty($id) ? new $relModelClass : $relModelClass::findOne($id);
+					$relObj = empty($relPost[$relPKAttr[0]]) ? new $relModelClass : $relModelClass::findOne($relPost[$relPKAttr[0]]);
 					$relObj->load($relPost);
 				} else {
-					$id = $relPost;
-					$relObj = [ $relPKAttr[0] => $id ];
+					$relObj = [ $other_fk => $relPost];
 				}
 				$container[] = $relObj;
 			}
@@ -303,12 +302,11 @@ trait RelationTrait
 		$isManyMany = false;
 		if ($relation->multiple ) { // Has many or many2many
 			if ($relation->via != null ) {
-				$relModelClass = $relation->via;
-			} else {
-				$relModelClass = $relation->modelClass;
+				$relation = $this->getRelation($relation->via[0]);
 			}
-			$links = array_keys($relation->link);
+			$relModelClass = $relation->modelClass;
 			$relModel = new $relModelClass;
+			$links = array_keys($relation->link);
 			$relPKAttr = $relModel->primarykey();
 			if (count($relPKAttr) > 1) {
 				$isManyMany = true;
