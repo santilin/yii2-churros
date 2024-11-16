@@ -79,8 +79,8 @@ regex;
         if (is_string($value) && strlen($value) < 2000) {
 
             if($this->clean === true) {
-                if (strncasecmp($value, 'mailto://', 9) == 0 ) {
-                    $value = substr($value, 9);
+                if (strncasecmp($value, 'mailto:', 7) == 0 ) {
+                    $value = substr($value, 7);
                     if (preg_match('/^[^@]+@([^@]+)$/', $value, $matches)) {
                         $value = $matches[1];
                     } else {

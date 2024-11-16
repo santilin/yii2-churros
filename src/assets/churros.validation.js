@@ -255,8 +255,8 @@ window.yii.churros = (function ($) {
 			}
 
 			if (options.clean) {
-				if (value.toLowerCase().indexOf('mailto://') === 0) {
-					value = value.substr(9);
+				if (value.toLowerCase().indexOf('mailto:') === 0) {
+					value = value.substr(7);
 					var emailParts = value.split('@');
 					if (emailParts.length === 2) {
 						value = emailParts[1];
