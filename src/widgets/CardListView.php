@@ -36,7 +36,7 @@ class CardListView extends ListView
 			$this->summary = strtr($this->summary, ['{item}' => '{'.$this->labelSingular.'}',
 				'{items}' => '{'.$this->labelPlural.'}' ]);
 		}
-
+		Html::addCssClass($this->itemOptions, 'card');
 	}
 
 	public function run()
