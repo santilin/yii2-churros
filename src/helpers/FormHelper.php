@@ -331,6 +331,9 @@ ajax;
 				$post_form .= Html::submitButton($title, $button['htmlOptions']);
 				$post_form .= Html::endForm();
 				$ret[] = $post_form;
+				break;
+			case 'html':
+				$ret[] = $button['html'];
 			}
 		}
 		return implode($sep, $ret);
