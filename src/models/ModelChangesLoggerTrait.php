@@ -62,13 +62,13 @@ trait ModelChangesLoggerTrait
 	static public function extractChangesForNotifications(string $value)
 	{
 		$ret = [];
-		if (preg_match_all('/(([0-9]+):([0-9]+):([0-9]+){#([^,]*)#}),*/', $value??'', $changes, PREG_SET_ORDER)) {
+		if (preg_match_all('/(?:(\d+):(\d+):(\d+)\{#([^#]*?)#\},?)+/', $value??'', $changes, PREG_SET_ORDER)) {
 			$c = [];
 			foreach ($changes as $change) {
-				$c['id'] = $change[2];
-				$c['field'] = $change[3];
-				$c['subtype'] = $change[4];
-				$c['value'] = $change[5];
+				$c['id'] = $change[1];
+				$c['field'] = $change[2];
+				$c['subtype'] = $change[3];
+				$c['value'] = $change[4];
 				$ret[] = $c;
 			}
 		}
