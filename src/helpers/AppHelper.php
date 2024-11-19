@@ -408,7 +408,7 @@ class AppHelper
 
 	static public function modelize(string $identifier, bool $nochangefirst = false): string
 	{
-		$parts = explode('_', str_replace('-','_',$identifier));
+		$parts = explode('_', str_replace(['-',' '],['_','_'],$identifier));
 		$ret = '';
 		if ($nochangefirst) {
 			$ret = array_shift($parts);
