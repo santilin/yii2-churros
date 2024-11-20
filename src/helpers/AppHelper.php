@@ -459,4 +459,10 @@ class AppHelper
 		return $converter->convert($html);
 	}
 
+	// copied from Symfony\Component\DomCrawler/Crawler
+	static public function normalizeWhitespace(string $string): string
+	{
+		return trim(preg_replace("/(?:[ \n\r\t\x0C]{2,}+|[\n\r\t\x0C])/", ' ', $string), " \n\r\t\x0C");
+	}
+
 }
