@@ -7,6 +7,7 @@ use yii\db\ActiveRecord;
 use yii\base\{InvalidConfigException,InvalidArgumentException};
 use yii\helpers\{ArrayHelper,Url};
 use santilin\churros\helpers\{YADTC,AppHelper,FormHelper};
+use santilin\churros\lang\EsHelper;
 use santilin\churros\ModelSearchTrait;
 
 trait ModelInfoTrait
@@ -45,7 +46,7 @@ trait ModelInfoTrait
 		$t_params = array_filter($params, function($value) { return is_string($value); });
 		$translated = Yii::t($category, $message, $t_params, $language);
 		if( ($language == 'es' || substr(Yii::$app->language,0,2) == 'es') ) {
-			$male_words = AppHelper::SPANISH_MALE_WORDS;
+			$male_words = EsHelper::SPANISH_MALE_WORDS;
 		} else {
 			$male_words = [];
 		}
