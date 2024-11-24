@@ -261,9 +261,9 @@ trait RelationTrait
         }
     }
 
-    public function usedInRelation(string $rel_name): int
+    public function usedInRelation(string $relation_name): int
     {
-		$rel_method_name = 'get' . ucfirst($rel_name);
+		$rel_method_name = 'get' . ucfirst($relation_name);
 		if( method_exists($this, $rel_method_name)) {
 			return call_user_func([$this, $rel_method_name])->exists();
 		} else {
@@ -742,8 +742,20 @@ trait RelationTrait
 	{
 		foreach ($this::$relations as $rel_name => $rel_info) {
 			if ($rel_info['model'] == $model_name) {
-				$rel_info['name'] = $rel_name;
+				// $rel_info['name'] = $rel_name;
 				return $rel_info;
+			}
+		}
+		return null;
+	}
+
+	public function findOtherRelationByModel(string $model_name): ?array
+	{
+		if ($this::$isJunctionModel) {
+			foreach ($this::$relations as $rel_name => $rel_info) {
+				if ($rel_info['model'] != $model_name) {
+					return $rel_info;
+				}
 			}
 		}
 		return null;

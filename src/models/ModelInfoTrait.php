@@ -411,8 +411,20 @@ trait ModelInfoTrait
 		return substr($string, $secondLastDotPosition + 1);
 	}
 
-    public function relatedFieldForModel($related_model): string|array|null
-    {
+	/**
+	 * Determines the related field of this model to another model.
+	 *
+	 * This method analyzes the relationships defined in the current class and attempts to find
+	 * the corresponding field that relates to the provided model.
+	 *
+	 * @param object $related_model The model object for which to find the related field.
+	 * @return string|array|null Returns:
+	 *                           - A string representing the field name for simple relations.
+	 *                           - An array containing the join table and field for ManyToMany relations.
+	 *                           - Null if no relation is found.
+	 */
+	public function relatedFieldForModel($related_model): string|array|null
+	{
 		$tc = get_class($this);
 		$oc = get_class($related_model);
 		$cn = $related_model->className();

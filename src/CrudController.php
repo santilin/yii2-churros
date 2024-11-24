@@ -612,23 +612,35 @@ class CrudController extends \yii\web\Controller
 		$master = $this->getMasterModel();
 		if ($master) {
 			$prefix = $this->getBaseRoute() . '/' . $master->controllerName(). '/';
-			$breadcrumbs[] = [
+			$breadcrumbs['master_index'] = [
 				'label' => StringHelper::mb_ucfirst($master->getModelInfo('title_plural')),
 				'url' => [ $prefix . 'index']
 			];
 			$keys = $master->getPrimaryKey(true);
 			$keys[0] = $prefix . 'view';
-			$breadcrumbs[] = [
+			$breadcrumbs['master_model'] = [
 				'label' => $master->recordDesc('short', 25),
 				'url' => $keys
 			];
-			$breadcrumbs[] = [
-				'label' => StringHelper::mb_ucfirst($model->getModelInfo('title_plural')),
-				'url' => $this->getActionRoute('index')
-			];
+			if ($model::$isJunctionModel) {
+				$other_relation = $model->findOtherRelationByModel($master->getModelInfo('model_name'));
+				if ($other_relation) {
+					$other_model_class = $other_relation['modelClass'];
+					$other_model_label = $other_model_class::getModelInfo('title_plural');
+					$breadcrumbs['other_index'] = [
+						'label' => StringHelper::mb_ucfirst($other_model_label),
+						'url' => $this->getActionRoute('index')
+					];
+				}
+			} else {
+				$breadcrumbs['child_index'] = [
+					'label' => StringHelper::mb_ucfirst($model->getModelInfo('title_plural')),
+					'url' => $this->getActionRoute('index')
+				];
+			}
 		} else {
 			if (FormHelper::hasPermission($permissions, 'index')) {
-				$breadcrumbs[] = [
+				$breadcrumbs['model_index'] = [
 					'label' =>  $model->getModelInfo('title_plural'),
 					'url' => [ $this->id . '/index' ]
 				];
@@ -639,6 +651,7 @@ class CrudController extends \yii\web\Controller
 			}
 		}
 		$prim_keys = $model->getPrimaryKey(true);
+		$pk = $model->getPrimaryKey();
 		if (empty($model->getPrimaryKey())) { // create, index or duplicate
 			$has_prim_keys = false;
 			foreach ($prim_keys as $k => $kv) {
@@ -651,8 +664,8 @@ class CrudController extends \yii\web\Controller
 				$prim_keys = [];
 			}
 		}
-		if (!empty($prim_keys)) {
-			$breadcrumbs[] = [
+		if (!empty($prim_keys) && !$model::$isJunctionModel) {
+			$breadcrumbs['model_model'] = [
 				'label' => $model->recordDesc('short', 25),
 				'url' => $scenario!='view' ? array_merge([$this->getActionRoute('view')], $prim_keys) : null,
 			];
