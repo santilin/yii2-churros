@@ -539,7 +539,7 @@ trait ModelInfoTrait
 	}
 
 	public function handyFieldValues(string $field, string $format,
-		string $model_format = 'medium', array|string $scope = [], ?string $filter_fields = null)
+		string $model_format = 'medium', array|string|null $scope = null, ?string $filter_fields = null)
 	{
 		throw new \Exception("field '$field' not supported in " . get_called_class() . "::handyFieldValues() ");
 	}
@@ -775,22 +775,26 @@ trait ModelInfoTrait
 	 * @return ActiveQuery The modified ActiveQuery object with applied scopes.
 	 *
 	 */
-	static public function applyScopes(ActiveQuery $q, string|array $scopes, bool $set_order_by = true): ActiveQuery
+	static public function applyScopes(ActiveQuery $q, string|array|null $scopes, bool $set_order_by = true): ActiveQuery
 	{
-		$save_order = $q->orderBy;
-		foreach ( (array)$scopes as $scope) {
-			$scope_args = [];
-			if (is_array($scope)) {
-				$scope_func = trim(reset($scope));
-				$scope_args = $scope;
-			} else {
-				$scope_func = trim($scope);
+		if (!empty($scopes)) {
+			$save_order = $q->orderBy;
+			foreach ( (array)$scopes as $scope) {
+				$scope_args = [];
+				if (is_array($scope)) {
+					$scope_func = trim(reset($scope));
+					$scope_args = $scope;
+				} else {
+					$scope_func = trim($scope);
+				}
+				if( $scope_func ) {
+					call_user_func_array([$q,$scope_func],$scope_args);
+				}
 			}
-			if( $scope_func ) {
-				call_user_func_array([$q,$scope_func],$scope_args);
+			if ($set_order_by && empty($save_order) && $q->orderBy == $save_order) {
+				$q->defaultOrder();
 			}
-		}
-		if ($set_order_by && empty($save_order) && $q->orderBy == $save_order) {
+		} else if ($set_order_by) {
 			$q->defaultOrder();
 		}
 		return $q;
