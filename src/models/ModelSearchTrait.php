@@ -60,13 +60,6 @@ trait ModelSearchTrait
 		$provider->query->$scope(...$scopes_arguments);
 	}
 
-	public function addScopes(&$provider, array $scopes)
-	{
-		foreach ($scopes as $scope) {
-			$provider->query->$scope();
-		}
-	}
-
 	/**
 	 * Adds related filters and sorts to dataproviders for grids
 	*/
