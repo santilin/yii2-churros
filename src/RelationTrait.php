@@ -57,7 +57,7 @@ trait RelationTrait
         if( $formName === null ) {
 			$formName = $this->formName();
 		}
-        if ($this->load($post, $formName)) {
+		if (isset($post[$formName])) {
             $relations_in_model = static::$relations;
 			foreach ($relations_in_form as $rel_name) {
 				if (!isset($relations_in_model[$rel_name])) {
@@ -83,15 +83,18 @@ trait RelationTrait
                     // HasMany or Many2Many outside of formName
 					if (array_key_exists($rel_name, $post)) {
 						$post_data = $post[$rel_name]?:[];
+						unset($post[$rel_name]);
 					}
 					if( $post_data === null ) {
 						if (array_key_exists($formName, $post) && array_key_exists($rel_name, $post[$formName])) {
 							$post_data = $post[$formName][$rel_name]?:[];
+							unset($post[$formName][$rel_name]);
 						}
 					}
 					if( $post_data === null ) {
 						if (array_key_exists($model_relation['model'], $post)) {
 							$post_data = $post[$model_relation['model']]?:[];
+							unset($post[$model_relation['model']]);
 						}
 					}
 					if ($post_data !== null) {
@@ -99,7 +102,7 @@ trait RelationTrait
                     }
                 }
             }
-            return true;
+            return $this->load($post, $formName);
         }
         return false;
     }
