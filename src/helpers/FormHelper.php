@@ -181,9 +181,6 @@ class FormHelper
 			$caption = $title = $button['title']??$name;
 			$icon = $button['icon']??null;
 			if ($icon) {
-				if ($name == 'create') {
-					$love = true;
-				}
 				if (substr($icon, 0, 1) == '/') {
 					$title = Html::img($icon, array_merge([
 						'class'=>'icon d-lg-none d-inline-block',
@@ -501,7 +498,7 @@ ajax;
 	static public function jsonColumnUrlCreatorWithReturnTo($action, $model, $key, $index, $column)
 	{
 		if ($column->controller) {
-			$params = [ $column->controller . '/' . str_replace('/','\\', $key) . '/' . $action];
+			$params = [ $column->controller . '/' . str_replace('/',';', $key) . '/' . $action];
 		} else {
 			$params = is_array($key) ? $key : ['id' => (string) $key];
 		}
