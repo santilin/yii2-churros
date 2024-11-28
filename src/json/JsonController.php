@@ -519,6 +519,11 @@ class JsonController extends \yii\web\Controller
 			}
 			if ($this->action) {
 				// Remove action part to get only the json path
+				if (StringHelper::endsWith($this->_path, '/' . $this->action->id)) {
+					$this->_path = substr($this->_path, 0, -strlen($this->action->id) - 1);
+				}
+
+/*
 				$pos_action = strrpos($this->_path, '/'. $this->action->id . '/');
 				if ($pos_action === false) {
 					$action_len = strlen($this->action->id)+1;
@@ -529,6 +534,7 @@ class JsonController extends \yii\web\Controller
 				if ($pos_action !== false) {
 					$this->_path = substr($this->_path, 0, $pos_action);
 				}
+*/
 			}
 		}
 		return $this->root_model;
