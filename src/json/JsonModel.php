@@ -290,13 +290,15 @@ class JsonModel extends \yii\base\Model
             $json_path = substr($json_path, 0, -1);
         }
         $this->_path = $json_path;
-        if ($id && !StringHelper::endsWith($this->_path, "/$id")) {
-            $this->_path .= "/$id";
-        }
         if ($locator === null) {
             $locator = static::$_locator;
         }
-        $id = str_replace(";", '/', $id);
+        if ($id) {
+            if (!StringHelper::endsWith($this->_path, "/$id")) {
+                $this->_path .= "/$id";
+            }
+            $id = str_replace(";", '/', $id);
+        }
         $this->_json_object = $json_modelable->getJsonObject($json_path, $id, $locator);
         if ($this->_json_object !== null) {
             $this->_is_new_record = false;

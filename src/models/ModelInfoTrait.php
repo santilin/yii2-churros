@@ -274,7 +274,7 @@ trait ModelInfoTrait
 //     }
     }
 
-	public function setDefaultValues($context = null, bool $duplicating = false)
+	public function setDefaultValues()
 	{
 	}
 

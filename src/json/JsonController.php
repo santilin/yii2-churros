@@ -196,7 +196,7 @@ class JsonController extends \yii\web\Controller
 		$params = array_merge($req->get(), $req->post());
 		$params['permissions'] = FormHelper::resolvePermissions($params['permissions']??[], $this->crudActions);
 		$model = $this->findFormModel($this->getPath(), $id, null, 'duplicate', $params);
-		$model->setDefaultValues($this, true); // duplicating
+		$model->setDefaultValues(); // duplicating
 		$relations = empty($params['_form_relations'])?[]:explode(",", $params['_form_relations']);
 		$model->scenario = 'duplicate';
 		$mc = get_class($model);
