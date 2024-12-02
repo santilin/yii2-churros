@@ -16,6 +16,8 @@ use santilin\churros\helpers\{AppHelper,FormHelper};
  */
 trait ModelSearchTrait
 {
+	use ModelTrait;
+
 	public $_gridPageSize = 20;
 
 	public function __get($name)
@@ -53,11 +55,6 @@ trait ModelSearchTrait
 				return 'LIKE';
 			}
 		}
-	}
-
-	public function addScope(&$provider, string $scope, array $scopes_arguments)
-	{
-		$provider->query->$scope(...$scopes_arguments);
 	}
 
 	/**
