@@ -86,10 +86,11 @@ generateQuoteBtn_$cell_key.addEventListener('click', () => {
 </script>
 modal;
 
-			$text =  Html::tag('span', $truncated_text, $this->captionOptions) . Html::a('<i class="fas ba-book-open"></i>', '#', [
+			$text =  Html::tag('span', $truncated_text, $this->captionOptions)
+				. Html::a('<i class="fas fa-book-open"></i>', '#', [
 				'title' => 'Pincha para leer más',
-				'class' => "btn btn-outline-primary btn-sm py-0 px-1",
-				'style' => 'position: absolute; right: 0; font-size:xx-small',
+				'class' => "btn btn-outline-secondary btn-sm py-0 px-1 ms-3",
+				'style' => 'font-size:xx-small',
 				'data' => [
 					'bs-toggle' => 'modal',
 					'bs-target' => "#modalSeeMore_$cell_key",
