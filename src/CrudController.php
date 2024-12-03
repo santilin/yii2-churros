@@ -371,12 +371,15 @@ class CrudController extends \yii\web\Controller
 
 	protected function returnTo(?string $to, string $from, $model, array $redirect_params = []): string|array
 	{
-		if (empty($to) || $to == 'returnTo') {
+		if (empty($to) || $to == 'returnTo' || $to == 'referrer') {
 			$returnTo = $this->request->post('returnTo');
 			if( !$returnTo ) {
 				$returnTo = $this->request->queryParams['returnTo']??null;
 			}
-			if( $returnTo ) {
+			if( !$returnTo ) {
+				$returnto = Yii::$app->request->getReferrer();
+			}
+			if ($returnTo) {
 				return $returnTo;
 			}
 			$to = null;
