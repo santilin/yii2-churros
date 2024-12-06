@@ -610,7 +610,7 @@ class CrudController extends \yii\web\Controller
 		return $ret;
 	}
 
-    public function genBaseBreadCrumbs(string $action_id, $model, array $view_params= []): array
+    public function genBaseBreadCrumbs(string $action_id, $model, array $view_params = []): array
 	{
 		$scenario = $model->scenario?:$action_id;
 		$permissions = $view_params['permissions']??[];
@@ -645,15 +645,11 @@ class CrudController extends \yii\web\Controller
 				];
 			}
 		} else {
-			if (FormHelper::hasPermission($permissions, 'index')) {
+			if (FormHelper::hasPermission($permissions, 'index') && $scenario) {
 				$breadcrumbs['model_index'] = [
 					'label' =>  $model->getModelInfo('title_plural'),
 					'url' => [ $this->id . '/index' ]
 				];
-			// } else {
-			// 	$breadcrumbs[] = [
-			// 		'label' =>  $model->getModelInfo('title_plural'),
-			// 	];
 			}
 		}
 		$prim_keys = $model->getPrimaryKey(true);

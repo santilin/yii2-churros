@@ -542,8 +542,10 @@ class JsonController extends \yii\web\Controller
 	/**
 	 * @todo @param $context
 	 */
-	public function genBaseBreadCrumbs(string $action_id, $model, array $permissions = []): array
+	public function genBaseBreadCrumbs(string $action_id, $model, array $view_params = []): array
 	{
+		$scenario = $model->scenario?:$action_id;
+		$permissions = $view_params['permissions']??[];
 		$breadcrumbs = [];
 		$master = $this->getMasterModel();
 		$path_parts = explode('/',$model->getPath());
@@ -562,7 +564,7 @@ class JsonController extends \yii\web\Controller
 				'url' => $master_keys
 			];
 		} else {
-			if (FormHelper::hasPermission($permissions, 'index') && $action_id != 'index') {
+			if (FormHelper::hasPermission($permissions, 'index') && $scenario) {
 				$breadcrumbs[] = [
 					'label' =>  $model->getModelInfo('title_plural'),
 					'url' => [ $this->id . '/index' ]
@@ -574,7 +576,7 @@ class JsonController extends \yii\web\Controller
 			}
 		}
 		$partial_path = Url::to($keys) . '/';
-		for ($p=1; $p<count($path_parts)-1; $p++) {
+		for ($p=1; $p<count($path_parts); $p++) {
 			$partial_path .= $path_parts[$p] . '/';
 			$breadcrumbs[] = [
 				'label' => $path_parts[$p],
@@ -587,9 +589,9 @@ class JsonController extends \yii\web\Controller
  		// 		'url' => $action_id!='view' ? array_merge([$this->getActionRoute('view', $model)], $model->getPrimaryKey(true)) : null,
  		// 	];
  		// } else {
-			$breadcrumbs[] = [
-				'label' => $path_parts[$p],
-			];
+			// $breadcrumbs[] = [
+			// 	'label' => $path_parts[$p],
+			// ];
 		// }
 		return $breadcrumbs;
 	}
