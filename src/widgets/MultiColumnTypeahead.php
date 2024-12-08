@@ -28,6 +28,7 @@ class MultiColumnTypeahead extends Typeahead
 	public $createButton = false;
 	public $limit = 5;
 	public $exactMatch = false;
+	public $overwriteInputs = true;
 
 	/**
 	 * Initializes the widget
@@ -44,9 +45,15 @@ class MultiColumnTypeahead extends Typeahead
 		foreach ($this->formFields as $formField => $dbField) {
 			$form_field_id = Html::getInputId($this->model, $formField);
 			$item_fields[] = "item.$dbField";
-			$set_dest_fields_values[] = <<<js
-if (item.$dbField != '') $('#$form_field_id').val(item.$dbField);
+			if ($this->overwriteInputs) {
+				$set_dest_fields_values[] = <<<js
+$('#$form_field_id').val(item.$dbField);
 js;
+			} else {
+				$set_dest_fields_values[] = <<<js
+if (item.$dbField != '' && $('#$form_field_id').val() == '') $('#$form_field_id').val(item.$dbField);
+js;
+			}
 		}
 		$s_item_fields = implode(',',$item_fields);
 		if (empty($this->suggestionsDisplay)) {
@@ -153,9 +160,17 @@ js
 		$nf = 0;
 		foreach ($this->formFields as $formField => $dbField) {
 			$form_field_id = Html::getInputId($this->model, $formField);
-			$set_dest_fields_values[] = <<<js
-if (datumParts.$formField !== undefined && datumParts.$formField != '') { $('#$form_field_id').val(datumParts.$formField) };
+			if ($this->overwriteInputs) {
+				$set_dest_fields_values[] = <<<js
+if (datumParts.$formField !== undefined && datumParts.$formField != '') {
+	$('#$form_field_id').val(datumParts.$formField) };
 js;
+			} else {
+				$set_dest_fields_values[] = <<<js
+if (datumParts.$formField !== undefined && datumParts.$formField != '' && $('#$form_field_id').val() == '') {
+	$('#$form_field_id').val(datumParts.$formField) };
+js;
+			}
 			if ($nf++>0) {
 				$reset_dest_fields_values[] = <<<js
 $('#$form_field_id').val('');
@@ -165,7 +180,11 @@ js;
 			}
 		}
 		$js_set_fields_values = implode("\n", $set_dest_fields_values);
-		$js_reset_fields_values = implode("\n", $reset_dest_fields_values);
+		if ($this->overwriteInputs) {
+			$js_reset_fields_values = implode("\n", $reset_dest_fields_values);
+		} else {
+			$js_reset_fields_values = '';
+		}
 		$js_id = str_replace('-','_',$id);
 		/// @todo make a module and refactor change an blur event handlers
 		$view->registerJS(<<<js
