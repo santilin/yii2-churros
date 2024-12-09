@@ -247,12 +247,19 @@ class SimpleGridView extends \yii\grid\GridView
 			}
             $this->groups[$kg] = $group;
 			if (!$group->orderby) {
-				$group->orderby = $group->column;
+				$group->orderby[$group->column] = SORT_ASC;
+			} else if (is_string($group->orderby)) {
+				$tmp_order = $group->orderby;
+				$group->orderby = [];
+				$group->orderby[$tmp_order] = SORT_ASC;
 			}
-			$grid_orderby[] = $group->orderby;
+			$grid_orderby = array_merge($grid_orderby, $group->orderby);
         }
         if (count($grid_orderby)){
-			$this->dataProvider->query->orderBy(join(',',$grid_orderby) . ',' . $this->dataProvider->query->orderBy);
+			if (!empty($this->dataProvider->query->orderBy)) {
+				$grid_orderby = array_merge($grid_orderby, (array)$this->dataProvider->query->orderBy);
+			}
+			$this->dataProvider->query->orderBy($grid_orderby);
 		}
 	}
 
