@@ -1,3 +1,7 @@
+# ActionColumn:
+- El js de los filtros tiene que estar en ActionColumn.
+
+
 # save relations:
 - Si es hasone y solo es la foreign key, no generar la relación en el formulario
 
