@@ -118,7 +118,24 @@ class ActionColumn extends \yii\grid\ActionColumn
 
 	public function renderFilterCell()
 	{
-		return Html::tag('td', "Mis fitros", $this->filterOptions);
+		return Html::tag('th', <<<html
+		<div>
+		<span class="d-flex gap-2">
+		<span id="contenedorIconsFilter">
+
+		<button id="moreFilter" >
+		<i class="fas fa-filter text-primary p-0 fs-5 ms-1"
+		role="button"></i>
+		</button>
+		<span id="lessFilter">
+		<i class="fa fa-times-circle text-danger p-0 fs-5 ms-1" role="button"></i>
+		</span>
+		</span>
+		</span>
+		</div>
+
+html
+		, $this->filterOptions);
 	}
 
 
