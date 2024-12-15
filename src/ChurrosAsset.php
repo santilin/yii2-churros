@@ -23,6 +23,7 @@ class ChurrosAsset extends AssetBundle
     ];
     public $js = [
         'churros.validation.js',
+        'churros.grid.js',
     ];
     public $depends = [
         'yii\web\YiiAsset',

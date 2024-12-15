@@ -1,5 +1,41 @@
 const ChurrosGrid = (function() {
 	return {
+		resetFilters(grid_id) {
+			const grid = document.getElementById(grid_id);
+			if (!grid) return false;
+
+			const filters = grid.querySelector('.filters');
+			if (!filters) return false;
+
+			const removeFiltersLink = filters.querySelector('.remove-filters');
+			if (!removeFiltersLink) return false;
+
+			const inputs = filters.querySelectorAll('input');
+			const selects = filters.querySelectorAll('select');
+			let changedElement = false;
+
+			inputs.forEach(input => {
+				if (input.value !== '' && !changedElement) {
+					input.value = '';
+					changedElement = input;
+				} else {
+					input.value = '';
+				}
+			});
+
+			selects.forEach(select => {
+				if (select.selectedIndex !== 0 && !changedElement) {
+					select.selectedIndex = 0;
+					changedElement = select;
+				} else {
+					select.selectedIndex = 0;
+				}
+			});
+			if (changedElement) {
+				changedElement.dispatchEvent(new Event('change', { bubbles: true }));
+			}
+			return true;
+		},
 		createODSFile(id, fileName, excludedClasses = [], excludedRows = [], excludedCols = []) {
 			const table = document.getElementById(id);
 			const content = this.generateContentXML(table, excludedClasses, excludedRows, excludedCols);

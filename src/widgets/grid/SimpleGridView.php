@@ -116,29 +116,6 @@ class SimpleGridView extends \yii\grid\GridView
 	{
 		$view = $this->getView();
         ChurrosAsset::register($view);
-		$view->registerJs(<<<js
-{
-	const actionColumn = document.querySelector('.action-column');
-	const filters = document.querySelector('.filters');
-	const lessFilterSpan = document.getElementById('lessFilter');
-	lessFilterSpan.addEventListener('click',()=>{
-		const inputs = filters.querySelectorAll('input');
-		const selects = filters.querySelectorAll('select');
-		let hay_filtros = null;
-		inputs.forEach(input=>{
-			hay_filtros = input;
-			input.value = '';
-		});
-		if (hay_filtros) {
-			$(hay_filtros).trigger('change');
-		}
-		selects.forEach(select => {
-			select.selectedIndex = 0;
-		});
-	});
-}
-js
-	, \yii\web\View::POS_END);
         return parent::run();
 	}
 
