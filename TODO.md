@@ -8,12 +8,15 @@
 # translations
 - Ampliar malewords a más idiomas.
 
-# Login yii2-usuario
+# yii2-usuario
+- ¿Opción para obligar a cambiar la contraseña?
+- cache de permisos
+- Hay acceso a trivel.test/user/2
+- Si no hay rbac, que no aparezcan los menús relacionados con roles, etc.
 - Contraseña (recordar) no está bien el orden.
 - forgot: forbiden si estoy logueado como admin
-
-# Breadcrumbs
-- http://cappel.test/app/application/3/models/JsonController/update?returnTo=/app/application/jsedit/3
+- arreglar mailParams
+- layout del formulario de cambio de contraseña. Seguridad de ese formulario. ¿Quitarlo?
 
 # Sqlite3
 - Crear issue en github PRAGMA
@@ -24,9 +27,9 @@
 # CrudController
 * CrudController::pdf: Incluir css del módulo/modelo actual
 - Duplicar: imágenes, aparece el check para borrar la imagen.
-- update: Ya no aparece el check para elimiinar la imagen
+- update: Ya no aparece el check para eliminar la imagen
 - Behaviors: access-control tiene que ejecutarse antes que verb, para que no dé error si no tiene acceso.
-- gridPerms: No pasarlo como parámetro independiente, porque debe poderse cambiarn en changeParams.
+- gridPerms: No pasarlo como parámetro independiente, porque debe poderse cambiar en changeParams.
 
 # Reports:
 * Quitar (no definido) al imprimir
@@ -35,13 +38,6 @@
 - gui: ¿Añadir relación?
 * Hacer uso de los model.Agente.report? o los permisos del Param?
 
-# User
-- ¿Opción para obligar a cambiar la contraseña?
-- cache de permisos
-- yii2usuario: alert falla cuando se redirige de bs4 a bs3 porque no espera un array aquí: /home/santilin/devel/-yii2base/vendor/2amigos/yii2-usuario/src/User/resources/views/shared/_alert.php
-- Hay acceso a trivel.test/user/2
-- Añadir opción visible en profile en resources ... _menu.php: yiiparam('user_profile');
-- Si no hay rbac, que no aparezcan los menús relacionados con roles, etc.
 
 # Adjuntos y subir ficheros
 * Opciones
