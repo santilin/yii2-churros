@@ -1,14 +1,12 @@
-# ActionColumn:
-- El js de los filtros tiene que estar en ActionColumn.
-
-
 # save relations:
 - Si es hasone y solo es la foreign key, no generar la relación en el formulario
 
 # translations
 - Ampliar malewords a más idiomas.
 
-# yii2-usuario
+# yii2-
+- Si no hay rbac tables y no eres admin, da error esto
+    http://snv.test/user/admin/update?id=2
 - ¿Opción para obligar a cambiar la contraseña?
 - cache de permisos
 - Hay acceso a trivel.test/user/2
