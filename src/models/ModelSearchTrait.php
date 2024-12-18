@@ -354,6 +354,7 @@ trait ModelSearchTrait
 		}
 	}
 
+	/// Replaces table names with aliases
 	private function addJoinIfNotExists($query, $aliases, $join_type, $tablename, $on): bool
 	{
 		if (!empty($query->join)) {
@@ -371,7 +372,20 @@ trait ModelSearchTrait
 			}
 		}
 		foreach ($aliases as $alias => $tbl) {
-			$on = preg_replace('/\b' . $tbl. '\./', $alias . '.', $on);
+			$tbl_parts = explode('.', $tbl);
+			if (count($tbl_parts) == 2) { // if database is present, there is no ambiguity
+				$on = preg_replace('/\b' . $tbl. '\./', $alias . '.', $on);
+			} else { // do not replace $tbl if it is a tablaname
+				$on_parts = explode('=', $on);
+				foreach ($on_parts as $on_k => $on_part) { // @todo @tbl.@tbl
+					if (preg_match("/\b$tbl.\w+\./", $on_part)) {
+						continue;
+					} else {
+						$on_parts[$on_k] = preg_replace('/\b' . $tbl. '\./', $alias . '.', $on_part);
+					}
+				}
+				$on = implode('=', $on_parts);
+			}
 		}
 		$query->join($join_type, $tablename, $on);
 		return true;
