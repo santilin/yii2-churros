@@ -162,9 +162,10 @@ trait ModelSearchTrait
 					$junction_model_class = $junction_relation['modelClass'];
 					$junction_model = $junction_model_class::instance();
 					$junction_table_alias = $table_alias . '_join_' . $field_name;
-					$nested_relations[$junction_table_alias] = $junction_relation['relatedTablename'];
+					$nested_tablename = str_replace(['{{%', '{{', '}}'], '', $junction_model->tableName());
+					$nested_relations[$junction_table_alias] = $nested_tablename; // $junction_relation['relatedTablename'];
 					/// @todo $final_attribute when nested
-					$this->addJoinIfNotExists($query, $nested_relations, "LEFT JOIN", [ $junction_table_alias => $junction_model->tableName()], $junction_relation['join']);
+					$this->addJoinIfNotExists($query, $nested_relations, "LEFT JOIN", [ $junction_table_alias => $nested_tablename], $junction_relation['join']);
 					$related_table_alias = $junction_table_alias . '_' . $field_name;
 					$nested_relations[$related_table_alias] = $relation['relatedTablename'];
 					$model_class = $relation['modelClass'];
@@ -184,7 +185,7 @@ trait ModelSearchTrait
 						}
 					} else {
 						$final_attribute = $relation['other'];
-						$table_alias = $junction_model->tableName();
+						$table_alias = $nested_tablename;
 					}
 				} else {
 					$table_alias .= "_$field_name";
