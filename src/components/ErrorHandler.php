@@ -23,4 +23,13 @@ class ErrorHandler extends \yii\web\ErrorHandler
 		return parent::renderException($exception);
 	}
 
+
+	/**
+     * Handles fatal PHP errors.
+     */
+    public function handleFatalError()
+    {
+        unset($_SESSION['GridPageSize']);
+        return parent::handleFatalError();
+    }
 }

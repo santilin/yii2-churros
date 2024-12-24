@@ -197,8 +197,7 @@ class CrudController extends \yii\web\Controller
 		$model = $this->findFormModel(null, null, 'create', $params);
 		$model->scenario = 'create';
 
-		$relations = empty($params['_form_relations'])?[]:explode(",", $params['_form_relations']);
-		if ($model->loadAll($params, $relations) ) {
+		if ($model->loadAll($params, static::findRelationsInForm($params)) ) {
 			if ($model->saveAll(true) ) {
 				if ($this->request->getIsAjax()) {
 					return json_encode($model->getAttributes());
@@ -228,8 +227,7 @@ class CrudController extends \yii\web\Controller
 		$model = $this->findFormModel($id, null, 'duplicate', $params);
 		$model->scenario = 'duplicate';
 
-		$relations = empty($params['_form_relations'])?[]:explode(",", $params['_form_relations']);
-		if ($model->loadAll($this->request->post(), $relations) ) {
+		if ($model->loadAll($this->request->post(), static::findRelationsInForm($params))) {
 			$model->setIsNewRecord(true);
 			$model->resetPrimaryKeys();
 			if( $model->saveAll(true) ) {
@@ -262,9 +260,7 @@ class CrudController extends \yii\web\Controller
 			return $this->redirect(array_merge(['create'], $params));
 		}
 		$model->scenario = 'update';
-
-		$relations = empty($params['_form_relations'])?[]:explode(",", $params['_form_relations']);
-		if ($model->loadAll($params, $relations)) {
+		if ($model->loadAll($params, static::findRelationsInForm($params))) {
 			if ($model->saveAll(true)) {
 				if ($this->request->getIsAjax()) {
 					\Yii::$app->response->format = \yii\web\Response::FORMAT_JSON;
@@ -547,7 +543,7 @@ class CrudController extends \yii\web\Controller
 
 
 	// Ajax
-	public function actionAutocomplete(string $search, string $format, array $fields = [], string $scopes = '', string $model_format = 'long')
+	public function actionAutocomplete(string $search, string $format, array $fields = [], array|string $scopes = '', string $id_field = null, string $model_format = 'long')
 	{
 		\Yii::$app->response->format = \yii\web\Response::FORMAT_JSON;
 		$ret = [];
@@ -559,15 +555,20 @@ class CrudController extends \yii\web\Controller
 		foreach ($fields as $field) {
 			$fld_values[$field] = $search;
 		}
-		if (!empty($scopes)) {
-			$indexParams['_search_scopes'] = explode(',', $scopes);
+		foreach ((array)$scopes as $scope) {
+			$indexParams['_search_scopes'] = explode(',', $scope);
 		}
 		$dataProvider = $searchModel->search([$searchModel->formName() => $fld_values, 'or' => true ]);
 		if ($format == 'select2' || $format == 'select') {
 			foreach ($dataProvider->getModels() as $record) {
-				$ret[] = [ 'id' => $record->getPrimaryKey(), 'text' => $record->recordDesc($model_format) ];
+				$id = $id_field ? $record->$id_field : $record->getPrimaryKey();
+				$ret[] = [ 'id' => $id, 'text' => $record->recordDesc($model_format) ];
 			}
-			return [ 'results' => $ret ];
+			if ($format == 'select2') {
+				return [ 'results' => $ret ];
+			} else {
+				return $ret;
+			}
 		} else {
 			foreach ($dataProvider->getModels() as $record) {
 				$ret[] = [ 'text' => $record->recordDesc($model_format) ];

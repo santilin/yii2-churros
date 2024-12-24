@@ -36,7 +36,9 @@ trait ModelTrait
 				$q->defaultOrder();
 			}
 		} else if ($set_order_by) {
-			$q->defaultOrder();
+			if (method_exists($q, 'defaultOrder')) {
+				$q->defaultOrder();
+			}
 		}
 		return $q;
 	}

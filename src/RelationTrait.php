@@ -59,7 +59,7 @@ trait RelationTrait
 		}
 		if (isset($post[$formName])) {
             $relations_in_model = static::$relations;
-			foreach ($relations_in_form as $rel_name) {
+			foreach ($relations_in_form as $rel_key => $rel_name) {
 				if (!isset($relations_in_model[$rel_name])) {
 					continue;
 				}
@@ -80,22 +80,19 @@ trait RelationTrait
 						$this->populateRelation($rel_name, $rel_model);
 					}
 				} else {
-                    // HasMany or Many2Many outside of formName
+                    // HasMany or Many2Many
 					if (array_key_exists($rel_name, $post)) {
 						$post_data = $post[$rel_name]?:[];
 						unset($post[$rel_name]);
-					}
-					if( $post_data === null ) {
-						if (array_key_exists($formName, $post) && array_key_exists($rel_name, $post[$formName])) {
-							$post_data = $post[$formName][$rel_name]?:[];
-							unset($post[$formName][$rel_name]);
-						}
-					}
-					if( $post_data === null ) {
-						if (array_key_exists($model_relation['model'], $post)) {
-							$post_data = $post[$model_relation['model']]?:[];
-							unset($post[$model_relation['model']]);
-						}
+					} else if (array_key_exists($rel_key, $post)) {
+						$post_data = $post[$rel_key]?:[];
+						unset($post[$rel_key]);
+					} else if (array_key_exists($formName, $post) && array_key_exists($rel_name, $post[$formName])) {
+						$post_data = $post[$formName][$rel_name]?:[];
+						unset($post[$formName][$rel_name]);
+					} else if (array_key_exists($model_relation['model'], $post)) {
+						$post_data = $post[$model_relation['model']]?:[];
+						unset($post[$model_relation['model']]);
 					}
 					if ($post_data !== null) {
                         $this->loadToRelation($rel_name, (array)$post_data);

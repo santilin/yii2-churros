@@ -9,6 +9,32 @@ use santilin\churros\helpers\FormHelper;
 trait ControllerTrait
 {
 
+	static public function findRelationsInForm(array $form_params): array
+	{
+		if (!isset($form_params['_form_relations'])) {
+			return [];
+		}
+		if (is_string($form_params['_form_relations'])) {
+			try {
+				$relations = json_decode($form_params['_form_relations'], JSON_OBJECT_AS_ARRAY | JSON_THROW_ON_ERROR);
+			} catch (JsonException $e) {
+				$relations = explode(',', $form_params['_form_relations']);
+			}
+		} else {
+			$relations = $form_params['_form_relations'];
+		}
+		$ret = [];
+		foreach ($relations as $rk => $rn) {
+			$rpos = strrpos($rk, '\\');
+			if ($rpos !== FALSE) {
+				$ret[substr($rk, $rpos+1)] = $rn;
+			} else {
+				$ret[$rk] = $rn;
+			}
+		}
+		return $ret;
+	}
+
 	public function getRoutePrefix($route = null, bool $add_slash = true): string
 	{
 		if( $route === null ) {
