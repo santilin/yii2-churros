@@ -199,7 +199,7 @@ trait ModelSearchTrait
 				throw new InvalidArgumentException($field_name . ": relation not found in model " . self::class . ' (SearchModel::filterWhereRelated)');
 			}
 		}
-		return [$final_attribute??$attribute,$table_alias,$model,$relation];
+		return [$final_attribute??$attribute,$table_alias == 'as' ? '':$table_alias,$model,$relation];
 	}
 
 
