@@ -604,14 +604,14 @@ ajax;
 	static public function joinHasManyModels($parent, array $models,
 		string $record_format = 'long', string $tag = 'ul', array $tag_options = [], $context = null): string
 	{
-		if( $models == null || count($models)==0 ) {
+		if( $models === null || count($models)==0 ) {
 			return "";
 		}
 		$keys = $parent->getPrimaryKey(true);
 		$keys[0] = 'view';
 		$parent_route = Url::toRoute($keys);
 		$attrs = [];
-		foreach((array)$models as $model) {
+		foreach($models as $model) {
 			if( $model != null ) {
 				$url = Url::to(array_merge([$parent_route . '/'.  $model->controllerName()],  $model->getPrimaryKey(true)));
 				$attrs[] = "<a href='$url'>" .  $model->recordDesc($record_format, 0, $context) . "</a>";
@@ -619,7 +619,7 @@ ajax;
 		}
 		switch ($tag) {
 			case 'ul':
-				return Html::tag($tag, '<li draggable="true">' . join('</li><li>', $attrs) . '</li>', $tag_options);
+				return Html::tag($tag, '<li>' . join('</li><li>', $attrs) . '</li>', $tag_options);
 			case 'raw':
 				return $attrs;
 			default:

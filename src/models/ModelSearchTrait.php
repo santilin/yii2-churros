@@ -152,6 +152,7 @@ trait ModelSearchTrait
 		while (strpos($attribute, '.') !== FALSE || isset($model::$relations[$attribute])) {
 			if (strpos($attribute, '.') === FALSE) {
 				$field_name = $attribute;
+				$attribute = '';
 			} else {
 				list($field_name, $attribute) = AppHelper::splitString($attribute, '.');
 			}

@@ -165,9 +165,8 @@ class JsonController extends \yii\web\Controller
 		$params = array_merge($req->get(), $req->post());
 		$params['permissions'] = FormHelper::resolvePermissions($params['permissions']??[], $this->crudActions);
 		$model = $this->findFormModel($this->getPath(), null, null, 'create', $params);
-		$relations = empty($params['_form_relations'])?[]:explode(",", $params['_form_relations']);
 		$model->scenario = 'create';
-		if ($model->loadAll($params, $relations) ) {
+		if ($model->loadAll($params, static::findRelationsInForm($params)) ) {
 			$model->setIsnewRecord(true);
 			if ($model->validate() && $model->save(false) ) {
 				if ($req->getIsAjax()) {
@@ -197,10 +196,9 @@ class JsonController extends \yii\web\Controller
 		$params['permissions'] = FormHelper::resolvePermissions($params['permissions']??[], $this->crudActions);
 		$model = $this->findFormModel($this->getPath(), $id, null, 'duplicate', $params);
 		$model->setDefaultValues(); // duplicating
-		$relations = empty($params['_form_relations'])?[]:explode(",", $params['_form_relations']);
 		$model->scenario = 'duplicate';
 		$mc = get_class($model);
-		if ($model->loadAll($params, $relations) ) {
+		if ($model->loadAll($params, static::findRelationsInForm($params)) ) {
 			$model->setIsNewRecord(true);
 			if ($model->validate() && $model->save(false)) {
 				if ($req->getIsAjax()) {
@@ -229,9 +227,8 @@ class JsonController extends \yii\web\Controller
 		$params = array_merge($req->get(), $req->post());
 		$params['permissions'] = FormHelper::resolvePermissions($params['permissions']??[], $this->crudActions);
 		$model = $this->findFormModel($this->getPath(), $id, null, 'update', $params);
-		$relations = empty($params['_form_relations'])?[]:explode(",", $params['_form_relations']);
 
-		if ($model->loadAll($params, $relations) && $req->isPost ) {
+		if ($model->loadAll($params, static::findRelationsInForm($params)) && $req->isPost ) {
 			if ($model->validate() && $model->save(false) ) {
 				if ($req->getIsAjax()) {
 					return json_encode($model->getAttributes());
