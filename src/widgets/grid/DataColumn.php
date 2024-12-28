@@ -80,7 +80,11 @@ try {
 } catch (\yii\base\ErrorException $e) {
     throw new \yii\base\ErrorException($e->getMessage() . ":{$this->attribute}=" . json_encode($model->{$this->attribute}),
         $e->getCode(), $e->getSeverity(), $e->getFile(), $e->getLine(), $e->getPrevious());
+} catch (\yii\base\InvalidArgumentException $e) {
+    throw new \yii\base\ErrorException($e->getMessage() . ":{$this->attribute}=" . json_encode($model->{$this->attribute}),
+    $e->getCode(), 0, $e->getFile(), $e->getLine(), $e->getPrevious());
 }
+
     }
 
 

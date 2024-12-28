@@ -29,6 +29,7 @@ class ErrorHandler extends \yii\web\ErrorHandler
      */
     public function handleFatalError()
     {
+        /// @todo solo si el error es out of memory
         unset($_SESSION['GridPageSize']);
         return parent::handleFatalError();
     }
