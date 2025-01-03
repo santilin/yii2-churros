@@ -24,11 +24,10 @@ class YADTC extends \DateTime
     }
 
 	/**
-	 * Intenta crear un DateTime a partir de cualquier tipo de variable y sin tener que especificar
-	 * el formato.
+	 * Intenta crear un DateTime a partir de cualquier tipo de variable y sin tener que especificar el formato.
 	 * Si la fecha es incorrecta o ambigua, lanza una excepción.
 	 */
-	static public function fromString($datetime, $format = null, $timezone = null)
+	static public function fromString($datetime, $format = null, $timezone = null): YADTC
 	{
 		if( $datetime === null || $datetime instanceof YADTC ) {
 			return $datetime;
@@ -43,7 +42,7 @@ class YADTC extends \DateTime
 			return null;
 		}
 		if (is_int($datetime)) {
-			return new YADTC('@$datetime');
+			return new YADTC($datetime, $timezone);
 		}
 		if ($format !== null && is_string($datetime)) {
 			$dt = self::createFromFormat($format, $datetime, $timezone);
@@ -122,20 +121,6 @@ class YADTC extends \DateTime
 		}
 	}
 
-	static public function fromFormToSql($datestr, $format)
-	{
-		if( $datestr instanceof YADTC || $datestr instanceof \DateTime) {
-			$date = $datestr;
-		} else {
-			$date = self::fromCepaimForm($datestr);
-		}
-		if( $date ) {
-			return $date->format($format);
-		} else {
-			return '';
-		}
-	}
-
 	static public function today($modify = null, DateTimeZone $timezone = NULL)
 	{
 		$dt = new \DateTime("now", $timezone);
@@ -161,6 +146,26 @@ class YADTC extends \DateTime
 		return $dt;
 	}
 
+	static public function dateOrToday(int|string|\DateTime|YADTC $date = null,
+									   DateTimeZone $timezone = null): YADTC
+	{
+		if ($date instanceof YADTC ) {
+			return $date;
+		}
+		if( ($date instanceof \DateTime) ) {
+			$f = new YADTC();
+			$f->setTimestamp( $date->getTimestamp() );
+			$f->setTimezone( $date->getTimezone() );
+			return $f;
+		}
+		if (!$date || (is_string($date) && trim($date) == '')) {
+			return YADTC::today($timezone);
+		}
+		if (is_int($date)) {
+			return YADTC($date, $timezone);
+		}
+		return self::fromString($date, $timezone);
+	}
 
 	public function year()
 	{
@@ -173,6 +178,23 @@ class YADTC extends \DateTime
 	public function day()
 	{
 		return intval($this->format('d'));
+	}
+	public function week()
+	{
+		return intval($this->format('W'));
+	}
+	public function weekDay()
+	{
+		return intval($this->format('w'));
+	}
+	public function weekDayStartsMonday()
+	{
+		$d = intval($this->format('w'));
+		if ($d == 0) { // sunday
+			return 6;
+		} else {
+			return --$d;
+		}
 	}
 	public function hour()
 	{

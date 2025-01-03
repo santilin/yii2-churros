@@ -50,11 +50,14 @@ class DbController extends Controller
 	/** @var int the number or records to seed or dump, defaults to 0 meaning all */
 	public $count = 0;
 
+	/** @var string the where clause to filter records */
+	public ?string $where = null;
+
     public function options($actionID)
     {
         return array_merge(
             parent::options($actionID),
-            ['db', 'format', 'truncateTables','createFile','seedersPath','fixturesPath','count']
+            ['db', 'format', 'truncateTables','createFile','seedersPath','fixturesPath','count', 'where']
         );
     }
 
@@ -106,6 +109,7 @@ class DbController extends Controller
 			case 'bigint unsigned':
 			case 'float':
 			case 'double':
+			case 'double unsigned':
 			case 'bool':
 			case 'char':
 			case 'boolean':
@@ -230,8 +234,9 @@ EOF;
      * @param string $tableName the table to be dumped
      * @param string $where query filter
      */
-    public function actionDumpTable(string $tableName, string $where = '')
+    public function actionDumpTable(string $tableName)
     {
+		$where = $this->where;
 		$tableSchema = $this->db->schema->getTableSchema($tableName, true /*refresh*/);
 		if ($tableSchema == null) {
 			throw new \Exception("$tableName not found in database");
@@ -259,7 +264,7 @@ EOF;
 				$write_file = false;
 			}
 			if ($write_file) {
-				\file_put_contents($filename, $preamble . $this->dumpTable($schemaName, $tableSchema, $where));
+				\file_put_contents($filename, $preamble . $this->dumpTable($schemaName, $tableSchema, $where??''));
 				echo "Created $this->format for table $tableName in $filename\n";
 			}
 		} else {
