@@ -265,7 +265,6 @@ class JsonController extends \yii\web\Controller
 				return $this->redirect($this->returnTo(null, 'delete', $model));
 			} else {
 				Yii::$app->session->addFlash('error', $model->t('churros', $this->getResultMessage('error_delete')));
-				$this->addErrorFlashes($model);
 			}
 		} catch (\yii\db\IntegrityException $e) {
 			$model->addError('delete', $model->t('churros',

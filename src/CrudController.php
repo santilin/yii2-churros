@@ -540,8 +540,6 @@ class CrudController extends \yii\web\Controller
 		return [];
 	}
 
-
-
 	// Ajax
 	public function actionAutocomplete(string $search, string $format, array $fields = [], array|string $scopes = '', string $id_field = null, string $model_format = 'long')
 	{
@@ -576,8 +574,6 @@ class CrudController extends \yii\web\Controller
 			return $ret;
 		}
 	}
-
-
 
 	public function getMasterModel()
 	{
