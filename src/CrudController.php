@@ -395,14 +395,14 @@ class CrudController extends \yii\web\Controller
 				$to_model = null;
 				switch ($from) {
 					case 'create':
-						if ($this->request->post('_and_create') == '1') {
+						if ($this->request->post("_and_$from") == '1') {
 							$to_action = 'create';
 						} else {
 							$to_action = 'view';
 						}
 						break;
 					case 'duplicate':
-						if ($this->request->post('_and_create') == '1') {
+						if ($this->request->post("_and_$from") == '1') {
 							$to_action = 'duplicate';
 						} else {
 							$to_action = 'view';
