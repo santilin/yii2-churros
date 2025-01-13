@@ -105,7 +105,7 @@ trait ModelInfoTrait
 		return strtr($translated, $placeholders);
 	}
 
-	public function recordDesc(string $format='', int $max_len = 0, $context = null): string
+	public function recordDesc(string $format=null, int $max_len = 0, $context = null): string
 	{
 		$ret = '';
 		if( !$format || $format == 'short' ) {

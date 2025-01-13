@@ -225,7 +225,7 @@ trait RelationTrait
      * @return bool
      * @throws Exception
      */
-    public function saveAll(bool $runValidation = true): bool
+    public function saveAll(bool $runValidation = true, $attributeNames = null): bool
     {
 		$must_commit = false;
 		$trans = $this->getDb()->getTransaction();
@@ -235,7 +235,7 @@ trait RelationTrait
 		}
 		$wasNewRecord = $this->isNewRecord;
         try {
-            if ($this->save($runValidation)) {
+            if ($this->save($runValidation, $attributeNames)) {
 				if ($this->saveRelated($wasNewRecord)) {
 					if( $must_commit ) {
 						$trans->commit();
@@ -484,7 +484,7 @@ trait RelationTrait
 					foreach ($records as $index => $relModel) {
 						// Set relModel foreign key
 						foreach ($relation->link as $foreign_key => $value) {
-							if( is_object($relModel) ) {
+							if (is_object($relModel)) {
 								$relModel->$foreign_key = $this->$value;
 							}
 							$notDeletedFK[$foreign_key] = $this->$value;
