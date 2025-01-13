@@ -347,14 +347,14 @@ class JsonController extends \yii\web\Controller
 		if (empty($to)) {
 			switch ($from) {
 				case 'create':
-					if (Yii::$app->request->post('_and_create') == '1') {
+					if ($this->request->post("_and_$from") == '1') {
 						$to = 'create';
 					} else {
 						$to = 'view';
 					}
 					break;
 				case 'duplicate':
-					if (Yii::$app->request->post('_and_create') == '1') {
+					if ($this->request->post("_and_$from") == '1') {
 						$to = 'duplicate';
 					} else {
 						$to = 'view';
