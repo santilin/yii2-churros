@@ -83,8 +83,8 @@ class JsonModel extends \yii\base\Model
             }
             $child = new $model_class;
             $child->parent_model = $this;
-            $child->setPath($this->getPath() . '/' . $child->jsonPath());
             $child->setJsonModelable($this);
+            $child->setPath($this->getPath() . '/' . $child->jsonPath());
             $primary_key_set = false;
             if (is_array($rm)) {
                 foreach ($rm as $fldname => $fldvalue) {
@@ -321,17 +321,6 @@ class JsonModel extends \yii\base\Model
         return $this->_json_object;
     }
 
-    /**
-     * Load all attributes including related attributes
-     * @param $post
-     * @param array $relations_in_form
-     * @return bool
-     */
-//     public function loadAll($post, $relations_in_form = [], $formName = null)
-//     {
-// 		return $this->load($post, $formName);
-// 	}
-
     public function jsonGet(string $path)
     {
         return $this->_json_modelable->getJsonValue($path);
@@ -455,37 +444,48 @@ class JsonModel extends \yii\base\Model
 				return true;
 			}
             $relations_in_model = static::$relations;
-            foreach($relations_in_model as $rel_name => $model_relation ) {
-				if( !in_array($rel_name, $relations_in_form) ) {
-					continue;
-				}
-				if( $model_relation['type'] == 'HasOne' || $model_relation['type'] == "OneToOne" ) {
-					// Look for embedded relations data in the main form
-					$post_data = null;
-					if( isset($post[$formName][$rel_name]) && is_array($post[$formName][$rel_name]) ) {
-						$post_data = $post[$formName][$rel_name];
-					} else if( isset($post[$formName][$model_relation['model']]) && is_array($post[$formName][$model_relation['model']]) ) {
-						$post_data = $post[$formName][$model_relation['model']];
-					} else if( isset($post[$model_relation['model']]) && is_array($post[$model_relation['model']]) ) {
-						$post_data = $post[$model_relation['model']];
-					}
-					if( $post_data ) {
-						$rel_model = new $model_relation['modelClass'];
-						$rel_model->setAttributes( $post_data );
-						$this->populateRelation($rel_name, $rel_model);
-					}
-				} else {
-                    // HasMany or Many2Many outside of formName
-					$post_data = (isset($post[$rel_name]) && is_array($post[$rel_name]))
-						? $post[$rel_name] : null;
-					if( $post_data === null ) {
-						$post_data = (isset($post[$formName][$rel_name]) && is_array($post[$formName][$rel_name])) ? $post[$formName][$rel_name] : null ;
-					}
-					if( $post_data === null ) {
-						$post_data = (isset($post[$model_relation['model']]) && is_array($post[$model_relation['model']])) ? $post[$model_relation['model']] : null ;
-					}
-					if( $post_data ) {
-                        $this->loadToRelation($rel_name, $post_data);
+            foreach ($relations_in_model as $rel_name => $model_relation) {
+                foreach ($relations_in_form as $rel_form_name => $rel_form_relation) {
+                    if ($rel_form_name != $rel_name && $rel_form_relation != $rel_name) {
+                        continue;
+                    }
+                    $related_model_name = $model_relation['model'];
+                    if ($model_relation['type'] == 'HasOne' || $model_relation['type'] == "OneToOne") {
+                        // Look for embedded relations data in the main form
+                        $post_data = null;
+                        if( isset($post[$formName][$rel_name]) && is_array($post[$formName][$rel_name]) ) {
+                            $post_data = $post[$formName][$rel_name];
+                        } else if( isset($post[$formName][$related_model_name]) && is_array($post[$formName][$related_model_name]) ) {
+                            $post_data = $post[$formName][$related_model_name];
+                        } else if( isset($post[$related_model_name]) && is_array($post[$related_model_name]) ) {
+                            $post_data = $post[$related_model_name];
+                        }
+                        if( $post_data ) {
+                            $rel_model = new $model_relation['modelClass'];
+                            $rel_model->setAttributes( $post_data );
+                            $this->populateRelation($rel_name, $rel_model);
+                        }
+                    } else {
+                        // HasMany or Many2Many outside of formName
+                        $post_data = null;
+                        if (is_string($rel_form_name) && isset($post[$formName][$rel_form_name]) && is_array($post[$formName][$rel_form_name])) {
+                            $post_data = $post[$formName][$rel_form_name];
+                        } else if (isset($post[$formName][$rel_form_relation]) && is_array($post[$formName][$rel_form_relation])) {
+                            $post_data = $post[$formName][$rel_form_relation];
+                        } else if (is_string($rel_form_name) && isset($post[$rel_form_name]) && is_array($post[$rel_form_name])) {
+                            $post_data = $post[$rel_form_name];
+                        } else if (isset($post[$rel_form_relation]) && is_array($post[$rel_form_relation])) {
+                            $post_data = $post[$rel_form_relation];
+                        } else if ($rel_form_name != $related_model_name && $rel_form_relation != $related_model_name) {
+                            if (isset($post[$formName][$related_model_name]) && is_array($post[$formName][$related_model_name])) {
+                                $post_data = $post[$formName][$related_model_name];
+                            } else if (isset($post[$related_model_name]) && is_array($post[$related_model_name])) {
+                                $post_data = $post[$related_model_name];
+                            }
+                        }
+                        if ($post_data) {
+                            $this->loadToRelation($rel_name, $post_data);
+                        }
                     }
                 }
             }
@@ -497,22 +497,21 @@ class JsonModel extends \yii\base\Model
 
     /**
      * Refactored from loadAll() function
-     * @param $relation skimmed relation data
-     * @param $rel_name
-     * @param $v form values
+     * @param string $rel_name
+     * @param array $form_values
      * @return bool
      */
-    public function loadToRelation($rel_name, $v)
+    public function loadToRelation(string $rel_name, array $form_values): void
     {
-        /* @var $this ActiveRecord */
-        /* @var $relObj ActiveRecord */
-        /* @var $relModelClass ActiveRecord */
+        /* @var $this JsonModel */
+        /* @var $relObj JsonModel */
+        /* @var $relModelClass string */
         $relation = static::$relations[$rel_name];
 		$relModelClass = $relation['modelClass'];
 		$container = [];
         $relPKAttr = [ $relModelClass::$_locator ?? 'id' ];
         if ($relation['type'] == 'HasMany') {
-            foreach ($v as $relPost) {
+            foreach ($form_values as $relPost) {
                 $relObj = new $relModelClass;
                 if (!is_array($relPost) ) {
                     $relPost = [$relPKAttr[0] => $relPost];
@@ -531,7 +530,7 @@ class JsonModel extends \yii\base\Model
                 }
             }
         } else if ($relation['type'] == 'ManyToMany') {
-			foreach( $v as $relPost ) {
+			foreach( $form_values as $relPost ) {
 				if( is_array($relPost) ) {
 					$id = $relPost[$relPKAttr[0]];
 					$relObj = empty($id) ? new $relModelClass : $relModelClass::findOne($id);
@@ -543,9 +542,7 @@ class JsonModel extends \yii\base\Model
 				$container[] = $relObj;
 			}
         }
-// 		$this->populateRelation($rel_name, $container);
         $this->_related[$rel_name] = $container;
-        return true;
     }
 
 	public function handyFieldValues(string $field, string $format,

@@ -136,6 +136,13 @@ class AppHelper
 		return $string;
 	}
 
+	static public function utf8StartsWithUpper(string $str): bool
+	{
+		$chr = mb_substr ($str, 0, 1, "UTF-8");
+		return mb_strtolower($chr, "UTF-8") != $chr;
+	}
+
+
 	static public function getAppLocaleLanguage(): string
 	{
 		return str_replace("-", "_", Yii::$app->language);
