@@ -27,13 +27,13 @@ class YADTC extends \DateTime
 	 * Intenta crear un DateTime a partir de cualquier tipo de variable y sin tener que especificar el formato.
 	 * Si la fecha es incorrecta o ambigua, lanza una excepción.
 	 */
-	static public function fromString($datetime, $format = null, $timezone = null): YADTC
+	static public function fromString($datetime, $format = null, \DateTimeZone $timezone = null): YADTC
 	{
 		if( $datetime === null || $datetime instanceof YADTC ) {
 			return $datetime;
 		}
 		if( ($datetime instanceof \DateTime) ) {
-			$f = new Fecha();
+			$f = new self;
 			$f->setTimestamp( $datetime->getTimestamp() );
 			$f->setTimezone( $datetime->getTimezone() );
 			return $f;
@@ -84,12 +84,19 @@ class YADTC extends \DateTime
  		throw new \Exception("Invalid format of date '" . strval($sdate) . "'");
 	}
 
+	static public function fromWeek(int $week, int $year, \DateTimeZone $timezone = null): YADTC
+	{
+		$date = new self("now", $timezone);
+		$date->setISODate($year, $week);
+		return $date;
+	}
+
 	/**
 	 * Creates a YADTC from a SQL string.
 	 * @param string|mixed $date
 	 * @param bool $onlymysql Admit only msyql format
 	 */
-	static public function fromSQL($date, $onlymysql = false)
+	static public function fromSQL($date, $onlymysql = false): YADTC
 	{
 		if( $date == null ) {
 			return null;
