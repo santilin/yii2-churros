@@ -122,6 +122,7 @@ class DbController extends Controller
 				}
 			case "string":
 			case 'date':
+			case 'time':
 			case 'timestamp':
 			case 'datetime':
 			case "mediumtext":
