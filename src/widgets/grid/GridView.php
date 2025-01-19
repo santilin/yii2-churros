@@ -37,6 +37,9 @@ class GridView extends SimpleGridView
 			];
 			$this->emptyText = Yii::t('churros', 'No {items} found.', $configItems);
 		}
+		// if ($this->title === null) {
+		// 	$this->title = $this->itemLabelPlural;
+		// }
 		parent::init();
 	}
 
@@ -276,10 +279,20 @@ class GridView extends SimpleGridView
 				];
 				if (($summaryContent = $this->summary) === null) {
 					if ($pageCount <= 1) {
-						$summary = Yii::t('churros', 'Showing <b>{totalCount, number}</b>', $configSummary + $configItems);
+						if ($this->title !== false && $this->title == '') {
+							$summary = Yii::t('churros', "Showing <b>{totalCount, number}</b> {totalCount, plural, one{{item}} other{{items}}}.", $configSummary + $configItems);
+						} else {
+							$summary = Yii::t('churros', 'Showing <b>{totalCount, number}</b>', $configSummary + $configItems);
+						}
 					} else {
-						$summary = Yii::t('churros', 'Showing <b>{begin, number}-{end, number}</b> of <b>{totalCount, number}</b>', $configSummary + $configItems);
+						if ($this->title !== false && $this->title == '') {
+							$summary = Yii::t('churros', "Showing <b>{begin, number}-{end, number}</b> of <b>{totalCount, number}</b> {totalCount, plural, one{{item}} other{{items}}}.", $configSummary + $configItems);
+						} else {
+							$summary = Yii::t('churros', 'Showing <b>{begin, number}-{end, number}</b> of <b>{totalCount, number}</b>', $configSummary + $configItems);
+						}
 					}
+				} else if ($summaryContent !== false) {
+					$summary = Yii::$app->getI18n()->format($summaryContent, $configSummary, Yii::$app->language);
 				}
 			} else {
 				$begin = $page = $pageCount = 1;
@@ -294,7 +307,7 @@ class GridView extends SimpleGridView
 				];
 				if (($summaryContent = $this->summary) === null) {
 					$summary = Yii::t('churros', 'Total <b>{count, number}</b>', $configSummary + $configItems);;
-				} else {
+				} else if ($summaryContent !== false) {
 					$summary = Yii::$app->getI18n()->format($summaryContent, $configSummary, Yii::$app->language);
 				}
 			}
