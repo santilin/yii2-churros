@@ -84,7 +84,6 @@ class JsonModel extends \yii\base\Model
             $child = new $model_class;
             $child->parent_model = $this;
             $child->setJsonModelable($this);
-            $child->setPath($this->getPath() . '/' . $child->jsonPath());
             $primary_key_set = false;
             if (is_array($rm)) {
                 foreach ($rm as $fldname => $fldvalue) {
@@ -107,6 +106,7 @@ class JsonModel extends \yii\base\Model
                     $child->setPrimaryKey($rm);
                 }
             }
+            $child->setPath($this->getPath() . '/' . $child->jsonPath() . '/' . $child->_id);
             $models[] = $child;
         }
         return $models;
@@ -168,7 +168,7 @@ class JsonModel extends \yii\base\Model
             if (count($parts)<2) {
                 return null;
             }
-            if (!in_array($parts[count($parts)-1], ['fields','behaviors','models'])) {
+            if (!in_array($parts[count($parts)-1], ['fields','behaviors','models','controllers'])) {
                 array_pop($parts);
             }
             array_pop($parts);
@@ -268,7 +268,7 @@ class JsonModel extends \yii\base\Model
             $this->_id = $id;
             if (!empty(static::$_locator)) {
                 $values = [ static::$_locator => $id ];
-                $this->setAttributes($values);
+                $this->setAttributes($values, false); // if safeonly, there can be recursion while getting scenarios
             }
         }
     }

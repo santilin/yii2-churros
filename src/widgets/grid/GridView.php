@@ -241,7 +241,6 @@ class GridView extends SimpleGridView
 
 	public function renderSummaryWithTitle()
 	{
-		$count = $this->dataProvider->getCount(); // records in current page
 		$summaryOptions = $this->summaryOptions;
 		$tag = ArrayHelper::remove($summaryOptions, 'tag', 'div');
 		Html::addCssClass($summaryOptions, 'supertitle');
@@ -253,6 +252,7 @@ class GridView extends SimpleGridView
 			'items-acc' => $this->itemLabelAccusative,
 		];
 		$summary = '';
+		$count = $this->dataProvider->getCount(); // records in current page
 		if ($count == 0) {
 			if ($this->emptyText !== false) {
 				$summary = $this->title;
