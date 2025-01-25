@@ -238,6 +238,17 @@ class YADTC extends \DateTime
 	{
 		return $this->format('Y-m-d');
 	}
+
+	public function moveToBeginningOfWeek(): YADTC
+	{
+		return $this->modify('monday this week');
+	}
+
+	public function moveToEndingOfWeek(): YADTC
+	{
+		return $this->modify('sunday this week');
+	}
+
 	public function lastDayOfMonth($month = null, $year = null): int
 	{
 		if( $month == null ) {
