@@ -282,7 +282,7 @@ trait RelationTrait
 			} else if ($records instanceof \yii\db\BaseActiveRecord) {
 				$records = (array)$records;
 			}
-			$justUpdateIds = count($records)== 0 || !($records[0] instanceof \yii\db\BaseActiveRecord);
+			$justUpdateIds = $records === null || count($records) == 0 || !($records[0] instanceof \yii\db\BaseActiveRecord);
 			if( $justUpdateIds ) {
 				$success = $this->updateIds($wasNewRecord, $rel_name, $records);
 			} else {
@@ -301,6 +301,7 @@ trait RelationTrait
 		$success = true;
 		$isManyMany = false;
 		if ($relation->multiple ) { // Has many or many2many
+			$master_link = $relation->link;
 			if ($relation->via != null ) {
 				$relation = $this->getRelation($relation->via[0]);
 			}
@@ -309,22 +310,24 @@ trait RelationTrait
 			$links = array_keys($relation->link);
 			$relPKAttr = $relModel->primarykey();
 			if (count($relPKAttr) > 1) {
+				$other_fk = array_values($master_link)[0];
+				$this_fk = array_keys($relation->link)[0];
 				$isManyMany = true;
-				foreach ($relPKAttr as $attr ) {
-					if (!in_array($attr, $links) ) {
-						$other_fk = $attr;
-					} else {
-						$this_fk = $attr;
-					}
-				}
+				// foreach ($relPKAttr as $attr ) {
+				// 	if (!in_array($attr, $links) ) {
+				// 		$other_fk = $attr;
+				// 	} else {
+				// 		$this_fk = $attr;
+				// 	}
+				// }
 			}
 
 			if (!$wasNewRecord) {
 				// DELETE WITH 'NOT IN' PK MODEL & REL MODEL
 				if ($isManyMany) {
 					$query = [];
-					foreach ($relation->link as $foreign_key => $value ) {
-						$query = [ "AND", [ $foreign_key => $this->$value ] ];
+					foreach ($relation->link as $foreign_key => $fldvalue ) {
+						$query = [ "AND", [ $foreign_key => $this->$fldvalue ] ];
 					}
 					foreach ($records as $pk_values) {
 						$dontDeletePk[$other_fk][] = $pk_values[$other_fk];
@@ -382,13 +385,15 @@ trait RelationTrait
 						continue;
 					}
 				}
-				if( !$must_save ) {
+				if (!$must_save) {
 					continue;
 				}
 				$relModel->setIsNewRecord(true);
 				$relModel->setAttributes($pk_values, false);
-				$relModel->$this_fk = $this->getPrimaryKey();
-				$relModel->$other_fk = $pk_values[$other_fk];
+				foreach ($relation->link as $foreign_key => $fldvalue ) {
+					$relModel->$foreign_key = $this->$fldvalue;
+				}
+				// $relModel->$other_fk = $pk_values[$other_fk];
 				$relSave = $relModel->save();
 				if (!$relSave || !empty($relModel->errors)) {
 					$relModelWords = $relModel->t('churros', "{title}");
