@@ -17,6 +17,9 @@ use yii\console\Controller;
  *
  * @author Santilín <santi@noviolento.es>
  * @since 1.0
+ *
+ * sudo apt install python3 python3-pip
+ * sudo apt install mkdocs-material-extensions
  */
 
 class DocController extends Controller
@@ -28,16 +31,23 @@ class DocController extends Controller
 		'capel' => [
 			'doc_pattern' => '//'.'/@',
 			'find_patterns' => ["*.cpp","*.h","TODO","*.json" ],
-			'find_exclude' => [],
+			'find_exclude' => [ 'mkdocs', 'vendor'],
 			'source_path' => '/home/santilin/devel/capel',
 			'dest_path' => '/home/santilin/devel/capel/doc/docs',
 		],
-		'apps' => [
+		'devel' => [
+			'doc_pattern' => '//'.'/#',
+			'find_patterns' => ["*.php","*.js","*.css","*.tex","*.txt" ],
+			'find_exclude' => [ 'mkdocs', 'vendor'],
+			'dest_path' => 'des'
+
+		],
+		'user' => [
 			'doc_pattern' => '//'.'/@',
 			'find_patterns' => ["*.php","*.js","*.css","*.tex","*.txt" ],
-			'find_exclude' => [],
-			'source_path' => '/home/santilin/devel/yii2base/app',
-			'dest_path' => '/home/santilin/devel/yii2base/app/_doc',
+			'find_exclude' => [ 'mkdocs', 'vendor'],
+			'dest_path' => 'usu'
+
 		]
 	];
 /*
@@ -55,6 +65,7 @@ class DocController extends Controller
 	const KANBOARD_CARD_LINK = '[kb$1](https://intranet.cepaim.org.es/kanboard/?controller=TaskViewController&action=show&task_id=$1)';
 
 	const HEADERS = [
+		'GL' => 'Gestión laboral',
 		'intro' =>    '010.Introducción',
 		'nomenclatura' => '020.Nomenclatura',
 		'acceso' =>   '040.Acceso/Permisos',
@@ -83,38 +94,47 @@ class DocController extends Controller
 	{
 		$this->stdout("Generando documentación de $suite\n", Console::FG_GREEN, Console::BOLD);
 		$params = $this->suite_params[$suite];
-  		$code_comments = $this->getCodeComments($params['source_path'],
-			$params['find_patterns'], $params['doc_pattern']);
+		$source_dir = $params['source_path'] ?? Yii::getAlias('@app');
+  		$code_comments = $this->getCodeComments($source_dir, $params['find_patterns'], $params['doc_pattern']);
 		if ($this->verbose) {
 			$this->stdout("Encontradas " . count($code_comments) . " líneas de comentarios\n");
 		}
-		$this->genDocFiles($code_comments, $params['doc_pattern'], $params['dest_path']);
- 		exec( "cd {$params['dest_path']}/..; mkdocs build");
+		$dest_dir = Yii::getAlias('@app/mkdocs/' . ($params['dest_path'] ?? '') . '/docs');
+		if (!is_dir($dest_dir)) {
+			if (!mkdir($dest_dir, 0755, true)) {
+				die("Failed to create destination directory: $dest_dir");
+			}
+		}
+		$this->genDocFiles($code_comments, $params['doc_pattern'], $dest_dir);
+ 		exec( "cd $dest_dir/..; mkdocs build");
 	}
 
 	private function genDocFiles(array $code_comments, string $doc_pattern, string $dest_path)
 	{
-		$pat = "\.\/([^:]*):([0-9^:]+):\s*$doc_pattern\s*(.*?):([0-9:\-\s]+)?(.*)$";
+		// The pattern previous to $doc_pattern is the file spec
+		$pat = "\.\/([^:]*):([0-9^:]+):\s*$doc_pattern(.*?)((:[0-9]+)|:[0-9\-])?\s+(.+)$";
 		$comments = [];
-		foreach( $code_comments as $line ) {
+		foreach ($code_comments as $line) {
 			$m = [];
  			if( preg_match("=$pat=", $line, $m) ) {
 				$file_parts = explode('.', $m[3]);
-				$file = array_shift($file_parts);
+				$file = mb_strtoupper(array_shift($file_parts));
 				if (empty($file_parts)) {
-					$header = $this->sortHeader('intro');
+					$header = str_replace('_', ' ', $this->sortHeader('intro'));
 				} else {
-					$header = $this->sortHeader(implode('.',$file_parts));
+					$header = str_replace('_', ' ', $this->sortHeader(implode('.',$file_parts)));
 				}
-				if( preg_match('/^202[0-9][0-9][0-9][0-9][0-9]$/', $m[4], $orderm) ) {
+				if (!empty($m[4])) {
+					$order = str_pad(trim($m[4]), 3, '0', STR_PAD_LEFT) . ':';
+				} else if( preg_match('/^202[0-9][0-9][0-9][0-9][0-9]$/', $m[5], $orderm) ) {
 					// Changelog
 					$order = '**' . substr($order,7,2) . '/' . substr($order,5,2) . '/' . substr($order,1,4) . '** ';
-				} else if( preg_match('/^([0-9]{1,4})-([0-9][0-9])-([0-9][0-9]).*$/', $m[4], $orderm ) ) {
+				} else if( preg_match('/^([0-9]{1,4})-([0-9][0-9])-([0-9][0-9]).*$/', $m[5], $orderm ) ) {
 					$order = $orderm[3] . '/' . $orderm[2] . '/' . $orderm[1] . ' ';
 				} else {
-					$order = str_pad(trim($m[4]), 3, '0', STR_PAD_LEFT);
+					$order = '';
 				}
-				$text = ":$order:" . trim($m[5]);
+				$text = $order . trim($m[6]);
 				$file_line = "[{$m[1]}:{$m[2]}]";
 				if( !isset($comments[$file]) ) {
 					$comments[$file] = [];
@@ -176,7 +196,7 @@ class DocController extends Controller
 			$this->stdout("find . $fnames -print0 | xargs -0 grep -on \"$doc_pattern.*$\"\n");
 		}
 		// find . para que todos los ficheros commiencen por ./
-		exec("cd $source_path; find . $fnames -print0 | xargs -0 grep -on \"$doc_pattern.*$\"", $comments, $result);
+		exec("cd $source_path; find . $fnames -type f -exec grep -on \"$doc_pattern.*$\" {} +", $comments, $result);
 		return $comments;
 	}
 
@@ -184,10 +204,8 @@ class DocController extends Controller
 	{
 		if( preg_match('/^([0-9]+)([^ ].*)$/', $header, $m) ) {
 			return str_pad($m[1], 3, '0', STR_PAD_LEFT) . '.'. $m[2];
-		} else if (isset(self::HEADERS[$header])) {
-			return self::HEADERS[$header];
 		} else {
-			return '500.' . $header;
+			return self::HEADERS[$header]??'500.' . $header;
 		}
 	}
 
