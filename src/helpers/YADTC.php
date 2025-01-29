@@ -96,7 +96,7 @@ class YADTC extends \DateTime
 	 * @param string|mixed $date
 	 * @param bool $onlymysql Admit only msyql format
 	 */
-	static public function fromSQL($date, $onlymysql = false): YADTC
+	static public function fromSQL($date, $onlymysql = false): ?YADTC
 	{
 		if( $date == null ) {
 			return null;
