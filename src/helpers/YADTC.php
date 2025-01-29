@@ -104,6 +104,9 @@ class YADTC extends \DateTime
 		$ret = self::createFromFormat('Y-m-d H:i:s', $date);
 		if( !$ret ) {
 			$ret = self::createFromFormat('!Y-m-d', $date);
+			if (!$ret) {
+				$ret = self::createFromFormat('Y-m-d H:i:s.v', $date);
+			}
 		}
 		if ($ret!==false) {
 			return $ret;
@@ -324,7 +327,7 @@ class YADTC extends \DateTime
 		return $this->getTimestamp() >= $d1->getTimeStamp()
 			&& $this->getTimestamp() <= $d2->getTimeStamp();
 	}
-	public function diff($other, $absolute = NULL): \DateInterval
+	public function diff($other, $absolute = false): \DateInterval
 	{
         if( $other instanceof YADTC ) {
             $t = $other->getTimeStamp();
