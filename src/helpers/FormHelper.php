@@ -575,7 +575,8 @@ ajax;
 		}
 	}
 
-	static public function joinMany2ManyModels(string $glue, array $models, string $record_format = 'long', bool $make_links = false, $context = null): string
+	static public function joinMany2ManyModels(array $models, string $record_format = 'long',
+		bool $make_links = false, string $tag = 'ul', array $tag_options = [], $context = null): string
 	{
 		if( $models == null || count($models)==0 ) {
 			return "";
@@ -598,11 +599,27 @@ ajax;
 				}
 			}
 		}
-		return join($glue, $attrs);
+		switch ($tag) {
+			case 'ul':
+				return Html::tag($tag, '<li>' . join('</li><li>', $attrs) . '</li>', $tag_options);
+			case 'span':
+				$ret = '';
+				foreach ($attrs as $attr) {
+					$ret .= Html::tag($tag, $attr, $tag_options);
+				}
+				return $ret;
+			case 'br':
+				return implode('<br/>', $attrs);
+			case ', ':
+			case ',':
+				return implode($tag, $attrs);
+			default:
+				return Html::tag($tag, join("</$tag><$tag>", $attrs), $tag_options);
+		}
 	}
 
-	static public function joinHasManyModels($parent, array $models,
-		string $record_format = 'long', string $tag = 'ul', array $tag_options = [], $context = null): string
+	static public function joinHasManyModels($parent, array $models, string $record_format = 'long',
+			string $tag = 'ul', array $tag_options = [], $context = null): string
 	{
 		if( $models === null || count($models)==0 ) {
 			return "";
@@ -620,6 +637,13 @@ ajax;
 		switch ($tag) {
 			case 'ul':
 				return Html::tag($tag, '<li>' . join('</li><li>', $attrs) . '</li>', $tag_options);
+			case 'span':
+				return Html::tag($tag, implode('', $attrs), $tag_options);
+			case 'br':
+				return implode('<br/>', $attrs);
+			case ', ':
+			case ',':
+				return implode($tag, $attrs);
 			case 'raw':
 				return $attrs;
 			default:
