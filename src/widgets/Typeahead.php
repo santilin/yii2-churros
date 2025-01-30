@@ -57,32 +57,35 @@ function(item) {
 }
 js;
 		}
-
+		$remote_url = Url::to($this->remoteUrl);
+		if (!str_contains($remote_url, '?')) {
+			$remote_url .= '?';
+		} else {
+			$remote_url .= '&';
+		}
 		$this->dataset = [[
 			'limit' => $this->limit,
 			'remote' => [
-				'url' => Url::to($this->remoteUrl) . '?'
-				. $this->formatParam . '=&'
-				. $this->searchParam . '=&'
-				. $this->pageParam . '=&' . $this->perPageParam . '=',
+				'url' => $remote_url
+					. $this->formatParam . '=&'
+					. $this->searchParam . '=&'
+					. $this->pageParam . '=&' . $this->perPageParam . '=',
 				'replace' => new \yii\web\JsExpression(<<<jsexpr
 function(url, query) {
-	const urlParams = new URLSearchParams(url);
-	let format = urlParams.get('{$this->formatParam}');
-	let page = urlParams.get('{$this->pageParam}');
-	let perpage = urlParams.get('{$this->perPageParam}');
-	if (!format) {
-		format = '{$this->format}';
-	}
-	if (!page) {
-		page = '1';
-	}
-	if (!perpage) {
-		perpage = '{$this->limit}';
-	}
-	return url.split("?")[0] + "?{$this->formatParam}=" + format
-		+ "&{$this->searchParam}=" + query
-		+ "&{$this->pageParam}=" + page + "&{$this->perPageParam}=" + perpage;
+    const params = new URLSearchParams(url.split('?')[1] || '');
+    params.set('{$this->searchParam}', query);
+    params.set('{$this->pageParam}', params.get('{$this->pageParam}') || '1');
+    params.set('{$this->perPageParam}', params.get('{$this->perPageParam}') || '{$this->limit}');
+	params.set('{$this->formatParam}', params.get('{$this->formatParam}') || 'select');
+	// Remove empty parameters
+    for (const [key, value] of params.entries()) {
+        if (value === '') {
+            params.delete(key);
+        }
+    }
+    const newUrl = url.split('?')[0] + '?' + params.toString();
+    console.log(newUrl);
+    return newUrl;
 }
 jsexpr
 				),

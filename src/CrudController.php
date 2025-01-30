@@ -541,20 +541,23 @@ class CrudController extends \yii\web\Controller
 	}
 
 	// Ajax
-	public function actionAutocomplete(string $search, string $format, array $fields = [], array|string $scopes = '', string $id_field = null, string $model_format = 'long')
+	public function actionAutocomplete(string $search, string $format, array|string $fields = [], array|string $scopes = '',
+									   string $id_field = null, string $model_format = 'long')
 	{
 		\Yii::$app->response->format = \yii\web\Response::FORMAT_JSON;
 		$ret = [];
 		$searchModel = $this->createSearchModel();
 		if (empty($fields)) {
 			$fields = $searchModel->findCodeAndDescFields();
+		} else if (is_string($fields)) {
+			$fields = explode(',',$fields);
 		}
 		$fld_values = [];
 		foreach ($fields as $field) {
 			$fld_values[$field] = $search;
 		}
-		foreach ((array)$scopes as $scope) {
-			$indexParams['_search_scopes'] = explode(',', $scope);
+		if (!empty($scopes)) {
+			$indexParams['_search_scopes'] = $scopes;
 		}
 		$dataProvider = $searchModel->search([$searchModel->formName() => $fld_values, 'or' => true ]);
 		if ($format == 'select2' || $format == 'select') {
