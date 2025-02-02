@@ -619,6 +619,7 @@ class CrudController extends \yii\web\Controller
 
     public function genBaseBreadCrumbs(string $action_id, $model, array $view_params = []): array
 	{
+		$bcs_style = $this->breadCrumbsStyle ?? ['standard'];
 		$scenario = $model->scenario?:$action_id;
 		$permissions = $view_params['permissions']??[];
 		$breadcrumbs = [];

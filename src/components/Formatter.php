@@ -3,7 +3,7 @@
 namespace santilin\churros\components;
 
 use Yii;
-use yii\helpers\{Html,Url};
+use yii\helpers\{ArrayHelper,Html,Url};
 use santilin\churros\components\Taxonomy;
 
 /* https://www.yiiframework.com/doc/api/2.0/yii-i18n-formatter */
@@ -91,7 +91,7 @@ class Formatter extends \yii\i18n\Formatter
 		return $ret;
 	}
 
-	public function asTokenized($value, string $sep = ','): string
+	public function asTokenized($value, string $sep = ', '): string
 	{
 		if (empty($value)) {
 			return '';
@@ -111,7 +111,14 @@ class Formatter extends \yii\i18n\Formatter
 				return $value;
 			}
 		} else if (is_array($value)) {
-			return implode($sep, $value);
+			if (!ArrayHelper::isIndexed($value, true)) {
+				foreach ($value as $k => $v) {
+					$ret[] = "$k:$v";
+				}
+				return implode($sep, $ret);
+			} else {
+				return implode($sep, $value);
+			}
 		}
 	}
 	/**
