@@ -71,19 +71,27 @@ class DataColumn extends \yii\grid\DataColumn
      */
     protected function renderDataCellContent($model, $key, $index)
     {
-try {
-        if ($this->content === null) {
-            return $this->grid->formatter->format($this->getDataCellValue($model, $key, $index), $this->format);
-        }
+        if (YII_ENV_DEV) {
+            try {
+                if ($this->content === null) {
+                    return $this->grid->formatter->format($this->getDataCellValue($model, $key, $index), $this->format);
+                }
+                return parent::renderDataCellContent($model, $key, $index);
+            } catch (\yii\base\ErrorException $e) {
+                throw $e;
+                $ce = get_class($e);
+                \Yii::warning($e->getMessage() . " in column {$this->attribute}");
+            } catch (\yii\base\InvalidArgumentException $e) {
+                \Yii::warning($e->getMessage() . " in column {$this->attribute}");
+            }
+            return '###Error###';
+        } else {
+            if ($this->content === null) {
+                return $this->grid->formatter->format($this->getDataCellValue($model, $key, $index), $this->format);
+            }
 
-        return parent::renderDataCellContent($model, $key, $index);
-} catch (\yii\base\ErrorException $e) {
-    throw new \yii\base\ErrorException($e->getMessage() . ":{$this->attribute}=" . json_encode($model->{$this->attribute}),
-        $e->getCode(), $e->getSeverity(), $e->getFile(), $e->getLine(), $e->getPrevious());
-} catch (\yii\base\InvalidArgumentException $e) {
-    throw new \yii\base\ErrorException($e->getMessage() . ":{$this->attribute}=" . json_encode($model->{$this->attribute}),
-    $e->getCode(), 0, $e->getFile(), $e->getLine(), $e->getPrevious());
-}
+            return parent::renderDataCellContent($model, $key, $index);
+        }
 
     }
 

@@ -38,20 +38,16 @@ class WidgetLayer
 					'content' => array_keys($this->widgets),
 				]
 			];
-		}/* else {
-			if (empty($this->widgetsLayout['type'])) {
-				$this->widgetsLayout['type'] = $type;
-			} else if (empty($this->widgetsLayout['style'])) {
-				$this->widgetsLayout['style'] = $style;
-			} else if (empty($this->widgetsLayout['layout'])) {
-				$this->widgetsLayout['layout'] = $layout;
-			}
-		}*/
+		}
 		if (YII_ENV_DEV) {
 			global $widgets_used;
 			$widgets_used = [];
 		}
-		$ret = $this->layoutWidgets($this->widgetsLayout, ['size' => $size, 'style' => $style]);
+		$ret = $this->layoutWidgets($this->widgetsLayout, [
+			'size' => 'large',
+			'style' => 'grid',
+			'layout' => '1col'
+		]);
 		if (YII_ENV_DEV) {
 			$not_used = array_diff(array_keys($this->widgets), $widgets_used);
 			if (!empty($not_used)) {
@@ -66,267 +62,304 @@ class WidgetLayer
 	/**
 	 * Recursivelly lays out the widgets
 	 */
-	protected function layoutWidgets(array $layout_rows, array $parent_options = []): string
+	protected function layoutWidgets(array $layout_row, array $parent_options = [], int|string $row_key = null): string
 	{
-		$parent_size = $parent_options['size']??'large';
-		$parent_style = $parent_options['style']??'grid';
-		$only_widget_names = true;
-		foreach($layout_rows as $lrk => $layout_row ) {
-			if (empty($layout_row)) {
-				unset($layout_rows[$lrk]);
-				continue;
-			}
-			if (is_array($layout_row)) {
-				$only_widget_names = false;
-				break;
-			}
-		}
-		if ($only_widget_names) {
-			$layout_rows = [
-				[
-					'type' => 'widgets',
-					'content' => $layout_rows,
-					'size' => $parent_size,
-					'layout' => $parent_options['layout']??'1col',
-					'style' => $parent_options['style']??'rows',
-				] ];
-		}
-		$ret = '';
-		foreach ($layout_rows as $lrk => $layout_row) {
-			$layout_of_row = $layout_row['layout']??'1col';
-			if ($layout_of_row == 'inline') {
-				$cols = 10000;
+		if (!isset($layout_row['content'])) {
+			if (count($layout_row) == 1) {
+				$ak = array_keys($layout_row);
+				return $this->layoutWidgets(reset($layout_row), $parent_options, reset($ak));
 			} else {
-				$cols = intval($layout_of_row); // ?:max(count($layout_row['content']), 4);
+				$ret = [];
+				foreach ($layout_row as $klr => $lr) {
+					$ret[] = $this->layoutWidgets($lr, [
+						'type' => 'container',
+						'style' => 'rows',
+						'layout' => $parent_options['layout']??'1col',
+						'size' => $parent_options['size']??'large',
+					], $klr);
+				}
+				return implode('', $ret);
 			}
-			$type_of_row = $layout_row['type']??'widgets';
-			switch ($type_of_row) {
-			case 'container':
-                switch ($layout_row['style']??'rows') {
-                    case 'tabs':
-						$ret .= '<div class=row><div class="' . $this->columnClasses(1) . '">';
-                        $tab_items = [];
-						$has_active = false;
-                        foreach ($layout_row['content'] as $kc => $content) {
-							if ($content === null) {
-								continue;
-							}
-                            if (!is_array($content)) {
-                                $content = [
-                                    'label' => $kc,
-                                    'content' => $content
-                                ];
-                            }
-                            if ($content['active']??false == true) {
-								$has_active = true;
-							}
-                            $tab_items[] = [
-                                'label' => $content['title']??$kc,
-								'options' => $content['htmlOptions']??[],
-								'active' => $content['active']??false,
-								'headerOptions' => $content['headerOptions']??[],
-								'content' => $this->layoutWidgets($content['content'], [
-									'layout' => $content['layout']??$layout_of_row,
-									'style' => $content['style']??$parent_style,
-									'type' => $type_of_row ]),
-                            ];
-                        }
-                        if (!$has_active && count($tab_items)) {
-							$tab_items[0]['active'] = true;
+		}
+		$layout_row_type = $layout_row['type']??'widgets';
+		if ($layout_row_type == 'container') {
+			if (empty($layout_row['style'])) {
+				$layout_row['style'] = 'rows';
+			}
+		} else {
+			if (empty($layout_row['style'])) {
+				$layout_row['style'] = 'grid';
+			}
+		}
+		if (empty($layout_row['size'])) {
+			$layout_row['size'] = $parent_options['size']??'large';
+		}
+		if (empty($layout_row['layout'])) {
+			$layout_row['layout'] = $parent_options['layout']??'1col';
+		}
+		if ($layout_row['layout'] == 'inline') {
+			$cols = 10000;
+		} else {
+			$cols = intval($layout_row['layout']); // ?:max(count($layout_row['content']), 4);
+		}
+		// if ($layout_row_type != 'html' && $layout_row_type != 'container') {
+		// 	$only_widget_names = true;
+		// 	foreach($layout_row as $lrk => $layout_row) {
+		// 		if (empty($layout_row)) {
+		// 			unset($layout_row[$lrk]);
+		// 			continue;
+		// 		}
+		// 		if (is_array($layout_row)) {
+		// 			$only_widget_names = false;
+		// 			break;
+		// 		}
+		// 	}
+		// 	if ($only_widget_names) {
+		// 		$layout_row = [
+		// 			[
+		// 				'type' => 'widgets',
+		// 				'content' => $layout_rows,
+		// 				'size' => $layout_row['size'],
+		// 				'layout' => $parent_options['layout']??'1col',
+		// 				'style' => $parent_options['style']??'rows',
+		// 			] ];
+		// 	}
+		// } else if ($layout_row_type == 'html') {
+		// 	$layout_rows = [
+		// 		[
+		// 			'type' => 'html',
+		// 			'content' => $layout_rows,
+		// 		]
+		// 	];
+		// }
+		$ret = '';
+		switch ($layout_row_type) {
+		case 'container':
+			switch ($layout_row['style']) {
+				case 'tabs':
+					$ret .= '<div class=row><div class="' . $this->columnClasses(1) . '">';
+					$tab_items = [];
+					$has_active = false;
+					foreach ($layout_row['content'] as $kc => $content) {
+						if ($content === null) {
+							continue;
 						}
-                        $ret .= Tabs::widget(['items' => $tab_items, 'tabContentOptions' => [ 'class' => 'mt-2'	] ]);
-						$ret .= '</div></div>';
-                        break;
-                    case 'rows':
-						$ret .= "<div class=\"row $cols-cols-layout\">";
-                        foreach ($layout_row['content'] as $kc => $content) {
-                            $ret .= '<div class="' . $this->columnClasses($cols) . '">';
-                            $ret .= $this->layoutWidgets([$content],
-                                ['layout' => $layout_of_row, 'style' => $content['style']??$parent_style, 'type' => $type_of_row ]);
-                            $ret .= "</div>\n";
-                        }
-                        $ret .= '</div>';
-                        break;
-                    case 'cols':
-						$cols = min(count($layout_row['content']), 4);
-						$ret .= "<div class=\"row $cols-cols-layout\">";
-                        foreach ($layout_row['content'] as $kc => $content) {
-                            $ret .= '<div class="' . $this->columnClasses($cols) . '">';
-                            $ret .= $this->layoutWidgets([$content],
-                                ['layout' => "{$cols}cols", 'style' => $content['style']??$parent_style, 'type' => $type_of_row ]);
-                            $ret .= "</div>\n";
-                        }
-                        $ret .= '</div>';
-                        break;
-                }
-				$ret .= "<!--container_[$lrk]-->";
-				break;
-			case 'widgets':
-			case 'fields':
-				$indexf = 0;
-                $only_widget_names = true;
-                foreach($layout_row as $lrk => $rl) {
-                    if (is_array($rl)) {
-                        $only_widget_names = false;
-                        break;
-                    }
-                }
-                if ($only_widget_names) {
-                    $layout_row = ['type' => $type_of_row, 'content' => $layout_row];
-                }
-                if (!isset($layout_row['style'])) {
-					$layout_row['style'] = $parent_style;
-				}
-				$subtitle = $layout_row['subtitle']??null;
-				$row_html = '';
-				if ($subtitle) {
-					$row_html .= "<div class=row><div class=col12><div class=\"subtitle mb-3 alert alert-warning\">$subtitle</div></div></div>";
-				}
-				$row_html .= '<div class=row>';
-                foreach ($layout_row['content'] as $widget_name ) {
-					$fs = '';
-					$open_divs = 0;
-					if ($widget = $this->widgets[$widget_name]??false) {
-						if (YII_ENV_DEV) {
-							global $widgets_used;
-							$widgets_used[] = $widget_name;
+						if (!is_array($content)) {
+							$content = [
+								'label' => $kc,
+								'content' => $content
+							];
 						}
-						if ($widget instanceof \yii\bootstrap5\ActiveField ) {
-							// bs5 ActiveFields add a row container over the whole field
-							if ($widget->horizontalCssClasses['layout']??false) {
-								$widget_layout = ArrayHelper::remove($widget->horizontalCssClasses, 'layout');
-							} else {
-								$widget_layout = $widget->layout??'large';
+						if ($content['active']??false == true) {
+							$has_active = true;
+						}
+						$tab_items[] = [
+							'label' => ArrayHelper::remove($content, 'title', $kc),
+							'options' => ArrayHelper::remove($content, 'htmlOptions', []),
+							'active' => ArrayHelper::remove($content, 'active', false),
+							'headerOptions' => ArrayHelper::remove($content, 'headerOptions', []),
+							'content' => $this->layoutWidgets($content, [
+								'layout' => $layout_row['layout']??$layout_row['layout'],
+								'style' => $layout_row['style']??$layout_row['style'],
+								'type' => $layout_row['type']??$type_of_row
+							], $kc),
+						];
+					}
+					if (!$has_active && count($tab_items)) {
+						$tab_items[0]['active'] = true;
+					}
+					$ret .= Tabs::widget(['items' => $tab_items, 'tabContentOptions' => [ 'class' => 'mt-2'	] ]);
+					$ret .= '</div></div>';
+					break;
+				case 'rows':
+					$ret .= "<div class=\"row $cols-cols-layout\">";
+					foreach ($layout_row['content'] as $kc => $content) {
+						$ret .= '<div class="' . $this->columnClasses($cols) . '">';
+						$ret .= $this->layoutWidgets([$content],
+							['layout' => $layout_row['layout'], 'style' => $content['style']??$layout_row['style'], 'type' => $type_of_row ], $kc);
+						$ret .= "</div>\n";
+					}
+					$ret .= '</div>';
+					break;
+				case 'cols':
+					$cols = min(count($layout_row['content']), 4);
+					$ret .= "<div class=\"row $cols-cols-layout\">";
+					foreach ($layout_row['content'] as $kc => $content) {
+						$ret .= '<div class="' . $this->columnClasses($cols) . '">';
+						$ret .= $this->layoutWidgets([$content],
+							['layout' => "{$cols}cols", 'style' => $content['style']??$layout_row['style'], 'type' => $type_of_row ], $kc);
+						$ret .= "</div>\n";
+					}
+					$ret .= '</div>';
+					break;
+			}
+			$ret .= "<!--container_[$row_key]-->";
+			break;
+		case 'widgets':
+		case 'fields':
+			$indexf = 0;
+			$only_widget_names = true;
+			foreach($layout_row as $lrk => $rl) {
+				if (is_array($rl)) {
+					$only_widget_names = false;
+					break;
+				}
+			}
+			if ($only_widget_names) {
+				$layout_row = ['type' => $type_of_row, 'content' => $layout_row, 'style' => 'grid'];
+			}
+			$subtitle = $layout_row['subtitle']??null;
+			$row_html = '';
+			if ($subtitle) {
+				$row_html .= "<div class=row><div class=col-12><div class=\"subtitle mb-3 alert alert-warning\">$subtitle</div></div></div>";
+			}
+			$row_html .= '<div class=row>';
+			foreach ($layout_row['content'] as $widget_name ) {
+				$fs = '';
+				$open_divs = 0;
+				if ($widget = $this->widgets[$widget_name]??false) {
+					if (YII_ENV_DEV) {
+						global $widgets_used;
+						$widgets_used[] = $widget_name;
+					}
+					if ($widget instanceof \yii\bootstrap5\ActiveField ) {
+						// bs5 ActiveFields add a row container over the whole field
+						if ($widget->horizontalCssClasses['layout']??false) {
+							$widget_layout = ArrayHelper::remove($widget->horizontalCssClasses, 'layout');
+						} else {
+							$widget_layout = $widget->layout??'large';
+						}
+						if ($layout_row['size'] == 'small') {
+							switch ($widget_layout) {
+								case 'short':
+									$widget_layout = 'medium';
+									break;
+								case 'medium':
+									$widget_layout = 'large';
+									break;
 							}
-							if ($parent_size == 'small') {
-								switch ($widget_layout) {
-									case 'short':
-										$widget_layout = 'medium';
-										break;
-									case 'medium':
-										$widget_layout = 'large';
-										break;
-								}
-							} else if ($parent_size == 'medium') {
-								switch ($widget_layout) {
-									case 'short':
-										$widget_layout = 'medium';
-										break;
-									case 'medium':
-										$widget_layout = 'large';
-										break;
-								}
+						} else if ($layout_row['size'] == 'medium') {
+							switch ($widget_layout) {
+								case 'short':
+									$widget_layout = 'medium';
+									break;
+								case 'medium':
+									$widget_layout = 'large';
+									break;
 							}
-							Html::addCssClass($widget->options, "layout-$layout_of_row");
+						}
+						Html::addCssClass($widget->options, "layout-{$layout_row['layout']}");
+						$col_classes = $this->columnClasses($widget_layout == 'full' ? 1 : $cols);
+						$fs .=  "<div class=\"$col_classes\">";
+						$open_divs++;
+						if ($widget_layout != 'full') {
+							Html::addCssClass($widget->options, 'w-100');
+						}
+						Html::addCssClass($widget->options, 'row');
+						$fs .= $this->layoutActiveField($widget_name, $widget, $layout_row, $widget_layout, $layout_row['layout'], $indexf++);
+					} else if (is_array($widget)) { // Recordview attribute
+						$widget_layout = $widget['layout']??'large';
+						/// @todo refactor
+						if ($layout_row['size'] == 'small') {
+							switch ($widget_layout) {
+								case 'short':
+									$widget_layout = 'medium';
+									break;
+								case 'medium':
+									$widget_layout = 'large';
+									break;
+							}
+						} else if ($layout_row['size'] == 'medium') {
+							switch ($widget_layout) {
+								case 'short':
+									$widget_layout = 'medium';
+									break;
+								case 'medium':
+									$widget_layout = 'large';
+									break;
+							}
+						}
+						if ($layout_row['style'] == 'grid-cards' || $layout_row['style'] == 'grid') {
 							$col_classes = $this->columnClasses($widget_layout == 'full' ? 1 : $cols);
-							$fs .=  "<div class=\"$col_classes\">";
-							$open_divs++;
+							if ($col_classes) {
+								$fs .=  "<div class=\"$col_classes\">";
+								$open_divs++;
+							}
 							if ($widget_layout != 'full') {
-								Html::addCssClass($widget->options, 'w-100');
-							}
-							Html::addCssClass($widget->options, 'row');
-							$fs .= $this->layoutActiveField($widget_name, $widget, $layout_row, $widget_layout, $layout_of_row, $indexf++);
-						} else if (is_array($widget)) { // Recordview attribute
-							$widget_layout = $widget['layout']??'large';
-							/// @todo refactor
-							if ($parent_size == 'small') {
-								switch ($widget_layout) {
-									case 'short':
-										$widget_layout = 'medium';
-										break;
-									case 'medium':
-										$widget_layout = 'large';
-										break;
-								}
-							} else if ($parent_size == 'medium') {
-								switch ($widget_layout) {
-									case 'short':
-										$widget_layout = 'medium';
-										break;
-									case 'medium':
-										$widget_layout = 'large';
-										break;
-								}
-							}
-							if ($parent_style == 'grid-cards' || $parent_style == 'grid') {
-								$col_classes = $this->columnClasses($widget_layout == 'full' ? 1 : $cols);
-								if ($col_classes) {
-									$fs .=  "<div class=\"$col_classes\">";
+								if ($layout_row['style'] != 'grid-cards') {
 									$open_divs++;
+									$fs .= "<div class=\"row w-100\">";
 								}
-								if ($widget_layout != 'full') {
-									if ($parent_style != 'grid-cards') {
-										$open_divs++;
-										$fs .= "<div class=\"row w-100\">";
-									}
 // 								} else {
 // 									$widget['label'] = false;
-								}
-								$fs .= $this->layoutOneField($widget, $layout_row, $widget_layout, $indexf++);
-							} else {
-								$fs .= "<div class=\"row w-100\">";
-								$open_divs++;
-								$fs .= $this->layoutOneField($widget, $layout_row, $widget_layout, $indexf++);
 							}
-						} else if (is_string($widget)) {
-							throw new \Exception($widget . ': invalid widget');
+							$fs .= $this->layoutOneField($widget, $layout_row, $widget_layout, $indexf++);
 						} else {
-							throw new \Exception(get_class($widget) . ': invalid widget class');
+							$fs .= "<div class=\"row w-100\">";
+							$open_divs++;
+							$fs .= $this->layoutOneField($widget, $layout_row, $widget_layout, $indexf++);
 						}
-						for ( ; $open_divs>0; $open_divs--) {
-							$fs .= '</div>';
-						}
-						$row_html .= $fs;
+					} else if (is_string($widget)) {
+						throw new \Exception($widget . ': invalid widget');
 					} else {
-						if (YII_ENV_DEV) {
-							Yii::error("$widget_name: widget in fieldsLayout not found in form field definitions");
-						}
+						throw new \Exception(get_class($widget) . ': invalid widget class');
 					}
-
-				}
-				$row_html .= '</div><!-- main row-->';
-				if (($title = $layout_row['title']??false) != false) {
-					$legend = Html::tag('legend', $title, $layout_row['title_options']??[]);
-					$ret .= Html::tag('fieldset', "$legend<hr/>$row_html", $layout_row['htmlOptions']??[]);
+					for ( ; $open_divs>0; $open_divs--) {
+						$fs .= '</div>';
+					}
+					$row_html .= $fs;
 				} else {
-					$ret .= $row_html;
-				}
-				break;
-
-			case 'buttons':
-				$ret .= '<div class="mt-2 clearfix row">';
-				if ($layout_of_row != 'inline') {
-					$classes = $this->widget_layout_horiz_config[$layout_of_row]['large']['horizontalCssClasses']['offset'];
-					$ret .= '<div class="' . implode(' ', (array)$classes) . '">';
-				} else {
-					$ret .= "<div>";
-				}
-				$ret .= $this->layoutButtons($layout_row['content'], $layout_of_row, $layout_row['options']??[]);
-				$ret .= '</div><!--buttons -->' .  "\n";
-				$ret .= '</div><!--row-->';
-				break;
-			case 'subtitle':
-				$ret .= $this->layoutContent(null, $layout_row['title'], $layout_row['options']??[]);
-				break;
-			case 'html':
-				$label = ArrayHelper::remove($layout_row, 'label', null);
-				if ($parent_size == '3cols') {
-					$layout_of_row = '1col';
-				}
-				$classes = $this->widget_layout_horiz_config[$layout_of_row]['large']['horizontalCssClasses'];
-				if ($label) {
-					$labelOptions = [ 'class' => implode(' ', (array)$classes['label'])];
 					if (YII_ENV_DEV) {
-						$labelOptions['class'] .= " {$layout_of_row}xlarge";
+						Yii::error("$widget_name: widget in fieldsLayout not found in form field definitions");
 					}
-					$ret .= Html::tag('label', $label, $labelOptions );
 				}
-				if (YII_ENV_DEV) {
-					$classes['wrapper'][] = "{$layout_of_row}xlarge";
-				}
-				$ret .= Html::tag('div', $layout_row['content'], $classes['wrapper']);
-				break;
+
 			}
+			$row_html .= '</div><!-- main row-->';
+			if (($title = $layout_row['title']??false) != false) {
+				$legend = Html::tag('legend', $title, $layout_row['title_options']??[]);
+				$ret .= Html::tag('fieldset', "$legend<hr/>$row_html", $layout_row['htmlOptions']??[]);
+			} else {
+				$ret .= $row_html;
+			}
+			break;
+
+		case 'buttons':
+			$ret .= '<div class="mt-2 clearfix row">';
+			if ($layout_row['layout'] != 'inline') {
+				$classes = $this->widget_layout_horiz_config[$layout_row['layout']]['large']['horizontalCssClasses']['offset'];
+				$ret .= '<div class="' . implode(' ', (array)$classes) . '">';
+			} else {
+				$ret .= "<div>";
+			}
+			$ret .= $this->layoutButtons($layout_row['content'], $layout_row['layout'], $layout_row['options']??[]);
+			$ret .= '</div><!--buttons -->' .  "\n";
+			$ret .= '</div><!--row-->';
+			break;
+		case 'subtitle':
+			$ret .= $this->layoutContent(null, $layout_row['title'], $layout_row['options']??[]);
+			break;
+		case 'html':
+			$label = ArrayHelper::remove($layout_row, 'label', null);
+			if ($layout_row['layout'] == '3cols') {
+				$layout_row['layout'] = '1col';
+			}
+			$classes = $this->widget_layout_horiz_config[$layout_row['layout']]['large']['horizontalCssClasses'];
+			$ret .= '<div class=row>';
+			if ($label) {
+				$labelOptions = [ 'class' => implode(' ', (array)$classes['label'])];
+				if (YII_ENV_DEV) {
+					$labelOptions['class'] .= " {$layout_row['layout']}xlarge";
+				}
+				$ret .= Html::tag('label', $label, $labelOptions );
+			}
+			if (YII_ENV_DEV) {
+				$classes['wrapper'][] = "{$layout_row['layout']}xlarge";
+			}
+			$ret .= Html::tag('div', implode('', $layout_row['content']),
+							  ['class' => $classes['wrapper']]);
+			$ret .= '</div><!--html row-->';
+			break;
 		}
 		return $ret;
 	}
