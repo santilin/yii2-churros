@@ -340,25 +340,36 @@ class WidgetLayer
 			$ret .= $this->layoutContent(null, $layout_row['title'], $layout_row['options']??[]);
 			break;
 		case 'html':
+		case 'html_rows':
 			$label = ArrayHelper::remove($layout_row, 'label', null);
 			if ($layout_row['layout'] == '3cols') {
 				$layout_row['layout'] = '1col';
 			}
 			$classes = $this->widget_layout_horiz_config[$layout_row['layout']]['large']['horizontalCssClasses'];
-			$ret .= '<div class=row>';
-			if ($label) {
-				$labelOptions = [ 'class' => implode(' ', (array)$classes['label'])];
-				if (YII_ENV_DEV) {
-					$labelOptions['class'] .= " {$layout_row['layout']}xlarge";
-				}
-				$ret .= Html::tag('label', $label, $labelOptions );
-			}
+			// if ($label) {
+			// 	$labelOptions = [ 'class' => implode(' ', (array)$classes['label'])];
+			// 	if (YII_ENV_DEV) {
+			// 		$labelOptions['class'] .= " {$layout_row['layout']}xlarge";
+			// 	}
+			// 	$ret .= Html::tag('label', $label, $labelOptions );
+			// }
 			if (YII_ENV_DEV) {
 				$classes['wrapper'][] = "{$layout_row['layout']}xlarge";
 			}
-			$ret .= Html::tag('div', implode('', $layout_row['content']),
+			if ($layout_row_type == 'html_rows') {
+				foreach ($layout_row['content'] as $html_key => $html_content) {
+					$ret .= '<div class=row>';
+					$ret .= Html::tag('div', $html_content,
 							  ['class' => $classes['wrapper']]);
-			$ret .= '</div><!--html row-->';
+					$ret .= "</div><!--html row $html_key-->";
+				}
+			} else {
+				$ret .= '<div class=row>';
+				$ret .= Html::tag('div', implode('', $layout_row['content']),
+								  ['class' => $classes['wrapper']]);
+				$ret .= '</div><!--html row-->';
+
+			}
 			break;
 		}
 		return $ret;
