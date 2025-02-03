@@ -421,8 +421,16 @@ class JsonController extends \yii\web\Controller
 		$route = $this->getRoutePrefix($this->getPath(), false) . $model->getPath();
 		if ($action_id) {
 			if (is_array($action_id)) {
+				$action_route = Url::to($action_id);
 				$action = array_shift($action_id);
 				$route .= "/$action?id=" . array_shift($action_id);
+				if (($q_pos = strpos($action_route, '?')) !== FALSE) {
+					if (strpos($route, '?') === FALSE) {
+						$route .= substr($action_route, $q_pos);
+					} else {
+						$route .= '&' . substr($action_route, $q_pos+1);
+					}
+				}
 			} else {
 				$route .= "/$action_id";
 			}
