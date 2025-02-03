@@ -95,7 +95,7 @@ class WidgetLayer
 			$layout_row['size'] = $parent_options['size']??'large';
 		}
 		if (empty($layout_row['layout'])) {
-			$layout_row['layout'] = $parent_options['layout']??'1col';
+			$layout_row['layout'] = '1col';
 		}
 		if ($layout_row['layout'] == 'inline') {
 			$cols = 10000;
@@ -159,9 +159,9 @@ class WidgetLayer
 							'active' => ArrayHelper::remove($content, 'active', false),
 							'headerOptions' => ArrayHelper::remove($content, 'headerOptions', []),
 							'content' => $this->layoutWidgets($content, [
-								'layout' => $layout_row['layout']??$layout_row['layout'],
-								'style' => $layout_row['style']??$layout_row['style'],
-								'type' => $layout_row['type']??$type_of_row
+								'layout' => $layout_row['layout'],
+								'style' => $layout_row['style'],
+								'type' => $layout_row['type'],
 							], $kc),
 						];
 					}
@@ -176,7 +176,7 @@ class WidgetLayer
 					foreach ($layout_row['content'] as $kc => $content) {
 						$ret .= '<div class="' . $this->columnClasses($cols) . '">';
 						$ret .= $this->layoutWidgets([$content],
-							['layout' => $layout_row['layout'], 'style' => $content['style']??$layout_row['style'], 'type' => $type_of_row ], $kc);
+							['layout' => $layout_row['layout'], 'style' => $content['style']??$layout_row['style'], 'type' => $layout_row_type ], $kc);
 						$ret .= "</div>\n";
 					}
 					$ret .= '</div>';
@@ -187,7 +187,7 @@ class WidgetLayer
 					foreach ($layout_row['content'] as $kc => $content) {
 						$ret .= '<div class="' . $this->columnClasses($cols) . '">';
 						$ret .= $this->layoutWidgets([$content],
-							['layout' => "{$cols}cols", 'style' => $content['style']??$layout_row['style'], 'type' => $type_of_row ], $kc);
+							['layout' => "{$cols}cols", 'style' => $content['style']??$layout_row['style'], 'type' => $layout_row_type ], $kc);
 						$ret .= "</div>\n";
 					}
 					$ret .= '</div>';
@@ -206,7 +206,7 @@ class WidgetLayer
 				}
 			}
 			if ($only_widget_names) {
-				$layout_row = ['type' => $type_of_row, 'content' => $layout_row, 'style' => 'grid'];
+				$layout_row = ['type' => $layout_row_type, 'content' => $layout_row, 'style' => 'grid'];
 			}
 			$subtitle = $layout_row['subtitle']??null;
 			$row_html = '';
@@ -365,7 +365,7 @@ class WidgetLayer
 				}
 			} else {
 				$ret .= '<div class=row>';
-				$ret .= Html::tag('div', implode('', $layout_row['content']),
+				$ret .= Html::tag('div', implode('', (array)$layout_row['content']),
 								  ['class' => $classes['wrapper']]);
 				$ret .= '</div><!--html row-->';
 
