@@ -255,7 +255,7 @@ class SimpleGridView extends \yii\grid\GridView
 			}
 			$grid_orderby = array_merge($grid_orderby, $group->orderby);
         }
-        if (count($grid_orderby)){
+        if ($this->dataProvider instanceof \yii\data\ActiveDataProvider && count($grid_orderby)) {
 			if (!empty($this->dataProvider->query->orderBy)) {
 				$grid_orderby = array_merge($grid_orderby, (array)$this->dataProvider->query->orderBy);
 			}

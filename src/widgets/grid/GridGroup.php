@@ -82,7 +82,7 @@ class GridGroup extends BaseObject
 		if( $this->value instanceOf \Closure ) {
 			$this->current_value = call_user_func($this->value, $model, $key, $index, $this->grid);
 		} else if (ArrayHelper::KeyExists($this->value, $model)) {
-			$this->current_value = $model->{$this->value};
+			$this->current_value = ArrayHelper::getValue($model, $this->value);
 		} else {
 			$this->current_value = $this->grid->columns[$this->value]->getDataCellValue($model, $key, $index);
 		}
