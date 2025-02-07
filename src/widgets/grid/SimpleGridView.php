@@ -30,6 +30,7 @@ class SimpleGridView extends \yii\grid\GridView
 	public $totalsRow = true;
 	public $onlySummary = false;
 	protected $summaryColumns = [];
+	protected $savedRowData = [];
 	protected $summaryValues = [];
 	protected $previousModel = null;
 	protected $recno;
@@ -44,7 +45,6 @@ class SimpleGridView extends \yii\grid\GridView
 
     public $layout = "{summary}\n{pager}\n{items}";
     public $output = 'Screen';
-
 
 	public function __construct($config = [])
 	{
@@ -95,6 +95,7 @@ class SimpleGridView extends \yii\grid\GridView
 		parent::init();
 		if (count($this->groups) != 0 || $this->totalsRow) {
 			$this->beforeRow = function($model, $key, $index, $grid) {
+				$this->updateRowData($model, $key, $index);
 				return $grid->groupHeader($model, $key, $index, $grid);
 			};
 			$this->afterRow = function($model, $key, $index, $grid) {
@@ -115,13 +116,34 @@ class SimpleGridView extends \yii\grid\GridView
 	public function run()
 	{
 		$view = $this->getView();
-        ChurrosAsset::register($view);
-        return parent::run();
+		ChurrosAsset::register($view);
+		return parent::run();
+	}
+
+	public function findColumn(string $attribute): ?DataColumn
+	{
+		$targetColumn = null;
+		foreach ($this->columns as $column) {
+			if ($column instanceof DataColumn && $column->attribute === $attribute) {
+				return $column;
+			}
+		}
+		return null;
+	}
+
+	// override
+	public function renderTableRow($model, $key, $index)
+	{
+		$this->savedRowData = $this->updateRowData($model, $key, $index);
+		if( ($this->onlySummary && count($this->groups) == 0) || !$this->onlySummary ) {
+			return parent::renderTableRow($model, $key, $index);
+		} else {
+			return null;
+		}
 	}
 
 	/**
-	 * Creates the constant array of summary columns to be used by the
-	 * summary functions of each group
+	 * Creates the constant array of summary columns to be used by the summary functions of each group
 	 */
 	protected function initSummaryColumns()
 	{
@@ -130,7 +152,7 @@ class SimpleGridView extends \yii\grid\GridView
 				continue;
 			}
 			if ($column->summary) {
-				$kc = $column->attribute;
+				// $kc = $column->attribute;
 				$this->summaryColumns[$kc] = $column->summary;
 				switch ($column->summary) {
 					case 'sum':
@@ -163,54 +185,55 @@ class SimpleGridView extends \yii\grid\GridView
 	public function updateSummaryColumns($model)
 	{
 		// same in GridGroup::updateSummaries
-		foreach( $this->summaryColumns as $kc => $summary) {
+		foreach ($this->summaryColumns as $kc => $summary) {
+			$value = $this->savedRowData[$kc];
 			switch( $summary ) {
 			case 'sum':
-				$this->summaryValues[$kc] += $model[$kc];
+				$this->summaryValues[$kc] += $value;
 				break;
 			case 'distinct_sum':
-				if (!in_array($model[$kc], $this->summaryValues[$kc])) {
-					$this->summaryValues[$kc] += $model[$kc];
+				if (!in_array($value, $this->summaryValues[$kc])) {
+					$this->summaryValues[$kc] += $value;
 				}
 				break;
 			case 'count':
 				$this->summaryValues[$kc] ++;
 				break;
 			case 'distinct_count':
-				if (!in_array($model[$kc], $this->summaryValues[$kc])) {
-					$this->summaryValues[$kc] += $model[$kc];
+				if (!in_array($value, $this->summaryValues[$kc])) {
+					$this->summaryValues[$kc] += $value;
 				}
 				break;
 			case 'avg':
-				$this->summaryValues[$kc][0] += $model[$kc];
+				$this->summaryValues[$kc][0] += $value;
 				$this->summaryValues[$kc][1] ++;
 				break;
 			case 'distinct_avg':
-				if (!in_array($model[$kc], $this->summaryValues[$kc])) {
-					$this->summaryValues[$kc][0] += $model[$kc];
+				if (!in_array($value, $this->summaryValues[$kc])) {
+					$this->summaryValues[$kc][0] += $value;
 					$this->summaryValues[$kc][1] ++;
 				}
 				break;
 			case 'max':
 				if( $this->summaryValues[$kc] == null ) {
-					$this->summaryValues[$kc] = $model[$kc];
-				} else if( $this->summaryValues[$kc] < $model[$kc] ) {
-					$this->summaryValues[$kc] = $model[$kc];
+					$this->summaryValues[$kc] = $value;
+				} else if( $this->summaryValues[$kc] < $value ) {
+					$this->summaryValues[$kc] = $value;
 				}
 				break;
 			case 'min':
 				if( $this->summaryValues[$kc] == null ) {
-					$this->summaryValues[$kc] = $model[$kc];
-				} else if( $this->summaryValues[$kc] > $model[$kc] ) {
-					$this->summaryValues[$kc] = $model[$kc];
+					$this->summaryValues[$kc] = $value;
+				} else if( $this->summaryValues[$kc] > $value ) {
+					$this->summaryValues[$kc] = $value;
 				}
 				break;
 			case 'concat':
-				$this->summaryValues[$kc][] = $model[$kc];
+				$this->summaryValues[$kc][] = $value;
 				break;
 			case 'distinct_concat':
-				if (!in_array($model[$kc], $this->summaryValues[$kc])) {
-					$this->summaryValues[$kc][] = $model[$kc];
+				if (!in_array($value, $this->summaryValues[$kc])) {
+					$this->summaryValues[$kc][] = $value;
 				}
 				break;
 			}
@@ -219,7 +242,7 @@ class SimpleGridView extends \yii\grid\GridView
 
 	protected function resetGroupSummaryColumns()
 	{
-		foreach( $this->groups as $kg => $group )  {
+		foreach ($this->groups as $kg => $group)  {
 			$group->resetSummaries($this->summaryColumns, 0, count($this->groups));
 		}
 	}
@@ -263,16 +286,6 @@ class SimpleGridView extends \yii\grid\GridView
 		}
 	}
 
-	// override
-	public function renderTableRow($model, $key, $index)
-    {
-		if( ($this->onlySummary && count($this->groups) == 0) || !$this->onlySummary ) {
-			return parent::renderTableRow($model, $key, $index);
-		} else {
-			return null;
-		}
-    }
-
 	protected function groupHeader($model, $key, $index, $grid)
 	{
 		if( $this->previousModel === null ) {
@@ -284,7 +297,7 @@ class SimpleGridView extends \yii\grid\GridView
 		// close previous footers on group change
 		$updated_groups = [];
 		$previous_updated = false;
-		foreach( $this->groups as $kg => $group ) {
+		foreach ($this->groups as $kg => $group) {
 			$this_updated = $group->willUpdateGroup($model, $key, $index);
 			if( $previous_updated ) {
 				$updated_groups[$kg] = true;
@@ -292,8 +305,8 @@ class SimpleGridView extends \yii\grid\GridView
 				$previous_updated = $updated_groups[$kg] = $this_updated;
 			}
 		}
-		foreach( array_reverse($this->groups) as $kg => $group ) {
-			if( $updated_groups[$kg] ) {
+		foreach (array_reverse($this->groups) as $kg => $group) {
+			if ($updated_groups[$kg]) {
 				if ($group->footer !== false) {
 					$ret .= Html::tag('tr',
 						$group->getFooterContent($this->summaryColumns,
@@ -307,12 +320,12 @@ class SimpleGridView extends \yii\grid\GridView
 		}
 		$this->updateSummaryColumns($model);
 		$updated_groups = [];
-		foreach( $this->groups as $kg => $group ) {
+		foreach ($this->groups as $kg => $group) {
 			$updated_groups[$kg] = $group->updateGroup($model, $key, $index);
 		}
 		$first_header_shown = false;
-		foreach( $this->groups as $kg => $group ) {
-			if( $updated_groups[$kg] || $first_header_shown ) {
+		foreach ($this->groups as $kg => $group) {
+			if ($updated_groups[$kg] || $first_header_shown) {
 				$first_header_shown = true;
 				if ($group->header!==false) {
 					if( ($this->onlySummary && $group->level < count($this->groups))
@@ -324,7 +337,7 @@ class SimpleGridView extends \yii\grid\GridView
 				$this->current_level++;
 				$group->resetSummaries($this->summaryColumns, $this->current_level, count($this->groups));
 			}
-			$group->updateSummaries($this->summaryColumns, $this->current_level, $model);
+			$group->updateSummaries($this->summaryColumns, $this->current_level, $this->savedRowData);
 		}
 		$this->previousModel = $model;
 		return $ret;
@@ -335,16 +348,16 @@ class SimpleGridView extends \yii\grid\GridView
 		// Once the dataprovider has been consumed, print all the group footers and the grand total
 		$tdoptions = [ 'colspan' => count($this->columns) ];
 		$ret = '';
-		foreach( array_reverse($this->groups) as $kg => $group ) {
-			if( $group->footer ) {
+		foreach (array_reverse($this->groups) as $kg => $group) {
+			if ($group->footer) {
 				$ret .= Html::tag('tr',
 					$group->getFooterContent($this->summaryColumns, $model, $key, $index, $tdoptions));
 			}
 		}
-		if( $this->totalsRow ) {
+		if ($this->totalsRow) {
 			$fs = $this->getFooterSummary($this->summaryColumns, $tdoptions);
 			if ($fs) {
-				$ret .= Html::tag('tr', $fs, [ 'class' => 'grand-total']);
+				$ret .= Html::tag('tr', $fs, ['class' => 'grand-total']);
 			}
 		}
 		return $ret;
@@ -374,11 +387,11 @@ class SimpleGridView extends \yii\grid\GridView
 		}
 		if ($colspan==0) {
 			$ret = '</tr><tr>';
-			$ret .= Html::tag('td', $this->grandTotalLabel?:Yii::t('churros', "Totals") . ' ',
+			$ret .= Html::tag('td', $this->grandTotalLabel?:Yii::t('churros', 'Totals') . ' ',
 				[ 'class' => 'total-label', 'colspan' => 42] );
 			$ret .= '</tr><tr>';
 		} else {
-			$ret = Html::tag('td', $this->grandTotalLabel?:Yii::t('churros', "Totals") . ' ',
+			$ret = Html::tag('td', $this->grandTotalLabel?:Yii::t('churros', 'Totals') . ' ',
 				[ 'class' => 'total-label', 'colspan' => $colspan ] );
 		}
 		$nc = 0;
@@ -411,6 +424,20 @@ class SimpleGridView extends \yii\grid\GridView
 			}
 		}
 		return $ret;
+	}
+
+
+	// Update all the data values to have it before summaries and before setting other properties like class
+	protected function updateRowData($model, $key, $index)
+	{
+		$this->savedRowData = [];
+		foreach($this->columns as $keycol => $column) {
+			$value = $column->getDataCellValue($model, $key, $index);
+			$this->savedRowData[$keycol] = $value;
+		}
+		if( isset( $this->options['AfterRowData'] ) && is_callable( $this->options['AfterRowData'] ) ) {
+			call_user_func_array($this->options['AfterRowData'], [&$this->savedRowData, $this->columns]);
+		}
 	}
 
 }

@@ -131,7 +131,7 @@ class GridGroup extends BaseObject
 
 	public function getFooterContent($summary_columns, $model, $key, $index, $tdoptions)
 	{
-		if( $this->grid->onlySummary && $this->level > count($this->grid->groups) ) {
+		if ($this->grid->onlySummary && $this->level > count($this->grid->groups)) {
 			return $this->getOnlyTotalsContent($summary_columns, $model, $key, $index, $tdoptions);
 		} else {
 			return $this->getStandardFooterContent($summary_columns, $model, $key, $index, $tdoptions);
@@ -167,7 +167,15 @@ class GridGroup extends BaseObject
 			$content = call_user_func($content, $model, $key, $index, $this);
 		}
 		if ($content === true || $content === null) {
-			return $this->getSummaryContent($summary_columns, $content);
+			$group_column = $this->grid->findColumn($this->column);
+			$label = '';
+			if ($group_column) {
+				$label = $group_column->label ?: $this->column;
+				if ($label != '') {
+					$label = ' '  . mb_strtolower($label) . ' ';
+				}
+			}
+			return $this->getSummaryContent($summary_columns, $label . $this->current_value);
 		}
 		$ret = '';
 		if( $content !== false) {
@@ -182,15 +190,38 @@ class GridGroup extends BaseObject
 		return $ret;
 	}
 
-	public function getSummaryContent($summary_columns, $content)
+	/**
+	 * Generates the summary content for a group in a grid view.
+	 *
+	 * This function creates a summary row for a group in a grid, including a label cell
+	 * and cells for summary values of specified columns.
+	 *
+	 * @param array $summary_columns An associative array of columns to be summarized,
+	 *                               where keys are column attributes.
+	 * @param string $content Additional content to be appended to the "Totals" label.
+	 *
+	 * @return string HTML string representing the summary row.
+	 *
+	 * The resulting row includes:
+	 * - A label cell with "Totals" and additional content
+	 * - Cells for each summarized column, displaying formatted summary values
+	 * - Empty cells for non-summarized columns
+	 *
+	 * CSS classes are applied to cells based on:
+	 * - Column format
+	 * - Group footer level
+	 * - Whether the column is summarized
+	 *
+	 */
+	public function getSummaryContent($summary_columns, string $current_group_value)
 	{
 		$colspan = 0;
-		foreach ($this->grid->columns as $column) {
+		foreach ($this->grid->columns as $kc => $column) {
 			if( $column->visible ) {
 				if (!$column instanceof $this->grid->dataColumnClass) {
 					continue;
 				}
-				if( !isset($summary_columns[$column->attribute]) ) {
+				if( !isset($summary_columns[$kc]) ) {
 					$colspan++;
 				} else {
 					break;
@@ -201,21 +232,23 @@ class GridGroup extends BaseObject
 			'class' => 'group-total-label group-foot-' . strval($this->level),
 			'colspan' => $colspan,
 		];
-		$ret = Html::tag('td', Yii::t('churros', "Totals") . ' ' . $content, $tdoptions );
+		$ret = Html::tag('td', Yii::t('churros', 'Totals') . ' ' . $current_group_value, $tdoptions);
 		$nc = 0;
-		foreach( $this->grid->columns as $column ) {
+		foreach ($this->grid->columns as $kc => $column) {
 			if (!$column instanceof $this->grid->dataColumnClass) {
 				continue;
 			}
-			$kc = $column->attribute;
 			if( $nc++ < $colspan ) {
 				continue;
 			}
 			$classes = [
 				'w1'
 			];
-			if( ($column->format?:'raw') != 'raw' ) {
-				$classes[] = "format-{$column->format}";
+			if (is_array($column->format)) {
+				$format = $column->format[0];
+			}
+			if (($format?:'raw') != 'raw' ) {
+				$classes[] = "format-$format";
 			}
 			if( isset($summary_columns[$kc]) ) {
 				$classes[] = 'group-foot-' . strval($this->level);
@@ -268,55 +301,55 @@ class GridGroup extends BaseObject
 	{
 		// same in GridView::updateSummaries
 		for( $l = 1; $l <= $report_level; ++$l ) {
-			foreach( $summary_columns as $key => $summary) {
-				$kc = str_replace('.', '_', $key);
+			foreach ($summary_columns as $key => $summary) {
+				// $kc = str_replace('.', '_', $key);
 				switch( $summary ) {
 				case 'sum':
-					$this->summaryValues[$l][$key] += $row_values[$kc];
+					$this->summaryValues[$l][$key] += $row_values[$key];
 					break;
 				case 'distinct_sum':
-					if (!in_array($row_values[$key], $this->summaryValues[$l][$kc])) {
-						$this->summaryValues[$l][$key] += $row_values[$kc];
+					if (!in_array($row_values[$key], $this->summaryValues[$l][$key])) {
+						$this->summaryValues[$l][$key] += $row_values[$key];
 					}
 					break;
 				case 'count':
 					$this->summaryValues[$l][$key] ++;
 					break;
 				case 'distinct_count':
-					if (!in_array($row_values[$key], $this->summaryValues[$l][$kc])) {
+					if (!in_array($row_values[$key], $this->summaryValues[$l][$key])) {
 						$this->summaryValues[$l][$key] ++;
 					}
 					break;
 				case 'avg':
-					$this->summaryValues[$l][$key][0] += $row_values[$kc];
+					$this->summaryValues[$l][$key][0] += $row_values[$key];
 					$this->summaryValues[$l][$key][1] ++;
 					break;
 				case 'distinct_count':
-					if (!in_array($row_values[$key], $this->summaryValues[$l][$kc])) {
-						$this->summaryValues[$l][$key][0] += $row_values[$kc];
+					if (!in_array($row_values[$key], $this->summaryValues[$l][$key])) {
+						$this->summaryValues[$l][$key][0] += $row_values[$key];
 						$this->summaryValues[$l][$key][1] ++;
 					}
 					break;
 				case 'max':
 					if( $this->summaryValues[$l][$key] == null ) {
-						$this->summaryValues[$l][$key] = $row_values[$kc];
-					} else if( $this->summaryValues[$l][$key] < $row_values[$kc] ) {
-						$this->summaryValues[$l][$key] = $row_values[$kc];
+						$this->summaryValues[$l][$key] = $row_values[$key];
+					} else if( $this->summaryValues[$l][$key] < $row_values[$key] ) {
+						$this->summaryValues[$l][$key] = $row_values[$key];
 					}
 					break;
 				case 'min':
 					if( $this->summaryValues[$l][$key] == null ) {
-						$this->summaryValues[$l][$key] = $row_values[$kc];
-					} else if( $this->summaryValues[$l][$key] > $row_values[$kc] ) {
-						$this->summaryValues[$l][$key] = $row_values[$kc];
+						$this->summaryValues[$l][$key] = $row_values[$key];
+					} else if( $this->summaryValues[$l][$key] > $row_values[$key] ) {
+						$this->summaryValues[$l][$key] = $row_values[$key];
 					}
 					break;
 				case 'concat':
-					$this->summaryValues[$l][$key][] = $row_values[$kc];
+					$this->summaryValues[$l][$key][] = $row_values[$key];
 					break;
 				case 'distinct_concat':
-					if (!in_array($row_values[$key], $this->summaryValues[$l][$kc])) {
-						$this->summaryValues[$l][$key][] = $row_values[$kc];
+					if (!in_array($row_values[$key], $this->summaryValues[$l][$key])) {
+						$this->summaryValues[$l][$key][] = $row_values[$key];
 					}
 					break;
 				}
