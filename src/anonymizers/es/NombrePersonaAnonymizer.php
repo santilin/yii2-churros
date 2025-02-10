@@ -18,42 +18,65 @@ namespace santilin\churros\anonymizers\es;
 
 class NombrePersonaAnonymizer
 {
-	private $secretKey;
+    private $secretKey;
+    private $vowels = ['a', 'e', 'i', 'o', 'u'];
+    private $consonants = ['b', 'c', 'd', 'f', 'g', 'h', 'j', 'k', 'l', 'm', 'n', 'p', 'q', 'r', 's', 't', 'v', 'w', 'x', 'y', 'z'];
 
-	public function __construct(string $secretKey) {
-		$this->secretKey = $secretKey;
-	}
+    public function __construct(string $secretKey) {
+        $this->secretKey = $secretKey;
+    }
 
-	public function anonymize(string $name): string {
-		// Split the name into words
-		$words = explode(' ', $name);
+    public function anonymize(string $name): string {
+        $words = explode(' ', $name);
+        $anonymizedWords = array_map([$this, 'anonymizeWord'], $words);
+        return implode(' ', $anonymizedWords);
+    }
 
-		// anonymize each word
-		$anonymizedWords = array_map([$this, 'anonymizeWord'], $words);
+    private function anonymizeWord(string $word): string {
+        $letters = mb_str_split($word);
+        $anonymizedLetters = array_map([$this, 'anonymizeLetter'], $letters);
 
-		// Reassemble the name
-		return implode(' ', $anonymizedWords);
-	}
+        // Ensure at least one vowel deterministically
+        if (!$this->containsVowel($anonymizedLetters)) {
+            $position = $this->getDeterministicPosition($word);
+            $anonymizedLetters[$position] = $this->getDeterministicVowel($word, $position);
+        }
 
-	private function anonymizeWord(string $word): string {
-		$letters = mb_str_split($word); // Split word into characters (supports multibyte)
-		$anonymizedLetters = array_map([$this, 'anonymizeLetter'], $letters);
-		return implode('', $anonymizedLetters);
-	}
+        return implode('', $anonymizedLetters);
+    }
 
-	private function anonymizeLetter(string $letter): string {
-		// Only anonymize alphabetic characters
-		if (!ctype_alpha($letter)) {
-			return $letter;
-		}
+    private function anonymizeLetter(string $letter): string {
+        if (!ctype_alpha($letter)) {
+            return $letter;
+        }
 
-		// Generate a deterministic hash for the letter using secret key
-		$hash = crc32($this->secretKey . $letter);
+        $hash = crc32($this->secretKey . $letter);
+        $isVowel = in_array(strtolower($letter), $this->vowels);
+        $alphabet = $isVowel ? $this->vowels : $this->consonants;
 
-		// Map hash to a new letter (preserve case)
-		$alphabet = ctype_upper($letter) ? range('A', 'Z') : range('a', 'z');
-		return $alphabet[$hash % count($alphabet)];
-	}
+        if (ctype_upper($letter)) {
+            return strtoupper($alphabet[$hash % count($alphabet)]);
+        }
+
+        return $alphabet[$hash % count($alphabet)];
+    }
+
+    private function containsVowel(array $letters): bool {
+        foreach ($letters as $letter) {
+            if (in_array(strtolower($letter), $this->vowels)) {
+                return true;
+            }
+        }
+        return false;
+    }
+
+    private function getDeterministicPosition(string $word): int {
+        return crc32($this->secretKey . $word) % mb_strlen($word);
+    }
+
+    private function getDeterministicVowel(string $word, int $position): string {
+        $hash = crc32($this->secretKey . $word . $position);
+        $vowel = $this->vowels[$hash % count($this->vowels)];
+        return ctype_upper($word[$position]) ? strtoupper($vowel) : $vowel;
+    }
 }
-
-

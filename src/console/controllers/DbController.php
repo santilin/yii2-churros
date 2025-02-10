@@ -276,6 +276,9 @@ EOF;
 			if ($write_file) {
 				\file_put_contents($filename, $preamble . $this->dumpTable($schemaName, $tableSchema, $where??''));
 				echo "Created $this->format for table $tableName in $filename\n";
+				if ($where) {
+					echo "\twith where: $where\n";
+				}
 			}
 		} else {
 			echo $preamble . $this->dumpTable($schemaName, $tableSchema, $where);
@@ -352,10 +355,12 @@ EOF;
 		}
 		/**
 		 * @todo quote column names
-		 * $sql = "SELECT " . implode(',', array_map(function($col) {
-    return '[' . str_replace(']', ']]', $col) . ']';
+			$sql = "SELECT " . implode(',',$column_names) . " FROM ";
 		*/
-		$sql = "SELECT " . implode(',',$column_names) . " FROM ";
+		$sql = "SELECT " . implode(',', array_map(function($col) {
+			return '[[' . str_replace(']', ']]', $col) . ']]';
+		}, $column_names));
+		$sql .= ' FROM ';
 		if ($schemaName) {
 			$sql .= $schemaName . '.';
 		}

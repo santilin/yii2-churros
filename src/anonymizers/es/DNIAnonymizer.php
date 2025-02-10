@@ -27,7 +27,11 @@ class DNIAnonymizer
 		$this->secretKey = $secretKey;
 	}
 
-	public function anonymize(string $originalID): string {
+	public function anonymize(?string $originalID): ?string
+	{
+		if ($originalID === null || empty($originalID)) {
+			return $originalID;
+		}
 		$originalID = strtoupper($originalID);
 		$firstChar = $originalID[0];
 
