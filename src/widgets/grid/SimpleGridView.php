@@ -432,8 +432,10 @@ class SimpleGridView extends \yii\grid\GridView
 	{
 		$this->savedRowData = [];
 		foreach($this->columns as $keycol => $column) {
-			$value = $column->getDataCellValue($model, $key, $index);
-			$this->savedRowData[$keycol] = $value;
+			if ($column instanceof DataColumn) {
+				$value = $column->getDataCellValue($model, $key, $index);
+				$this->savedRowData[$keycol] = $value;
+			}
 		}
 		if( isset( $this->options['AfterRowData'] ) && is_callable( $this->options['AfterRowData'] ) ) {
 			call_user_func_array($this->options['AfterRowData'], [&$this->savedRowData, $this->columns]);
