@@ -33,22 +33,28 @@ class DbController extends Controller
     public $db = 'db';
 
     /** @var one of FORMATS */
-    public $format = 'seeder';
+    public string $format = 'seeder';
 
 	/** @var bool Wether to add the DROP TABLE command */
-	public $truncateTables = true;
+	public bool $truncateTables = true;
 
 	/** @var bool wether to create a file in seedersPath */
-	public $createFile = true;
+	public bool $createFile = true;
 
-	/** @var string path to the seeders directory, defaults to @app/database/seeders */
-	public $seedersPath = "@app/database/seeders";
+	/** @var string path to the output seeders directory, defaults to @app/database/seeders */
+	public string $seedersPath = "@app/database/seeders";
 
-	/** @var string path to the fixtures directory, defaults to @app/tests/fixtures/data */
-	public $fixturesPath = "@app/database/fixtures";
+	/** @var string path to the output fixtures directory, defaults to @app/tests/fixtures/data */
+	public string $fixturesPath = "@app/database/fixtures";
+
+	/** @var string path to the input obfuscator templates directory, defaults to @app/tests/obfjuscators */
+	public string $anonymizersPath = "@app/database/anonymizers";
 
 	/** @var int the number or records to seed or dump, defaults to 0 meaning all */
-	public $count = 0;
+	public int $count = 0;
+
+	/** @var bool the number or records to seed or dump, defaults to 0 meaning all */
+	public bool $anonymize = false;
 
 	/** @var string the where clause to filter records */
 	public ?string $where = null;
@@ -57,20 +63,21 @@ class DbController extends Controller
     {
         return array_merge(
             parent::options($actionID),
-            ['db', 'format', 'truncateTables','createFile','seedersPath','fixturesPath','count', 'where']
+            ['db', 'format', 'truncateTables','createFile','seedersPath','fixturesPath','count', 'where', 'anonymize']
         );
     }
 
     public function optionAliases()
     {
         return array_merge(parent::optionAliases(), [
-            'f' => 'format',
-            't' => 'truncateTables',
+			'a' => 'anonymize',
             'c' => 'createFile',
-            'p' => 'seedersPath',
-            'x' => 'fixturesPath',
+            'f' => 'format',
             'n' => 'count',
-        ]);
+            'p' => 'seedersPath',
+            't' => 'truncateTables',
+            'x' => 'fixturesPath',
+		]);
     }
 
     /**
@@ -360,6 +367,12 @@ EOF;
 			$sql .= " LIMIT {$this->count}";
 		}
 		$raw_data = $this->db->createCommand($sql)->queryAll();
+		if ($this->anonymize) {
+			$anonymizer_file = Yii::getAlias($this->anonymizersPath . '/' . $tableSchema->fullName . '.php');
+			require $anonymizer_file;
+			$anonymizer_function_name = '\\app\\database\\anonymizers\\' . str_replace('.', '_', $tableSchema->fullName) . '_anonymizer';
+			$anonymizer_function_name($raw_data);
+		}
 		$nrow = 0;
 		foreach ($raw_data as $row) {
 			$ncolumn = 0;
