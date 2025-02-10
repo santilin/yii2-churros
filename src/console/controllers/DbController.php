@@ -113,10 +113,12 @@ class DbController extends Controller
 			case 'bool':
 			case 'char':
 			case 'boolean':
-				if (strpos($value, ':') !== false) { // date in string format
-					return "'" . strtr($value, ["\\'" => "\\\\", "'" => "\\'"]) . "'";
+				if ($value === null && $phptype == 'boolean') {
+					return false;
 				} else if ($value === null) {
 					return "null";
+				} else if (strpos($value, ':') !== false) { // date in string format
+					return "'" . strtr($value, ["\\'" => "\\\\", "'" => "\\'"]) . "'";
 				} else {
 					return $value;
 				}
