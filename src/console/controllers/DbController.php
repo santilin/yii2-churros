@@ -465,7 +465,6 @@ EOF;
 
 	protected function getPreamble($command, $schema, $table = null)
 	{
-		$timestamp = date('Y-m-d H:i:s', time());
 		if ($table == null ) {
 			$table = $schema;
 		}
@@ -479,9 +478,7 @@ EOF;
 /**
  * Churros v $version
  * ./yii churros/db/$command --format={$this->format} --fixturesPath={$this->fixturesPath}
- * DB DSN: $schema
  * Schema: $schema
- * Timestamp: $timestamp
  */
 
 PREAMBLE;

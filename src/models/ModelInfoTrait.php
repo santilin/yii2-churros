@@ -4,6 +4,7 @@ namespace santilin\churros\models;
 
 use Yii;
 use yii\db\{ActiveRecord,ActiveQuery};
+use santilin\churros\json\JsonModel;
 use yii\base\{InvalidConfigException,InvalidArgumentException};
 use yii\helpers\{ArrayHelper,Url};
 use santilin\churros\helpers\{YADTC,AppHelper,FormHelper};
@@ -455,7 +456,7 @@ trait ModelInfoTrait
 		return null;
     }
 
-	public function addErrorsFrom(ActiveRecord $model, $key = null)
+	public function addErrorsFrom(ActiveRecord|JsonModel $model, $key = null)
 	{
 		if ($key !== null) {
 			$key = $key . '.';
