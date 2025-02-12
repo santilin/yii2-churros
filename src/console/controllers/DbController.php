@@ -340,7 +340,7 @@ EOF;
 		$php_types = [];
 		$column_names = [];
 		$db_columns = [];
-		$table_name = $tableSchema->name;
+		$table_name = $tableSchema->fullName;
 
 		if (Yii::$app->db->driverName == "sqlite") {
 			$show_create_table = "SELECT * FROM pragma_table_xinfo('{$tableSchema->name}') WHERE hidden=0";
@@ -353,20 +353,16 @@ EOF;
 			$php_types[] = $column->dbType;
 			$column_names[] = $column->name;
 		}
-		/**
-		 * @todo quote column names
-			$sql = "SELECT " . implode(',',$column_names) . " FROM ";
-		*/
-		$sql = "SELECT " . implode(',', array_map(function($col) {
-			return '[[' . str_replace(']', ']]', $col) . ']]';
+		$sql = "SELECT " . implode(',', array_map(function($col) use ($table_name) {
+			return "$table_name.[[" . str_replace(']', ']]', $col) . ']]';
 		}, $column_names));
-		$sql .= ' FROM ';
-		if ($schemaName) {
-			$sql .= $schemaName . '.';
-		}
-		$sql .= "{{{$table_name}}}";
+		$sql .= " FROM $table_name ";
 		if ($where) {
-			$sql .= " WHERE $where";
+			if (strpos(strtoupper($where), 'WHERE')===0 || strpos(strtoupper($where), ' WHERE ') !== FALSE) {
+				$sql .= $where;
+			} else {
+				$sql .= " WHERE $where";
+			}
 		}
 		if ($this->count != 0) {
 			$sql .= " LIMIT {$this->count}";
@@ -399,7 +395,7 @@ EOF;
 		$txt_data = '';
 		$php_types = [];
 		$columna_names = [];
-		$table_name = $tableSchema->name;
+		$table_name = $tableSchema->fullName;
 
 // 		Yii::$app->db->createCommand("USE $schemaName")->execute();
 		$ret = "\nclass {$table_name}Seeder {\n";
@@ -414,9 +410,16 @@ EOF;
 			$ret .= "\t\t" . strval($ncolumn ++) . " => '" . $column->name . "', // " . $column->phpType . "\n";
 		}
 		$ret .= "\t];\n\n";
-		$sql = "SELECT * FROM {{{$table_name}}}";
+		$sql = "SELECT " . implode(',', array_map(function($col) use ($table_name) {
+			return "$table_name.[[" . str_replace(']', ']]', $col) . ']]';
+		}, $column_names));
+		$sql .= " FROM $table_name ";
 		if ($where) {
-			$sql .= " WHERE $where";
+			if (strpos(strtoupper($where), 'WHERE')===0 || strpos(strtoupper($where), ' WHERE ') !== FALSE) {
+				$sql .= $where;
+			} else {
+				$sql .= " WHERE $where";
+			}
 		}
 		if ($this->count != 0) {
 			$sql .= " LIMIT {$this->count}";
