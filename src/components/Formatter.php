@@ -62,10 +62,14 @@ class Formatter extends \yii\i18n\Formatter
 		}
 	}
 
-	public function asSeconds2HoursMinutes($seconds)
+	public function asSeconds2HoursMinutes(int $seconds, bool $blank_on_zero = false)
 	{
 		if (empty($seconds) ) {
-			return "00:00";
+			if ($blank_on_zero) {
+				return '';
+			} else {
+				return "00:00";
+			}
 		} else {
 			return str_pad(floor($seconds / 60 / 60), 2, "0", STR_PAD_LEFT)
 				. ":" . substr("00" . (floor($seconds / 60) % 60), -2);
