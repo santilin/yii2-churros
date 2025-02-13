@@ -245,10 +245,9 @@ class GridGroup extends BaseObject
 				'w1'
 			];
 			if (is_array($column->format)) {
-				$format = $column->format[0];
-			}
-			if (($format?:'raw') != 'raw' ) {
-				$classes[] = "format-$format";
+				$classes[] = "format-{$column->format[0]}";
+			} else if ($column->format?:'raw' != 'raw') {
+				$classes[] = "format-{$column->format}";
 			}
 			if( isset($summary_columns[$kc]) ) {
 				$classes[] = 'group-foot-' . strval($this->level);
