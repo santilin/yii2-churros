@@ -17,14 +17,14 @@ class WidgetLayer
 	{
 	}
 
-	public function layout(string $type, string $layout = '1col',
+	public function layout(string $type, string $form_layout = '1col',
 						   string $size = 'large', string $style = 'grid'): string
 	{
 		if (empty($this->widgetsLayout)) {
 			$this->widgetsLayout = [
 				[
 					'type' => $type,
-					'layout' => $layout,
+					'layout' => $form_layout,
 					'style' => $style,
 					'content' => array_keys($this->widgets),
 				]
@@ -44,9 +44,9 @@ class WidgetLayer
 			$widgets_used = [];
 		}
 		$ret = $this->layoutWidgets($this->widgetsLayout, [
-			'size' => 'large',
-			'style' => 'grid',
-			'layout' => '1col'
+			'size' => $size,
+			'style' => $style,
+			'layout' => $form_layout,
 		]);
 		if (YII_ENV_DEV) {
 			$not_used = array_diff(array_keys($this->widgets), $widgets_used);
@@ -65,21 +65,29 @@ class WidgetLayer
 	protected function layoutWidgets(array $layout_row, array $parent_options = [], int|string $row_key = null): string
 	{
 		if (!isset($layout_row['content'])) {
-			if (count($layout_row) == 1) {
+			if (ArrayHelper::isIndexed($layout_row)) {
 				$ak = array_keys($layout_row);
-				return $this->layoutWidgets(reset($layout_row), $parent_options, reset($ak));
-			} else {
-				$ret = [];
-				foreach ($layout_row as $klr => $lr) {
-					$ret[] = $this->layoutWidgets($lr, [
-						'type' => 'container',
-						'style' => 'rows',
+				$av = reset($layout_row);
+				if (!is_array($av)) {
+					$layout_row = [
+						'type' => 'fields',
+						'content' => $layout_row,
 						'layout' => $parent_options['layout']??'1col',
 						'size' => $parent_options['size']??'large',
-					], $klr);
+					];
+					return $this->layoutWidgets($layout_row, $parent_options, reset($ak));
 				}
-				return implode('', $ret);
 			}
+			$ret = [];
+			foreach ($layout_row as $klr => $lr) {
+				$ret[] = $this->layoutWidgets($lr, [
+					'type' => 'container',
+					'style' => 'rows',
+					'layout' => $parent_options['layout']??'1col',
+					'size' => $parent_options['size']??'large',
+				], $klr);
+			}
+			return implode('', $ret);
 		}
 		$layout_row_type = $layout_row['type']??'widgets';
 		if ($layout_row_type == 'container') {
@@ -95,7 +103,7 @@ class WidgetLayer
 			$layout_row['size'] = $parent_options['size']??'large';
 		}
 		if (empty($layout_row['layout'])) {
-			$layout_row['layout'] = '1col';
+			$layout_row['layout'] = '1col'; // ?? $parent_options['layout']
 		}
 		if ($layout_row['layout'] == 'inline') {
 			$cols = 10000;
@@ -175,7 +183,7 @@ class WidgetLayer
 					$ret .= "<div class=\"row $cols-cols-layout\">";
 					foreach ($layout_row['content'] as $kc => $content) {
 						$ret .= '<div class="' . $this->columnClasses($cols) . '">';
-						$ret .= $this->layoutWidgets([$content],
+						$ret .= $this->layoutWidgets((array)$content,
 							['layout' => $layout_row['layout'], 'style' => $content['style']??$layout_row['style'], 'type' => $layout_row_type ], $kc);
 						$ret .= "</div>\n";
 					}
@@ -200,7 +208,7 @@ class WidgetLayer
 			$indexf = 0;
 			$only_widget_names = true;
 			foreach($layout_row as $lrk => $rl) {
-				if (is_array($rl)) {
+				if (is_string($lrk) || is_array($rl)) {
 					$only_widget_names = false;
 					break;
 				}
