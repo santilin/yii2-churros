@@ -224,4 +224,12 @@ trait ControllerTrait
 		return $ret;
 	}
 
+	/**
+	 * Override to adjust the _v param
+	 */
+	protected function changeSplitParams(array $params, $values, $field): array
+	{
+		return $params;
+	}
+
 } // trait
