@@ -194,7 +194,6 @@ class CrudController extends \yii\web\Controller
 		$params = array_merge($this->request->get(), $this->request->post());
 		$params['permissions'] = $this->resolvePermissions($params['permissions']??[], $this->userPermissions());
 		$model = $this->findFormModel(null, null, 'create', $params);
-		$model->scenario = 'create';
 
 		if ($model->loadAll($params, static::findRelationsInForm($params)) ) {
 			if ($model->saveAll(true) ) {
@@ -224,7 +223,6 @@ class CrudController extends \yii\web\Controller
 		$params = array_merge($this->request->get(), $this->request->post());
 		$params['permissions'] = $this->resolvePermissions($params['permissions']??[], $this->userPermissions());
 		$model = $this->findFormModel($id, null, 'duplicate', $params);
-		$model->scenario = 'duplicate';
 
 		if ($model->loadAll($this->request->post(), static::findRelationsInForm($params))) {
 			$model->setIsNewRecord(true);
@@ -258,7 +256,6 @@ class CrudController extends \yii\web\Controller
  		if ($model === null && FormHelper::hasPermission($params['permissions'], 'create')) {
 			return $this->redirect(array_merge(['create'], $params));
 		}
-		$model->scenario = 'update';
 		if ($model->loadAll($params, static::findRelationsInForm($params))) {
 			if ($model->saveAll(true)) {
 				if ($this->request->getIsAjax()) {
