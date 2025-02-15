@@ -42,6 +42,25 @@ trait ModelInfoTrait
 		return $this->recordDesc();
 	}
 
+	const ENGLISH_MALE_WORDS = [
+		"la" => "the",
+		"La" => "The",
+		"las" => "the",
+		"Las" => "The",
+		"una" => "one",
+		"un_a" => "one",
+		"Una" => "One",
+		"Un_a" => "One",
+		"esta" => "this",
+		"Esta" => "This",
+		"estas" => "these",
+		"Estas" => "These",
+		"otra" => "other",
+		"Otra" => "Other",
+		"otras" => "other",
+		"Otras" => "Other",
+	];
+
 	public function t($category, $message, $params = [], $language = null )
 	{
 		$t_params = array_filter($params, function($value) { return is_string($value); });
@@ -49,7 +68,7 @@ trait ModelInfoTrait
 		if( ($language == 'es' || substr(Yii::$app->language,0,2) == 'es') ) {
 			$male_words = EsHelper::SPANISH_MALE_WORDS;
 		} else {
-			$male_words = [];
+			$male_words = self::ENGLISH_MALE_WORDS;
 		}
 		$matches = $placeholders = [];
 		$female = $this->getModelInfo('female');
