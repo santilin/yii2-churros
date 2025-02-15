@@ -155,7 +155,6 @@ class CrudController extends \yii\web\Controller
 			'indexParams' => $this->changeActionParams($params, 'index', $detail),
 			'indexGrids' => [ '_grid' => [ '_grid', '', null, [], [], [] ] ],
 			'gridName' => $view,
-			'gridPerms' => $params['permissions'],
 		]);
 	}
 

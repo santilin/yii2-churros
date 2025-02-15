@@ -27,7 +27,6 @@
 - Duplicar: imágenes, aparece el check para borrar la imagen.
 - update: Ya no aparece el check para eliminar la imagen
 - Behaviors: access-control tiene que ejecutarse antes que verb, para que no dé error si no tiene acceso.
-- gridPerms: No pasarlo como parámetro independiente, porque debe poderse cambiar en changeParams.
 
 # Reports:
 * Quitar (no definido) al imprimir
