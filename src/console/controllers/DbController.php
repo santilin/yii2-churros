@@ -178,12 +178,12 @@ class DbController extends Controller
 			// }
 			// print_r($table_names);die;
 			$full_dump = $preamble;
-			foreach ($table_schemas as $table) {
-				if (!count($tables) || (count($tables) && in_array($table->name, $tables))) {
-					if( $table->name != 'migration' ) {
-						echo "Dumping {$table->name}\n";
-						$full_dump .= $this->dumpTable($schemaName, $table);
-						$runseeder .= "\t\t\$s = new {$table->name}Seeder(); \$s->run(\$db);\n";
+			foreach ($table_schemas as $tableSchema) {
+				if (!count($tables) || (count($tables) && in_array($tableSchema->name, $tables))) {
+					if( $tableSchema->name != 'migration' ) {
+						echo "Dumping {$tableSchema->fullName}\n";
+						$full_dump .= $this->dumpTable($tableSchema);
+						$runseeder .= "\t\t\$s = new {$tableSchema->name}Seeder(); \$s->run(\$db);\n";
 					}
 				}
 			}
@@ -214,16 +214,16 @@ EOF;
 			}
 		} else { // fixtures
 			$tables = $this->db->schema->getTableSchemas($schemaName, true);
-			foreach ($tables as $table) {
+			foreach ($tables as $tableSchema) {
 				$table_dump = '';
-				if( $table->name != 'migration' ) {
-					echo "Dumping {$table->name}\n";
-					$table_dump .= $this->dumpTable($schemaName, $table);
+				if( $tableSchema->name != 'migration' ) {
+					echo "Dumping {$tableSchema->name}\n";
+					$table_dump .= $this->dumpTable($tableSchema);
 				}
 				if ($this->createFile ) {
 					$write_file = true;
 					@mkdir(Yii::getAlias($this->fixturesPath), 0777, true);
-					$filename = Yii::getAlias($this->fixturesPath) . "/" . $table->name . ".php";
+					$filename = Yii::getAlias($this->fixturesPath) . "/" . $tableSchema->name . ".php";
 					if (\file_exists($filename) && !$this->confirm("The file $filename already exists. Do you want to overwrite it?") ) {
 						$write_file = false;
 					}
@@ -251,7 +251,6 @@ EOF;
 		if ($tableSchema == null) {
 			throw new \Exception("$tableName not found in database");
 		}
-		$schemaName = $tableSchema->schemaName??'';
 		$preamble = $this->getPreamble('dump-table', $tableName, $schemaName);
 		if ($this->createFile ) {
 			$write_file = true;
@@ -274,14 +273,14 @@ EOF;
 				$write_file = false;
 			}
 			if ($write_file) {
-				\file_put_contents($filename, $preamble . $this->dumpTable($schemaName, $tableSchema, $where??''));
+				\file_put_contents($filename, $preamble . $this->dumpTable($tableSchema, $where??''));
 				echo "Created $this->format for table $tableName in $filename\n";
 				if ($where) {
 					echo "\twith where: $where\n";
 				}
 			}
 		} else {
-			echo $preamble . $this->dumpTable($schemaName, $tableSchema, $where);
+			echo $preamble . $this->dumpTable($tableSchema, $where);
 		}
 	}
 
@@ -322,19 +321,19 @@ EOF;
 		$s->run($this->db);
 	}
 
-	protected function dumpTable(string $schemaName, $tableSchema, string $where = '')
+	protected function dumpTable($tableSchema, string $where = '')
 	{
 		switch( $this->format ) {
 		case 'seeder':
-			return $this->dumpTableAsSeeder($schemaName, $tableSchema, trim($where));
+			return $this->dumpTableAsSeeder($tableSchema, trim($where));
 		case 'fixture':
-			return $this->dumpTableAsFixture($schemaName, $tableSchema, trim($where));
+			return $this->dumpTableAsFixture($tableSchema, trim($where));
 		default:
 			throw new InvalidArgumentException("dump-table: $this->format: no contemplado");
 		}
 	}
 
-	protected function dumpTableAsFixture(string $schemaName, $tableSchema, string $where = null): string
+	protected function dumpTableAsFixture($tableSchema, string $where = null): string
     {
 		$txt_data = "return [\n";
 		$php_types = [];
@@ -390,15 +389,14 @@ EOF;
 	}
 
 
-	protected function dumpTableAsSeeder(string $schemaName, $tableSchema, string $where = null): string
+	protected function dumpTableAsSeeder($tableSchema, string $where = null): string
     {
 		$txt_data = '';
 		$php_types = [];
 		$columna_names = [];
 		$table_name = $tableSchema->fullName;
 
-// 		Yii::$app->db->createCommand("USE $schemaName")->execute();
-		$ret = "\nclass {$table_name}Seeder {\n";
+		$ret = "\nclass {" . str_replace('.', '_', $table_name) . "Seeder {\n";
 		$ret .= "\n";
 		$ret .= "\t/* columns */\n";
 		$ret .= "\tprivate \$columns = [\n";
