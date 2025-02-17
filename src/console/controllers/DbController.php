@@ -396,7 +396,7 @@ EOF;
 		$columna_names = [];
 		$table_name = $tableSchema->fullName;
 
-		$ret = "\nclass {" . str_replace('.', '_', $table_name) . "Seeder {\n";
+		$ret = "\nclass " . str_replace('.', '_', $table_name) . "Seeder {\n";
 		$ret .= "\n";
 		$ret .= "\t/* columns */\n";
 		$ret .= "\tprivate \$columns = [\n";
