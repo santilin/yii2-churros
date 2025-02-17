@@ -251,7 +251,7 @@ EOF;
 		if ($tableSchema == null) {
 			throw new \Exception("$tableName not found in database");
 		}
-		$preamble = $this->getPreamble('dump-table', $tableName, $schemaName);
+		$preamble = $this->getPreamble('dump-table', $tableName, $tableSchema->schemaName);
 		if ($this->createFile ) {
 			$write_file = true;
 			if ($this->format == 'seeder') {
