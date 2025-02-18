@@ -24,9 +24,13 @@ class BlockUserBehavior extends Behavior
 		if (!array_key_exists($this->activeAttribute, $event->changedAttributes)) {
 			return; // 'activa' attribute didn't change, so we don't need to do anything
 		}
+		if ($model->{$this->activeAttribute} == $event->changedAttributes[$this->activeAttribute]) {
+			// same value, different type
+			return;
+		}
 		$user = $model->{$this->userRelation};
 		if ($user) {
-			if ($user->getIsBlocked()) {
+			if ($user->getIsBlocked() && $model->{$this->activeAttribute}) {
 				$user->trigger(UserEvent::EVENT_BEFORE_UNBLOCK);
 				$result = (bool)$user->updateAttributes(['blocked_at' => null]);
 				$user->trigger(UserEvent::EVENT_AFTER_UNBLOCK);
