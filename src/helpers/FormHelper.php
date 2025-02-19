@@ -544,7 +544,7 @@ ajax;
 		}
 	}
 
-	public static function renderTitle(string $supertitle, string $title, string $subtitle, bool $embedded = false): string
+	public static function renderTitle(string ?$supertitle, string ?$title, string ?$subtitle, bool $embedded = false): string
 	{
         $parts = [];
         if ($supertitle) {
