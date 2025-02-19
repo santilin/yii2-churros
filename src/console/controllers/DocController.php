@@ -35,20 +35,6 @@ class DocController extends Controller
 			'source_path' => '/home/santilin/devel/capel',
 			'dest_path' => '/home/santilin/devel/capel/doc/docs',
 		],
-		'devel' => [
-			'doc_pattern' => '//'.'/#',
-			'find_patterns' => ["*.php","*.js","*.css","*.tex","*.txt" ],
-			'find_exclude' => [ 'mkdocs', 'vendor'],
-			'dest_path' => 'des'
-
-		],
-		'user' => [
-			'doc_pattern' => '//'.'/@',
-			'find_patterns' => ["*.php","*.js","*.css","*.tex","*.txt" ],
-			'find_exclude' => [ 'mkdocs', 'vendor'],
-			'dest_path' => 'usu'
-
-		]
 	];
 /*
 	public function options($action_id)
@@ -65,24 +51,7 @@ class DocController extends Controller
 	const KANBOARD_CARD_LINK = '[kb$1](https://intranet.cepaim.org.es/kanboard/?controller=TaskViewController&action=show&task_id=$1)';
 
 	const HEADERS = [
-		'GL' => 'Gestión laboral',
-		'intro' =>    '010.Introducción',
-		'nomenclatura' => '020.Nomenclatura',
-		'acceso' =>   '040.Acceso/Permisos',
-		'permisos' => '040.Acceso/Permisos',
-		'permiso' =>  '040.Acceso/Permisos',
-		'modelo' =>   '100.Modelo',
-		'db' =>       '110.Base de datos',
-		'bd' =>       '110.Base de datos',
-		'form' =>     '200.Formularios',
 
-
-		'informes' => '300.Informes y estadísticas',
-		'stats' =>    '300.Informes y estadísticas',
-		'estadist' => '300.Informes y estadísticas',
-		'estadis' =>  '300.Informes y estadísticas',
-		'estadísticas' => '300.Informes y estadísticas',
-		'estadisticas' => '300.Informes y estadísticas',
 	];
 
 
@@ -93,24 +62,26 @@ class DocController extends Controller
 	public function actionBuild(string $suite)
 	{
 		$this->stdout("Generando documentación de $suite\n", Console::FG_GREEN, Console::BOLD);
-		$params = $this->suite_params[$suite];
-		$source_dir = $params['source_path'] ?? Yii::getAlias('@app');
-  		$code_comments = $this->getCodeComments($source_dir, $params['find_patterns'], $params['doc_pattern']);
+		$suites_config = require_once(Yii::getAlias('@app/mkdocs/suites.php'));
+		$suite_params = $suites_config[$suite];
+		$source_dir = $suite_params['source_path'] ?? Yii::getAlias('@app');
+  		$code_comments = $this->getCodeComments($source_dir, $suite_params['find_patterns'], $suite_params['doc_pattern']);
 		if ($this->verbose) {
 			$this->stdout("Encontradas " . count($code_comments) . " líneas de comentarios\n");
 		}
-		$dest_dir = Yii::getAlias('@app/mkdocs/' . ($params['dest_path'] ?? '') . '/docs');
+		$dest_dir = Yii::getAlias('@app/mkdocs/' . ($suite_params['dest_path'] ?? '') . '/docs');
 		if (!is_dir($dest_dir)) {
 			if (!mkdir($dest_dir, 0755, true)) {
 				die("Failed to create destination directory: $dest_dir");
 			}
 		}
-		$this->genDocFiles($code_comments, $params['doc_pattern'], $dest_dir);
+		$this->genDocFiles($code_comments, $suite_params, $dest_dir);
  		exec( "cd $dest_dir/..; mkdocs build");
 	}
 
-	private function genDocFiles(array $code_comments, string $doc_pattern, string $dest_path)
+	private function genDocFiles(array $code_comments, array $suite_params, string $dest_path)
 	{
+		$doc_pattern = $suite_params['doc_pattern'];
 		// The pattern previous to $doc_pattern is the file spec
 		$pat = "\.\/([^:]*):([0-9^:]+):\s*$doc_pattern(.*?)((:[0-9]+)|:[0-9\-])?\s+(.+)$";
 		$comments = [];
@@ -120,9 +91,9 @@ class DocController extends Controller
 				$file_parts = explode('.', $m[3]);
 				$file = mb_strtoupper(array_shift($file_parts));
 				if (empty($file_parts)) {
-					$header = str_replace('_', ' ', $this->sortHeader('intro'));
+					$header = str_replace('_', ' ', $this->sortHeader('intro', $suite_params['headers']));
 				} else {
-					$header = str_replace('_', ' ', $this->sortHeader(implode('.',$file_parts)));
+					$header = str_replace('_', ' ', $this->sortHeader(implode('.',$file_parts), $suite_params['headers']));
 				}
 				if (!empty($m[4])) {
 					$order = str_pad(trim($m[4]), 3, '0', STR_PAD_LEFT) . ':';
@@ -200,12 +171,12 @@ class DocController extends Controller
 		return $comments;
 	}
 
-	private function sortHeader($header)
+	private function sortHeader($header, array $headers): string
 	{
 		if( preg_match('/^([0-9]+)([^ ].*)$/', $header, $m) ) {
 			return str_pad($m[1], 3, '0', STR_PAD_LEFT) . '.'. $m[2];
 		} else {
-			return self::HEADERS[$header]??'500.' . $header;
+			return $headers[$header]??'500.' . $header;
 		}
 	}
 
