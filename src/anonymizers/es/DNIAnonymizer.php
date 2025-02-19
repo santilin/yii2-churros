@@ -21,6 +21,8 @@ class DNIAnonymizer
 	const NIE_PREFIXES = ['X' => 0, 'Y' => 1, 'Z' => 2];
 	const CIF_LETTERS = 'ABCDEFGHJKLMNPQRSUVW';
 
+	private $exceptions = [ 'admin' ];
+
 	private $secretKey;
 
 	public function __construct(string $secretKey) {
@@ -29,7 +31,7 @@ class DNIAnonymizer
 
 	public function anonymize(?string $originalID): ?string
 	{
-		if ($originalID === null || empty($originalID)) {
+		if ($originalID === null || empty($originalID) || in_array($originalID, $this->exceptions)) {
 			return $originalID;
 		}
 		$originalID = strtoupper($originalID);

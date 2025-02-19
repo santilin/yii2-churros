@@ -33,12 +33,13 @@ trait EmailSenderModelTrait
 		$to = (array)$to;
 		if( YII_ENV_DEV ) {
 			$subject = "[dev:to:" . reset($to) . "]$subject";
+			$to = [AppHelper::yiiparam('develEmail')??'no-reply@example.com'];
 		}
 		$composed = Yii::$app->mailer
 			->compose( [ 'html' => $view_name, 'text' => "text/$view_name" ], $view_params )
 			->setFrom($from)
-			->setTo( YII_ENV_DEV ? [AppHelper::yiiparam('develEmail')] : $to )
-			->setSubject( $subject);
+			->setTo($to)
+			->setSubject($subject);
 		try {
 			$sent = $composed->send();
 		} catch ( \Swift_TransportException $e ) {
