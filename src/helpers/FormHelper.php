@@ -162,7 +162,7 @@ class FormHelper
 	static public function displayButtons(array $buttons, string $sep = '&nbsp;'): string
 	{
 		$ret = [];
-		foreach( $buttons as $name => $button ) {
+		foreach ($buttons as $name => $button) {
 			if( empty($button) ) {
 				continue;
 			}
@@ -199,7 +199,7 @@ class FormHelper
 				}
 			}
 			$url_return_to = ArrayHelper::remove($button, 'returnTo', null);
-			switch ($button['type']) {
+			switch ($button['type']??'button') {
 			case 'a-post':
 				$button['htmlOptions']['data']['method'] = 'post';
 				// no break
