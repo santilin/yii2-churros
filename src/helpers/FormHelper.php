@@ -429,9 +429,12 @@ ajax;
 	}
 
 
-	static public function mergePermissions(array $final_perms, array $extra_perms): array
+	static public function mergePermissions(array $final_perms, ?array $extra_perms): array
 	{
-		foreach( $extra_perms as $extra_perm ) {
+		if (empty($extra_perms)) {
+			return $final_perms;
+		}
+		foreach ($extra_perms as $extra_perm ) {
 			if( $extra_perm[0] == '-' ) {
 				$extra_perm = substr($extra_perm,1);
 				if( in_array($extra_perm, $final_perms) ) {

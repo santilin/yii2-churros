@@ -1,3 +1,5 @@
+Tynymce: no carga los plugins 'print', 'contextMenu', 'paste'
+
 # save relations:
 - Si es hasone y solo es la foreign key, no generar la relación en el formulario
 

@@ -151,23 +151,23 @@ trait ModelSearchTrait
 		$relation = null;
 		while (strpos($attribute, '.') !== FALSE || isset($model::$relations[$attribute])) {
 			if (strpos($attribute, '.') === FALSE) {
-				$field_name = $attribute;
+				$relation_name = $attribute;
 				$attribute = '';
 			} else {
-				list($field_name, $attribute) = AppHelper::splitString($attribute, '.');
+				list($relation_name, $attribute) = AppHelper::splitString($attribute, '.');
 			}
-			$relation = $model::$relations[$field_name]??null;
+			$relation = $model::$relations[$relation_name]??null;
 			if ($relation) {
 				if ($relation['type'] == 'ManyToMany') {
 					$junction_relation = $model::$relations[$relation['join']];
 					$junction_model_class = $junction_relation['modelClass'];
 					$junction_model = $junction_model_class::instance();
-					$junction_table_alias = $table_alias . '_join_' . $field_name;
+					$junction_table_alias = $table_alias . '_join_' . $relation_name;
 					$nested_tablename = str_replace(['{{%', '{{', '}}'], '', $junction_model->tableName());
 					$nested_relations[$junction_table_alias] = $nested_tablename; // $junction_relation['relatedTablename'];
 					/// @todo $final_attribute when nested
 					$this->addJoinIfNotExists($query, $nested_relations, "LEFT JOIN", [ $junction_table_alias => $nested_tablename], $junction_relation['join']);
-					$related_table_alias = $junction_table_alias . '_' . $field_name;
+					$related_table_alias = $junction_table_alias . '_' . $relation_name;
 					$nested_relations[$related_table_alias] = $relation['relatedTablename'];
 					$model_class = $relation['modelClass'];
 					$model = $model_class::instance();
@@ -177,7 +177,7 @@ trait ModelSearchTrait
 						}
 					}
 					if ($this->addJoinIfNotExists($query, $nested_relations, "LEFT JOIN", [ $related_table_alias => $model->tableName()], $related_relation['join'])) {
-						if ($attribute == $field_name) { // no related field set
+						if ($attribute == $relation_name) { // no related field set
 							/// @todo findCodeAndDescFields
 							$final_attribute = $related_table_alias . '.' . $model->findCodeField();
 						} else {
@@ -189,7 +189,7 @@ trait ModelSearchTrait
 						$table_alias = $nested_tablename;
 					}
 				} else {
-					$table_alias .= "_$field_name";
+					$table_alias = $relation_name;
 					$model_class = $relation['modelClass'];
 					$model = $model_class::instance();
 					$nested_relations[$table_alias] = $relation['relatedTablename'];
@@ -197,7 +197,7 @@ trait ModelSearchTrait
 					$final_attribute = $attribute;
 				}
 			} else {
-				throw new InvalidArgumentException($field_name . ": relation not found in model " . self::class . ' (SearchModel::filterWhereRelated)');
+				throw new InvalidArgumentException($relation_name . ": relation not found in model " . self::class . ' (SearchModel::filterWhereRelated)');
 			}
 		}
 		return [$final_attribute??$attribute,$table_alias == 'as' ? '':$table_alias,$model,$relation];
