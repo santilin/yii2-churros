@@ -452,7 +452,8 @@ trait ModelInfoTrait
 		foreach (self::$relations as $relname => $rel_info) {
 			if ($rel_info['modelClass'] == $cn) {
 				if ($rel_info['type'] == 'ManyToMany') {
-					$rel_field = $this->getLastTwoParts($rel_info['right']);
+					// $rel_field = $this->getLastTwoParts($rel_info['right']);
+					$rel_field = $rel_info['other'];
 					return [$rel_info['join'], $rel_field];
 				}
 				$related_field = $rel_info['left'];

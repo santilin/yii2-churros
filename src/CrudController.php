@@ -141,7 +141,7 @@ class CrudController extends \yii\web\Controller
 		$related_field = $detail->relatedFieldForModel($master);
 		if (is_array($related_field)) { // many2many
 			$params['_search_relations'] = [ $related_field[0] ];
-			$params[$detail->formName()][$related_field[1]] = $master->getPrimaryKey();
+			$params[$detail->formName()][$related_field[0].'.'.$related_field[1]] = $master->getPrimaryKey();
 		} else {
 			$params[$detail->formName()][$related_field] = $master->getPrimaryKey();
 			$detail->$related_field = $master->getPrimaryKey();
