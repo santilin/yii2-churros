@@ -159,10 +159,10 @@ class YADTC extends \DateTime
 	static public function dateOrToday(int|string|\DateTime|YADTC $date = null,
 									   DateTimeZone $timezone = null): YADTC
 	{
-		if ($date instanceof YADTC ) {
+		if ($date instanceof YADTC) {
 			return $date;
 		}
-		if( ($date instanceof \DateTime) ) {
+		if ($date instanceof \DateTime) {
 			$f = new YADTC();
 			$f->setTimestamp( $date->getTimestamp() );
 			$f->setTimezone( $date->getTimezone() );
@@ -242,12 +242,12 @@ class YADTC extends \DateTime
 		return $this->format('Y-m-d');
 	}
 
-	public function moveToBeginningOfWeek(): YADTC
+	public function moveToWeekStart(): YADTC
 	{
 		return $this->modify('monday this week');
 	}
 
-	public function moveToEndingOfWeek(): YADTC
+	public function moveToWeekEnd(): YADTC
 	{
 		return $this->modify('sunday this week');
 	}
