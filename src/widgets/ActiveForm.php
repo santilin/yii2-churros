@@ -373,7 +373,7 @@ class ActiveForm extends Bs5ActiveForm
 			$ret .= Html::errorSummary($models, $options);
 		} else {
 			Html::addCssClass($options, $this->errorSummaryCssClass);
-			$ret .= Html::errorSummary($models, $options);
+			$ret = Html::errorSummary($models, $options);
 		}
 		return $ret;
 	}
