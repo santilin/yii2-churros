@@ -110,36 +110,6 @@ class WidgetLayer
 		} else {
 			$cols = intval($layout_row['layout']); // ?:max(count($layout_row['content']), 4);
 		}
-		// if ($layout_row_type != 'html' && $layout_row_type != 'container') {
-		// 	$only_widget_names = true;
-		// 	foreach($layout_row as $lrk => $layout_row) {
-		// 		if (empty($layout_row)) {
-		// 			unset($layout_row[$lrk]);
-		// 			continue;
-		// 		}
-		// 		if (is_array($layout_row)) {
-		// 			$only_widget_names = false;
-		// 			break;
-		// 		}
-		// 	}
-		// 	if ($only_widget_names) {
-		// 		$layout_row = [
-		// 			[
-		// 				'type' => 'widgets',
-		// 				'content' => $layout_rows,
-		// 				'size' => $layout_row['size'],
-		// 				'layout' => $parent_options['layout']??'1col',
-		// 				'style' => $parent_options['style']??'rows',
-		// 			] ];
-		// 	}
-		// } else if ($layout_row_type == 'html') {
-		// 	$layout_rows = [
-		// 		[
-		// 			'type' => 'html',
-		// 			'content' => $layout_rows,
-		// 		]
-		// 	];
-		// }
 		$ret = '';
 		switch ($layout_row_type) {
 		case 'container':
@@ -200,6 +170,8 @@ class WidgetLayer
 					}
 					$ret .= '</div>';
 					break;
+				default:
+					throw new \Exception($layout_row['style'] . ': container style not valid');
 			}
 			$ret .= "<!--container_[$row_key]-->";
 			break;
@@ -345,7 +317,10 @@ class WidgetLayer
 			$ret .= '</div><!--row-->';
 			break;
 		case 'subtitle':
-			$ret .= $this->layoutContent(null, $layout_row['title'], $layout_row['options']??[]);
+			$ret .= $this->layoutSubtitle($layout_row['content'], $layout_row['layout'], 'large', $layout_row['options']??[]);
+			break;
+		case 'label&content':
+			$ret .= $this->layoutContent($layout_row['label'], $layout_row['content'], $layout_row['layout'], 'large', $layout_row['options']??[]);
 			break;
 		case 'html':
 		case 'html_rows':
@@ -468,7 +443,6 @@ class WidgetLayer
 					}
 				}
 				$classes['wrapperOptions']['class'] = implode(' ', $classes['wrapper']) . ' fld-' . $widget_name;
-				$classes['field'] = ['love'];
 				if (YII_ENV_DEV) {
 					$classes['wrapperOptions']['class'] .= " {$layout_of_row}x$widget_layout";
 				}
@@ -494,23 +468,31 @@ class WidgetLayer
 		return $fs;
 	}
 
-	protected function layoutContent(?string $label, string $content, array $options = []):string
+	protected function layoutContent(string $label, string $content, string $layout_of_row,
+									 string $widget_layout, array $options = []):string
 	{
 		$ret = '';
-		$wrapper_options = [ 'class' => $this->fieldConfig['horizontalCssClasses']['wrapper'] ];
-		if( isset($options['class']) ) {
-			Html::addCssClass($wrapper_options, $options['class']);
+		$classes = $this->widget_layout_horiz_config[$layout_of_row][$widget_layout]['horizontalCssClasses'];
+		$ret .= '<div class="row mb-3">';
+		if (!empty($label)) {
+			$ret .= Html::tag('label', $label, [ 'class' => $classes['label']]);
 		}
-		if( empty($label) ) {
-			Html::addCssClass($wrapper_options, $this->fieldConfig['horizontalCssClasses']['offset']);
-		}
-		$wrapper_tag = ArrayHelper::remove($wrapper_options, 'tag', 'div');
-		$ret .= Html::beginTag($wrapper_tag, $wrapper_options);
-		$ret .= $content;
-		$ret .= Html::endTag($wrapper_tag);
+		$ret .= Html::tag('div', $content, [ 'class' => $classes['wrapper']]);
+		$ret .= '</div>';
 		return $ret;
 	}
 
+	protected function layoutSubtitle(string $content, string $layout_of_row,
+		string $widget_layout, array $options = []):string
+	{
+		$ret = '';
+		$classes = $this->widget_layout_horiz_config[$layout_of_row][$widget_layout]['horizontalCssClasses'];
+		$tag = ArrayHelper::remove($options, 'tag', 'h2');
+		$ret .= '<div class="row mb-3">';
+		$ret .= Html::tag($tag, $content, $options);
+		$ret .= '</div>';
+		return $ret;
+	}
 	public function layoutButtons(array $buttons, string $layout, array $options = []): string
 	{
 		$buttons = FormHelper::displayButtons($buttons);

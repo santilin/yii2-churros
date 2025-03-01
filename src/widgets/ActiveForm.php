@@ -15,6 +15,7 @@ class ActiveForm extends Bs5ActiveForm
 	public $fieldConfig = [ 'template' => "{label}\n{beginWrapper}\n{input}\n{hint}\n{error}\n{endWrapper}", ];
 
 	public $errorSummaryCssClass = 'error-summary alert alert-danger';
+	public $warningSummaryCssClass = 'error-summary alert alert-warning';
 
 	public const FORM_FIELD_HORIZ_CLASSES = [
 		'vertical' => [
@@ -358,14 +359,21 @@ class ActiveForm extends Bs5ActiveForm
 	];
 
 	#[Override]
-	public function errorSummary($models, $options = [])
+	public function errorSummary($models, $options = []): string
 	{
-		Html::addCssClass($options, $this->errorSummaryCssClass);
+		if (!empty($options['dontShow'])) {
+			return '';
+		}
 		$options['encode'] = $this->encodeErrorSummary;
 		$showWarnings = ArrayHelper::remove($options, 'showWarnings');
-		$ret = Html::errorSummary($models, $options);
 		if ($showWarnings) {
-			$ret .= self::warningSummary($models, $options);
+			$warning_options = $options;
+			Html::addCssClass($warning_options, $this->warningSummaryCssClass);
+			$ret = self::warningSummary($models, $warning_options);
+			$ret .= Html::errorSummary($models, $options);
+		} else {
+			Html::addCssClass($options, $this->errorSummaryCssClass);
+			$ret .= Html::errorSummary($models, $options);
 		}
 		return $ret;
 	}
@@ -374,27 +382,55 @@ class ActiveForm extends Bs5ActiveForm
 	/**
 	 * Based on Html::errorSummary
 	 */
-	static protected function warningSummary($models, $options = [])
+	protected function warningSummary($models, $options = [])
 	{
 		$header = ArrayHelper::remove($options, 'warningsHeader', '<p>' . Yii::t('yii', 'Warnings:') . '</p>');
 		$footer = ArrayHelper::remove($options, 'footer', '');
 		$encode = ArrayHelper::remove($options, 'encode', true);
 		$showAllErrors = ArrayHelper::remove($options, 'showAllErrors', false);
 		$emptyClass = ArrayHelper::remove($options, 'emptyClass', null);
+		$layout = ArrayHelper::remove($options, 'layout', 'ul'); // New option for layout
+
+		Html::addCssClass($options, $this->warningSummaryCssClass);
 		$lines = self::collectWarnings($models, $encode, $showAllErrors);
+
 		if (empty($lines)) {
 			// still render the placeholder for client-side validation use
-			$content = '<ul></ul>';
+			$content = $this->getEmptyContent($layout);
 			if ($emptyClass !== null) {
 				$options['class'] = $emptyClass;
 			} else {
 				$options['style'] = isset($options['style']) ? rtrim($options['style'], ';') . '; display:none' : 'display:none';
 			}
 		} else {
-			$content = '<ul><li>' . implode("</li>\n<li>", $lines) . '</li></ul>';
+			$content = $this->formatContent($lines, $layout);
 		}
 
 		return Html::tag('div', $header . $content . $footer, $options);
+	}
+
+	protected function getEmptyContent($layout)
+	{
+		switch ($layout) {
+			case 'ol':
+				return '<ol></ol>';
+			case 'p':
+				return '<p></p>';
+			default:
+				return '<ul></ul>';
+		}
+	}
+
+	protected function formatContent($lines, $layout)
+	{
+		switch ($layout) {
+			case 'ol':
+				return '<ol><li>' . implode("</li>\n<li>", $lines) . '</li></ol>';
+			case 'p':
+				return '<p>' . implode("</p>\n<p>", $lines) . '</p>';
+			default:
+				return '<ul><li>' . implode("</li>\n<li>", $lines) . '</li></ul>';
+		}
 	}
 
 
