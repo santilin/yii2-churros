@@ -8,7 +8,7 @@ Trait ModelSuccessesTrait
 	/**
 	 * @var array saving success messages (attribute name => array of messages)
 	 */
-	private $_successes = null;
+	private ?array $_successes = null;
 
 	/**
 	 * Returns a value indicating whether there is any success after saving the model
