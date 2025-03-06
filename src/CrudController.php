@@ -368,8 +368,11 @@ class CrudController extends \yii\web\Controller
 		return $pdf->render();
 	}
 
-	protected function returnTo(?string $to, string $from, $model, array $redirect_params = []): string|array
+	protected function returnTo(array|string|null $to, string $from, $model, array $redirect_params = []): string|array
 	{
+		if (is_array($to)) {
+			return array_merge($to, $redirect_params);
+		}
 		if (empty($to) || $to == 'returnTo' || $to == 'referrer') {
 			$returnTo = $this->request->post('returnTo');
 			if( !$returnTo ) {
@@ -429,12 +432,11 @@ class CrudController extends \yii\web\Controller
 				}
 			} else if ($to_model == 'model') {
 			} else {
-				$model =$$to_model;
+				$model = $$to_model;
 			}
 		}
 		$pk = $model->getPrimaryKey(true);
 		switch($to_action) {
-			case 'view':
 			case 'update':
 			case 'duplicate':
 				$redirect_params = array_merge($redirect_params, $pk);
@@ -446,6 +448,7 @@ class CrudController extends \yii\web\Controller
 				break;
 			case 'index':
 				break;
+			case 'view':
 			default:
 				$redirect_params = array_merge($redirect_params, $pk);
 		}

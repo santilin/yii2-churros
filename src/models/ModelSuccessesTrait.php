@@ -67,6 +67,25 @@ Trait ModelSuccessesTrait
 	}
 
 	/**
+	 * Returns the successes for all attributes as a one-dimensional array.
+	 * @param bool $showAllWarnings boolean, if set to true every success message for each attribute will be shown otherwise
+	 * only the first success message for each attribute will be shown.
+	 * @return array successes for all attributes as a one-dimensional array. Empty array is returned if no success.
+	 * @see getWarnings()
+	 * @see getFirstWarnings()
+	 * @since 2.0.14
+	 */
+	public function getSuccessesSummary($showAllSuccesses = true)
+	{
+		$lines = [];
+		$successes = $showAllSuccesses ? $this->getSuccesses() : $this->getFirstSuccess();
+		foreach ($successes as $es) {
+			$lines = array_merge($lines, (array)$es);
+		}
+		return $lines;
+	}
+
+	/**
 	 * Removes all successes
 	 */
 	public function clearSuccesses($attribute = null)
