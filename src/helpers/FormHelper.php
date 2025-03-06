@@ -257,9 +257,7 @@ $ajax_error;
 	}
 });
 ajax;
-				$ret[] = Html::button(
-					$title,
-					$button['htmlOptions']);
+				$ret[] = Html::button( $title, $button['htmlOptions']);
 				break;
 			case 'ajax-post':
 				if (!is_array($button['url'])) {
@@ -298,16 +296,23 @@ ajax;
 			case 'reset':
 				$ret[] = Html::submitButton($title, $button['htmlOptions']);
 				break;
-			case 'button-post':
-				$button['htmlOptions']['data']['method'] = 'post';
 				// no break
 			case 'button':
-				if( isset($button['url']) && !isset($button['htmlOptions']['onclick']) ) {
-					$full_url = self::prepareButtonUrl($button['url'], $url_return_to);
-					if (StringHelper::startsWith($full_url, 'javascript:')) {
-						$button['htmlOptions']['onclick'] = substr($full_url, 11);
-					} else {
-						$button['htmlOptions']['onclick'] = "window.location.href='$full_url'";
+			case 'button-post':
+			case 'button-trigger':
+				$full_url = self::prepareButtonUrl($button['url'], $url_return_to);
+				if ($button['type'] == 'button_post') {
+					$button['htmlOptions']['data']['method'] = 'post';
+				}
+				if ($button['type'] == 'button-trigger') {
+					$button['htmlOptions']['data']['url'] = $full_url;
+				} else {
+					if (isset($button['url']) && !isset($button['htmlOptions']['onclick']) ) {
+						if (StringHelper::startsWith($full_url, 'javascript:')) {
+							$button['htmlOptions']['onclick'] = substr($full_url, 11);
+						} else {
+							$button['htmlOptions']['onclick'] = "window.location.href='$full_url'";
+						}
 					}
 				}
 				$ret[] = Html::button($title, $button['htmlOptions']);
