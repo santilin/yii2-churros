@@ -170,7 +170,8 @@ class JsonController extends \yii\web\Controller
 			$model->setIsnewRecord(true);
 			if ($model->validate() && $model->save(false) ) {
 				if ($req->getIsAjax()) {
-					return json_encode($model->getAttributes());
+					Yii::$app->response->format = \yii\web\Response::FORMAT_JSON;
+					return ['model' => $model->getAttributes(), 'success' => $model->getSuccesses()];
 				}
 				$this->addSuccessFlashes('create', $model);
 				return $this->redirect($this->returnTo(null, 'create', $model));
@@ -202,7 +203,8 @@ class JsonController extends \yii\web\Controller
 			$model->setIsNewRecord(true);
 			if ($model->validate() && $model->save(false)) {
 				if ($req->getIsAjax()) {
-					return json_encode($model->getAttributes());
+					Yii::$app->response->format = \yii\web\Response::FORMAT_JSON;
+					return ['model' => $model->getAttributes(), 'success' => $model->getSuccesses()];
 				}
 				$this->addSuccessFlashes('duplicate', $model);
 				return $this->redirect($this->returnTo(null, 'duplicate', $model));
@@ -231,7 +233,8 @@ class JsonController extends \yii\web\Controller
 		if ($model->loadAll($params, static::findRelationsInForm($params)) && $req->isPost ) {
 			if ($model->validate() && $model->save(false) ) {
 				if ($req->getIsAjax()) {
-					return json_encode($model->getAttributes());
+					Yii::$app->response->format = \yii\web\Response::FORMAT_JSON;
+					return ['model' => $model->getAttributes(), 'success' => $model->getSuccesses()];
 				}
 				$this->addSuccessFlashes('update', $model);
 				return $this->redirect($this->returnTo(null, 'update', $model));
@@ -259,7 +262,8 @@ class JsonController extends \yii\web\Controller
 		try {
 			if ($model->delete()) {
 				if (Yii::$app->request->getIsAjax()) {
-					return json_encode($path);
+					Yii::$app->response->format = \yii\web\Response::FORMAT_JSON;
+					return ['model' => $model->getAttributes(), 'success' => $model->getSuccesses()];
 				}
 				$this->addSuccessFlashes('delete', $model);
 				return $this->redirect($this->returnTo(null, 'delete', $model));
