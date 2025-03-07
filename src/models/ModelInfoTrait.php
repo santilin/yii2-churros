@@ -42,7 +42,8 @@ trait ModelInfoTrait
 		return $this->recordDesc();
 	}
 
-	const ENGLISH_MALE_WORDS = [
+	/// Traits can not have constants
+	static $ENGLISH_MALE_WORDS = [
 		"la" => "the",
 		"La" => "The",
 		"las" => "the",
@@ -68,7 +69,7 @@ trait ModelInfoTrait
 		if( ($language == 'es' || substr(Yii::$app->language,0,2) == 'es') ) {
 			$male_words = EsHelper::SPANISH_MALE_WORDS;
 		} else {
-			$male_words = self::ENGLISH_MALE_WORDS;
+			$male_words = $ENGLISH_MALE_WORDS;
 		}
 		$matches = $placeholders = [];
 		$female = $this->getModelInfo('female');
