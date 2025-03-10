@@ -473,11 +473,11 @@ class WidgetLayer
 	{
 		$ret = '';
 		$classes = $this->widget_layout_horiz_config[$layout_of_row][$widget_layout]['horizontalCssClasses'];
-		$ret .= '<div class="row mb-3">';
+		$ret .= '<div class="row w-100">';
 		if (!empty($label)) {
 			$ret .= Html::tag('label', $label, [ 'class' => $classes['label']]);
 		}
-		$ret .= Html::tag('div', $content, [ 'class' => $classes['wrapper']]);
+		$ret .= Html::tag('div', $content, [ 'class' => array_merge(['field'], $classes['wrapper'])]);
 		$ret .= '</div>';
 		return $ret;
 	}
