@@ -229,7 +229,8 @@ class CrudController extends \yii\web\Controller
 			$model->resetPrimaryKeys();
 			if( $model->saveAll(true) ) {
 				if ($this->request->getIsAjax()) {
-					return json_encode($model->getAttributes());
+					Yii::$app->response->format = \yii\web\Response::FORMAT_JSON;
+					return ['model' => $model->getAttributes(), 'success' => $model->getSuccesses()];
 				}
 				$this->addSuccessFlashes('duplicate', $model);
 				return $this->redirect($this->returnTo(null, 'duplicate', $model));
@@ -259,11 +260,8 @@ class CrudController extends \yii\web\Controller
 		if ($model->loadAll($params, static::findRelationsInForm($params))) {
 			if ($model->saveAll(true)) {
 				if ($this->request->getIsAjax()) {
-					\Yii::$app->response->format = \yii\web\Response::FORMAT_JSON;
-					return [
-						'data' => $model->getAttributes(),
-						'success_message' => $model->t('churros', $this->getResultMessage('update')),
-					];
+					Yii::$app->response->format = \yii\web\Response::FORMAT_JSON;
+					return ['model' => $model->getAttributes(), 'success' => $model->getSuccesses()];
 				}
 				$this->addSuccessFlashes('update', $model);
 				return $this->redirect($this->returnTo(null, 'update', $model));
@@ -291,7 +289,8 @@ class CrudController extends \yii\web\Controller
 		try {
 			if ($model->deleteWithRelated()) {
 				if ($this->request->getIsAjax()) {
-					return json_encode($id);
+					Yii::$app->response->format = \yii\web\Response::FORMAT_JSON;
+					return ['model' => $model->getAttributes(), 'success' => $model->getSuccesses()];
 				}
 				$this->addSuccessFlashes('delete', $model);
 				return $this->redirect($this->returnTo(null, 'delete', $model));
