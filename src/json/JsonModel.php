@@ -107,9 +107,15 @@ class JsonModel extends \yii\base\Model
                 }
             }
             $child->setPath($this->getPath() . '/' . $child->jsonPath() . '/' . $child->_id);
+            $child->afterFind();
             $models[] = $child;
         }
         return $models;
+    }
+
+    public function afterFind()
+    {
+        // trigger?
     }
 
     public function loadRelatedModels(string $relation_name): array|JsonModel
