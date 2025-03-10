@@ -96,7 +96,11 @@ trait ModelInfoTrait
 					$placeholders[$bracket_match] = $this->recordDesc();
 					break;
 				case 'record_link':
-					$placeholders[$bracket_match] = $this->recordDesc('link');
+					if (Yii::$app->controller) {
+						$placeholders[$bracket_match] = $this->linkToMe('medium');
+					} else {
+						$placeholders[$bracket_match] = $this->recordDesc();
+					}
 					break;
 				case 'record_long':
 					$placeholders[$bracket_match] = $this->recordDesc('long');

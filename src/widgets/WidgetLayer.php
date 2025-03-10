@@ -150,7 +150,7 @@ class WidgetLayer
 					$ret .= '</div></div>';
 					break;
 				case 'rows':
-					$ret .= "<div class=\"row $cols-cols-layout\">";
+					$ret .= "<div class=\"row layout-$cols-cols\">";
 					foreach ($layout_row['content'] as $kc => $content) {
 						$ret .= '<div class="' . $this->columnClasses($cols) . '">';
 						$ret .= $this->layoutWidgets((array)$content,
@@ -161,7 +161,7 @@ class WidgetLayer
 					break;
 				case 'cols':
 					$cols = min(count($layout_row['content']), 4);
-					$ret .= "<div class=\"row $cols-cols-layout\">";
+					$ret .= "<div class=\"row layout-$cols-cols\">";
 					foreach ($layout_row['content'] as $kc => $content) {
 						$ret .= '<div class="' . $this->columnClasses($cols) . '">';
 						$ret .= $this->layoutWidgets([$content],
