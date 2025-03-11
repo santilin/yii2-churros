@@ -96,7 +96,7 @@ class WidgetLayer
 			}
 		} else {
 			if (empty($layout_row['style'])) {
-				$layout_row['style'] = 'grid';
+				$layout_row['style'] = 'rows';
 			}
 		}
 		if (empty($layout_row['size'])) {
@@ -186,14 +186,16 @@ class WidgetLayer
 				}
 			}
 			if ($only_widget_names) {
-				$layout_row = ['type' => $layout_row_type, 'content' => $layout_row, 'style' => 'grid'];
+				$layout_row = ['type' => $layout_row_type, 'content' => $layout_row, 'style' => 'rows'];
 			}
 			$subtitle = $layout_row['subtitle']??null;
 			$row_html = '';
 			if ($subtitle) {
 				$row_html .= "<div class=row><div class=col-12><div class=\"subtitle mb-3 alert alert-warning\">$subtitle</div></div></div>";
 			}
-			$row_html .= '<div class=row>';
+			if ($layout_row['style'] != 'rows') {
+				$row_html .= '<div class=row>';
+			}
 			foreach ($layout_row['content'] as $widget_name ) {
 				$fs = '';
 				$open_divs = 0;
@@ -202,7 +204,7 @@ class WidgetLayer
 						global $widgets_used;
 						$widgets_used[] = $widget_name;
 					}
-					if ($widget instanceof \yii\bootstrap5\ActiveField ) {
+					if ($widget instanceof \yii\bootstrap5\ActiveField) {
 						// bs5 ActiveFields add a row container over the whole field
 						if ($widget->horizontalCssClasses['layout']??false) {
 							$widget_layout = ArrayHelper::remove($widget->horizontalCssClasses, 'layout');
@@ -295,7 +297,9 @@ class WidgetLayer
 				}
 
 			}
-			$row_html .= '</div><!-- main row-->';
+			if ($layout_row['style'] != 'rows') {
+				$row_html .= '</div><!-- main row-->';
+			}
 			if (($title = $layout_row['title']??false) != false) {
 				$legend = Html::tag('legend', $title, $layout_row['title_options']??[]);
 				$ret .= Html::tag('fieldset', "$legend<hr/>$row_html", $layout_row['htmlOptions']??[]);
@@ -365,6 +369,7 @@ class WidgetLayer
 		$row_style = $layout_row['style'];
 		switch ($row_style) {
 			case 'grid':
+			case 'rows':
 			case 'grid-nolabels':
 				if ('static' == $widget_layout) {
 					$classes = $this->widget_layout_horiz_config['static']['horizontalCssClasses'];
@@ -424,6 +429,7 @@ class WidgetLayer
 		switch ($row_style = $layout_row['style']) {
 			case 'grid':
 			case 'grid-nolabels':
+			case 'rows':
 				if ($widget_layout == 'checkbox') {
 					$widget_layout = 'large';
 				}
