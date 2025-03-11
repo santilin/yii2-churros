@@ -90,7 +90,7 @@ class WidgetLayer
 			return implode('', $ret);
 		}
 		$layout_row_type = $layout_row['type']??'widgets';
-		if ($layout_row_type == 'container') {
+		if ($layout_row_type == 'container' || $layout_row_type == 'fields' || $layout_row_type == 'widgets') {
 			if (empty($layout_row['style'])) {
 				$layout_row['style'] = 'rows';
 			}
@@ -185,11 +185,16 @@ class WidgetLayer
 					break;
 				}
 			}
+			$row_html = '';
+			$add_row_container = false;
+			if ($cols == 1 && $layout_row['style']!='rows') {
+				$add_row_container = true;
+				$row_html .= "<div class=\"row layout-$cols-cols\"><div col=\"col-12\">";
+			}
 			if ($only_widget_names) {
 				$layout_row = ['type' => $layout_row_type, 'content' => $layout_row, 'style' => 'rows'];
 			}
 			$subtitle = $layout_row['subtitle']??null;
-			$row_html = '';
 			if ($subtitle) {
 				$row_html .= "<div class=row><div class=col-12><div class=\"subtitle mb-3 alert alert-warning\">$subtitle</div></div></div>";
 			}
@@ -299,6 +304,9 @@ class WidgetLayer
 			}
 			if ($layout_row['style'] != 'rows') {
 				$row_html .= '</div><!-- main row-->';
+			}
+			if ($cols == 1 && $add_row_container) {
+				$row_html .= '</div></div>';
 			}
 			if (($title = $layout_row['title']??false) != false) {
 				$legend = Html::tag('legend', $title, $layout_row['title_options']??[]);
