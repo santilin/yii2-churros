@@ -146,7 +146,7 @@ class WidgetLayer
 					if (!$has_active && count($tab_items)) {
 						$tab_items[0]['active'] = true;
 					}
-					$ret .= Tabs::widget(['items' => $tab_items, 'tabContentOptions' => [ 'class' => 'mt-2'	] ]);
+					$ret .= Tabs::widget(['items' => $tab_items, 'tabContentOptions' => $layout_row['htmlOptions']??[]]);
 					$ret .= '</div></div>';
 					break;
 				case 'rows':
