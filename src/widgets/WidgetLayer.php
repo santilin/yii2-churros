@@ -352,10 +352,9 @@ class WidgetLayer
 				$classes['wrapper'][] = "{$layout_row['layout']}xlarge";
 			}
 			if ($layout_row_type == 'html_rows') {
-				foreach ($layout_row['content'] as $html_key => $html_content) {
-					$ret .= '<div class=row>';
-					$ret .= Html::tag('div', $html_content,
-							  ['class' => $classes['wrapper']]);
+				foreach ((array)$layout_row['content'] as $html_key => $html_content) {
+					$ret .= "<div class=\"row layout-$cols-cols\">";
+					$ret .= Html::tag('div', $html_content, ['class' => $classes['wrapper']]);
 					$ret .= "</div><!--html row $html_key-->";
 				}
 			} else {
