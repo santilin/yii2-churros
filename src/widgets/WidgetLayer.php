@@ -154,7 +154,7 @@ class WidgetLayer
 					foreach ($layout_row['content'] as $kc => $content) {
 						$ret .= '<div class="' . $this->columnClasses($cols) . '">';
 						$ret .= $this->layoutWidgets((array)$content,
-							['layout' => $layout_row['layout'], 'style' => $content['style']??$layout_row['style'], 'type' => $layout_row_type ], $kc);
+							['layout' => $layout_row['layout'], 'style' => $content['style']??$layout_row['style'], 'type' => $layout_row_type, 'has_cols_layout' => true ], $kc);
 						$ret .= "</div>\n";
 					}
 					$ret .= '</div>';
@@ -165,7 +165,8 @@ class WidgetLayer
 					foreach ($layout_row['content'] as $kc => $content) {
 						$ret .= '<div class="' . $this->columnClasses($cols) . '">';
 						$ret .= $this->layoutWidgets([$content],
-							['layout' => "{$cols}cols", 'style' => $content['style']??$layout_row['style'], 'type' => $layout_row_type ], $kc);
+							['layout' => "{$cols}cols", 'style' => $content['style']??$layout_row['style'],
+							 'type' => $layout_row_type, 'has_cols_layout' => true ], $kc);
 						$ret .= "</div>\n";
 					}
 					$ret .= '</div>';
@@ -187,9 +188,8 @@ class WidgetLayer
 			}
 			$row_html = '';
 			$add_row_container = false;
-			if ($cols == 1 && $layout_row['style']!='rows') {
-				$add_row_container = true;
-				$row_html .= "<div class=\"row layout-$cols-cols\"><div col=\"col-12\">";
+			if (empty($parent_options['has_col_layout'])) {
+				$row_html .= "<div class=\"row layout-$cols-cols\"><div class=\"col-12\">";
 			}
 			if ($only_widget_names) {
 				$layout_row = ['type' => $layout_row_type, 'content' => $layout_row, 'style' => 'rows'];
@@ -300,12 +300,11 @@ class WidgetLayer
 						Yii::error("$widget_name: widget in fieldsLayout not found in form field definitions");
 					}
 				}
-
 			}
 			if ($layout_row['style'] != 'rows') {
 				$row_html .= '</div><!-- main row-->';
 			}
-			if ($cols == 1 && $add_row_container) {
+			if (empty($parent_options['has_col_layout'])) {
 				$row_html .= '</div></div>';
 			}
 			if (($title = $layout_row['title']??false) != false) {
