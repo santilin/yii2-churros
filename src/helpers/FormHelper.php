@@ -300,14 +300,18 @@ ajax;
 			case 'button':
 			case 'button-post':
 			case 'button-trigger':
-				$full_url = self::prepareButtonUrl($button['url'], $url_return_to);
+				if (isset($button['url'])) {
+					$full_url = self::prepareButtonUrl($button['url'], $url_return_to);
+				} else {
+					$full_url = null;
+				}
 				if ($button['type'] == 'button_post') {
 					$button['htmlOptions']['data']['method'] = 'post';
 				}
 				if ($button['type'] == 'button-trigger') {
 					$button['htmlOptions']['data']['url'] = $full_url;
 				} else {
-					if (isset($button['url']) && !isset($button['htmlOptions']['onclick']) ) {
+					if ( $full_url && !isset($button['htmlOptions']['onclick']) ) {
 						if (StringHelper::startsWith($full_url, 'javascript:')) {
 							$button['htmlOptions']['onclick'] = substr($full_url, 11);
 						} else {
