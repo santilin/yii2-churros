@@ -81,6 +81,9 @@ class WidgetLayer
 			}
 			$ret = [];
 			foreach ($layout_row as $klr => $lr) {
+				if ($lr === null) {
+					continue;
+				}
 				$ret[] = $this->layoutWidgets($lr, [
 					'type' => 'container',
 					'style' => 'rows',
