@@ -18,8 +18,8 @@ class ActiveForm extends Bs5ActiveForm
 	public $warningSummaryCssClass = 'error-summary alert alert-warning';
 
 	public const FORM_FIELD_HORIZ_CLASSES = [
-		'vertical' => [
-			'full' => [
+		'vertical' => [ // form_layout
+			'full' => [ // field_layout
 				'horizontalCssClasses' => [
 					'offset' => 'offset-md-2 offset-3',
 					'label' => ['col-12', 'text-start text-break'],
@@ -173,7 +173,6 @@ class ActiveForm extends Bs5ActiveForm
 					'field' => 'form-group form-check-input',
 				]
 			],
-
 		],
 
 		'2cols' => [
