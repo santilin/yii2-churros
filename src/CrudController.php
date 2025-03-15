@@ -369,26 +369,13 @@ class CrudController extends \yii\web\Controller
 
 	protected function returnTo(array|string|null $to, string $from, $model, array $redirect_params = []): string|array
 	{
-		if (!empty($to)) {
-			if (is_array($to) || !empty(parse_url($to, PHP_URL_SCHEME))) {
-				return array_merge((array)$to, $redirect_params);
+		if (empty($to)) {
+			if ($to = $this->request->post('returnTo', null)) {
+				return $to;
 			}
-			if ($to == 'returnTo') {
-				$to = $this->request->post('returnTo', null);
-				if( !$to ) {
-					$to = $this->request->queryParams['returnTo']??null;
-				}
-				if ($to) {
-					return $to;
-				}
-			} else if ($to == 'referrer') {
-				$to = Yii::$app->request->getReferrer();
-				if ($to) {
-					return $to;
-				}
+			if ($to = $this->request->queryParams['returnTo']??null) {
+				return $to;
 			}
-			list($to_model, $to_action) = AppHelper::splitString($to, '.');
-		} else if (empty($to)) {
 			if ($this->isJunctionModel && $this->getMasterModel()) {
 				$to_model = 'parent';
 				$to_action = 'view';
@@ -426,6 +413,23 @@ class CrudController extends \yii\web\Controller
 						$to_action = $from;
 				}
 			}
+		} else {
+			if (is_array($to) || !empty(parse_url($to, PHP_URL_SCHEME))) {
+				return array_merge((array)$to, $redirect_params);
+			}
+			if ($to == 'returnTo') {
+				if ($to = $this->request->post('returnTo', null)) {
+					return $to;
+				}
+				if ($to = $this->request->queryParams['returnTo']??null) {
+					return $to;
+				}
+			} else if ($to == 'referrer') {
+				if ($to = Yii::$app->request->getReferrer()) {
+					return $to;
+				}
+			}
+			list($to_model, $to_action) = AppHelper::splitString($to, '.');
 		}
 		if ($to_model) {
 			if ($to_model == 'parent') {
