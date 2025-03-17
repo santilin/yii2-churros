@@ -161,11 +161,7 @@ class WidgetLayer
 							['layout' => $layout_row['layout'], 'style' => $content['style']??$layout_row['style'], 'type' => $layout_row_type, 'has_col_layout' => true ], $kc);
 						$rows_content .= "</div>\n";
 					}
-					if (!empty($layout_row['htmlOptions'])) {
-						Html::addCssClass($layout_row['htmlOptions'], "row layout-$cols-cols");
-					} else {
-						$layout_row['htmlOptions'] = [ 'class' => "row layout-$cols-cols"];
-					}
+					Html::addCssClass($layout_row['htmlOptions'], "row layout-$cols-cols");
 					$ret .= Html::tag('div', $rows_content, $layout_row['htmlOptions']);
 					break;
 				case 'cols':
@@ -362,21 +358,13 @@ class WidgetLayer
 			if ($layout_row_type == 'html_rows') {
 				foreach ((array)$layout_row['content'] as $html_key => $html_content) {
 					$ret .= "<div class=\"row layout-$cols-cols\">";
-					if (!empty($layout_row['htmlOptions'])) {
-						Html::addCssClass($layout_row['htmlOptions'], $classes['wrapper']);
-					} else {
-						$layout_row['htmlOptions'] = $classes['wrapper'];
-					}
+					Html::addCssClass($layout_row['htmlOptions'], $classes['wrapper']);
 					$ret .= Html::tag('div', $html_content, $layout_row['htmlOptions']);
 					$ret .= "</div><!--html row $html_key-->";
 				}
 			} else {
 				$ret .= '<div class=row>';
-				if (!empty($layout_row['htmlOptions'])) {
-					Html::addCssClass($layout_row['htmlOptions'], $classes['wrapper']);
-				} else {
-					$layout_row['htmlOptions'] = $classes['wrapper'];
-				}
+				Html::addCssClass($layout_row['htmlOptions'], $classes['wrapper']);
 				$ret .= Html::tag('div', implode('', (array)$layout_row['content']),
 								  $layout_row['htmlOptions']);
 				$ret .= '</div><!--html row-->';
