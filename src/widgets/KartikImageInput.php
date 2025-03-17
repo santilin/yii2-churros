@@ -18,7 +18,7 @@ class KartikImageInput extends \kartik\file\FileInput
 	const ATTR_URL_SERIALIZED = 2;
 
 	public $caption;
-	public $deleteCheck = false;
+	public $deleteFileName = ':delete_me:';
 	public $attrUrlType = self::ATTR_URL_VERBATIM;
 
     /**
@@ -39,45 +39,42 @@ class KartikImageInput extends \kartik\file\FileInput
 			'initialPreviewAsData' => true,
 			'overwriteInitial' => true
 		];
-		$images = [];
 		switch( $this->attrUrlType ) {
 		case self::ATTR_URL_VERBATIM:
-			$this->pluginOptions['initialPreview'][] = Html::getAttributeValue($this->model, $this->attribute);
+			$img_value = Html::getAttributeValue($this->model, $this->attribute);
+			$this->pluginOptions['initialPreview'][] = $img_value;
 			break;
 		case self::ATTR_URL_UPLOAD_BEHAVIOR:
- 			$img_data = $this->model->getUploadedFormFileUrl($this->attribute);
- 			if( $img_data ) {
-// 				$this->options['hiddenOptions'] = ['value' =>  Html::getAttributeValue($this->model, $this->attribute)];
-				$this->pluginOptions['initialPreview'][] = $img_data;
+ 			$img_value = $this->model->getUploadedFormFileUrl($this->attribute);
+ 			if( $img_value) {
+				$this->pluginOptions['initialPreview'][] = $img_value;
 			}
 			break;
 		case self::ATTR_URL_SERIALIZED:
-			$serialized = Html::getAttributeValue($this->model, $this->attribute);
-			if( $serialized != '' && is_string($serialized))  {
-				$images = @unserialize($serialized);
+			$img_value = Html::getAttributeValue($this->model, $this->attribute);
+			if( $img_value != '' && is_string($img_value))  {
+				$images = @unserialize($img_value);
 				if ($images === false ) {
-					$images = [ $serialized ];
+					$images = [ $img_value ];
 				}
-				foreach( $images as $filename ) {
+				foreach ($images as $filename ) {
 					$this->pluginOptions['initialPreview'][] = Yii::getAlias("@uploads/$filename");
 				}
 			}
 			break;
 		}
-		$parent_file_input = parent::run();
-		if( $this->deleteCheck !== false && !empty($this->model->{$this->attribute}) ) {
-			if( $this->deleteCheck == true ) {
-				$deleteCheckOptions = [ 'label' => 'Delete me: ' . $this->model->{$this->attribute} ];
-			} else {
-				$deleteCheckOptions = $this->deleteCheck;
-			}
-			$delete_check = Html::checkbox(Html::getInputName($this->model, $this->attribute),
-				false, $deleteCheckOptions);
-		} else {
-			$delete_check = '';
-		}
+		if ($img_value) {
+			$input_name = Html::getInputName($this->model, $this->attribute);
+			$this->pluginEvents['fileclear'] = new \yii\web\JsExpression(<<<js
 
-		echo Html::tag('div', $parent_file_input . $delete_check);
+function(e) {
+	$("input[name='$input_name'][type='hidden']").val("{$this->deleteFileName}");
+	return true;
+}
+js
+			);
+		}
+		echo parent::run();
 	}
 
 }
