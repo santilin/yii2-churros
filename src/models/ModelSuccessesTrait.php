@@ -61,9 +61,9 @@ Trait ModelSuccessesTrait
 		$this->_successes += $items;
 	}
 
-	public function addSuccessesFrom(ModelInfoTrait $model)
+	public function addSuccessesFrom(ModelSuccessesTrait $model)
 	{
-		$this->addSuccesses($model->getSuccesses);
+		// $this->addSuccesses($model->getSuccesses);
 	}
 
 	/**
