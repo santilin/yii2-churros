@@ -38,6 +38,7 @@ class FileUploadBehavior extends \yii\base\Behavior
     /** @var string Name of file to store in the owner attribute. */
     public $fileAttrValue = '[[pk]].[[extension]]';
 
+    public $deleteFileName = ':delete_me:';
 
     /** @var \yii\web\UploadedFile */
     protected $file;
@@ -102,15 +103,13 @@ class FileUploadBehavior extends \yii\base\Behavior
 			// Replaces the UploadedFile object into the path to the final file
 			$this->owner->{$this->attribute} = implode('.',
 					array_filter([$this->file->baseName, $this->file->extension]));
-		} else {
-			if( $this->owner->{$this->attribute} === '1' ) { /// Deleting the file
-				$oldvalue = ArrayHelper::getValue($this->owner->oldAttributes, $this->attribute, null);
-				$this->oldPath = $this->resolvePath($oldvalue);
-				$this->owner->{$this->attribute} = null;
-			} else if ( false === $this->owner->isNewRecord && empty($this->owner->{$this->attribute})) {
-				$this->owner->{$this->attribute} = ArrayHelper::getValue($this->owner->oldAttributes, $this->attribute,
-					null);
-			}
+		} else if ($this->owner->{$this->attribute} === $this->deleteFileName) { /// Deleting the file
+            $oldvalue = ArrayHelper::getValue($this->owner->oldAttributes, $this->attribute, null);
+            $this->oldPath = $this->resolvePath($oldvalue);
+            $this->owner->{$this->attribute} = null;
+        } else if ( false === $this->owner->isNewRecord && empty($this->owner->{$this->attribute})) {
+            $this->owner->{$this->attribute} =
+                ArrayHelper::getValue($this->owner->oldAttributes, $this->attribute, null);
 		}
 	}
 
