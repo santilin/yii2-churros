@@ -28,7 +28,7 @@ class CrudController extends \yii\web\Controller
 	const MSG_NO_ACTION = 'The action on {La} {title} <a href="{model_link}">{record_medium}</a> has been successful.';
 	const MSG_CREATED = '{La} {title} <a href="{model_link}">{record_medium}</a> has been successfully created.';
 	const MSG_UPDATED = '{La} {title} <a href="{model_link}">{record_medium}</a> has been successfully updated.';
-	const MSG_DELETED = '{La} {title} <strong>{record_long}</strong> has been successfully deleted.';
+	const MSG_DELETED = '{La} {title} <strong>{record_medium}</strong> has been successfully deleted.';
 	const MSG_ERROR_DELETE = 'There has been an error deleting {la} {title} <a href="{model_link}">{record_medium}</a>';
 	const MSG_DUPLICATED = '{La} {title} <a href="{model_link}">{record_medium}</a> has been successfully duplicated.';
 	const MSG_ERROR_DELETE_INTEGRITY = 'Unable to delete {la} {title} <a href="{model_link}">{record_medium}</a> because it has related data.';
@@ -397,10 +397,10 @@ class CrudController extends \yii\web\Controller
 						}
 						break;
 					case 'delete_error':
-					case 'not_deleted':
 						$to_action = 'parent.index';
 						break;
 					case 'update':
+					case 'not_deleted':
 						$to_action = 'view';
 						break;
 					case 'delete':

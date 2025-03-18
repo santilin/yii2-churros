@@ -72,8 +72,8 @@ return [
 		=> "{La} {title} <a href=\"{model_link}\">{record_medium}</a> se ha creado correctamente.",
     '{La} {title} <a href="{model_link}">{record_medium}</a> has been successfully updated.'
 		=> '{La} {title} <a href="{model_link}">{record_medium}</a> se ha actualizado correctamente.',
-    '{La} {title} <strong>{record_long}</strong> has been successfully deleted.'
-		=> '{La} {title} <strong>{record_long}</strong> se ha borrado correctamente.',
+    '{La} {title} <strong>{record_medium}</strong> has been successfully deleted.'
+		=> '{La} {title} <strong>{record_medium}</strong> se ha borrado correctamente.',
     '{La} {title} <a href="{model_link}">{record_medium}</a> has been successfully duplicated.'
 		=> '{La} {title} <a href="{model_link}">{record_medium}</a> se ha duplicado correctamente.',
 	'The action {action} on {la} {title} <a href="{model_link}">{record_medium}</a> has been successful.' => 'La acción {action} sobre {la} {title} <a href="{model_link}">{record_medium}</a> se ha realizado correctamente.',
@@ -92,8 +92,8 @@ return [
     'You can\'t update {la} {title} {record_medium}  because you are not the author' => 'No puedes modificar {esta} {title} porque no l{a} has creado tú',
     'You can\'t view {la} {title} {record_medium}  because you are not the author' => 'No puedes ver {esta} {title} porque no l{a} has creado tú',
     'Error deleting {la} {title} {record_medium}' => 'Error borrando {la} {title} {record_medium}',
-    "{La} {title} <strong>{record_long}</strong> can't be deleted because it has related data"
-		=> "No se puede borrar {la} {title} <strong>{record_long}</strong>  porque está en uso en otros ficheros",
+    "{La} {title} <strong>{record_medium}</strong> can't be deleted because it has related data"
+		=> "No se puede borrar {la} {title} <strong>{record_medium}</strong>  porque está en uso en otros ficheros",
 	'{Esta} {title} is used in other files' => '{Esta} {title} se usa en algún otro fichero',
 	'Create {title}' => 'Crear {title}',
 	"The value '{value}' is not valid for {attribute}" => "El valor '{value}' no es válido para el campo {attribute}",
