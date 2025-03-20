@@ -80,24 +80,35 @@ class AppHelper
 	static public function checkIsLink(string $target, string $link, string $eol = "\n"): bool
 	{
 		echo "Checking if $link is a link to $target...$eol";
-		if( !file_exists($target) ) {
+
+		if (!file_exists($target)) {
 			echo "$target: target of $link symlink not found$eol";
 			return false;
 		}
-		if( !file_exists($link) ) {
+
+		if (is_link($link) && !file_exists($link)) {
+			@unlink($link); // Eliminar enlace roto antes de recrear
 			@symlink($target, $link);
-			if( !is_link($link) ) {
+			if (!is_link($link)) {
 				$error = error_get_last();
 				echo $link . ": " . $error['message'] . " creating symlink to $target$eol";
 				return false;
 			}
 		}
-		if( !is_link($link) ) {
+
+		if (!is_link($link)) {
 			echo $link . ": is not a symlink$eol";
 			return false;
-		} else {
-			echo $link . ": Ok$eol";
 		}
+
+		// Verificación añadida: Comparar destino real
+		$actualTarget = readlink($link);
+		if ($actualTarget !== $target) {
+			echo "$link: points to incorrect target '$actualTarget' (should be '$target')$eol";
+			return false;
+		}
+
+		echo $link . ": Ok$eol";
 		return true;
 	}
 
