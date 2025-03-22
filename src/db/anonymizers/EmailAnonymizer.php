@@ -1,6 +1,6 @@
 <?php
 
-namespace santilin\churros\anonymizers;
+namespace santilin\churros\db\anonymizers;
 
 /*
  * Example usage
