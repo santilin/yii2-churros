@@ -615,6 +615,7 @@ ajax;
 			case 'ul':
 				return Html::tag($tag, '<li>' . join('</li><li>', $attrs) . '</li>', $tag_options);
 			case 'span':
+			case 'badge':
 				$ret = '';
 				foreach ($attrs as $attr) {
 					$ret .= Html::tag($tag, $attr, $tag_options);
@@ -626,7 +627,7 @@ ajax;
 			case ',':
 				return implode($tag, $attrs);
 			default:
-				return Html::tag($tag, join("</$tag><$tag>", $attrs), $tag_options);
+				return Html::tag($tag, join("</$tag><$tag>", $attrs) . "</$tag>", $tag_options);
 		}
 	}
 

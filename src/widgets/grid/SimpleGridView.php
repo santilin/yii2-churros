@@ -432,7 +432,7 @@ class SimpleGridView extends \yii\grid\GridView
 	{
 		$this->savedRowData = [];
 		foreach($this->columns as $keycol => $column) {
-			if ($column instanceof DataColumn) {
+			if ($column instanceof DataColumn && !empty($column->summary)) {
 				$value = $column->getDataCellValue($model, $key, $index);
 				$this->savedRowData[$keycol] = $value;
 			}
