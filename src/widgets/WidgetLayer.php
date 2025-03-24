@@ -79,7 +79,12 @@ class WidgetLayer
 					return $this->layoutWidgets($layout_row, $parent_options, reset($ak));
 				}
 			}
-			$ret = [];
+			if ($layout_row['layout']??'1col' == 'inline') {
+				$cols = 10000;
+			} else {
+				$cols = intval($layout_row['layout']??'1'); // ?:max(count($layout_row['content']), 4);
+			}
+			$ret = ["<div class=\"row layout-$cols-cols\">"];
 			foreach ($layout_row as $klr => $lr) {
 				if ($lr === null) {
 					continue;
@@ -89,9 +94,10 @@ class WidgetLayer
 					'style' => 'rows',
 					'layout' => $parent_options['layout']??'1col',
 					'size' => $parent_options['size']??'large',
-					'has_col_layout' => $parent_options['has_col_layout']??false,
+					'has_col_layout' => $parent_options['has_col_layout']??true,
 				], $klr);
 			}
+			$ret[] = '</div>';
 			return implode('', $ret);
 		}
 		$layout_row_type = $layout_row['type']??'widgets';
@@ -193,9 +199,9 @@ class WidgetLayer
 			}
 			$row_html = '';
 			$add_row_container = false;
-			if (empty($parent_options['has_col_layout'])) {
-				$row_html .= "<div class=\"row layout-$cols-cols\"><div class=\"col-12\">";
-			}
+			// if (empty($parent_options['has_col_layout'])) {
+			// 	$row_html .= "<div class=\"row layout-$cols-cols\"><div class=\"col-12\">";
+			// }
 			if ($only_widget_names) {
 				$layout_row = ['type' => $layout_row_type, 'content' => $layout_row, 'style' => 'rows'];
 			}
@@ -203,9 +209,9 @@ class WidgetLayer
 			if ($subtitle) {
 				$row_html .= "<div class=row><div class=col-12><div class=\"subtitle mb-3 alert alert-warning\">$subtitle</div></div></div>";
 			}
-			if ($layout_row['style'] != 'rows') {
-				$row_html .= '<div class=row>';
-			}
+			// if ($layout_row['style'] != 'rows') {
+			// 	$row_html .= '<div class=row>';
+			// }
 			foreach ($layout_row['content'] as $widget_name ) {
 				$fs = '';
 				$open_divs = 0;
@@ -306,12 +312,12 @@ class WidgetLayer
 					}
 				}
 			}
-			if ($layout_row['style'] != 'rows') {
-				$row_html .= '</div><!-- main row-->';
-			}
-			if (empty($parent_options['has_col_layout'])) {
-				$row_html .= '</div></div>';
-			}
+			// if ($layout_row['style'] != 'rows') {
+			// 	$row_html .= '</div><!-- main row-->';
+			// }
+			// if (empty($parent_options['has_col_layout'])) {
+			// 	$row_html .= '</div></div>';
+			// }
 			if (($title = $layout_row['title']??false) != false) {
 				$legend = Html::tag('legend', $title, $layout_row['title_options']??[]);
 				$ret .= Html::tag('fieldset', "$legend<hr/>$row_html", $layout_row['htmlOptions']??[]);
