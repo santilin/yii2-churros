@@ -64,7 +64,8 @@ class WidgetLayer
 	 */
 	protected function layoutWidgets(array $layout_row, array $parent_options = [], int|string $row_key = null): string
 	{
-		$has_parent_layout = $parent_options['has_parent_layout']??false;
+		$has_parent_row = $parent_options['has_parent_row']??false;
+		$has_parent_col = $parent_options['has_parent_col']??false;
 		if (!isset($layout_row['content'])) {
 			if (ArrayHelper::isIndexed($layout_row)) {
 				$ak = array_keys($layout_row);
@@ -75,7 +76,8 @@ class WidgetLayer
 						'content' => $layout_row,
 						'layout' => $parent_options['layout']??'1col',
 						'size' => $parent_options['size']??'large',
-						'has_parent_layout' => $has_parent_layout,
+						'has_parent_row' => $has_parent_row,
+						'has_parent_col' => $has_parent_col,
 					];
 					return $this->layoutWidgets($layout_row, $parent_options, reset($ak));
 				}
@@ -86,6 +88,9 @@ class WidgetLayer
 				$cols = intval($layout_row['layout']??'1'); // ?:max(count($layout_row['content']), 4);
 			}
 			$ret = ["<div class=\"row layout-$cols-cols\">"];
+			if (!$has_parent_col) {
+				$ret[] = '<div class="' . $this->columnClasses($cols) . '">';
+			}
 			foreach ($layout_row as $klr => $lr) {
 				if ($lr === null) {
 					continue;
@@ -95,8 +100,12 @@ class WidgetLayer
 					'style' => 'rows',
 					'layout' => $parent_options['layout']??'1col',
 					'size' => $parent_options['size']??'large',
-					'has_parent_layout' => $has_parent_layout,
+					'has_parent_row' => true,
+					'has_parent_col' => true,
 				], $klr);
+			}
+			if (!$has_parent_col) {
+				$ret[] = '</div>';
 			}
 			$ret[] = '</div>';
 			return implode('', $ret);
@@ -129,7 +138,7 @@ class WidgetLayer
 			$cols = intval($layout_row_layout); // ?:max(count($layout_row['content']), 4);
 		}
 		$ret = '';
-		if (!$has_parent_layout) {
+		if (!$has_parent_row) {
 			$ret .= "<!--parent row--><div class=\"row layout-$cols-cols\">";
 		}
 		switch ($layout_row_type) {
@@ -160,7 +169,7 @@ class WidgetLayer
 								'layout' => $row_content['layout']??'1col',
 								'style' => $layout_row_style,
 								'type' => $layout_row_type,
-								'has_parent_layout' => false,
+								'has_parent_row' => false,
 							], $kc),
 						];
 					}
@@ -178,7 +187,7 @@ class WidgetLayer
 							'layout' => $layout_row_layout,
 							'style' => $layout_row_style,
 							'type' => $layout_row_type,
-							'has_parent_layout' => false ], $kc);
+							'has_parent_row' => false ], $kc);
 					}
 					Html::addCssClass($layout_row['htmlOptions'], "row layout-$cols-cols");
 					$ret .= Html::tag('div', $rows_content, $layout_row['htmlOptions']);
@@ -188,11 +197,21 @@ class WidgetLayer
 					// $cols = min(count($layout_row['content']), 4);
 					$ret .= '<!--cols-->';
 					foreach ($layout_row['content'] as $kc => $row_content) {
-						$ret .= '<div class="' . $this->columnClasses($cols) . '">';
-						$ret .= $this->layoutWidgets([$row_content],
-							['layout' => "{$cols}cols", 'style' => $row_content['style']??$layout_row_style,
-							 'type' => $layout_row_type, 'has_parent_layout' => true ], $kc);
-						$ret .= "</div>\n";
+						if (empty($row_content['content'])) { /// grouping
+							$ret .= '<div class="santilín ' . $this->columnClasses($cols) . '">';
+							$ret .= $this->layoutWidgets($row_content, [
+								'layout' => $layout_row_layout,
+								'style' => $layout_row_style,
+								'type' => $layout_row_type,
+								'has_parent_row' => false, 'has_parent_col' => false ], $kc);
+							$ret .= "</div>\n";
+						} else {
+							$ret .= '<div class="' . $this->columnClasses($cols) . '">';
+							$ret .= $this->layoutWidgets([$row_content],
+								['layout' => "{$cols}cols", 'style' => $row_content['style']??$layout_row_style,
+								'type' => $layout_row_type, 'has_parent_row' => true ], $kc);
+							$ret .= "</div>\n";
+						}
 					}
 					$ret .= "<!--end cols-->";
 					break;
@@ -203,6 +222,7 @@ class WidgetLayer
 			break;
 		case 'widgets':
 		case 'fields':
+
 			$indexf = 0;
 			$only_widget_names = true;
 			foreach($layout_row as $lrk => $rl) {
@@ -211,7 +231,10 @@ class WidgetLayer
 					break;
 				}
 			}
-			$row_html = '<div class="' . $this->columnClasses($cols) . '">';
+			$row_html = '';
+			if (!$has_parent_col) {
+				$row_html.= '<div class="' . $this->columnClasses($cols) . '">';
+			}
 			if ($only_widget_names) {
 				$layout_row = ['type' => $layout_row_type, 'content' => $layout_row, 'style' => 'rows'];
 			}
@@ -325,7 +348,9 @@ class WidgetLayer
 			} else {
 				$ret .= $row_html;
 			}
-			$ret .= '</div>';
+			if (!$has_parent_col) {
+				$ret .= '</div>';
+			}
 			break;
 
 		case 'buttons':
@@ -348,6 +373,7 @@ class WidgetLayer
 			break;
 		case 'html':
 		case 'html_rows':
+
 			$label = ArrayHelper::remove($layout_row, 'label', null);
 			if ($layout_row_layout == '3cols') {
 				$layout_row_layout = '1col';
@@ -377,7 +403,7 @@ class WidgetLayer
 			}
 			break;
 		}
-		if (!$has_parent_layout) {
+		if (!$has_parent_row) {
 			$ret .= '</div><!--parent row-->';
 		}
 		return $ret;
