@@ -79,36 +79,47 @@ class WidgetLayer
 						'has_parent_row' => $has_parent_row,
 						'has_parent_col' => $has_parent_col,
 					];
-					return $this->layoutWidgets($layout_row, $parent_options, reset($ak));
+				} else {
+					$layout_row = [
+						'type' => 'container',
+						'content' => $layout_row,
+						'layout' => '1col',
+						'size' => $parent_options['size']??'large',
+						'style' => 'rows',
+						'has_parent_row' => $has_parent_row,
+						'has_parent_col' => $has_parent_col,
+					];
 				}
-			}
-			if ($layout_row['layout']??'1col' == 'inline') {
-				$cols = 10000;
+				return $this->layoutWidgets($layout_row, $parent_options, reset($ak));
 			} else {
-				$cols = intval($layout_row['layout']??'1'); // ?:max(count($layout_row['content']), 4);
-			}
-			$ret = ["<div class=\"row layout-$cols-cols\">"];
-			if (!$has_parent_col) {
-				$ret[] = '<div class="' . $this->columnClasses($cols) . '">';
-			}
-			foreach ($layout_row as $klr => $lr) {
-				if ($lr === null) {
-					continue;
+				if ($layout_row['layout']??'1col' == 'inline') {
+					$cols = 10000;
+				} else {
+					$cols = intval($layout_row['layout']??'1'); // ?:max(count($layout_row['content']), 4);
 				}
-				$ret[] = $this->layoutWidgets($lr, [
-					'type' => 'container',
-					'style' => 'rows',
-					'layout' => $parent_options['layout']??'1col',
-					'size' => $parent_options['size']??'large',
-					'has_parent_row' => true,
-					'has_parent_col' => true,
-				], $klr);
-			}
-			if (!$has_parent_col) {
+				$ret = ["<div class=\"row layout-$cols-cols\">"];
+				if (!$has_parent_col) {
+					$ret[] = '<div class="' . $this->columnClasses($cols) . '">';
+				}
+				foreach ($layout_row as $klr => $lr) {
+					if ($lr === null) {
+						continue;
+					}
+					$ret[] = $this->layoutWidgets($lr, [
+						'type' => 'container',
+						'style' => 'rows',
+						'layout' => $parent_options['layout']??'1col',
+						'size' => $parent_options['size']??'large',
+						'has_parent_row' => true,
+						'has_parent_col' => true,
+					], $klr);
+				}
+				if (!$has_parent_col) {
+					$ret[] = '</div>';
+				}
 				$ret[] = '</div>';
+				return implode('', $ret);
 			}
-			$ret[] = '</div>';
-			return implode('', $ret);
 		}
 		$layout_row_layout = $layout_row['layout'] ?? '1col';
 		if (empty($layout_row['type'])) {
@@ -166,10 +177,10 @@ class WidgetLayer
 							'active' => ArrayHelper::remove($row_content, 'active', false),
 							'headerOptions' => ArrayHelper::remove($row_content, 'headerOptions', []),
 							'content' => $this->layoutWidgets($row_content, [
-								'layout' => $row_content['layout']??'1col',
+								'layout' => $layout_row_layout,
 								'style' => $layout_row_style,
 								'type' => $layout_row_type,
-								'has_parent_row' => false,
+								'has_parent_row' => false, 'has_parent_col' => false
 							], $kc),
 						];
 					}
@@ -180,38 +191,38 @@ class WidgetLayer
 					$ret .= "</div><!--end tabs-->";
 					break;
 				case 'rows':
-					$ret .= '<!--rows--><div class="' . $this->columnClasses($cols) . '">';
+					if (!$has_parent_col) {
+						$ret .='<div class="' . $this->columnClasses($cols) . '">';
+					}
+					$ret .= '<!--rows-->';
 					$rows_content = '';
 					foreach ($layout_row['content'] as $kc => $row_content) {
-						$rows_content .= $this->layoutWidgets((array)$row_content, [
+						$rows_content .= $this->layoutWidgets($row_content, [
 							'layout' => $layout_row_layout,
 							'style' => $layout_row_style,
 							'type' => $layout_row_type,
-							'has_parent_row' => false ], $kc);
+							'has_parent_row' => true, 'has_parent_col' => true ], $kc);
 					}
-					Html::addCssClass($layout_row['htmlOptions'], "row layout-$cols-cols");
-					$ret .= Html::tag('div', $rows_content, $layout_row['htmlOptions']);
-					$ret .= "</div><!--end rows-->";
+					$ret .= $rows_content;
+					// $ret .= Html::tag('div', $rows_content, $layout_row['htmlOptions']??[]);
+					if (!$has_parent_col) {
+						$ret .= '</div>';
+					}
+					$ret .= '<!--end rows-->';
 					break;
 				case 'cols':
 					// $cols = min(count($layout_row['content']), 4);
-					$ret .= '<!--cols-->';
+					$ret .= "<!--$cols cols-->";
 					foreach ($layout_row['content'] as $kc => $row_content) {
-						if (empty($row_content['content'])) { /// grouping
-							$ret .= '<div class="santilín ' . $this->columnClasses($cols) . '">';
-							$ret .= $this->layoutWidgets($row_content, [
+						$row_options = $row_content['htmlOptions']??[];
+						Html::addCssClass($row_options, $this->columnClasses($cols));
+						$ret .= Html::tag('div',
+							$this->layoutWidgets($row_content, [
 								'layout' => $layout_row_layout,
 								'style' => $layout_row_style,
 								'type' => $layout_row_type,
-								'has_parent_row' => false, 'has_parent_col' => false ], $kc);
-							$ret .= "</div>\n";
-						} else {
-							$ret .= '<div class="' . $this->columnClasses($cols) . '">';
-							$ret .= $this->layoutWidgets([$row_content],
-								['layout' => "{$cols}cols", 'style' => $row_content['style']??$layout_row_style,
-								'type' => $layout_row_type, 'has_parent_row' => true ], $kc);
-							$ret .= "</div>\n";
-						}
+								'has_parent_row' => false, 'has_parent_col' => false], $kc),
+							$row_options);
 					}
 					$ret .= "<!--end cols-->";
 					break;
@@ -220,9 +231,9 @@ class WidgetLayer
 			}
 			$ret .= "<!--end container: $row_key-->";
 			break;
+
 		case 'widgets':
 		case 'fields':
-
 			$indexf = 0;
 			$only_widget_names = true;
 			foreach($layout_row as $lrk => $rl) {
@@ -233,7 +244,7 @@ class WidgetLayer
 			}
 			$row_html = '';
 			if (!$has_parent_col) {
-				$row_html.= '<div class="' . $this->columnClasses($cols) . '">';
+				$row_html.= '<div class=" santilín ' . $this->columnClasses($cols) . '">';
 			}
 			if ($only_widget_names) {
 				$layout_row = ['type' => $layout_row_type, 'content' => $layout_row, 'style' => 'rows'];
@@ -308,19 +319,19 @@ class WidgetLayer
 							}
 						}
 						if ($layout_row_style == 'grid-cards' || $layout_row_style == 'grid') {
-							$col_classes = $this->columnClasses($widget_layout == 'full' ? 1 : $cols);
-							if ($col_classes) {
-								$fs .=  "<div class=\"$col_classes\">";
-								$open_divs++;
-							}
-							if ($widget_layout != 'full') {
-								if ($layout_row_style != 'grid-cards') {
+							// $col_classes = $this->columnClasses($widget_layout == 'full' ? 1 : $cols);
+							// if ($col_classes) {
+							// 	$fs .=  "<div class=\"$col_classes\">";
+							// 	$open_divs++;
+							// }
+							// if ($widget_layout != 'full') {
+							// 	if ($layout_row_style != 'grid-cards') {
 									$open_divs++;
 									$fs .= "<div class=\"row w-100\">";
-								}
+								// }
 // 								} else {
 // 									$widget['label'] = false;
-							}
+							// }
 							$fs .= $this->layoutOneField($widget, $layout_row, $widget_layout, $indexf++);
 						} else {
 							$fs .= "<div class=\"row w-100\">";
@@ -372,13 +383,11 @@ class WidgetLayer
 			$ret .= $this->layoutContent($layout_row['label'], $layout_row['content'], $layout_row_layout, 'large', $layout_row['htmlOptions']??[]);
 			break;
 		case 'html':
-		case 'html_rows':
-
-			$label = ArrayHelper::remove($layout_row, 'label', null);
-			if ($layout_row_layout == '3cols') {
-				$layout_row_layout = '1col';
+			if (!$has_parent_col) {
+				$ret .= "<div class=col-12>";
 			}
-			$classes = $this->widget_layout_horiz_config[$layout_row_layout]['large']['horizontalCssClasses'];
+			$label = ArrayHelper::remove($layout_row, 'label', null);
+			$classes = $this->widget_layout_horiz_config[$layout_row_layout]['full']['horizontalCssClasses'];
 			// if ($label) {
 			// 	$labelOptions = [ 'class' => implode(' ', (array)$classes['label'])];
 			// 	if (YII_ENV_DEV) {
@@ -389,17 +398,17 @@ class WidgetLayer
 			if (YII_ENV_DEV) {
 				$classes['wrapper'][] = "{$layout_row_layout}xlarge";
 			}
-			if ($layout_row_type == 'html_rows') {
-				foreach ((array)$layout_row['content'] as $html_key => $html_content) {
-					$ret .= "<div class=\"row layout-$cols-cols\">";
-					Html::addCssClass($layout_row['htmlOptions'], $classes['wrapper']);
-					$ret .= Html::tag('div', $html_content, $layout_row['htmlOptions']);
-					$ret .= "</div><!--html row $html_key-->";
-				}
-			} else {
-				Html::addCssClass($layout_row['htmlOptions'], $classes['wrapper']);
-				$ret .= Html::tag('div', implode('', (array)$layout_row['content']),
+			Html::addCssClass($layout_row['htmlOptions'], 'row w-100 html');
+			$content_options = [];
+			Html::addCssClass($content_options, $classes['wrapper']);
+			foreach ((array)$layout_row['content'] as $html_key => $html_content) {
+				$ret .= Html::tag('div',
+							Html::tag('div', $html_content, $content_options),
 								  $layout_row['htmlOptions']);
+				$ret .= "<!--html row $html_key-->";
+			}
+			if (!$has_parent_col) {
+				$ret .= '</div>';
 			}
 			break;
 		}
