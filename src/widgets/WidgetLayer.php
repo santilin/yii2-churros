@@ -413,7 +413,7 @@ class WidgetLayer
 		string $widget_layout, string $layout_of_row, int $indexf): string
 	{
 		$fs = '';
-		$row_style = $layout_row['style'];
+		$row_style = $layout_row['style']??'grid';
 		switch ($row_style) {
 			case 'grid':
 			case 'rows':
