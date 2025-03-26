@@ -217,7 +217,7 @@ class WidgetLayer
 						$row_options = $row_content['htmlOptions']??[];
 						Html::addCssClass($row_options, $this->columnClasses($cols));
 						$ret .= Html::tag('div',
-							$this->layoutWidgets($row_content, [
+							$this->layoutWidgets((array)$row_content, [
 								'layout' => $layout_row_layout,
 								'style' => $layout_row_style,
 								'type' => $layout_row_type,
@@ -244,7 +244,7 @@ class WidgetLayer
 			}
 			$row_html = '';
 			if (!$has_parent_col) {
-				$row_html.= '<div class=" santilín ' . $this->columnClasses($cols) . '">';
+				$row_html.= '<div class="' . $this->columnClasses($cols) . '">';
 			}
 			if ($only_widget_names) {
 				$layout_row = ['type' => $layout_row_type, 'content' => $layout_row, 'style' => 'rows'];
