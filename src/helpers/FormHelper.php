@@ -643,7 +643,7 @@ ajax;
 		$attrs = [];
 		foreach($models as $model) {
 			if( $model != null ) {
-				$url = Url::to(array_merge([$parent_route . '/'.  $model->controllerName()],  $model->getPrimaryKey(true)));
+				$url = Url::to(array_merge([$parent_route . '/'.  $model->controllerName(). '/view'], $model->getPrimaryKey(true)));
 				$attrs[] = "<a href='$url'>" .  $model->recordDesc($record_format, 0, $context) . "</a>";
 			}
 		}
