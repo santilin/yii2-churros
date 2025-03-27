@@ -191,13 +191,17 @@ class WidgetLayer
 					$ret .= "</div><!--end tabs-->";
 					break;
 				case 'rows':
+				case 'grid-nolabels':
 					if (!$has_parent_col) {
 						$ret .='<div class="' . $this->columnClasses($cols) . '">';
 					}
 					$ret .= '<!--rows-->';
 					$rows_content = '';
 					foreach ($layout_row['content'] as $kc => $row_content) {
-						$rows_content .= $this->layoutWidgets($row_content, [
+						if (empty($row_content))  {
+							continue;
+						}
+						$rows_content .= $this->layoutWidgets((array)$row_content, [
 							'layout' => $layout_row_layout,
 							'style' => $layout_row_style,
 							'type' => $layout_row_type,
