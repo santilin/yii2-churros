@@ -664,5 +664,16 @@ ajax;
 		}
 	}
 
+	static function modelsToHandyFieldValues(array $models, string $model_format, string $result_format)
+	{
+		if (empty($models)) {
+			return [];
+		}
+		$ret = [];
+		foreach($models as $model) {
+			$ret[$model->getPrimaryKey()] = $model->recordDesc($model_format);
+		}
+		return $models[0]->formatHandyFieldValues('', $ret, $result_format);
+	}
 
 } // class
