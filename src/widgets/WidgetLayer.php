@@ -51,7 +51,7 @@ class WidgetLayer
 		if (YII_ENV_DEV) {
 			$not_used = array_diff(array_keys($this->widgets), $widgets_used);
 			if (!empty($not_used)) {
-				Yii::error("Widgets in form not used in layout: " . json_encode($not_used));
+				Yii::warning("Widgets in form not used in layout: " . json_encode($not_used));
 			}
 			unset($widgets_used);
 		}
@@ -205,6 +205,7 @@ class WidgetLayer
 							'layout' => $layout_row_layout,
 							'style' => $layout_row_style,
 							'type' => $layout_row_type,
+							'size' => $layout_row['size'],
 							'has_parent_row' => true, 'has_parent_col' => true ], $kc);
 					}
 					$ret .= $rows_content;
@@ -353,7 +354,7 @@ class WidgetLayer
 					$row_html .= $fs;
 				} else {
 					if (YII_ENV_DEV) {
-						Yii::error("$widget_name: widget in fieldsLayout not found in form field definitions");
+						Yii::warning("$widget_name: widget in fieldsLayout not found in form field definitions");
 					}
 				}
 			}
