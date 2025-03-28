@@ -2,8 +2,8 @@
 
 namespace santilin\churros\db;
 
-use yii\db\Connection;
-use yii\db\Query;
+use Yii;
+use yii\db\{Connection,Query};
 
 class TableSynchronizer
 {
@@ -31,37 +31,47 @@ class TableSynchronizer
 			$query->limit($this->limit);
 		}
 
+		$schema_origen = $this->dbOrigen->getTableSchema($this->tblOrigen);
+		$schema_destino = $this->dbDest->getTableSchema($this->tblDest); // Nuevo: esquema destino
 		$sourceRecords = $query->all($this->dbOrigen);
 
-		// 2. Procesar registros
-		foreach ($sourceRecords as $record) {
-			$id = $record['id'];
+		// Preprocesar PKs destino
+		$destPk = $schema_destino->primaryKey;
+		$sourcePkValues = [];
 
-			// 3. Verificar existencia en destino
+		foreach ($sourceRecords as $record) {
+			$pk_conds = [];
+			foreach ($destPk as $pk) { // Usar PKs del destino
+				if (!isset($record[$pk])) {
+					throw new \Exception("Columna PK '$pk' no existe en registro origen");
+				}
+				$pk_conds[$pk] = $record[$pk];
+			}
+
+			// Almacenar PKs para eliminación posterior
+			$sourcePkValues[] = array_values($pk_conds);
+
+			// Verificar existencia usando PKs destino
 			$existingRecord = (new Query())
-			->select('id')
-			->from($this->tblDest)
-			->where(['id' => $id])
-			->one($this->dbDest);
+				->from($this->tblDest)
+				->where($pk_conds)
+				->one($this->dbDest);
 
 			if ($existingRecord) {
-				// 4. Actualizar registro existente
 				$this->dbDest->createCommand()
-				->update($this->tblDest, $record, ['id' => $id])
+				->update($this->tblDest, $record, $pk_conds)
 				->execute();
 			} else {
-				// 5. Insertar nuevo registro
 				$this->dbDest->createCommand()
 				->insert($this->tblDest, $record)
 				->execute();
 			}
 		}
 
-		// 6. Eliminar registros obsoletos (opcional, dependiendo del caso de uso)
-		if (empty($this->where) && $this->limit == 0) {
-			$sourceIds = array_column($sourceRecords, 'id');
+		// Eliminación segura con claves compuestas
+		if (empty($this->where) && $this->limit == 0 && !empty($destPk)) {
 			$this->dbDest->createCommand()
-			->delete($this->tblDest, ['NOT IN', 'id', $sourceIds])
+			->delete($this->tblDest, ['NOT IN', $destPk, $sourcePkValues])
 			->execute();
 		}
 
