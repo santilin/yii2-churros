@@ -9,6 +9,8 @@ use santilin\churros\helpers\FormHelper;
 
 class WidgetLayer
 {
+	protected array $widgets_used = [];
+
 	public function __construct(
 		protected array|string|null $widgetsLayout,
 		protected array $widgets,
@@ -40,8 +42,7 @@ class WidgetLayer
 			];
 		}
 		if (YII_ENV_DEV) {
-			global $widgets_used;
-			$widgets_used = [];
+			$this->widgets_used = [];
 		}
 		$ret = $this->layoutWidgets($this->widgetsLayout, [
 			'size' => $size,
@@ -49,11 +50,11 @@ class WidgetLayer
 			'layout' => $form_layout,
 		]);
 		if (YII_ENV_DEV) {
-			$not_used = array_diff(array_keys($this->widgets), $widgets_used);
+			$not_used = array_diff(array_keys($this->widgets), $this->widgets_used);
 			if (!empty($not_used)) {
 				Yii::warning("Widgets in form not used in layout: " . json_encode($not_used));
 			}
-			unset($widgets_used);
+			$this->widgets_used = [];
 		}
 		return $ret;
 	}
@@ -258,13 +259,15 @@ class WidgetLayer
 			if ($subtitle) {
 				$row_html .= "<div class=row><div class=col-12><div class=\"subtitle mb-3 alert alert-warning\">$subtitle</div></div></div>";
 			}
+			if ($layout_row['content'] === true) {
+				$layout_row['content'] = array_diff(array_keys($this->widgets), $this->widgets_used);
+			}
 			foreach ($layout_row['content'] as $widget_name ) {
 				$fs = '';
 				$open_divs = 0;
 				if ($widget = $this->widgets[$widget_name]??false) {
 					if (YII_ENV_DEV) {
-						global $widgets_used;
-						$widgets_used[] = $widget_name;
+						$this->widgets_used[] = $widget_name;
 					}
 					if ($widget instanceof \yii\bootstrap5\ActiveField) {
 						// bs5 ActiveFields add a row container over the whole field
