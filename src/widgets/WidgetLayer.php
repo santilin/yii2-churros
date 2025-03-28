@@ -41,21 +41,17 @@ class WidgetLayer
 				]
 			];
 		}
-		if (YII_ENV_DEV) {
-			$this->widgets_used = [];
-		}
+		$this->widgets_used = [];
 		$ret = $this->layoutWidgets($this->widgetsLayout, [
 			'size' => $size,
 			'style' => $style,
 			'layout' => $form_layout,
 		]);
-		if (YII_ENV_DEV) {
-			$not_used = array_diff(array_keys($this->widgets), $this->widgets_used);
-			if (!empty($not_used)) {
-				Yii::warning("Widgets in form not used in layout: " . json_encode($not_used));
-			}
-			$this->widgets_used = [];
+		$not_used = array_diff(array_keys($this->widgets), $this->widgets_used);
+		if (!empty($not_used)) {
+			Yii::warning("Widgets in form not used in layout: " . json_encode($not_used));
 		}
+		$this->widgets_used = [];
 		return $ret;
 	}
 
@@ -266,9 +262,7 @@ class WidgetLayer
 				$fs = '';
 				$open_divs = 0;
 				if ($widget = $this->widgets[$widget_name]??false) {
-					if (YII_ENV_DEV) {
-						$this->widgets_used[] = $widget_name;
-					}
+					$this->widgets_used[] = $widget_name;
 					if ($widget instanceof \yii\bootstrap5\ActiveField) {
 						// bs5 ActiveFields add a row container over the whole field
 						if ($widget->horizontalCssClasses['layout']??false) {
@@ -276,7 +270,7 @@ class WidgetLayer
 						} else {
 							$widget_layout = $widget->layout??'large';
 						}
-						if ($layout_row['size'] == 'small') {
+						if ($layout_row['size'] == 'small' || $cols >= 4) {
 							switch ($widget_layout) {
 								case 'short':
 									$widget_layout = 'medium';
@@ -285,7 +279,7 @@ class WidgetLayer
 									$widget_layout = 'large';
 									break;
 							}
-						} else if ($layout_row['size'] == 'medium') {
+						} else if ($layout_row['size'] == 'medium' || $cols >= 3) {
 							switch ($widget_layout) {
 								case 'short':
 									$widget_layout = 'medium';
@@ -363,7 +357,7 @@ class WidgetLayer
 			}
 			if (($title = $layout_row['title']??false) != false) {
 				$legend = Html::tag('legend', $title, $layout_row['title_options']??[]);
-				$ret .= Html::tag('fieldset', "$legend<hr/>$row_html", $layout_row['htmlOptions']??[]);
+				$ret .= Html::tag('fieldset', "<div class=row>$legend<hr/>$row_html</div>", $layout_row['htmlOptions']??[]);
 			} else {
 				$ret .= $row_html;
 			}
