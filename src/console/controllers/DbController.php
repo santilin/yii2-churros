@@ -289,6 +289,7 @@ EOF;
 	 */
 	public function actionSeedTable($tableName, $inputfilename = null)
 	{
+		$tablename = str_replace('.','_', $tablename);
 		switch( $this->format ) {
 		case 'seeder':
 			if( $inputfilename == null ) {
@@ -374,6 +375,7 @@ EOF;
 			$anonymizer_function_name($raw_data);
 		}
 		$nrow = 0;
+		$table_name = str_replace('.', '_', $table_name);
 		foreach ($raw_data as $row) {
 			$ncolumn = 0;
 			$txt_data .= "\t'{$table_name}{$nrow}' => [\n";
@@ -438,6 +440,7 @@ EOF;
 			}
 			$txt_data .= "],\n";
 		}
+		$table_name = str_replace('.', '_', $table_name);
 		$ret .= "\tpublic function run(\$db) {\n";
 		$ret .= "\t\t\$rows_$table_name = [\n$txt_data\t\t];\n";
 		$ret .= "\n";
