@@ -254,11 +254,12 @@ EOF;
 		$preamble = $this->getPreamble('dump-table', $tableName, $tableSchema->schemaName);
 		if ($this->createFile ) {
 			$write_file = true;
+			$_tableName = str_replace('.','_', $tableName);
 			if ($this->format == 'seeder') {
 				if (!is_dir(Yii::getAlias($this->seedersPath))) {
 					mkdir(Yii::getAlias($this->seedersPath), 0777, true);
 				}
-				$filename = Yii::getAlias($this->seedersPath) . "/{$tableName}Seeder.php";
+				$filename = Yii::getAlias($this->seedersPath) . "/{$_tableName}Seeder.php";
 			} else {
 
 				if (!is_dir(Yii::getAlias($this->fixturesPath))) {
@@ -267,7 +268,7 @@ EOF;
 				if (!is_writable(Yii::getAlias($this->fixturesPath))) {
 					throw new \Exception(Yii::getAlias($this->fixturesPath) . ": not writable");
 				}
-				$filename = Yii::getAlias($this->fixturesPath) . "/{$tableName}.php";
+				$filename = Yii::getAlias($this->fixturesPath) . "/{$_tableName}.php";
 			}
 			if (\file_exists($filename) && !$this->confirm("The file $filename already exists. Do you want to overwrite it?") ) {
 				$write_file = false;
@@ -289,7 +290,7 @@ EOF;
 	 */
 	public function actionSeedTable($tableName, $inputfilename = null)
 	{
-		$tablename = str_replace('.','_', $tablename);
+		$tableName = str_replace('.','_', $tableName);
 		switch( $this->format ) {
 		case 'seeder':
 			if( $inputfilename == null ) {
@@ -301,10 +302,10 @@ EOF;
 			$class->run($this->db);
 			break;
 		case 'cvs':
-			$this->seedTableFromCsv($tablename, $inputfilename);
+			$this->seedTableFromCsv($tableName, $inputfilename);
 			break;
 		default:
-			throw new InvalidArgumentException("seed-table: $this->format: no contemplado");
+			throw new InvalidArgumentException("seed-table: $tableName: $this->format: no contemplado");
 		}
 	}
 
@@ -393,12 +394,13 @@ EOF;
 
 	protected function dumpTableAsSeeder($tableSchema, string $where = null): string
     {
+		$_table_name = str_replace('.', '_', $table_name);
 		$txt_data = '';
 		$php_types = [];
 		$columna_names = [];
 		$table_name = $tableSchema->fullName;
 
-		$ret = "\nclass " . str_replace('.', '_', $table_name) . "Seeder {\n";
+		$ret = "\nclass {$_table_name}Seeder {\n";
 		$ret .= "\n";
 		$ret .= "\t/* columns */\n";
 		$ret .= "\tprivate \$columns = [\n";
@@ -440,9 +442,8 @@ EOF;
 			}
 			$txt_data .= "],\n";
 		}
-		$table_name = str_replace('.', '_', $table_name);
 		$ret .= "\tpublic function run(\$db) {\n";
-		$ret .= "\t\t\$rows_$table_name = [\n$txt_data\t\t];\n";
+		$ret .= "\t\t\$rows_$_table_name = [\n$txt_data\t\t];\n";
 		$ret .= "\n";
 		if( $this->truncateTables ) {
 			$ret .= "\t\t\$db->createCommand()->checkIntegrity(false)->execute();\n";
