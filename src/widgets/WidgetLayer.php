@@ -129,7 +129,9 @@ class WidgetLayer
 			$layout_row_type = $layout_row['type'];
 		}
 		if (empty($layout_row['style'])) {
-			if (strpos($layout_row_layout, 'col')) {
+			if ($layout_row_layout == '1col') {
+				$layout_row_style = 'rows';
+			} else if (strpos($layout_row_layout, 'cols')) {
 				$layout_row_style = 'cols';
 			} else {
 				$layout_row_style = 'rows';
