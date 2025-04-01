@@ -384,7 +384,12 @@ class WidgetLayer
 			$ret .= $this->layoutSubtitle($layout_row['content'], $layout_row_layout, 'large', $layout_row['htmlOptions']??[]);
 			break;
 		case 'label&content':
-			$ret .= $this->layoutContent($layout_row['label'], $layout_row['content'], $layout_row_layout, 'large', $layout_row['htmlOptions']??[]);
+			if (isset($layout_row['htmlOptions'])) {
+				Html::addCssClass($layout_row['htmlOptions'], 'form-control-plaintext');
+			} else {
+				$layout_row['htmlOptions']['class'] = 'form-control-plaintext';
+			}
+			$ret .= $this->layoutContent($layout_row['label'], $layout_row['content'], $layout_row_layout, 'large', $layout_row['htmlOptions']);
 			break;
 		case 'html':
 			if (!$has_parent_col) {
@@ -543,7 +548,9 @@ class WidgetLayer
 		if (!empty($label)) {
 			$ret .= Html::tag('label', $label, [ 'class' => $classes['label']]);
 		}
-		$ret .= Html::tag('div', $content, [ 'class' => array_merge(['field'], $classes['wrapper'])]);
+		Html::addCssClass($options, 'field');
+		Html::addCssClass($options, $classes['wrapper']);
+		$ret .= Html::tag('div', $content, $options);
 		$ret .= '</div>';
 		return $ret;
 	}
