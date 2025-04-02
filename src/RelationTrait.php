@@ -66,18 +66,27 @@ trait RelationTrait
 				$model_relation = $relations_in_model[$rel_name];
 				// Look for embedded relations data in the main form
 				$post_data = null;
-				if( $model_relation['type'] == 'HasOne' || $model_relation['type'] == "OneToOne" ) {
-					if( isset($post[$formName][$rel_name]) && is_array($post[$formName][$rel_name]) ) {
+				if ($model_relation['type'] == 'HasOne' || $model_relation['type'] == "OneToOne") {
+					if (isset($post[$formName][$rel_name])) {
 						$post_data = $post[$formName][$rel_name];
-					} else if( isset($post[$formName][$model_relation['model']]) && is_array($post[$formName][$model_relation['model']]) ) {
+					} else if (isset($post[$formName][$model_relation['model']])) {
 						$post_data = $post[$formName][$model_relation['model']];
-					} else if( isset($post[$model_relation['model']]) && is_array($post[$model_relation['model']]) ) {
+					} else if (isset($post[$model_relation['model']])) {
 						$post_data = $post[$model_relation['model']];
 					}
-					if( $post_data ) {
+					if ($post_data !== null) {
 						$rel_model = new $model_relation['modelClass'];
-						$rel_model->setAttributes( $post_data );
-						$this->populateRelation($rel_name, $rel_model);
+						if (is_array($model_relation['left'])) {
+							// Sets the foreign keys of this model if multiple keys
+							if (is_string($post_data)) {
+								$post_data = json_decode($post_data);
+								$this->setAttributes(array_combine($rel_model->primaryKey(),$post_data));
+							}
+						} else if (is_array($post_data)) {
+							// creates a new relmodel and populates it
+							$rel_model->setAttributes($post_data);
+							$this->populateRelation($rel_name, $rel_model);
+						}
 					}
 				} else {
                     // HasMany or Many2Many

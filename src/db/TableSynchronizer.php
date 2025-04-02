@@ -18,10 +18,9 @@ class TableSynchronizer
 
 	public function synchronize()
 	{
-		// 1. Obtener registros de la tabla origen
 		$query = (new Query())
-		->select('*')
-		->from($this->tblOrigen);
+			->select('*')
+			->from($this->tblOrigen);
 
 		if ($this->where) {
 			$query->where($this->where);
@@ -34,10 +33,15 @@ class TableSynchronizer
 		$schema_origen = $this->dbOrigen->getTableSchema($this->tblOrigen);
 		$schema_destino = $this->dbDest->getTableSchema($this->tblDest); // Nuevo: esquema destino
 		$sourceRecords = $query->all($this->dbOrigen);
+		$result = $this->dbDest->createCommand("SELECT COUNT(*) FROM {$this->tblDest}")->queryOne();
+		$dest_count = intval(reset($result));
+		echo "Syncronizing $dest_count records into $this->tblDest\n";
+		echo "Read " . count($sourceRecords) . " records from $this->tblOrigen\n";
 
 		// Preprocesar PKs destino
 		$destPk = $schema_destino->primaryKey;
 		$sourcePkValues = [];
+		$existing_count = $new_count = 0;
 
 		foreach ($sourceRecords as $record) {
 			$pk_conds = [];
@@ -58,10 +62,12 @@ class TableSynchronizer
 				->one($this->dbDest);
 
 			if ($existingRecord) {
+				$existing_count++;
 				$this->dbDest->createCommand()
 				->update($this->tblDest, $record, $pk_conds)
 				->execute();
 			} else {
+				$new_count++;
 				$this->dbDest->createCommand()
 				->insert($this->tblDest, $record)
 				->execute();
@@ -69,11 +75,14 @@ class TableSynchronizer
 		}
 
 		// Eliminación segura con claves compuestas
-		if (empty($this->where) && $this->limit == 0 && !empty($destPk)) {
-			$this->dbDest->createCommand()
-			->delete($this->tblDest, ['NOT IN', $destPk, $sourcePkValues])
-			->execute();
+		if (count($sourcePkValues) && !empty($destPk)) {
+			$deleted_count = $this->dbDest->createCommand()
+				->delete($this->tblDest, ['NOT IN', $destPk, $sourcePkValues])
+				->execute();
 		}
+		echo "Inserted " . $new_count . " records into {$this->tblDest}\n";
+		echo "Updated " . $existing_count . " records in {$this->tblDest}\n";
+		echo "Deleted " . $deleted_count . " records from {$this->tblDest}\n";
 
 		return count($sourceRecords);
 	}
