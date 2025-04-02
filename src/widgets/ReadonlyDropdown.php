@@ -1,10 +1,10 @@
 <?php
 namespace santilin\churros\widgets;
 
-use yii\widgets\InputWidget;
+use yii\bootstrap5\InputWidget;
 use yii\helpers\Html;
 
-class ReadOnlyDropdownList extends InputWidget
+class ReadonlyDropdown extends InputWidget
 {
     /**
      * @var \yii\base\Model the data model that this widget is associated with
@@ -31,8 +31,8 @@ class ReadOnlyDropdownList extends InputWidget
      */
     public function run()
     {
-        $this->renderDropdown();
         $this->renderHiddenField();
+        $this->renderDropdown();
     }
 
     /**
