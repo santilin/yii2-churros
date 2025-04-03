@@ -55,10 +55,40 @@ class DevelController extends Controller
 				echo Yii::$app->db->dsn;
 				break;
 			case 'db.username':
-				echo Yii::$app->db->username;
+				$user= Yii::$app->db->username;
+				if (!$user) {
+					$dsn = Yii::$app->db->dsn;
+					if (preg_match("/user=(.*?)(;|$)/", $dsn, $matches)) {
+						$user = $matches[1];
+					}
+				}
+				echo $user;
 				break;
 			case 'db.password':
-				echo Yii::$app->db->password;
+				$pwd = Yii::$app->db->password;
+				if (!$pwd) {
+					$dsn = Yii::$app->db->dsn;
+					if (preg_match("/password=(.*?)(;|$)/", $dsn, $matches)) {
+						$pwd = $matches[1];
+					}
+				}
+				echo $pwd;
+				break;
+			case 'db.database':
+				$name = '';
+				$dsn = Yii::$app->db->dsn;
+				if (preg_match("/dbname=(.*?)(;|$)/", $dsn, $matches)) {
+					$name = $matches[1];
+				}
+				echo $name;
+				break;
+			case 'db.host':
+				$dsn = Yii::$app->db->dsn;
+				$host = '';
+				if (preg_match("/host=(.*)(;|$)/", $dsn, $matches)) {
+					$host = $matches[1];
+				}
+				echo $host;
 				break;
 			case 'db.charset':
 				echo Yii::$app->db->charset;
