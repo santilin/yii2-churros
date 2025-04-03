@@ -254,12 +254,11 @@ EOF;
 		$preamble = $this->getPreamble('dump-table', $tableName, $tableSchema->schemaName);
 		if ($this->createFile ) {
 			$write_file = true;
-			$_tableName = str_replace('.','_', $tableName);
 			if ($this->format == 'seeder') {
 				if (!is_dir(Yii::getAlias($this->seedersPath))) {
 					mkdir(Yii::getAlias($this->seedersPath), 0777, true);
 				}
-				$filename = Yii::getAlias($this->seedersPath) . "/{$_tableName}Seeder.php";
+				$filename = Yii::getAlias($this->seedersPath) . "/{$tableName}Seeder.php";
 			} else {
 
 				if (!is_dir(Yii::getAlias($this->fixturesPath))) {
@@ -268,7 +267,7 @@ EOF;
 				if (!is_writable(Yii::getAlias($this->fixturesPath))) {
 					throw new \Exception(Yii::getAlias($this->fixturesPath) . ": not writable");
 				}
-				$filename = Yii::getAlias($this->fixturesPath) . "/{$_tableName}.php";
+				$filename = Yii::getAlias($this->fixturesPath) . "/{$tableName}.php";
 			}
 			if (\file_exists($filename) && !$this->confirm("The file $filename already exists. Do you want to overwrite it?") ) {
 				$write_file = false;
@@ -394,11 +393,11 @@ EOF;
 
 	protected function dumpTableAsSeeder($tableSchema, string $where = null): string
     {
-		$_table_name = str_replace('.', '_', $table_name);
 		$txt_data = '';
 		$php_types = [];
 		$columna_names = [];
 		$table_name = $tableSchema->fullName;
+		$_table_name = str_replace('.', '_', $table_name);
 
 		$ret = "\nclass {$_table_name}Seeder {\n";
 		$ret .= "\n";
