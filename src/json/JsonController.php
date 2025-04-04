@@ -512,7 +512,7 @@ class JsonController extends \yii\web\Controller
 					"The root json record for '$root_model_name' does not exist"));
 			}
 		}
-		$this->_path = parse_url($_SERVER['REQUEST_URI'], PHP_URL_PATH);
+		$this->_path = urldecode(parse_url($_SERVER['REQUEST_URI'], PHP_URL_PATH));
 		if ($this->_path) {
 			$pos_path = false;
 			if ($this->_path_start) {
