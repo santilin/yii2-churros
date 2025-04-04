@@ -259,21 +259,26 @@ class JsonModel extends \yii\base\Model
         }
     }
 
-    public function setPrimaryKey($id)
+    public function setPrimaryKey($id = null)
     {
-        if (is_array($id)) {
+        $locator = static::$_locator??null;
+        if ($id===null) {
+            if (!empty(static::$_locator)) {
+                $this->_id = $this->$locator;
+            }
+        } else if (is_array($id)) {
             foreach ($id as $id_k => $id_v) {
                 $this->$id_k = $id_v;
-                if (!empty(static::$_locator)) {
-                    if ($id_k == static::$_locator) {
+                if ($locator) {
+                    if ($id_k == $locator) {
                         $this->$id_k = $id_v;
                     }
                 }
             }
         } else {
             $this->_id = $id;
-            if (!empty(static::$_locator)) {
-                $values = [ static::$_locator => $id ];
+            if ($locator) {
+                $values = [ $locator => $id ];
                 $this->setAttributes($values, false); // if safeonly, there can be recursion while getting scenarios
             }
         }
@@ -450,9 +455,13 @@ class JsonModel extends \yii\base\Model
 				return true;
 			}
             $relations_in_model = static::$relations;
+            $relations_handled = [];
             foreach ($relations_in_model as $rel_name => $model_relation) {
                 foreach ($relations_in_form as $rel_form_name => $rel_form_relation) {
                     if ($rel_form_name != $rel_name && $rel_form_relation != $rel_name) {
+                        continue;
+                    }
+                    if (isset($relations_handled[$rel_form_relation])) {
                         continue;
                     }
                     $related_model_name = $model_relation['model'];
@@ -470,6 +479,7 @@ class JsonModel extends \yii\base\Model
                             $rel_model = new $model_relation['modelClass'];
                             $rel_model->setAttributes( $post_data );
                             $this->populateRelation($rel_name, $rel_model);
+                            $relations_handled[$rel_form_relation] = true;
                         }
                     } else {
                         // HasMany or Many2Many outside of formName
@@ -491,6 +501,7 @@ class JsonModel extends \yii\base\Model
                         }
                         if ($post_data) {
                             $this->loadToRelation($rel_name, $post_data);
+                            $relations_handled[$rel_form_relation] = true;
                         }
                     }
                 }
@@ -507,7 +518,7 @@ class JsonModel extends \yii\base\Model
      * @param array $form_values
      * @return bool
      */
-    public function loadToRelation(string $rel_name, array $form_values): void
+    public function loadToRelation(string $rel_name, array $post_data): void
     {
         /* @var $this JsonModel */
         /* @var $relObj JsonModel */
@@ -517,30 +528,27 @@ class JsonModel extends \yii\base\Model
 		$container = [];
         $relPKAttr = [ $relModelClass::$_locator ?? 'id' ];
         if ($relation['type'] == 'HasMany') {
-            foreach ($form_values as $relPost) {
+            foreach ($post_data as $form_values) {
                 $relObj = new $relModelClass;
-                if (!is_array($relPost) ) {
-                    $relPost = [$relPKAttr[0] => $relPost];
+                $relObj->setJsonModelable($this);
+                $relObj->parent_model = $this;
+                if (!is_array($form_values) ) {
+                    $form_values = [$relPKAttr[0] => $form_values];
                 }
-                if (count($relPost)) {
-                    foreach ($relObj->_attributes as $ka => $av) {
-                        if (!array_key_exists($ka, $relPost)) {
-                            unset($relObj->_attributes[$ka]);
-                        } else {
-                            $relObj->_attributes[$ka] = $relPost[$ka];
-                        }
-                    }
+                if (count($form_values)) {
+                    $relObj->_attributes = array_intersect_key($form_values, $relObj->_attributes);
+                    $relObj->afterFind();
                     $container[] = $relObj;
                 }
             }
         } else if ($relation['type'] == 'ManyToMany') {
-			foreach( $form_values as $relPost ) {
-				if( is_array($relPost) ) {
-					$id = $relPost[$relPKAttr[0]];
+            foreach ($post_data as $form_values) {
+				if( is_array($form_values) ) {
+					$id = $form_values[$relPKAttr[0]];
 					$relObj = empty($id) ? new $relModelClass : $relModelClass::findOne($id);
-					$relObj->load($relPost);
+					$relObj->load($form_values);
 				} else {
-					$id = $relPost;
+					$id = $form_values;
 					$relObj = [ $relPKAttr[0] => $id ];
 				}
 				$container[] = $relObj;
