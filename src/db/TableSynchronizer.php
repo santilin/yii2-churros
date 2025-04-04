@@ -53,7 +53,7 @@ class TableSynchronizer
 			}
 
 			// Almacenar PKs para eliminación posterior
-			$sourcePkValues[] = array_values($pk_conds);
+			$sourcePkValues[] = $pk_conds;
 
 			// Verificar existencia usando PKs destino
 			$existingRecord = (new Query())
