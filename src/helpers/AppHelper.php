@@ -237,19 +237,19 @@ class AppHelper
 	}
 
 	// for mb_ucfirst use StringHelper::mb_ucfirst
-    static public function mb_lcfirst($str, $encoding = 'UTF-8')
+    static public function mb_lcfirst(string $str, $encoding = 'UTF-8')
     {
         return mb_strtolower( mb_substr($str, 0, 1, $encoding), $encoding)
         . mb_substr($str, 1, mb_strlen($str), $encoding);
     }
 
-	static public function mb_strcasecmp($str1, $str2, $encoding = null)
+	static public function mb_strcasecmp(string $str1, string $str2, string $encoding = null)
 	{
 		if (null === $encoding) { $encoding = mb_internal_encoding(); }
 		return strcmp(mb_strtoupper($str1, $encoding), mb_strtoupper($str2, $encoding));
 	}
 
-	static public function yiiparam($name, $default = null)
+	static public function yiiparam(string $name, $default = null)
 	{
 		if ( isset(Yii::$app->params[$name]) ) {
 			return Yii::$app->params[$name];

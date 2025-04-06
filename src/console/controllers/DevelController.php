@@ -50,52 +50,67 @@ class DevelController extends Controller
 
 	public function actionPrintConfig(string $what)
 	{
-		switch($what) {
-			case 'db.dsn':
-				echo Yii::$app->db->dsn;
-				break;
-			case 'db.username':
-				$user= Yii::$app->db->username;
-				if (!$user) {
-					$dsn = Yii::$app->db->dsn;
-					if (preg_match("/user=(.*?)(;|$)/", $dsn, $matches)) {
-						$user = $matches[1];
-					}
+		if (strncmp($what,'db.',3)==0 || $what == 'db') {
+			$db = Yii::$app->db;
+			$driver_name = $db->driverName;
+			$user= $db->username;
+			if (!$user) {
+				$dsn = $db->dsn;
+				if (preg_match("/user=(.*?)(;|$)/", $dsn, $matches)) {
+					$user = $matches[1];
 				}
-				echo $user;
-				break;
-			case 'db.password':
-				$pwd = Yii::$app->db->password;
-				if (!$pwd) {
-					$dsn = Yii::$app->db->dsn;
-					if (preg_match("/password=(.*?)(;|$)/", $dsn, $matches)) {
-						$pwd = $matches[1];
-					}
+			}
+			$pwd = $db->password;
+			if (!$pwd) {
+				$dsn = $db->dsn;
+				if (preg_match("/password=(.*?)(;|$)/", $dsn, $matches)) {
+					$pwd = $matches[1];
 				}
-				echo $pwd;
-				break;
-			case 'db.database':
-				$name = '';
-				$dsn = Yii::$app->db->dsn;
-				if (preg_match("/dbname=(.*?)(;|$)/", $dsn, $matches)) {
-					$name = $matches[1];
-				}
-				echo $name;
-				break;
-			case 'db.host':
-				$dsn = Yii::$app->db->dsn;
-				$host = '';
-				if (preg_match("/host=(.*)(;|$)/", $dsn, $matches)) {
-					$host = $matches[1];
-				}
-				echo $host;
-				break;
-			case 'db.charset':
-				echo Yii::$app->db->charset;
-				break;
-			case 'db.collation':
-				echo Yii::$app->db->charset . '_spanish_ci';
-				break;
+			}
+			$dbname = '';
+			if ($driver_name == 'sqlite') {
+				$dbname = Yii::getAlias(substr($db->dsn,7));
+			} else if (preg_match("/dbname=(.*?)(;|$)/", $db->dsn, $matches)) {
+				$dbname = $matches[1];
+			}
+			$dsn = $db->dsn;
+			$host = '';
+			if (preg_match("/host=(.*)(;|$)/", $dsn, $matches)) {
+				$host = $matches[1];
+			}
+			switch($what) {
+				case 'db':
+					echo "dsn={$db->dsn}\n";
+					echo "driver={$db->driverName}";
+					echo "database=$dbname\n";
+					echo "user=$user\n";
+					echo "pwd=$pwd\n";
+					echo "host=$host\n";
+					echo "charset={$db->charset}\n";
+					echo "collation={$db->charset}_spanish_ci\n";
+					break;
+				case 'db.dsn':
+					echo $db->dsn;
+					break;
+				case 'db.username':
+					echo $user;
+					break;
+				case 'db.password':
+					echo $pwd;
+					break;
+				case 'db.database':
+					echo $dbname;
+					break;
+				case 'db.host':
+					echo $host;
+					break;
+				case 'db.charset':
+					echo $db->charset;
+					break;
+				case 'db.collation':
+					echo $db->charset . '_spanish_ci';
+					break;
+			}
 		}
 	}
 

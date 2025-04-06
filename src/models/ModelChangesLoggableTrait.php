@@ -115,15 +115,15 @@ trait ModelChangesLoggableTrait
 								$model_change->value = 1;
 								$model_change->subtype = $model_change::V_SUBTYPE_SETFALSE;
 							}
-						} else if (AppHelper::mb_strcasecmp($current_value, $old_value, 'UTF-8') == 0) {
-							$model_change->subtype = $model_change::V_SUBTYPE_CHANGECASE;
-						} else if (str_replace([' ',"\t","\n","\r"], '', $old_value) ==
-							str_replace([' ',"\t","\n","\r"], '', $current_value)) {
-							$model_change->subtype = $model_change::V_SUBTYPE_CHANGESPACES;
 						} else if ($current_value == '') {
 							$model_change->subtype = $model_change::V_SUBTYPE_EMPTY;
 						} else if ($current_value != '' && $old_value == '') {
 							$model_change->subtype = $model_change::V_SUBTYPE_UNEMPTY;
+						} else if (AppHelper::mb_strcasecmp($current_value, $old_value??'', 'UTF-8') == 0) {
+							$model_change->subtype = $model_change::V_SUBTYPE_CHANGECASE;
+						} else if (str_replace([' ',"\t","\n","\r"], '', $old_value) ==
+							str_replace([' ',"\t","\n","\r"], '', $current_value)) {
+							$model_change->subtype = $model_change::V_SUBTYPE_CHANGESPACES;
 						} else {
 							$model_change->subtype = $model_change::V_SUBTYPE_CHANGE;
 						}

@@ -73,6 +73,17 @@ trait RelationTrait
 						$post_data = $post[$formName][$model_relation['model']];
 					} else if (isset($post[$model_relation['model']])) {
 						$post_data = $post[$model_relation['model']];
+					} else if (is_array($model_relation['left'])) {
+						foreach ($model_relation['left'] as $full_mr_left) {
+							$mr_left = AppHelper::lastWord($full_mr_left, '.');
+							if (isset($post[$formName][$mr_left])) {
+								$post_data = $post[$formName][$mr_left];
+								break;
+							} else if (isset($post[$mr_left])) {
+								$post_data = $post[$mr_left];
+								break;
+							}
+						}
 					}
 					if ($post_data !== null) {
 						$rel_model = new $model_relation['modelClass'];
