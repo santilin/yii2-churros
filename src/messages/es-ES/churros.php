@@ -145,4 +145,5 @@ return [
 	'Next' => 'Siguiente',
 	'Previous' => 'Anterior',
 	'Finish' => 'Terminar',
+	'Rows per page' => 'Por página',
 ];

@@ -1,9 +1,11 @@
-body.cepaim_ { .grid-footer {
+.grid-footer {
   display: flex;
-  justify-content: space-between; }
+  justify-content: space-between;
+}
   .grid-footer .grid-items-per-page {
     padding-left: 0;
     display: flex;
+    align-items: center !important;
     min-width: 35px;
     max-height: 26px;
     list-style: none; }
@@ -11,7 +13,8 @@ body.cepaim_ { .grid-footer {
       cursor: default;
       background: #f8f8ff;
       border: 0px;
-      cursor: default; }
+      cursor: default;
+
 /*      .grid-footer .grid-items-per-page li:first-child:hover {
         cursor: default;
         background: #f8f8ff;

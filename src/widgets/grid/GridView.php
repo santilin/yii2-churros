@@ -77,21 +77,21 @@ class GridView extends SimpleGridView
             return '';
         }
         $urls = [];
-		$html = "<ul class=grid-items-per-page><li>" . Yii::t('churros', 'Rows per page') . '</li>';
+		$html = "<nav><ul class=\"pagination grid-items-per-page\"><li class=\"d-flex align-items-center\">" . Yii::t('churros', 'Rows per page') . '&nbsp;</li>';
         foreach ([6 => '6', 12 => '12',24 => '24', 60 => '60', -1 => Yii::t('churros', 'All')] as $page_size => $label) {
 			if ($pagination->pageSize == $page_size) {
-				$li_class = ' class=current';
+				$li_class = ' class="page-item active"';
 			} else {
-				$li_class = '';
+				$li_class = ' class="page-item"';
 			}
 			if ($page_size == -1) {
 				$pagination_url = $pagination->createUrl(0, 999999999);
 			} else {
 				$pagination_url = $pagination->createUrl($pagination->page, $page_size);
 			}
-			$html.= "<li$li_class>" . Html::a($label, $pagination_url, ['data' => ['pjax' => '1']]) . '</li>';
+			$html.= "<li$li_class>" . Html::a($label, $pagination_url, ['class' => 'page-link', 'data' => ['pjax' => '1']]) . '</li>';
 		}
-		$html .= '</ul>';
+		$html .= '</ul></nav>';
 		return $html;
     }
 
