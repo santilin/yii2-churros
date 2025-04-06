@@ -73,8 +73,7 @@ class WidgetLayer
 						'content' => $layout_row,
 						'layout' => $parent_options['layout']??'1col',
 						'size' => $parent_options['size']??'large',
-						'has_parent_row' => $has_parent_row,
-						'has_parent_col' => $has_parent_col,
+						'style' => 'grid'
 					];
 				} else {
 					$layout_row = [
@@ -83,12 +82,11 @@ class WidgetLayer
 						'layout' => '1col',
 						'size' => $parent_options['size']??'large',
 						'style' => 'rows',
-						'has_parent_row' => $has_parent_row,
-						'has_parent_col' => $has_parent_col,
 					];
+					$has_parent_row = $has_parent_col = false;
 				}
-				return $this->layoutWidgets($layout_row, $parent_options, reset($ak));
 			} else {
+				die("No en widgetlayer");
 				if ($layout_row['layout']??'1col' == 'inline') {
 					$cols = 10000;
 				} else {
@@ -107,8 +105,8 @@ class WidgetLayer
 						'style' => 'rows',
 						'layout' => $parent_options['layout']??'1col',
 						'size' => $parent_options['size']??'large',
-						'has_parent_row' => true,
-						'has_parent_col' => true,
+						'has_parent_row' => false,
+						'has_parent_col' => false,
 					], $klr);
 				}
 				if (!$has_parent_col) {
@@ -194,7 +192,7 @@ class WidgetLayer
 					if (!$has_parent_col) {
 						$ret .='<div class="' . $this->columnClasses($cols) . '">';
 					}
-					$ret .= '<!--rows-->';
+					$ret .= "<!--$row_key: start rows-->";
 					$rows_content = '';
 					foreach ($layout_row['content'] as $kc => $row_content) {
 						if (empty($row_content))  {
@@ -205,14 +203,14 @@ class WidgetLayer
 							'style' => $layout_row_style,
 							'type' => $layout_row_type,
 							'size' => $layout_row['size'],
-							'has_parent_row' => true, 'has_parent_col' => true ], $kc);
+							'has_parent_row' => false, 'has_parent_col' => true], $kc);
 					}
 					$ret .= $rows_content;
 					// $ret .= Html::tag('div', $rows_content, $layout_row['htmlOptions']??[]);
 					if (!$has_parent_col) {
 						$ret .= '</div>';
 					}
-					$ret .= '<!--end rows-->';
+					$ret .= "<!--$row_key: end rows-->";
 					break;
 				case 'cols':
 					// $cols = min(count($layout_row['content']), 4);
