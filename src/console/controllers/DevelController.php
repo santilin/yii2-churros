@@ -75,13 +75,13 @@ class DevelController extends Controller
 			}
 			$dsn = $db->dsn;
 			$host = '';
-			if (preg_match("/host=(.*)(;|$)/", $dsn, $matches)) {
+			if (preg_match("/host=(.*?)(;|$)/", $dsn, $matches)) {
 				$host = $matches[1];
 			}
 			switch($what) {
 				case 'db':
 					echo "dsn={$db->dsn}\n";
-					echo "driver={$db->driverName}";
+					echo "driver={$db->driverName}\n";
 					echo "database=$dbname\n";
 					echo "user=$user\n";
 					echo "pwd=$pwd\n";
