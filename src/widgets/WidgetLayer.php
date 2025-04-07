@@ -61,11 +61,11 @@ class WidgetLayer
 	 */
 	protected function layoutWidgets(array $layout_row, array $parent_options = [], int|string $row_key = null): string
 	{
+		$ret = '';
 		$has_parent_row = $parent_options['has_parent_row']??false;
 		$has_parent_col = $parent_options['has_parent_col']??false;
 		if (!isset($layout_row['content'])) {
 			if (ArrayHelper::isIndexed($layout_row)) {
-				$ak = array_keys($layout_row);
 				$av = reset($layout_row);
 				if (!is_array($av)) {
 					$layout_row = [
@@ -85,35 +85,17 @@ class WidgetLayer
 					];
 					$has_parent_row = $has_parent_col = false;
 				}
+			} else if (count($layout_row) == 1) {
+				$ret .= '<!--' . array_key_first($layout_row) . "-->\n";
+				$layout_row = reset($layout_row);
 			} else {
-				die("No en widgetlayer");
-				if ($layout_row['layout']??'1col' == 'inline') {
-					$cols = 10000;
-				} else {
-					$cols = intval($layout_row['layout']??'1'); // ?:max(count($layout_row['content']), 4);
-				}
-				$ret = ["<div class=\"row layout-$cols-cols\">"];
-				if (!$has_parent_col) {
-					$ret[] = '<div class="' . $this->columnClasses($cols) . '">';
-				}
-				foreach ($layout_row as $klr => $lr) {
-					if ($lr === null) {
-						continue;
-					}
-					$ret[] = $this->layoutWidgets($lr, [
-						'type' => 'container',
-						'style' => 'rows',
-						'layout' => $parent_options['layout']??'1col',
-						'size' => $parent_options['size']??'large',
-						'has_parent_row' => false,
-						'has_parent_col' => false,
-					], $klr);
-				}
-				if (!$has_parent_col) {
-					$ret[] = '</div>';
-				}
-				$ret[] = '</div>';
-				return implode('', $ret);
+				$layout_row = [
+					'type' => 'container',
+					'content' => $layout_row,
+					'layout' => '1col',
+					'size' => $parent_options['size']??'large',
+					'style' => 'rows',
+				];
 			}
 		}
 		$layout_row_layout = $layout_row['layout'] ?? '1col';
@@ -145,7 +127,6 @@ class WidgetLayer
 		} else {
 			$cols = intval($layout_row_layout); // ?:max(count($layout_row['content']), 4);
 		}
-		$ret = '';
 		if (!$has_parent_row) {
 			$ret .= "<!--parent row--><div class=\"row layout-$cols-cols\">";
 		}
@@ -223,7 +204,7 @@ class WidgetLayer
 								'layout' => $layout_row_layout,
 								'style' => $layout_row_style,
 								'type' => $layout_row_type,
-								'has_parent_row' => false, 'has_parent_col' => false], $kc),
+								'has_parent_row' => true, 'has_parent_col' => true], $kc),
 							$row_options);
 					}
 					$ret .= "<!--end cols-->";
