@@ -129,7 +129,7 @@ class WidgetLayer
 		if ($layout_row_type == 'container') {
 			$ret .= "<!--container $layout_row_style: $row_key-->";
 			if (!$this->lastWasRow()) {
-				$ret .= "<div class=\"row layout-$cols-cols lay-{$this->lastLevel()}-lvl\">";
+				$ret .= "<div class=\"row lay-$cols-cols lay-{$this->lastLevel()}-lvl\">";
 				$this->setLastRow($cols);
 				$row_added = true;
 			}
