@@ -129,7 +129,7 @@ class WidgetLayer
 		if ($layout_row_type == 'container') {
 			$ret .= "<!--container $layout_row_style: $row_key-->";
 			if (!$this->lastWasRow()) {
-				$ret .= "<div class=\"row layout-$cols-cols\">";
+				$ret .= "<div class=\"row layout-$cols-cols lay-{$this->lastLevel()}-lvl\">";
 				$this->setLastRow($cols);
 				$row_added = true;
 			}
@@ -236,7 +236,7 @@ class WidgetLayer
 					throw new \Exception($layout_row_style . ': container style not valid');
 			}
 			if ($row_added) {
-				$ret .= "</div><!--{$this->lastLevels()}-->";
+				$ret .= "</div>";
 				$this->removeLast();
 			}
 			$ret .= "<!--end container $layout_row_style: $row_key-->";
@@ -613,17 +613,9 @@ html;
 	{
 		array_pop($this->row_col);
 	}
-	private function lastLevels(): string
+	private function lastLevel(): string
 	{
-		$ret = '';
-		foreach ($this->row_col as $r_c) {
-			if ($r_c < 0) {
-				$ret .= 'c';
-			} else {
-				$ret .= 'r';
-			}
-		}
-		return $ret;
+		return count($this->row_col) / 2;
 	}
 	private function noLast()
 	{
