@@ -183,7 +183,8 @@ class DbController extends Controller
 					if( $tableSchema->name != 'migration' ) {
 						echo "Dumping {$tableSchema->fullName}\n";
 						$full_dump .= $this->dumpTable($tableSchema);
-						$runseeder .= "\t\t\$s = new {$tableSchema->name}Seeder(); \$s->run(\$db);\n";
+						$class_name =str_replace('.', '_', tableSchema->fullName)
+						$runseeder .= "\t\t\$s = new {$class_name}Seeder(); \$s->run(\$db);\n";
 					}
 				}
 			}
@@ -450,7 +451,7 @@ EOF;
 		}
 		$ret .= <<<EOF
 		echo "Seeding $table_name\\n";
-		foreach( \$rows_$table_name as \$row ) {
+		foreach( \$rows_$_table_name as \$row ) {
 			foreach( \$this->columns as \$ck => \$cv ) {
 				if( \$cv == '' ) {
 					unset(\$row[\$ck]);
