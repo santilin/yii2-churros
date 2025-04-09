@@ -183,7 +183,7 @@ class DbController extends Controller
 					if( $tableSchema->name != 'migration' ) {
 						echo "Dumping {$tableSchema->fullName}\n";
 						$full_dump .= $this->dumpTable($tableSchema);
-						$class_name =str_replace('.', '_', tableSchema->fullName)
+						$class_name =str_replace('.', '_', tableSchema->fullName);
 						$runseeder .= "\t\t\$s = new {$class_name}Seeder(); \$s->run(\$db);\n";
 					}
 				}
