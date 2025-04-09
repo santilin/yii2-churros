@@ -217,13 +217,17 @@ trait ModelSearchTrait
 		if ($attribute == '') {
 			$search_flds = $model->findCodeAndDescFields();
 			$rel_conds = [ 'OR' ];
-			foreach( $search_flds as $search_fld ) {
-				$fld_conds = [ 'OR' ];
+			foreach ($search_flds as $search_fld) {
 				$operator = $this->operatorForAttr($search_fld);
-				foreach ((array)$value['v'] as $v) {
-					$fld_conds[] = [ $operator, "$table_alias.$search_fld", $v];
+				if (is_array($value['v'])) {
+					$fld_conds = [ 'OR' ];
+					foreach ($value['v'] as $v) {
+						$fld_conds[] = [ $operator, "$table_alias.$search_fld", $v];
+					}
+					$rel_conds[] = $fld_conds;
+				} else {
+					$rel_conds[] = [ $operator, "$table_alias.$search_fld", $value['v']];
 				}
-				$rel_conds[] = $fld_conds;
 			}
 			return $rel_conds;
 		} else if ($attribute == $model->primaryKey()[0] ) {

@@ -1,6 +1,7 @@
 const ChurrosGrid = (function() {
 	return {
 		resetFilters(grid_id) {
+			console.log('Resetting filters on ' + grid_id);
 			const grid = document.getElementById(grid_id);
 			if (!grid) return false;
 
