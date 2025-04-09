@@ -14,7 +14,7 @@ use kartik\typeahead\Typeahead as KartikTypeahead;
  * - A suggestion is selected
  */
 
-class Typeahead extends KartikTypeahead
+class TypeaheadSelect extends KartikTypeahead
 {
 	public $exactMatch = false;
 	public $suggestionsDisplay;
