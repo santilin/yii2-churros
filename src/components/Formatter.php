@@ -76,6 +76,19 @@ class Formatter extends \yii\i18n\Formatter
 		}
 	}
 
+	public function asSeconds2Format(string $format, ?int $seconds, bool $blank_on_zero = false)
+	{
+		if (empty($seconds) ) {
+			if ($blank_on_zero) {
+				return '';
+			} else {
+				return "00:00";
+			}
+		} else {
+			return date($format, $seconds);
+		}
+	}
+
 
 	public function asUploadedImage($images, $options = [])
 	{
