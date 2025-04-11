@@ -51,6 +51,11 @@ class TableSynchronizer
 				}
 				$pk_conds[$pk] = $record[$pk];
 			}
+			foreach (array_keys($record) as $fname) {
+				if (!$schema_destino->getColumn($fname)) {
+					unset($record[$fname]);
+				}
+			}
 
 			// Almacenar PKs para eliminación posterior
 			$sourcePkValues[] = $pk_conds;
@@ -64,13 +69,13 @@ class TableSynchronizer
 			if ($existingRecord) {
 				$existing_count++;
 				$this->dbDest->createCommand()
-				->update($this->tblDest, $record, $pk_conds)
-				->execute();
+					->update($this->tblDest, $record, $pk_conds)
+					->execute();
 			} else {
 				$new_count++;
 				$this->dbDest->createCommand()
-				->insert($this->tblDest, $record)
-				->execute();
+					->insert($this->tblDest, $record)
+					->execute();
 			}
 		}
 

@@ -36,7 +36,7 @@ class JsonModel extends \yii\base\Model
                     $this->_json_object->set("$.{$rel_info['relatedTablename']}", $value);
                 } else {
                     $this->_json_modelable->setJsonObject('$' . $this->_path, $value??[],
-                                                          $this->_id ?: $this->{static::$_locator}, null);
+                        $this->_id ?: $this->{static::$_locator}, null);
                 }
             } else {
                 throw new \Exception("error en tipo de relación en __set");
