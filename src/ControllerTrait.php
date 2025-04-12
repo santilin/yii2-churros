@@ -238,4 +238,14 @@ trait ControllerTrait
 		return $params;
 	}
 
+	protected function extractAction(string $url): string
+	{
+		$url_parts = parse_url($url);
+		if (!empty($url_parts['path'])) {
+			$path_parts = explode('/', $url_parts['path']);
+			return array_pop($path_parts);
+		}
+		return '';
+	}
+
 } // trait

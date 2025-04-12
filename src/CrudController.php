@@ -369,8 +369,25 @@ class CrudController extends \yii\web\Controller
 
 	protected function returnTo(array|string|null $to, string $from, $model, array $redirect_params = []): string|array
 	{
+		if ($to === 'returnTo') {
+			if ($to = $this->request->post('returnTo', null)) {
+				return $to;
+			}
+			if ($to = $this->request->queryParams['returnTo']??null) {
+				return $to;
+			}
+			$to = '';
+		} else if ($to === 'referrer') {
+			if ($to = Yii::$app->request->getReferrer()) {
+				return $to;
+			}
+			$to = '';
+		}
 		if (empty($to)) {
 			if ($to = $this->request->post('returnTo', null)) {
+				return $to;
+			}
+			if ($to = $this->request->post('_formSuccessUrl', null)) {
 				return $to;
 			}
 			if ($to = $this->request->queryParams['returnTo']??null) {
@@ -416,19 +433,17 @@ class CrudController extends \yii\web\Controller
 		} else {
 			if (is_array($to)) {
 				return array_merge($to, $redirect_params);
-			} else if (!empty(parse_url($to, PHP_URL_SCHEME))) {
+			}
+			$form_success_url = $this->request->post('_form_successUrl', null);
+			if (!empty($form_success_url)) {
+				$action_in_url = $this->extractAction($form_success_url);
+				$action_in_to = $this->extractAction($to);
+				if ($action_in_to == $action_in_url) {
+					return $form_success_url;
+				}
+			}
+			if (!empty(parse_url($to, PHP_URL_SCHEME))) {
 				return $to;
-			} else if ($to == 'returnTo') {
-				if ($to = $this->request->post('returnTo', null)) {
-					return $to;
-				}
-				if ($to = $this->request->queryParams['returnTo']??null) {
-					return $to;
-				}
-			} else if ($to == 'referrer') {
-				if ($to = Yii::$app->request->getReferrer()) {
-					return $to;
-				}
 			}
 			list($to_model, $to_action) = AppHelper::splitString($to, '.');
 		}
@@ -472,7 +487,6 @@ class CrudController extends \yii\web\Controller
 		}
 		return $redirect_params;
 	}
-
 
 	/**
 	 * @deprecated
