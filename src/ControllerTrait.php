@@ -79,16 +79,17 @@ trait ControllerTrait
 
 	protected function addSuccessFlashes($action_id, $model, $success_message = null)
 	{
-		if( $success_message !== false ) {
-			if( !$success_message ) {
+		if ($success_message !== false) {
+			if (!$success_message) {
 				$success_messages = $model->getSuccessesSummary(true);
 				if (count($success_messages) > 0) {
 					$success_message = implode('<br/>', $success_messages);
 				} else {
-					$success_message = $this->getResultMessage($action_id);
+					$success_message = $model->t('churros', $this->getResultMessage($action_id));
 				}
+			} else {
+				$success_message = $model->t('churros', $success_message);
 			}
-			$success_message = $model->t('churros', $success_message);
 			if( strpos($success_message, '{model_link}') !== FALSE ) {
 				$link_to_model = $this->linkToModel($model);
 				$success_message = str_replace('{model_link}', $link_to_model, $success_message);

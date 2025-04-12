@@ -365,15 +365,14 @@ class ActiveForm extends Bs5ActiveForm
 		}
 		$options['encode'] = $this->encodeErrorSummary;
 		$showWarnings = ArrayHelper::remove($options, 'showWarnings');
+		$ret = '';
 		if ($showWarnings) {
 			$warning_options = $options;
 			Html::addCssClass($warning_options, $this->warningSummaryCssClass);
 			$ret = self::warningSummary($models, $warning_options);
-			$ret .= Html::errorSummary($models, $options);
-		} else {
-			Html::addCssClass($options, $this->errorSummaryCssClass);
-			$ret = Html::errorSummary($models, $options);
 		}
+		Html::addCssClass($options, $this->errorSummaryCssClass);
+		$ret .= Html::errorSummary($models, $options);
 		return $ret;
 	}
 

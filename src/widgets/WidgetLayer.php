@@ -50,7 +50,7 @@ class WidgetLayer
 		]);
 		$not_used = array_diff(array_keys($this->widgets), $this->widgets_used);
 		if (!empty($not_used)) {
-			Yii::warning("Widgets in form not used in layout: " . json_encode($not_used));
+			Yii::warning("Widgets in form not used in layout: '" . implode("','",$not_used) . "'");
 		}
 		$this->widgets_used = [];
 		return $ret;

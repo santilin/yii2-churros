@@ -414,10 +414,11 @@ class CrudController extends \yii\web\Controller
 				}
 			}
 		} else {
-			if (is_array($to) || !empty(parse_url($to, PHP_URL_SCHEME))) {
-				return array_merge((array)$to, $redirect_params);
-			}
-			if ($to == 'returnTo') {
+			if (is_array($to)) {
+				return array_merge($to, $redirect_params);
+			} else if (!empty(parse_url($to, PHP_URL_SCHEME))) {
+				return $to;
+			} else if ($to == 'returnTo') {
 				if ($to = $this->request->post('returnTo', null)) {
 					return $to;
 				}
