@@ -32,7 +32,7 @@ class DevelController extends Controller
 			$capelfname = basename(getcwd()) . '.capel.json';
 		}
 		if( $schemafname == null ) {
-			$schemafname = self::CAPELDIR . '/share/definitions/program_schema.json';
+			$schemafname = self::CAPELDIR . '/share/definitions/project_schema.json';
 		}
 		echo "Validating $capelfname aginst $schemafname\n";
 		$data = json_decode(file_get_contents($capelfname));
