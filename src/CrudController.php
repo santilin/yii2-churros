@@ -383,6 +383,7 @@ class CrudController extends \yii\web\Controller
 			}
 			$to = '';
 		}
+		$to_model = null;
 		if (empty($to)) {
 			if ($to = $this->request->post('returnTo', null)) {
 				return $to;
@@ -397,7 +398,6 @@ class CrudController extends \yii\web\Controller
 				$to_model = 'parent';
 				$to_action = 'view';
 			} else {
-				$to_model = null;
 				switch ($from) {
 					case 'create':
 						if ($this->request->post("_and_create") == '1') {

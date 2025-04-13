@@ -341,23 +341,31 @@ class JsonController extends \yii\web\Controller
 	 */
 	protected function returnTo(array|string|null $to, string $from, $model, array $redirect_params = []): string|array
 	{
-		if (is_array($to)) {
-			return array_merge($to, $redirect_params);
+		if ($to === 'returnTo') {
+			if ($to = $this->request->post('returnTo', null)) {
+				return $to;
+			}
+			if ($to = $this->request->queryParams['returnTo']??null) {
+				return $to;
+			}
+			$to = '';
+		} else if ($to === 'referrer') {
+			if ($to = Yii::$app->request->getReferrer()) {
+				return $to;
+			}
+			$to = '';
 		}
-		if (empty($to) || $to == 'returnTo' || $to == 'referrer') {
-			$returnTo = $this->request->post('returnTo');
-			if( !$returnTo ) {
-				$returnTo = $this->request->queryParams['returnTo']??null;
-			}
-			if( !$returnTo ) {
-				$returnto = Yii::$app->request->getReferrer();
-			}
-			if ($returnTo) {
-				return $returnTo;
-			}
-			$to = null;
-		}
+		$to_model = null;
 		if (empty($to)) {
+			if ($to = $this->request->post('returnTo', null)) {
+				return $to;
+			}
+			if ($to = $this->request->post('_formSuccessUrl', null)) {
+				return $to;
+			}
+			if ($to = $this->request->queryParams['returnTo']??null) {
+				return $to;
+			}
 			switch ($from) {
 				case 'create':
 					if ($this->request->post("_and_create") == '1') {
@@ -386,8 +394,23 @@ class JsonController extends \yii\web\Controller
 				default:
 					$to = $from;
 			}
+		} else {
+			if (is_array($to)) {
+				return array_merge($to, $redirect_params);
+			}
+			$form_success_url = $this->request->post('_form_successUrl', null);
+			if (!empty($form_success_url)) {
+				$action_in_url = $this->extractAction($form_success_url);
+				$action_in_to = $this->extractAction($to);
+				if ($action_in_to == $action_in_url) {
+					return $form_success_url;
+				}
+			}
+			if (!empty(parse_url($to, PHP_URL_SCHEME))) {
+				return $to;
+			}
+			list($to_model, $to_action) = AppHelper::splitString($to, '.');
 		}
-		list($to_model, $to_action) = AppHelper::splitString($to, '.');
 		if ($to_model) {
 			if ($to_model == 'parent') {
 				if ($model->parentModel()) {
