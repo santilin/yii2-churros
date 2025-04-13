@@ -409,8 +409,8 @@ class JsonController extends \yii\web\Controller
 			if (!empty(parse_url($to, PHP_URL_SCHEME))) {
 				return $to;
 			}
-			list($to_model, $to_action) = AppHelper::splitString($to, '.');
 		}
+		list($to_model, $to_action) = AppHelper::splitString($to, '.');
 		if ($to_model) {
 			if ($to_model == 'parent') {
 				if ($model->parentModel()) {
