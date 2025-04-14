@@ -47,6 +47,16 @@ class CrudController extends \yii\web\Controller
 		return $actionParams;
 	}
 
+	public function prefix() :string
+	{
+		return $this->_prefix??$this->id;
+	}
+
+	public function modelName() :string
+	{
+		return strrchr(static::$_model_name, '\\') ? substr(strrchr(static::$_model_name, '\\'), 1) : '';
+	}
+
 	public function behaviors()
 	{
 		$ret = [];

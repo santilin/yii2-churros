@@ -59,6 +59,10 @@ class AuthHelper
 		static::$lastMessage = '';
 		$role = $auth->getRole($role_name);
 		if( !$role ) {
+			$perm = $auth->getPermission($role_name);
+			if ($perm) {
+				throw new \Exception("$role_name: role already exists as a permission");
+			}
 			$role = $auth->createRole($role_name);
 			$role->description = $role_desc;
 			$auth->add($role);

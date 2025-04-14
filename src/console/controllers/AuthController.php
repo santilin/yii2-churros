@@ -144,21 +144,24 @@ class AuthController extends Controller
 	/**
 	 * Creates the permissions for a model inside a module
 	 */
-	public function createControllerPermissions(string $module_id, string $model_name, array $controller,
-												Role $visora, Role $editora)
+	public function createControllerPermissions(string $module_id, string $model_name,
+		array $controller, Role $visora, Role $editora)
 	{
-		$auth = $this->authManager;
 		$model_class = $controller['class'];
+		if (!class_exists($model_class)) {
+			return;
+		}
+		$auth = $this->authManager;
 		$model = $model_class::instance();
 		$model_title = $model->t('app', "{title_plural}");
 		$model_perm_name = $module_id . '.' . $model_name;
 
 		$model_editora = AuthHelper::createOrUpdateRole(
-			$model_perm_name . '.' . $editora->name,
+			str_replace('.', ".{$model_name}.", $editora->name),
 			Yii::t('churros', '{model} editor', ['model' => $model_title]), $auth);
 		AuthHelper::echoLastMessage();
 		$model_visora = AuthHelper::createOrUpdateRole(
-			$model_perm_name . '.' . $visora->name,
+			str_replace('.', ".{$model_name}.", $visora->name),
 			Yii::t('churros', '{model} viewer', ['model' => $model_title]), $auth);
 		AuthHelper::echoLastMessage();
 
@@ -206,6 +209,10 @@ class AuthController extends Controller
 	public function createModulePermissions(string $module_id, array $module_info)
 	{
 		$auth = $this->authManager;
+		$perm_desc = $module_info['title']??$module_id;
+		$permission = AuthHelper::createOrUpdatePermission(
+			$module_id . ".index", Yii::t('churros', '{perm_desc} module', ['perm_desc' => $perm_desc]), $auth);
+		AuthHelper::echoLastMessage();
 		$visora = AuthHelper::createOrUpdateRole("$module_id.viewer",
 			Yii::t('churros', "View all $module_id records"), $auth);
 		AuthHelper::echoLastMessage();
@@ -214,6 +221,10 @@ class AuthController extends Controller
 		AuthHelper::echoLastMessage();
 		foreach ($module_info['controllers']??[] as $cname => $controller) {
 			$this->createControllerPermissions($module_id, $cname, $controller, $visora, $editora);
+			$perm_desc = $cname . ' in ' . $module_info['title']??$module_id;
+			$permission = AuthHelper::createOrUpdatePermission(
+				"{$module_id}.{$cname}.menu", Yii::t('churros', '{perm_desc} controller menu	', ['perm_desc' => $perm_desc]), $auth);
+			AuthHelper::echoLastMessage();
 		}
 // 		AuthHelper::createOrUpdatePermission("$module_id.menu",
 // 			Yii::t('churros', 'Access to \'{module}\' module menu',
