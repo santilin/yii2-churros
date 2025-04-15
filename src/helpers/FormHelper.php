@@ -300,6 +300,9 @@ ajax;
 			case 'button':
 			case 'button-post':
 			case 'button-trigger':
+				if (!isset($button['type'])) {
+					$love = true;
+				}
 				if (isset($button['url'])) {
 					$full_url = self::prepareButtonUrl($button['url'], $url_return_to);
 				} else {

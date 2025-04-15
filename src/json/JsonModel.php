@@ -6,10 +6,14 @@ use JsonPath\JsonObject;
 use yii\base\{InvalidArgumentException,InvalidConfigException};
 use yii\helpers\{ArrayHelper,StringHelper};
 use santilin\churros\json\JsonModelable;
+use santilin\churros\models\ModelTracesTrait;
+
 
 class JsonModel extends \yii\base\Model
 // implements \yii\db\ActiveRecordInterface
 {
+    use ModelTracesTrait;
+
     static protected $parent_model_class;
     static protected $_locator = null;
     protected $parent_model = null;
@@ -377,6 +381,8 @@ class JsonModel extends \yii\base\Model
                         $this->addError($k, $err_message);
                         break;
                     case 'T:':
+                        $this->addTrace($err_message);
+                        break;
                     case 'W:':
                         $this->addWarning($k, $err_message);
                     default:

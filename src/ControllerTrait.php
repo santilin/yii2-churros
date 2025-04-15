@@ -77,7 +77,7 @@ trait ControllerTrait
 		}
 	}
 
-	protected function addSuccessFlashes($action_id, $model, $success_message = null)
+	protected function addSuccessFlashes(string $action_id, $model, ?string $success_message = null)
 	{
 		if ($success_message !== false) {
 			if (!$success_message) {
