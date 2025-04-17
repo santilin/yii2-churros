@@ -386,9 +386,9 @@ class WidgetLayer
 				break;
 			case 'label&content':
 				if (isset($layout_row['htmlOptions'])) {
-					Html::addCssClass($layout_row['htmlOptions'], 'form-control-plaintext');
+					Html::addCssClass($layout_row['htmlOptions'], 'fake-readonly-control');
 				} else {
-					$layout_row['htmlOptions']['class'] = 'form-control-plaintext';
+					$layout_row['htmlOptions']['class'] = 'fake-readonly-control';
 				}
 				$ret .= $this->layoutContent($layout_row['label'], $layout_row['content'], $layout_row_layout, 'large', $layout_row['htmlOptions']);
 				break;
@@ -546,8 +546,7 @@ class WidgetLayer
 			$ret .= Html::tag('label', $label, [ 'class' => $classes['label']]);
 		}
 		Html::addCssClass($options, 'field');
-		Html::addCssClass($options, $classes['wrapper']);
-		$ret .= Html::tag('div', $content, $options);
+		$ret .= Html::tag('div', Html::tag('div', $content, $options), ['class' => $classes['wrapper']]);
 		$ret .= '</div>';
 		return $ret;
 	}

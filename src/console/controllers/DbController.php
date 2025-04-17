@@ -376,7 +376,7 @@ EOF;
 			$anonymizer_function_name($raw_data);
 		}
 		$nrow = 0;
-		$table_name = str_replace('.', '_', $table_name);
+		$table_name = $tableSchema->name;
 		foreach ($raw_data as $row) {
 			$ncolumn = 0;
 			$txt_data .= "\t'{$table_name}{$nrow}' => [\n";

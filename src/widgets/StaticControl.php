@@ -23,7 +23,7 @@ class StaticControl extends \yii\widgets\InputWidget
 		if (is_callable($value)) {
 			$value = call_user_func($value, $this->model, $this);
 		}
-        Html::addCssClass($this->options, 'form-control-plaintext');
+        Html::addCssClass($this->options, 'fake-readonly-control');
 		if (trim(strval($value)) == '') {
 			$value = $this->nullText;
 		}
