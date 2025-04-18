@@ -336,7 +336,7 @@ class JsonModel extends \yii\base\Model
         return $this->_json_object;
     }
 
-    public function jsonGet(string $path)
+    public function rootJsonGet(string $path)
     {
         return $this->_json_modelable->getJsonValue($path);
     }
