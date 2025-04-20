@@ -112,7 +112,10 @@ class ActionColumn extends \yii\grid\ActionColumn
 
 		$params = is_array($key) ? $key : ['id' => (string) $key];
 		$params[0] = $this->controller ? $this->controller . '/' . $action : $action;
-
+		// Preserve grid filters and order
+		if ($action == 'delete') {
+			$params += [ 'returnTo' => Yii::$app->request->url ];
+		}
 		return Url::toRoute($params);
 	}
 
