@@ -75,13 +75,17 @@ class WidgetLayer
 						'style' => 'grid'
 					];
 				} else {
-					$layout_row = [
-						'type' => 'container',
-						'content' => $layout_row,
-						'layout' => '1col',
-						'size' => $parent_options['size']??'large',
-						'style' => 'rows',
-					];
+					foreach (array_filter($layout_row) as $klr => $lr) {
+						$ret .= $this->layoutWidgets($lr, $parent_options, $klr);
+					}
+					return $ret;
+					// $layout_row = [
+					// 	'type' => 'container',
+					// 	'content' => $layout_row,
+					// 	'layout' => '1col',
+					// 	'size' => $parent_options['size']??'large',
+					// 	'style' => 'rows',
+					// ];
 				}
 			} else if (count($layout_row) == 1) {
 				$ret .= '<!--' . array_key_first($layout_row) . "-->\n";
@@ -125,9 +129,9 @@ class WidgetLayer
 		} else {
 			$cols = intval($layout_row_layout); // ?:max(count($layout_row['content']), 4);
 		}
-		$row_added = false;
 		if ($layout_row_type == 'container') {
 			$ret .= "<!--container $layout_row_style: $row_key-->";
+			$row_added = false;
 			if (!$this->lastWasRow()) {
 				$ret .= "<div class=\"row lay-$cols-cols lay-{$this->lastLevel()}-lvl\">";
 				$this->setLastRow($cols);
@@ -241,12 +245,18 @@ class WidgetLayer
 			}
 			$ret .= "<!--end container $layout_row_style: $row_key-->";
 		} else {
-			$added_col = false;
-			if (!$this->noLast() && $this->lastWasRow()) {
-				$added_col = true;
-				$this->setLastCol($cols);
-				$ret .= '<div class="' . $this->columnClasses($cols) . '">';
+			$row_added = false;
+			if ($this->noLast()) {
+				$ret .= "<div class=\"row lay-$cols-cols lay-{$this->lastLevel()}-lvl\">";
+				$this->setLastRow($cols);
+				$row_added = true;
 			}
+			$col_added = false;
+			// if ($this->lastWasRow()) {
+			// 	$col_added = true;
+			// 	$this->setLastCol($cols);
+			// 	$ret .= '<div class="' . $this->columnClasses($cols) . '">';
+			// }
 			switch ($layout_row_type) {
 			case 'widgets':
 			case 'fields':
@@ -258,16 +268,16 @@ class WidgetLayer
 						break;
 					}
 				}
-				$row_html = '';
-				$col_added = false;
-				if (!$this->lastWasCol() && $this->lastWasRow()) {
-					$col_added = true;
-					$this->setLastCol($cols);
-					$row_html.= '<div class="' . $this->columnClasses($cols) . '">';
-				}
 				if ($only_widget_names) {
 					$layout_row = ['type' => $layout_row_type, 'content' => $layout_row, 'style' => 'rows'];
 				}
+				$row_html = '';
+				$col_added = false;
+				// if (!$this->lastWasCol() && $this->lastWasRow()) {
+				// 	$col_added = true;
+				// 	$this->setLastCol($cols);
+				// 	$row_html.= '<div class="' . $this->columnClasses($cols) . '">';
+				// }
 				$subtitle = $layout_row['subtitle']??null;
 				if ($subtitle) {
 					$row_html .= "<div class=row><div class=col-12><div class=\"subtitle mb-3 alert alert-warning\">$subtitle</div></div></div>";
@@ -416,7 +426,11 @@ class WidgetLayer
 				}
 				break;
 			}
-			if ($added_col) {
+			if ($col_added) {
+				$this->removeLast();
+				$ret .= '</div>';
+			}
+			if ($row_added) {
 				$this->removeLast();
 				$ret .= '</div>';
 			}

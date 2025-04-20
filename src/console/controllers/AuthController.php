@@ -181,11 +181,11 @@ class AuthController extends Controller
 		foreach ($controller['perms'] as $perm_name) {
 			$perm_desc = Yii::t('churros', ucfirst($perm_name));
 			$permission = AuthHelper::createOrUpdatePermission(
-				$model_perm_name . ".$perm_name",
+				$model_perm_name . "." . lcFirst($perm_name),
 				$perm_desc . ' ' . $model_title, $auth);
 			AuthHelper::echoLastMessage();
 
-			$add_to_visora = ($perm_name == 'view' || $perm_name == 'index' || $perm_name == 'menu' );
+			$add_to_visora = ($perm_name == 'view' || $perm_name == 'index' || $perm_name == 'menu');
 			if( $add_to_visora ) {
 				if( !$auth->hasChild($model_visora, $permission) ) {
 					$auth->addChild($model_visora, $permission);
@@ -194,11 +194,14 @@ class AuthController extends Controller
  					echo "= Permission '{$permission->name}' already exists in role {$model_visora->name}\n";
 				}
 			}
-			if( !$auth->hasChild($model_editora, $permission) ) {
-				$auth->addChild($model_editora, $permission);
-				echo "+ Permission '{$permission->name}' added to role '{$model_editora->name}'\n";
- 			} else {
- 				echo "= Permission '{$permission->name}' already exists in role '{$model_editora->name}'\n";
+			if ($perm_name == 'update' || $perm_name == 'create' || $perm_name == 'duplicate'
+				|| $perm_name == 'delete') {
+				if( !$auth->hasChild($model_editora, $permission) ) {
+					$auth->addChild($model_editora, $permission);
+					echo "+ Permission '{$permission->name}' added to role '{$model_editora->name}'\n";
+				} else {
+					echo "= Permission '{$permission->name}' already exists in role '{$model_editora->name}'\n";
+				}
 			}
 		}
 	}
@@ -226,26 +229,6 @@ class AuthController extends Controller
 				"{$module_id}.{$cname}.menu", Yii::t('churros', '{perm_desc} controller menu	', ['perm_desc' => $perm_desc]), $auth);
 			AuthHelper::echoLastMessage();
 		}
-// 		AuthHelper::createOrUpdatePermission("$module_id.menu",
-// 			Yii::t('churros', 'Access to \'{module}\' module menu',
-// 			[ 'module' => $module_title?:$module_id ]), $auth);
-// 		AuthHelper::echoLastMessage();
-// 		$role_all_name = "$module_id.all.menu";
-// 		$role_all = AuthHelper::createOrUpdateRole($role_all_name,
-// 			Yii::t('churros', 'Access to all menus of module {module}', [ 'module' => $module_id ]), $auth);
-// 		AuthHelper::echoLastMessage();
-// 		AuthHelper::createOrUpdatePermission("$module_id.site.index",
-// 			Yii::t('churros', 'Access to \'{module}\' site index',
-// 			[ 'module' => $module_title?:$module_id ]), $auth);
-// 		AuthHelper::echoLastMessage();
-// 		AuthHelper::createOrUpdatePermission("$module_id.site.about",
-// 			Yii::t('churros', 'Access to \'{module}\' site about',
-// 			[ 'module' => $module_title?:$module_id ]), $auth);
-// 		AuthHelper::echoLastMessage();
-// 		AuthHelper::createOrUpdatePermission("$module_id.reports",
-// 			Yii::t('churros', 'Access to \'{module}\' reports',
-// 			[ 'module' => $module_title?:$module_id ]), $auth);
-// 		AuthHelper::echoLastMessage();
 	}
 
 	/**
