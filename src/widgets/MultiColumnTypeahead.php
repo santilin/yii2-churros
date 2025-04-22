@@ -45,15 +45,22 @@ class MultiColumnTypeahead extends Typeahead
 		foreach ($this->formFields as $formField => $dbField) {
 			$form_field_id = Html::getInputId($this->model, $formField);
 			$item_fields[] = "item.$dbField";
+			$js = '';
 			if ($this->overwriteInputs) {
-				$set_dest_fields_values[] = <<<js
+				$js = <<<js
 $('#$form_field_id').val(item.$dbField);
 js;
 			} else {
-				$set_dest_fields_values[] = <<<js
+				$js = <<<js
 if (item.$dbField != '' && $('#$form_field_id').val() == '') $('#$form_field_id').val(item.$dbField);
 js;
 			}
+			if (YII_ENV_DEV) {
+				$js .= <<<js
+console.log("$form_field_id = ", item.$dbField);
+js;
+			}
+			$set_dest_fields_values[] = $js;
 		}
 		$s_item_fields = implode(',',$item_fields);
 		if (empty($this->suggestionsDisplay)) {
@@ -143,6 +150,7 @@ jsexpr
 		$js_set_fields_values = implode("\n", $set_dest_fields_values);
 		$this->pluginEvents["typeahead:select"] = new \yii\web\JsExpression(<<<js
 function(event, item) {
+console.log('typeahead:select');
 	$js_set_fields_values
 }
 js
@@ -160,17 +168,24 @@ js
 		$nf = 0;
 		foreach ($this->formFields as $formField => $dbField) {
 			$form_field_id = Html::getInputId($this->model, $formField);
+			$js = '';
 			if ($this->overwriteInputs) {
-				$set_dest_fields_values[] = <<<js
+				 $js = <<<js
 if (datumParts.$formField !== undefined && datumParts.$formField != '') {
 	$('#$form_field_id').val(datumParts.$formField) };
 js;
 			} else {
-				$set_dest_fields_values[] = <<<js
+				$js = <<<js
 if (datumParts.$formField !== undefined && datumParts.$formField != '' && $('#$form_field_id').val() == '') {
 	$('#$form_field_id').val(datumParts.$formField) };
 js;
 			}
+			if (YII_ENV_DEV) {
+				$js .= <<<js
+				console.log("$form_field_id = ", datumParts.$formField);
+js;
+			}
+			$set_dest_fields_values[] = $js;
 			if ($nf++>0) {
 				$reset_dest_fields_values[] = <<<js
 $('#$form_field_id').val('');
@@ -205,7 +220,7 @@ $('#$id').blur(function(e) {
 		}
 		if (selectedDatum) {
 			const datumParts = $(selectedDatum[0]).data('ttSelectableObject');
-			if (datumParts[mctaqhead_exact_match_field_$js_id] == $(this).val()) {
+			if (datumParts[mctahead_exact_match_field_$js_id] == $(this).val()) {
 				$js_set_fields_values
 			}
 		}
