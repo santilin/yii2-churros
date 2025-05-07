@@ -5,6 +5,7 @@ use Yii;
 use yii\helpers\{ArrayHelper,Html};
 use yii\bootstrap5\ActiveForm as Bs5ActiveForm;
 use santilin\churros\widgets\ActiveFormTrait;
+use santilin\churros\widgets\ChurrosAsset;
 
 // https://getbootstrap.com/docs/4.1/components/forms/
 
@@ -356,6 +357,14 @@ class ActiveForm extends Bs5ActiveForm
 			]
 		]
 	];
+
+	#[Override]
+    public function registerClientScript()
+	{
+        $view = $this->getView();
+        ChurrosAsset::register($view);
+	}
+
 
 	#[Override]
 	public function errorSummary($models, $options = []): string

@@ -1,5 +1,5 @@
 <?php
-namespace santilin\churros;
+namespace santilin\churros\widgets;
 
 use yii\web\AssetBundle;
 

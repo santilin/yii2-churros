@@ -159,6 +159,24 @@ class FormHelper
 		}
 	}
 
+	public static function fillJsOptions(string $form, array $options): array
+	{
+		if (!isset($options['enterAsTab'])) {
+			$options['enterAsTab'] = AppHelper::yiiparam('FormEnterAsTab', false) === true
+				|| FormHelper::getConfig($form, 'FormEnterAsTab', false);
+		}
+		if (!isset($options['preventBackspaceNavigation'])) {
+			$options['preventBackspaceNavigation'] = AppHelper::yiiparam('preventBackspaceNavigation', false) === true
+				|| FormHelper::getConfig($form, 'preventBackspaceNavigation', false);
+		}
+		if (!isset($options['setFocus'])) {
+			$options['setFocus'] = AppHelper::yiiparam('setFocus', true) === true
+				|| FormHelper::getConfig($form, 'setFocus', true);
+		}
+		return $options;
+	}
+
+
 	static public function displayButtons(array $buttons, string $sep = '&nbsp;'): string
 	{
 		$ret = [];

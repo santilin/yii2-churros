@@ -3,7 +3,6 @@ namespace santilin\churros\widgets;
 use yii\base\InvalidConfigException;
 use yii\helpers\{Html};
 use yii\web\View;
-use santilin\churros\ChurrosAsset;
 
 class TaxonomyInput extends \yii\widgets\InputWidget
 {
@@ -80,8 +79,6 @@ class TaxonomyInput extends \yii\widgets\InputWidget
  		$html .= '</div><!--row-->';
         $this->registerClientScript();
 		$view = $this->getView();
-        ChurrosAsset::register($view);
-		return $html;
 	}
 
 	protected function getLevelValues($l, $value)

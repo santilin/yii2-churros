@@ -13,7 +13,7 @@ use yii\data\Pagination;
 use yii\helpers\{ArrayHelper,Html,Url};
 use yii\grid\DataColumn;
 use santilin\churros\widgets\grid\GridGroup;
-use santilin\churros\ChurrosAsset;
+use santilin\churros\widgets\ChurrosAsset;
 
 class SimpleGridView extends \yii\grid\GridView
 {

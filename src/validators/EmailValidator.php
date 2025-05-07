@@ -4,7 +4,6 @@ namespace santilin\churros\validators;
 use yii;
 use yii\helpers\Json;
 use yii\validators\ValidationAsset;
-use santilin\churros\ChurrosAsset;
 
 class EmailValidator extends \yii\validators\EmailValidator
 {
@@ -44,7 +43,6 @@ class EmailValidator extends \yii\validators\EmailValidator
     public function clientValidateAttribute($model, $attribute, $view)
     {
         ValidationAsset::register($view);
-        ChurrosAsset::register($view);
         if ($this->enableIDN) {
             PunycodeAsset::register($view);
         }

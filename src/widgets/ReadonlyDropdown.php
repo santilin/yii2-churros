@@ -31,7 +31,7 @@ class ReadonlyDropdown extends InputWidget
      */
     public function run()
     {
-        $this->renderHiddenField();
+        $this->renderHiddenField(); // This order makes the dropdown value take precedence in PHP if not disabled
         $this->renderDropdown();
     }
 

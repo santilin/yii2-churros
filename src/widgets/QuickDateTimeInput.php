@@ -13,7 +13,7 @@ use yii\base\InvalidConfigException;
 use yii\web\View;
 use yii\widgets\MaskedInput;
 use santilin\churros\helpers\DateTimeEx;
-use santilin\churros\{ChurrosAsset,DateFormatterAsset};
+use santilin\churros\widgets\{DateFormatterAsset};
 
 class QuickDateTimeInput extends MaskedInput
 {
@@ -91,7 +91,6 @@ class QuickDateTimeInput extends MaskedInput
 				break;
 			}
 		}
-        ChurrosAsset::register($this->view);
  		DateFormatterAsset::register($this->view);
 		$this->js_error_message = addslashes($this->errorMessage);
         $this->clientOptions = array_merge([

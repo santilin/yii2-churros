@@ -5,7 +5,7 @@
  * @license http://www.yiiframework.com/license/
  */
 
-namespace santilin\churros;
+namespace santilin\churros\widgets;
 
 use yii\web\AssetBundle;
 
@@ -22,7 +22,7 @@ class ChurrosAsset extends AssetBundle
         'churros.views.css',
     ];
     public $js = [
-        'churros.validation.js',
+        'churros.form.js',
         'churros.grid.js',
     ];
     public $depends = [

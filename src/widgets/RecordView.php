@@ -16,7 +16,7 @@ use yii\helpers\ArrayHelper;
 use yii\helpers\Html;
 use yii\helpers\Inflector;
 use yii\i18n\Formatter;
-use santilin\churros\ChurrosAsset;
+use santilin\churros\widgets\ChurrosAsset;
 use santilin\churros\helpers\{AppHelper,FormHelper};
 use santilin\churros\widgets\WidgetLayer;
 use santilin\churros\widgets\ActiveForm;
