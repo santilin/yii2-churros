@@ -269,6 +269,7 @@ window.yii.FormController = (function() {
         }
         if (!form) throw new Error('Form not found');
         this.form = form;
+		form.controller = this;
     }
 
     FormController.prototype = {
@@ -303,6 +304,7 @@ window.yii.FormController = (function() {
 
         resetChanged: function() {
             _changedForms.set(this.form, false);
+			return this;
         },
 
         // Disable all fields except one (by selector or element)
@@ -332,6 +334,7 @@ window.yii.FormController = (function() {
 					this.form.elements[index].focus();
 				}
 			}
+			return this;
 		},
 		formEnterAsTab: function(event) {
 			if (event.keyCode === 13 && ( event.target.nodeName === 'INPUT' || event.target.nodeName === 'SELECT') ) {
@@ -357,10 +360,10 @@ window.yii.FormController = (function() {
 			}
 		},
 
-		preventBackspaceNavigation: function(e) {
+		preventBackspaceNavigation: function(event) {
 			var doPrevent = false;
-			if (e.keyCode === 8) {
-				var d = e.srcElement || e.target;
+			if (event.keyCode === 8) {
+				var d = event.srcElement || event.target;
 				if ((d.tagName.toUpperCase() === 'INPUT' &&
 					(d.type.toUpperCase() === 'TEXT' ||
 					d.type.toUpperCase() === 'PASSWORD' ||
@@ -371,8 +374,7 @@ window.yii.FormController = (function() {
 					d.type.toUpperCase() === 'DATE' )) ||
 					d.tagName.toUpperCase() === 'TEXTAREA') {
 					doPrevent = d.readOnly || d.disabled;
-				}
-				else {
+				} else {
 					doPrevent = true;
 				}
 			}
@@ -383,10 +385,11 @@ window.yii.FormController = (function() {
 			if (!exceptElement) return;
 
 			// Select all input, select, and textarea fields in the form
-			var fields = exceptElement.form.querySelectorAll('input, select, textarea');
+			var fields = this.form.querySelectorAll('input:not([type="hidden"]), select, textarea');
 			fields.forEach(function(field) {
 				field.disabled = (field !== exceptElement);
 			});
+			return this;
 		},
     };
 

@@ -44,7 +44,7 @@ document.getElementById('$buttonId').addEventListener('click', function() {
     if (!this.form._hasChanged) {
         dropdown = document.getElementById('$id');
         dropdown.disabled = false;
-        window.yii.ChurrosForm.disableAllFieldsButOne(dropdown);
+        this.form.controller.disableAllFieldsButOne(dropdown);
     }
     this.style.display = 'none';
 });
