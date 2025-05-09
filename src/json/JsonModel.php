@@ -379,12 +379,14 @@ class JsonModel extends \yii\base\Model
                 switch (substr($err_message,0,2)) {
                     case 'E:':
                         $this->addError($k, $err_message);
+                        $this->addTrace($err_message);
                         break;
                     case 'T:':
                         $this->addTrace($err_message);
                         break;
                     case 'W:':
                         $this->addWarning($k, $err_message);
+                        $this->addTrace($err_message);
                     default:
                 }
             }
