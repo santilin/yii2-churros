@@ -260,8 +260,7 @@ EOF;
 					mkdir(Yii::getAlias($this->seedersPath), 0777, true);
 				}
 				$filename = Yii::getAlias($this->seedersPath) . "/{$tableName}Seeder.php";
-			} else {
-
+			} else { // fixture
 				if (!is_dir(Yii::getAlias($this->fixturesPath))) {
 					mkdir(Yii::getAlias($this->fixturesPath), 0777, true);
 				}
@@ -379,7 +378,7 @@ EOF;
 		$table_name = $tableSchema->name;
 		foreach ($raw_data as $row) {
 			$ncolumn = 0;
-			$txt_data .= "\t'{$table_name}{$nrow}' => [\n";
+			$txt_data .= "\t'{$tableSchema->fullName}{$nrow}' => [\n";
 			foreach($row as $column) {
 				$txt_data .= "\t\t'" . $column_names[$ncolumn] . '\' => ' . $this->getPhpValue($column, $php_types[$ncolumn]) . ",\n";
 				$ncolumn++;

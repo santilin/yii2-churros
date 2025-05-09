@@ -155,13 +155,12 @@ class JsonModel extends \yii\base\Model
         $this->_is_new_record = $is_new;
     }
 
-    public function parentModel($parent_id = null): ?JsonModel
+    public function parentModel($parent_id = null, $force = false): ?JsonModel
     {
         if (empty(static::$parent_model_class)) {
-            $this->parent_model = null;
-            return null;
+            return $this->parent_model;
         }
-        if ($this->parent_model === null) {
+        if ($this->parent_model === null || $force) {
             if (!$this->_json_modelable) {
                 throw new InvalidConfigException("Json model has no _json_modelable set");
             }
