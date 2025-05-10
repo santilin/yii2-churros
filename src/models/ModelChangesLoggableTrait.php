@@ -104,7 +104,7 @@ trait ModelChangesLoggableTrait
 						$model_change->record_id = $record_id;
 						$model_change->field = $nfield;
 						$model_change->value = $old_value;
-						$model_change->changed_by = \Yii::$app->user->identity->id;
+						$model_change->changed_by = \Yii::$app?->user?->identity?->id;
 						$model_change->changed_at = new \yii\db\Expression("NOW()");
 						$model_change->type = $model_change::V_TYPE_UPDATE;
 						if (is_bool($current_value)) {
@@ -163,11 +163,33 @@ trait ModelChangesLoggableTrait
 		}
 	}
 
-
 	public function sendModelChangesNotification(ModelChangesEvent $e)
 	{
 		$changes_record = $e->getChangesRecord();
 		$changes_record->sendModelChangesNotification();
+	}
+
+
+	public function createChangesLog(int $type, int $subtype, string $field, mixed $old_value,
+									 ?int $changed_by = null, ?string $fecha = null, string $comments = null): false|\yii\db\ActiveRecord
+	{
+		$relation = static::$relations[static::$_log_model_changes_relation]??false;
+		if ($relation) {
+			$changes_log_model = new $relation['modelClass'];
+			$changes_log_model->field = $changes_log_model->findChangeableFieldIndex($this->getModelInfo('model_name'), $field);
+			if ($changes_log_model->field!==false) {
+				$changes_log_model->changed_at = $fecha ?: new \yii\db\Expression('NOW()');
+				$changes_log_model->changed_by = $changed_by;
+				$changes_log_model->record_id = $this->id;
+				$changes_log_model->type = $type;
+				$changes_log_model->subtype = $subtype;
+				$changes_log_model->value = $old_value;
+				$changes_log_model->comments = $comments;
+				$changes_log_model->save();
+				return $changes_log_model;
+			}
+		}
+		return false;
 	}
 
 }
