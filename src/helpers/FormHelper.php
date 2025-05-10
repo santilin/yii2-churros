@@ -85,7 +85,7 @@ class FormHelper
 		return $views[$index];
 	}
 
-	/// @return [ view_name, title, $model, $permissions ]
+	/// @return [ view_name, title, $permissions, $view_params ]
 	static public function viewFromRequest(array $views, array $params): array
 	{
  		$_nv=$params[self::VIEWS_NVIEW_PARAM]??0;
@@ -96,7 +96,7 @@ class FormHelper
 		if (is_string($_nv)) {
 			foreach ($views as $view => $view_info) {
 				if ($view == $_nv || AppHelper::lastWord($view,'/') == $_nv) {
-					return [ $view, $view_info[0], $view_info[1], $view_info[2]??[], $view_info[3]??''];
+					return [ $view, $view_info[0], $view_info[1]??[], $view_info[2]??''];
 				}
 			}
 			$_nv = 0;
@@ -106,7 +106,7 @@ class FormHelper
 		}
 		foreach($views as $kv => $view ) {
 			if( $_nv-- == 0 ) {
-				return [ $kv, $view[0], $view[1], $view[2]??[], $view[3]??'' ];
+				return [ $kv, $view[0], $view[1]??[], $view[2]??'' ];
 			}
 		}
 	}

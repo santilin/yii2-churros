@@ -253,8 +253,7 @@ trait ModelSearchTrait
 	 */
 	public function transformGridFilterValues()
 	{
-		return;
-		foreach( array_merge(array_keys($this->normal_attrs), array_keys($this->related_properties)) as $attr ) {
+		foreach (array_merge(array_keys($this->normal_attrs), array_keys($this->related_properties)) as $attr ) {
 			$value = $this->$attr;
 			if ($value === null || $value === '') {
 				continue;
@@ -263,7 +262,7 @@ trait ModelSearchTrait
 				if( substr($value,0,2) == '{"' && substr($value,-2) == '"}' ) {
 					$value = json_decode($value, true);
 				} else {
-					$love = true;
+					continue;
 				}
 			}
 			if ($value['v']!=='') {
