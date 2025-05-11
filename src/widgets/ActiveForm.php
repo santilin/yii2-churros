@@ -361,6 +361,7 @@ class ActiveForm extends Bs5ActiveForm
 	#[Override]
     public function registerClientScript()
 	{
+		parent::registerClientScript();
         $view = $this->getView();
         ChurrosAsset::register($view);
 	}

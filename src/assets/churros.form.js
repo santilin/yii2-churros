@@ -88,9 +88,9 @@ window.yii.churros = (function ($) {
 				return false;
 			}
 			let today = new Date();
-			if (matches.groups.year_long !== 'undefined') {
+			if (matches.groups.year_long !== undefined) {
 				year = parseInt(matches.groups.year_long);
-			} else if (matches.groups.year_short !== 'undefined') {
+			} else if (matches.groups.year_short !== undefined) {
 				year = parseInt(matches.groups.year_short);
 			} else {
 				year = today.getFullYear();;
@@ -100,27 +100,27 @@ window.yii.churros = (function ($) {
 			} else if (year<100) {
 				year += 2000;
 			}
-			if (matches.groups.month !== 'undefined') {
+			if (matches.groups.month !== undefined) {
 				month = parseInt(matches.groups.month);
 			} else {
 				month = today.getMonth() + 1;
 			}
-			if (matches.groups.day !== 'undefined') {
+			if (matches.groups.day !== undefined) {
 				day = parseInt(matches.groups.day);
 			} else {
 				day = today.getDate();
 			}
-			if (matches.groups.hour !== 'undefined') {
+			if (matches.groups.hour !== undefined) {
 				hour = parseInt(matches.groups.hour);
 			} else {
 				hour = today.getHours();
 			}
-			if (matches.groups.minute !== 'undefined') {
+			if (matches.groups.minute !== undefined) {
 				minute = parseInt(matches.groups.minute);
 			} else {
 				minute = today.getMinutes();
 			}
-			if (matches.groups.second !== 'undefined') {
+			if (matches.groups.second !== undefined) {
 				second = parseInt(matches.groups.second);
 			} else {
 				second = 0;
@@ -147,7 +147,7 @@ window.yii.churros = (function ($) {
 				var date_js = null;
 			} else {
 				let ds = date_input.val();
-				if (default_times !== 'undefined' ) {
+				if (default_times !== undefined ) {
 					for (const prop in default_times) {
 						ds = ds.replace(prop, default_times[prop]);
 					}

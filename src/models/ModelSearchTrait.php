@@ -23,9 +23,15 @@ trait ModelSearchTrait
 	public function __get($name)
 	{
 		// GridView::renderFilter: needs activeAttribute when related property
-		if ( /*!isset(static::$relations[$name]) && */property_exists($this, 'related_properties')) {
-			if( array_key_exists($name, $this->related_properties) ) {
-				return $this->related_properties[$name];
+		if (property_exists($this, 'related_properties')) {
+			if (array_key_exists($name, $this->related_properties)) {
+				if (!isset(static::$relations[$name])) {
+					return $this->related_properties[$name];
+				} else if (empty($this->related_properties[$name])) {
+					return parent::__get($name);
+				} else {
+					throw new \Exception("ambigüedad");
+				}
 			}
 		}
 		return parent::__get($name);
@@ -257,7 +263,7 @@ trait ModelSearchTrait
 	{
 		foreach (array_merge(array_keys($this->normal_attrs), array_keys($this->related_properties)) as $attr ) {
 			$value = $this->$attr;
-			if ($value === null || $value === '' || $value === []) {
+			if ($value === null || $value === '' || $value === [] || is_object($value)) {
 				continue;
 			}
 			if (!is_array($value)) {
