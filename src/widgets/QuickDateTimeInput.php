@@ -216,7 +216,7 @@ $('#$id').closest('form').submit(function(e) {
  		return true;
  	}
 });
-$('#$id').on('change blur'), function(e) {
+$('#$id').on('change blur', function(e) {
 	if (!window.yii.churros.dateInputChange($(this), '$orig_id', '$this->format', '$this->saveFormat', '$format_as_regex', '$this->js_error_message'$s_default_time)) {
 		e.preventDefault();
 		return false;
