@@ -75,7 +75,7 @@ trait ModelChangesLoggableTrait
 			// 			$model_change->saveOrFail();
 		} else {
 			$model_name = $event->sender->getModelInfo('model_name');
-			$_log_model_changes_relation_info = static::$relations[$this->_log_model_changes_relation];
+			$_log_model_changes_relation_info = static::$relations[static::$_log_model_changes_relation];
 			$record_id = strval(count($this->primaryKey())==1 ? $this->getPrimaryKey() : json_encode($this->getPrimaryKey(true)));
 			$model_change = new $_log_model_changes_relation_info['modelClass'];
 			if ($event->name == self::EVENT_AFTER_INSERT) {

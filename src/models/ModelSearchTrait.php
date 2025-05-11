@@ -23,7 +23,7 @@ trait ModelSearchTrait
 	public function __get($name)
 	{
 		// GridView::renderFilter: needs activeAttribute when related property
-		if ( !isset(static::$relations[$name]) && property_exists($this, 'related_properties')) {
+		if ( /*!isset(static::$relations[$name]) && */property_exists($this, 'related_properties')) {
 			if( array_key_exists($name, $this->related_properties) ) {
 				return $this->related_properties[$name];
 			}
@@ -42,9 +42,11 @@ trait ModelSearchTrait
 		}
 	}
 
-    public function operatorForAttr(string $attr): string
+    public function operatorForAttr(?string $rel_name, string $attr): string
 	{
-		if (array_key_exists($attr, $this->related_properties)) {
+		if ($rel_name && array_key_exists($rel_name, $this->related_properties)) {
+			return '=';
+		} else if (array_key_exists($attr,$this->related_properties)) {
 			return '=';
 		} else {
 			if (array_key_exists($attr, $this->normal_attrs)) {
@@ -213,12 +215,12 @@ trait ModelSearchTrait
 		$conds = [];
 		list($attribute, $table_alias, $model, $relation) = $this->addRelatedFieldToJoin($relation_name, $query);
 
-		$value = FormHelper::toOpExpression($value, false, $this->operatorForAttr($attribute?:$relation_name) );
+		$value = FormHelper::toOpExpression($value, false, $this->operatorForAttr($relation_name, $attribute) );
 		if ($attribute == '') {
 			$search_flds = $model->findCodeAndDescFields();
 			$rel_conds = [ 'OR' ];
 			foreach ($search_flds as $search_fld) {
-				$operator = $this->operatorForAttr($search_fld);
+				$operator = $this->operatorForAttr(null, $search_fld);
 				if (is_array($value['v'])) {
 					$fld_conds = [ 'OR' ];
 					foreach ($value['v'] as $v) {
@@ -255,7 +257,7 @@ trait ModelSearchTrait
 	{
 		foreach (array_merge(array_keys($this->normal_attrs), array_keys($this->related_properties)) as $attr ) {
 			$value = $this->$attr;
-			if ($value === null || $value === '') {
+			if ($value === null || $value === '' || $value === []) {
 				continue;
 			}
 			if (!is_array($value)) {

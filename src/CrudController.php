@@ -106,13 +106,13 @@ class CrudController extends \yii\web\Controller
 			throw new NotFoundHttpException("Unable to create a searchModel for $this->id crud controller");
 		}
 		$form_name = $searchModel->formName();
-		if (empty($params[$form_name])) {
-			if (!empty(Yii::$app->session[$form_name . '.grid-filters'])) {
-				$params[$form_name] = Yii::$app->session[$form_name. '.grid-filters'];
-			}
-		} else {
-			Yii::$app->session->set($form_name . '.grid-filters', $params[$form_name]);
-		}
+		// if (empty($params[$form_name])) {
+		// 	if (!empty(Yii::$app->session[$form_name . '.grid-filters'])) {
+		// 		$params[$form_name] = Yii::$app->session[$form_name. '.grid-filters'];
+		// 	}
+		// } else {
+		// 	Yii::$app->session->set($form_name . '.grid-filters', $params[$form_name]);
+		// }
 		$params['permissions'] = $this->resolvePermissions($params['permissions']??[], $this->userPermissions());
 		if ($this->getMasterModel()) {
 			$related_field = $searchModel->relatedFieldForModel($this->getMasterModel());

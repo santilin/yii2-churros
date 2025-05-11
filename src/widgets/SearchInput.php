@@ -24,7 +24,7 @@ class SearchInput extends \yii\bootstrap5\InputWidget
 		$scope = $this->formName??$this->model->formName();
 		// $this->model is a ModelSearchTrait
 		$value = $this->model->$attribute;
-		$value = FormHelper::toOpExpression($value, false, $this->model->operatorForAttr($attribute));
+		$value = FormHelper::toOpExpression($value, false, $this->model->operatorForAttr(null, $attribute));
 // 		$ret .= "<div class='row form-inline'>";
 // 		$ret .= "<div class='left-field control-form'>";
 

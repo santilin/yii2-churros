@@ -102,14 +102,11 @@ class GridView extends SimpleGridView
 			// No mostrar la fila de filtro si no hay valores filtrados
  			$filter_attrs = $this->filterModel->activeAttributes();
 			$has_filters = false;
-			foreach ($this->columns as $kc => $column) {
-				$attribute = $column->attribute??$kc;
-				if (in_array($attribute, $filter_attrs)) {
-					$v = $this->filterModel->$attribute;
-					if (!empty($v)) {
-						$has_filters = true;
-						break;
-					}
+			foreach ($filter_attrs as $attribute) {
+				$v = $this->filterModel->$attribute;
+				if (!empty($v)) {
+					$has_filters = true;
+					break;
 				}
 			}
  			if (!$has_filters) {
