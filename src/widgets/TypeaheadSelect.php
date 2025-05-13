@@ -7,15 +7,10 @@ use yii\helpers\Html;
 use yii\base\InvalidConfigException;
 use kartik\typeahead\Typeahead as KartikTypeahead;
 
-/**
- * This widget fills in the display fields when:
- * - The input blurs
- * - The enter key is pressed
- * - A suggestion is selected
- */
-
 class TypeaheadSelect extends KartikTypeahead
 {
+	public $relatedModel = null;
+	public $searchFields =  [];
 	public $exactMatch = false;
 	public $suggestionsDisplay;
 	public $display;
@@ -43,19 +38,37 @@ class TypeaheadSelect extends KartikTypeahead
 	public function init()
 	{
 		if (empty($this->suggestionsDisplay)) {
+			// Build a JS function string that displays all searchFields
+			$fieldsJs = [];
+			foreach ($this->searchFields as $field) {
+				$fieldsJs[] = "item." . $field;
+			}
+			$fieldsDisplay = implode(" + ' - ' + ", $fieldsJs);
+
 			$this->suggestionsDisplay = <<<js
 function(item) {
-debugger;
-	return '<div data=\"' + item.id + '\" class=suggestion>' + item.text + '</div>';
+    return '<div data="' + item.id + '" class="suggestion">' + ($fieldsDisplay) + '</div>';
 }
 js;
 		}
- 		if (empty($this->display)) {
+
+		if (empty($this->display)) {
+			$fieldsJs = [];
+			foreach ($this->searchFields as $field) {
+				$fieldsJs[] = "item." . $field;
+			}
+			$fieldsDisplay = implode(" + ' - ' + ", $fieldsJs);
+
 			$this->display = <<<js
 function(item) {
-	return item.text;
+	return $fieldsDisplay;
 }
 js;
+		}
+
+		$searchFieldsParam = '';
+		if (!empty($this->searchFields)) {
+			$searchFieldsParam = '&searchFields=' . urlencode(json_encode($this->searchFields));
 		}
 
 		$this->dataset = [[
@@ -63,7 +76,8 @@ js;
 			'remote' => [
 				'url' => $this->remoteUrl . '?'
 					. $this->searchParam . '=&' . $this->resultFormatParam . '='
-					. $this->pageParam . '=&' . $this->perPageParam . '=',
+					. $this->pageParam . '=&' . $this->perPageParam . '='
+					. $searchFieldsParam,
 				'replace' => new \yii\web\JsExpression(<<<jsexpr
 function(url, query) {
 	const urlParams = new URLSearchParams(url);
@@ -82,7 +96,7 @@ function(url, query) {
 	return url.split("?")[0] + "?{$this->searchParam}=" + query
 		+ "&{$this->resultFormatParam}=" + resultFormat
 		+ "&{$this->pageParam}=" + page
-		+ "&{$this->perPageParam}=" + perpage;
+		+ "&{$this->perPageParam}=" + perpage
 }
 jsexpr
 				),
@@ -108,7 +122,7 @@ js;
 		parent::init();
 	}
 
-    public function registerAssets2()
+    public function registerAssets()
     {
 		$view = $this->getView();
 		$hidden_name = $this->options['name']??Html::getInputName($this->model, $this->attribute);
