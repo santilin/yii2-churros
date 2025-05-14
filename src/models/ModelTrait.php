@@ -19,6 +19,9 @@ trait ModelTrait
 	static public function applyScopes(ActiveQuery $q, string|array|null $scopes, bool $set_order_by = true): ActiveQuery
 	{
 		if (!empty($scopes)) {
+			if (is_string($scopes)) {
+				$scopes = explode(',', $scopes);
+			}
 			$save_order = $q->orderBy;
 			foreach ( (array)$scopes as $scope) {
 				$scope_args = [];

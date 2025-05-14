@@ -126,7 +126,6 @@ legend {
   text-overflow: ellipsis;
   max-width: 50ch;
   font-size: 0.8em;
-  white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
   flex: 0 1 auto;
@@ -160,8 +159,6 @@ legend {
 
 }
 
-
-
 .grid-header .subtitle, .grid-header .supertitle {
   font-variant: small-caps;
   font-size: small;
@@ -170,7 +167,6 @@ legend {
   text-overflow: ellipsis;
   flex: 0 1 auto;
 }
-
 
 .format-currency {
   text-align: right;

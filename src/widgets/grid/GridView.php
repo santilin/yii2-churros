@@ -73,7 +73,7 @@ class GridView extends SimpleGridView
     public function renderFilterCount()
     {
 		$pagination = $this->dataProvider->getPagination();
-        if ($pagination === false || $pagination->totalCount < 6) {
+        if ($pagination === false || $pagination->totalCount <= 6) {
             return '';
         }
         $urls = [];

@@ -262,7 +262,11 @@ trait ModelSearchTrait
 	public function transformGridFilterValues()
 	{
 		foreach (array_merge(array_keys($this->normal_attrs), array_keys($this->related_properties)) as $attr ) {
-			$value = $this->$attr;
+			if (array_key_exists($attr, $this->related_properties)) {
+				$value = $this->related_properties[$attr];
+			} else {
+				$value = $this->$attr;
+			}
 			if ($value === null || $value === '' || $value === [] || is_object($value)) {
 				continue;
 			}
