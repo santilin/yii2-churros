@@ -160,14 +160,15 @@ trait RelationTrait
 				}
                 if (is_array($relPost) ) {
 					// many2many relation with _POST = array of records
-					if( array_filter($relPost) ) {
+					if (array_filter($relPost)) {
 						$condition = [];
-						$condition[$relPKAttr[0]] = $this->primaryKey;
 						foreach ($relPost as $relAttr => $relAttrVal) {
 							if (in_array($relAttr, $relPKAttr)) {
 								$condition[$relAttr] = $relAttrVal;
+								unset($relPKAttr[array_search($relAttr, $relPKAttr)]);
 							}
 						}
+						$condition[$relPKAttr[array_key_first($relPKAttr)]] = $this->primaryKey;
 						$relObj = null;
 						if (!empty($this->primaryKey)) {
 							$relObj = $relModelClass::findOne($condition);
@@ -230,7 +231,7 @@ trait RelationTrait
 					$relObj = empty($relPost[$relPKAttr[0]]) ? new $relModelClass : $relModelClass::findOne($relPost[$relPKAttr[0]]);
 					$relObj->load($relPost);
 				} else {
-					$relObj = [ $other_fk => $relPost];
+					$relObj = [$other_fk => $relPost];
 				}
 				$container[] = $relObj;
 			}
