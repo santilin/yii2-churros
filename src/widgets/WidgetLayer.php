@@ -392,6 +392,12 @@ class WidgetLayer
 				$ret .= '</div><!--row-->';
 				break;
 			case 'subtitle':
+				$col_added = false;
+				if (!$this->lastWasCol()) {
+					$this->setLastCol($cols);
+					$col_added = true;
+					$ret .='<div class="' . $this->columnClasses($cols) . ' " style="display: flex; flex-direction: column">';
+				}
 				$ret .= $this->layoutSubtitle($layout_row['content'], $layout_row_layout, 'large', $layout_row['htmlOptions']??[]);
 				break;
 			case 'label&content':
@@ -569,11 +575,8 @@ class WidgetLayer
 		string $widget_layout, array $options = []):string
 	{
 		$ret = '';
-		$classes = $this->widget_layout_horiz_config[$layout_of_row][$widget_layout]['horizontalCssClasses'];
 		$tag = ArrayHelper::remove($options, 'tag', 'h2');
-		$ret .= '<div class="row mb-3">';
 		$ret .= Html::tag($tag, $content, $options);
-		$ret .= '</div>';
 		return $ret;
 	}
 	public function layoutButtons(array $buttons, string $layout, array $options = []): string
