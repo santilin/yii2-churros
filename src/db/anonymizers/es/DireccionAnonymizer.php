@@ -3,14 +3,14 @@
 namespace santilin\churros\db\anonymizers\es;
 
 /*
- * Example usage:
- * $Anonymizer = new NombrePersonaAnonymizer('your-secret-key-here');
- * $originalName = 'Álvaro Núñez, José Ángel';
- * echo "Original: $originalName\n";
- * echo "Anonymized: " . $Anonymizer->anonymize($originalName) . "\n";
+ * Ejemplo de uso:
+ * $anonymizer = new DireccionAnonymizer('tu-clave-secreta');
+ * $original = 'Calle de la Constitución, 23 2ºB';
+ * echo "Original: $original\n";
+ * echo "Anonimizada: " . $anonymizer->anonymize($original) . "\n";
  */
 
-class NombrePersonaAnonymizer
+class DireccionAnonymizer
 {
     private $secretKey;
     private $vowels;
@@ -18,12 +18,12 @@ class NombrePersonaAnonymizer
 
     public function __construct(string $secretKey) {
         $this->secretKey = $secretKey;
-        // All vowels (lowercase and uppercase, including accented and ü)
+        // Todas las vocales relevantes en español (mayúsculas, minúsculas, acentuadas y ü)
         $this->vowels = [
             'a', 'e', 'i', 'o', 'u', 'á', 'é', 'í', 'ó', 'ú', 'ü',
             'A', 'E', 'I', 'O', 'U', 'Á', 'É', 'Í', 'Ó', 'Ú', 'Ü'
         ];
-        // Spanish consonants (lowercase and uppercase)
+        // Consonantes españolas (mayúsculas y minúsculas)
         $baseConsonants = [
             'b', 'c', 'd', 'f', 'g', 'h', 'j', 'k', 'l', 'm', 'n',
             'ñ', 'p', 'q', 'r', 's', 't', 'v', 'w', 'x', 'y', 'z'
@@ -31,13 +31,22 @@ class NombrePersonaAnonymizer
         $this->consonants = array_merge($baseConsonants, array_map('mb_strtoupper', $baseConsonants));
     }
 
-    public function anonymize(string $name): string {
-        $words = preg_split('/\s+/u', $name, -1, PREG_SPLIT_NO_EMPTY);
-        $anonymizedWords = array_map([$this, 'anonymizeWord'], $words);
-        return implode(' ', $anonymizedWords);
+    public function anonymize(?string $direccion): ?string
+    {
+        if (empty($direccion)) {
+            return $direccion;
+        }        // Separa por espacios, pero mantiene números y signos juntos a palabras
+        $words = preg_split('/(\s+)/u', $direccion, -1, PREG_SPLIT_DELIM_CAPTURE);
+        $anonymized = array_map([$this, 'anonymizeWord'], $words);
+        return implode('', $anonymized);
     }
 
     private function anonymizeWord(string $word): string {
+        // Si la palabra es solo espacios, retorna igual
+        if (preg_match('/^\s+$/u', $word)) {
+            return $word;
+        }
+
         $letters = $this->mb_str_split_unicode($word);
         $anonymizedLetters = [];
 
@@ -45,8 +54,8 @@ class NombrePersonaAnonymizer
             $anonymizedLetters[] = $this->anonymizeLetter($letter, $i, $word);
         }
 
-        // Ensure at least one vowel is present
-        if (!$this->containsVowel($anonymizedLetters)) {
+        // Asegura al menos una vocal si hay alguna letra
+        if ($this->hasLetters($letters) && !$this->containsVowel($anonymizedLetters)) {
             $position = $this->getDeterministicPosition($word);
             $anonymizedLetters[$position] = $this->getDeterministicVowel($word, $position);
         }
@@ -55,7 +64,7 @@ class NombrePersonaAnonymizer
     }
 
     private function anonymizeLetter(string $letter, int $index, string $word): string {
-        // Only anonymize Unicode letters
+        // Solo anonimiza letras Unicode
         if (!$this->isUnicodeLetter($letter)) {
             return $letter;
         }
@@ -63,7 +72,6 @@ class NombrePersonaAnonymizer
         $isVowel = $this->isVowel($letter);
         $alphabet = $isVowel ? $this->vowels : $this->consonants;
 
-        // Deterministic hash based on secret, letter, position, and word
         $hash = crc32($this->secretKey . $letter . $index . $word);
         return $alphabet[$hash % count($alphabet)];
     }
@@ -77,9 +85,26 @@ class NombrePersonaAnonymizer
         return false;
     }
 
+    private function hasLetters(array $letters): bool {
+        foreach ($letters as $letter) {
+            if ($this->isUnicodeLetter($letter)) {
+                return true;
+            }
+        }
+        return false;
+    }
+
     private function getDeterministicPosition(string $word): int {
-        $len = mb_strlen($word, 'UTF-8');
-        return $len > 0 ? crc32($this->secretKey . $word) % $len : 0;
+        $letters = $this->mb_str_split_unicode($word);
+        $positions = [];
+        foreach ($letters as $i => $letter) {
+            if ($this->isUnicodeLetter($letter)) {
+                $positions[] = $i;
+            }
+        }
+        if (count($positions) === 0) return 0;
+        $hash = crc32($this->secretKey . $word);
+        return $positions[$hash % count($positions)];
     }
 
     private function getDeterministicVowel(string $word, int $position): string {
@@ -88,21 +113,18 @@ class NombrePersonaAnonymizer
     }
 
     private function isVowel(string $char): bool {
-        // Compare in a Unicode-aware, case-insensitive way
         return in_array($char, $this->vowels, true);
     }
 
     private function isUnicodeLetter(string $char): bool {
-        // Unicode-aware check for letter
         return (bool) preg_match('/^\p{L}$/u', $char);
     }
 
     private function mb_str_split_unicode(string $str): array {
-        // Polyfill for mb_str_split for PHP < 7.4
         if (function_exists('mb_str_split')) {
             return mb_str_split($str, 1, 'UTF-8');
         }
-        // Fallback
         return preg_split('//u', $str, -1, PREG_SPLIT_NO_EMPTY);
     }
 }
+
