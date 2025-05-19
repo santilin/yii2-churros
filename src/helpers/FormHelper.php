@@ -67,7 +67,7 @@ class FormHelper
 	static public function gridFromRequest(array $views, array $params): array
 	{
 		$_nv=$params[self::VIEWS_NVIEW_PARAM]??0;
-		if( is_numeric($_nv) ) {
+		if (is_numeric($_nv)) {
 			if ($_nv > (count($views)-1) ) {
 				$_nv = 0;
 			}
@@ -77,7 +77,7 @@ class FormHelper
 				}
 			}
 		} else {
-			if( isset($views[$_nv])	) {
+			if (isset($views[$_nv])) {
 				return $views[$_nv];
 			}
 		}
