@@ -35,11 +35,8 @@ class GridView extends SimpleGridView
 				'items-many' => $this->itemLabelMany,
 				'items-acc' => $this->itemLabelAccusative,
 			];
-			$this->emptyText = Yii::t('churros', 'No {items} found.', $configItems);
+			$this->emptyText = Yii::t('churros', 'No {items} found.', [ 'items' => mb_lcfirst($configItems['items']??'items') ]);
 		}
-		// if ($this->title === null) {
-		// 	$this->title = $this->itemLabelPlural;
-		// }
 		parent::init();
 	}
 

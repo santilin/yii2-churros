@@ -411,17 +411,16 @@ class WidgetLayer
 			case 'html':
 				$label = ArrayHelper::remove($layout_row, 'label', null);
 				$classes = $this->widget_layout_horiz_config[$layout_row_layout]['full']['horizontalCssClasses'];
-				// if ($label) {
-				// 	$labelOptions = [ 'class' => implode(' ', (array)$classes['label'])];
-				// 	if (YII_ENV_DEV) {
-				// 		$labelOptions['class'] .= " {$layout_row_layout}xlarge";
-				// 	}
-				// 	$ret .= Html::tag('label', $label, $labelOptions );
-				// }
+				$col_added = false;
+				if (!$this->lastWasCol()) {
+					$this->setLastCol($cols);
+					$col_added = true;
+					$ret .='<div class="' . $this->columnClasses($cols) . ' " style="display: flex; flex-direction: column">';
+				}
 				if (YII_ENV_DEV) {
 					$classes['wrapper'][] = "{$layout_row_layout}xlarge";
 				}
-				Html::addCssClass($layout_row['htmlOptions'], 'row w-100 html');
+				Html::addCssClass($layout_row['htmlOptions'], 'row html');
 				$content_options = [];
 				Html::addCssClass($content_options, $classes['wrapper']);
 				foreach ((array)$layout_row['content'] as $html_key => $html_content) {

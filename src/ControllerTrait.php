@@ -8,6 +8,14 @@ use santilin\churros\helpers\FormHelper;
 
 trait ControllerTrait
 {
+	static public function getModelName(bool $short = false): string
+	{
+		if ($short) {
+			return StringHelper::lastWord($this->_model_name, '\\');
+		} else {
+			return $this->_model_name;
+		}
+	}
 
 	static public function findRelationsInForm(array $form_params): array
 	{

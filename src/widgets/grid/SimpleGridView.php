@@ -396,6 +396,9 @@ class SimpleGridView extends \yii\grid\GridView
 		}
 		$nc = 0;
 		foreach ($this->columns as $column) {
+			if (!($column instanceof DataColumn)) {
+				continue;
+			}
 			if( $nc++ < $colspan ) {
 				continue;
 			}
