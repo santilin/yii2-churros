@@ -30,7 +30,7 @@ trait ModelSearchTrait
 				} else if (empty($this->related_properties[$name])) {
 					return parent::__get($name);
 				} else {
-					throw new \Exception("ambigüedad");
+					return $this->related_properties[$name];
 				}
 			}
 		}
