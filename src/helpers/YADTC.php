@@ -7,6 +7,9 @@ use Yii;
 class YADTC extends \DateTime
 {
 	const SQL_DATE_FORMAT = 'Y-m-d';
+	const SQL_DATETIME_FORMAT = 'Y-m-d H:i:s';
+	const SQL_TIME_FORMAT = 'H:i:s';
+
 	const NOW = '\\app\\lib\\YADTC::NOW';
 
 	#[\ReturnTypeWillChange]
@@ -638,6 +641,36 @@ class YADTC extends \DateTime
 		}
 	}
 
+	public static function getTimeStringAgoInWord($date)
+    {
+		return static::getTimeStampAgoInWord(static::anyDateTimeToUnixTime($date));
+    }
+
+    /**
+     * Returns time ago in words.
+     * @param int $timestamp
+     * @return string
+     */
+    public static function asDuration($timestamp)
+    {
+
+        $difference = time() - static::anyDateTimeToUnixTime($timestamp);
+        $ret = Yii::$app->formatter->asDuration($difference, ",");
+        $parts = explode(",", $ret);
+        if( count($parts) >= 2 ) {
+			return $parts[0] . " y " . $parts[1];
+		} else {
+			return $ret;
+		}
+    }
+
+	public static function datetimeDiffToString($fecha_ini, $fecha_fin)
+	{
+		$ds = new DateTime($fecha_ini);
+		$de = new DateTime($fecha_fin);
+		$diff = $de->diff($ds);
+		return $diff->format("%H:%I:%S");
+	}
 
 
 } // class YADTC

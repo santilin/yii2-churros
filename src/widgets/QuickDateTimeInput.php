@@ -12,7 +12,7 @@ use yii\helpers\Html;
 use yii\base\InvalidConfigException;
 use yii\web\View;
 use yii\widgets\MaskedInput;
-use santilin\churros\helpers\DateTimeEx;
+use santilin\churros\helpers\YADTC;
 use santilin\churros\widgets\{DateFormatterAsset};
 
 class QuickDateTimeInput extends MaskedInput
@@ -45,7 +45,7 @@ class QuickDateTimeInput extends MaskedInput
 		}
 		parent::init();
 		if (!$this->datetype) {
-			$this->datetype = DateTimeEx::guessTypeFromFormat($this->format);
+			$this->datetype = YADTC::guessTypeFromFormat($this->format);
 		}
 		if ($this->errorMessage == null) {
 			switch ($this->datetype) {
@@ -70,7 +70,7 @@ class QuickDateTimeInput extends MaskedInput
 					$this->saveFormat = $dcm->getSaveFormat('date');
 				}
 				if (!$this->saveFormat) {
-					$this->saveFormat = DateTimeEx::DATETIME_DATE_SQL_FORMAT;
+					$this->saveFormat = YADTC::SQL_DATE_FORMAT;
 				}
 				break;
 			case 'datetime':
@@ -78,7 +78,7 @@ class QuickDateTimeInput extends MaskedInput
 					$this->saveFormat = $dcm->getSaveFormat('datetime');
 				}
 				if (!$this->saveFormat) {
-					$this->saveFormat = DateTimeEx::DATETIME_DATETIME_SQL_FORMAT;
+					$this->saveFormat = YADTC::SQL_DATETIME_FORMAT;
 				}
 				break;
 			case 'time':
@@ -86,7 +86,7 @@ class QuickDateTimeInput extends MaskedInput
 					$this->saveFormat = $dcm->getSaveFormat('date');
 				}
 				if (!$this->saveFormat) {
-					$this->saveFormat = DateTimeEx::DATETIME_TIME_SQL_FORMAT;
+					$this->saveFormat = YADTC::SQL_TIME_FORMAT;
 				}
 				break;
 			}
@@ -157,15 +157,15 @@ class QuickDateTimeInput extends MaskedInput
 			if( empty($this->options['value']) ) {
 				$value = Html::getAttributeValue($this->model, $this->attribute);
 				if(!empty($value)) {
-					$parsed_date = DateTimeEx::createFromFormat($this->saveFormat, $value);
+					$parsed_date = YADTC::createFromFormat($this->saveFormat, $value);
 					if ($parsed_date == null) {
 						switch ($this->datetype) {
 							case 'date':
 							case 'time':
-								$parsed_date = DateTimeEx::createFromFormat(DateTimeEx::DATETIME_DATETIME_SQL_FORMAT, $value);
+								$parsed_date = YADTC::createFromFormat(YADTC::SQL_DATETIME_FORMAT, $value);
 								break;
 							case 'datetime':
-								$parsed_date = DateTimeEx::createFromFormat(DateTimeEx::DATETIME_DATE_SQL_FORMAT, $value);
+								$parsed_date = YADTC::createFromFormat(YADTC::SQL_DATE_FORMAT, $value);
 								break;
 						}
 					}

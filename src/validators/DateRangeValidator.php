@@ -3,7 +3,7 @@
  * Adapted from https://github.com/nerburish/yii2-daterange-validator
  */
 namespace santilin\churros\validators;
-use santilin\churros\helpers\DateTimeEx;
+use santilin\churros\helpers\YADTC;
 use yii\validators\Validator;
 use yii\base\DynamicModel;
 use yii\validators\DateValidator;
@@ -27,8 +27,8 @@ class DateRangeValidator extends Validator
      * If not set, will be used the format defined in formatter component in the same way as DateValidator does
      * See DateValidator format: http://www.yiiframework.com/doc-2.0/yii-validators-datevalidator.html#
      */
-    public $formatDate = 'php:' . DateTimeEx::DATETIME_DATE_SQL_FORMAT;
-    public $formatDateTime = 'php:' . DateTimeEx::DATETIME_DATETIME_SQL_FORMAT;
+    public $formatDate = 'php:' . YADTC::SQL_DATE_FORMAT;
+    public $formatDateTime = 'php:' . YADTC::SQL_DATETIME_FORMAT;
 
     /**
      * @var string attribute name of the model passed where the until date timestamp will be assigned
