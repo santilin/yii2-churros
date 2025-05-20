@@ -347,15 +347,9 @@ class WidgetLayer
 										break;
 								}
 							}
-							if ($layout_row_style == 'grid-cards' || $layout_row_style == 'grid') {
-								$open_divs++;
-								$fs .= "<div class=\"row w-100\">";
-								$fs .= $this->layoutOneField($widget, $layout_row, $widget_layout, $indexf++);
-							} else {
-								$fs .= "<div class=\"row w-100\">";
-								$open_divs++;
-								$fs .= $this->layoutOneField($widget, $layout_row, $widget_layout, $indexf++);
-							}
+							$open_divs++;
+							$fs .= "<div class=\"row\">";
+							$fs .= $this->layoutOneField($widget, $layout_row, $widget_layout, $indexf++);
 						} else if (is_string($widget)) {
 							throw new \Exception($widget . ': invalid widget');
 						} else {
