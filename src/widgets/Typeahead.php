@@ -20,7 +20,6 @@ class Typeahead extends KartikTypeahead
 	public $suggestionsDisplay;
 	public $display;
 	public $remoteUrl;
-	public $format = 'select';
 	public $searchParam = 'search';
 	public $formatParam = 'format';
 	public $pageParam = 'page';

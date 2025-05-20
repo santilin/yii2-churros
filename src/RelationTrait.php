@@ -168,7 +168,9 @@ trait RelationTrait
 								unset($relPKAttr[array_search($relAttr, $relPKAttr)]);
 							}
 						}
-						$condition[$relPKAttr[array_key_first($relPKAttr)]] = $this->primaryKey;
+						if (count($relPKAttr)) {
+							$condition[$relPKAttr[array_key_first($relPKAttr)]] = $this->primaryKey;
+						}
 						$relObj = null;
 						if (!empty($this->primaryKey)) {
 							$relObj = $relModelClass::findOne($condition);
