@@ -357,13 +357,13 @@ class JsonController extends \yii\web\Controller
 		}
 		$to_model = null;
 		if (empty($to)) {
+			if ($to = $this->request->queryParams['returnTo']??null) {
+				return $to;
+			}
 			if ($to = $this->request->post('returnTo', null)) {
 				return $to;
 			}
-			if ($to = $this->request->post('_formSuccessUrl', null)) {
-				return $to;
-			}
-			if ($to = $this->request->queryParams['returnTo']??null) {
+			if ($to = $this->request->post('_form_successUrl', null)) {
 				return $to;
 			}
 			switch ($from) {

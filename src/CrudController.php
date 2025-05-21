@@ -398,7 +398,7 @@ class CrudController extends \yii\web\Controller
 			if ($to = $this->request->post('returnTo', null)) {
 				return $to;
 			}
-			if ($to = $this->request->post('_formSuccessUrl', null)) {
+			if ($to = $this->request->post('_form_successUrl', null)) {
 				return $to;
 			}
 			if ($to = $this->request->queryParams['returnTo']??null) {
