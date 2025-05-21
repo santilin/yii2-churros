@@ -38,25 +38,17 @@ class TypeaheadSelect extends KartikTypeahead
 
 	public function init()
 	{
+		if (empty($this->remoteUrl)) {
+			throw new InvalidConfigException("remoteUrl can not be empty");
+		}
 		$this->hidden_id = $this->options['id']??Html::getInputId($this->model, $this->attribute);
 		$this->typeahead_id = $this->options['id'] = $this->hidden_id . '_typeahead';
 		$this->options['id'] = $this->hidden_id . '_typeadead';
 		$this->options['name'] = '_typeadead_' . ($this->options['name']??Html::getInputName($this->model, $this->attribute));
 		if (empty($this->suggestionsDisplay)) {
-			if (empty($this->searchFields)) {
-				$fieldsDisplay = 'item.text';
-			} else {
-				// Build a JS function string that displays all searchFields
-				$fieldsJs = [];
-				foreach ($this->searchFields as $field) {
-					$fieldsJs[] = "item." . $field;
-				}
-				$fieldsDisplay = implode(" + ' - ' + ", $fieldsJs);
-			}
-
 			$this->suggestionsDisplay = <<<js
 function(item) {
-    return '<div class="suggestion">' + ($fieldsDisplay) + '</div>';
+    return '<div class="suggestion">' + item.text + '</div>';
 }
 js;
 		}

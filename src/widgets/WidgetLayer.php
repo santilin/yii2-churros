@@ -348,7 +348,7 @@ class WidgetLayer
 								}
 							}
 							$open_divs++;
-							$fs .= "<div class=\"row\">";
+							$fs .= "<div class=\"row align-items-center\">";
 							$fs .= $this->layoutOneField($widget, $layout_row, $widget_layout, $indexf++);
 						} else if (is_string($widget)) {
 							throw new \Exception($widget . ': invalid widget');
