@@ -272,12 +272,6 @@ class WidgetLayer
 					$layout_row = ['type' => $layout_row_type, 'content' => $layout_row, 'style' => 'rows'];
 				}
 				$row_html = '';
-				$col_added = false;
-				// if (!$this->lastWasCol() && $this->lastWasRow()) {
-				// 	$col_added = true;
-				// 	$this->setLastCol($cols);
-				// 	$row_html.= '<div class="' . $this->columnClasses($cols) . '">';
-				// }
 				$subtitle = $layout_row['subtitle']??null;
 				if ($subtitle) {
 					$row_html .= "<div class=row><div class=col-12><div class=\"subtitle mb-3 alert alert-warning\">$subtitle</div></div></div>";
@@ -286,6 +280,12 @@ class WidgetLayer
 					$layout_row['content'] = array_diff(array_keys($this->widgets), $this->widgets_used);
 				}
 				foreach ($layout_row['content'] as $widget_name ) {
+					// $col_added = false;
+					// if (!$this->lastWasCol() && $this->lastWasRow()) {
+					// 	$col_added = true;
+					// 	$this->setLastCol($cols);
+					// 	$row_html.= '<div class="' . $this->columnClasses($cols) . '">';
+					// }
 					$fs = '';
 					$open_divs = 0;
 					if ($widget = $this->widgets[$widget_name]??false) {
@@ -316,14 +316,13 @@ class WidgetLayer
 										break;
 								}
 							}
-							Html::addCssClass($widget->options, "layout-$layout_row_layout");
-							$col_classes = $this->columnClasses($widget_layout == 'full' ? 1 : $cols);
-							$fs .=  "<div class=\"$col_classes\">";
-							$open_divs++;
+							Html::addCssClass($widget->options, "row layout-$layout_row_layout");
 							if ($widget_layout != 'full') {
 								Html::addCssClass($widget->options, 'w-100');
 							}
-							Html::addCssClass($widget->options, 'row');
+							$col_classes = $this->columnClasses($widget_layout == 'full' ? 1 : $cols);
+							$fs .=  "<div class=\"$col_classes\">";
+							$open_divs++;
 							$fs .= $this->layoutActiveField($widget_name, $widget, $layout_row, $widget_layout, $layout_row_layout, $indexf++);
 						} else if (is_array($widget)) { // Recordview attribute
 							$widget_layout = $widget['layout']??'large';
@@ -347,8 +346,11 @@ class WidgetLayer
 										break;
 								}
 							}
+							$col_classes = $this->columnClasses($widget_layout == 'full' ? 1 : $cols);
+							$fs .=  "<div class=\"$col_classes\">";
 							$open_divs++;
 							$fs .= "<div class=\"row align-items-center\">";
+							$open_divs++;
 							$fs .= $this->layoutOneField($widget, $layout_row, $widget_layout, $indexf++);
 						} else if (is_string($widget)) {
 							throw new \Exception($widget . ': invalid widget');
