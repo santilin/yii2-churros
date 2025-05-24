@@ -7,33 +7,33 @@ use JsonPath\JsonObject;
 trait JsonModelableTrait
 {
 	/** @var JsonPath\JsonObject the root of the json content */
-	protected $_json_root = false;
+	protected $_root_json = false;
 
 	public function getJsonObject(string $path, ?string $id, ?string $locator=null): ?JsonObject
 	{
-		if ($this->_json_root === false) {
-			$this->_json_root = $this->createRootJson();
+		if ($this->_root_json === false) {
+			$this->_root_json = $this->loadRootJson();
 		}
 		if ($id && AppHelper::lastWord($path, '/') == $id) {
 			$path = AppHelper::removeLastWord($path, '/');
 		}
 		if ($id) { // The id takes precedence over the locator
-			$ret = $this->_json_root->getJsonObjects('$' . str_replace('/','.',$path)
+			$ret = $this->_root_json->getJsonObjects('$' . str_replace('/','.',$path)
 				. "['$id']");
 			if ($ret !== false) {
 				return $ret;
 			}
-			$ret = $this->_json_root->getJsonObjects('$' . str_replace('/','.',$path)
+			$ret = $this->_root_json->getJsonObjects('$' . str_replace('/','.',$path)
 				. "[?(@=='$id')]");
 			if (is_array($ret) && isset($ret[0])) {
 				return $ret[0];
 			}
 		}
 		if ($locator && $id) {
-			$ret = $this->_json_root->getJsonObjects('$' . str_replace('/','.',$path)
+			$ret = $this->_root_json->getJsonObjects('$' . str_replace('/','.',$path)
 				. "[?(@.$locator=='$id')]");
 			if ($ret === false) {
-				$ret = $this->_json_root->getJsonObjects('$' . str_replace('/','.',$path)
+				$ret = $this->_root_json->getJsonObjects('$' . str_replace('/','.',$path)
 				. "[?(@=='$id')]");
 			}
 			if (is_array($ret) && isset($ret[0])) {
@@ -43,7 +43,7 @@ trait JsonModelableTrait
 		if ($id) {
 			return null;
 		}
-		$ret = $this->_json_root->getJsonObjects('$' . str_replace('/','.',$path));
+		$ret = $this->_root_json->getJsonObjects('$' . str_replace('/','.',$path));
 		if ($ret) {
 			return $ret;
 		} else {
@@ -53,8 +53,8 @@ trait JsonModelableTrait
 
 	public function setJsonObject(string $path, mixed $value, ?string $id, ?string $locator=null)
 	{
-		if ($this->_json_root === false) {
-			$this->_json_root = $this->createRootJson();
+		if ($this->_root_json === false) {
+			$this->_root_json = $this->loadRootJson();
 		}
 		if (AppHelper::lastWord($path, '/') == $id) {
 			$path = AppHelper::removeLastWord($path, '/');
@@ -67,16 +67,16 @@ trait JsonModelableTrait
 		} else if ($id) {
 			$set_path = $path . '.'. $id;
 		}
-		$this->_json_root->set($set_path, $value);
+		$this->_root_json->set($set_path, $value);
 	}
 
 	public function getJsonArray(string $path, ?string $id, ?string $locator=null): array
 	{
-		if ($this->_json_root === false) {
-			$this->_json_root = $this->createRootJson();
+		if ($this->_root_json === false) {
+			$this->_root_json = $this->loadRootJson();
 		}
 		if ($locator && $id) {
-			$ret = $this->_json_root->get('$' . str_replace('/','.',$path)
+			$ret = $this->_root_json->get('$' . str_replace('/','.',$path)
 				. "[?(@.$locator=='$id')]");
 			if (is_array($ret)) {
 				return $ret[0];
@@ -84,7 +84,7 @@ trait JsonModelableTrait
 				return $ret;
 			}
 		} else {
-			$ret = $this->_json_root->get('$' . str_replace('/','.',$path) . ($id?('.' . $id):''));
+			$ret = $this->_root_json->get('$' . str_replace('/','.',$path) . ($id?('.' . $id):''));
 			if (!empty($ret)) {
 				return $ret;
 			} else {
@@ -95,10 +95,10 @@ trait JsonModelableTrait
 
 	public function getJsonValue(string $path)
 	{
-		if ($this->_json_root === false) {
-			$this->_json_root = $this->createRootJson();
+		if ($this->_root_json === false) {
+			$this->_root_json = $this->loadRootJson();
 		}
-		return $this->_json_root->get($path);
+		return $this->_root_json->get($path);
 	}
 
 }
