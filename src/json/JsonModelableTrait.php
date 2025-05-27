@@ -1,6 +1,7 @@
 <?php
 
 namespace santilin\churros\json;
+use yii\base\InvalidConfigException;
 use santilin\churros\Helpers\AppHelper;
 use JsonPath\JsonObject;
 
@@ -12,7 +13,7 @@ trait JsonModelableTrait
 	public function getJsonObject(string $path, ?string $id, ?string $locator=null): ?JsonObject
 	{
 		if ($this->_root_json === false) {
-			$this->_root_json = $this->loadRootJson();
+			throw new InvalidConfigException("getJsonValue::_root_json == null");
 		}
 		if ($id && AppHelper::lastWord($path, '/') == $id) {
 			$path = AppHelper::removeLastWord($path, '/');
@@ -54,7 +55,7 @@ trait JsonModelableTrait
 	public function setJsonObject(string $path, mixed $value, ?string $id, ?string $locator=null)
 	{
 		if ($this->_root_json === false) {
-			$this->_root_json = $this->loadRootJson();
+			throw new InvalidConfigException("getJsonValue::_root_json == null");
 		}
 		if (AppHelper::lastWord($path, '/') == $id) {
 			$path = AppHelper::removeLastWord($path, '/');
@@ -73,7 +74,7 @@ trait JsonModelableTrait
 	public function getJsonArray(string $path, ?string $id, ?string $locator=null): array
 	{
 		if ($this->_root_json === false) {
-			$this->_root_json = $this->loadRootJson();
+			throw new InvalidConfigException("getJsonValue::_root_json == null");
 		}
 		if ($locator && $id) {
 			$ret = $this->_root_json->get('$' . str_replace('/','.',$path)
@@ -96,7 +97,7 @@ trait JsonModelableTrait
 	public function getJsonValue(string $path)
 	{
 		if ($this->_root_json === false) {
-			$this->_root_json = $this->loadRootJson();
+			throw new InvalidConfigException("getJsonValue::_root_json == null");
 		}
 		return $this->_root_json->get($path);
 	}
