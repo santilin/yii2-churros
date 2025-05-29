@@ -313,6 +313,8 @@ class JsonModel extends \yii\base\Model
             }
             $id = str_replace(";", '/', $id);
         }
+        /// @ojo
+        $json_path = str_replace('/outputs/','/applications/modules/', $json_path);
         $this->_json_object = $json_modelable->getJsonObject($json_path, $id, $locator);
         if ($this->_json_object !== null) {
             $this->_is_new_record = false;
@@ -327,7 +329,7 @@ class JsonModel extends \yii\base\Model
             } else {
                 foreach ($v as $fldname => $fldvalue) {
                     if ($this->hasAttribute($fldname)) {
-                        $this->$fldname = $fldvalue;
+                        $this->__set($fldname, $fldvalue); // prefer attributes over public properties
                     }
                 }
             }

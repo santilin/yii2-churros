@@ -8,11 +8,11 @@ use JsonPath\JsonObject;
 trait JsonModelableTrait
 {
 	/** @var JsonPath\JsonObject the root of the json content */
-	protected $_root_json = false;
+	protected $_root_json = null;
 
 	public function getJsonObject(string $path, ?string $id, ?string $locator=null): ?JsonObject
 	{
-		if ($this->_root_json === false) {
+		if ($this->_root_json === null) {
 			throw new InvalidConfigException("getJsonValue::_root_json == null");
 		}
 		if ($id && AppHelper::lastWord($path, '/') == $id) {
@@ -54,7 +54,7 @@ trait JsonModelableTrait
 
 	public function setJsonObject(string $path, mixed $value, ?string $id, ?string $locator=null)
 	{
-		if ($this->_root_json === false) {
+		if ($this->_root_json === null) {
 			throw new InvalidConfigException("getJsonValue::_root_json == null");
 		}
 		if (AppHelper::lastWord($path, '/') == $id) {
@@ -73,7 +73,7 @@ trait JsonModelableTrait
 
 	public function getJsonArray(string $path, ?string $id, ?string $locator=null): array
 	{
-		if ($this->_root_json === false) {
+		if ($this->_root_json === null) {
 			throw new InvalidConfigException("getJsonValue::_root_json == null");
 		}
 		if ($locator && $id) {
@@ -96,7 +96,7 @@ trait JsonModelableTrait
 
 	public function getJsonValue(string $path)
 	{
-		if ($this->_root_json === false) {
+		if ($this->_root_json === null) {
 			throw new InvalidConfigException("getJsonValue::_root_json == null");
 		}
 		return $this->_root_json->get($path);

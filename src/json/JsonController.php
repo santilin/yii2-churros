@@ -415,6 +415,9 @@ class JsonController extends \yii\web\Controller
 			if ($to_model == 'parent') {
 				if ($model->parentModel()) {
 					$model = $model->parentModel();
+				} else {
+					$to_model = 'model';
+					$to_action  = 'index';
 				}
 			} else if ($to_model == 'model') {
 			} else {
@@ -502,11 +505,10 @@ class JsonController extends \yii\web\Controller
         } /// @todo else
 	}
 
-
 	public function getPath()
 	{
-		if ($this->root_model === false ) {
-			$this->getRootModel();
+		if (!$this->_path) {
+			$this->getRootModel(true);
 		}
 		return $this->_path;
 	}
@@ -516,7 +518,7 @@ class JsonController extends \yii\web\Controller
 		return $this->getRootModel();
 	}
 
-	public function getRootModel()
+	public function getRootModel(bool $force = false)
 	{
 		if ($this->root_model !== false) {
 			return $this->root_model;
@@ -534,7 +536,7 @@ class JsonController extends \yii\web\Controller
 				throw new NotFoundHttpException(Yii::t('churros',
 					"The root json record for '$root_model_name' does not exist"));
 			} else {
-				$this->root_model->loadRootJson();
+				$this->root_model->loadRootJson(1);
 			}
 		}
 		$this->_path = urldecode(parse_url($_SERVER['REQUEST_URI'], PHP_URL_PATH));
