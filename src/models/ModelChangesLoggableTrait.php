@@ -65,7 +65,7 @@ trait ModelChangesLoggableTrait
 
 
 	// Logs the changes after the model is saved or deleted
-	public function handleModelChanges($event)
+	protected function handleModelChanges($event)
 	{
 		$must_trigger = false;
 		if ($event->name == self::EVENT_AFTER_DELETE) {
@@ -107,6 +107,9 @@ trait ModelChangesLoggableTrait
 						$model_change->changed_by = \Yii::$app?->user?->identity?->id;
 						$model_change->changed_at = new \yii\db\Expression("NOW()");
 						$model_change->type = $model_change::V_TYPE_UPDATE;
+						if (method_exists($this, 'modelChangesComment')) {
+							$model_change->comments = $this->modelChangesComment();
+						}
 						if (is_bool($current_value)) {
 							if ($current_value) {
 								$model_change->subtype = $model_change::V_SUBTYPE_SETTRUE;
@@ -191,5 +194,4 @@ trait ModelChangesLoggableTrait
 		}
 		return false;
 	}
-
 }

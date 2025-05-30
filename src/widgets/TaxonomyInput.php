@@ -79,6 +79,7 @@ class TaxonomyInput extends \yii\widgets\InputWidget
  		$html .= '</div><!--row-->';
         $this->registerClientScript();
 		$view = $this->getView();
+		return $html;
 	}
 
 	protected function getLevelValues($l, $value)
