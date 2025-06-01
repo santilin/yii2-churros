@@ -115,6 +115,13 @@ trait RelationTrait
 						unset($post[$model_relation['model']]);
 					}
 					if ($post_data !== null) {
+						// find first relation with the same model to coalesce differente scoped relations
+						// foreach ($relations_in_model as $rn => $rinfo) {
+						// 	if ($rinfo['model'] == $model_relation['model']) {
+						// 		$rel_name = $rn;
+						// 		break;
+						// 	}
+						// }
                         $this->loadToRelation($rel_name, (array)$post_data);
                     }
                 }
@@ -165,12 +172,12 @@ trait RelationTrait
 						foreach ($relPost as $relAttr => $relAttrVal) {
 							if (in_array($relAttr, $relPKAttr)) {
 								$condition[$relAttr] = $relAttrVal;
-								unset($relPKAttr[array_search($relAttr, $relPKAttr)]);
+								// unset($relPKAttr[array_search($relAttr, $relPKAttr)]);
 							}
 						}
-						if (count($relPKAttr)) {
-							$condition[$relPKAttr[array_key_first($relPKAttr)]] = $this->primaryKey;
-						}
+						// if (count($relPKAttr)) {
+						// 	$condition[$relPKAttr[array_key_first($relPKAttr)]] = $this->primaryKey;
+						// }
 						$relObj = null;
 						if (!empty($this->primaryKey)) {
 							$relObj = $relModelClass::findOne($condition);
@@ -325,7 +332,7 @@ trait RelationTrait
 		$isManyMany = false;
 		if ($relation->multiple ) { // Has many or many2many
 			$master_link = $relation->link;
-			if ($relation->via != null ) {
+			if ($relation->via != null) {
 				$relation = $this->getRelation($relation->via[0]);
 			}
 			$relModelClass = $relation->modelClass;
@@ -456,7 +463,7 @@ trait RelationTrait
         $isSoftDelete = isset($this->_rt_softdelete);
 		$link = $relation->link;
 		/// SCT Add error info
-		if( $relation->via != null ) {
+		if ($relation->via != null) {
 			$records_copy = $records;
 			foreach ($records as $index => $relModel) {
 				$attributes = $relModel->attributes;
@@ -479,7 +486,7 @@ trait RelationTrait
 				}
 			}
 		}
-		if( $success ) {
+		if ($success) {
 			$dontDeletePk = [];
 			$notDeletedFK = [];
 			if ($relation->multiple) {
@@ -568,7 +575,9 @@ trait RelationTrait
 						}
 					}
 
+					// Save all posted records
 					foreach ($records as $index => $relModel) {
+						$is_new = $relModel->isNewRecord;
 						$relSave = $relModel->save();
 
 						if (!$relSave || !empty($relModel->errors)) {
@@ -731,11 +740,28 @@ trait RelationTrait
         }
     }
 
+    public function createChildren($rel_name, $form_class_name)
+	{
+		// Get the relation query
+		$relation = $this->getRelation($rel_name);
+
+		// Create a query for the relation
+		$query = $this->createRelationQuery($form_class_name, $relation->link, $relation->multiple);
+		$query->where = $relation->where;
+
+		// Set the modelClass to your form class
+		$query->modelClass = $form_class_name;
+
+		// Return all related records as instances of $form_class_name
+		return $query->all();
+	}
+
+
+
     public function createRelatedModels(string $relation_name, array $current_values = [],
                                       string $form_class_name = null): array|JsonModel
     {
         $rel_info = static::$relations[$relation_name];
-        $rel_name = $rel_info['relatedTablename'];
         $rel_model_class = $rel_info['modelClass'];
         if ($form_class_name != null) {
             $child = new $form_class_name;
