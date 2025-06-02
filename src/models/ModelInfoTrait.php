@@ -14,7 +14,7 @@ use santilin\churros\ModelSearchTrait;
 trait ModelInfoTrait
 {
 	use ModelSuccessesTrait, ModelWarningsTrait, ModelTrait;
-    protected $crudScenarios = [ 'default', 'create', 'duplicate', 'update' ];
+    protected $crudScenarios = [ 'default', 'create', 'duplicate', 'update', 'delete' ];
 
 	public function getCrudScenarios(): array
 	{

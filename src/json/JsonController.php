@@ -108,7 +108,7 @@ class JsonController extends \yii\web\Controller
 	/**
 	 * @param array $params 'permissions' => parent permissions
 	 */
-	public function indexDetails($master, string $view, array $params,
+	public function indexDetails($master, string $relation_name, string $view, array $params,
 								 $previous_context = null, string $search_model_class = null)
 	{
 		unset($params['permissions']);
