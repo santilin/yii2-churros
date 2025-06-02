@@ -114,12 +114,13 @@ class CrudController extends \yii\web\Controller
 		// 	Yii::$app->session->set($form_name . '.grid-filters', $params[$form_name]);
 		// }
 		$params['permissions'] = $this->resolvePermissions($params['permissions']??[], $this->userPermissions());
-		if ($this->getMasterModel()) {
-			$related_field = $searchModel->relatedFieldForModel($this->getMasterModel());
-			if (is_array($related_field)) { // many2many
-			} else {
-				$searchModel->setAttribute($related_field,
-				$params[$form_name][$related_field] = $this->getMasterModel()->getPrimaryKey());
+		if ($master_model = $this->getMasterModel()) {
+			$relation_info = $searchModel->relationToModel($master_model);
+			$relation_name = "get" . ucfirst($relation_info['name']);
+			$relation = $searchModel->$relation_name();
+			foreach ($relation->link as $left_field => $right_field) {
+				$params[$form_name][$right_field] = $master_model->$left_field;
+				$searchModel->$right_field = $master_model->$left_field;
 			}
 		}
 		$params = $this->changeActionParams($params, 'index', $searchModel);
@@ -133,7 +134,7 @@ class CrudController extends \yii\web\Controller
 	/**
 	 * @param array $params 'parentPermissions' => parent permissions
 	 */
-	public function indexDetails($master, string $view, array $params, $previous_context = null, string $search_model_class = null)
+	public function indexDetails($master, string $relation_name, string $view, array $params, $previous_context = null, string $search_model_class = null)
 	{
 		$this->action = $this->createAction('index');
 		// Tiene preferencia la clase más específica
@@ -148,13 +149,15 @@ class CrudController extends \yii\web\Controller
 			throw new \Exception("No {$search_model_class}_Search nor $search_model_class{$view}_Search class found in CrudController::indexDetails");
 		}
 		$params['permissions'] = $this->resolvePermissions([], $this->userPermissions());
-		$related_field = $detail->relatedFieldForModel($master);
-		if (is_array($related_field)) { // many2many
-			$params['_search_relations'] = [ $related_field[0] ];
-			$params[$detail->formName()][$related_field[0].'.'.$related_field[1]] = $master->getPrimaryKey();
-		} else {
-			$params[$detail->formName()][$related_field] = $master->getPrimaryKey();
-			$detail->$related_field = $master->getPrimaryKey();
+		$relation_getter = "get" . ucfirst($relation_name);
+		$relation = $master->$relation_getter();
+		$link = $relation->link;
+		if ($relation->multiple && $relation->via) { // many2many
+			$params['_search_relations'] = $relation_name;
+		}
+		foreach ($link as $left_field => $right_field) {
+			$params[$detail->formName()][$left_field] = $master->$right_field;
+			$detail->$left_field = $master->$right_field;
 		}
 		$params['master'] = $master;
 		$params['embedded'] = true;
@@ -204,6 +207,14 @@ class CrudController extends \yii\web\Controller
 		$params = array_merge($this->request->get(), $this->request->post());
 		$params['permissions'] = $this->resolvePermissions($params['permissions']??[], $this->userPermissions());
 		$model = $this->findFormModel(null, null, 'create', $params);
+		if ($master_model = $this->getMasterModel()) {
+			$relation_info = $model->relationToModel($master_model);
+			$relation_name = "get" . ucfirst($relation_info['name']);
+			$relation = $model->$relation_name();
+			foreach ($relation->link as $left_field => $right_field) {
+				$model->$right_field = $master_model->$left_field;
+			}
+		}
 
 		if ($model->loadAll($params, static::findRelationsInForm($params)) ) {
 			if ($model->saveAll(true) ) {

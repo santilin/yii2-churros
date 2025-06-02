@@ -436,6 +436,27 @@ trait ModelInfoTrait
 		return substr($string, $secondLastDotPosition + 1);
 	}
 
+
+	public function relationToModel($related_model): array
+	{
+		$cn = $related_model->className();
+		foreach (self::$relations as $relname => $rel_info) {
+			if ($rel_info['modelClass'] == $cn) {
+				$rel_info['name'] = $relname;
+				return $rel_info;
+			}
+		}
+		// If it's a derived class like *Form, *Search, look up its parent
+		$cn = get_parent_class($related_model);
+		foreach (self::$relations as $relname => $rel_info) {
+			$rel_info['name'] = $relname;
+			if ($rel_info['modelClass'] == $cn) {
+				return $rel_info;
+			}
+		}
+		return [];
+	}
+
 	/**
 	 * Determines the related field of this model to another model.
 	 *
@@ -454,6 +475,7 @@ trait ModelInfoTrait
 		$oc = get_class($related_model);
 		$cn = $related_model->className();
 		$relations = self::$relations;
+		$related_field = null;
 		foreach (self::$relations as $relname => $rel_info) {
 			if ($rel_info['modelClass'] == $cn) {
 				if ($rel_info['type'] == 'ManyToMany') {
@@ -462,21 +484,25 @@ trait ModelInfoTrait
 					return [$rel_info['join'], $rel_field];
 				}
 				$related_field = $rel_info['left'];
-				list($table, $field) = AppHelper::splitFieldName($related_field);
-				return $field;
+				break;
 			}
 		}
-		// If it's a derived class like *Form, *Search, look up its parent
-		$cn = get_parent_class($related_model);
-		foreach (self::$relations as $relname => $rel_info) {
-			if( $rel_info['modelClass'] == $cn ) {
-				if ($rel_info['type'] == 'ManyToMany') {
-					continue;
+		if (empty($related_field)) {
+			// If it's a derived class like *Form, *Search, look up its parent
+			$cn = get_parent_class($related_model);
+			foreach (self::$relations as $relname => $rel_info) {
+				if ($rel_info['modelClass'] == $cn) {
+					if ($rel_info['type'] == 'ManyToMany') {
+						continue;
+					}
+					$related_field = $rel_info['left'];
+					break;
 				}
-				$related_field = $rel_info['left'];
-				list($table, $field) = AppHelper::splitFieldName($related_field);
-				return $field;
 			}
+		}
+		if (!is_array($related_field)) {
+			list($table, $field) = AppHelper::splitFieldName($related_field);
+			return $field;
 		}
 		return null;
     }

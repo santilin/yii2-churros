@@ -447,24 +447,11 @@ class JsonModel extends \yii\base\Model
         }
     }
 
-    public function createChildren(string $rel_name, string $form_class_name)
+    public function createChildren(string $relation_name, string $form_class_name = null)
     {
-        // 1. Obtén la consulta de la relación
-        $relationQuery = $this->getRelation($rel_name);
-
-        // 2. Crea una consulta sobre la clase heredada
-        $formQuery = $form_class_name::find();
-
-        // 3. Replica los JOINs, WHERE y parámetros
-        foreach ($relationQuery->join as $join) {
-            call_user_func_array([$formQuery, 'join'], $join);
-        }
-        $formQuery->andWhere($relationQuery->where);
-        $formQuery->addParams($relationQuery->params);
-
-        // 4. Ejecuta la consulta y retorna los objetos del form_class_name
-        return $formQuery->all();
+        return $this->createRelatedModels($relation_name, [], $form_class_name);
     }
+
 
 
 
