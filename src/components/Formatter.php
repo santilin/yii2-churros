@@ -116,7 +116,7 @@ class Formatter extends \yii\i18n\Formatter
 	{
 		if (empty($value)) {
 			return '';
-		} else if( is_string($value) ) {
+		} else if(is_string($value) ) {
 			$l = strlen($value);
 			if( $l > 2 ) {
 				if( $value[$l-1] == $sep ) {

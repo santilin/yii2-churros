@@ -78,8 +78,6 @@ class DataColumn extends \yii\grid\DataColumn
                 }
                 return parent::renderDataCellContent($model, $key, $index);
             } catch (\yii\base\ErrorException $e) {
-                throw $e;
-                $ce = get_class($e);
                 \Yii::warning($e->getMessage() . " in column {$this->attribute}");
             } catch (\yii\base\InvalidArgumentException $e) {
                 \Yii::warning($e->getMessage() . " in column {$this->attribute}");
