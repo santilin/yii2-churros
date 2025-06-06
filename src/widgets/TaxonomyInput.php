@@ -137,7 +137,7 @@ $('#$id').keyup( function(e) {
 function split_by_dot(str, dot)
 {
 	if (!str) {
-		return '';
+		return [];
 	}
 	const ret = str.split(dot).filter(function(i) { return i });
 	console.log(str, dot, '=>', ret);

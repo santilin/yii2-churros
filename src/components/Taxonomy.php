@@ -50,6 +50,21 @@ class Taxonomy
 		return implode($sep, $ret_parts);
 	}
 
+	static public function formatTitles(string $value, array $taxonomy, string $sep = '/'): string
+	{
+		$value_parts = explode($taxonomy['dot']??'.', $value);
+		$ret_parts = [];
+		$items = $taxonomy['items'];
+		foreach( $value_parts as $k => $v ) {
+			if( count($items) ) {
+				$ret_parts[] = $items[$v]['abbrev']??$items[$v]['title']??'????';
+				$items = $items[$v]['items']??[];
+			} else {
+				break;
+			}
+		}
+		return implode($sep, $ret_parts);
+	}
 
 	static public function calcLevel(string $value, array $taxonomy): int
 	{

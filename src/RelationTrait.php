@@ -343,13 +343,6 @@ trait RelationTrait
 				$other_fk = array_values($master_link)[0];
 				$this_fk = array_keys($relation->link)[0];
 				$isManyMany = true;
-				// foreach ($relPKAttr as $attr ) {
-				// 	if (!in_array($attr, $links) ) {
-				// 		$other_fk = $attr;
-				// 	} else {
-				// 		$this_fk = $attr;
-				// 	}
-				// }
 			}
 
 			if (!$wasNewRecord) {
@@ -843,5 +836,25 @@ trait RelationTrait
 		}
 		return $ret;
 	}
+
+	public function linkDetails($detail, $relation_name): void
+	{
+		$relation_getter = "get" . ucfirst($relation_name);
+		$relation = $this->$relation_getter();
+		$link = $relation->link;
+		if ($relation->multiple && $relation->via) { // many2many
+			foreach ($link as $left_field => $right_field) {
+				$params[$detail->formName()][$left_field] = $this->$right_field;
+				$detail->$left_field = $this->$right_field;
+			}
+			// $params['_search_relations'] = $relation_name;
+		} else {
+			foreach ($link as $left_field => $right_field) {
+				$params[$detail->formName()][$left_field] = $this->$right_field;
+				$detail->$left_field = $this->$right_field;
+			}
+		}
+	}
+
 
 }

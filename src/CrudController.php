@@ -149,16 +149,7 @@ class CrudController extends \yii\web\Controller
 			throw new \Exception("No {$search_model_class}_Search nor $search_model_class{$view}_Search class found in CrudController::indexDetails");
 		}
 		$params['permissions'] = $this->resolvePermissions([], $this->userPermissions());
-		$relation_getter = "get" . ucfirst($relation_name);
-		$relation = $master->$relation_getter();
-		$link = $relation->link;
-		if ($relation->multiple && $relation->via) { // many2many
-			$params['_search_relations'] = $relation_name;
-		}
-		foreach ($link as $left_field => $right_field) {
-			$params[$detail->formName()][$left_field] = $master->$right_field;
-			$detail->$left_field = $master->$right_field;
-		}
+		$master->linkDetails($detail, $relation_name);
 		$params['master'] = $master;
 		$params['embedded'] = true;
 		$params['previous_context'] = $previous_context;
@@ -208,14 +199,9 @@ class CrudController extends \yii\web\Controller
 		$params['permissions'] = $this->resolvePermissions($params['permissions']??[], $this->userPermissions());
 		$model = $this->findFormModel(null, null, 'create', $params);
 		if ($master_model = $this->getMasterModel()) {
-			$relation_info = $model->relationToModel($master_model);
-			$relation_name = "get" . ucfirst($relation_info['name']);
-			$relation = $model->$relation_name();
-			foreach ($relation->link as $left_field => $right_field) {
-				$model->$right_field = $master_model->$left_field;
-			}
+			$relation_info = $model->relationToModel($model);
+			$model->linkDetails($master_model, $relation_info['name']);
 		}
-
 		if ($model->loadAll($params, static::findRelationsInForm($params)) ) {
 			if ($model->saveAll(true) ) {
 				if ($this->request->getIsAjax()) {
