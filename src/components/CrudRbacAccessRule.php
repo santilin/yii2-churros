@@ -53,10 +53,10 @@ class CrudRbacAccessRule extends AccessRule
 					$perm = "{$model_name}.view";
 					break;
 				case 'update':
+				case 'remove-image':
 					$perm = "{$model_name}.update";
 					break;
 				case 'delete':
-				case 'remove-image':
 					$perm = "{$model_name}.delete";
 					break;
 				case 'duplicate':

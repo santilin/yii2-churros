@@ -214,7 +214,7 @@ class AuthController extends Controller
 		$auth = $this->authManager;
 		$perm_desc = $module_info['title']??$module_id;
 		$permission = AuthHelper::createOrUpdatePermission(
-			$module_id . ".index", Yii::t('churros', '{perm_desc} module', ['perm_desc' => $perm_desc]), $auth);
+			$module_id . ".admin", Yii::t('churros', '{perm_desc} module admin', ['perm_desc' => $perm_desc]), $auth);
 		AuthHelper::echoLastMessage();
 		$visora = AuthHelper::createOrUpdateRole("$module_id.viewer",
 			Yii::t('churros', "View all $module_id records"), $auth);
