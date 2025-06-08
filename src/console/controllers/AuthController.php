@@ -207,9 +207,9 @@ class AuthController extends Controller
 	}
 
 	/**
-	 * Creates the permissions for a module
+	 * Creates the permissions for a rbac module
 	 */
-	public function createModulePermissions(string $module_id, array $module_info)
+	public function createModuleRbacPermissions(string $module_id, array $module_info)
 	{
 		$auth = $this->authManager;
 		$perm_desc = $module_info['title']??$module_id;

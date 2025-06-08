@@ -119,11 +119,12 @@ class GridView extends SimpleGridView
 
 	protected function renderSelectViews()
 	{
-		if( count($this->selectViews) ) {
-			$selectViewsOptions = $this->selectViewsOptions;
+		if (count($this->selectViews)) {
+			$selectViewsOptions = array_merge(['class' => 'mb-2'], $this->selectViewsOptions);
 			$tag = ArrayHelper::remove($selectViewsOptions, 'tag', 'div');
 			return Html::tag($tag,
-				FormHelper::displayButtons([$this->selectViews]), $selectViewsOptions);
+				FormHelper::displayButtons([$this->selectViews]),
+				$selectViewsOptions);
 		} else {
 			return '';
 		}
@@ -132,7 +133,9 @@ class GridView extends SimpleGridView
     public function renderToolbar()
     {
 		if (count($this->toolbarButtons)) {
-			JSZipAsset::register($this->getView());
+			if (isset($this->toolbarButtons['export'])) {
+				JSZipAsset::register($this->getView());
+			}
 			$toolbarButtonsOptions = $this->toolbarButtonsOptions;
 			Html::addCssClass($toolbarButtonsOptions, 'toolbar');
 			$tag = ArrayHelper::remove($toolbarButtonsOptions, 'tag', 'div');
@@ -307,7 +310,8 @@ class GridView extends SimpleGridView
 			}
 		}
 		$title = $this->renderTitle();
-		return Html::tag('div', Html::tag($tag, $summary, $summaryOptions) . Html::tag('div', $title), [ 'class' => 'title-container']);
+		return Html::tag('div', Html::tag($tag, $summary, $summaryOptions)
+			. Html::tag('div', $title), [ 'class' => 'title-container']);
 	}
 
     /**

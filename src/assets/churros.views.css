@@ -11,7 +11,16 @@
 .grid-view .grid-header {
   display: flex;
   justify-content: space-between;
-  align-items: center;
+  align-items: end;
+}
+
+.grid-view .grid-header .grid-toolbar {
+  margin-bottom: 0.5rem;
+  display: flex;
+}
+
+.grid-view .grid-header .grid-toolbar .toolbar {
+  margin-right: 0.5rem;
 }
 
 .grid-footer {
@@ -167,6 +176,18 @@ legend {
   text-overflow: ellipsis;
   flex: 0 1 auto;
 }
+
+.grid-view .action-buttons {
+  white-space:nowrap;
+  width:1%;
+}
+.grid-view .action-buttons a {
+  width: 1.125em;
+  height: 1.125em;
+  font-size: 1.125em;
+  vertical-align: middle;
+}
+
 
 .format-currency {
   text-align: right;
