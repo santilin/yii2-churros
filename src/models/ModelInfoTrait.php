@@ -132,24 +132,28 @@ trait ModelInfoTrait
 
 	public function recordDesc(string $format=null, int $max_len = 0, $context = null): string
 	{
-		$ret = '';
+		$ret = $_format = '';
 		if( !$format || $format == 'short' ) {
 			$_format = self::getModelInfo('record_desc_format_short');
 		} elseif ($format == 'medium') {
 			$_format = self::getModelInfo('record_desc_format_medium');
 		} elseif ($format == 'long' || $format == 'large' || $format == 'full') {
 			$_format = self::getModelInfo('record_desc_format_long');
-		} elseif ($format == 'desc') {
-			$fields = static::findDescFields();
-			$_format = '{' . implode('}, {',array_filter($fields)) . '}';
-		} elseif ($format == 'code&desc') {
+		} else if ($format == 'code&desc') {
 			$fields = static::findCodeAndDescFields();
+			$_format = '{' . implode('}, {',array_filter($fields)) . '}';
+		} else if ($format == 'desc') {
+			$fields = static::findDescFields();
 			$_format = '{' . implode('}, {',array_filter($fields)) . '}';
 		} else {
 			$_format = $format;
 		}
+		if (!$_format) {
+			$fields = static::findCodeAndDescFields();
+			$_format = '{' . implode('}, {',array_filter($fields)) . '}';
+		}
 		$values = $matches = [];
-		if( preg_match_all('/{([a-zA-Z0-9\._]+)(\%([^}])*)*}+/', $_format, $matches) ) {
+		if (preg_match_all('/{([a-zA-Z0-9\._]+)(\%([^}])*)*}+/', $_format, $matches) ) {
 			foreach( $matches[0] as $n => $match ) {
 				$value = ArrayHelper::getValue($this, $matches[1][$n]);
 				if( is_object($value) && method_exists($value, 'recordDesc') ) {
@@ -824,5 +828,53 @@ trait ModelInfoTrait
 		$this->setIsNewRecord($other->getIsNewRecord());
 		$this->setPrimarykey($other->getPrimaryKey(true));
 	}
+
+	public function getRelaxedDirtyAttributes($names = null)
+	{
+		if ($names === null) {
+			$names = $this->attributes();
+		}
+		$names = array_flip($names);
+		$attributes = [];
+		$old_attributes = $this->getOldAttributes();
+		if ($old_attributes === null) {
+			foreach ($this->_attributes as $name => $value) {
+				if (isset($names[$name])) {
+					$attributes[$name] = $value;
+				}
+			}
+		} else {
+			foreach ($this->getAttributes() as $name => $value) {
+				if (isset($names[$name]) && (!array_key_exists($name, $old_attributes) || $this->isRelaxedValueDifferent($value, $old_attributes[$name]))) {
+					$attributes[$name] = $value;
+				}
+			}
+		}
+
+		return $attributes;
+	}
+
+	private function isRelaxedValueDifferent($newValue, $oldValue)
+	{
+		if (is_array($newValue) && is_array($oldValue)) {
+			// Only sort associative arrays
+			$sorter = function (&$array) {
+				if (ArrayHelper::isAssociative($array)) {
+					ksort($array);
+				}
+			};
+			$newValue = ArrayHelper::recursiveSort($newValue, $sorter);
+			$oldValue = ArrayHelper::recursiveSort($oldValue, $sorter);
+			return $newValue !== $oldValue;
+		}
+		if ($newValue === null || $oldValue === null) {
+			return $newValue !== $oldValue;
+		}
+		if (is_bool($newValue) || is_bool($oldValue)) {
+			return $newValue !== $oldValue;
+		}
+		return $newValue != $oldValue;
+	}
+
 
 } // trait ModelInfoTrait

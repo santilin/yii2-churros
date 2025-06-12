@@ -59,16 +59,16 @@ trait RelationTrait
 		}
 		if (isset($post[$formName])) {
             $relations_in_model = static::$relations;
-			foreach ($relations_in_form as $rel_key => $rel_name) {
-				if (!isset($relations_in_model[$rel_name])) {
+			foreach ($relations_in_form as $rel_key => $relation_name) {
+				if (!isset($relations_in_model[$relation_name])) {
 					continue;
 				}
-				$model_relation = $relations_in_model[$rel_name];
+				$model_relation = $relations_in_model[$relation_name];
 				// Look for embedded relations data in the main form
 				$post_data = null;
 				if ($model_relation['type'] == 'HasOne' || $model_relation['type'] == "OneToOne") {
-					if (isset($post[$formName][$rel_name])) {
-						$post_data = $post[$formName][$rel_name];
+					if (isset($post[$formName][$relation_name])) {
+						$post_data = $post[$formName][$relation_name];
 					} else if (isset($post[$formName][$model_relation['model']])) {
 						$post_data = $post[$formName][$model_relation['model']];
 					} else if (isset($post[$model_relation['model']])) {
@@ -96,20 +96,20 @@ trait RelationTrait
 						} else if (is_array($post_data)) {
 							// creates a new relmodel and populates it
 							$rel_model->setAttributes($post_data);
-							$this->populateRelation($rel_name, $rel_model);
+							$this->populateRelation($relation_name, $rel_model);
 						}
 					}
 				} else {
                     // HasMany or Many2Many
-					if (array_key_exists($rel_name, $post)) {
-						$post_data = $post[$rel_name]?:[];
-						unset($post[$rel_name]);
+					if (array_key_exists($relation_name, $post)) {
+						$post_data = $post[$relation_name]?:[];
+						unset($post[$relation_name]);
 					} else if (array_key_exists($rel_key, $post)) {
 						$post_data = $post[$rel_key]?:[];
 						unset($post[$rel_key]);
-					} else if (array_key_exists($formName, $post) && array_key_exists($rel_name, $post[$formName])) {
-						$post_data = $post[$formName][$rel_name]?:[];
-						unset($post[$formName][$rel_name]);
+					} else if (array_key_exists($formName, $post) && array_key_exists($relation_name, $post[$formName])) {
+						$post_data = $post[$formName][$relation_name]?:[];
+						unset($post[$formName][$relation_name]);
 					} else if (array_key_exists($model_relation['model'], $post)) {
 						$post_data = $post[$model_relation['model']]?:[];
 						unset($post[$model_relation['model']]);
@@ -118,11 +118,11 @@ trait RelationTrait
 						// find first relation with the same model to coalesce differente scoped relations
 						// foreach ($relations_in_model as $rn => $rinfo) {
 						// 	if ($rinfo['model'] == $model_relation['model']) {
-						// 		$rel_name = $rn;
+						// 		$relation_name = $rn;
 						// 		break;
 						// 	}
 						// }
-                        $this->loadToRelation($rel_name, (array)$post_data);
+                        $this->loadToRelation($relation_name, (array)$post_data);
                     }
                 }
             }
@@ -134,24 +134,21 @@ trait RelationTrait
     /**
      * Refactored from loadAll() function
      * @param $relation skimmed relation data
-     * @param $rel_name
+     * @param $relation_name
      * @param $form_values form values
      * @return bool
      */
-    public function loadToRelation($rel_name, $form_values)
+    public function loadToRelation(string $relation_name, array|string $form_values)
     {
-        /* @var $this ActiveRecord */
-        /* @var $relObj ActiveRecord */
-        /* @var $relModelClass ActiveRecord */
-        $relation = $this->getRelation($rel_name);
-		$relModelClass = $relation->modelClass;
-        $relPKAttr = $relModelClass::primaryKey();
-
 		$container = [];
-		if (count($relPKAttr) > 1) { // Many to many with junction model
-			$link = $relation->link;
-			$link_keys = array_keys($link);
-			$this_pk = reset($link_keys);
+        $relation = $this->getRelation($relation_name);
+		$link = $relation->link;
+		if ($relation->via != null) { // Many to many with junction model
+			$relation_name = $relation->via[0];
+			$relation = $this->getRelation($relation_name);
+		}
+		if ($relation->multiple) {
+			$relModelClass = $relation->modelClass;
 			if (is_string($form_values)) {
 				if (str_contains($form_values, ',')) {
 					// TreeWidget: No array is passed, a comma separated string instead
@@ -162,90 +159,69 @@ trait RelationTrait
 				}
 			}
             foreach ($form_values as $relPost) {
-				if( $relPost == null ) {
+				if (empty($relPost)) {
 					continue;
 				}
-                if (is_array($relPost) ) {
+                if (is_array($relPost)) {
 					// many2many relation with _POST = array of records
 					if (array_filter($relPost)) {
+						$relModel = new $relModelClass;
 						$condition = [];
-						foreach ($relPost as $relAttr => $relAttrVal) {
-							if (in_array($relAttr, $relPKAttr)) {
-								$condition[$relAttr] = $relAttrVal;
-								// unset($relPKAttr[array_search($relAttr, $relPKAttr)]);
+						foreach ($relModel->primaryKey() as $pk) {
+							if (isset($relPost[$pk])) {
+								$condition[$pk] = $relPost[$pk];
 							}
 						}
-						// if (count($relPKAttr)) {
-						// 	$condition[$relPKAttr[array_key_first($relPKAttr)]] = $this->primaryKey;
-						// }
-						$relObj = null;
-						if (!empty($this->primaryKey)) {
-							$relObj = $relModelClass::findOne($condition);
+						foreach ($link as $this_fk => $other_pk) {
+							$relPost[$this_fk] = $condition[$this_fk] = $this->$other_pk;
 						}
-						if (is_null($relObj)) {
-							$relObj = new $relModelClass;
+						$relModel = $relModelClass::findOne($condition);
+						if (is_null($relModel)) {
+							$relModel = new $relModelClass;
 						}
-						$relObj->load($relPost, '');
-						$container[] = $relObj;
+						$relModel->load($relPost, '');
+						$container[] = $relModel;
 					}
                 } else {
 					// many2many relation with _POST = array of related ids
 					$m2mkeys = [];
-					foreach( $relPKAttr as $pk ) {
-						if( $pk == $this_pk ) {
-							$m2mkeys[$pk] = $this->primaryKey;
-						} else {
-							$m2mkeys[$pk] = $relPost;
+					foreach ($relation->link as $this_fk => $other_pk) {
+						$m2mkeys[$other_pk] = $relPost;
+					}
+					foreach ($relation->via[1]->link as $rel_fk => $this_pk) {
+						foreach ($relation->link as $this_fk => $other_pk) {
+							if ($this_fk == $this_pk) {
+								$m2mkeys[$rel_fk] = $this->$this_pk;
+							}
 						}
 					}
-					$container[] = $m2mkeys;
+					$relModel = $relModelClass::findOne($m2mkeys);
+					if (!$relModel) {
+						$relModel = new $relModelClass;
+						$relModel->setAttributes($m2mkeys, false);
+					}
+					$container[] = $relModel;
                 }
             }
-        } else if ($relation->via == null) {
-			if (count($relPKAttr)) { // Has Many with primary key
-				foreach ($form_values as $relPost) {
-					if (is_array($relPost) ) {
-						if( array_filter($relPost) ) {
-							/* @var $relObj ActiveRecord */
-							$relObj = (empty($relPost[$relPKAttr[0]])) ? new $relModelClass() : $relModelClass::findOne($relPost[$relPKAttr[0]]);
-							if (is_null($relObj)) {
-								$relObj = new $relModelClass();
-							}
-							$relObj->load($relPost, '');
-							$container[] = $relObj;
-						}
-					} else {
-						// Just primary key of records, just one field in primary key
-						$container[] = [ $relPKAttr[0] => $relPost ];
-					}
-				}
-			} else { // Has Many without primary key
-				foreach ($form_values as $relPost) {
-					if (is_array($relPost) ) {
-						if( array_filter($relPost) ) {
-							/* @var $relObj ActiveRecord */
-							$relObj = new $relModelClass();
-							$relObj->load($relPost, '');
-							$container[] = $relObj;
-						}
-					} else {
-						throw new \Exception("no primery key found");
-					}
-				}
-			}
 		} else { // Many2Many
+			throw new \Exception('stop');
+
 			$other_fk = reset($relation->link);
 			foreach ($form_values as $relPost) {
-				if( is_array($relPost) ) {
+				if (is_array($relPost) ) {
 					$relObj = empty($relPost[$relPKAttr[0]]) ? new $relModelClass : $relModelClass::findOne($relPost[$relPKAttr[0]]);
 					$relObj->load($relPost);
+					$container[] = $relObj;
 				} else {
-					$relObj = [$other_fk => $relPost];
+					$relObj = $relModelClass::findOne($relPost);
+					if ($relObj) {
+						$container[] = $relObj;
+					}
+
 				}
-				$container[] = $relObj;
 			}
         }
-		$this->populateRelation($rel_name, $container);
+		$this->populateRelation($relation_name, $container);
         return true;
     }
 
@@ -265,14 +241,15 @@ trait RelationTrait
 		}
 		$wasNewRecord = $this->isNewRecord;
         try {
+			$relations_in_form = array_keys($this->relatedRecords);
             if ($this->save($runValidation, $attributeNames)) {
-				if ($this->saveRelated($wasNewRecord)) {
-					if( $must_commit ) {
+				if ($this->saveRelated($relations_in_form)) {
+					if ($must_commit) {
 						$trans->commit();
 					}
 					return true;
 				} else {
-					if( $must_commit ) {
+					if ($must_commit) {
 						$trans->rollback();
 					}
                     $this->isNewRecord = $wasNewRecord;
@@ -302,10 +279,13 @@ trait RelationTrait
     }
 
 
-    public function saveRelated(bool $wasNewRecord): bool
+    public function saveRelated(array $relations_in_form): bool
     {
 		$success = true;
-		foreach ($this->relatedRecords as $rel_name => $records) {
+		foreach ($this->relatedRecords as $relation_name => $records) {
+			if (count($relations_in_form) && !in_array($relation_name, $relations_in_form)) {
+				continue;
+			}
 			/* @var $records ActiveRecord | ActiveRecord[] */
 			if ($records instanceof \yii\db\BaseActiveRecord && !$records->getIsNewRecord()) {
 				continue;
@@ -314,181 +294,34 @@ trait RelationTrait
 			}
 			$justUpdateIds = $records === null || count($records) == 0 || !($records[0] instanceof \yii\db\BaseActiveRecord);
 			if( $justUpdateIds ) {
-				$success = $this->updateIds($wasNewRecord, $rel_name, $records);
+				throw new \Exception("Stop");
+				$success = $this->updateIds($relation_name, $records);
 			} else {
-				$success = $this->updateRecords($wasNewRecord, $rel_name, $records);
+				$success = $this->updateRecords($relation_name, $records);
 			}
 		}
 		return $success;
     }
 
-    private function updateIds(bool $wasNewRecord, string $rel_name, $records)
-    {
-		$relation = $this->getRelation($rel_name);
-        $isSoftDelete = isset($this->_rt_softdelete);
-		$dontDeletePk = [];
-		$notDeletedFK = [];
-		$success = true;
-		$isManyMany = false;
-		if ($relation->multiple ) { // Has many or many2many
-			$master_link = $relation->link;
-			if ($relation->via != null) {
-				$relation = $this->getRelation($relation->via[0]);
-			}
-			$relModelClass = $relation->modelClass;
-			$relModel = new $relModelClass;
-			$links = array_keys($relation->link);
-			$relPKAttr = $relModel->primarykey();
-			if (count($relPKAttr) > 1) {
-				$other_fk = array_values($master_link)[0];
-				$this_fk = array_keys($relation->link)[0];
-				$isManyMany = true;
-			}
-
-			if (!$wasNewRecord) {
-				// DELETE WITH 'NOT IN' PK MODEL & REL MODEL
-				if ($isManyMany) {
-					$query = [];
-					foreach ($relation->link as $foreign_key => $fldvalue ) {
-						$query = [ "AND", [ $foreign_key => $this->$fldvalue ] ];
-					}
-					foreach ($records as $pk_values) {
-						$dontDeletePk[$other_fk][] = $pk_values[$other_fk];
-					}
-					foreach ($dontDeletePk as $attr => $value) {
-						$query[] = ["NOT IN", $attr, $value];
-					}
-					try {
-						if ($isSoftDelete) {
-							$relModel->updateAll($this->_rt_softdelete, $query);
-						} else {
-							$relModel->deleteAll($query);
-						}
-					} catch (IntegrityException $exc) {
-						$this->addError($rel_name, "Data can't be deleted because it's still used by another data.");
-						$success = false;
-					}
-					$records_in_database = $relation->select($other_fk)->asArray()->all();
-				} else {
-					if( $relation->via != null ) { // Many2Many
-						$records_in_database = $relation->asArray()->all();
-					} else {
-						$query = [];
-						foreach ($relation->link as $foreign_key => $value ) {
-							$query = [ "AND", [ $foreign_key => $this->$value ] ];
-						}
-						foreach ($records as $pk_values) {
-							$dontDeletePk[] = $pk_values;
-						}
-						if (!empty($dontDeletePk)) {
-							$query = ['and', $notDeletedFK, ['not in', $relPKAttr[0], $dontDeletePk]];
-							try {
-								if ($isSoftDelete) {
-									$relModel->updateAll($this->_rt_softdelete, $query);
-								} else {
-									$relModel->deleteAll($query);
-								}
-							} catch (IntegrityException $exc) {
-								$this->addError($rel_name, "Data can't be deleted because it's still used by another data.");
-								$success = false;
-							}
-						}
-					}
-				}
-			} else {
-				$records_in_database = [];
-			}
-			// Get the ids already in the database
- 			// Save ids
-			foreach ($records as $index => $pk_values) {
-				$must_save = true;
-				foreach( $records_in_database as $key => $record ) {
-					if( $pk_values[$other_fk] == $record[$other_fk] ) {
-						$must_save = false;
-						continue;
-					}
-				}
-				if (!$must_save) {
-					continue;
-				}
-				$relModel->setIsNewRecord(true);
-				$relModel->setAttributes($pk_values, false);
-				foreach ($relation->link as $foreign_key => $fldvalue ) {
-					$relModel->$foreign_key = $this->$fldvalue;
-				}
-				// $relModel->$other_fk = $pk_values[$other_fk];
-				$relSave = $relModel->save();
-				if (!$relSave || !empty($relModel->errors)) {
-					$relModelWords = $relModel->t('churros', "{title}");
-					$index++;
-					foreach ($relModel->errors as $validation) {
-						foreach ($validation as $errorMsg) {
-							$this->addError($rel_name, "$relModelWords #$index : $errorMsg");
-						}
-					}
-					$success = false;
-				}
-			}
-		} else {
-			// throw new \Exception("Non-multiple relations not supported");
-// 			//Has One
-// 			foreach ($link as $key => $value) {
-// 				$records->$key = $this->$value;
-// 			}
-// 			$relSave = $records->save();
-// 			if (!$relSave || !empty($records->errors)) {
-// 				$recordsWords = Yii::t('churros', Inflector::camel2words(StringHelper::basename($AQ->modelClass)));
-// 				foreach ($records->errors as $validation) {
-// 					foreach ($validation as $errorMsg) {
-// 						$this->addError($rel_name, "$recordsWords : $errorMsg");
-// 					}
-// 				}
-// 				$error = true;
-// 			}
-		}
-		return $success;
-    }
-
-    private function updateRecords(bool $wasNewRecord, string $rel_name, array $records): bool
+    private function updateRecords(string $relation_name, array $records): bool
     {
 		$success = true;
-		$relation = $this->getRelation($rel_name);
-        $isSoftDelete = isset($this->_rt_softdelete);
+		$relation = $this->getRelation($relation_name);
 		$link = $relation->link;
-		/// SCT Add error info
-		if ($relation->via != null) {
-			$records_copy = $records;
-			foreach ($records as $index => $relModel) {
-				$attributes = $relModel->attributes;
-				if( $relModel->isNewRecord ) {
-					$relSave = $relModel->save();
-					if (!$relSave || !empty($relModel->errors)) {
-						$relModelWords = Yii:: t('churros', Inflector::camel2words(StringHelper::basename($AQ->modelClass)));
-						$index++;
-						foreach ($relModel->errors as $validation) {
-							foreach ($validation as $errorMsg) {
-								$this->addError($rel_name, "$relModelWords #$index : $errorMsg");
-							}
-						}
-						$success = false;
-					} else {
-					$rel_name = $rel_name . Inflector::camel2words(StringHelper::basename($AQ->primaryModel::className()));
-						$records[$index] = new $rel_name;
-						$rel_name->$link = $relModel->primaryKey;
-					}
-				}
-			}
+        // $isSoftDelete = isset($this->_rt_softdelete);
+		if ($relation->via != null) { // real model, not junction model
+			$relation_name = $relation->via[0];
+			$relation = $this->getRelation($relation_name);
 		}
 		if ($success) {
-			$dontDeletePk = [];
-			$notDeletedFK = [];
-			if ($relation->multiple) {
+			if ($relation->multiple) { // hasmany or many2many
+				$dontDeletePk = [];
 				$relModelClass = $relation->modelClass;
 				$relPKAttr = $relModelClass::primarykey();
 				if (count($relPKAttr) == 0) { // HasMany without primary key
 					foreach ($records as $index => $relModel) {
 						// Set relModel foreign key
-						foreach ($relation->link as $foreign_key => $value) {
+						foreach ($link as $foreign_key => $value) {
 							if( is_object($relModel) ) {
 								$relModel->$foreign_key = $this->$value;
 							}
@@ -499,89 +332,54 @@ trait RelationTrait
 							$index++;
 							foreach ($relModel->errors as $validation) {
 								foreach ($validation as $errorMsg) {
-									$this->addError($rel_name, "$relModelWords #$index : $errorMsg");
+									$this->addError($relation_name, "$relModelWords #$index : $errorMsg");
 								}
 							}
 							$success = false;
 						}
 					}
-
 				} else {
-					$isManyMany = (count($relPKAttr) > 1);
 					/* @var $relModel ActiveRecord */
+					$relation_getter = "get" . ucfirst($relation_name);
+					$query = $this->$relation_getter();
 					foreach ($records as $index => $relModel) {
-						// Set relModel foreign key
-						foreach ($relation->link as $foreign_key => $value) {
-							if (is_object($relModel)) {
-								$relModel->$foreign_key = $this->$value;
-							}
-							$notDeletedFK[$foreign_key] = $this->$value;
+						if (!is_array($relModel)) {
+							$dontDeletePk = $relModel->getPrimaryKey();
 						}
-
-						// get primary key of related model
-						if ($isManyMany) {
-							$mainPK = array_keys($relation->link)[0];
-							foreach ($relModel->primaryKey as $attr => $value) {
-								if ($attr != $mainPK) {
-									$dontDeletePk[$attr][] = $value;
-								}
-							}
-						} else {
-							$dontDeletePk[] = is_object($relModel) ? $relModel->primaryKey : $relModel;
+						$dont_delete_query = [];
+						foreach ($dontDeletePk as $attr => $value) {
+							$dont_delete_query[$attr] = $value;
 						}
+						$query->andWhere(['not', [ 'and', $dont_delete_query]]);
 					}
-
-					if (!$wasNewRecord) {
-						// DELETE WITH 'NOT IN' PK MODEL & REL MODEL
-						if ($isManyMany) {
-							// Many Many
-							$query = ['and', $notDeletedFK];
-							foreach ($dontDeletePk as $attr => $value) {
-								$notIn = ['not in', $attr, $value];
-								array_push($query, $notIn);
-							}
-							try {
-								if ($isSoftDelete) {
-									$relModel->updateAll($this->_rt_softdelete, $query);
-								} else {
-									$relModel->deleteAll($query);
-								}
-							} catch (IntegrityException $exc) {
-								$this->addError($rel_name, "Data can't be deleted because it's still used by another data.");
-								$success = false;
-							}
-						} else {
-							// Has Many
-							$query = ['and', $notDeletedFK, ['not in', $relPKAttr[0], $dontDeletePk]];
-							if (!empty($dontDeletePk)) {
-								try {
-									if ($isSoftDelete) {
-										$relModel->updateAll($this->_rt_softdelete, $query);
-									} else {
-										$relModel->deleteAll($query);
-									}
-								} catch (IntegrityException $exc) {
-									$this->addError($rel_name, "Data can't be deleted because it's still used by another data.");
-									$success = false;
-								}
-							}
+					try {
+						$records_to_delete = $query->all();
+						foreach ($records_to_delete as $record_to_delete) {
+							// if ($isSoftDelete) {
+								// $record_to_delete->_rt_softdelete, $query);
+							// } else {
+								$record_to_delete->delete();
+							// }
 						}
+					} catch (IntegrityException $exc) {
+						$this->addError($relation_name, "Data can't be deleted because it's still used by another data.");
+						$success = false;
 					}
 
 					// Save all posted records
 					foreach ($records as $index => $relModel) {
-						$is_new = $relModel->isNewRecord;
-						$relSave = $relModel->save();
-
-						if (!$relSave || !empty($relModel->errors)) {
-							$relModelWords = Yii:: t('churros', Inflector::camel2words(StringHelper::basename($relModelClass)));
-							$index++;
-							foreach ($relModel->errors as $validation) {
-								foreach ($validation as $errorMsg) {
-									$this->addError($rel_name, "$relModelWords #$index : $errorMsg");
+						if (!empty($relModel->getRelaxedDirtyAttributes())) {
+							$relSave = $relModel->save();
+							if (!$relSave || !empty($relModel->errors)) {
+								$relModelWords = Yii:: t('churros', Inflector::camel2words(StringHelper::basename($relModelClass)));
+								$index++;
+								foreach ($relModel->errors as $validation) {
+									foreach ($validation as $errorMsg) {
+										$this->addError($relation_name, "$relModelWords #$index : $errorMsg");
+									}
 								}
+								$success = false;
 							}
-							$success = false;
 						}
 					}
 				}
@@ -595,7 +393,7 @@ trait RelationTrait
 					$recordsWords = Yii:: t('churros', Inflector::camel2words(StringHelper::basename($AQ->modelClass)));
 					foreach ($records->errors as $validation) {
 						foreach ($validation as $errorMsg) {
-							$this->addError($rel_name, "$recordsWords : $errorMsg");
+							$this->addError($relation_name, "$recordsWords : $errorMsg");
 						}
 					}
 					$success = false;
@@ -603,7 +401,6 @@ trait RelationTrait
 			}
 		}
 		return $success;
-
     }
 
     /**
@@ -714,10 +511,10 @@ trait RelationTrait
         }
     }
 
-    public function createChild(string $rel_name, string $form_class_name = null)
+    public function createChild(string $relation_name, string $form_class_name = null)
     {
-        if (isset(static::$relations[$rel_name])) {
-            $r = static::$relations[$rel_name];
+        if (isset(static::$relations[$relation_name])) {
+            $r = static::$relations[$relation_name];
             $rel_model_class = $r['modelClass'];
             if ($form_class_name != null) {
                 $child = new $form_class_name;
@@ -733,10 +530,10 @@ trait RelationTrait
         }
     }
 
-    public function createChildren($rel_name, $form_class_name)
+    public function createChildren($relation_name, $form_class_name)
 	{
 		// Get the relation query
-		$relation = $this->getRelation($rel_name);
+		$relation = $this->getRelation($relation_name);
 
 		// Create a query for the relation
 		$query = $this->createRelationQuery($form_class_name, $relation->link, $relation->multiple);
@@ -787,9 +584,9 @@ trait RelationTrait
 
     protected function findRelationByModel(string $model_name): ?array
 	{
-		foreach ($this::$relations as $rel_name => $rel_info) {
+		foreach ($this::$relations as $relation_name => $rel_info) {
 			if ($rel_info['model'] == $model_name) {
-				// $rel_info['name'] = $rel_name;
+				// $rel_info['name'] = $relation_name;
 				return $rel_info;
 			}
 		}
@@ -799,7 +596,7 @@ trait RelationTrait
 	public function findOtherRelationByModel(string $model_name): ?array
 	{
 		if ($this::$isJunctionModel) {
-			foreach ($this::$relations as $rel_name => $rel_info) {
+			foreach ($this::$relations as $relation_name => $rel_info) {
 				if ($rel_info['model'] != $model_name) {
 					return $rel_info;
 				}
