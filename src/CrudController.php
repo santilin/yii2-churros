@@ -235,7 +235,7 @@ class CrudController extends \yii\web\Controller
 		if ($model->loadAll($this->request->post(), static::findRelationsInForm($params))) {
 			$model->setIsNewRecord(true);
 			$model->resetPrimaryKeys();
-			if( $model->saveAll(true) ) {
+			if ($model->saveAll(true) ) {
 				if ($this->request->getIsAjax()) {
 					Yii::$app->response->format = \yii\web\Response::FORMAT_JSON;
 					return ['model' => $model->getAttributes(), 'success' => $model->getSuccesses()];

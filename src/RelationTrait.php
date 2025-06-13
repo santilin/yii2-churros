@@ -192,7 +192,7 @@ trait RelationTrait
 						$m2mkeys[$other_pk] = $relPost;
 					}
 					foreach ($junction_link as $rel_fk => $this_pk) {
-						$m2mkeys[$rel_fk] = $this->$this_fk;
+						$m2mkeys[$rel_fk] = $this->$this_pk;
 					}
 					$relModel = $relModelClass::findOne($m2mkeys);
 					if (!$relModel) {
@@ -368,6 +368,9 @@ trait RelationTrait
 					// Save all posted records
 					foreach ($records as $index => $relModel) {
 						if (!empty($relModel->getRelaxedDirtyAttributes())) {
+							foreach ($link as $fk => $pk) {
+								$relModel->$fk = $this->$pk; // in case is a new record
+							}
 							$relSave = $relModel->save();
 							if (!$relSave || !empty($relModel->errors)) {
 								$relModelWords = Yii:: t('churros', Inflector::camel2words(StringHelper::basename($relModelClass)));
