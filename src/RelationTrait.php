@@ -3,8 +3,8 @@
 /**
  * RelationTrait
  *
- * @author Yohanes Candrajaya <moo.tensai@gmail.com>
- * @since 1.0
+ * @author Santilín <z@zzzzz.es>
+ * Based on a work by Yohanes Candrajaya <moo.tensai@gmail.com>
  */
 
 namespace santilin\churros;
@@ -221,7 +221,6 @@ trait RelationTrait
 			}
         }
 		$this->populateRelation($relation_name, $container);
-        return true;
     }
 
     /**
@@ -240,9 +239,9 @@ trait RelationTrait
 		}
 		$wasNewRecord = $this->isNewRecord;
         try {
-			$relations_in_form = array_keys($this->relatedRecords);
+			$relatedRecords = $this->relatedRecords; // validation can change, add or remove _related items
             if ($this->save($runValidation, $attributeNames)) {
-				if ($this->saveRelated($relations_in_form)) {
+				if ($this->saveRelated($wasNewRecord, $relatedRecords)) {
 					if ($must_commit) {
 						$trans->commit();
 					}
@@ -278,13 +277,10 @@ trait RelationTrait
     }
 
 
-    public function saveRelated(array $relations_in_form): bool
+    public function saveRelated(bool $wasNewRecord, array $relatedRecords): bool
     {
 		$success = true;
-		foreach ($this->relatedRecords as $relation_name => $records) {
-			if (count($relations_in_form) && !in_array($relation_name, $relations_in_form)) {
-				continue;
-			}
+		foreach ($relatedRecords as $relation_name => $records) {
 			/* @var $records ActiveRecord | ActiveRecord[] */
 			if ($records instanceof \yii\db\BaseActiveRecord && !$records->getIsNewRecord()) {
 				continue;
@@ -640,15 +636,14 @@ trait RelationTrait
 	{
 		$relation_getter = "get" . ucfirst($relation_name);
 		$relation = $this->$relation_getter();
-		$link = $relation->link;
-		if ($relation->multiple && $relation->via) { // many2many
-			foreach ($link as $left_field => $right_field) {
+		if ($relation->via) { // many2many
+			foreach ($relation->via[1]->link as $left_field => $right_field) {
 				$params[$detail->formName()][$left_field] = $this->$right_field;
 				$detail->$left_field = $this->$right_field;
 			}
 			// $params['_search_relations'] = $relation_name;
-		} else {
-			foreach ($link as $left_field => $right_field) {
+		} else if ($relation->multiple) {
+			foreach ($relation->link as $left_field => $right_field) {
 				$params[$detail->formName()][$left_field] = $this->$right_field;
 				$detail->$left_field = $this->$right_field;
 			}

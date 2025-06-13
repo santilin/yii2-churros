@@ -28,9 +28,9 @@ trait ModelSearchTrait
 				if (!isset(static::$relations[$name])) {
 					return $this->related_properties[$name];
 				} else if (empty($this->related_properties[$name])) {
-					if (array_key_exists($name, $this->relatedRecords) && isempty($this->relatedRecords['name'])) {
-						unset($this->relatedRecords['name']);
-					}
+					// if (array_key_exists($name, $this->relatedRecords) && empty($this->relatedRecords['name'])) {
+					// 	unset($this->relatedRecords['name']);
+					// }
 					return parent::__get($name);
 				} else {
 					return $this->related_properties[$name];

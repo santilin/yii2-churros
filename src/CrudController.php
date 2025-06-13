@@ -149,11 +149,11 @@ class CrudController extends \yii\web\Controller
 			throw new \Exception("No {$search_model_class}_Search nor $search_model_class{$view}_Search class found in " . __METHOD__);
 		}
 		$params['permissions'] = $this->resolvePermissions([], $this->userPermissions());
-		$master->linkDetails($detail, $relation_name);
 		$params['_search_relation'] = $relation_name;
 		$params['master'] = $master;
 		$params['embedded'] = true;
 		$params['previous_context'] = $previous_context;
+		$master->linkDetails($detail, $relation_name);
 		$this->layout = false;
 		return $this->render($view, [
 			'searchModel' => $detail,
@@ -231,7 +231,6 @@ class CrudController extends \yii\web\Controller
 		$params = array_merge($this->request->get(), $this->request->post());
 		$params['permissions'] = $this->resolvePermissions($params['permissions']??[], $this->userPermissions());
 		$model = $this->findFormModel($id, null, 'duplicate', $params);
-
 		if ($model->loadAll($this->request->post(), static::findRelationsInForm($params))) {
 			$model->setIsNewRecord(true);
 			$model->resetPrimaryKeys();
