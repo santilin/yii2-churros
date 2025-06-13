@@ -149,6 +149,7 @@ class CrudController extends \yii\web\Controller
 			throw new \Exception("No {$search_model_class}_Search nor $search_model_class{$view}_Search class found in " . __METHOD__);
 		}
 		$params['permissions'] = $this->resolvePermissions([], $this->userPermissions());
+		$master->linkDetails($detail, $relation_name);
 		$params['_search_relation'] = $relation_name;
 		$params['master'] = $master;
 		$params['embedded'] = true;
