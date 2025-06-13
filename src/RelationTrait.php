@@ -146,6 +146,9 @@ trait RelationTrait
 		if ($relation->via != null) { // Many to many with junction model
 			$relation_name = $relation->via[0];
 			$relation = $this->getRelation($relation_name);
+			$junction_link = $relation->link;
+		} else {
+			$junction_link = [];
 		}
 		if ($relation->multiple) {
 			$relModelClass = $relation->modelClass;
@@ -185,15 +188,11 @@ trait RelationTrait
                 } else {
 					// many2many relation with _POST = array of related ids
 					$m2mkeys = [];
-					foreach ($relation->link as $this_fk => $other_pk) {
+					foreach ($link as $this_fk => $other_pk) {
 						$m2mkeys[$other_pk] = $relPost;
 					}
-					foreach ($relation->via[1]->link as $rel_fk => $this_pk) {
-						foreach ($relation->link as $this_fk => $other_pk) {
-							if ($this_fk == $this_pk) {
-								$m2mkeys[$rel_fk] = $this->$this_pk;
-							}
-						}
+					foreach ($junction_link as $rel_fk => $this_pk) {
+						$m2mkeys[$rel_fk] = $this->$this_fk;
 					}
 					$relModel = $relModelClass::findOne($m2mkeys);
 					if (!$relModel) {
