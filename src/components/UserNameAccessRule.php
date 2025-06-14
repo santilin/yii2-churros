@@ -14,19 +14,19 @@ class UserNameAccessRule extends AccessRule
         if (empty($items)) {
             return true;
         }
-        if( !$user->getIdentity() ) {
+        if (!$user->getIdentity()) {
 			return false;
         }
         // Gives an oportunity to not have rbac tables
-		if( in_array($user->getIdentity()->username, $items) ) {
+		if (in_array($user->getIdentity()->username, $items) ) {
 			return true;
 		}
-		try {
+		// try {
 			if( parent::matchRole($user) ) {
 				return true;
 			}
-		} catch (\yii\db\Exception $e) {
-		}
+		// } catch (\yii\db\Exception $e) {
+		// }
 		return false;
 	}
 

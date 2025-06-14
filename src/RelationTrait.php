@@ -287,13 +287,7 @@ trait RelationTrait
 			} else if ($records instanceof \yii\db\BaseActiveRecord) {
 				$records = (array)$records;
 			}
-			$justUpdateIds = $records === null || count($records) == 0 || !($records[0] instanceof \yii\db\BaseActiveRecord);
-			if( $justUpdateIds ) {
-				throw new \Exception("Stop");
-				$success = $this->updateIds($relation_name, $records);
-			} else {
-				$success = $this->updateRecords($relation_name, $records);
-			}
+			$success = $this->updateRecords($relation_name, $records);
 		}
 		return $success;
     }
