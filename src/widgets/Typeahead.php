@@ -26,6 +26,7 @@ class Typeahead extends KartikTypeahead
 	public $perPageParam = 'pagesize';
 	public $createButton = false;
 	public $limit = 5;
+	public ?string $searchField = null;
 
 	// from Yii InputWidget
 	protected function getInput($type, $list = false)
@@ -62,13 +63,24 @@ js;
 		} else {
 			$remote_url .= '&';
 		}
+
+		// Agrega el parámetro field si está definido
+		if ($this->searchField !== null) {
+			$remote_url .= 'field=' . urlencode($this->searchField) . '&';
+		}
+		$remote_url .= $this->formatParam . '=&'
+			. $this->searchParam . '=&'
+			. $this->pageParam . '=&' . $this->perPageParam . '=';
+
+		$jsFieldParam = '';
+		if ($this->searchField !== null) {
+			$jsFieldParam = "params.set('fields', '" . addslashes($this->searchField) . "');";
+		}
+
 		$this->dataset = [[
 			'limit' => $this->limit,
 			'remote' => [
-				'url' => $remote_url
-					. $this->formatParam . '=&'
-					. $this->searchParam . '=&'
-					. $this->pageParam . '=&' . $this->perPageParam . '=',
+				'url' => $remote_url,
 				'replace' => new \yii\web\JsExpression(<<<jsexpr
 function(url, query) {
     const params = new URLSearchParams(url.split('?')[1] || '');
@@ -76,6 +88,7 @@ function(url, query) {
     params.set('{$this->pageParam}', params.get('{$this->pageParam}') || '1');
     params.set('{$this->perPageParam}', params.get('{$this->perPageParam}') || '{$this->limit}');
 	params.set('{$this->formatParam}', params.get('{$this->formatParam}') || 'select');
+	$jsFieldParam
 	// Remove empty parameters
     for (const [key, value] of params.entries()) {
         if (value === '') {
@@ -122,7 +135,8 @@ js
 	{
 		$view = $this->getView();
 		$hidden_name = $this->options['name']??Html::getInputName($this->model, $this->attribute);
-		$typeahead_id = ($this->options['id']??Html::getInputId($this->model, $this->attribute)) . '_typeahead';
+		$typeahead_field_id = $this->options['id']??Html::getInputId($this->model, $this->attribute);
+		$typeahead_id = $typeahead_field_id . '_typeahead';
 
 		// Cuando se pulsa INTRO y está desplegado el menú de sugerencias, se selecciona la primera
 		$set_dest_fields_values = $reset_dest_fields_values = [];
@@ -140,6 +154,9 @@ js;
 		$js_id = str_replace('-','_',$typeahead_id);
 		/// @todo make a module and refactor change an blur event handlers
 		$view->registerJS(<<<js
+$('#$typeahead_field_id').on('change', function() {
+    $("input[name='$hidden_name']").val($(this).val());
+});
 let mctahead_exact_match_field_$js_id = $js_exact_match_field;
 let mctahead_changed_$js_id = false;
 $('#$typeahead_id').on('change', function(e) {

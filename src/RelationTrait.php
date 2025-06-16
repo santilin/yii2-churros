@@ -223,6 +223,18 @@ trait RelationTrait
 		$this->populateRelation($relation_name, $container);
     }
 
+    public function validateAll($attributeNames = null): bool
+	{
+		// validation can change, add or remove _related items
+		$relatedRecords = $this->relatedRecords;
+		$ret = $this->validate($attributeNames);
+		foreach ($relatedRecords as $rn => $rvs) {
+			$this->populateRelation($rn, $rvs);
+		}
+		return $ret;
+	}
+
+
     /**
      * Save model including all related models already loaded
      * @param array $relations The relations to consider for this form
@@ -239,9 +251,13 @@ trait RelationTrait
 		}
 		$wasNewRecord = $this->isNewRecord;
         try {
-			$relatedRecords = $this->relatedRecords; // validation can change, add or remove _related items
-            if ($this->save($runValidation, $attributeNames)) {
-				if ($this->saveRelated($wasNewRecord, $relatedRecords)) {
+			if ($runValidation) {
+				$validated = $this->validateAll($attributeNames);
+			} else {
+				$validated = true;
+			}
+			if ($validated && $this->save(false, $attributeNames)) {
+				if ($this->saveRelated($wasNewRecord, $this->relatedRecords)) {
 					if ($must_commit) {
 						$trans->commit();
 					}
@@ -333,7 +349,9 @@ trait RelationTrait
 					$query = $this->$relation_getter();
 					foreach ($records as $index => $relModel) {
 						if (!is_array($relModel)) {
-							$dontDeletePk = $relModel->getPrimaryKey();
+							$dontDeletePk = $relModel->getPrimaryKey(true);
+						} else {
+							$dontDeletePk = $relModel;
 						}
 						$dont_delete_query = [];
 						foreach ($dontDeletePk as $attr => $value) {

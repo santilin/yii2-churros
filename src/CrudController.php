@@ -568,16 +568,16 @@ class CrudController extends \yii\web\Controller
 	}
 
 	// Ajax
-	public function actionAutocomplete(string $search, string $format, array|string $fields = [], array|string $scopes = '',
-									   string $id_field = null, string $model_format = 'long')
+	public function actionAutocomplete(string $search, string $format, array|string $fields = [],
+		array|string $scopes = '', string $id_field = null, string $model_format = 'long')
 	{
 		\Yii::$app->response->format = \yii\web\Response::FORMAT_JSON;
 		$ret = [];
 		$searchModel = $this->createSearchModel();
-		if (empty($fields)) {
-			$fields = $searchModel->findCodeAndDescFields();
-		} else if (is_string($fields)) {
+		if ($had_fields = !empty($fields)) {
 			$fields = explode(',',$fields);
+		} else if (is_string($fields)) {
+			$fields = $searchModel->findCodeAndDescFields();
 		}
 		$fld_values = [];
 		foreach ($fields as $field) {
@@ -590,7 +590,12 @@ class CrudController extends \yii\web\Controller
 		if ($format == 'select2' || $format == 'select') {
 			foreach ($dataProvider->getModels() as $record) {
 				$id = $id_field ? $record->$id_field : $record->getPrimaryKey();
-				$ret[] = [ 'id' => $id, 'text' => $record->recordDesc($model_format) ];
+				if ($had_fields) {
+					$fld = $fields[0];
+					$ret[] = [ 'id' => $id, 'text' => $record->$fld ];
+				} else {
+					$ret[] = [ 'id' => $id, 'text' => $record->recordDesc($model_format) ];
+				}
 			}
 			if ($format == 'select2') {
 				return [ 'results' => $ret ];
