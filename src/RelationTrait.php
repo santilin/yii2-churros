@@ -223,21 +223,6 @@ trait RelationTrait
 		$this->populateRelation($relation_name, $container);
     }
 
-    public function validateAll($attributeNames = null): bool
-	{
-		// validation can change, add or remove _related items
-		$relatedRecords = $this->relatedRecords;
-		$ret = $this->validate($attributeNames);
-		foreach (array_keys($this->relatedRecords) as $rn) {
-			unset($this->$rn);
-		}
-		foreach ($relatedRecords as $rn => $rvs) {
-			$this->populateRelation($rn, $rvs);
-		}
-		return $ret;
-	}
-
-
     /**
      * Save model including all related models already loaded
      * @param array $relations The relations to consider for this form
@@ -254,13 +239,9 @@ trait RelationTrait
 		}
 		$wasNewRecord = $this->isNewRecord;
         try {
-			if ($runValidation) {
-				$validated = $this->validateAll($attributeNames);
-			} else {
-				$validated = true;
-			}
-			if ($validated && $this->save(false, $attributeNames)) {
-				if ($this->saveRelated($wasNewRecord, $this->relatedRecords)) {
+			$relatedRecords = $this->relatedRecords;
+			if ($this->save(true, $attributeNames)) {
+				if ($this->saveRelated($wasNewRecord, $relatedRecords)) {
 					if ($must_commit) {
 						$trans->commit();
 					}
@@ -299,7 +280,13 @@ trait RelationTrait
     public function saveRelated(bool $wasNewRecord, array $relatedRecords): bool
     {
 		$success = true;
-		foreach ($relatedRecords as $relation_name => $records) {
+		foreach (array_keys($this->relatedRecords) as $rn) {
+			unset($this->$rn);
+		}
+		foreach ($relatedRecords as $rn => $rvs) {
+			$this->populateRelation($rn, $rvs);
+		}
+		foreach ($this->relatedRecords as $relation_name => $records) {
 			/* @var $records ActiveRecord | ActiveRecord[] */
 			if ($records instanceof \yii\db\BaseActiveRecord && !$records->getIsNewRecord()) {
 				continue;
