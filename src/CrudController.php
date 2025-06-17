@@ -575,8 +575,10 @@ class CrudController extends \yii\web\Controller
 		$ret = [];
 		$searchModel = $this->createSearchModel();
 		if ($had_fields = !empty($fields)) {
-			$fields = explode(',',$fields);
-		} else if (is_string($fields)) {
+			if (is_string($fields)) {
+				$fields = explode(',',$fields);
+			}
+		} else {
 			$fields = $searchModel->findCodeAndDescFields();
 		}
 		$fld_values = [];
@@ -586,7 +588,8 @@ class CrudController extends \yii\web\Controller
 		if (!empty($scopes)) {
 			$indexParams['_search_scopes'] = $scopes;
 		}
-		$dataProvider = $searchModel->search([$searchModel->formName() => $fld_values, 'or' => true ]);
+		$dataProvider = $searchModel->search([$searchModel->formName() => $fld_values, 'or' => true]);
+		$dataProvider->query->select($fields[0])->distinct();
 		if ($format == 'select2' || $format == 'select') {
 			foreach ($dataProvider->getModels() as $record) {
 				$id = $id_field ? $record->$id_field : $record->getPrimaryKey();

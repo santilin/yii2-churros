@@ -169,8 +169,13 @@ class JsonModel extends \yii\base\Model
             }
             $locator = static::$_locator;
             $id = $locator ? $this->$locator : $this->_id;
-            if ($id && !StringHelper::endsWith($this->_path, $id)) {
-                $parts = explode('/', $this->_path . '/' . $id);
+            if ($id) {
+                $id = str_replace('/',';',$id);
+                if (!StringHelper::endsWith($this->_path, $id)) {
+                    $parts = explode('/', $this->_path . '/' . $id);
+                } else {
+                    $parts = explode('/', $this->_path);
+                }
             } else {
                 $parts = explode('/', $this->_path);
             }

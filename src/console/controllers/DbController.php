@@ -99,6 +99,7 @@ class DbController extends Controller
 
     protected function getPhpValue($value, string $phptype)
     {
+		$phptype = str_replace(' (', '(', $phptype);
 		if (substr($phptype,0,3) == 'int' || substr($phptype,0,7) == 'tinyint'
 			|| substr($phptype,0,9) == 'mediumint'
 			|| substr($phptype,0,8) == 'smallint') {

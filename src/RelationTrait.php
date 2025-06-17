@@ -228,6 +228,9 @@ trait RelationTrait
 		// validation can change, add or remove _related items
 		$relatedRecords = $this->relatedRecords;
 		$ret = $this->validate($attributeNames);
+		foreach (array_keys($this->relatedRecords) as $rn) {
+			unset($this->$rn);
+		}
 		foreach ($relatedRecords as $rn => $rvs) {
 			$this->populateRelation($rn, $rvs);
 		}
