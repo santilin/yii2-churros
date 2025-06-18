@@ -207,6 +207,7 @@ trait ModelSearchTrait
 					$nested_relations[$table_alias] = $relation['relatedTablename'];
 					$this->addJoinIfNotExists($query, $nested_relations, "LEFT JOIN", [ $table_alias => $model->tableName()], $relation['join']);
 					$final_attribute = $attribute;
+				}
 			} else {
 				throw new InvalidArgumentException($relation_name . ": relation not found in model " . self::class . ' (SearchModel::filterWhereRelated)');
 			}
