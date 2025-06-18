@@ -233,7 +233,7 @@ trait RelationTrait
     {
 		$must_commit = false;
 		$trans = $this->getDb()->getTransaction();
-		if( !$trans ) {
+		if (!$trans) {
 			$trans = $this->getDb()->beginTransaction();
 			$must_commit = true;
 		}
@@ -634,8 +634,30 @@ trait RelationTrait
 		return $ret;
 	}
 
-	public function linkDetails($detail, $relation_name): void
+
+	protected function relationOfModel($related_model): ?string
 	{
+		$cn = $related_model->className();
+		foreach (self::$relations as $relname => $rel_info) {
+			if ($rel_info['modelClass'] == $cn) {
+				return $relname;
+			}
+		}
+		// If it's a derived class like *Form, *Search, look up its parent
+		$cn = get_parent_class($related_model);
+		foreach (self::$relations as $relname => $rel_info) {
+			if ($rel_info['modelClass'] == $cn) {
+				return $relname;
+			}
+		}
+		return null;
+	}
+
+	public function linkDetails($detail, ?string $relation_name = null): void
+	{
+		if (empty($relation_name)) {
+			$relation_name = $this->relationOfModel($detail);
+		}
 		$relation_getter = "get" . ucfirst($relation_name);
 		$relation = $this->$relation_getter();
 		if ($relation->via) { // many2many

@@ -188,9 +188,10 @@ trait ModelSearchTrait
 						}
 					}
 					if ($this->addJoinIfNotExists($query, $nested_relations, "LEFT JOIN", [ $related_table_alias => $model->tableName()], $related_relation['join'])) {
-						if ($attribute == $relation_name) { // no related field set
+						if (!$attribute || $attribute == $relation_name) { // no related field set
 							/// @todo findCodeAndDescFields
-							$final_attribute = $related_table_alias . '.' . $model->findCodeField();
+							list(, $final_attribute) = AppHelper::splitFieldName($related_relation['right']);
+							$table_alias = $related_table_alias;
 						} else {
 							$final_attribute = $attribute;
 							$table_alias = $related_table_alias;
@@ -206,7 +207,6 @@ trait ModelSearchTrait
 					$nested_relations[$table_alias] = $relation['relatedTablename'];
 					$this->addJoinIfNotExists($query, $nested_relations, "LEFT JOIN", [ $table_alias => $model->tableName()], $relation['join']);
 					$final_attribute = $attribute;
-				}
 			} else {
 				throw new InvalidArgumentException($relation_name . ": relation not found in model " . self::class . ' (SearchModel::filterWhereRelated)');
 			}
@@ -241,8 +241,6 @@ trait ModelSearchTrait
 				}
 			}
 			return $rel_conds;
-		} else if ($attribute == $model->primaryKey()[0] ) {
-			return ["$table_alias.$attribute" => $value['v']];
 		} else {
 			return [$value['op'], "$table_alias.$attribute", $value['v'] ];
 		}
