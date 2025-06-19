@@ -200,8 +200,7 @@ class CrudController extends \yii\web\Controller
 		$params['permissions'] = $this->resolvePermissions($params['permissions']??[], $this->userPermissions());
 		$model = $this->findFormModel(null, null, 'create', $params);
 		if ($master_model = $this->getMasterModel()) {
-			$relation_info = $model->relationToModel($model);
-			$model->linkDetails($master_model, $relation_info['name']);
+			$master_model->linkDetails($model);
 		}
 		if ($model->loadAll($params, static::findRelationsInForm($params)) ) {
 			if ($model->saveAll(true) ) {
