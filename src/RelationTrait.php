@@ -655,8 +655,13 @@ trait RelationTrait
 
 	public function linkDetails($detail, ?string $relation_name = null): void
 	{
-		if (empty($relation_name)) {
+		if (!$relation_name) {
 			$relation_name = $this->relationOfModel($detail);
+		}
+		if (!$relation_name) {
+			Yii::warning("No relation between " . get_class($this)
+				. " and " . get_class($detail));
+			return;
 		}
 		$relation_getter = "get" . ucfirst($relation_name);
 		$relation = $this->$relation_getter();
