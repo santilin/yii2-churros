@@ -170,7 +170,7 @@ legend {
 }
 
 .grid-view .title-container {
-
+  padding-left: 0.25rem;
 }
 
 .grid-header .subtitle, .grid-header .supertitle {

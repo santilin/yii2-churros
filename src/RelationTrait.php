@@ -69,18 +69,23 @@ trait RelationTrait
 				if ($model_relation['type'] == 'HasOne' || $model_relation['type'] == "OneToOne") {
 					if (isset($post[$formName][$relation_name])) {
 						$post_data = $post[$formName][$relation_name];
+						unset($post[$formName][$relation_name]);
 					} else if (isset($post[$formName][$model_relation['model']])) {
 						$post_data = $post[$formName][$model_relation['model']];
+						unset($post[$formName][$model_relation['model']]);
 					} else if (isset($post[$model_relation['model']])) {
 						$post_data = $post[$model_relation['model']];
+						unset($post[$model_relation['model']]);
 					} else if (is_array($model_relation['left'])) {
 						foreach ($model_relation['left'] as $full_mr_left) {
 							$mr_left = AppHelper::lastWord($full_mr_left, '.');
 							if (isset($post[$formName][$mr_left])) {
 								$post_data = $post[$formName][$mr_left];
+								unset($post[$formName][$mr_left]);
 								break;
 							} else if (isset($post[$mr_left])) {
 								$post_data = $post[$mr_left];
+								unset($post[$mr_left]);
 								break;
 							}
 						}
@@ -92,6 +97,8 @@ trait RelationTrait
 							if (is_string($post_data)) {
 								$post_data = json_decode($post_data);
 								$this->setAttributes(array_combine($rel_model->primaryKey(),$post_data));
+							} else {
+								throw new \Exception("stop");
 							}
 						} else if (is_array($post_data)) {
 							// creates a new relmodel and populates it
