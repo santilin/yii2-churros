@@ -73,9 +73,11 @@ class TableSynchronizer
 					->execute();
 			} else {
 				$new_count++;
-				$this->dbDest->createCommand()
+				if (intval($this->dbDest->createCommand()
 					->insert($this->tblDest, $record)
-					->execute();
+					->execute()) == 0) {
+					throw new \Exception("No se ha podido insertar el registro en {$this->tblDest}\n");
+				}
 			}
 		}
 
