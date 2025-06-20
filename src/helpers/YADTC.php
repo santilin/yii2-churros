@@ -101,23 +101,25 @@ class YADTC extends \DateTime
 	 */
 	static public function fromSQL($date, $onlymysql = false): ?YADTC
 	{
-		if( $date == null ) {
+		if ($date == null) {
 			return null;
 		}
-		$ret = self::createFromFormat('Y-m-d H:i:s', $date);
-		if( !$ret ) {
-			$ret = self::createFromFormat('!Y-m-d', $date);
+		$date_parts = explode('-', $date);
+		if (intval($date_parts[1]) <= 12) {
+			$ret = self::createFromFormat('Y-m-d H:i:s', $date);
 			if (!$ret) {
-				$ret = self::createFromFormat('Y-m-d H:i:s.v', $date);
+				$ret = self::createFromFormat('!Y-m-d', $date);
+				if (!$ret) {
+					$ret = self::createFromFormat('Y-m-d H:i:s.v', $date);
+				}
+			}
+			if ($ret!==false) {
+				return $ret;
+			} else if (!$onlymysql) {
+				return self::fromString($date);
 			}
 		}
-		if ($ret!==false) {
-			return $ret;
-		} else if (!$onlymysql) {
-			return self::fromString($date);
-		} else {
-			throw new \Exception("La fecha " . print_r($date, true) . " no tiene formato sql");
-		}
+		throw new \Exception("La fecha " . print_r($date, true) . " no tiene formato sql");
 	}
 
 	/**
