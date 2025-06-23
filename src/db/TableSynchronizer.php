@@ -13,7 +13,6 @@ class TableSynchronizer
 		public string $tblOrigen,
 		public string $tblDest,
 		public Query|string|null $where = null,
-		public string
 		public int $limit = 0
 	) {}
 
@@ -22,7 +21,7 @@ class TableSynchronizer
 		if (is_string($this->where)) {
 			$sourceQuery = (new Query())
 				->select('*')
-				->from($this->tblOrigen);
+				->from($this->tblOrigen)
 				->where($this->where);
 		} else {
 			$sourceQuery = $this->where;
