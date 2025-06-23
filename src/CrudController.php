@@ -585,10 +585,14 @@ class CrudController extends \yii\web\Controller
 		foreach ($fields as $field) {
 			$fld_values[$field] = $search;
 		}
+		$dp_search_params = [
+			$searchModel->formName() => $fld_values,
+			'or' => true
+		];
 		if (!empty($scopes)) {
-			$indexParams['_search_scopes'] = $scopes;
+			$dp_search_params['_search_scopes'] = $scopes;
 		}
-		$dataProvider = $searchModel->search([$searchModel->formName() => $fld_values, 'or' => true]);
+		$dataProvider = $searchModel->search($dp_search_params);
 		if ($had_fields) {
 			$dataProvider->query->select($fields[0])->distinct();
 		}
