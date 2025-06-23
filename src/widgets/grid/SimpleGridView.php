@@ -373,7 +373,7 @@ class SimpleGridView extends \yii\grid\GridView
 		}
 		$p = $this->dataProvider->getPagination();
 		if( $p && $p->getPageCount() > 1 ) {
-			return '<td colspan="42">' . Yii::t('churros', 'Not showing totals because not all the rows have been shown') . '</td>';
+			return '<td colspan="420">' . Yii::t('churros', 'Not showing totals because not all the rows have been shown') . '</td>';
 		}
 		$colspan = 0;
 		foreach ($this->columns as $kc => $column) {
@@ -383,6 +383,8 @@ class SimpleGridView extends \yii\grid\GridView
 				} else {
 					break;
 				}
+			} else {
+				$colspan++;
 			}
 		}
 		if ($colspan==0) {
@@ -397,6 +399,7 @@ class SimpleGridView extends \yii\grid\GridView
 		$nc = 0;
 		foreach ($this->columns as $column) {
 			if (!($column instanceof DataColumn)) {
+				$nc++;
 				continue;
 			}
 			if( $nc++ < $colspan ) {

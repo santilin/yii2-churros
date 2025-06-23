@@ -12,27 +12,31 @@ class TableSynchronizer
 		public Connection $dbDest,
 		public string $tblOrigen,
 		public string $tblDest,
-		public string $where = '',
+		public Query|string|null $where = null,
+		public string
 		public int $limit = 0
 	) {}
 
 	public function synchronize()
 	{
-		$query = (new Query())
-			->select('*')
-			->from($this->tblOrigen);
-
-		if ($this->where) {
-			$query->where($this->where);
+		if (is_string($this->where)) {
+			$sourceQuery = (new Query())
+				->select('*')
+				->from($this->tblOrigen);
+				->where($this->where);
+		} else {
+			$sourceQuery = $this->where;
+			if (empty($sourceQuery->from)) {
+				$sourceQuery->from($this->tblOrigen);
+			}
 		}
-
-		if ($this->limit > 0) {
-			$query->limit($this->limit);
+		if ($this->limit > 0 && $sourceQuery->limit == 0) {
+			$sourceQuery->limit($this->limit);
 		}
 
 		$schema_origen = $this->dbOrigen->getTableSchema($this->tblOrigen);
 		$schema_destino = $this->dbDest->getTableSchema($this->tblDest); // Nuevo: esquema destino
-		$sourceRecords = $query->all($this->dbOrigen);
+		$sourceRecords = $sourceQuery->all($this->dbOrigen);
 		$result = $this->dbDest->createCommand("SELECT COUNT(*) FROM {$this->tblDest}")->queryOne();
 		$dest_count = intval(reset($result));
 		echo "Syncronizing $dest_count records into $this->tblDest\n";

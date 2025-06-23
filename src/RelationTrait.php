@@ -675,7 +675,7 @@ trait RelationTrait
 		if ($relation->via) { // many2many
 			foreach ($relation->via[1]->link as $left_field => $right_field) {
 				$params[$detail->formName()][$left_field] = $this->$right_field;
-				$detail->$left_field = $this->$right_field;
+				// $detail->$left_field = $this->$right_field;
 			}
 			// $params['_search_relations'] = $relation_name;
 		} else if ($relation->multiple) {

@@ -178,6 +178,7 @@ class CrudController extends \yii\web\Controller
 			$this->layout = false;
 			return $this->render('_view', [
 				'model' => $model,
+				'title' => 'View',
 				'viewForms' => [ '_view' => [ '', null, [], '' ] ],
 				'viewParams' => $this->changeActionParams($params, 'view', $model)
 			]);
@@ -588,7 +589,9 @@ class CrudController extends \yii\web\Controller
 			$indexParams['_search_scopes'] = $scopes;
 		}
 		$dataProvider = $searchModel->search([$searchModel->formName() => $fld_values, 'or' => true]);
-		$dataProvider->query->select($fields[0])->distinct();
+		if ($had_fields) {
+			$dataProvider->query->select($fields[0])->distinct();
+		}
 		if ($format == 'select2' || $format == 'select') {
 			foreach ($dataProvider->getModels() as $record) {
 				$id = $id_field ? $record->$id_field : $record->getPrimaryKey();
