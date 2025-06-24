@@ -588,4 +588,51 @@ class JsonModel extends \yii\base\Model
     {
     }
 
+
+	protected function relationOfModel($related_model): ?string
+	{
+		$cn = $related_model->className();
+		foreach (self::$relations as $relname => $rel_info) {
+			if ($rel_info['modelClass'] == $cn) {
+				return $relname;
+			}
+		}
+		// If it's a derived class like *Form, *Search, look up its parent
+		$cn = get_parent_class($related_model);
+		foreach (self::$relations as $relname => $rel_info) {
+			if ($rel_info['modelClass'] == $cn) {
+				return $relname;
+			}
+		}
+		return null;
+	}
+
+	public function linkDetails($detail, ?string $relation_name = null): void
+	{
+		if (!$relation_name) {
+			$relation_name = $this->relationOfModel($detail);
+		}
+		if (!$relation_name) {
+			Yii::warning("No relation between " . get_class($this)
+				. " and " . get_class($detail));
+			return;
+		}
+		$relation_getter = "get" . ucfirst($relation_name);
+		$relation = $this->$relation_getter();
+		if ($relation->via) { // many2many
+			foreach ($relation->via[1]->link as $left_field => $right_field) {
+				$params[$detail->formName()][$left_field] = $this->$right_field;
+				// $detail->$left_field = $this->$right_field;
+			}
+			// $params['_search_relations'] = $relation_name;
+		} else if ($relation->multiple) {
+			foreach ($relation->link as $left_field => $right_field) {
+				$params[$detail->formName()][$left_field] = $this->$right_field;
+				$detail->$left_field = $this->$right_field;
+			}
+		}
+	}
+
+
+
 } // class

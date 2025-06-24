@@ -448,4 +448,43 @@ class SimpleGridView extends \yii\grid\GridView
 		}
 	}
 
+	static public function fromArray(&$array, $options = [], $htmlOptions = [])
+	{
+		$use_key = ArrayHelper::removeValue($options, 'UseKey', false);
+		$summary_fields = ArrayHelper::removeValue($options, 'SummaryFields', []);
+		$format_fields = ArrayHelper::removeValue($options, 'FormatFields', []);
+		$cols = [];
+		if (!empty($array)) {
+			$fieldsinfo = reset($array);
+			if ($use_key !== false ) {
+				foreach($array as $key => &$values ) {
+					$values[$use_key] = $key;
+				}
+				$cols = [
+					[ 'attribute' => $use_key, 'type' => 'string' ]
+				];
+			} else {
+				$cols = [];
+			}
+			foreach ($fieldsinfo as $fldname => $fldvalue) {
+				$type = gettype($fldvalue);
+				$col = [
+					'attribute' => $fldname,
+					'type' => $type
+				];
+				if (array_key_exists($fldname, $summary_fields)) {
+					$col['summary'] = $summary_fields[$fldname];
+				}
+				if (array_key_exists($fldname, $format_fields)) {
+					$col['format'] = $format_fields[$fldname];
+					if( $col['format'] == 'percent' ) {
+						$col['type'] = 'float';
+					}
+				}
+				$cols[] = $col;
+			}
+		}
+		return new self(['columns' => $cols, 'options' => $htmlOptions]);
+	}
+
 }
