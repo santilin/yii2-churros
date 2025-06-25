@@ -123,14 +123,10 @@ class JsonController extends \yii\web\Controller
 		if (!$detail) {
 			throw new \Exception("No {$search_model_class}_Search nor $search_model_class{$view}_Search class found in CrudController::indexDetails");
 		}
-		// $related_field = $detail->relatedFieldForModel($master);
-		// $params[$detail->formName()][$related_field] = $master->getPrimaryKey();
-		// $detail->$related_field = $master->getPrimaryKey();
+		// There is no need to link master and details here
 		$params['master'] = $master;
 		$params['embedded'] = true;
 		$params['previous_context'] = $previous_context;
-		$detail->setPath($detail->getPath() . '/actions');
-		// $master->linkDetails($detail);
 		$this->layout = false;
 		return $this->render($view, [
 			'searchModel' => $detail,
