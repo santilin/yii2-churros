@@ -117,8 +117,8 @@ fieldset {
 }
 
 legend {
-	background-color: #3498db;
-	color: white;
+    background-color: var(--bs-primary);   /* Bootstrap primary background */
+    color: var(--bs-light);
 	padding: 5px 10px;
 	border-radius: 4px;
 	font-weight: bold;
@@ -193,7 +193,6 @@ legend {
   vertical-align: middle;
 }
 
-
 .format-currency {
   text-align: right;
 }
@@ -206,4 +205,8 @@ legend {
   font-size: 0.875rem !important;
   border-radius: var(--bs-border-radius-sm) !important;
   height: inherit !important;
+}
+
+tr.filters > td > select.form-select {
+  width: 100%;
 }

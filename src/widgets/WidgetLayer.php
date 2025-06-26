@@ -297,7 +297,7 @@ class WidgetLayer
 							} else {
 								$widget_layout = $widget->layout??'large';
 							}
-							if ($layout_row['size'] == 'small' || $cols >= 4) {
+							if ($layout_row['size'] == 'small' || ($cols >= 4 && $layout_row_layout != 'inline') ) {
 								switch ($widget_layout) {
 									case 'short':
 										$widget_layout = 'medium';
@@ -306,7 +306,7 @@ class WidgetLayer
 										$widget_layout = 'large';
 										break;
 								}
-							} else if ($layout_row['size'] == 'medium' || $cols >= 3) {
+							} else if ($layout_row['size'] == 'medium' || ($cols >= 3 && $layout_row_layout != 'inline')) {
 								switch ($widget_layout) {
 									case 'short':
 										$widget_layout = 'medium';
@@ -316,14 +316,18 @@ class WidgetLayer
 										break;
 								}
 							}
-							Html::addCssClass($widget->options, "row layout-$layout_row_layout");
-							if ($widget_layout != 'full') {
-								Html::addCssClass($widget->options, 'w-100');
+							if ($layout_row_layout != 'inline') {
+								Html::addCssClass($widget->options, "row layout-$layout_row_layout");
+								if ($widget_layout != 'full') {
+									Html::addCssClass($widget->options, 'w-100');
+								}
+								$col_classes = $this->columnClasses($widget_layout == 'full' ? 1 : $cols);
+								$open_divs++;
+								$fs .=  "<div class=\"$col_classes\">";
+								$fs .= $this->layoutActiveField($widget_name, $widget, $layout_row, $widget_layout, $layout_row_layout, $indexf++);
+							} else {
+								$fs .= $this->layoutActiveField($widget_name, $widget, $layout_row, $widget_layout, $layout_row_layout, $indexf++);
 							}
-							$col_classes = $this->columnClasses($widget_layout == 'full' ? 1 : $cols);
-							$fs .=  "<div class=\"$col_classes\">";
-							$open_divs++;
-							$fs .= $this->layoutActiveField($widget_name, $widget, $layout_row, $widget_layout, $layout_row_layout, $indexf++);
 						} else if (is_array($widget)) { // Recordview attribute
 							$widget_layout = $widget['layout']??'large';
 							/// @todo refactor

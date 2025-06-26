@@ -121,7 +121,7 @@ class ActionColumn extends \yii\grid\ActionColumn
 
 	public function renderFilterCell()
 	{
-		return Html::tag('th', <<<html
+		return Html::tag('td', <<<html
 <div class="d-flex gap-2">
   <a class="d-flex position-relative remove-filters" role="button" data-pjax="1" href="javascript:void(0);" onclick="ChurrosGrid.resetFilters('{$this->grid->id}'); return false;">
   <i class="fas fa-filter text-secondary p-0 fs-6 ms-1"></i>
