@@ -58,9 +58,4 @@ trait NoRelationTrait
 		return $this->delete();
 	}
 
-	public function linkDetails($detail, $relation_name): void
-    {
-    }
-
-
 }

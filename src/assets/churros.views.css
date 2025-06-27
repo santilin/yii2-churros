@@ -24,9 +24,9 @@
   display: flex;
 }
 
-.grid-view .grid-header .grid-toolbar .toolbar {
+/*.grid-view .grid-header .grid-toolbar .toolbar {
   margin-right: 0.5rem;
-}
+}*/
 
 .grid-footer {
   display: flex;
