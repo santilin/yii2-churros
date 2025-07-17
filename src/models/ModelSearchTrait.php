@@ -90,7 +90,8 @@ trait ModelSearchTrait
 				continue;
 			}
 			if ($col_attribute != $attribute) {
-				throw new \Exception("$col_attribute != " . ($column_def['attribute']??null));
+				Yii::warning("No searchable: $col_attribute != " . ($column_def['attribute']??null));
+				continue; // No searchable
 			}
 			list($sort_fldname, $table_alias, $model, $relation) = $this->addRelatedFieldToJoin($attribute, $provider->query);
 			// continue;
