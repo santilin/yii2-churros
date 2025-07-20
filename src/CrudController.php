@@ -496,14 +496,6 @@ class CrudController extends \yii\web\Controller
 	}
 
 	/**
-	 * @deprecated
-	 */
-	protected function whereToGoNow(string $from, $model)
-	{
-		die(__FUNCTION__ . "Deprecated");
-	}
-
-	/**
 	 * @param $model not used, for compatibility with JsonController
 	 */
   	public function getActionRoute($action_id = null, $model = null, $master_model = null): string

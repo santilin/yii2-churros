@@ -12,7 +12,7 @@ use yii\i18n\formatter;
 use yii\widgets\ListView;
 use yii\base\InvalidConfigException;
 use yii\helpers\Html;
-use santilin\churros\ChurrosAsset;
+use santilin\churros\widgets\ChurrosAsset;
 /**
  * This ListView acts like a table
  */

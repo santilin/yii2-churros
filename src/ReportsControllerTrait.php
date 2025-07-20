@@ -17,7 +17,7 @@ trait ReportsControllerTrait
 	public function actionIndex()
 	{
 		$params = Yii::$app->request->queryParams;
-		$searchModel = $this->createSearchModel();
+		$searchModel = $this->createSearchModel('\app\forms\Param_reports_Search');
 		$params['permissions'] = FormHelper::resolvePermissions($params['permissions']??[], $this->crudActions);
 		$params = $this->changeActionParams($params, 'index', $searchModel);
 		return $this->render('index', [
@@ -35,7 +35,7 @@ trait ReportsControllerTrait
 	public function actionCreate()
 	{
 		$params = Yii::$app->request->queryParams;
-		$model_name = static::$_model_name . '_report_form_Form';
+		$model_name = str_replace("\\models\\","\\forms\\", static::$_model_name). '_report_form_Form';
 		$report_def = $this->findFormModel(null, $model_name, 'create', $params);
 		if (isset($_POST['_form_relations']) ) {
 			$relations = explode(",", $_POST['_form_relations']);
@@ -45,7 +45,7 @@ trait ReportsControllerTrait
 		if ($report_def->loadAll(Yii::$app->request->post(), $relations) ) {
 			if( $report_def->saveAll(true) ) {
 				$this->addSuccessFlashes('create', $report_def);
-				return $this->whereToGoNow('create', $report_def);
+				return $this->redirect($this->returnTo(null, 'create', $report_def));
 			}
 		}
 		return $this->render('create', [
@@ -60,7 +60,7 @@ trait ReportsControllerTrait
 	public function actionUpdate($id)
 	{
 		$params = Yii::$app->request->post();
-		$model_name = static::$_model_name . '_report_form_Form';
+		$model_name = str_replace("\\models\\","\\forms\\", static::$_model_name). '_report_form_Form';
 		$report_def = $this->findFormModel($id, $model_name, 'update', $params);
 		if( !$report_def->checkAccessByRole('roles') ) {
 			Yii::$app->session->setFlash('error',
@@ -111,13 +111,13 @@ trait ReportsControllerTrait
 		if( isset($params['save']) ) {
 			return $this->actionUpdate($id);
 		}
-		$model_name = static::$_model_name . '_report_form_Form';
+		$model_name = str_replace("\\models\\","\\forms\\", static::$_model_name). '_report_form_Form';
 		$report_def = $this->findFormModel($id, $model_name, 'update', $params);
-		if( !$report_def->checkAccessByRole('roles') ) {
-			Yii::$app->session->setFlash('error',
-				$report_def->t('churros', "{model.title}: you have not access to this report"));
-			return $this->redirect(['index']);
-		}
+		// if( !$report_def->checkAccessByRole('roles') ) {
+		// 	Yii::$app->session->setFlash('error',
+		// 		$report_def->t('churros', "{model.title}: you have not access to this report"));
+		// 	return $this->redirect(['index']);
+		// }
 		$report_model_name = $report_def->model;
 		if( strpos($report_model_name, '\\') === FALSE ) {
 			$report_model_name= "\\app\\models\\$report_model_name";
