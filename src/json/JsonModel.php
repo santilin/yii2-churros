@@ -636,19 +636,14 @@ class JsonModel extends \yii\base\Model
 
 	public function linkToMe(string $format = 'long', string $action = 'view', bool $global = false, string $base_route = null): string
 	{
-        $parts = explode('/', $this->_path);
-        $app_name = $parts[2];
-        $module_name = $parts[4];
+
 		if ($base_route === null) {
 			$base_route = Yii::$app->module?->id;
 			if ($base_route) {
 				$base_route .= '/';
 			}
 		}
-		$link = $base_route . $this->_json_modelable::getModelInfo('controller_name')
-            . '/' . $this->_json_modelable->getPrimaryKey() . '/';
-		$link .= "apps/$app_name/modules/$module_name/";
-		$link .= $this->jsonPath() . "/$action";
+		$link = $base_route . $this->pathToUrl($action);
         $url = Url::to([$link, 'id' => $this->getPrimaryKey()], $global);
 		if ($format == false) {
 			return $url;
