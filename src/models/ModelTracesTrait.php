@@ -95,7 +95,7 @@ Trait ModelTracesTrait
 
 	public function traceMessage(string $module, string $controller, string $action)
 	{
-		return 	$this->t('The action {action} on {la} {title} <a href="{model_link}">{record_medium}</a> has been successful.',  [ 'action' => AppHelper::modelize($action) ]);
+		return 	$this->t('The action {action} on {la} {title} <a href="{record_url}">{record_medium}</a> has been successful.',  [ 'action' => AppHelper::modelize($action) ]);
 	}
 
 }

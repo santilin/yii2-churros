@@ -21,6 +21,9 @@ trait JsonModelableTrait
 		if ($id) { // The id takes precedence over the locator
 			$ret = $this->_root_json->getJsonObjects('$' . str_replace('/','.',$path)
 				. "['$id']");
+			if (is_array($ret) && isset($ret[0])) {
+				return $ret[0];
+			}
 			if ($ret !== false) {
 				return $ret;
 			}

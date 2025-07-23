@@ -102,6 +102,9 @@ trait ModelInfoTrait
 						$placeholders[$bracket_match] = $this->recordDesc();
 					}
 					break;
+				case 'record_url':
+					$placeholders[$bracket_match] = $this->linkToMe(false);
+					break;
 				case 'record_long':
 					$placeholders[$bracket_match] = $this->recordDesc('long');
 					break;

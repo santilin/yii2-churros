@@ -525,6 +525,10 @@ ajax;
 		if ($open) {
 			$dt .= ' open';
 		}
+		if (!isset($body_options['data']['id'])) {
+			$body_options['data']['id'] = self::detailsIdFromSummary($summary);
+		}
+
 		$encode_summary = ArrayHelper::remove($summary_options, 'encodeSummary', true);
 		$summary_tag = ArrayHelper::remove($summary_options, 'summaryTag', null);
 		$summary_tag_options = ArrayHelper::remove($summary_options, 'summarytagOptions', []);
@@ -717,6 +721,14 @@ ajax;
 			$ret[$model->getPrimaryKey()] = $model->recordDesc($model_format);
 		}
 		return $models[0]->formatHandyFieldValues('', $ret, $result_format);
+	}
+
+	static private function detailsIdFromSummary($summary)
+	{
+		$id = strtolower($summary);                  // Lowercase
+		$id = preg_replace('/[^a-z0-9]+/', '-', $id); // Replace non-alphanum with dashes
+		$id = trim($id, '-');                      // Remove trailing -
+		return $id;
 	}
 
 } // class

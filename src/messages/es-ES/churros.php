@@ -68,19 +68,19 @@ return [
     'Active' => 'Activo',
     'Inactive' => 'Inactivo',
     '{inactive} since' => '{inactive} desde',
-	"{La} {title} <a href=\"{model_link}\">{record_medium}</a> has been successfully created."
-		=> "{La} {title} <a href=\"{model_link}\">{record_medium}</a> se ha creado correctamente.",
-    '{La} {title} <a href="{model_link}">{record_medium}</a> has been successfully updated.'
-		=> '{La} {title} <a href="{model_link}">{record_medium}</a> se ha actualizado correctamente.',
+	"{La} {title} <a href=\"{record_url}\">{record_medium}</a> has been successfully created."
+		=> "{La} {title} <a href=\"{record_url}\">{record_medium}</a> se ha creado correctamente.",
+    '{La} {title} <a href="{record_url}">{record_medium}</a> has been successfully updated.'
+		=> '{La} {title} <a href="{record_url}">{record_medium}</a> se ha actualizado correctamente.',
     '{La} {title} <strong>{record_medium}</strong> has been successfully deleted.'
 		=> '{La} {title} <strong>{record_medium}</strong> se ha borrado correctamente.',
-    '{La} {title} <a href="{model_link}">{record_medium}</a> has been successfully duplicated.'
-		=> '{La} {title} <a href="{model_link}">{record_medium}</a> se ha duplicado correctamente.',
-	'The action {action} on {la} {title} <a href="{model_link}">{record_medium}</a> has been successful.' => 'La acción {action} sobre {la} {title} <a href="{model_link}">{record_medium}</a> se ha realizado correctamente.',
-	'The action on {la} {title} <a href="{model_link}">{record_medium}</a> has been successful.' => 'La acción sobre {la} {title} <a href="{model_link}">{record_medium}</a> se ha realizado correctamente.',
-	'There has been an error deleting {la} {title} <a href="{model_link}">{record_medium}</a>' => 'Se ha producido un error al borrar {la} {title} <a href="{model_link}">{record_medium}</a>',
-	'Unable to delete {la} {title} <a href="{model_link}">{record_medium}</a> because it has related data.' => 'No se ha podido borrar {la} {title} <a href="{model_link}">{record_medium}</a> porque tiene datos relacionados.',
-	'Unable to delete {la} {title} <a href="{model_link}">{record_medium}</a> because it is used by at least one {relation_title}.' => 'No se ha podido borrar {la} {title} <a href="{model_link}">{record_medium}</a> porque es usado por al menos {un} {relation_title}.',
+    '{La} {title} <a href="{record_url}">{record_medium}</a> has been successfully duplicated.'
+		=> '{La} {title} <a href="{record_url}">{record_medium}</a> se ha duplicado correctamente.',
+	'The action {action} on {la} {title} <a href="{record_url}">{record_medium}</a> has been successful.' => 'La acción {action} sobre {la} {title} <a href="{record_url}">{record_medium}</a> se ha realizado correctamente.',
+	'The action on {la} {title} <a href="{record_url}">{record_medium}</a> has been successful.' => 'La acción sobre {la} {title} <a href="{record_url}">{record_medium}</a> se ha realizado correctamente.',
+	'There has been an error deleting {la} {title} <a href="{record_url}">{record_medium}</a>' => 'Se ha producido un error al borrar {la} {title} <a href="{record_url}">{record_medium}</a>',
+	'Unable to delete {la} {title} <a href="{record_url}">{record_medium}</a> because it has related data.' => 'No se ha podido borrar {la} {title} <a href="{record_url}">{record_medium}</a> porque tiene datos relacionados.',
+	'Unable to delete {la} {title} <a href="{record_url}">{record_medium}</a> because it is used by at least one {relation_title}.' => 'No se ha podido borrar {la} {title} <a href="{record_url}">{record_medium}</a> porque es usado por al menos {un} {relation_title}.',
 
 	'Duplicating {title}: {record_short}' => 'Duplicando {title}: {record_short}',
 	'Updating {title}: {record_short}' => 'Editando {title}: {record_short}',
@@ -109,8 +109,8 @@ return [
 		=> 'El informe "{record}" tiene errores en su definición.',
 	'Not showing totals because not all the rows have been shown' =>
 		'No se muestran los totales porque no se están mostrando todos los registros',
-	'The report <a href="{model_link}">{record_medium}</a> has been successfully updated.'
-		=> 'El informe <a href="{model_link}">{record_medium}</a> se ha guardado correctamente..',
+	'The report <a href="{record_url}">{record_medium}</a> has been successfully updated.'
+		=> 'El informe <a href="{record_url}">{record_medium}</a> se ha guardado correctamente..',
 	'Unable to send email to {email} from {from}' => 'No se ha podido enviar el email a {email} desde {from}',
 	'Unable to send email to {email} and other {ndest} recipients from {from}' => 'No se ha podido enviar el email a {email} y a otros {ndest} destinatarios desde {from}',
 

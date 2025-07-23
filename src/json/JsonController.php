@@ -30,15 +30,15 @@ class JsonController extends \yii\web\Controller
 	protected $_path_start = null;
 
 
-	const MSG_DEFAULT = 'The action on {la} {title} <a href="{model_link}">{record_medium}</a> has been successful.';
-	const MSG_NO_ACTION = 'The action on {La} {title} <a href="{model_link}">{record_medium}</a> has been successful.';
-	const MSG_CREATED = '{La} {title} <a href="{model_link}">{record_medium}</a> has been successfully created.';
-	const MSG_UPDATED = '{La} {title} <a href="{model_link}">{record_medium}</a> has been successfully updated.';
+	const MSG_DEFAULT = 'The action on {la} {title} <a href="{record_url}">{record_medium}</a> has been successful.';
+	const MSG_NO_ACTION = 'The action on {La} {title} <a href="{record_url}">{record_medium}</a> has been successful.';
+	const MSG_CREATED = '{La} {title} <a href="{record_url}">{record_medium}</a> has been successfully created.';
+	const MSG_UPDATED = '{La} {title} <a href="{record_url}">{record_medium}</a> has been successfully updated.';
 	const MSG_DELETED = '{La} {title} <strong>{record_medium}</strong> has been successfully deleted.';
-	const MSG_ERROR_DELETE = 'There has been an error deleting {la} {title} <a href="{model_link}">{record_medium}</a>';
-	const MSG_DUPLICATED = '{La} {title} <a href="{model_link}">{record_medium}</a> has been successfully duplicated.';
-	const MSG_ERROR_DELETE_INTEGRITY = 'Unable to delete {la} {title} <a href="{model_link}">{record_medium}</a> because it has related data.';
-	const MSG_ERROR_DELETE_USED_IN_RELATION = 'Unable to delete {la} {title} <a href="{model_link}">{record_medium}</a> because it is used by at least one {relation_title}.';
+	const MSG_ERROR_DELETE = 'There has been an error deleting {la} {title} <a href="{record_url}">{record_medium}</a>';
+	const MSG_DUPLICATED = '{La} {title} <a href="{record_url}">{record_medium}</a> has been successfully duplicated.';
+	const MSG_ERROR_DELETE_INTEGRITY = 'Unable to delete {la} {title} <a href="{record_url}">{record_medium}</a> because it has related data.';
+	const MSG_ERROR_DELETE_USED_IN_RELATION = 'Unable to delete {la} {title} <a href="{record_url}">{record_medium}</a> because it is used by at least one {relation_title}.';
 	const MSG_ACCESS_DENIED = 'Access denied to this {title}.';
 	const MSG_NOT_FOUND = '{Title} with primary key {id} not found.';
 
@@ -65,17 +65,17 @@ class JsonController extends \yii\web\Controller
 
 	public function beforeAction($action)
 	{
-        if( count($_POST) == 0 && count($_FILES) == 0 && isset($_SERVER['CONTENT_TYPE'])
-			&& substr($_SERVER['CONTENT_TYPE'], 0, 19) == 'multipart/form-data' ) {
-			if( $this->request->getMethod() === 'POST' && isset($_SERVER['CONTENT_LENGTH']) ) {
-				if( intval($_SERVER['CONTENT_LENGTH'])>0 ) {
+        if (count($_POST) == 0 && count($_FILES) == 0 && isset($_SERVER['CONTENT_TYPE'])
+			&& substr($_SERVER['CONTENT_TYPE'], 0, 19) == 'multipart/form-data') {
+			if ($this->request->getMethod() === 'POST' && isset($_SERVER['CONTENT_LENGTH'])) {
+				if (intval($_SERVER['CONTENT_LENGTH'])>0) {
 					Yii::$app->session->addFlash('error', strtr(Yii::t('churros', 'PHP discarded POST data because of request exceeding either post_max_size={post_size} or upload_max_filesize={upload_size}'), ['{post_size}' => ini_get('post_max_size'), '{upload_size}' => ini_get('upload_max_filesize')]));
 					$this->redirect(Yii::$app->request->referrer ?: Yii::$app->homeUrl);
 					return false;
 				}
 			}
         }
-        if (YII_ENV_TEST && $action->id == "delete" ) {
+        if (YII_ENV_TEST && $action->id == "delete") {
 			$this->enableCsrfValidation = false;
 		}
 		$this->getRootModel();
@@ -164,9 +164,9 @@ class JsonController extends \yii\web\Controller
 		$params['permissions'] = FormHelper::resolvePermissions($params['permissions']??[], $this->crudActions);
 		$model = $this->findFormModel($this->getPath(), null, null, 'create', $params);
 		$model->scenario = 'create';
-		if ($model->loadAll($params, static::findRelationsInForm($params)) ) {
+		if ($model->loadAll($params, static::findRelationsInForm($params))) {
 			$model->setIsnewRecord(true);
-			if ($model->validate() && $model->save(false) ) {
+			if ($model->validate() && $model->save(false)) {
 				if ($req->getIsAjax()) {
 					Yii::$app->response->format = \yii\web\Response::FORMAT_JSON;
 					return ['model' => $model->getAttributes(), 'success' => $model->getSuccesses()];
@@ -197,7 +197,7 @@ class JsonController extends \yii\web\Controller
 		$model->setDefaultValues(); // duplicating
 		$model->scenario = 'duplicate';
 		$mc = get_class($model);
-		if ($model->loadAll($params, static::findRelationsInForm($params)) ) {
+		if ($model->loadAll($params, static::findRelationsInForm($params))) {
 			$model->setIsNewRecord(true);
 			if ($model->validate() && $model->save(false)) {
 				if ($req->getIsAjax()) {
@@ -228,8 +228,8 @@ class JsonController extends \yii\web\Controller
 		$params['permissions'] = FormHelper::resolvePermissions($params['permissions']??[], $this->crudActions);
 		$model = $this->findFormModel($this->getPath(), $id, null, 'update', $params);
 
-		if ($model->loadAll($params, static::findRelationsInForm($params)) && $req->isPost ) {
-			if ($model->validate() && $model->save(false) ) {
+		if ($model->loadAll($params, static::findRelationsInForm($params)) && $req->isPost) {
+			if ($model->validate() && $model->save(false)) {
 				if ($req->getIsAjax()) {
 					Yii::$app->response->format = \yii\web\Response::FORMAT_JSON;
 					return ['model' => $model->getAttributes(), 'success' => $model->getSuccesses()];
@@ -271,7 +271,7 @@ class JsonController extends \yii\web\Controller
 		} catch (\yii\db\IntegrityException $e) {
 			$model->addError('delete', $model->t('churros',
 				$this->getResultMessage('error_delete_integrity')));
-		} catch (\yii\web\ForbiddenHttpException $e ) {
+		} catch (\yii\web\ForbiddenHttpException $e) {
 			$model->addError('delete', $model->t('churros',
 				$this->getResultMessage('error_delete')));
 		}
@@ -288,7 +288,7 @@ class JsonController extends \yii\web\Controller
 	{
 		$params = Yii::$app->request->queryParams;
 		$model = $this->findModel($id, $params);
-		if( YII_DEBUG ) {
+		if (YII_DEBUG) {
             Yii::$app->getModule('debug')->instance->allowedIPs = [];
         }
 		// https://stackoverflow.com/a/54568044/8711400
@@ -301,10 +301,10 @@ class JsonController extends \yii\web\Controller
 		$margin_footer = AppHelper::yiiparam('pdfMarginFooter', 15);
 		$margin_top = AppHelper::yiiparam('pdfMarginTop', 20);
 		$margin_bottom = AppHelper::yiiparam('pdfMarginBottom', 20);
-		if( $this->findViewFile('_pdf_header') ) {
+		if ($this->findViewFile('_pdf_header')) {
 			$header_content = $this->renderPartial('_pdf_header', ['model'=>$model]);
 			// h:{00232}
-			if( strncmp($header_content,'h:{',3) === 0 ) {
+			if (strncmp($header_content,'h:{',3) === 0) {
 				$margin_top = intval(substr($header_content,3,5));
 				$header_content = substr($header_content,9);
 			}
@@ -313,7 +313,7 @@ class JsonController extends \yii\web\Controller
 			$methods['setHeader'] = date('Y-m-d H:i') . '|'
 				. $model->getModelInfo('title') . '|' . Yii::$app->name . ' - {PAGENO}';
 		}
-		if( $this->findViewFile('_pdf_footer') ) {
+		if ($this->findViewFile('_pdf_footer')) {
 			$methods['setFooter'] = $this->renderPartial('_pdf_footer', ['model'=>$model]);
 		}
 		$pdf = new \kartik\mpdf\Pdf([
@@ -429,7 +429,7 @@ class JsonController extends \yii\web\Controller
 				$redirect_params = array_merge($redirect_params, [ 'id' => $model->getPrimaryKey()]);
 				// no break
 			case 'create':
-				if( isset($_REQUEST['_form_cancelUrl']) ) {
+				if (isset($_REQUEST['_form_cancelUrl'])) {
 					$redirect_params['_form_cancelUrl'] = $_REQUEST['_form_cancelUrl'];
 				}
 				break;
@@ -484,7 +484,7 @@ class JsonController extends \yii\web\Controller
 		$value = $_GET[$clientIdGetParamName];
 		$searchModel = $this->createSearchModel();
 		$query = $searchModel->find();
-		foreach( (array)$fields as $field ) {
+		foreach( (array)$fields as $field) {
 			$query->orWhere( [ "like", $field, $value  ] );
 		}
 		foreach( $query->all() as $record) {
@@ -498,7 +498,7 @@ class JsonController extends \yii\web\Controller
 	{
 		$params = Yii::$app->request->queryParams;
 		$model = $this->findModel($id, $params);
-		if( $model ) {
+		if ($model) {
             return json_encode($model->getAttributes());
         } /// @todo else
 	}
@@ -641,7 +641,7 @@ class JsonController extends \yii\web\Controller
 	protected function linkToModel($model)
 	{
 		$pk = $model->getPrimaryKey();
-		if( is_array($pk) ) {
+		if (is_array($pk)) {
 			$link = Url::to(array_merge([$this->getActionRoute('view', $model)], $pk));
 		} else {
 			$link = Url::to([$this->getActionRoute('view', $model), 'id' => $pk]);

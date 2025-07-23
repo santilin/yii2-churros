@@ -2,9 +2,10 @@
 
 namespace santilin\churros\json;
 
+use Yii;
 use JsonPath\JsonObject;
 use yii\base\{InvalidArgumentException,InvalidConfigException};
-use yii\helpers\{ArrayHelper,StringHelper};
+use yii\helpers\{ArrayHelper,StringHelper,Url};
 use santilin\churros\json\JsonModelable;
 use santilin\churros\models\ModelTracesTrait;
 
@@ -319,7 +320,7 @@ class JsonModel extends \yii\base\Model
             $id = str_replace(";", '/', $id);
         }
         /// @ojo
-        $json_path = str_replace('/outputs','/applications/modules', $json_path);
+        $json_path = str_replace('/outputs','/apps/*/modules', $json_path);
         $this->_json_object = $json_modelable->getJsonObject($json_path, $id, $locator);
         if ($this->_json_object !== null) {
             $this->_is_new_record = false;
@@ -630,6 +631,29 @@ class JsonModel extends \yii\base\Model
 				$params[$detail->formName()][$left_field] = $this->$right_field;
 				$detail->$left_field = $this->$right_field;
 			}
+		}
+	}
+
+	public function linkToMe(string $format = 'long', string $action = 'view', bool $global = false, string $base_route = null): string
+	{
+        $parts = explode('/', $this->_path);
+        $app_name = $parts[2];
+        $module_name = $parts[4];
+		if ($base_route === null) {
+			$base_route = Yii::$app->module?->id;
+			if ($base_route) {
+				$base_route .= '/';
+			}
+		}
+		$link = $base_route . $this->_json_modelable::getModelInfo('controller_name')
+            . '/' . $this->_json_modelable->getPrimaryKey() . '/';
+		$link .= "apps/$app_name/modules/$module_name/";
+		$link .= $this->jsonPath() . "/$action";
+        $url = Url::to([$link, 'id' => $this->getPrimaryKey()], $global);
+		if ($format == false) {
+			return $url;
+		} else {
+			return \yii\helpers\Html::a($this->recordDesc($format, 0), $url);
 		}
 	}
 

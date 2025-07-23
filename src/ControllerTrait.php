@@ -98,10 +98,6 @@ trait ControllerTrait
 			} else {
 				$success_message = $model->t('churros', $success_message);
 			}
-			if( strpos($success_message, '{model_link}') !== FALSE ) {
-				$link_to_model = $this->linkToModel($model);
-				$success_message = str_replace('{model_link}', $link_to_model, $success_message);
-			}
 			Yii::$app->session->addFlash('success', $success_message);
 		}
 		$this->addErrorFlashes($model);
@@ -112,12 +108,7 @@ trait ControllerTrait
 		$errors = [];
 		foreach($model->getErrors() as $error_fld => $error_msgs) {
 			foreach ($error_msgs as $error) {
-				if( strpos($error, '{model_link}') !== FALSE ) {
-					$link_to_model = $this->linkToModel($model);
-					$errors[] = str_replace('{model_link}', $link_to_model, $error);
-				} else {
-					$errors[] = $error;
-				}
+				$errors[] = $error;
 			}
 		}
 		if (count($errors)) {
@@ -126,12 +117,7 @@ trait ControllerTrait
 		$warnings = [];
 		foreach($model->getWarnings() as $warning_fld => $warning_msgs) {
 			foreach ($warning_msgs as $warning) {
-				if( strpos($warning, '{model_link}') !== FALSE ) {
-					$link_to_model = $this->linkToModel($model);
-					$warnings[] = str_replace('{model_link}', $link_to_model, $warning);
-				} else {
-					$warnings[] = $warning;
-				}
+				$warnings[] = $warning;
 			}
 		}
 		if (count($warnings)) {
