@@ -195,11 +195,11 @@ class CrudController extends \yii\web\Controller
 	 * Creates a new model.
 	 * @return mixed
 	 */
-	public function actionCreate()
+	public function actionCreate($id = null)
 	{
 		$params = array_merge($this->request->get(), $this->request->post());
 		$params['permissions'] = $this->resolvePermissions($params['permissions']??[], $this->userPermissions());
-		$model = $this->findFormModel(null, null, 'create', $params);
+		$model = $this->findFormModel($id, null, 'create', $params);
 		if ($master_model = $this->getMasterModel()) {
 			$master_model->linkDetails($model);
 		}
@@ -707,7 +707,7 @@ class CrudController extends \yii\web\Controller
 				$prim_keys = [];
 			}
 		}
-		if (!empty($prim_keys) && !$model::$isJunctionModel) {
+		if (!empty($prim_keys) && !$model::$isJunctionModel && !$model->isNewRecord) {
 			$breadcrumbs['model_model'] = [
 				'label' => $model->recordDesc('short', 25),
 				'url' => $scenario!='view' ? array_merge([$this->getActionRoute('view')], $prim_keys) : null,
