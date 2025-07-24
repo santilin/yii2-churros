@@ -529,7 +529,7 @@ class WidgetLayer
 						}
 					}
 				}
-				$classes['wrapperOptions']['class'] = implode(' ', $classes['wrapper']) . ' fld-' . $widget_name;
+				$classes['wrapperOptions']['class'] = implode(' ', $classes['wrapper']) . " fld-$widget_name";
 				if (YII_ENV_DEV) {
 					$classes['wrapperOptions']['class'] .= " {$layout_of_row}x$widget_layout";
 				}
