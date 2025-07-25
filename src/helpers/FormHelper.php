@@ -634,10 +634,10 @@ ajax;
 		}
 	}
 
-	static public function joinMany2ManyModels(array $models, string $record_format = 'long',
+	static public function joinMany2ManyModels(null|array $models, string $record_format = 'long',
 		bool $make_links = false, string $tag = 'ul', array $tag_options = [], $context = null): string
 	{
-		if( $models == null || count($models)==0 ) {
+		if (empty($models)) {
 			return "";
 		}
 		$attrs = [];
@@ -678,10 +678,13 @@ ajax;
 		}
 	}
 
-	static public function joinHasManyModels($parent, array $models, string $record_format = 'long',
+	static public function joinHasManyModels($parent, array|null|string $models, string $record_format = 'long',
 			string $tag = 'ul', array $tag_options = [], $context = null): string
 	{
-		if( $models === null || count($models)==0 ) {
+		if (is_string($models)) {
+			return $models;
+		}
+		if (empty($models)) {
 			return "";
 		}
 		$keys = $parent->getPrimaryKey(true);
@@ -689,7 +692,7 @@ ajax;
 		$parent_route = Url::toRoute($keys);
 		$attrs = [];
 		foreach($models as $model) {
-			if( $model != null ) {
+			if ($model != null) {
 				$url = Url::to(array_merge([$parent_route . '/'.  $model->controllerName(). '/view'], $model->getPrimaryKey(true)));
 				$attrs[] = "<a href='$url'>" .  $model->recordDesc($record_format, 0, $context) . "</a>";
 			}

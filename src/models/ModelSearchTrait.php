@@ -18,7 +18,7 @@ trait ModelSearchTrait
 {
 	use ModelTrait;
 
-	public $_gridPageSize = 20;
+	public $_gridPageSize = 12;
 
 	public function __get($name)
 	{
