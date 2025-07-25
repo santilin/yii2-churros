@@ -319,8 +319,6 @@ class JsonModel extends \yii\base\Model
             }
             $id = str_replace(";", '/', $id);
         }
-        /// @ojo
-        $json_path = str_replace('/outputs','/apps/*/modules', $json_path);
         $this->_json_object = $json_modelable->getJsonObject($json_path, $id, $locator);
         if ($this->_json_object !== null) {
             $this->_is_new_record = false;

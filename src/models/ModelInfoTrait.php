@@ -507,7 +507,7 @@ trait ModelInfoTrait
 				}
 			}
 		}
-		if (!is_array($related_field)) {
+		if (!empty($related_field) && !is_array($related_field)) {
 			list($table, $field) = AppHelper::splitFieldName($related_field);
 			return $field;
 		}
