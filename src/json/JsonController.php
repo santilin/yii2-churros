@@ -534,7 +534,7 @@ class JsonController extends \yii\web\Controller
 				throw new NotFoundHttpException(Yii::t('churros',
 					"The root json record for '$root_model_name' does not exist"));
 			} else {
-				$this->root_model->loadRootJson(1);
+				$this->root_model->loadRootJson(1, true /*force*/);
 			}
 		}
 		$this->_path = urldecode(parse_url($_SERVER['REQUEST_URI'], PHP_URL_PATH));

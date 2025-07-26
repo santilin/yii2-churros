@@ -85,21 +85,19 @@ class Taxonomy
 	{
 		$ret_parts = [];
 		$dot = $taxonomy['dot']??'.';
-		$items = $taxonomy['items'];
 		$value_parts = explode($dot, $value);
-		$mask_items = explode($dot, $taxonomy['mask']);
+		$mask_parts = explode($dot, $taxonomy['mask']);
 		for ($i=0; $i<count($value_parts); ++$i) {
-			if (count($items)) {
-				$ret_parts[] = applySegmentedMask($value_parts[$i], $mask_parts[$i]);
-				$items = $items[$v]['items']??[];
+			if ($i >= $mask_parts) {
+				$ret_parts[] = $value_parts[$i];
 			} else {
-				break;
+				$ret_parts[] = self::applySegmentedMask($value_parts[$i], $mask_parts[$i]);
 			}
 		}
 		return implode($dot, $ret_parts);
 	}
 
-	private function applySegmentedMask($segmentInput, $segmentMask)
+	static private function applySegmentedMask($segmentInput, $segmentMask)
 	{
 		// Count number of mask chars
 		$padLength = strlen($segmentMask);
