@@ -41,7 +41,14 @@ class Taxonomy
 		$items = $taxonomy['items'];
 		foreach ($value_parts as $k => $v) {
 			if( count($items) ) {
-				$ret_parts[] = $items[$v]['abbrev']??$items[$v]['title']??'????';
+				$p = $items[$v]['abbrev']??$items[$v]['title']??'????';
+				if ($p === '????' && is_numeric($v)) {
+					$vt = ltrim($v, '0');
+					if ($vt != $v) {
+						$p = $items[$vt]['abbrev']??$items[$vt]['title']??'????';
+					}
+				}
+				$ret_parts[] = $p;
 				$items = $items[$v]['items']??[];
 			} else {
 				break;
@@ -55,9 +62,14 @@ class Taxonomy
 		$value_parts = explode($taxonomy['dot']??'.', $value);
 		$ret_parts = [];
 		$items = $taxonomy['items'];
-		foreach( $value_parts as $k => $v ) {
-			if( count($items) ) {
-				$ret_parts[] = $items[$v]['title']??$items[$v]['abbrev']??'????';
+		foreach ($value_parts as $k => $v) {
+			if (count($items)) {
+				$p = $items[$v]['title']??$items[$v]['abbrev']??'????';
+				if ($p === '????' && is_numeric($v) && ltrim($v, '0') !== $v) {
+					$v = ltrim($v, '0');
+					$p = $items[$v]['title']??$items[$v]['abbrev']??'????';
+				}
+				$ret_parts[] = $p;
 				$items = $items[$v]['items']??[];
 			} else {
 				break;
@@ -71,6 +83,18 @@ class Taxonomy
 		$parts = explode($taxonomy['dot']??'.', $value);
 		return count($parts);
 	}
+
+	static public function upToLevel(int $level, string $value, $inc_dot = false): string
+	{
+		$parts = explode($taxonomy['dot'] ?? '.', $value);
+		$parts = array_slice($parts, 0, $level);
+		$ret = implode($taxonomy['dot'] ?? '.', $parts);
+		if ($inc_dot) {
+			$ret .= $taxonomy['dot'] ?? '.';
+		}
+		return $ret;
+	}
+
 
 	static public function findTitles(array $taxonomy): array
 	{

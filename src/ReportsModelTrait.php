@@ -84,7 +84,7 @@ trait ReportsModelTrait
 
 	public function decodeValue()
 	{
-		$value = json_decode($this->value, true);
+		$value = json_decode($this->value??'', true);
 		$this->report_columns = $value['report_columns']??[];
 		$this->report_filters = $value['report_filters']??[];
 		$this->report_sorting = $value['report_sorting']??[];
