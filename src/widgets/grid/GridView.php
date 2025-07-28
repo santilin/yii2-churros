@@ -385,9 +385,13 @@ class GridView extends SimpleGridView
 		'export' => [
 			'type' => 'button',
 			'title' => 'Exportar',
-			'url' => "javascript:ChurrosGrid.createODSFile('grid-evaluacion-_grid_matriculas', 'table_export', ['filters']);",
+			'url' => "javascript:ChurrosGrid.createODSFile(this.dataset.table_id, this.dataset.saveas, ['filters']);",
 			'htmlOptions' => [
-				'class' => 'btn btn-secondary btn-outline'
+				'class' => 'btn btn-secondary btn-outline',
+				'data' => [
+					'table_id' => '',
+					'saveas' => '',
+				]
 			]
 		]
 	];
