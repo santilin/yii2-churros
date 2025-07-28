@@ -381,4 +381,15 @@ class GridView extends SimpleGridView
 		}
     }
 
+    const EXPORT_BUTTONS = [
+		'export' => [
+			'type' => 'button',
+			'title' => 'Exportar',
+			'url' => "javascript:ChurrosGrid.createODSFile('grid-evaluacion-_grid_matriculas', 'table_export', ['filters']);",
+			'htmlOptions' => [
+				'class' => 'btn btn-secondary btn-outline'
+			]
+		]
+	];
+
 }

@@ -84,7 +84,7 @@ class Taxonomy
 		return count($parts);
 	}
 
-	static public function upToLevel(int $level, string $value, $inc_dot = false): string
+	static public function upToLevel(int $level, string $value, array $taxonomy, $inc_dot = false): string
 	{
 		$parts = explode($taxonomy['dot'] ?? '.', $value);
 		$parts = array_slice($parts, 0, $level);

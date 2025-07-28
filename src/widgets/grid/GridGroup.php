@@ -122,7 +122,7 @@ class GridGroup extends BaseObject
 				'{group_header_label}' => $this->header_label,
 				'{group_footer_label}' => $this->footer_label,
 			]);
-			Html::addCssClass($tdoptions, "report group-head-{$this->column} group-head-{$this->level}");
+			Html::addCssClass($tdoptions, "group-head group-head-{$this->level} {$this->column}");
 			return Html::tag('td', $content, $tdoptions);
 		} else {
 			return '';
