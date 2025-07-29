@@ -53,18 +53,21 @@ trait ModelSearchTrait
 
     public function operatorForAttr(?string $rel_name, string $attr): string
 	{
+		$op = $this->related_operators[$rel_name]??false;
+		if ($op === false) {
+			$op = $this->normal_attrs[$rel_name]??false;
+		}
+		if ($op !== false) {
+			return $op;
+		}
 		if ($rel_name && array_key_exists($rel_name, $this->related_properties)) {
 			return '=';
 		} else if (array_key_exists($attr,$this->related_properties)) {
 			return '=';
+		} else if ($attr == 'id') {
+			return '=';
 		} else {
-			if (array_key_exists($attr, $this->normal_attrs)) {
-				return $this->normal_attrs[$attr];
-			} else if ($attr == 'id') {
-				return '=';
-			} else {
-				return 'LIKE';
-			}
+			return 'LIKE';
 		}
 	}
 

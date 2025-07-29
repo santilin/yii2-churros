@@ -49,11 +49,11 @@ class FormHelper
 
 	static public function extractFormName(array $views, int|string $_nv): string
 	{
-		if ($_nv > (count($views)-1) ) {
+		if ($_nv > (count($views)-1)) {
 			$_nv = 0;
 		}
-		foreach($views as $kv => $view_info ) {
-			if( $_nv-- == 0 ) {
+		foreach($views as $kv => $view_info) {
+			if ($_nv-- == 0) {
 				$form_class = $view_info[1];
 				$form = new $form_class;
 				return $form->formName();
@@ -68,11 +68,11 @@ class FormHelper
 	{
 		$_nv=$params[self::VIEWS_NVIEW_PARAM]??0;
 		if (is_numeric($_nv)) {
-			if ($_nv > (count($views)-1) ) {
+			if ($_nv > (count($views)-1)) {
 				$_nv = 0;
 			}
-			foreach($views as $kv => $view_info ) {
-				if( $_nv-- == 0 ) {
+			foreach($views as $kv => $view_info) {
+				if ($_nv-- == 0) {
 					return $view_info;
 				}
 			}
@@ -101,11 +101,11 @@ class FormHelper
 			}
 			$_nv = 0;
 		}
-		if ($_nv > (count($views)-1) ) {
+		if ($_nv > (count($views)-1)) {
 			$_nv = 0;
 		}
-		foreach($views as $kv => $view ) {
-			if( $_nv-- == 0 ) {
+		foreach($views as $kv => $view) {
+			if ($_nv-- == 0) {
 				return [ $kv, $view[0], $view[1]??[], $view[2]??'' ];
 			}
 		}
@@ -127,11 +127,11 @@ class FormHelper
 			}
 			$_nv = 0;
 		}
-		if ($_nv > (count($views)-1) ) {
+		if ($_nv > (count($views)-1)) {
 			$_nv = 0;
 		}
-		foreach($views as $kv => $view ) {
-			if( $_nv-- == 0 ) {
+		foreach($views as $kv => $view) {
+			if ($_nv-- == 0) {
 				return [ $kv, $view[0], $view[1], $view[2]??[], $view[3]??'' ];
 			}
 		}
@@ -144,11 +144,11 @@ class FormHelper
 			return ['reports',null,null,[]];
 		}
 		if (is_numeric($_nv)) {
-			if ($_nv > (count($views)-1) ) {
+			if ($_nv > (count($views)-1)) {
 				$_nv = 0;
 			}
-			foreach($views as $kv => $view ) {
-				if( $_nv-- == 0 ) {
+			foreach($views as $kv => $view) {
+				if ($_nv-- == 0) {
 					return [ $kv, $view[0], $view[1], $view[2]??[], $view[3]??'' ];
 				}
 			}
@@ -174,10 +174,10 @@ class FormHelper
 
 	public static function getConfig(string $form_name, string $name, $default_value = null)
 	{
-		if( isset($_SESSION['formconfig'][$form_name][$name])
-			&& $_SESSION['formconfig'][$form_name][$name] !== $default_value ) {
+		if (isset($_SESSION['formconfig'][$form_name][$name])
+			&& $_SESSION['formconfig'][$form_name][$name] !== $default_value) {
 			return $_SESSION['formconfig'][$form_name][$name];
-		} else if( isset(Yii::$app->params['formconfig'][$form_name][$name]) ) {
+		} else if (isset(Yii::$app->params['formconfig'][$form_name][$name])) {
 			return Yii::$app->params['formconfig'][$form_name][$name];
 		} else {
 			return $default_value;
@@ -206,19 +206,19 @@ class FormHelper
 	{
 		$ret = [];
 		foreach ($buttons as $name => $button) {
-			if( empty($button) ) {
+			if (empty($button)) {
 				continue;
 			}
-			if (!empty($button['nocreate']) ) {
+			if (!empty($button['nocreate'])) {
 				continue;
 			}
-			if( !isset($button['htmlOptions']) ) {
+			if (!isset($button['htmlOptions'])) {
 				$button['htmlOptions'] = [];
 			}
-			if( !isset($button['htmlOptions']['name']) ) {
+			if (!isset($button['htmlOptions']['name'])) {
 				$button['htmlOptions']['name'] = $name;
 			}
-			if( isset($button['htmlOptions']['autofocus']) ) {
+			if (isset($button['htmlOptions']['autofocus'])) {
 				$button['htmlOptions']['tabindex'] = static::ti();
 			}
 			$caption = $title = $button['title']??$name;
@@ -231,7 +231,7 @@ class FormHelper
 						'alt' => $title ], $button['iconOptions']??[]));
 				} else {
 					$hidable_title = "&nbsp;<span class=\"d-none d-lg-inline\">$title</span>";
-					if( strpos($icon, '<') !== FALSE ) {
+					if (strpos($icon, '<') !== FALSE) {
 						$title = $icon . $hidable_title;
 					} else {
 						$title = Html::tag('i', '', array_merge([
@@ -248,7 +248,7 @@ class FormHelper
 				// no break
 			case 'a':
 				unset($button['htmlOptions']['name']);
-				if( !isset($button['htmlOptions']['title']) ) {
+				if (!isset($button['htmlOptions']['title'])) {
 					$button['htmlOptions']['title'] = $caption;
 				}
 				Html::addCssClass($button['htmlOptions'], $name);
@@ -354,7 +354,7 @@ ajax;
 				if ($button['type'] == 'button-trigger') {
 					$button['htmlOptions']['data']['url'] = $full_url;
 				} else {
-					if ( $full_url && !isset($button['htmlOptions']['onclick']) ) {
+					if ( $full_url && !isset($button['htmlOptions']['onclick'])) {
 						if (StringHelper::startsWith($full_url, 'javascript:')) {
 							$button['htmlOptions']['onclick'] = substr($full_url, 11);
 						} else {
@@ -365,7 +365,7 @@ ajax;
 				$ret[] = Html::button($title, $button['htmlOptions']);
 				break;
 			case 'select':
-				if( isset($button['url']) && !isset($button['htmlOptions']['onchange']) ) {
+				if (isset($button['url']) && !isset($button['htmlOptions']['onchange'])) {
 					$full_url = self::prepareButtonUrl($button['url'], $url_return_to);
 					$button['htmlOptions']['onchange'] = "window.location.href='$full_url'";
 				}
@@ -423,7 +423,7 @@ ajax;
 		if (is_bool($perms)) {
 			return $perms;
 		}
-		if( $perm == '' || $perms == null) {
+		if ($perm == '' || $perms == null) {
 			return true;
 		}
 		if ($perms === []) {
@@ -443,17 +443,17 @@ ajax;
 
 	static public function hasAllPermissions($perms, array $req_perms = []): bool
 	{
-		if( $perms === false ) {
+		if ($perms === false) {
 			return false;
 		}
-		if( $req_perms === [] ) {
+		if ($req_perms === []) {
 			return true;
 		}
-		if( $perms === []) {
+		if ($perms === []) {
 			return true;
 		}
-		foreach( $req_perms as $req_perm ) {
-			if( !in_array($req_perm, $perms) ) {
+		foreach( $req_perms as $req_perm) {
+			if (!in_array($req_perm, $perms)) {
 				return false;
 			}
 		}
@@ -463,17 +463,17 @@ ajax;
 
 	static public function hasAnyPermissions($perms, array $req_perms = []): bool
 	{
-		if( $perms === false ) {
+		if ($perms === false) {
 			return false;
 		}
-		if( $req_perms === [] ) {
+		if ($req_perms === []) {
 			return true;
 		}
-		if( $perms === []) {
+		if ($perms === []) {
 			return true;
 		}
-		foreach( $req_perms as $req_perm ) {
-			if( in_array($req_perm, $perms) ) {
+		foreach( $req_perms as $req_perm) {
+			if (in_array($req_perm, $perms)) {
 				return true;
 			}
 		}
@@ -486,14 +486,14 @@ ajax;
 		if (empty($extra_perms)) {
 			return $final_perms;
 		}
-		foreach ($extra_perms as $extra_perm ) {
-			if( $extra_perm[0] == '-' ) {
+		foreach ($extra_perms as $extra_perm) {
+			if ($extra_perm[0] == '-') {
 				$extra_perm = substr($extra_perm,1);
-				if( in_array($extra_perm, $final_perms) ) {
+				if (in_array($extra_perm, $final_perms)) {
 					ArrayHelper::removeValue($final_perms, $extra_perm);
 				}
 			} else {
-				if( !in_array($extra_perm, $final_perms) ) {
+				if (!in_array($extra_perm, $final_perms)) {
 					$final_perms[] = $extra_perm;
 				}
 			}
@@ -568,8 +568,8 @@ ajax;
 
 	static public function toOpExpression($value, bool $strict, string $def_operator = null): array
 	{
-		if( is_string($value) && $value != '') {
-			if( substr($value,0,2) == '{"' && substr($value,-2) == '"}' ) {
+		if (is_string($value) && $value != '') {
+			if (substr($value,0,2) == '{"' && substr($value,-2) == '"}') {
 				return json_decode($value, true);
 			} else if (preg_match('/^(=|<>|<=|>=|>|<)(.*)$/', $value, $matches)) {
 				return [ 'v' => $matches[2], 'op' => $matches[1] ];
@@ -577,12 +577,14 @@ ajax;
 				return [ 'v' => explode(',',$matches[1]), 'op' => '=' ];
 			}
 		}
-		if (isset($value['op']) ) {
+		if (isset($value['op'])) {
 			if (isset($value['lft'])) {
-				return [ 'op' => $value['op'], 'v' => $value['lft'] ];
-			} else {
-				return $value;
+				$value = [ 'op' => $value['op'], 'v' => $value['lft'] ];
 			}
+			if ($value['op'] == 'BOOL') {
+				$value = [ 'op' => '=', 'v' => static::stringToBool($value['v']) ];
+			}
+			return $value;
 		}
 		if ($def_operator) {
 			return [ 'op' => $def_operator, 'v' => $value ];
@@ -733,5 +735,21 @@ ajax;
 		$id = trim($id, '-');                      // Remove trailing -
 		return $id;
 	}
+
+	static public function stringToBool(string $str): bool
+	{
+		$str = strtolower(trim($str));
+		$trueValues = ['true', '1', 'yes', 'on'];
+		$falseValues = ['false', '0', 'no', 'off'];
+
+		if (in_array($str, $trueValues, true)) {
+			return true;
+		} elseif (in_array($str, $falseValues, true)) {
+			return false;
+		}
+		return false;
+	}
+
+
 
 } // class
