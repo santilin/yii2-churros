@@ -568,23 +568,28 @@ ajax;
 
 	static public function toOpExpression($value, bool $strict, string $def_operator = null): array
 	{
-		if (is_string($value) && $value != '') {
-			if (substr($value,0,2) == '{"' && substr($value,-2) == '"}') {
-				return json_decode($value, true);
-			} else if (preg_match('/^(=|<>|<=|>=|>|<)(.*)$/', $value, $matches)) {
-				return [ 'v' => $matches[2], 'op' => $matches[1] ];
-			} else if (preg_match("/^IN\((.*)\)$/", $value, $matches)) {
-				return [ 'v' => explode(',',$matches[1]), 'op' => '=' ];
+		if (!is_array($value)) {
+			if ($def_operator == 'BOOL') {
+				return [ 'op' => '=', 'v' => static::stringToBool($value) ];
+			} else if (is_string($value) && $value != '') {
+				if (substr($value,0,2) == '{"' && substr($value,-2) == '"}') {
+					return [ 'op' => $def_operator, 'v' => json_decode($value, true)];
+				} else if (preg_match('/^(=|<>|<=|>=|>|<)(.*)$/', $value, $matches)) {
+					return [ 'v' => $matches[2], 'op' => $matches[1] ];
+				} else if (preg_match("/^IN\((.*)\)$/", $value, $matches)) {
+					return [ 'v' => explode(',',$matches[1]), 'op' => '=' ];
+				}
 			}
-		}
-		if (isset($value['op'])) {
-			if (isset($value['lft'])) {
-				$value = [ 'op' => $value['op'], 'v' => $value['lft'] ];
+		} else {
+			if (isset($value['op'])) {
+				if (isset($value['lft'])) {
+					$value = [ 'op' => $value['op'], 'v' => $value['lft'] ];
+				}
+				if ($value['op'] == 'BOOL') {
+					$value = [ 'op' => '=', 'v' => static::stringToBool($value['v']) ];
+				}
+				return $value;
 			}
-			if ($value['op'] == 'BOOL') {
-				$value = [ 'op' => '=', 'v' => static::stringToBool($value['v']) ];
-			}
-			return $value;
 		}
 		if ($def_operator) {
 			return [ 'op' => $def_operator, 'v' => $value ];
