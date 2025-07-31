@@ -196,7 +196,6 @@ class JsonController extends \yii\web\Controller
 		$model = $this->findFormModel($this->getPath(), $id, null, 'duplicate', $params);
 		$model->setDefaultValues(); // duplicating
 		$model->scenario = 'duplicate';
-		$mc = get_class($model);
 		if ($model->loadAll($params, static::findRelationsInForm($params))) {
 			$model->setIsNewRecord(true);
 			if ($model->validate() && $model->save(false)) {
