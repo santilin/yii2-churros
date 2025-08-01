@@ -505,7 +505,7 @@ class JsonController extends \yii\web\Controller
 	public function getPath()
 	{
 		if (!$this->_path) {
-			$this->getRootModel(true);
+			throw new \yii\base\UserException("No path defined");
 		}
 		return $this->_path;
 	}
@@ -563,19 +563,6 @@ class JsonController extends \yii\web\Controller
 				if (StringHelper::endsWith($this->_path, '/' . $this->action->id)) {
 					$this->_path = substr($this->_path, 0, -strlen($this->action->id) - 1);
 				}
-
-/*
-				$pos_action = strrpos($this->_path, '/'. $this->action->id . '/');
-				if ($pos_action === false) {
-					$action_len = strlen($this->action->id)+1;
-					if (substr($this->_path,-$action_len) == '/'.$this->action->id) {
-						$pos_action = strlen($this->_path) - $action_len;
-					}
-				}
-				if ($pos_action !== false) {
-					$this->_path = substr($this->_path, 0, $pos_action);
-				}
-*/
 			}
 		}
 		return $this->root_model;

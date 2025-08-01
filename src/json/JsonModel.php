@@ -17,7 +17,7 @@ class JsonModel extends \yii\base\Model
 
     static protected $parent_model_class;
     static protected $_locator = null;
-    protected $parent_model = null;
+    protected $_parent_model = null;
     protected $_attributes = [];
     /** @var bool whether this is a new record */
     protected $_is_new_record = true;
@@ -79,16 +79,22 @@ class JsonModel extends \yii\base\Model
         $this->_json_modelable = $other->_json_modelable;
     }
 
-    public function jsonArrayToModels(array $json_array, string $model_class): array
+    public function jsonArrayToModels(array $json_array, string $child_class = null): array
     {
         $models = [];
         foreach ($json_array as $rk => $rm) {
             if (is_integer($rk) && ($rm === null || $rm === false)) {
                 continue;
             }
-            $child = new $model_class;
-            $child->parent_model = $this;
-            $child->setJsonModelable($this);
+            if (!$child_class) {
+                $child_class = get_class($this);
+                $child = new $child_class;
+            } else {
+                $child = new $child_class;
+                $child->_parent_model = $this;
+            }
+            $child->_json_modelable = $this->_json_modelable;
+            $child->setPath($this->getPath() . '/' . $child->jsonPath() . '/' . $child->_id);
             $primary_key_set = false;
             if (is_array($rm)) {
                 foreach ($rm as $fldname => $fldvalue) {
@@ -111,7 +117,6 @@ class JsonModel extends \yii\base\Model
                     $child->setPrimaryKey($rm);
                 }
             }
-            $child->setPath($this->getPath() . '/' . $child->jsonPath() . '/' . $child->_id);
             $child->afterFind();
             $models[] = $child;
         }
@@ -134,7 +139,7 @@ class JsonModel extends \yii\base\Model
             return $related_models;
         } else {
             $child = new $rel_model_class;
-            $child->parent_model = $this;
+            $child->_parent_model = $this;
             $child->setPath($this->getPath() . '/' . $child->jsonPath());
             $child->loadJson($this->_json_modelable, $this->_path . "/$rel_name");
             return $child;
@@ -159,44 +164,45 @@ class JsonModel extends \yii\base\Model
     public function parentModel($parent_id = null, $force = false): ?JsonModel
     {
         if (empty(static::$parent_model_class)) {
-            return $this->parent_model;
+            return $this->_parent_model;
         }
-        if ($this->parent_model === null || $force) {
+        if ($this->_parent_model === null || $force) {
             if (!$this->_json_modelable) {
                 throw new InvalidConfigException("Json model has no _json_modelable set");
             }
             if (!$this->_path) {
                 return null;
             }
-            $locator = static::$_locator;
-            $id = $locator ? $this->$locator : $this->_id;
-            if ($id) {
-                $id = str_replace('/',';',$id);
-                if (!StringHelper::endsWith($this->_path, $id)) {
-                    $parts = explode('/', $this->_path . '/' . $id);
-                } else {
-                    $parts = explode('/', $this->_path);
-                }
+            // $locator = static::$_locator;
+            // $id = $locator ? $this->$locator : $this->_id;
+            // if ($id) {
+            //     $id = str_replace('/',';',$id);
+            //     if (!StringHelper::endsWith($this->_path, $id)) {
+            //         $parts = explode('/', $this->_path . '/' . $id);
+            //     } else {
+            //         $parts = explode('/', $this->_path);
+            //     }
+            // } else {
+            // }
+            $parts = explode('/', $this->_path);
+            if (in_array(\santilin\churros\models\ModelSearchTrait::class, class_uses($this))) {
+                // array_pop($parts); // search part
             } else {
-                $parts = explode('/', $this->_path);
+                if (count($parts)<2) {
+                    return null;
+                }
+                array_pop($parts); // $this->_id
+                array_pop($parts); // jsonPath()
             }
-            if (count($parts)<2) {
-                return null;
-            }
-            if (!in_array($parts[count($parts)-1],
-                ['fields','behaviors','models','controllers','modules'])) {
-                array_pop($parts);
-            }
-            array_pop($parts);
             if ($parent_id == null) {
                 $parent_id = $parts[count($parts)-1];
             }
-            $this->parent_model = new static::$parent_model_class;
-            if (!$this->parent_model->loadJson($this->_json_modelable, implode('/', $parts), $parent_id)) {
-                $this->parent_model = null;
+            $this->_parent_model = new static::$parent_model_class;
+            if (!$this->_parent_model->loadJson($this->_json_modelable, implode('/', $parts), $parent_id)) {
+                $this->_parent_model = null;
             }
         }
-        return $this->parent_model;
+        return $this->_parent_model;
     }
 
     public function setPath(string $path)
@@ -297,11 +303,12 @@ class JsonModel extends \yii\base\Model
     public function loadSearchModel(JsonModelable $json_modelable, string $json_path)
     {
         $this->_json_modelable = $json_modelable;
-        if (StringHelper::endsWith($json_path, '/'. static::jsonPath())) {
-            $this->_path = $json_path;
-        } else {
-            $this->_path = $json_path . '/'. static::jsonPath();
-        }
+        $this->_path = $json_path;
+        // if (StringHelper::endsWith($json_path, '/'. static::jsonPath())) {
+        // $this->_path = $json_path;
+        // } else {
+        //     $this->_path = $json_path . '/'. static::jsonPath();
+        // }
     }
 
 	public function loadJson(JsonModelable $json_modelable, string $json_path = null, string $id = null, string $locator = null):?JsonObject
@@ -412,7 +419,7 @@ class JsonModel extends \yii\base\Model
             } else {
                 $child = new $rel_model_class;
             }
-            $child->parent_model = $this;
+            $child->_parent_model = $this;
             $child->setPath($this->getPath() . '/' . $child->jsonPath());
             $child->setJsonModelable($this);
             return $child;
@@ -437,7 +444,7 @@ class JsonModel extends \yii\base\Model
             $related_models = [];
             foreach ($this->$relation_name as $kr => $rel_model) {
                 $child = new $form_class_name;
-                $child->parent_model = $this;
+                $child->_parent_model = $this;
                 $child->setPath($this->getPath() . '/' . $child->jsonPath());
                 $child->setJsonModelable($this);
                 $child->copy($rel_model);
@@ -552,7 +559,7 @@ class JsonModel extends \yii\base\Model
             foreach ($post_data as $form_values) {
                 $relObj = new $relModelClass;
                 $relObj->setJsonModelable($this);
-                $relObj->parent_model = $this;
+                $relObj->_parent_model = $this;
                 if (!is_array($form_values) ) {
                     $form_values = [$relPKAttr[0] => $form_values];
                 }

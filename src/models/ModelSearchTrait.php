@@ -317,7 +317,7 @@ trait ModelSearchTrait
 				$relation = self::$relations[$name]??null;
 				if (!$relation) {
 					$fullfldname = $this->tableName() . "." . $name;
-					if ($operator == "bool") {
+					if (strtoupper($operator) == "BOOL") {
 						if (is_bool($value)) {
 							$or_conds[] = [ $fullfldname => boolval($value) ];
 						} else {

@@ -74,26 +74,16 @@ trait JsonModelableTrait
 		$this->_root_json->set($set_path, $value);
 	}
 
-	public function getJsonArray(string $path, ?string $id, ?string $locator=null): array
+	public function getJsonArray(string $path): array
 	{
 		if ($this->_root_json === null) {
 			throw new InvalidConfigException("getJsonValue::_root_json == null");
 		}
-		if ($locator && $id) {
-			$ret = $this->_root_json->get('$' . str_replace('/','.',$path)
-				. "[?(@.$locator=='$id')]");
-			if (is_array($ret)) {
-				return $ret[0];
-			} else {
-				return $ret;
-			}
+		$ret = $this->_root_json->get('$' . str_replace('/','.',$path));
+		if (!empty($ret)) {
+			return $ret;
 		} else {
-			$ret = $this->_root_json->get('$' . str_replace('/','.',$path) . ($id?('.' . $id):''));
-			if (!empty($ret)) {
-				return $ret;
-			} else {
-				return [];
-			}
+			return [];
 		}
 	}
 
