@@ -14,13 +14,7 @@ use santilin\churros\ModelSearchTrait;
 trait ModelInfoTrait
 {
 	use ModelSuccessesTrait, ModelWarningsTrait, ModelTrait;
-    protected $crudScenarios = [ 'default', 'create', 'duplicate', 'update', 'delete' ];
 
-	public function getCrudScenarios(): array
-	{
-		// crudScenarios is protected to avoid returning it in $model->attributes()
-		return $this->crudScenarios;
-	}
 	// For validators only
     static public function empty($value)
     {
