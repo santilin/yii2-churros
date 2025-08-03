@@ -6,7 +6,6 @@ use yii\db\ActiveQuery;
 
 trait ModelTrait
 {
-
 	/**
 	 * Applies one or more scopes to an ActiveQuery object, adding a default order if none set.
 	 *
@@ -46,5 +45,15 @@ trait ModelTrait
 		return $q;
 	}
 
+	public function scenarios()
+	{
+		$scenarios = parent::scenarios();
+		if (!array_key_exists($this->scenario, $scenarios)) {
+			if (count($scenarios) == 1 && array_key_exists('default', $scenarios)) {
+				$scenarios[$this->scenario] = $scenarios['default'];
+			}
+		}
+		return $scenarios;
+	}
 
 } // trait

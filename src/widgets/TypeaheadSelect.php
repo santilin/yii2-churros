@@ -23,7 +23,7 @@ class TypeaheadSelect extends KartikTypeahead
 	public $idFieldParam = 'id_field';
 	public $searchFieldsParam = 'fields';
 	public $createButton = false;
-	public $limit = 5;
+	public $limit = 8;
 	public $format;
 
 	private $hidden_id;

@@ -455,6 +455,9 @@ class JsonController extends \yii\web\Controller
 	public function getActionRoute(string|array|null $action_id, $model, $master_model = null): string
 	{
 		$route = $this->getRoutePrefix($this->getPath(), false) . $model->getPath();
+		if (in_array(\santilin\churros\models\ModelSearchTrait::class, class_uses($model))) {
+			$route .= '/' . $model->jsonPath();
+		}
 		if ($action_id) {
 			if (is_array($action_id)) {
 				$action_route = Url::to($action_id);

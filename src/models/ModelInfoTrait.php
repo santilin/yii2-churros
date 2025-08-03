@@ -60,20 +60,20 @@ trait ModelInfoTrait
 	{
 		$t_params = array_filter($params, function($value) { return is_string($value); });
 		$translated = Yii::t($category, $message, $t_params, $language);
-		if( ($language == 'es' || substr(Yii::$app->language,0,2) == 'es') ) {
+		if (($language == 'es' || substr(Yii::$app->language,0,2) == 'es')) {
 			$male_words = EsHelper::SPANISH_MALE_WORDS;
 		} else {
 			$male_words = self::$ENGLISH_MALE_WORDS;
 		}
 		$matches = $placeholders = [];
 		$female = $this->getModelInfo('female');
-		if( preg_match_all('/({([a-zA-Z0-9\._]+)})+/', $translated, $matches) ) {
-			foreach( $matches[2] as $match ) {
+		if (preg_match_all('/({([a-zA-Z0-9\._]+)})+/', $translated, $matches)) {
+			foreach( $matches[2] as $match) {
 				$bracket_match = '{'.$match.'}';
-				if( substr($match,0,6) == 'model.' ) {
+				if (substr($match,0,6) == 'model.') {
 					$fld = substr($match, 6);
 					$placeholders[$bracket_match] = ArrayHelper::getValue($this,$fld,'');
-				} else switch( $match ) {
+				} else switch( $match) {
 				case 'title':
 					$placeholders[$bracket_match] = lcfirst(static::getModelInfo('title'));
 					break;
@@ -109,8 +109,8 @@ trait ModelInfoTrait
 					$placeholders[$bracket_match] = $this->recordDesc('short');
 					break;
 				default:
-					if( isset($male_words[$match]) ) {
-						if( $female )  {
+					if (isset($male_words[$match])) {
+						if ($female )  {
 							$placeholders[$bracket_match] = $match;
 						} else {
 							$placeholders[$bracket_match] = $male_words[$match];
@@ -130,7 +130,7 @@ trait ModelInfoTrait
 	public function recordDesc(string $format=null, int $max_len = 0, $context = null): string
 	{
 		$ret = $_format = '';
-		if( !$format || $format == 'short' ) {
+		if (!$format || $format == 'short') {
 			$_format = self::getModelInfo('record_desc_format_short');
 		} elseif ($format == 'medium') {
 			$_format = self::getModelInfo('record_desc_format_medium');
@@ -150,19 +150,19 @@ trait ModelInfoTrait
 			$_format = '{' . implode('}, {',array_filter($fields)) . '}';
 		}
 		$values = $matches = [];
-		if (preg_match_all('/{([a-zA-Z0-9\._]+)(\%([^}])*)*}+/', $_format, $matches) ) {
-			foreach( $matches[0] as $n => $match ) {
+		if (preg_match_all('/{([a-zA-Z0-9\._]+)(\%([^}])*)*}+/', $_format, $matches)) {
+			foreach( $matches[0] as $n => $match) {
 				$value = ArrayHelper::getValue($this, $matches[1][$n]);
-				if( is_object($value) && method_exists($value, 'recordDesc') ) {
+				if (is_object($value) && method_exists($value, 'recordDesc')) {
 					$value = $value->recordDesc($format, $max_len);
 				}
 				$sprintf_part = $matches[2][$n];
-				if( $sprintf_part == '' ) {
+				if ($sprintf_part == '') {
 					$sprintf_part = "%s";
-				} else if( $sprintf_part == '%T' ) {
+				} else if ($sprintf_part == '%T') {
 					$sprintf_part = '%s';
 					$value = Yii::$app->formatter->asDateTime($value);
-				} else if( $sprintf_part == '%D' ) {
+				} else if ($sprintf_part == '%D') {
 					$sprintf_part = '%s';
 					$value = Yii::$app->formatter->asDate($value);
 				} else if ($sprintf_part == '%_a') { // allowed_values
@@ -182,13 +182,13 @@ trait ModelInfoTrait
 		} else {
 			$ret = $_format;
 		}
-		if( $max_len == 0 ) {
+		if ($max_len == 0) {
 			return $ret;
-		} else if ($max_len < 0 ) {
+		} else if ($max_len < 0) {
 			return substr($ret, 0, -$max_len);
 		} else {
 			$len = strlen($ret);
-			if( $len > $max_len ) {
+			if ($len > $max_len) {
 				$ret = mb_substr($ret, 0, floor($max_len/2)-2) . '...' . mb_substr($ret, -floor($max_len/2)+2);
 			}
 		}
@@ -260,21 +260,21 @@ trait ModelInfoTrait
 
 	public function increment(string $fldname, string $increment, array $conds = [], bool $usegaps = true): string
 	{
-		if( $increment == '' ) {
+		if ($increment == '') {
 			$increment = "+1";
-		} else if( $increment[0] != '+' ) {
+		} else if ($increment[0] != '+') {
 			$increment = "+$increment";
 		}
 		$query = static::find()->select("MAX([[$fldname]])");
 		$fldvalue = $this->$fldname??'';
-		if( !empty($conds) ) {
+		if (!empty($conds)) {
 			$query->andwhere($conds);
 		}
 		$base = '';
 		if (preg_match('#^(.*?)(\d+)$#', $fldvalue, $matches)) {
 			$base = $matches[1];
 			$query->andWhere([ 'LIKE', $fldname, $base ]);
-			if( $usegaps ) {
+			if ($usegaps) {
 				$query->andWhere( [ "NOT IN", "CAST([[$fldname]] AS SIGNED) $increment",
 					static::find()->select("[[$fldname]]") ] );
 			}
@@ -282,18 +282,18 @@ trait ModelInfoTrait
 		}
 //     try {
 		$val = $query->scalar();
-		if( $val === null ) {
-			if( $base != '' ) {
+		if ($val === null) {
+			if ($base != '') {
 				return $fldvalue;
 			}
 		}
         $fval =  AppHelper::incrStr($val??0, $increment);
         return $fval;
-//     } catch( dbError &e ) { // sqlite3
-//         if( e.getNumber() == 1137 ) { // ERROR 1137 (HY000): Can't reopen table:
+//     } catch( dbError &e) { // sqlite3
+//         if (e.getNumber() == 1137) { // ERROR 1137 (HY000): Can't reopen table:
 //             sql = "SELECT MAX(" + nameToSQL( fldname ) + ")";
 //             sql+= " FROM " + nameToSQL( tablename );
-//             if( !conds.isEmpty() )
+//             if (!conds.isEmpty() )
 //                 sql+=" WHERE (" + conds + ")";
 //             return selectInt( sql ) + 1;
 //         } else throw;
@@ -306,7 +306,7 @@ trait ModelInfoTrait
 
 	public function saveOrFail(bool $runValidations = true)
 	{
-		if( !$this->save($runValidations) ) {
+		if (!$this->save($runValidations)) {
 			throw new \Exception("Save " . static::getModelInfo('title') . ': ' . print_r($this->getErrors(), true) );
 		}
 	}
@@ -392,11 +392,11 @@ trait ModelInfoTrait
 	static public function createFromDefault($number = 1)
     {
 		$ret = [];
-		for( $count = 0; $count < $number; ++$count ) {
+		for( $count = 0; $count < $number; ++$count) {
 			$modelname = get_called_class();
 			$model = new $modelname;
 			$model->setDefaultValues();
-			if( $number == 1 ) {
+			if ($number == 1) {
 				return $model;
 			} else {
 				$ret[] = $model;
@@ -408,7 +408,7 @@ trait ModelInfoTrait
     public function controllerName($prefix = '')
     {
 		$c = self::getModelInfo('controller_name');
-		if( !$c ) {
+		if (!$c) {
 			$c = AppHelper::stripNamespaceFromClassName($this);
 			$c = lcfirst(str_replace("Search", "", $c));
 		}
@@ -542,7 +542,7 @@ trait ModelInfoTrait
 	public function getOneError():string
 	{
 		$errors = $this->getFirstErrors(false);
-		if( count($errors) ) {
+		if (count($errors)) {
 			return reset($errors);
 		} else {
 			return '';
@@ -556,7 +556,7 @@ trait ModelInfoTrait
 	{
 		$fields = explode(',',static::getModelInfo('code_field'))
 			+ explode(',',static::getModelInfo('desc_field'));
-		if( count($fields) ) {
+		if (count($fields)) {
 			return array_pop($fields);
 		} else {
 			return [ $this->getPrimaryKey(), '' ];
@@ -565,7 +565,7 @@ trait ModelInfoTrait
 
 	static public function findCodeAndDescFields(string $relname = null): array
 	{
-		if( $relname == null ) {
+		if ($relname == null) {
 			$r0 = array_filter(explode(',',static::getModelInfo('code_field')));
 			$r1 = array_filter(explode(',',static::getModelInfo('desc_field')));
 			return array_merge($r0,$r1);
@@ -580,7 +580,7 @@ trait ModelInfoTrait
 
 	static public function findDescFields(string $relname = null): array
 	{
-		if( $relname == null ) {
+		if ($relname == null) {
 			return array_filter(explode(',',static::getModelInfo('desc_field')));
 		} else if (isset(static::$relations[$relname])) {
 			$relmodelname = static::$relations[$relname]['modelClass'];
@@ -599,17 +599,17 @@ trait ModelInfoTrait
 
 	public function formatHandyFieldValues($field, $values, $format)
 	{
-		if( $format == 'ids' ) {
+		if ($format == 'ids') {
 			return array_keys($values);
-		} else if( $format == 'values' ) {
+		} else if ($format == 'values') {
 			return array_values($values);
-		} else if( $format == 'value' ) {
+		} else if ($format == 'value') {
 			return $values[$this->$field]??null;
-		} else if( $format == 'select2' || $format == 'group' ) {
+		} else if ($format == 'select2' || $format == 'group') {
 			return ArrayHelper::map($values, 1,2,0);
-		} else if( $format == 'selectize' ) {
+		} else if ($format == 'selectize') {
 			$ret = [];
-			foreach( $values as $k => $v ) {
+			foreach( $values as $k => $v) {
 				$ret[] = [ 'value' => $k, 'text' => $v ];
 			}
 			return $ret;
@@ -631,7 +631,7 @@ trait ModelInfoTrait
 
 	public function resetPrimaryKeys()
 	{
-		foreach( $this->primaryKey() as $key_name ) {
+		foreach( $this->primaryKey() as $key_name) {
 			$this->$key_name = null;
 		}
 	}
@@ -674,10 +674,10 @@ trait ModelInfoTrait
 
 	static public function recRelationsLabels(array &$ret, $model, int $level, string $parent_relname, string $parent_title): void
 	{
-		if ($level == 0 ) {
+		if ($level == 0) {
 			return;
 		}
-		foreach ($model::$relations as $relname => $relinfo ) {
+		foreach ($model::$relations as $relname => $relinfo) {
 			$rel_model = $relinfo['modelClass'];
 			$relname = "$parent_relname.$relname";
 			if ($relinfo['type'] == 'HasMany' || $relinfo['type'] == 'ManyToMany') {
@@ -743,8 +743,14 @@ trait ModelInfoTrait
 			case "bool":
 				$boolValue = ($value['v'] == 'true') ? 1 : ($value['v'] == 'false' ? 0 : boolval($value['v']));
 				return [$fldname => $boolValue];
+			case '=i':
+				if (is_numeric($value['v'])) {
+					return [ '=', $fldname, $value['v']];
+				} else {
+					return [];
+				}
 			default:
-				return [];
+				throw new InvalidArgumentException($value['op'] . ': operator not supported');
 		}
 	}
 

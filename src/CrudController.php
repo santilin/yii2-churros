@@ -568,7 +568,11 @@ class CrudController extends \yii\web\Controller
 		$searchModel = $this->createSearchModel();
 		if ($had_fields = !empty($fields)) {
 			if (is_string($fields)) {
-				$fields = explode(',',$fields);
+				if ($fields[0] == '[') {
+					$fields = json_decode($fields);
+				} else {
+					$fields = explode(',',$fields);
+				}
 			}
 		} else {
 			$fields = $searchModel->findCodeAndDescFields();
@@ -586,17 +590,15 @@ class CrudController extends \yii\web\Controller
 		}
 		$dataProvider = $searchModel->search($dp_search_params);
 		if ($had_fields) {
-			$dataProvider->query->select($fields[0])->distinct();
+			if ($id_field && !in_array($id_field, $fields)) {
+				$fields[] = $id_field;
+			}
+			$dataProvider->query->select(implode(',',$fields))->distinct();
 		}
 		if ($format == 'select2' || $format == 'select') {
 			foreach ($dataProvider->getModels() as $record) {
 				$id = $id_field ? $record->$id_field : $record->getPrimaryKey();
-				if ($had_fields) {
-					$fld = $fields[0];
-					$ret[] = [ 'id' => $id, 'text' => $record->$fld ];
-				} else {
-					$ret[] = [ 'id' => $id, 'text' => $record->recordDesc($model_format) ];
-				}
+				$ret[] = [ 'id' => $id, 'text' => $record->recordDesc($model_format) ];
 			}
 			if ($format == 'select2') {
 				return [ 'results' => $ret ];

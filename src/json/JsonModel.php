@@ -187,6 +187,8 @@ class JsonModel extends \yii\base\Model
             $parts = explode('/', $this->_path);
             if (in_array(\santilin\churros\models\ModelSearchTrait::class, class_uses($this))) {
                 // array_pop($parts); // search part
+            } else if ($this->isNewRecord && $this->jsonPath() == $parts[count($parts)-1]) {
+                array_pop($parts); // jsonPath
             } else {
                 if (count($parts)<2) {
                     return null;
@@ -326,22 +328,22 @@ class JsonModel extends \yii\base\Model
                 $this->_path .= "/$id";
             }
             $id = str_replace(";", '/', $id);
-        }
-        $this->_json_object = $json_modelable->getJsonObject($json_path, $id, $locator);
-        if ($this->_json_object !== null) {
-            $this->_is_new_record = false;
-            $this->setPrimaryKey($id);
-            $v = $this->_json_object->getValue();
-            if ($v === null) {
-            } else if (is_bool($v)) {
-            } else if (is_string($v)) {
-                if ($v != $id) {
-                    throw new InvalidConfigException("$v != $id");
-                }
-            } else {
-                foreach ($v as $fldname => $fldvalue) {
-                    if ($this->hasAttribute($fldname)) {
-                        $this->__set($fldname, $fldvalue); // prefer attributes over public properties
+            $this->_json_object = $json_modelable->getJsonObject($json_path, $id, $locator);
+            if ($this->_json_object !== null) {
+                $this->_is_new_record = false;
+                $this->setPrimaryKey($id);
+                $v = $this->_json_object->getValue();
+                if ($v === null) {
+                } else if (is_bool($v)) {
+                } else if (is_string($v)) {
+                    if ($v != $id) {
+                        throw new InvalidConfigException("$v != $id");
+                    }
+                } else {
+                    foreach ($v as $fldname => $fldvalue) {
+                        if ($this->hasAttribute($fldname)) {
+                            $this->__set($fldname, $fldvalue); // prefer attributes over public properties
+                        }
                     }
                 }
             }
