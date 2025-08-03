@@ -187,6 +187,16 @@ class ActiveForm extends Bs5ActiveForm
 					'field' => '',
 				]
 			],
+			'fill' => [
+				'horizontalCssClasses' => [
+					'offset' => 'offset-3',
+					'label' => [ 'col-form-label w-label-12-5', 'text-end'],
+					'wrapper' => ['w-fld-87-5'],
+					'error' => '',
+					'hint' => '',
+					'field' => '',
+				]
+			],
 			'large' => [
 				'horizontalCssClasses' => [
 					'offset' => 'offset-3',

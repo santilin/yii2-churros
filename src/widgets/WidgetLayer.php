@@ -320,8 +320,11 @@ class WidgetLayer
 								Html::addCssClass($widget->options, "row layout-$layout_row_layout");
 								if ($widget_layout != 'full') {
 									Html::addCssClass($widget->options, 'w-100');
+								} else {
+									$love = true;
 								}
-								$col_classes = $this->columnClasses($widget_layout == 'full' ? 1 : $cols);
+								$col_classes = $this->columnClasses(
+									($widget_layout == 'full' || $widget_layout == 'fill') ? 1 : $cols);
 								$open_divs++;
 								$fs .=  "<div class=\"$col_classes\">";
 								$fs .= $this->layoutActiveField($widget_name, $widget, $layout_row, $widget_layout, $layout_row_layout, $indexf++);
@@ -458,17 +461,13 @@ class WidgetLayer
 					$classes = $this->widget_layout_horiz_config['inline']['horizontalCssClasses'];
 				} else {
 					$classes = $this->widget_layout_horiz_config[$layout_of_row][$widget_layout]['horizontalCssClasses'];
-					if ($row_style == 'grid-nolabels') {
-						$widget->enableLabel = false;
-					// } elseif ($row_style == 'grid-full-labels') {
-					// 	echo "<pre>"; print_r($this->widget_layout_horiz_config); die;
-					// 	$label_classes = $this->widget_layout_horiz_config['vertical']['horizontalCssClasses'];
-					// 	$classes['label'] = $label_classes['label'];
-					} else {
-						$widget->labelOptions['class'] = implode(' ', $classes['label']) . " fld-$widget_name col-form-label";
-						if (YII_ENV_DEV) {
-							$widget->labelOptions['class'] .= " {$layout_of_row}x$widget_layout";
-						}
+				}
+				if ($row_style == 'grid-nolabels') {
+					$widget->enableLabel = false;
+				} else {
+					$widget->labelOptions['class'] = implode(' ', $classes['label']) . " fld-$widget_name col-form-label";
+					if (YII_ENV_DEV) {
+						$widget->labelOptions['class'] .= " {$layout_of_row}x$widget_layout";
 					}
 				}
 				$widget->wrapperOptions['class'] = implode(' ', $classes['wrapper']);

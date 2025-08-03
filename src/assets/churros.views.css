@@ -1,3 +1,10 @@
+.w-label-12-5 {
+  width: 12.5%;
+}
+.w-fld-87-5 {
+  width: 87.5%;
+}
+
 .crud-grid-container {
   overflow-x:auto;
   width:auto;
