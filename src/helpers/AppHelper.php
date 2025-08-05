@@ -8,7 +8,7 @@
 namespace santilin\churros\helpers;
 
 use Yii;
-use yii\helpers\StringHelper;
+use yii\helpers\{ArrayHelper,StringHelper};
 use League\HTMLToMarkdown\HtmlConverter;
 
 class AppHelper
@@ -258,6 +258,10 @@ class AppHelper
 		}
 	}
 
+	static public function setYiiParam(string $name, $value)
+	{
+		ArrayHelper::setValue(Yii::$app->params, $name, $value);
+	}
 
 	/**
 	* @param array      $array
