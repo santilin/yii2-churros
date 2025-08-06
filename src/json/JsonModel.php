@@ -185,10 +185,13 @@ class JsonModel extends \yii\base\Model
             // } else {
             // }
             $parts = explode('/', $this->_path);
-            if (in_array(\santilin\churros\models\ModelSearchTrait::class, class_uses($this))) {
-                // array_pop($parts); // search part
-            } else if ($this->isNewRecord && $this->jsonPath() == $parts[count($parts)-1]) {
-                array_pop($parts); // jsonPath
+            if (empty($parts[count($parts)-1])) {
+                array_pop($parts);
+            }
+            if ($this->isNewRecord || in_array(\santilin\churros\models\ModelSearchTrait::class, class_uses($this))) {
+                if ($this->jsonPath() == $parts[count($parts)-1]) {
+                    array_pop($parts); // jsonPath
+                }
             } else {
                 if (count($parts)<2) {
                     return null;
