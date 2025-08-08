@@ -68,7 +68,7 @@ trait ModelInfoTrait
 		$matches = $placeholders = [];
 		$female = $this->getModelInfo('female');
 		if (preg_match_all('/({([a-zA-Z0-9\._]+)})+/', $translated, $matches)) {
-			foreach( $matches[2] as $match) {
+			foreach ($matches[2] as $match) {
 				$bracket_match = '{'.$match.'}';
 				if (substr($match,0,6) == 'model.') {
 					$fld = substr($match, 6);
