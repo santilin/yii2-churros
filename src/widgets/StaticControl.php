@@ -25,7 +25,7 @@ class StaticControl extends \yii\widgets\InputWidget
 		}
         Html::addCssClass($this->options, 'fake-readonly-control');
 		if (trim(strval($value)) == '') {
-			$value = $this->nullText;
+			$value = $this->nullText?:'&nbsp;';
 		}
 		return Html::tag('div', $value, $this->options);
 	}
