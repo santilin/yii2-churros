@@ -14,6 +14,21 @@ use League\HTMLToMarkdown\HtmlConverter;
 class AppHelper
 {
 
+	static public function unGroupValues($options)
+	{
+		$values = [];
+		foreach ($options as $key => $value) {
+			if (is_array($value)) {
+				// Recursive call for optgroups
+				$values = array_merge($values, $value);
+			} else {
+				// This is a leaf option
+				$values[] = $key;
+			}
+		}
+		return $values;
+	}
+
 	static public function findKeyInArray($array, $key)
 	{
 		foreach ($array as $k => $value) {

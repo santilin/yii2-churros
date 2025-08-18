@@ -607,6 +607,8 @@ trait ModelInfoTrait
 			return $values[$this->$field]??null;
 		} else if ($format == 'select2' || $format == 'group') {
 			return ArrayHelper::map($values, 1,2,0);
+		} else if ($format == 'ungroup') {
+			return AppHelper::unGroupValues($values);
 		} else if ($format == 'selectize') {
 			$ret = [];
 			foreach( $values as $k => $v) {
