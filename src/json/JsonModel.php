@@ -94,7 +94,6 @@ class JsonModel extends \yii\base\Model
                 $child->_parent_model = $this;
             }
             $child->_json_modelable = $this->_json_modelable;
-            $child->setPath($this->getPath() . '/' . $child->jsonPath() . '/' . $child->_id);
             $primary_key_set = false;
             if (is_array($rm)) {
                 foreach ($rm as $fldname => $fldvalue) {
@@ -117,6 +116,7 @@ class JsonModel extends \yii\base\Model
                     $child->setPrimaryKey($rm);
                 }
             }
+            $child->setPath($this->getPath() . '/' . $child->_id);
             $child->afterFind();
             $models[] = $child;
         }
@@ -161,22 +161,17 @@ class JsonModel extends \yii\base\Model
         $this->_is_new_record = $is_new;
     }
 
-    public function parentModel($parent_id = null, $force = false): ?JsonModel
+    public function parentModel($force = false): ?JsonModel
     {
         if (empty(static::$parent_model_class)) {
             return $this->_parent_model;
         }
         if ($this->_parent_model === null || $force) {
-            if (!$this->_json_modelable) {
-                throw new InvalidConfigException("Json model has no _json_modelable set");
-            }
             if (!$this->_path) {
                 return null;
             }
-            $parts = explode('/', $this->_path);
-            if (empty($parts[count($parts)-1])) {
-                array_pop($parts);
-            }
+            $parts = array_filter(explode('/', $this->_path));
+            $gc = get_class($this);
             if ($this->isNewRecord || in_array(\santilin\churros\models\ModelSearchTrait::class, class_uses($this))) {
                 if ($this->jsonPath() == $parts[count($parts)-1]) {
                     array_pop($parts); // jsonPath
@@ -186,13 +181,11 @@ class JsonModel extends \yii\base\Model
                     return null;
                 }
                 array_pop($parts); // $this->_id
-                array_pop($parts); // jsonPath()
-            }
-            if ($parent_id == null) {
-                $parent_id = $parts[count($parts)-1];
+                array_pop($parts); // $this->jsonPath()
             }
             $this->_parent_model = new static::$parent_model_class;
-            if (!$this->_parent_model->loadJson($this->_json_modelable, implode('/', $parts), $parent_id)) {
+            if (!$this->_parent_model->loadJson($this->_json_modelable,
+                '/'. implode('/', $parts))) {
                 $this->_parent_model = null;
             }
         }
@@ -273,8 +266,12 @@ class JsonModel extends \yii\base\Model
     {
         $locator = static::$_locator??null;
         if ($id===null) {
-            if (!empty(static::$_locator)) {
-                $this->_id = $this->$locator;
+            if ($locator) {
+                if (empty($this->$locator)) {
+                    $this->$locator = $this->_id;
+                } else {
+                    $this->_id = $this->$locator;
+                }
             }
         } else if (is_array($id)) {
             foreach ($id as $id_k => $id_v) {
@@ -298,11 +295,6 @@ class JsonModel extends \yii\base\Model
     {
         $this->_json_modelable = $json_modelable;
         $this->_path = $json_path . '/'. static::jsonPath();
-        // $this->_path = $json_path ;
-        // if (StringHelper::endsWith($json_path, '/'. static::jsonPath())) {
-        // $this->_path = $json_path;
-        // } else {
-        // }
     }
 
 	public function loadJson(JsonModelable $json_modelable, string $json_path = null, string $id = null, string $locator = null):?JsonObject
@@ -318,7 +310,6 @@ class JsonModel extends \yii\base\Model
         $this->_json_object = $json_modelable->getJsonObject($json_path, $id, $locator);
         if ($this->_json_object !== null) {
             $this->_is_new_record = false;
-            $this->setPrimaryKey($id);
             $v = $this->_json_object->getValue();
             if ($v === null) {
             } else if (is_bool($v)) {
@@ -333,6 +324,7 @@ class JsonModel extends \yii\base\Model
                     }
                 }
             }
+            $this->setPrimaryKey($id);
         }
         return $this->_json_object;
     }
@@ -451,9 +443,6 @@ class JsonModel extends \yii\base\Model
     {
         return $this->createRelatedModels($relation_name, [], $form_class_name);
     }
-
-
-
 
     /**
      * Load all attributes including related attributes
