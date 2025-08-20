@@ -352,7 +352,6 @@ class JsonController extends \yii\web\Controller
 			}
 			$to = '';
 		}
-		$to_model = null;
 		if (empty($to)) {
 			if ($to = $this->request->queryParams['returnTo']??null) {
 				return $to;
@@ -416,8 +415,7 @@ class JsonController extends \yii\web\Controller
 					$to_model = 'model';
 					$to_action  = 'index';
 				}
-			} else if ($to_model == 'model') {
-			} else {
+			} else if ($to_model != 'model') {
 				$model = $$to_model;
 			}
 		}

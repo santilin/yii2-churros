@@ -173,17 +173,6 @@ class JsonModel extends \yii\base\Model
             if (!$this->_path) {
                 return null;
             }
-            // $locator = static::$_locator;
-            // $id = $locator ? $this->$locator : $this->_id;
-            // if ($id) {
-            //     $id = str_replace('/',';',$id);
-            //     if (!StringHelper::endsWith($this->_path, $id)) {
-            //         $parts = explode('/', $this->_path . '/' . $id);
-            //     } else {
-            //         $parts = explode('/', $this->_path);
-            //     }
-            // } else {
-            // }
             $parts = explode('/', $this->_path);
             if (empty($parts[count($parts)-1])) {
                 array_pop($parts);
@@ -308,11 +297,11 @@ class JsonModel extends \yii\base\Model
     public function loadSearchModel(JsonModelable $json_modelable, string $json_path)
     {
         $this->_json_modelable = $json_modelable;
-        $this->_path = $json_path;
+        $this->_path = $json_path . '/'. static::jsonPath();
+        // $this->_path = $json_path ;
         // if (StringHelper::endsWith($json_path, '/'. static::jsonPath())) {
         // $this->_path = $json_path;
         // } else {
-        //     $this->_path = $json_path . '/'. static::jsonPath();
         // }
     }
 
@@ -326,27 +315,21 @@ class JsonModel extends \yii\base\Model
         if ($locator === null) {
             $locator = static::$_locator;
         }
-        if ($id) {
-            if (!StringHelper::endsWith($this->_path, "/$id")) {
-                $this->_path .= "/$id";
-            }
-            $id = str_replace(";", '/', $id);
-            $this->_json_object = $json_modelable->getJsonObject($json_path, $id, $locator);
-            if ($this->_json_object !== null) {
-                $this->_is_new_record = false;
-                $this->setPrimaryKey($id);
-                $v = $this->_json_object->getValue();
-                if ($v === null) {
-                } else if (is_bool($v)) {
-                } else if (is_string($v)) {
-                    if ($v != $id) {
-                        throw new InvalidConfigException("$v != $id");
-                    }
-                } else {
-                    foreach ($v as $fldname => $fldvalue) {
-                        if ($this->hasAttribute($fldname)) {
-                            $this->__set($fldname, $fldvalue); // prefer attributes over public properties
-                        }
+        $this->_json_object = $json_modelable->getJsonObject($json_path, $id, $locator);
+        if ($this->_json_object !== null) {
+            $this->_is_new_record = false;
+            $this->setPrimaryKey($id);
+            $v = $this->_json_object->getValue();
+            if ($v === null) {
+            } else if (is_bool($v)) {
+            } else if (is_string($v)) {
+                if ($v != $id) {
+                    throw new InvalidConfigException("$v != $id");
+                }
+            } else {
+                foreach ($v as $fldname => $fldvalue) {
+                    if ($this->hasAttribute($fldname)) {
+                        $this->__set($fldname, $fldvalue); // prefer attributes over public properties
                     }
                 }
             }

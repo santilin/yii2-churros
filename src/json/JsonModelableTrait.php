@@ -47,7 +47,7 @@ trait JsonModelableTrait
 		if ($id) {
 			return null;
 		}
-		$ret = $this->_root_json->getJsonObjects('$' . str_replace('/','.',$path));
+		$ret = $this->_root_json->getJsonObjects('$' . str_replace('/', '.', $path));
 		if ($ret) {
 			return $ret;
 		} else {

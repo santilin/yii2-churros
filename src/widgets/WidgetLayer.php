@@ -320,8 +320,6 @@ class WidgetLayer
 								Html::addCssClass($widget->options, "row layout-$layout_row_layout");
 								if ($widget_layout != 'full') {
 									Html::addCssClass($widget->options, 'w-100');
-								} else {
-									$love = true;
 								}
 								$col_classes = $this->columnClasses(
 									($widget_layout == 'full' || $widget_layout == 'fill') ? 1 : $cols);
