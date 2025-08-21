@@ -88,11 +88,8 @@ class JsonModel extends \yii\base\Model
             }
             if (!$child_class) {
                 $child_class = get_class($this);
-                $child = new $child_class;
-            } else {
-                $child = new $child_class;
-                $child->_parent_model = $this;
-            }
+            } // do not set parent_model as the fields are not loaded
+            $child = new $child_class;
             $child->_json_modelable = $this->_json_modelable;
             $primary_key_set = false;
             if (is_array($rm)) {
@@ -167,27 +164,26 @@ class JsonModel extends \yii\base\Model
             return $this->_parent_model;
         }
         if ($this->_parent_model === null || $force) {
+            $this->_parent_model = null;
             if (!$this->_path) {
                 return null;
             }
             $parts = array_filter(explode('/', $this->_path));
             $gc = get_class($this);
-            if ($this->isNewRecord || in_array(\santilin\churros\models\ModelSearchTrait::class, class_uses($this))) {
-                if ($this->jsonPath() == $parts[count($parts)-1]) {
-                    array_pop($parts); // jsonPath
-                }
+            if ((count($parts) % 2) == 0) {
+                array_pop($parts);
+            }
+            if (count($parts)==0) {
+                return null;
+            }
+            if ($this->jsonPath() == end($parts)) {
+                array_pop($parts); // jsonPath
             } else {
-                if (count($parts)<2) {
-                    return null;
-                }
-                array_pop($parts); // $this->_id
-                array_pop($parts); // $this->jsonPath()
+                throw new \Exception($this->_path . ': invalid path');
             }
             $this->_parent_model = new static::$parent_model_class;
-            if (!$this->_parent_model->loadJson($this->_json_modelable,
-                '/'. implode('/', $parts))) {
-                $this->_parent_model = null;
-            }
+            $this->_parent_model->loadJson($this->_json_modelable,
+                '/'. implode('/', $parts), end($parts));
         }
         return $this->_parent_model;
     }
@@ -300,14 +296,15 @@ class JsonModel extends \yii\base\Model
 	public function loadJson(JsonModelable $json_modelable, string $json_path = null, string $id = null, string $locator = null):?JsonObject
     {
         $this->_json_modelable = $json_modelable;
-        if (substr($json_path,-1,1) == '/') {
-            $json_path = substr($json_path, 0, -1);
+        $path_parts = array_filter(explode('/', $json_path));
+        if ($id && count($path_parts) % 2 == 1) {
+            $path_parts[] = $id;
         }
-        $this->_path = $json_path;
+        $this->_path = '/' . implode('/', $path_parts);
         if ($locator === null) {
             $locator = static::$_locator;
         }
-        $this->_json_object = $json_modelable->getJsonObject($json_path, $id, $locator);
+        $this->_json_object = $json_modelable->getJsonObject($this->_path, $id, $locator);
         if ($this->_json_object !== null) {
             $this->_is_new_record = false;
             $v = $this->_json_object->getValue();

@@ -452,23 +452,17 @@ class JsonController extends \yii\web\Controller
 	 */
 	public function getActionRoute(string|array|null $action_id, $model, $master_model = null): string
 	{
-		$route = $this->getRoutePrefix($this->getPath(), false) . $model->getPath();
-		if (in_array(\santilin\churros\models\ModelSearchTrait::class, class_uses($model))) {
-			$route .= '/' . $model->jsonPath();
-		}
-		if ($action_id) {
-			if (is_array($action_id)) {
-				$action_route = Url::to($action_id);
-				$action = array_shift($action_id);
-				$route .= "/$action?id=" . array_shift($action_id);
-				if (($q_pos = strpos($action_route, '?')) !== FALSE) {
-					if (strpos($route, '?') === FALSE) {
-						$route .= substr($action_route, $q_pos);
-					} else {
-						$route .= '&' . substr($action_route, $q_pos+1);
-					}
-				}
-			} else {
+		if (is_array($action_id)) {
+			$path_parts = array_filter(explode('/', $model->getPath()));
+			if (count($path_parts) % 2 == 0) {
+				array_pop($path_parts);
+			}
+			$action_id[0] = $this->getRoutePrefix($this->getPath(), false)
+				. '/' . implode('/', $path_parts) . '/' . $action_id[0];
+			$route = Url::to($action_id);
+		} else {
+			$route = $this->getRoutePrefix($this->getPath(), false) . $model->getPath();
+			if ($action_id) {
 				$route .= "/$action_id";
 			}
 		}
