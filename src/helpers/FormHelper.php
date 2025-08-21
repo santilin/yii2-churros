@@ -230,7 +230,7 @@ class FormHelper
 						'aria' => [ 'hidden'=>'true', 'label' => $title ],
 						'alt' => $title ], $button['iconOptions']??[]));
 				} else {
-					$hidable_title = "&nbsp;<span class=\"d-none d-lg-inline\">$title</span>";
+					$hidable_title = "<span class=\"d-none d-lg-inline\">$title</span>";
 					if (strpos($icon, '<') !== FALSE) {
 						$title = $icon . $hidable_title;
 					} else {

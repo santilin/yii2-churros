@@ -35,6 +35,9 @@
   display: flex;
 }
 
+[data-bs-theme="light"] .table tbody tr td.main-column a {
+  text-decoration: underline !important;
+}
 /*.grid-view .grid-header .grid-toolbar .toolbar {
   margin-right: 0.5rem;
 }*/
