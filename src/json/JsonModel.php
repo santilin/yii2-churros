@@ -290,7 +290,7 @@ class JsonModel extends \yii\base\Model
     public function loadSearchModel(JsonModelable $json_modelable, string $json_path)
     {
         $this->_json_modelable = $json_modelable;
-        $this->_path = $json_path . '/'. static::jsonPath();
+        $this->_path = $json_path; // . '/'. static::jsonPath();
     }
 
 	public function loadJson(JsonModelable $json_modelable, string $json_path = null, string $id = null, string $locator = null):?JsonObject

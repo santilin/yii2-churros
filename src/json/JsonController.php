@@ -123,6 +123,7 @@ class JsonController extends \yii\web\Controller
 		if (!$detail) {
 			throw new \Exception("No {$search_model_class}_Search nor $search_model_class{$view}_Search class found in CrudController::indexDetails");
 		}
+		$detail->setPath($detail->getPath() . '/' . $detail->jsonPath());
 		// There is no need to link master and details here
 		$params['master'] = $master;
 		$params['embedded'] = true;
