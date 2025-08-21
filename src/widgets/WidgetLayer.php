@@ -174,7 +174,16 @@ class WidgetLayer
 					if (!$has_active && count($tab_items)) {
 						$tab_items[0]['active'] = true;
 					}
-					$ret .= Tabs::widget(['items' => $tab_items, 'tabContentOptions' => $layout_row['htmlOptions']??[]]);
+					$tabs = new Tabs(['items' => $tab_items, 'tabContentOptions' => $layout_row['htmlOptions']??[]]);
+					$tabs_id = $tabs->getId();
+					$ret .= $tabs->run();
+					$ret .= <<<js
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+	window.yii.churros.persistBootstrapTabs('#$tabs_id a[data-bs-toggle="tab"]');
+});
+</script>
+js;
 					if ($col_added) {
 						$this->removeLast();
 						$ret .= "</div>";

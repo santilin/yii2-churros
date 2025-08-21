@@ -253,7 +253,31 @@ window.yii.churros = (function ($) {
 					document.body.removeChild(text_area);
 				}
 			}
-		}
+		},
+
+		persistBootstrapTabs: function (tabSelector) {
+			// Derive a unique localStorage key by sanitizing the selector string
+			var key = 'activeTab_' + tabSelector.replace(/[^a-z0-9]/gi, '_');
+
+			// Activate saved tab on load
+			var activeTab = localStorage.getItem(key);
+			if (activeTab) {
+				var triggerEl = document.querySelector(tabSelector + '[href="' + activeTab + '"]');
+				if (triggerEl) {
+					var tab = new bootstrap.Tab(triggerEl);
+					tab.show();
+				}
+			}
+
+			// Save active tab on show
+			var tabLinks = document.querySelectorAll(tabSelector);
+			tabLinks.forEach(function (tabLink) {
+				tabLink.addEventListener('shown.bs.tab', function (event) {
+					var tabId = event.target.getAttribute('href');
+					localStorage.setItem(key, tabId);
+				});
+			});
+		},
 
 	};
 })(window.jQuery);
