@@ -136,7 +136,7 @@ class YADTC extends \DateTime
 		}
 	}
 
-	static public function today($modify = null, DateTimeZone $timezone = NULL)
+	static public function today($modify = null, \DateTimeZone $timezone = NULL)
 	{
 		$dt = new \DateTime("now", $timezone);
 		if ($modify != null) {
@@ -149,12 +149,9 @@ class YADTC extends \DateTime
 		return $ext_dt;
 	}
 
-	static public function now(string|\DateTimeZone $timezone = '')
+	static public function now(string|\DateTimeZone $timezone = null)
 	{
 		if (is_string($timezone)) {
-			if ($timezone=='') {
-				$timezone = 'Europe/Madrid'; // date_default_timezone_get();
-			}
 			$timezone = new \DateTimeZone($timezone);
 		}
 		$dt = new \DateTime("now", $timezone);
@@ -162,7 +159,7 @@ class YADTC extends \DateTime
 	}
 
 	static public function dateOrToday(int|string|\DateTime|YADTC $date = null,
-									   DateTimeZone $timezone = null): YADTC
+									   \DateTimeZone $timezone = null): YADTC
 	{
 		if ($date instanceof YADTC) {
 			return $date;
@@ -179,7 +176,7 @@ class YADTC extends \DateTime
 		if (is_int($date)) {
 			return YADTC($date, $timezone);
 		}
-		return self::fromString($date, $timezone);
+		return self::fromString($date, 'Y-m-d', $timezone);
 	}
 
 	public function year()
@@ -639,7 +636,7 @@ class YADTC extends \DateTime
 		} else if ($isTime) {
 			return 'time';
 		} else {
-			throw new \Exception($this->format . ': unable to guess type from format');
+			throw new \Exception($format . ': unable to guess type from format');
 		}
 	}
 
