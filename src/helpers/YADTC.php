@@ -171,7 +171,7 @@ class YADTC extends \DateTime
 			return $f;
 		}
 		if (!$date || (is_string($date) && trim($date) == '')) {
-			return YADTC::today($timezone);
+			return YADTC::today(null, $timezone);
 		}
 		if (is_int($date)) {
 			return YADTC($date, $timezone);
