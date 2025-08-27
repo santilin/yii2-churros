@@ -104,7 +104,11 @@ trait ModelChangesLoggableTrait
 						$model_change->record_id = $record_id;
 						$model_change->field = $nfield;
 						$model_change->value = $old_value;
-						$model_change->changed_by = \Yii::$app?->user?->identity?->id;
+						if (\Yii::$app instanceof \yii\web\Application) {
+							$model_change->changed_by = \Yii::$app->user?->identity?->id;
+						} else {
+							$model_change->changed_by = \Yii::$app->params['user_identity_id']??null;
+						}
 						$model_change->changed_at = new \yii\db\Expression("NOW()");
 						$model_change->type = $model_change::V_TYPE_UPDATE;
 						if (method_exists($this, 'modelChangesComment')) {
