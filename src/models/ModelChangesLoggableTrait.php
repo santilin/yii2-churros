@@ -148,7 +148,7 @@ trait ModelChangesLoggableTrait
 		}
 	}
 
-	public function formatModelChange(string $subtype, string $changed_field, string $changed_label, mixed $new_value, mixed $old_value): string
+	public function formatModelChange(int $subtype, string $changed_field, string $changed_label, mixed $new_value, mixed $old_value): string
 	{
 		switch ($subtype) {
 			case self::$V_SUBTYPE_EMPTY:

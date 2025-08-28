@@ -480,4 +480,20 @@ class AppHelper
 		return trim(preg_replace("/(?:[ \n\r\t\x0C]{2,}+|[\n\r\t\x0C])/", ' ', $string), " \n\r\t\x0C");
 	}
 
+    public static function getValorArrayMulti($array, $indice) {
+
+        foreach ($array as $key => $value) {
+            if (is_array($value)) {
+                $result = self::getValorArrayMulti($value, $indice);
+                if ($result) {
+                    return $result; // Devuelve el valor si se encuentra en un nivel inferior
+                }
+            }
+            if ($key === $indice) {
+                return $value; // Devuelve el valor si se encuentra en el nivel actual
+            }
+        }
+        return null; // Devuelve null si no se encuentra el valor en el array
+    }
+
 }
