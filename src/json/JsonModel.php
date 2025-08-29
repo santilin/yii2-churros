@@ -322,6 +322,7 @@ class JsonModel extends \yii\base\Model
                 }
             }
             $this->setPrimaryKey($id);
+            $this->afterFind();
         }
         return $this->_json_object;
     }
@@ -512,7 +513,6 @@ class JsonModel extends \yii\base\Model
         }
         return false;
     }
-
 
     /**
      * Refactored from loadAll() function
