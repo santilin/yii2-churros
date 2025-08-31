@@ -668,20 +668,19 @@ ajax;
 		switch ($tag) {
 			case 'ul':
 				return Html::tag($tag, '<li>' . join('</li><li>', $attrs) . '</li>', $tag_options);
-			case 'span':
-			case 'badge':
-				$ret = '';
-				foreach ($attrs as $attr) {
-					$ret .= Html::tag($tag, $attr, $tag_options);
-				}
-				return $ret;
 			case 'br':
 				return implode('<br/>', $attrs);
 			case ', ':
 			case ',':
 				return implode($tag, $attrs);
+			case 'span':
+			case 'badge':
 			default:
-				return Html::tag($tag, join("</$tag><$tag>", $attrs) . "</$tag>", $tag_options);
+				$ret = '';
+				foreach ($attrs as $attr) {
+					$ret .= Html::tag($tag, $attr, $tag_options);
+				}
+				return $ret;
 		}
 	}
 

@@ -59,17 +59,17 @@ trait RelationTrait
 		}
 		if (isset($post[$formName])) {
             $relations_in_model = static::$relations;
-			foreach ($relations_in_form as $rel_key => $relation_name) {
-				if (!isset($relations_in_model[$relation_name])) {
+			foreach ($relations_in_form as $rel_key => $relation_in_form) {
+				if (!isset($relations_in_model[$relation_in_form])) {
 					continue;
 				}
-				$model_relation = $relations_in_model[$relation_name];
+				$model_relation = $relations_in_model[$relation_in_form];
 				// Look for embedded relations data in the main form
 				$post_data = null;
 				if ($model_relation['type'] == 'HasOne' || $model_relation['type'] == "OneToOne") {
-					if (isset($post[$formName][$relation_name])) {
-						$post_data = $post[$formName][$relation_name];
-						unset($post[$formName][$relation_name]);
+					if (isset($post[$formName][$relation_in_form])) {
+						$post_data = $post[$formName][$relation_in_form];
+						unset($post[$formName][$relation_in_form]);
 					} else if (isset($post[$formName][$model_relation['model']])) {
 						$post_data = $post[$formName][$model_relation['model']];
 						unset($post[$formName][$model_relation['model']]);
@@ -103,20 +103,20 @@ trait RelationTrait
 						} else if (is_array($post_data)) {
 							// creates a new relmodel and populates it
 							$rel_model->setAttributes($post_data);
-							$this->populateRelation($relation_name, $rel_model);
+							$this->populateRelation($relation_in_form, $rel_model);
 						}
 					}
 				} else {
                     // HasMany or Many2Many
-					if (array_key_exists($relation_name, $post)) {
-						$post_data = $post[$relation_name]?:[];
-						unset($post[$relation_name]);
+					if (array_key_exists($relation_in_form, $post)) {
+						$post_data = $post[$relation_in_form]?:[];
+						unset($post[$relation_in_form]);
 					} else if (array_key_exists($rel_key, $post)) {
 						$post_data = $post[$rel_key]?:[];
 						unset($post[$rel_key]);
-					} else if (array_key_exists($formName, $post) && array_key_exists($relation_name, $post[$formName])) {
-						$post_data = $post[$formName][$relation_name]?:[];
-						unset($post[$formName][$relation_name]);
+					} else if (array_key_exists($formName, $post) && array_key_exists($relation_in_form, $post[$formName])) {
+						$post_data = $post[$formName][$relation_in_form]?:[];
+						unset($post[$formName][$relation_in_form]);
 					} else if (array_key_exists($model_relation['model'], $post)) {
 						$post_data = $post[$model_relation['model']]?:[];
 						unset($post[$model_relation['model']]);
@@ -125,11 +125,11 @@ trait RelationTrait
 						// find first relation with the same model to coalesce differente scoped relations
 						// foreach ($relations_in_model as $rn => $rinfo) {
 						// 	if ($rinfo['model'] == $model_relation['model']) {
-						// 		$relation_name = $rn;
+						// 		$relation_in_form = $rn;
 						// 		break;
 						// 	}
 						// }
-                        $this->loadToRelation($relation_name, (array)$post_data);
+                        $this->loadToRelation($relation_in_form, (array)$post_data);
                     }
                 }
             }
@@ -173,17 +173,27 @@ trait RelationTrait
 					continue;
 				}
                 if (is_array($relPost)) {
+					$relPost = array_filter($relPost);
 					// many2many relation with _POST = array of records
-					if (array_filter($relPost)) {
+					if ($relPost) {
 						$relModel = new $relModelClass;
 						$condition = [];
-						foreach ($relModel->primaryKey() as $pk) {
-							if (isset($relPost[$pk])) {
-								$condition[$pk] = $relPost[$pk];
+						if (ArrayHelper::isAssociative($relPost)) {
+							foreach ($relModel->primaryKey() as $pk) {
+								if (isset($relPost[$pk])) {
+									$condition[$pk] = $relPost[$pk];
+								}
 							}
-						}
-						foreach ($link as $this_fk => $other_pk) {
-							$relPost[$this_fk] = $condition[$this_fk] = $this->$other_pk;
+							foreach ($link as $this_fk => $other_pk) {
+								$relPost[$this_fk] = $condition[$this_fk] = $this->$other_pk;
+							}
+						} else {
+							// many2many relation with _POST = array of arrays of related ids
+							foreach ($relModel->primaryKey() as $pk) {
+								$pkv = array_shift($relPost);
+								$condition[$pk] = $pkv;
+							}
+							$relPost = $condition;
 						}
 						$relModel = $relModelClass::findOne($condition);
 						if (is_null($relModel)) {
