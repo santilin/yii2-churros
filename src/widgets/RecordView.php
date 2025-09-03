@@ -35,7 +35,7 @@ class RecordView extends Widget
     public $headerTemplate = <<<html
 <div class="panel-heading panel-primary d-flex justify-content-between">
 {title}
-    <div class="panel-toolbar">
+    <div class="toolbar">
 {buttons}
     </div>
 </div>

@@ -32,6 +32,7 @@
 
 .grid-view .grid-header .grid-toolbar {
   margin-bottom: 0.5rem;
+  margin-right: 3px;
   display: flex;
 }
 
@@ -139,7 +140,7 @@ legend {
 	font-size: 1.1em;
 }
 
-.panel-toolbar {
+.panel-heading .toolbar {
   align-self: center;
 }
 
