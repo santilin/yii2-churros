@@ -278,7 +278,18 @@ window.yii.churros = (function ($) {
 				});
 			});
 		},
-
+		htmlEncode : function (str) {
+			return str.replace(/[&<>'"]/g, function(char) {
+				const map = {
+					'&': '&amp;',
+					'<': '&lt;',
+					'>': '&gt;',
+					"'": '&#39;',
+					'"': '&quot;'
+				};
+				return map[char];
+			});
+		}
 	};
 })(window.jQuery);
 
