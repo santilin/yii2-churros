@@ -151,7 +151,7 @@ trait ModelInfoTrait
 		}
 		$values = $matches = [];
 		if (preg_match_all('/{([a-zA-Z0-9\._]+)(\%([^}])*)*}+/', $_format, $matches)) {
-			foreach( $matches[0] as $n => $match) {
+			foreach ($matches[0] as $n => $match) {
 				$value = ArrayHelper::getValue($this, $matches[1][$n]);
 				if (is_object($value) && method_exists($value, 'recordDesc')) {
 					$value = $value->recordDesc($format, $max_len);
@@ -743,6 +743,7 @@ trait ModelInfoTrait
 			case "NOT BETWEEN":
 				return [$value['op'], $fldname, explode(',', $value['v'])];
 			case "bool":
+			case "BOOL":
 				$boolValue = ($value['v'] == 'true') ? 1 : ($value['v'] == 'false' ? 0 : boolval($value['v']));
 				return [$fldname => $boolValue];
 			case '=i':

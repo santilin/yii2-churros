@@ -519,20 +519,19 @@ ajax;
 	}
 
 	static public function detailsTag(string $summary, string $body, bool $open = false,
-						array $body_options = [], array $summary_options = [])
+						array $detail_options = [], array $summary_options = [])
 	{
 		$dt = '<details';
 		if ($open) {
 			$dt .= ' open';
 		}
-		if (!isset($body_options['data']['id'])) {
-			$body_options['data']['id'] = self::detailsIdFromSummary($summary);
+		if (!isset($detail_options['data']['id'])) {
+			$detail_options['data']['id'] = self::detailsIdFromSummary($summary);
 		}
-
+		$dt .= Html::renderTagAttributes($detail_options) . '>';
 		$encode_summary = ArrayHelper::remove($summary_options, 'encodeSummary', true);
 		$summary_tag = ArrayHelper::remove($summary_options, 'summaryTag', null);
 		$summary_tag_options = ArrayHelper::remove($summary_options, 'summarytagOptions', []);
-		$dt .= Html::renderTagAttributes($body_options) . '>';
 		$dt .= '<summary' . Html::renderTagAttributes($summary_options) . '>';
 		$summary_content = $encode_summary ? Html::encode($summary) : $summary;
 		if ($summary_tag) {

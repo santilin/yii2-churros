@@ -310,12 +310,12 @@ trait RelationTrait
 			} else if ($records instanceof \yii\db\BaseActiveRecord) {
 				$records = (array)$records;
 			}
-			$success = $this->updateRecords($relation_name, $records);
+			$success = $this->updateRecords($relation_name, $records, $wasNewRecord);
 		}
 		return $success;
     }
 
-    private function updateRecords(string $relation_name, array $records): bool
+    private function updateRecords(string $relation_name, array $records, bool $isNewRecord): bool
     {
 		$success = true;
 		$relation = $this->getRelation($relation_name);
@@ -325,32 +325,32 @@ trait RelationTrait
 			$relation_name = $relation->via[0];
 			$relation = $this->getRelation($relation_name);
 		}
-		if ($success) {
-			if ($relation->multiple) { // hasmany or many2many
-				$dontDeletePk = [];
-				$relModelClass = $relation->modelClass;
-				$relPKAttr = $relModelClass::primarykey();
-				if (count($relPKAttr) == 0) { // HasMany without primary key
-					foreach ($records as $index => $relModel) {
-						// Set relModel foreign key
-						foreach ($link as $foreign_key => $value) {
-							if( is_object($relModel) ) {
-								$relModel->$foreign_key = $this->$value;
-							}
-						}
-						$relSave = $relModel->save();
-						if (!$relSave || !empty($relModel->errors)) {
-							$relModelWords = Yii:: t('churros', Inflector::camel2words(StringHelper::basename($relModelClass)));
-							$index++;
-							foreach ($relModel->errors as $validation) {
-								foreach ($validation as $errorMsg) {
-									$this->addError($relation_name, "$relModelWords #$index : $errorMsg");
-								}
-							}
-							$success = false;
+		if ($relation->multiple) { // hasmany or many2many
+			$dontDeletePk = [];
+			$relModelClass = $relation->modelClass;
+			$relPKAttr = $relModelClass::primarykey();
+			if (count($relPKAttr) == 0) { // HasMany without primary key
+				foreach ($records as $index => $relModel) {
+					// Set relModel foreign key
+					foreach ($link as $foreign_key => $value) {
+						if( is_object($relModel) ) {
+							$relModel->$foreign_key = $this->$value;
 						}
 					}
-				} else {
+					$relSave = $relModel->save();
+					if (!$relSave || !empty($relModel->errors)) {
+						$relModelWords = Yii:: t('churros', Inflector::camel2words(StringHelper::basename($relModelClass)));
+						$index++;
+						foreach ($relModel->errors as $validation) {
+							foreach ($validation as $errorMsg) {
+								$this->addError($relation_name, "$relModelWords #$index : $errorMsg");
+							}
+						}
+						$success = false;
+					}
+				}
+			} else {
+				if (!$isNewRecord) {
 					/* @var $relModel ActiveRecord */
 					$relation_getter = "get" . ucfirst($relation_name);
 					$query = $this->$relation_getter();
@@ -379,42 +379,41 @@ trait RelationTrait
 						$this->addError($relation_name, "Data can't be deleted because it's still used by another data.");
 						$success = false;
 					}
-
-					// Save all posted records
-					foreach ($records as $index => $relModel) {
-						if (!empty($relModel->getRelaxedDirtyAttributes())) {
-							foreach ($link as $fk => $pk) {
-								$relModel->$fk = $this->$pk; // in case is a new record
-							}
-							$relSave = $relModel->save();
-							if (!$relSave || !empty($relModel->errors)) {
-								$relModelWords = Yii:: t('churros', Inflector::camel2words(StringHelper::basename($relModelClass)));
-								$index++;
-								foreach ($relModel->errors as $validation) {
-									foreach ($validation as $errorMsg) {
-										$this->addError($relation_name, "$relModelWords #$index : $errorMsg");
-									}
+				}
+				// Save all posted records
+				foreach ($records as $index => $relModel) {
+					if (!empty($relModel->getRelaxedDirtyAttributes())) {
+						foreach ($link as $fk => $pk) {
+							$relModel->$fk = $this->$pk; // in case is a new record
+						}
+						$relSave = $relModel->save();
+						if (!$relSave || !empty($relModel->errors)) {
+							$relModelWords = Yii:: t('churros', Inflector::camel2words(StringHelper::basename($relModelClass)));
+							$index++;
+							foreach ($relModel->errors as $validation) {
+								foreach ($validation as $errorMsg) {
+									$this->addError($relation_name, "$relModelWords #$index : $errorMsg");
 								}
-								$success = false;
 							}
+							$success = false;
 						}
 					}
 				}
-			} else {
-				//Has One
-				foreach ($link as $key => $value) {
-					$records->$key = $this->$value;
-				}
-				$relSave = $records->save();
-				if (!$relSave || !empty($records->errors)) {
-					$recordsWords = Yii:: t('churros', Inflector::camel2words(StringHelper::basename($AQ->modelClass)));
-					foreach ($records->errors as $validation) {
-						foreach ($validation as $errorMsg) {
-							$this->addError($relation_name, "$recordsWords : $errorMsg");
-						}
+			}
+		} else {
+			//Has One
+			foreach ($link as $key => $value) {
+				$records->$key = $this->$value;
+			}
+			$relSave = $records->save();
+			if (!$relSave || !empty($records->errors)) {
+				$recordsWords = Yii:: t('churros', Inflector::camel2words(StringHelper::basename($AQ->modelClass)));
+				foreach ($records->errors as $validation) {
+					foreach ($validation as $errorMsg) {
+						$this->addError($relation_name, "$recordsWords : $errorMsg");
 					}
-					$success = false;
 				}
+				$success = false;
 			}
 		}
 		return $success;
