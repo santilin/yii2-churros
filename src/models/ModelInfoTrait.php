@@ -6,7 +6,7 @@ use Yii;
 use yii\db\{ActiveRecord,ActiveQuery};
 use santilin\churros\json\JsonModel;
 use yii\base\{InvalidConfigException,InvalidArgumentException};
-use yii\helpers\{ArrayHelper,Url};
+use yii\helpers\{ArrayHelper,Html,Url};
 use santilin\churros\helpers\{YADTC,AppHelper,FormHelper};
 use santilin\churros\lang\EsHelper;
 use santilin\churros\ModelSearchTrait;
@@ -927,5 +927,18 @@ trait ModelInfoTrait
 		}
 	}
 
+	public function dumpErrors(bool $encode = false, string $sep = "\n"): string
+	{
+		// Copied from Html::collectErrors
+		// If there are the same error messages for different attributes, array_unique will leave gaps
+		// between sequential keys. Applying array_values to reorder array keys.
+		$lines = array_values(array_unique($this->getErrorSummary(true)));
+		if ($encode) {
+			foreach ($lines as &$line) {
+				$line = Html::encode($line);
+			}
+		}
+		return join($sep, $lines);
+	}
 
 } // trait ModelInfoTrait
