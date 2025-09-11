@@ -74,6 +74,11 @@ class JsonModel extends \yii\base\Model
         return parent::__get($name);
     }
 
+    public function getJsonModelable(): JsonModelable
+    {
+        return $this->_json_modelable;
+    }
+
     public function setJsonModelable(JsonModel $other)
     {
         $this->_json_modelable = $other->_json_modelable;
@@ -168,22 +173,23 @@ class JsonModel extends \yii\base\Model
             if (!$this->_path) {
                 return null;
             }
-            $parts = array_filter(explode('/', $this->_path));
-            $gc = get_class($this);
+            $parts = array_filter(static::split_by_slash_outside_brackets($this->path));
             if ((count($parts) % 2) == 0) {
                 array_pop($parts);
             }
             if (count($parts)==0) {
                 return null;
             }
+            $jp = $this->jsonPath();
             if ($this->jsonPath() == end($parts)) {
                 array_pop($parts); // jsonPath
             } else {
                 throw new \Exception($this->_path . ': invalid path');
             }
-            $this->_parent_model = new static::$parent_model_class;
+            $parent_id = array_pop($parts);
+            $this->_parent_model = new static::$parent_model_class();
             $this->_parent_model->loadJson($this->_json_modelable,
-                '/'. implode('/', $parts), end($parts));
+                '/'. implode('/', $parts), $parent_id);
         }
         return $this->_parent_model;
     }
@@ -296,15 +302,14 @@ class JsonModel extends \yii\base\Model
 	public function loadJson(JsonModelable $json_modelable, string $json_path = null, string $id = null, string $locator = null):?JsonObject
     {
         $this->_json_modelable = $json_modelable;
-        $path_parts = array_filter(explode('/', $json_path));
-        if ($id && count($path_parts) % 2 == 1) {
-            $path_parts[] = $id;
+        if (str_ends_with($json_path, '/' . $this->jsonPath() . '/' . $id)) {
+            $json_path = substr($json_path, 0, -strlen("/$id"));
         }
-        $this->_path = '/' . implode('/', $path_parts);
+        $this->_path = $json_path . '/' . $id;
         if ($locator === null) {
             $locator = static::$_locator;
         }
-        $this->_json_object = $json_modelable->getJsonObject($this->_path, $id, $locator);
+        $this->_json_object = $json_modelable->getJsonObject($json_path, $id, $locator);
         if ($this->_json_object !== null) {
             $this->_is_new_record = false;
             $v = $this->_json_object->getValue();
@@ -632,6 +637,34 @@ class JsonModel extends \yii\base\Model
 		}
 	}
 
+
+	private static function split_by_slash_outside_brackets($str)
+    {
+        $result = [];
+        $buffer = '';
+        $bracket_level = 0;
+
+        $len = strlen($str);
+        for ($i = 0; $i < $len; $i++) {
+            $c = $str[$i];
+
+            if ($c === '[') {
+                $bracket_level++;
+            } elseif ($c === ']') {
+                if ($bracket_level > 0) $bracket_level--;
+            }
+
+            if ($c === '/' && $bracket_level === 0) {
+                $result[] = $buffer;
+                $buffer = '';
+            } else {
+                $buffer .= $c;
+            }
+        }
+        // Push the last chunk
+        $result[] = $buffer;
+        return $result;
+    }
 
 
 } // class

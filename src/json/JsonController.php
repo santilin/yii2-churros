@@ -40,7 +40,7 @@ class JsonController extends \yii\web\Controller
 	const MSG_ERROR_DELETE_INTEGRITY = 'Unable to delete {la} {title} <a href="{record_url}">{record_medium}</a> because it has related data.';
 	const MSG_ERROR_DELETE_USED_IN_RELATION = 'Unable to delete {la} {title} <a href="{record_url}">{record_medium}</a> because it is used by at least one {relation_title}.';
 	const MSG_ACCESS_DENIED = 'Access denied to this {title}.';
-	const MSG_NOT_FOUND = '{Title} with primary key {id} not found.';
+	const MSG_NOT_FOUND = '{Title} with path {path}/{id} not found.';
 
 	/**
 	 * An array of extra params to pass to the views
@@ -556,8 +556,10 @@ class JsonController extends \yii\web\Controller
 			}
 			if ($this->action) {
 				// Remove action part to get only the json path
-				if (StringHelper::endsWith($this->_path, '/' . $this->action->id)) {
-					$this->_path = substr($this->_path, 0, -strlen($this->action->id) - 1);
+				$suffix = '/' . $this->action->id;
+				$suffixLen = strlen($suffix);
+				if (str_ends_with($this->_path, $suffix)) {
+					$this->_path = substr($this->_path, 0, -$suffixLen);
 				}
 			}
 		}

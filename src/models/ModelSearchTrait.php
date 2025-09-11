@@ -79,7 +79,7 @@ trait ModelSearchTrait
 		foreach ($gridColumns as $col_attribute => $column_def) {
 			if ( $column_def === null // Allows for conditional definition of columns
 // 				|| is_int($attribute)
-				|| StringHelper::endsWith($column_def['class']??'','ActionColumn') ) {
+				|| str_ends_with($column_def['class']??'','ActionColumn') ) {
 				continue;
 			}
 			if (!empty($column_def['filterAttribute'])) {
