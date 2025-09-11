@@ -56,10 +56,10 @@ class SimpleGridView extends \yii\grid\GridView
 				'prevPageLabel' => '<',
 			];
 		}
-		if( $this->output != 'Screen' ) {
+		if ($this->output != 'Screen' ) {
 			$config['dataProvider']->pagination = false;
 		}
-		if( empty($config['dataColumnClass']) ) {
+		if (empty($config['dataColumnClass']) ) {
 			$config['dataColumnClass'] = \santilin\churros\widgets\grid\DataColumn::class;
 		}
 		// Eliminar propiedades de kartik data column
@@ -99,7 +99,7 @@ class SimpleGridView extends \yii\grid\GridView
 				return $grid->groupHeader($model, $key, $index, $grid);
 			};
 			$this->afterRow = function($model, $key, $index, $grid) {
-				if( $this->recno < $this->dataProvider->getCount() ) {
+				if ($this->recno < $this->dataProvider->getCount() ) {
 					return '';
 				}
 				return $grid->finalRow($model, $key, $index, $grid);
@@ -135,7 +135,7 @@ class SimpleGridView extends \yii\grid\GridView
 	public function renderTableRow($model, $key, $index)
 	{
 		$this->savedRowData = $this->updateRowData($model, $key, $index);
-		if( ($this->onlySummary && count($this->groups) == 0) || !$this->onlySummary ) {
+		if (($this->onlySummary && count($this->groups) == 0) || !$this->onlySummary ) {
 			return parent::renderTableRow($model, $key, $index);
 		} else {
 			return null;
@@ -215,16 +215,16 @@ class SimpleGridView extends \yii\grid\GridView
 				}
 				break;
 			case 'max':
-				if( $this->summaryValues[$kc] == null ) {
+				if ($this->summaryValues[$kc] == null ) {
 					$this->summaryValues[$kc] = $value;
-				} else if( $this->summaryValues[$kc] < $value ) {
+				} else if ($this->summaryValues[$kc] < $value ) {
 					$this->summaryValues[$kc] = $value;
 				}
 				break;
 			case 'min':
-				if( $this->summaryValues[$kc] == null ) {
+				if ($this->summaryValues[$kc] == null ) {
 					$this->summaryValues[$kc] = $value;
-				} else if( $this->summaryValues[$kc] > $value ) {
+				} else if ($this->summaryValues[$kc] > $value ) {
 					$this->summaryValues[$kc] = $value;
 				}
 				break;
@@ -288,7 +288,7 @@ class SimpleGridView extends \yii\grid\GridView
 
 	protected function groupHeader($model, $key, $index, $grid)
 	{
-		if( $this->previousModel === null ) {
+		if ($this->previousModel === null ) {
 			$this->previousModel = $model;
 		}
 		$ret = '';
@@ -299,7 +299,7 @@ class SimpleGridView extends \yii\grid\GridView
 		$previous_updated = false;
 		foreach ($this->groups as $kg => $group) {
 			$this_updated = $group->willUpdateGroup($model, $key, $index);
-			if( $previous_updated ) {
+			if ($previous_updated ) {
 				$updated_groups[$kg] = true;
 			} else {
 				$previous_updated = $updated_groups[$kg] = $this_updated;
@@ -328,7 +328,7 @@ class SimpleGridView extends \yii\grid\GridView
 			if ($updated_groups[$kg] || $first_header_shown) {
 				$first_header_shown = true;
 				if ($group->header!==false) {
-					if( ($this->onlySummary && $group->level < count($this->groups))
+					if (($this->onlySummary && $group->level < count($this->groups))
  						|| $group->level <= count($this->groups) ) {
 						$ret .= Html::tag('tr',
 							$group->getHeaderContent($model, $key, $index, $tdoptions));
@@ -368,11 +368,11 @@ class SimpleGridView extends \yii\grid\GridView
 	 */
 	public function getFooterSummary($summary_columns, $tdoptions)
 	{
-		if( count($summary_columns) == 0 ) {
+		if (count($summary_columns) == 0 ) {
 			return '';
 		}
 		$p = $this->dataProvider->getPagination();
-		if( $p && $p->getPageCount() > 1 ) {
+		if ($p && $p->getPageCount() > 1 ) {
 			return '<td colspan="420">' . Yii::t('churros', 'Not showing totals because not all the rows have been shown') . '</td>';
 		}
 		$colspan = 0;
@@ -402,21 +402,21 @@ class SimpleGridView extends \yii\grid\GridView
 				$nc++;
 				continue;
 			}
-			if( $nc++ < $colspan ) {
+			if ($nc++ < $colspan ) {
 				continue;
 			}
 			$kc = $column->attribute;
 			$classes = [];
-			if( ($column->format?:'raw') != 'raw' ) {
+			if (($column->format?:'raw') != 'raw' ) {
 				if (is_array($column->format)) {
 					$classes[] = "format-" . reset($column->format);
 				} else {
 					$classes[] = "format-$column->format";
 				}
 			}
-			if( isset($summary_columns[$kc]) ) {
+			if (isset($summary_columns[$kc]) ) {
 				$value = 0.0;
-				if( $summary_columns[$kc] == 'f_avg' ) {
+				if ($summary_columns[$kc] == 'f_avg' ) {
 					if ($this->summaryValues[$kc][1] != 0 ) {
 						$value = $this->summaryValues[$kc][0] / $this->summaryValues[$kc][1];
 					}
@@ -443,7 +443,7 @@ class SimpleGridView extends \yii\grid\GridView
 				$this->savedRowData[$keycol] = $value;
 			}
 		}
-		if( isset( $this->options['AfterRowData'] ) && is_callable( $this->options['AfterRowData'] ) ) {
+		if (isset( $this->options['AfterRowData'] ) && is_callable( $this->options['AfterRowData'] ) ) {
 			call_user_func_array($this->options['AfterRowData'], [&$this->savedRowData, $this->columns]);
 		}
 	}
@@ -477,7 +477,7 @@ class SimpleGridView extends \yii\grid\GridView
 				}
 				if (array_key_exists($fldname, $format_fields)) {
 					$col['format'] = $format_fields[$fldname];
-					if( $col['format'] == 'percent' ) {
+					if ($col['format'] == 'percent' ) {
 						$col['type'] = 'float';
 					}
 				}
