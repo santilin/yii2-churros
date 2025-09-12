@@ -164,8 +164,8 @@ trait ModelSearchTrait
 		$model = $this;
 		$table_alias = 'as';
 		$relation = null;
-		while (strpos($attribute, '.') !== FALSE || isset($model::$relations[$attribute])) {
-			if (strpos($attribute, '.') === FALSE) {
+		while (($pos_attr=strpos($attribute, '.')) !== FALSE || isset($model::$relations[$attribute])) {
+			if ($pos_attr === FALSE) {
 				$relation_name = $attribute;
 				$attribute = '';
 			} else {
@@ -205,7 +205,7 @@ trait ModelSearchTrait
 						$table_alias = $nested_tablename;
 					}
 				} else {
-					$table_alias = $relation_name;
+					$table_alias .= "_" . $relation_name;
 					$model_class = $relation['modelClass'];
 					$model = $model_class::instance();
 					$nested_relations[$table_alias] = $relation['relatedTablename'];
