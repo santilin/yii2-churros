@@ -97,13 +97,25 @@ class GridView extends SimpleGridView
     {
 		if ($this->filterModel && $this->dataProvider->getCount() == 0) {
 			// No mostrar la fila de filtro si no hay valores filtrados
- 			$filter_attrs = $this->filterModel->activeAttributes();
 			$has_filters = false;
-			foreach ($filter_attrs as $attribute) {
-				$v = $this->filterModel->$attribute;
-				if (!empty($v)) {
-					$has_filters = true;
-					break;
+ 			$filter_attrs = $this->filterModel->activeAttributes();
+			foreach ($this->columns as $kc => $column) {
+				$gc = get_class($column);
+				if ($column instanceof \yii\grid\ActionColumn) {
+					continue;
+				}
+				if (!$column->visible) {
+					continue;
+				}
+				if ($column->filterAttribute) {
+					$kc = $column->filterAttribute;
+				}
+				if (in_array($kc, $filter_attrs)) {
+					$v = ArrayHelper::getValue($this->filterModel, $kc);
+					if (!empty($v)) {
+						$has_filters = true;
+						break;
+					}
 				}
 			}
  			if (!$has_filters) {

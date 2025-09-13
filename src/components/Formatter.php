@@ -62,7 +62,7 @@ class Formatter extends \yii\i18n\Formatter
 		}
 	}
 
-	public function asSeconds2HoursMinutes(?int $seconds, bool $blank_on_zero = false)
+	public function asSeconds2Hours(?int $seconds, bool $blank_on_zero = false)
 	{
 		if (empty($seconds) ) {
 			if ($blank_on_zero) {

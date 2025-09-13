@@ -17,10 +17,11 @@ class CrudController extends \yii\web\Controller
 {
 	use ControllerTrait;
 
-	static protected $_prefix = null;
-	static protected $_model_name = null;
-	protected $crudActions = [];
-	protected $isJunctionModel = false;
+	public $model;
+	public array $modelOldAttributes = [];
+	protected static ?string $_prefix = null;
+	protected static ?string $_model_name = null;
+	protected array $crudActions = [];
 	protected $masterModel = false;
 	protected $masterController = null;
 
@@ -172,21 +173,21 @@ class CrudController extends \yii\web\Controller
 	public function actionView($id)
 	{
 		$params = $this->request->queryParams;
-		$model = $this->findModel($id, $params);
+		$this->model = $this->findModel($id, $params);
 		$params['permissions'] = $this->resolvePermissions($params['permissions']??[], $this->userPermissions());
 		if ($this->request->getIsAjax()) {
 			$this->layout = false;
 			return $this->render('_view', [
-				'model' => $model,
+				'model' => $this->model,
 				'title' => 'View',
 				'viewForms' => [ '_view' => [ '', null, [], '' ] ],
-				'viewParams' => $this->changeActionParams($params, 'view', $model)
+				'viewParams' => $this->changeActionParams($params, 'view', $this->model)
 			]);
 		} else {
 			return $this->render('view', [
-				'model' => $model,
+				'model' => $this->model,
 				'viewForms' => [ '_view' => [ '', null, [], '' ] ],
-				'viewParams' => $this->changeActionParams($params, 'view', $model)
+				'viewParams' => $this->changeActionParams($params, 'view', $this->model)
 			]);
 		}
 	}
@@ -199,23 +200,23 @@ class CrudController extends \yii\web\Controller
 	{
 		$params = array_merge($this->request->get(), $this->request->post());
 		$params['permissions'] = $this->resolvePermissions($params['permissions']??[], $this->userPermissions());
-		$model = $this->findFormModel($id, null, 'create', $params);
+		$this->model = $this->findFormModel($id, null, 'create', $params);
 		if ($master_model = $this->getMasterModel()) {
-			$master_model->linkDetails($model);
+			$master_model->linkDetails($this->model);
 		}
-		if ($model->loadAll($params, static::findRelationsInForm($params)) ) {
-			if ($model->saveAll(true) ) {
+		if ($this->model->loadAll($params, static::findRelationsInForm($params)) ) {
+			if ($this->model->saveAll(true) ) {
 				if ($this->request->getIsAjax()) {
-					return json_encode($model->getAttributes());
+					return json_encode($this->model->getAttributes());
 				}
-				$this->addSuccessFlashes('create', $model);
-				return $this->redirect($this->returnTo(null, 'create', $model));
+				$this->addSuccessFlashes('create', $this->model);
+				return $this->redirect($this->returnTo(null, 'create', $this->model));
 			}
 		}
 		return $this->render('create', [
-			'model' => $model,
+			'model' => $this->model,
 			'viewForms' => [ '_form' => [ '', null, $this->crudActions, '' ] ],
-			'formParams' => $this->changeActionParams($params, 'create', $model)
+			'formParams' => $this->changeActionParams($params, 'create', $this->model)
 		]);
 	}
 
@@ -230,23 +231,23 @@ class CrudController extends \yii\web\Controller
 	{
 		$params = array_merge($this->request->get(), $this->request->post());
 		$params['permissions'] = $this->resolvePermissions($params['permissions']??[], $this->userPermissions());
-		$model = $this->findFormModel($id, null, 'duplicate', $params);
-		if ($model->loadAll($this->request->post(), static::findRelationsInForm($params))) {
-			$model->setIsNewRecord(true);
-			$model->resetPrimaryKeys();
-			if ($model->saveAll(true) ) {
+		$this->model = $this->findFormModel($id, null, 'duplicate', $params);
+		if ($this->model->loadAll($this->request->post(), static::findRelationsInForm($params))) {
+			$this->model->setIsNewRecord(true);
+			$this->model->resetPrimaryKeys();
+			if ($this->model->saveAll(true) ) {
 				if ($this->request->getIsAjax()) {
 					Yii::$app->response->format = \yii\web\Response::FORMAT_JSON;
-					return ['model' => $model->getAttributes(), 'success' => $model->getSuccesses()];
+					return ['model' => $this->model->getAttributes(), 'success' => $this->model->getSuccesses()];
 				}
-				$this->addSuccessFlashes('duplicate', $model);
-				return $this->redirect($this->returnTo(null, 'duplicate', $model));
+				$this->addSuccessFlashes('duplicate', $this->model);
+				return $this->redirect($this->returnTo(null, 'duplicate', $this->model));
 			}
 		}
 		return $this->render('duplicate', [
-			'model' => $model,
+			'model' => $this->model,
 			'viewForms' => [ '_form' => [ '', null, [], '' ] ],
-			'formParams' => $this->changeActionParams($params, 'duplicate', $model)
+			'formParams' => $this->changeActionParams($params, 'duplicate', $this->model)
 		]);
 	}
 
@@ -260,24 +261,24 @@ class CrudController extends \yii\web\Controller
 	{
 		$params = array_merge($this->request->get(), $this->request->post());
 		$params['permissions'] = $this->resolvePermissions($params['permissions']??[], $this->userPermissions());
-		$model = $this->findFormModel($id, null, 'update', $params);
- 		if ($model === null && FormHelper::hasPermission($params['permissions'], 'create')) {
+		$this->model = $this->findFormModel($id, null, 'update', $params);
+ 		if ($this->model === null && FormHelper::hasPermission($params['permissions'], 'create')) {
 			return $this->redirect(array_merge(['create'], $params));
 		}
-		if ($model->loadAll($params, static::findRelationsInForm($params))) {
-			if ($model->saveAll(true)) {
+		if ($this->model->loadAll($params, static::findRelationsInForm($params))) {
+			if ($this->model->saveAll(true)) {
 				if ($this->request->getIsAjax()) {
 					Yii::$app->response->format = \yii\web\Response::FORMAT_JSON;
-					return ['model' => $model->getAttributes(), 'success' => $model->getSuccesses()];
+					return ['model' => $this->model->getAttributes(), 'success' => $this->model->getSuccesses()];
 				}
-				$this->addSuccessFlashes('update', $model);
-				return $this->redirect($this->returnTo(null, 'update', $model));
+				$this->addSuccessFlashes('update', $this->model);
+				return $this->redirect($this->returnTo(null, 'update', $this->model));
 			}
 		}
 		return $this->render('update', [
-			'model' => $model,
+			'model' => $this->model,
 			'viewForms' => [ '_form' => [ '', null, [], '' ] ],
-			'formParams' => $this->changeActionParams($params, 'update', $model)
+			'formParams' => $this->changeActionParams($params, 'update', $this->model)
 		]);
 	}
 
@@ -288,35 +289,35 @@ class CrudController extends \yii\web\Controller
 	 */
 	public function actionDelete($id)
 	{
-		$model = $this->findModel($id);
+		$this->model = $this->findModel($id);
 		if (!in_array('delete', $this->crudActions)) {
-			throw new ForbiddenHttpException($model->t('churros',
+			throw new ForbiddenHttpException($this->model->t('churros',
 				$this->getResultMessage('access_denied')));
 		}
 		try {
-			if ($model->deleteWithRelated()) {
+			if ($this->model->deleteWithRelated()) {
 				if ($this->request->getIsAjax()) {
 					Yii::$app->response->format = \yii\web\Response::FORMAT_JSON;
-					return ['model' => $model->getAttributes(), 'success' => $model->getSuccesses()];
+					return ['model' => $this->model->getAttributes(), 'success' => $this->model->getSuccesses()];
 				}
-				$this->addSuccessFlashes('delete', $model);
-				return $this->redirect($this->returnTo(null, 'delete', $model));
+				$this->addSuccessFlashes('delete', $this->model);
+				return $this->redirect($this->returnTo(null, 'delete', $this->model));
 			} else {
-				Yii::$app->session->addFlash('error', $model->t('churros', $this->getResultMessage('error_delete')));
-				$this->addErrorFlashes($model);
+				Yii::$app->session->addFlash('error', $this->model->t('churros', $this->getResultMessage('error_delete')));
+				$this->addErrorFlashes($this->model);
 			}
 		} catch (\yii\db\IntegrityException $e) {
-			$model->addError('delete', $model->t('churros',
+			$this->model->addError('delete', $this->model->t('churros',
 				$this->getResultMessage('error_delete_integrity')));
 			if (YII_ENV_DEV) {
-				$model->addError('delete_integrity', $e->getMessage());
+				$this->model->addError('delete_integrity', $e->getMessage());
 			}
 		} catch (\yii\web\ForbiddenHttpException $e ) {
-			$model->addError('delete', $model->t('churros',
+			$this->model->addError('delete', $this->model->t('churros',
 				$this->getResultMessage('error_delete')));
 		}
-		$this->addErrorFlashes($model);
-		return $this->redirect($this->returnTo(null, 'delete_error', $model));
+		$this->addErrorFlashes($this->model);
+		return $this->redirect($this->returnTo(null, 'delete_error', $this->model));
 	}
 
 	/**
@@ -327,14 +328,14 @@ class CrudController extends \yii\web\Controller
 	public function actionPdf($id)
 	{
 		$params = $this->request->queryParams;
-		$model = $this->findModel($id, $params);
+		$this->model = $this->findModel($id, $params);
 		if( YII_DEBUG ) {
             Yii::$app->getModule('debug')->instance->allowedIPs = [];
         }
 		// https://stackoverflow.com/a/54568044/8711400
 		$content = $this->renderAjax('_pdf', [
-			'model' => $model,
-			'viewParams' => $this->changeActionParams($params, 'pdf', $model)
+			'model' => $this->model,
+			'viewParams' => $this->changeActionParams($params, 'pdf', $this->model)
 		]);
 		$methods = [];
 		$margin_header = AppHelper::yiiparam('pdfMarginHeader', 15);
@@ -351,10 +352,10 @@ class CrudController extends \yii\web\Controller
 			$methods['setHeader'] = $header_content;
 		} else {
 			$methods['setHeader'] = date('Y-m-d H:i') . '|'
-				. $model->getModelInfo('title') . '|' . Yii::$app->name . ' - {PAGENO}';
+				. $this->model->getModelInfo('title') . '|' . Yii::$app->name . ' - {PAGENO}';
 		}
 		if( $this->findViewFile('_pdf_footer') ) {
-			$methods['setFooter'] = $this->renderPartial('_pdf_footer', ['model'=>$model]);
+			$methods['setFooter'] = $this->renderPartial('_pdf_footer', ['model'=>$this->model]);
 		}
 		$pdf = new \kartik\mpdf\Pdf([
 			'mode' => \kartik\mpdf\Pdf::MODE_CORE,
@@ -368,7 +369,7 @@ class CrudController extends \yii\web\Controller
 			'content' => $content,
 			'cssFile' => '@vendor/kartik-v/yii2-mpdf/src/assets/kv-mpdf-bootstrap.min.css',
 			'cssInline' => file_get_contents(Yii::getAlias('@app') . '/web/css/print.css'),
-			'options' => ['title' => $model->recordDesc()],
+			'options' => ['title' => $this->model->recordDesc()],
 			'methods' => $methods,
 		]);
 		return $pdf->render();
@@ -401,7 +402,7 @@ class CrudController extends \yii\web\Controller
 			if ($to = $this->request->queryParams['returnTo']??null) {
 				return $to;
 			}
-			if ($this->isJunctionModel && $this->getMasterModel()) {
+			if ($this->model::$isJunctionModel && $this->getMasterModel()) {
 				$to_model = 'parent';
 				$to_action = 'view';
 			} else {
@@ -457,14 +458,14 @@ class CrudController extends \yii\web\Controller
 		if ($to_model) {
 			if ($to_model == 'parent') {
 				if ($this->getMasterModel()) {
-					$model = $this->masterModel;
+					$this->model = $this->masterModel;
 				}
 			} else if ($to_model == 'model') {
 			} else {
-				$model = $$to_model;
+				$this->model = $$to_model;
 			}
 		}
-		$pk = $model->getPrimaryKey(true);
+		$pk = $this->model->getPrimaryKey(true);
 		switch($to_action) {
 			case 'update':
 			case 'duplicate':
@@ -482,7 +483,7 @@ class CrudController extends \yii\web\Controller
 				$redirect_params = array_merge($redirect_params, $pk);
 		}
 		if ($to_model) {
-			$redirect_params[0] = Url::to('/' . $this->getBaseRoute() . '/' . $model->controllerName()
+			$redirect_params[0] = Url::to('/' . $this->getBaseRoute() . '/' . $this->model->controllerName()
 				. '/' . $to_action, $pk);
 		} else {
 			$redirect_params[0] = $this->getActionRoute($to_action);
@@ -525,9 +526,9 @@ class CrudController extends \yii\web\Controller
 	public function actionRawModel($id)
 	{
 		$params = $this->request->queryParams;
-		$model = $this->findModel($id, $params);
+		$this->model = $this->findModel($id, $params);
 		if( $model ) {
-            return json_encode($model->getAttributes());
+            return json_encode($this->model->getAttributes());
         } /// @todo else
 	}
 
@@ -766,7 +767,7 @@ class CrudController extends \yii\web\Controller
 		return $breadcrumbs;
 	}
 
-	protected function linkToModel($model)
+	protected function linkToModel($model): string
 	{
 		$pk = $model->getPrimaryKey();
 		if( is_array($pk) ) {
