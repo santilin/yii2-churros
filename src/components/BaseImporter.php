@@ -163,7 +163,7 @@ abstract class BaseImporter
 			$transaction = $this->record->getDb()->beginTransaction();
 		}
         $ret = $this->importCsvRecords($csvdelimiter, $csvquote);
-		if( $ret == self::OK ) {
+		if ($ret == self::OK) {
 			$this->output("Insertados {$this->imported} registros");
 			$this->output("Actualizados {$this->updated} registros");
 			if (!$this->dry_run) {
@@ -177,7 +177,7 @@ abstract class BaseImporter
 			if (!$this->auto_commit) {
 				$transaction->rollBack();
 			}
-			switch( $ret ) {
+			switch( $ret) {
 			case self::ABORTED_ON_ERROR:
 				$this->output("Aborted on error");
 				break;
@@ -220,9 +220,9 @@ abstract class BaseImporter
             return self::FILE_ERROR;
         }
         if (array_diff($csvline,$csvheaders) != []
-        && array_diff($csvheaders,$csvline) != [] ) {
+        && array_diff($csvheaders,$csvline) != []) {
 			foreach( $csvline as $key=>$value) {
-				if( $csvline[$key] != $csvheaders[$key] ) {
+				if ($csvline[$key] != $csvheaders[$key]) {
 					echo "$key=>$value <==> $key=>" . $csvheaders[$key]. "\n";
 				}
 			}
@@ -245,9 +245,9 @@ abstract class BaseImporter
 				$this->output("Leyendo línea CSV {$this->csvline}");
 			}
 			$ret = $this->importLine($import_fields_info, $csvheaders, $csvline);
-			if( $ret != self::OK  && $ret != self::IGNORED_RECORD && $ret != self::EMPTY_RECORD ) {
+			if ($ret != self::OK  && $ret != self::IGNORED_RECORD && $ret != self::EMPTY_RECORD) {
 				$has_errors = true;
-				if( $this->abort_on_error ) {
+				if ($this->abort_on_error) {
 					fclose($file);
 					return self::ABORTED_ON_ERROR;
 				}
@@ -304,13 +304,13 @@ abstract class BaseImporter
 					}
 				}
 			}
-			if( !$this->ignoreRecord($this->record_to_import) ) {
-				if( $has_errors ) {
+			if (!$this->ignoreRecord($this->record_to_import)) {
+				if ($has_errors) {
 					return self::RECORD_WITH_ERRORS;
 				} else {
 					// Guarda la línea original de este registro por si da error poder mostrar la línea del error
 					$this->afterReadLine($this->record_to_import, $csvline);
-					if( count($this->record_to_import) > 0 ) {
+					if (count($this->record_to_import) > 0) {
 						return $this->importRecord($this->record_to_import);
 					} else {
 						return self::RECORD_WITH_ERRORS;
@@ -349,11 +349,11 @@ abstract class BaseImporter
 					} else {
 						$has_error = true;
 					}
-					if (!$has_error && !$r->saveAll(false) ) {
+					if (!$has_error && !$r->saveAll(false)) {
 						$has_error = true;
 					} else {
 						$this->updated++;
-						if( $this->verbose ) {
+						if ($this->verbose) {
 							$this->output("Actualizado registro " . $r->recordDesc() . "\n" . json_encode($changes));
 						}
 					}
@@ -365,7 +365,7 @@ abstract class BaseImporter
 					$has_error = true;
 				}
 			} elseif (!$r->saveAll(false)) {
-				if( $r->getFirstError('yii\db\IntegrityException')) {
+				if ($r->getFirstError('yii\db\IntegrityException')) {
 					if ($this->ignore_dups) {
 						$this->output("Ignorando registro duplicado " . $r->recordDesc());
 						$ignored = true;
@@ -378,7 +378,7 @@ abstract class BaseImporter
 				}
 			} else {
 				$this->imported++;
-				if( $this->verbose ) {
+				if ($this->verbose) {
 					$this->output("Importado registro " . $r->recordDesc());
 				}
 			}
@@ -386,12 +386,12 @@ abstract class BaseImporter
 			$has_error = true;
 		}
 		if ($has_error) {
-			if ($this->auto_commit ) {
+			if ($this->auto_commit) {
 				$transaction->rollBack();
 			}
 			$ne = 0;
 			foreach ($r->getFirstErrors() as $k => $error) {
-				if ($ne == 0 ) {
+				if ($ne == 0) {
 					$error .= json_encode($r->getAttributes(),JSON_UNESCAPED_UNICODE);
 				}
 				$this->addError($error);
@@ -420,12 +420,12 @@ abstract class BaseImporter
 			if (is_array($value)) {
 				continue;
 			}
-			if( $value != null ) { // keep default values
+			if ($value != null) { // keep default values
 				$record->$field = $value;
 			}
         }
         foreach ($values as $field => $value) {
-			if( !is_array($value) ) {
+			if (!is_array($value)) {
 				continue;
 			}
 			$record->loadAll([ $record->formName() => [ $field => $value ]], [$field]);
@@ -468,7 +468,7 @@ abstract class BaseImporter
 		$csvheaders = array_keys($import_fields_info);
 		foreach($csvlines as $csvline) {
 			$ret = $this->importLine($import_fields_info, $csvheaders, $csvline);
-			if( !$ret ) {
+			if (!$ret) {
 				break;
 			}
 		}
@@ -482,13 +482,13 @@ abstract class BaseImporter
     {
         $import_fields_info = $this->getImportFieldsInfo();
         $ret = '';
-        foreach( $import_fields_info as $key => $value ) {
-			if( $ret != '' ) {
+        foreach( $import_fields_info as $key => $value) {
+			if ($ret != '') {
 				$ret .= ",";
 			}
 			$ret .= "\"$key\"";
         }
-        if( $echo ) {
+        if ($echo) {
 			echo "$ret\n";
 		} else {
 			return $ret;
@@ -533,7 +533,7 @@ abstract class BaseImporter
 
     protected function import_copy_with_default($csv_value, $array_csv, string $default): string
     {
-		if( trim($csv_value) == '') {
+		if (trim($csv_value) == '') {
 			return $default;
 		} else {
 			return trim($csv_value);
@@ -594,12 +594,12 @@ abstract class BaseImporter
     {
 		$related_class = "\app\models\\$related_model";
 		$related_record = new $related_class;
-		if( !is_array($related_fields) ) {
+		if (!is_array($related_fields)) {
 			$related_fields = [ $related_fields ];
 		}
-		foreach( $related_fields as $search_field ) {
+		foreach( $related_fields as $search_field) {
 			$found = $related_record->find()->andWhere( [ $search_field => $related_value] )->one();
-			if( $found ) {
+			if ($found) {
 				return $found->$related_field;
 			}
 		}
@@ -609,7 +609,7 @@ abstract class BaseImporter
     protected function import_find_in_array($value, $array_csv, $array)
     {
 		foreach($array as $arr_key=>$arr_value) {
-			if( $value == $arr_value ) {
+			if ($value == $arr_value) {
 				return $arr_key;
 			}
 		}
@@ -623,7 +623,7 @@ abstract class BaseImporter
 	 */
 	public function addError(string $message)
 	{
-		if( $this->csvline != 0 ) {
+		if ($this->csvline != 0) {
 			$exc_message = "l:{$this->csvline}: $message";
 		} else {
 			$exc_message = $message;
@@ -634,14 +634,14 @@ abstract class BaseImporter
 	protected function add_error_get_last()
 	{
 		$last_error = error_get_last();
-		if( $last_error ) {
+		if ($last_error) {
 			$this->errors[] = $last_error['message'];
 		}
 	}
 
 	protected function output(string $message)
 	{
-		if( !$this->verbose ) {
+		if (!$this->verbose) {
 			return;
 		}
 		if ($this->dry_run) {
@@ -656,9 +656,9 @@ abstract class BaseImporter
      */
     public function showErrors($result)
     {
-		if( $result != self::OK ) {
-			foreach( $this->getErrors() as $key => $error ) {
-				if ( is_array($error) ) {
+		if ($result != self::OK) {
+			foreach( $this->getErrors() as $key => $error) {
+				if ( is_array($error)) {
 					$strerror = array_pop($error);
 				} else {
 					$strerror = & $error;
@@ -679,11 +679,11 @@ abstract class BaseImporter
     public function getErrorsAsString()
     {
 		$ret = "";
-		foreach( $this->getErrors() as $error ) {
-			if (strlen($ret) != 0 ) {
+		foreach( $this->getErrors() as $error) {
+			if (strlen($ret) != 0) {
 				$ret .= ".";
 			}
-			if ( is_array($error) ) {
+			if ( is_array($error)) {
 				$ret .= array_pop($error);
 			} else {
 				$ret .= $error;

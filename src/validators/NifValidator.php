@@ -8,8 +8,8 @@ class NifValidator extends Validator
     public function validateAttribute($model, $attribute)
     {
 		$validating_nif = new Nif($model->$attribute);
-		if( !$validating_nif->verify() ) {
-			if( $model instanceof ModelInfoTrait ) {
+		if (!$validating_nif->verify()) {
+			if ($model instanceof ModelInfoTrait) {
 				$this->addError($model, $attribute,
 					$model->t('churros', "The value '{value}' is not valid for {attribute}", [
 						'attribute' => $model->getAttributeLabel($attribute),

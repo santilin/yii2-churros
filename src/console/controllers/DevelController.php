@@ -28,10 +28,10 @@ class DevelController extends Controller
 	{
 		// https://json-schema.org/understanding-json-schema/index.html
 		$validator = new \JsonSchema\Validator();
-		if( $capelfname == null ) {
+		if ($capelfname == null) {
 			$capelfname = basename(getcwd()) . '.capel.json';
 		}
-		if( $schemafname == null ) {
+		if ($schemafname == null) {
 			$schemafname = self::CAPELDIR . '/share/definitions/project_schema.json';
 		}
 		echo "Validating $capelfname aginst $schemafname\n";

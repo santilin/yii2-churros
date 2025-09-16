@@ -32,16 +32,16 @@ class YADTC extends \DateTime
 	 */
 	static public function fromString($datetime, $format = null, \DateTimeZone $timezone = null): YADTC
 	{
-		if( $datetime === null || $datetime instanceof YADTC ) {
+		if ($datetime === null || $datetime instanceof YADTC) {
 			return $datetime;
 		}
-		if( ($datetime instanceof \DateTime) ) {
+		if (($datetime instanceof \DateTime)) {
 			$f = new self;
 			$f->setTimestamp( $datetime->getTimestamp() );
 			$f->setTimezone( $datetime->getTimezone() );
 			return $f;
 		}
-		if( is_string($datetime) && $datetime == '' ) {
+		if (is_string($datetime) && $datetime == '') {
 			return null;
 		}
 		if (is_int($datetime)) {
@@ -49,7 +49,7 @@ class YADTC extends \DateTime
 		}
 		if ($format !== null && is_string($datetime)) {
 			$dt = self::createFromFormat($format, $datetime, $timezone);
-			if( $dt !== false ) {
+			if ($dt !== false) {
 				if (strpos(static::guessTypeFromFormat($format), "time") === FALSE) {
 					$dt->setTime(0,0,0);
 				}
@@ -76,7 +76,7 @@ class YADTC extends \DateTime
 		foreach ($variations as $regexp => $format) {
 			if (preg_match ('|' . $regexp . '|', $sdate)) {
 				$datetime = self::createFromFormat($format, $sdate, $timezone);
-				if ($datetime !== false ) {
+				if ($datetime !== false) {
 					if (!str_contains($format, 'H')) {
 						$datetime->setTime(0,0,0);
 					}
@@ -129,7 +129,7 @@ class YADTC extends \DateTime
 	static public function formatFromSQL($format, $date, $onlymysql = false)
 	{
 		$ret = self::fromSQL($date, $onlymysql);
-		if( $ret ) {
+		if ($ret) {
 			return $ret->format($format);
 		} else {
 			return '';
@@ -256,59 +256,59 @@ class YADTC extends \DateTime
 
 	public function lastDayOfMonth($month = null, $year = null): int
 	{
-		if( $month == null ) {
+		if ($month == null) {
 			$month = $this->month();
 		}
-		if( $year == null ) {
+		if ($year == null) {
 			$year = $this->year();
 		}
 		return ($month== 2 ? ($year % 4 ? 28 : ($year % 100 ? 29 : ($year % 400 ? 28 : 29))) : (($month - 1) % 7 % 2 ? 30 : 31));
 	}
 	public function isLeap($year = null): bool
 	{
-		if( $year === null ) {
+		if ($year === null) {
 				$year = $this->year();
 		}
 		return ((($year % 4) == 0) && ((($year % 100) != 0) || (($year %400) == 0)));
 	}
 	public function eq($other): bool
 	{
-		if( !$other instanceof \DateTime && !$other instanceof YADTC) {
+		if (!$other instanceof \DateTime && !$other instanceof YADTC) {
 			$other = static::fromString($other);
 		}
 		return $this->getTimestamp() == $other->getTimestamp();
 	}
 	public function neq($other): bool
 	{
-		if( !$other instanceof \DateTime && !$other instanceof YADTC) {
+		if (!$other instanceof \DateTime && !$other instanceof YADTC) {
 			$other = static::fromString($other);
 		}
 		return $this->getTimestamp() != $other->getTimestamp();
 	}
 	public function lt($other): bool
 	{
-		if( !$other instanceof \DateTime && !$other instanceof YADTC) {
+		if (!$other instanceof \DateTime && !$other instanceof YADTC) {
 			$other = static::fromString($other);
 		}
 		return $this->getTimestamp() < $other->getTimestamp();
 	}
 	public function lte($other): bool
 	{
-		if( !$other instanceof \DateTime && !$other instanceof YADTC) {
+		if (!$other instanceof \DateTime && !$other instanceof YADTC) {
 			$other = static::fromString($other);
 		}
 		return $this->getTimestamp() <= $other->getTimestamp();
 	}
 	public function gt($other): bool
 	{
-		if( !$other instanceof \DateTime && !$other instanceof YADTC) {
+		if (!$other instanceof \DateTime && !$other instanceof YADTC) {
 			$other = static::fromString($other);
 		}
 		return $this->getTimestamp() > $other->getTimestamp();
 	}
 	public function gte($other): bool
 	{
-		if( !$other instanceof \DateTime && !$other instanceof YADTC) {
+		if (!$other instanceof \DateTime && !$other instanceof YADTC) {
 			$other = static::fromString($other);
 		}
 		return $this->getTimestamp() >= $other->getTimestamp();
@@ -331,11 +331,11 @@ class YADTC extends \DateTime
 	}
 	public function diff($other, $absolute = false): \DateInterval
 	{
-        if( $other instanceof YADTC ) {
+        if ($other instanceof YADTC) {
             $t = $other->getTimeStamp();
             $other = new \DateTime();
             $other->setTimestamp($t);
-		} else if( !$other instanceof \DateTime) {
+		} else if (!$other instanceof \DateTime) {
 			$other = \DateTime::fromString($other);
 		}
 		return parent::diff($other, $absolute);
@@ -404,7 +404,7 @@ class YADTC extends \DateTime
 			'U'
 		];
 
-		switch ( $syntax ) {
+		switch ( $syntax) {
 			case 'date':
 				$from = $strf_syntax;
 				$to   = $date_syntax;
@@ -420,7 +420,7 @@ class YADTC extends \DateTime
 		}
 
 		$pattern = array_map(
-			function ( $s ) {
+			function ( $s) {
 				return '/(?<!\\\\|\%)' . $s . '/';
 			},
 			$from
@@ -453,7 +453,7 @@ class YADTC extends \DateTime
 
 	static public function edad(\DateTime $nacimiento, \DateTime $adiade = null )
 	{
-		if( $adiade == null ) {
+		if ($adiade == null) {
 			$adiade = new \DateTime("now", $nacimiento->getTimezone());
 		}
 		$age = $nacimiento->diff($adiade)->y;
@@ -475,7 +475,7 @@ class YADTC extends \DateTime
 
     public function addDays($days)
     {
-		if( $days < 0 ) {
+		if ($days < 0) {
 			$this->modify("$days days");
 		} else {
 			$this->modify("+$days days");
@@ -488,7 +488,7 @@ class YADTC extends \DateTime
 		// We extract the day of the month as $start_day
 		$start_day = $date->format('j');
 		// We add months to the given date
-		if( $months>0) {
+		if ($months>0) {
 			$this->modify("+{$months} month");
 		} else {
 			$this->modify("{$months} month");
@@ -569,11 +569,11 @@ class YADTC extends \DateTime
 	{
 		static $months = ['enero','febrero', 'marzo', 'abril', 'mayo', 'junio', 'julio', 'agosto', 'septiembre', 'octubre', 'noviembre', 'diciembre'];
 
-		if( $year_ini == null ) {
+		if ($year_ini == null) {
 			$year_ini=strftime('%Y',time());
 		}
 		$ret = [];
-		for( $y=$year_ini; $y<$year_ini+$nyears; ++$y ) {
+		for( $y=$year_ini; $y<$year_ini+$nyears; ++$y) {
 			$i=1;
 			foreach ($months as $m) {
 				$ret[$y.'-'.str_pad($i++,2,'0',STR_PAD_LEFT).'-01']=$m.' '.$y;
@@ -593,7 +593,7 @@ class YADTC extends \DateTime
         $primer_anyo = $fecha_ini->year();
         $ultimo_anyo = $fecha_fin->year();
 
-        for( $y = $fecha_ini->year(); $y <= $fecha_fin->year() ; ++$y ) {
+        for( $y = $fecha_ini->year(); $y <= $fecha_fin->year() ; ++$y) {
 			foreach ($months as $num_mes => $nombre_mes) {
                 if($primer_anyo == $y){
                     if ($num_mes < $fecha_ini->month()) continue;
@@ -656,7 +656,7 @@ class YADTC extends \DateTime
         $difference = time() - static::anyDateTimeToUnixTime($timestamp);
         $ret = Yii::$app->formatter->asDuration($difference, ",");
         $parts = explode(",", $ret);
-        if( count($parts) >= 2 ) {
+        if (count($parts) >= 2) {
 			return $parts[0] . " y " . $parts[1];
 		} else {
 			return $ret;

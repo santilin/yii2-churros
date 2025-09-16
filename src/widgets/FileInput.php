@@ -42,8 +42,8 @@ class FileInput extends \kartik\file\FileInput
 		$images = [];
 		$delete_check = '';
 		$attr_value = trim($this->model->{$this->attribute});
-		if( $attr_value ) {
-			switch( $this->attrUrlType ) {
+		if ($attr_value) {
+			switch( $this->attrUrlType) {
 			case self::ATTR_URL_VERBATIM:
 				$this->pluginOptions['initialPreview'][] = $attr_value;
 				break;
@@ -53,19 +53,19 @@ class FileInput extends \kartik\file\FileInput
 				break;
 			case self::ATTR_URL_SERIALIZED:
 				$serialized = $attr_value;
-				if( $serialized != '' && is_string($serialized))  {
+				if ($serialized != '' && is_string($serialized))  {
 					$images = @unserialize($serialized);
-					if ($images === false ) {
+					if ($images === false) {
 						$images = [ $serialized ];
 					}
-					foreach( $images as $filename ) {
+					foreach( $images as $filename) {
 						$this->pluginOptions['initialPreview'][] = Yii::getAlias("@uploads/$filename");
 					}
 				}
 				break;
 			}
-			if( $this->deleteCheck !== false ) {
-				if( $this->deleteCheck == true ) {
+			if ($this->deleteCheck !== false) {
+				if ($this->deleteCheck == true) {
 					$deleteCheckOptions = [ 'label' => 'Delete me: ' . $this->model->{$this->attribute} ];
 				} else {
 					$deleteCheckOptions = $this->deleteCheck;

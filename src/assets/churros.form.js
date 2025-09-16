@@ -10,7 +10,7 @@ window.yii.churros = (function ($) {
 		dot_dot_groups: function(mask, dot) {
 			const parts = mask.split(dot);
 			let ret = [];
-			for( i=0; i<parts.length; ++i ) {
+			for( i=0; i<parts.length; ++i) {
 				ret.push(parts[i].length);
 			}
 			return ret;
@@ -18,7 +18,7 @@ window.yii.churros = (function ($) {
 		dot_dot_validate_input: function($form, attribute, messages, mask, dot, options) {
 			var $input = $form.find(attribute.input);
 			value = pub.dot_dot_validate($input.val(), mask, dot, options);
-			if( value !== false ) {
+			if (value !== false) {
 				$input.val(value);
 			} else {
 				messages.push(options['message']);
@@ -27,38 +27,38 @@ window.yii.churros = (function ($) {
 		dot_dot_validate(value, mask, dot, options) {
 			const groups = pub.dot_dot_groups(mask, dot);
 			var regexp_dot;
-			if( dot == '.' ) {
+			if (dot == '.') {
 				regexp_dot = '\\.';
 			} else {
 				regexp_dot = dot;
 			}
-			if( groups.length == 0 ) {
+			if (groups.length == 0) {
 				return true;
 			}
 			let reg_exps = [];
-			for( i=0; i<groups.length; ++i ) {
-				if( i==0 ) {
+			for( i=0; i<groups.length; ++i) {
+				if (i==0) {
 					reg_exps.push("[0-9]{1," + groups[i] + "}");
 				} else {
 					reg_exps.push(regexp_dot + "[0-9]{0," + groups[i] + "}");
 				}
 			}
 			let re_str = '';
-			for( i=0; i<reg_exps.length; ++i ) {
-				if( i>0 ) {
+			for( i=0; i<reg_exps.length; ++i) {
+				if (i>0) {
 					re_str += '|';
 				}
-				for( j=0; j<=i; ++j ) {
+				for( j=0; j<=i; ++j) {
 					re_str += reg_exps[j];
 				}
 			}
 			console.log(re_str);
 			var rgx = new RegExp("^(" + re_str + ")$");
-			if( value.match(rgx) ) {
+			if (value.match(rgx)) {
 				var parts = value.split(dot);
 				let ret = '';
-				for( i=0; i<parts.length; ++i ) {
-					if( i!=0 ) {
+				for( i=0; i<parts.length; ++i) {
+					if (i!=0) {
 						ret += dot;
 					}
 					ret += parts[i].padStart(groups[i], '0')
@@ -127,7 +127,7 @@ window.yii.churros = (function ($) {
 			}
 
 			var d = new Date(year, month-1, day);
-			if( d.getFullYear() != year || d.getMonth() != month-1 || d.getDate() != day ) {
+			if (d.getFullYear() != year || d.getMonth() != month-1 || d.getDate() != day) {
 				return null;
 			} else {
 				d.setHours(hour);
@@ -147,7 +147,7 @@ window.yii.churros = (function ($) {
 				var date_js = null;
 			} else {
 				let ds = date_input.val();
-				if (default_times !== undefined ) {
+				if (default_times !== undefined) {
 					for (const prop in default_times) {
 						ds = ds.replace(prop, default_times[prop]);
 					}
@@ -157,7 +157,7 @@ window.yii.churros = (function ($) {
 			}
 			let error_el = date_input.next('.invalid-feedback');
 			let form_control = date_input.closest(".form-control");
-			if( date_js === null ) { // empty
+			if (date_js === null) { // empty
 				$('#' + orig_id).val('');
 				if (error_el) {
 					error_el.text("");
@@ -166,7 +166,7 @@ window.yii.churros = (function ($) {
 					form_control.removeClass('is-invalid');
 				}
 				return true;
-			} else if (date_js == false ) { // wrong
+			} else if (date_js == false) { // wrong
 				$('#' + orig_id).val( date_input.val() );
 				if (error_el) {
 					error_el.text(err_message);
@@ -361,30 +361,30 @@ window.yii.FormController = (function() {
 				while( (this.form.elements[index].type === "hidden"
 					|| window.getComputedStyle(this.form.elements[index]).display === "none"
 					|| this.form.elements[index].tabIndex == -1 )) {
-					if (++index == this.form.elements.length ) {
+					if (++index == this.form.elements.length) {
 						break;
 					}
 				}
-				if (index < this.form.elements.length ) {
+				if (index < this.form.elements.length) {
 					this.form.elements[index].focus();
 				}
 			}
 			return this;
 		},
 		formEnterAsTab: function(event) {
-			if (event.keyCode === 13 && ( event.target.nodeName === 'INPUT' || event.target.nodeName === 'SELECT') ) {
+			if (event.keyCode === 13 && ( event.target.nodeName === 'INPUT' || event.target.nodeName === 'SELECT')) {
 				var form = event.target.form;
 				var index = Array.prototype.indexOf.call(form, event.target);
 				index++;
 				if (form.elements.length > 0) {
 					while( (form.elements[index].type === "hidden"
 						|| window.getComputedStyle(form.elements[index]).display === "none"
-						|| form.elements[index].tabIndex == -1 ) ) {
-						if (++index == form.elements.length ) {
+						|| form.elements[index].tabIndex == -1 )) {
+						if (++index == form.elements.length) {
 							break;
 						}
 					}
-					if (index < form.elements.length ) {
+					if (index < form.elements.length) {
 						form.elements[index].focus();
 					}
 				}

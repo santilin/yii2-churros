@@ -174,7 +174,7 @@ class GridView extends SimpleGridView
 		];
         if ($count == 0) {
 			$ret = $this->renderSelectViews();
-			if( $this->emptyText !== false ) {
+			if ($this->emptyText !== false) {
 				$ret = Html::tag('div',
 					Yii::t('churros', $this->emptyText, $configItems) . ' ' . $ret, $summaryOptions);
 			}
@@ -205,7 +205,7 @@ class GridView extends SimpleGridView
 					} else {
 						$counts = Yii::t('churros', 'Showing <b>{begin, number}-{end, number}</b> of <b>{totalCount, number}</b> {totalCount, plural, one{{item}} other{{items}}}.', $configSummary + $configItems);
 					}
-					if( $selectViewsContent ) {
+					if ($selectViewsContent) {
 						$counts .= ' ' . $selectViewsContent;
 					}
 					if ($embedded && $title) {

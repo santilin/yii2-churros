@@ -79,7 +79,7 @@ trait ModelSearchTrait
 		foreach ($gridColumns as $col_attribute => $column_def) {
 			if ( $column_def === null // Allows for conditional definition of columns
 // 				|| is_int($attribute)
-				|| str_ends_with($column_def['class']??'','ActionColumn') ) {
+				|| str_ends_with($column_def['class']??'','ActionColumn')) {
 				continue;
 			}
 			if (!empty($column_def['filterAttribute'])) {
@@ -109,7 +109,7 @@ trait ModelSearchTrait
 						// Set orders from the related search model
 						$related_model = $related_model_search_class::instance();
 						$related_model_provider = $related_model->search([]);
-						if ($sort_fldname != 'id' && isset($related_model_provider->sort->attributes[$sort_fldname]) ) {
+						if ($sort_fldname != 'id' && isset($related_model_provider->sort->attributes[$sort_fldname])) {
 							$related_sort = $related_model_provider->sort->attributes[$sort_fldname];
 							if (isset($related_sort['label'])) {
 								$new_related_sort = [ 'label' => $related_sort['label']];
@@ -118,7 +118,7 @@ trait ModelSearchTrait
 								$new_related_sort = [];
 							}
 							foreach ($related_sort as $asc_desc => $sort_def) {
-								foreach( $sort_def as $key => $value ) {
+								foreach( $sort_def as $key => $value) {
 									$new_related_sort[$asc_desc]
 									= [ $table_alias.".".$key => $value ];
 								}
@@ -255,7 +255,7 @@ trait ModelSearchTrait
     // Advanced search with operators
 	protected function makeSearchParam($values)
 	{
-		if( is_array($values) ) {
+		if (is_array($values)) {
 			return json_encode($values);
 		} else {
 			return $values;
@@ -267,7 +267,7 @@ trait ModelSearchTrait
 	 */
 	public function transformGridFilterValues()
 	{
-		foreach (array_merge(array_keys($this->normal_attrs), array_keys($this->related_properties)) as $attr ) {
+		foreach (array_merge(array_keys($this->normal_attrs), array_keys($this->related_properties)) as $attr) {
 			if (array_key_exists($attr, $this->related_properties)) {
 				$value = $this->related_properties[$attr];
 			} else {
@@ -277,7 +277,7 @@ trait ModelSearchTrait
 				continue;
 			}
 			if (!is_array($value)) {
-				if( substr($value,0,2) == '{"' && substr($value,-2) == '"}' ) {
+				if (substr($value,0,2) == '{"' && substr($value,-2) == '"}') {
 					$value = json_decode($value, true);
 				} else {
 					continue;
@@ -292,9 +292,9 @@ trait ModelSearchTrait
 					} else {
 						$this->$attr = "IN('" . implode("','",$value['v']) . "')";
 					}
-				} else if (in_array($value['op'], ['<','>','<=','>=','<>'] ) ) {
+				} else if (in_array($value['op'], ['<','>','<=','>=','<>'] )) {
 					$this->$attr = $value['op'] . $value['v'];
-				} else if( $value['op'] == 'LIKE' ) {
+				} else if ($value['op'] == 'LIKE') {
 					$this->$attr = "LIKE '%{$value['v']}%'";
 				}
 			} else {
@@ -305,7 +305,7 @@ trait ModelSearchTrait
 
 	protected function filterGlobal(&$query, array $attributes, string $value, $inclusiva = false)
 	{
-		if( $value === null || $value === '' ) {
+		if ($value === null || $value === '') {
 			return;
 		}
 		$or_conds = [ 'OR' ];
@@ -336,7 +336,7 @@ trait ModelSearchTrait
 				list($relation_name, $attribute) = AppHelper::splitFieldName($name);
 				$relation = self::$relations[$relation_name]??null;
 			}
-			if( $relation ) {
+			if ($relation) {
 				// Hay tres tipos de campos relacionados:
 				// 1. El nombre de la relación (productora, attribute = '' )
 				// 2. Relación y campo: Productora.nombre
@@ -347,15 +347,15 @@ trait ModelSearchTrait
 				$model_class = $relation['modelClass'];
 				$model = $model_class::instance();
 				$search_flds = [];
-				if( $attribute == '' ) {
+				if ($attribute == '') {
 					$search_flds = $model->findCodeAndDescFields();
 					$rel_conds = [ 'OR' ];
-					foreach( $search_flds as $search_fld ) {
+					foreach( $search_flds as $search_fld) {
 						$rel_conds[] = [ 'LIKE', "$table_alias.$search_fld", $value ];
 					}
 					$or_conds[] = $rel_conds;
-				} elseif ($attribute == $model->primaryKey()[0] ) {
-					if( isset($relation['other']) ) {
+				} elseif ($attribute == $model->primaryKey()[0]) {
+					if (isset($relation['other'])) {
 						list($right_table, $right_fld ) = AppHelper::splitFieldName($relation['other']);
 					} else {
 						list($right_table, $right_fld ) = AppHelper::splitFieldName($relation['right']);
@@ -368,8 +368,8 @@ trait ModelSearchTrait
 				throw new InvalidArgumentException($relation_name . ": relation not found in model " . self::class . ' (SearchModel::filterWhereRelated)');
 			}
 		}
-		if( count( $or_conds ) > 1 ) {
-			if( $inclusiva ) {
+		if (count( $or_conds ) > 1) {
+			if ($inclusiva) {
 				$query->orWhere($or_conds);
 			} else {
 				$query->andWhere($or_conds);

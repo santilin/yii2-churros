@@ -67,26 +67,26 @@ class AppHelper
 
 	static public function checkWritableDir(string $path, int $perm = 0775, ?string $eol = "\n"): bool
 	{
-		if( $eol ) echo "Checking if $path is writable...$eol";
-		if (!is_dir($path) ) {
-			if( @mkdir($path, $perm) ) {
-				if( $eol ) echo "$path: created$eol";
+		if ($eol ) echo "Checking if $path is writable...$eol";
+		if (!is_dir($path)) {
+			if (@mkdir($path, $perm)) {
+				if ($eol ) echo "$path: created$eol";
 			} else {
 				$error = error_get_last();
-				if( $eol ) echo "$path: " . $error['message'] . $eol;
+				if ($eol ) echo "$path: " . $error['message'] . $eol;
 				return false;
 			}
 		} else {
-			if (!is_writable($path) ) {
+			if (!is_writable($path)) {
 				@chmod($dir, $perm);
 			}
         }
-		if (!is_writable($path) ) {
+		if (!is_writable($path)) {
 			$whoami = exec('whoami');
-			if( $eol ) echo $path . ": not writable by $whoami user$eol";
+			if ($eol ) echo $path . ": not writable by $whoami user$eol";
 			return false;
 		} else {
-			if( $eol ) echo $path . ": Ok$eol";
+			if ($eol ) echo $path . ": Ok$eol";
 		}
 		return true;
 
@@ -176,12 +176,12 @@ class AppHelper
 
 	static public function incrStr(string $str, int $inc = 1): string
 	{
-		if( preg_match('/([0-9]+)[^0-9]*$/', $str, $matches) ) {
+		if (preg_match('/([0-9]+)[^0-9]*$/', $str, $matches)) {
 			$value = $matches[1];
 			$vlen = strlen($value);
 			$newvalue = intval($value) + $inc;
 			$newvlen = strlen(strval($newvalue));
-			if( $newvlen < $vlen ) {
+			if ($newvlen < $vlen) {
 				$newvalue = substr($value,0,$vlen-$newvlen) . $newvalue;
 			}
 			return preg_replace('/([0-9]+)([^0-9]*)$/', "$newvalue$2", $str);
@@ -234,13 +234,13 @@ class AppHelper
 	static public function concatArrayValues($array, $keyname, $valuesname, $delimiter = ", ")
 	{
 		$ret = [];
-		foreach( $array as $element ) {
+		foreach( $array as $element) {
 			$key = $value = '';
-			foreach ( $element as $element_key => $element_value ) {
-				if( $element_key == $keyname ) {
+			foreach ( $element as $element_key => $element_value) {
+				if ($element_key == $keyname) {
 					$key = $element_value;
 				} else {
-					if( $value != '') {
+					if ($value != '') {
 						$value .= $delimiter;
 					}
 					$value .= $element_value;
@@ -266,7 +266,7 @@ class AppHelper
 
 	static public function yiiparam(string $name, $default = null)
 	{
-		if ( isset(Yii::$app->params[$name]) ) {
+		if ( isset(Yii::$app->params[$name])) {
 			return Yii::$app->params[$name];
 		} else {
 			return $default;
@@ -315,7 +315,7 @@ class AppHelper
                 } elseif (is_array($v) && isset($res[$k]) && is_array($res[$k])) {
                     $res[$k] = static::merge($res[$k], $v);
                 } else {
-					if( in_array($k, $keys_to_concat) && isset($res[$k])) {
+					if (in_array($k, $keys_to_concat) && isset($res[$k])) {
 						$res[$k] .= " $v";
 					} else {
 						$res[$k] = $v;
@@ -329,8 +329,8 @@ class AppHelper
     static public function fileExtension($url)
     {
 		$url_parts = parse_url($url);
-		if( count($url_parts) != 1 ) {
-			if( isset($url_parts['path']) ) {
+		if (count($url_parts) != 1) {
+			if (isset($url_parts['path'])) {
 				return pathinfo($url_parts['path'], PATHINFO_EXTENSION);
 			}
 		}
@@ -340,7 +340,7 @@ class AppHelper
 
 	static public function dumpHtml($var, $title = null)
 	{
-		if( $title ) {
+		if ($title) {
 			echo "<h1>$title</h1>";
 		}
         echo "\n<pre>";
@@ -359,12 +359,12 @@ class AppHelper
 	 */
 	static public function splitFieldName($fieldname, $reverse = true): array
 	{
-		if( $reverse ) {
+		if ($reverse) {
 			$dotpos = strrpos($fieldname, '.');
 		} else {
 			$dotpos = strpos($fieldname, '.');
 		}
-		if( $dotpos !== FALSE ) {
+		if ($dotpos !== FALSE) {
 			$fldname = substr($fieldname, $dotpos + 1);
 			$tablename = substr($fieldname, 0, $dotpos);
 			return [ $tablename, $fldname ];
@@ -376,7 +376,7 @@ class AppHelper
 	static public function splitString($s, $sep): array
 	{
 		$pos = strpos($s, $sep);
-		if( $pos !== FALSE ) {
+		if ($pos !== FALSE) {
 			$last = substr($s, $pos + 1);
 			$first = substr($s, 0, $pos);
 			return [ $first, $last];
@@ -409,7 +409,7 @@ class AppHelper
 		$count_values = count($values);
 		for ($nv = 0; $nv < $count_values; $nv++) {
 			if ($values_display != '') {
-				if ($nv == $count_values-1 ) {
+				if ($nv == $count_values-1) {
 					$values_display .= ' y ';
 				} else {
 					$values_display .= ', ';

@@ -17,12 +17,12 @@ class ActivatableInput extends \kartik\datecontrol\DateControl
      */
     public function run()
     {
-		if( $this->labels == [] ) {
+		if ($this->labels == []) {
 			$this->labels = [ Yii::t('churros', 'Inactive'), Yii::t('churros', 'Active') ];
 		}
 		$this->value = Html::getAttributeValue($this->field->model, $this->field->attribute);
-		if( !isset($this->widgetOptions['layout'])) {
-			if( $this->value == '' ) {
+		if (!isset($this->widgetOptions['layout'])) {
+			if ($this->value == '') {
 				$active = $this->labels[1];
 			} else {
 				$active = $this->labels[0];
@@ -38,7 +38,7 @@ class ActivatableInput extends \kartik\datecontrol\DateControl
     public function getDisplayValue($data)
     {
 		$disp_value = parent::getDisplayValue($data);
-		if( $disp_value == '' && $this->value != '' && $this->type === self::FORMAT_DATETIME ) {
+		if ($disp_value == '' && $this->value != '' && $this->type === self::FORMAT_DATETIME) {
 			$_doTranslate = (isset($this->language) && $this->language != 'en');
 			$saveFormat = substr($this->saveFormat, 0, strpos($this->saveFormat, ' '));
 			$settings = $_doTranslate ? ArrayHelper::getValue($this->pluginOptions, 'dateSettings', []) : [];

@@ -70,7 +70,7 @@ function(item) {
 	let s_items='';
 	for (i=0; i<props.length; ++i) {
 		if (props[i]!='') {
-			if (s_items.length != 0 ) {
+			if (s_items.length != 0) {
 				s_items += ', ';
 			}
 			s_items += props[i];
@@ -88,7 +88,7 @@ function(item) {
 	let s_items='';
 	for (i=0; i<props.length; ++i) {
 		if (props[i]!='') {
-			if (s_items.length != 0 ) {
+			if (s_items.length != 0) {
 				s_items += ', ';
 			}
 			s_items += props[i];
@@ -120,13 +120,13 @@ function(url, query) {
 	let fields = urlParams.get('{$this->fieldsParam}');
 	let page = urlParams.get('{$this->pageParam}');
 	let perpage = urlParams.get('{$this->perPageParam}');
-	if (fields == '' ) {
+	if (fields == '') {
 		fields = '$s_fields';
 	}
-	if (page == '' ) {
+	if (page == '') {
 		page = '1';
 	}
-	if (perpage == '' ) {
+	if (perpage == '') {
 		perpage = '{$this->limit}';
 	}
 	return url.split("{$this->searchParam}=")[0] + "{$this->searchParam}=" + query

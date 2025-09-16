@@ -40,7 +40,7 @@ class DateRangeValidator extends Validator
      */
 	public function validateAttribute($model, $attribute)
     {
-		if( $this->untilAttribute == '' ) {
+		if ($this->untilAttribute == '') {
 			throw new InvalidConfigException('DateRangeValidator: untilAttribute not set');
 		}
 		$format = $this->type == DateValidator::TYPE_DATE ? $this->formatDate : $this->formatDateTime;
@@ -79,7 +79,7 @@ class DateRangeValidator extends Validator
 		}
 
 		if ($validationModel->parsedFrom && $validationModel->parsedUntil) {
-			if( $validationModel->parsedFrom > $validationModel->parsedUntil ) {
+			if ($validationModel->parsedFrom > $validationModel->parsedUntil) {
 				return $this->addError($model, $attribute, Yii::t('churros',
 					'{from-label} {from} can\'t be greater than {until-label} {until}', [
 						'from-label' => $model->getAttributeLabel($attribute),

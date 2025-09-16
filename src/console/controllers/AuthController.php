@@ -102,13 +102,13 @@ class AuthController extends Controller
 			Yii::t('churros', '{model} viewer', ['model' => $model_title]), $auth);
 		AuthHelper::echoLastMessage();
 
-		if( !$auth->hasChild($visora, $model_visora) ) {
+		if (!$auth->hasChild($visora, $model_visora)) {
 			$auth->addChild($visora, $model_visora);
 			echo "+ Role '{$model_visora->name}' added to role '{$visora->name}'\n";
 		} else {
 			echo "= Role '{$model_visora->name}' already exists in role {$visora->name}\n";
 		}
-		if( !$auth->hasChild($editora, $model_editora) ) {
+		if (!$auth->hasChild($editora, $model_editora)) {
 			$auth->addChild($editora, $model_editora);
 			echo "+ Role '{$model_editora->name}' added to role '{$editora->name}'\n";
 		} else {
@@ -123,15 +123,15 @@ class AuthController extends Controller
 			AuthHelper::echoLastMessage();
 
 			$add_to_visora = ($perm_name == 'view' || $perm_name == 'index' || $perm_name == 'menu' );
-			if( $add_to_visora ) {
-				if( !$auth->hasChild($model_visora, $permission) ) {
+			if ($add_to_visora) {
+				if (!$auth->hasChild($model_visora, $permission)) {
 					$auth->addChild($model_visora, $permission);
 					echo "+ Permission '{$permission->name}' added to role '{$model_visora->name}'\n";
 				} else {
 					echo "= Permission '{$permission->name}' already exists in role {$model_visora->name}\n";
 				}
 			}
-			if( !$auth->hasChild($model_editora, $permission) ) {
+			if (!$auth->hasChild($model_editora, $permission)) {
 				$auth->addChild($model_editora, $permission);
 				echo "+ Permission '{$permission->name}' added to role '{$model_editora->name}'\n";
 			} else {
@@ -165,13 +165,13 @@ class AuthController extends Controller
 			Yii::t('churros', '{model} viewer', ['model' => $model_title]), $auth);
 		AuthHelper::echoLastMessage();
 
-		if( !$auth->hasChild($visora, $model_visora) ) {
+		if (!$auth->hasChild($visora, $model_visora)) {
 			$auth->addChild($visora, $model_visora);
 			echo "+ Role '{$model_visora->name}' added to role '{$visora->name}'\n";
 		} else {
 			echo "= Role '{$model_visora->name}' already exists in role {$visora->name}\n";
 		}
-		if( !$auth->hasChild($editora, $model_editora) ) {
+		if (!$auth->hasChild($editora, $model_editora)) {
 			$auth->addChild($editora, $model_editora);
 			echo "+ Role '{$model_editora->name}' added to role '{$editora->name}'\n";
 		} else {
@@ -186,8 +186,8 @@ class AuthController extends Controller
 			AuthHelper::echoLastMessage();
 
 			$add_to_visora = ($perm_name == 'view' || $perm_name == 'index' || $perm_name == 'menu');
-			if( $add_to_visora ) {
-				if( !$auth->hasChild($model_visora, $permission) ) {
+			if ($add_to_visora) {
+				if (!$auth->hasChild($model_visora, $permission)) {
 					$auth->addChild($model_visora, $permission);
 					echo "+ Permission '{$permission->name}' added to role '{$model_visora->name}'\n";
  				} else {
@@ -196,7 +196,7 @@ class AuthController extends Controller
 			}
 			if ($perm_name == 'update' || $perm_name == 'create' || $perm_name == 'duplicate'
 				|| $perm_name == 'delete') {
-				if( !$auth->hasChild($model_editora, $permission) ) {
+				if (!$auth->hasChild($model_editora, $permission)) {
 					$auth->addChild($model_editora, $permission);
 					echo "+ Permission '{$permission->name}' added to role '{$model_editora->name}'\n";
 				} else {
@@ -238,20 +238,20 @@ class AuthController extends Controller
 	{
 		$no_model_perms = [];
 		$prev_model = null;
-		if ($type == null || StringHelper::startsWith($type, 'perm') ) {
+		if ($type == null || StringHelper::startsWith($type, 'perm')) {
 			$perms = $this->authManager->getItems(Item::TYPE_PERMISSION);
 			asort($perms);
 			$this->stdout("= PERMISSIONS\n");
-			foreach ($perms as $perm ) {
+			foreach ($perms as $perm) {
 				$name = $perm->name;
-				if( preg_match( '/([A-Za-z_][A-Za-z_0-9]*).(index|create|view|update|delete|update|report|duplicate)/', $name, $m ) ) {
-					if( $m[1] == "Reports" ) {
+				if (preg_match( '/([A-Za-z_][A-Za-z_0-9]*).(index|create|view|update|delete|update|report|duplicate)/', $name, $m )) {
+					if ($m[1] == "Reports") {
 						continue;
 					}
-					if( $prev_model == $m[1] ) {
+					if ($prev_model == $m[1]) {
 						$this->stdout(', ' . $m[2]);
 					} else {
-						if( $prev_model == null ) {
+						if ($prev_model == null) {
 							$this->stdout("== MODELS ==\n");
 						} else {
 							$this->stdout("\n");
@@ -263,53 +263,53 @@ class AuthController extends Controller
 					$no_model_perms[] = $perm;
 				}
 			}
-			if( $prev_model ) {
+			if ($prev_model) {
 				$this->stdout("\n");
 			}
 			$this->stdout("== OTHER\n");
-			foreach( $no_model_perms as $perm ) {
+			foreach( $no_model_perms as $perm) {
 				$this->stdout($perm->name . "\n");
 			}
 		}
-		if ($type == null || StringHelper::startsWith($type, 'rol') ) {
+		if ($type == null || StringHelper::startsWith($type, 'rol')) {
 			$roles = $this->authManager->getItems(Item::TYPE_ROLE);
 			asort($roles);
 			$this->stdout("\n= ROLES\n");
-			foreach( $roles as $role ) {
+			foreach( $roles as $role) {
 				$subroles = $this->authManager->getChildRoles($role->name);
-				if( count($subroles) ) {
+				if (count($subroles)) {
 					$s_subroles = '';
 					foreach($subroles as $subrol) {
-						if( $subrol->name != $role->name ) {
+						if ($subrol->name != $role->name) {
 							$s_subroles .= $subrol->name . ", ";
 						}
 					}
-					if( $s_subroles ) {
+					if ($s_subroles) {
 						$this->stdout("- ".$role->name.":roles:$s_subroles\n");
 					}
 				}
 				$role_perms = $this->authManager->getPermissionsByRole($role->name);
-				if( count($role_perms) ) {
+				if (count($role_perms)) {
 					$this->stdout("- ".$role->name.":perms:");
 					foreach($role_perms as $perm) {
 						$this->stdout($perm->name . ", ");
 					}
 					$this->stdout("\n");
-				} else if( empty($s_subroles) ) {
+				} else if (empty($s_subroles)) {
 					$this->stdout("- ". $role->name. "\n");
 				}
 			}
 		}
 
-		if ($type == null || StringHelper::startsWith($type, 'user') ) {
+		if ($type == null || StringHelper::startsWith($type, 'user')) {
 			$this->stdout("\n= USERS' ASSIGNMENTS\n");
 			$user_class = Yii::$app->user->identityClass;
 			$user = new $user_class;
 			$users = $user->find()->all();
-			foreach( $users as $user ) {
+			foreach( $users as $user) {
 				$this->stdout("user:{$user->id}:{$user->username}:");
 				$assignments = $this->authManager->getAssignments($user->id);
-				foreach( $assignments as $as ) {
+				foreach( $assignments as $as) {
 					$this->stdout($as->roleName . ", ");
 				}
 				$this->stdout("\n");
@@ -325,25 +325,25 @@ class AuthController extends Controller
 	{
 		$users_ids = $this->authManager->getUserIdsByRole($role);
 		$subroles = $this->authManager->getChildRoles($role);
-		if( count($subroles) ) {
+		if (count($subroles)) {
 			$s_subroles = '';
 			foreach($subroles as $subrol) {
-				if( $subrol->name != $role ) {
+				if ($subrol->name != $role) {
 					$s_subroles .= $subrol->name . ", ";
 				}
 			}
-			if( $s_subroles ) {
+			if ($s_subroles) {
 				$this->stdout("- ".$role.":roles:$s_subroles\n");
 			}
 		}
 		$role_perms = $this->authManager->getPermissionsByRole($role);
-		if( count($role_perms) ) {
+		if (count($role_perms)) {
 			$this->stdout("- ".$role.":perms:");
 			foreach($role_perms as $perm) {
 				$this->stdout($perm->name . ", ");
 			}
 			$this->stdout("\n");
-		} else if( empty($s_subroles) ) {
+		} else if (empty($s_subroles)) {
 			$this->stdout("- ". $role. "\n");
 		}
 	}
@@ -352,7 +352,7 @@ class AuthController extends Controller
 	public function actionAssignPermToUser($perm_name, $user_id)
 	{
 		$permission = $this->authManager->getItem($perm_name);
-		if( $permission == null ) {
+		if ($permission == null) {
 			return false;
 		}
 		$this->authManager->assign($permission, $user_id);
@@ -361,11 +361,11 @@ class AuthController extends Controller
 	public function actionAssignToRole($perm_name, $role_name)
 	{
 		$permission = $this->authManager->getItem($perm_name);
-		if( $permission == null ) {
+		if ($permission == null) {
 			throw new \Exception( "$perm_name: perm not found" );
 		}
 		$role = $this->authManager->getRole($role_name);
-		if( !$role ) {
+		if (!$role) {
 			throw new \Exception( "$role_name: role not found" );
 		}
 		if (!$this->authManager->hasChild($role, $permission)) {

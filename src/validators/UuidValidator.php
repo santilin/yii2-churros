@@ -10,8 +10,8 @@ class UuidValidator extends Validator
     {
 		$uuid = $model->$attribute;
 		$exact = $this->options['exact']??true;
-		if( !static::validate($uuid, $exact)) ) {
-			if( $model instanceof ModelInfoTrait ) {
+		if (!static::validate($uuid, $exact))) {
+			if ($model instanceof ModelInfoTrait) {
 				$this->addError($model, $attribute,
 					$model->t('churros', "The UUID '{value}' is not valid for {attribute}", [
 						'attribute' => $model->getAttributeLabel($attribute),
@@ -32,16 +32,16 @@ class UuidValidator extends Validator
 
     static public function validate(string &$uuid, bool $exact = true): bool
     {
-		if( $exact ) {
+		if ($exact) {
 			$uuid = Uuid::fromString($uuid);
 		} else {
 			$matches = [];
 			$pat = substr(Uuid::VALID_PATTERN,1,-1);
-			if( preg_match("/$pat/", $uuid, $matches) ) {
+			if (preg_match("/$pat/", $uuid, $matches)) {
 				$uuid = Uuid::fromString($matches[0]);
 			}
 		}
-		if( $uuid instanceof Uuid ) {
+		if ($uuid instanceof Uuid) {
 			return true;
 		}
 		return false;

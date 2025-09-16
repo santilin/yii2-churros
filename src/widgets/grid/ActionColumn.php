@@ -29,24 +29,24 @@ class ActionColumn extends \yii\grid\ActionColumn
      */
     protected function initDefaultButtons()
     {
-        if( $this->crudPerms === null ) {
+        if ($this->crudPerms === null) {
 			$this->crudPerms = [ 'create', 'view', 'update', 'delete' ];
 		}
 		$options = $this->buttonOptions;
-        if( FormHelper::hasPermission($this->crudPerms, 'view') ) {
-			if( !isset($this->buttons['view']) ) {
+        if (FormHelper::hasPermission($this->crudPerms, 'view')) {
+			if (!isset($this->buttons['view'])) {
 				$this->initDefaultButton('view', 'view', array_merge(
 					[ 'title' => Yii::t('churros', 'View') ]));
 			}
 		}
-        if( FormHelper::hasPermission($this->crudPerms, 'update') ) {
-			if( !isset($this->buttons['update']) ) {
+        if (FormHelper::hasPermission($this->crudPerms, 'update')) {
+			if (!isset($this->buttons['update'])) {
 				$this->initDefaultButton('update', 'update', array_merge(
 					[ 'title' => Yii::t('churros', 'Update') ]));
 			}
 		}
-        if( FormHelper::hasPermission($this->crudPerms, 'delete') ) {
-			if( !isset($this->buttons['delete']) ) {
+        if (FormHelper::hasPermission($this->crudPerms, 'delete')) {
+			if (!isset($this->buttons['delete'])) {
 				$this->initDefaultButton('delete', 'delete', array_merge(
 					[ 'title' => Yii::t('churros', 'Delete'),
 					  'data-confirm' => Yii::t('yii', 'Are you sure you want to delete this item?'),
@@ -55,14 +55,14 @@ class ActionColumn extends \yii\grid\ActionColumn
 			}
 		}
         if (FormHelper::hasAllPermissions($this->crudPerms, ['duplicate'])) {
-			if( !isset($this->buttons['duplicate']) ) {
+			if (!isset($this->buttons['duplicate'])) {
 				$this->initDefaultButton('duplicate', 'duplicate', array_merge(
 					[ 'title' => Yii::t('churros', 'Duplicate')]));
 			}
 		}
-		foreach( $this->buttons as $index => $button ) {
+		foreach( $this->buttons as $index => $button) {
 			if (!str_contains($this->template, '{'.$index.'}')) {
-				if ($this->template !='' ) {
+				if ($this->template !='') {
 					$this->template .= ' ';
 				}
 				$this->template .= '{'.$index.'}';
@@ -84,7 +84,7 @@ class ActionColumn extends \yii\grid\ActionColumn
 				$options = array_merge($this->buttonOptions, $additionalOptions);
 				Html::addCssClass($options, $this->buttonOptions['class']??[]);
                 Html::addCssClass($options, $name);
-				if( empty($options['aria-label']) ) {
+				if (empty($options['aria-label'])) {
 					$options['aria-label'] = $options['title'];
 				}
 				$icon = isset($this->icons[$iconName])

@@ -54,7 +54,7 @@ trait RelationTrait
      */
     public function loadAll(array $post, array $relations_in_form = [], ?string $formName = null): bool
     {
-        if( $formName === null ) {
+        if ($formName === null) {
 			$formName = $this->formName();
 		}
 		if (isset($post[$formName])) {
@@ -224,7 +224,7 @@ trait RelationTrait
 
 			$other_fk = reset($relation->link);
 			foreach ($form_values as $relPost) {
-				if (is_array($relPost) ) {
+				if (is_array($relPost)) {
 					$relObj = empty($relPost[$relPKAttr[0]]) ? new $relModelClass : $relModelClass::findOne($relPost[$relPKAttr[0]]);
 					$relObj->load($relPost);
 					$container[] = $relObj;
@@ -274,7 +274,7 @@ trait RelationTrait
                 return false;
             }
 		} catch (\yii\db\IntegrityException $e) {
-			if( $must_commit ) {
+			if ($must_commit) {
 				$trans->rollBack();
 			}
             $this->isNewRecord = $wasNewRecord;
@@ -286,7 +286,7 @@ trait RelationTrait
     public function usedInRelation(string $relation_name): int
     {
 		$rel_method_name = 'get' . ucfirst($relation_name);
-		if( method_exists($this, $rel_method_name)) {
+		if (method_exists($this, $rel_method_name)) {
 			return call_user_func([$this, $rel_method_name])->exists();
 		} else {
 			return 0;
@@ -333,7 +333,7 @@ trait RelationTrait
 				foreach ($records as $index => $relModel) {
 					// Set relModel foreign key
 					foreach ($link as $foreign_key => $value) {
-						if( is_object($relModel) ) {
+						if (is_object($relModel)) {
 							$relModel->$foreign_key = $this->$value;
 						}
 					}

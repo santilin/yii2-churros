@@ -28,7 +28,7 @@ class FileUploadException extends \Exception
         $defaultMessage = 'Unknown error occurred.',
         $code = 0,
         Exception $previous = null
-    ) {
+   ) {
         $this->errorCode = $errorCode;
 
         parent::__construct($this->prepareMessage($errorCode, $defaultMessage), $code, $previous);

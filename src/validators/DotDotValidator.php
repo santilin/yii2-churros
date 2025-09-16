@@ -34,7 +34,7 @@ class DotDotValidator extends Validator
     public function validateAttribute($model, $attribute)
     {
 		$value = $model->$attribute;
-		if( $this->validateValue($value) === null ) {
+		if ($this->validateValue($value) === null) {
 			$model->$attribute = $this->formatValue($value);
 		} else {
 			$this->addError($model, $attribute, $this->message);
@@ -46,32 +46,32 @@ class DotDotValidator extends Validator
      */
     protected function validateValue($value)
     {
-		if( $this->mask == '' ) {
+		if ($this->mask == '') {
 			return true;
 		}
 		$mask_groups = $this->maskToGroups($this->mask, $this->dot);
 		$regexp_dot = $this->dot;
-		if( $this->dot == '.' ) {
+		if ($this->dot == '.') {
 			$regexp_dot = '\\.';
 		}
 		$reg_exps = [];
-		for( $i=0; $i<count($mask_groups); ++$i ) {
-			if( $i==0 ) {
+		for( $i=0; $i<count($mask_groups); ++$i) {
+			if ($i==0) {
 				$reg_exps[] = "[0-9]{1," . $mask_groups[$i] . "}";
 			} else {
 				$reg_exps[] = $regexp_dot . "[0-9]{0," . $mask_groups[$i] . "}";
 			}
 		}
 		$re_str = '';
-		for( $i=0; $i<count($reg_exps); ++$i ) {
-			if( $i>0 ) {
+		for( $i=0; $i<count($reg_exps); ++$i) {
+			if ($i>0) {
 				$re_str .= '|';
 			}
-			for( $j=0; $j<=$i; ++$j ) {
+			for( $j=0; $j<=$i; ++$j) {
 				$re_str .= $reg_exps[$j];
 			}
 		}
-		if( preg_match('/^(' . $re_str . ')$/', $value ) ) {
+		if (preg_match('/^(' . $re_str . ')$/', $value )) {
 			return null;
 		} else {
 			return [ $this->message, [] ];
@@ -94,7 +94,7 @@ class DotDotValidator extends Validator
 		$parts = explode($this->dot, $value);
 		$ret = '';
 		for( $i=0; $i<count($mask_parts); ++$i) {
-			if( $ret != '' ) {
+			if ($ret != '') {
 				$ret .= $this->dot;
 			}
 			$ret .= str_pad($parts[$i]??'0', strlen($mask_parts[$i]), '0', STR_PAD_LEFT);

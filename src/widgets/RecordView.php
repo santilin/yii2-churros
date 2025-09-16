@@ -200,7 +200,7 @@ html;
                 [ 'class' => "field" ],
 				$contentOptions,
 				$attribute['contentOptions']??[]);
-			switch( $attribute['format'] ) {
+			switch( $attribute['format']) {
 			case 'integer':
 			case 'currency':
 			case 'decimal':

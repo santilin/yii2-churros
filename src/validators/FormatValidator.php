@@ -19,7 +19,7 @@ class FormatValidator extends Validator
     public function validateAttribute($model, $attribute)
     {
 		$value = $model->{$attribute};
-		if( ($message = $this->validateValue($value)) === null ) {
+		if (($message = $this->validateValue($value)) === null) {
 			$model->{$attribute} = $this->formatValue($this->format, $value);
 		} else {
 			$this->addError($model, $attribute, $message);

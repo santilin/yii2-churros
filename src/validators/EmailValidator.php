@@ -27,13 +27,13 @@ class EmailValidator extends \yii\validators\EmailValidator
     public function validateAttribute($model, $attribute)
     {
         $value = strtolower(trim($model->$attribute));
-        if( $value == '' ) {
-			if( $this->required ) {
+        if ($value == '') {
+			if ($this->required) {
 				$this->addError($model, $attribute, $this->emptyMessage);
 			} else {
 				$model->$attribute = $this->default;
 			}
-		} elseif( $this->validateValue($value) === null ) {
+		} elseif ($this->validateValue($value) === null) {
 			$model->$attribute = $value;
 		} else {
 			$this->addError($model, $attribute, $this->message);
@@ -48,7 +48,7 @@ class EmailValidator extends \yii\validators\EmailValidator
         }
         $options = $this->getClientOptions($model, $attribute);
         $ret = '';
-		if( $this->required ) {
+		if ($this->required) {
 			$req_options = $options;
 			$req_options['message'] = $this->emptyMessage;
 			$ret = 'yii.validation.required(value, messages, ' . Json::htmlEncode($req_options) . ')&&';

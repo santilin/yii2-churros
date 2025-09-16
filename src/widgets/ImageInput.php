@@ -25,7 +25,7 @@ class ImageInput extends \yii\widgets\InputWidget
 
 	public function init()
 	{
-		if( !$this->form ) {
+		if (!$this->form) {
 			throw new InvalidConfigException('ImageInput::form must be set');
 		}
 		return parent::init();
@@ -37,7 +37,7 @@ class ImageInput extends \yii\widgets\InputWidget
     public function run()
     {
 		$thumb_options = [ 'width' => $this->thumbSize ];
-		switch( $this->attrUrlType ) {
+		switch( $this->attrUrlType) {
 		case self::ATTR_URL_VERBATIM:
 			$src = Html::getAttributeValue($this->model, $this->attribute);
 			if ($src) {
@@ -52,12 +52,12 @@ class ImageInput extends \yii\widgets\InputWidget
 			break;
 		case self::ATTR_URL_SERIALIZED:
 			$serialized = Html::getAttributeValue($this->model, $this->attribute);
-			if( $serialized != '' && is_string($serialized))  {
+			if ($serialized != '' && is_string($serialized))  {
 				$images = @unserialize($serialized);
-				if ($images === false ) {
+				if ($images === false) {
 					$images = [ $serialized ];
 				}
-				foreach( $images as $filename ) {
+				foreach( $images as $filename) {
 					echo Html::img($filename, $thumb_options);
 				}
 			}
@@ -67,8 +67,8 @@ class ImageInput extends \yii\widgets\InputWidget
 			$this->form->options['enctype'] = 'multipart/form-data';
 		}
 		$parent_file_input =  $this->renderInputHtml('file');
-		if( $this->deleteCheck !== false && !empty($this->model->{$this->attribute}) ) {
-			if( $this->deleteCheck == true ) {
+		if ($this->deleteCheck !== false && !empty($this->model->{$this->attribute})) {
+			if ($this->deleteCheck == true) {
 				$deleteCheckOptions = [ 'label' => Yii::t('churros','Delete this image') . ': ' . $this->model->{$this->attribute} ];
 			} else {
 				$deleteCheckOptions = $this->deleteCheck;

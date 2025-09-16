@@ -220,7 +220,7 @@ class FileUploadBehavior extends \yii\base\Behavior
     public function afterSave()
     {
         if ($this->file instanceof UploadedFile !== true) {
-			if( $this->oldPath !== null ) { // Deleting the file
+			if ($this->oldPath !== null) { // Deleting the file
 				$this->owner->{$this->attribute} = $this->oldPath;
 				$path = $this->resolvePath($this->privateFilePath . $this->fileAttrValue);
 				@unlink($path);
@@ -233,8 +233,8 @@ class FileUploadBehavior extends \yii\base\Behavior
         FileHelper::createDirectory(pathinfo($path, PATHINFO_DIRNAME), 0775, true);
 
         if (!$this->file->saveAs($path)) {
-			if( YII_ENV_TEST ) {
-				if( !rename($this->file->tempName, Yii::getAlias($path)) ) {
+			if (YII_ENV_TEST) {
+				if (!rename($this->file->tempName, Yii::getAlias($path))) {
 					throw new FileUploadException($this->file->error, 'File saving error.');
 				}
 			} else {
@@ -249,7 +249,7 @@ class FileUploadBehavior extends \yii\base\Behavior
     {
 		if ($this->owner->{$this->attribute} instanceof UploadedFile) {
 			$file = $this->owner->{$this->attribute};
-			if( $file->error == 0 ) {
+			if ($file->error == 0) {
 				$raw_image = base64_encode(file_get_contents($file->tempName));
 			} else {
 				$raw_image = base64_encode(file_get_contents(Yii::getAlias('@churros/assets/i/wrong-uploaded-image.png')));

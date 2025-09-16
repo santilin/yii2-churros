@@ -24,7 +24,7 @@ class GalleryInput extends \kartik\file\FileInput
      */
     public function run()
     {
-		if( $this->controller_url == '' || substr($this->controller_url,-1,1) == '/') {
+		if ($this->controller_url == '' || substr($this->controller_url,-1,1) == '/') {
 			$this->controller_url .= $this->model->controllerName();
 		}
 		$this->pluginOptions = [
@@ -35,7 +35,7 @@ class GalleryInput extends \kartik\file\FileInput
 				'overwriteInitial' => true
 		];
 		$images = Html::getAttributeValue($this->model, $this->attribute);
-		if( $images != '' )  {
+		if ($images != '' )  {
 			$show_options = $this->options;
 			$show_options['id'] = 'fake-' . $show_options['id'];
 			if (isset($this->options['caption'])) {

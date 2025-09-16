@@ -18,7 +18,7 @@ class SpanishNumberValidator extends NumberValidator
     public function validateAttribute($model, $attribute)
     {
         $value = $model->$attribute;
-		if (strpos($value, ',') !== FALSE ) {
+		if (strpos($value, ',') !== FALSE) {
 			$model->$attribute = str_replace(',', '.', $value);
 		}
 		return parent::validateAttribute($model, $attribute);
@@ -30,7 +30,7 @@ class SpanishNumberValidator extends NumberValidator
     public function getClientOptions($model, $attribute)
     {
 		$options = parent::getClientOptions($model, $attribute);
-		if( !$this->integerOnly ) {
+		if (!$this->integerOnly) {
 			$options['pattern'] = new JsExpression($this->clientNumberPattern);
 		}
         return $options;

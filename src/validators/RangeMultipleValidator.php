@@ -59,7 +59,7 @@ class RangeMultipleValidator extends Validator
         if (!is_array($this->range)
             && !($this->range instanceof \Closure)
             && !($this->range instanceof \Traversable)
-        ) {
+       ) {
             throw new InvalidConfigException('The "range" property must be set.');
         }
         if ($this->message === null) {
@@ -74,12 +74,12 @@ class RangeMultipleValidator extends Validator
     {
         $in = false;
 
-        if( is_string($value) ) {
+        if (is_string($value)) {
 			$value = array_filter(explode($this->delimiter, $value));
 		}
-        if( ( $value instanceof \Traversable || is_array($value))
+        if (( $value instanceof \Traversable || is_array($value))
             && ArrayHelper::isSubset($value, $this->range, $this->strict)
-        ) {
+       ) {
             $in = true;
         }
 

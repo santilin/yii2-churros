@@ -30,7 +30,7 @@ trait ModelTrait
 				} else {
 					$scope_func = trim($scope);
 				}
-				if( $scope_func ) {
+				if ($scope_func) {
 					call_user_func_array([$q,$scope_func],$scope_args);
 				}
 			}

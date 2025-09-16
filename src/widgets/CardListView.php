@@ -27,7 +27,7 @@ class CardListView extends ListView
 	public function __construct($config = [])
 	{
 		parent::__construct($config);
-		if( empty($this->summary) ) {
+		if (empty($this->summary)) {
 			if ($this->dataProvider->getPagination() !== false) {
                 $this->summary = Yii::t('churros', 'Showing <b>{begin, number}-{end, number}</b> of <b>{totalCount, number}</b> {totalCount, plural, one{item} other{items}}.');
 			} else {

@@ -39,25 +39,25 @@ class KartikImageInput extends \kartik\file\FileInput
 			'initialPreviewAsData' => true,
 			'overwriteInitial' => true
 		];
-		switch( $this->attrUrlType ) {
+		switch( $this->attrUrlType) {
 		case self::ATTR_URL_VERBATIM:
 			$img_value = Html::getAttributeValue($this->model, $this->attribute);
 			$this->pluginOptions['initialPreview'][] = $img_value;
 			break;
 		case self::ATTR_URL_UPLOAD_BEHAVIOR:
  			$img_value = $this->model->getUploadedFormFileUrl($this->attribute);
- 			if( $img_value) {
+ 			if ($img_value) {
 				$this->pluginOptions['initialPreview'][] = $img_value;
 			}
 			break;
 		case self::ATTR_URL_SERIALIZED:
 			$img_value = Html::getAttributeValue($this->model, $this->attribute);
-			if( $img_value != '' && is_string($img_value))  {
+			if ($img_value != '' && is_string($img_value))  {
 				$images = @unserialize($img_value);
-				if ($images === false ) {
+				if ($images === false) {
 					$images = [ $img_value ];
 				}
-				foreach ($images as $filename ) {
+				foreach ($images as $filename) {
 					$this->pluginOptions['initialPreview'][] = Yii::getAlias("@uploads/$filename");
 				}
 			}

@@ -25,7 +25,7 @@ class Base extends \Faker\Provider\Base
 
     public function integer($max_digits = 10)
     {
-		if( $max_digits == 1 ) {
+		if ($max_digits == 1) {
 			return $this->randomDigitNotNull();
 		} else {
 			return $this->decimal($max_digits);
@@ -34,7 +34,7 @@ class Base extends \Faker\Provider\Base
 
     public function integerUnsigned($max_digits = 10): int
     {
-		if( $max_digits == 1 ) {
+		if ($max_digits == 1) {
 			return $this->generator->randomDigit();
 		} else {
 			return $this->decimalUnsigned($max_digits);
@@ -44,7 +44,7 @@ class Base extends \Faker\Provider\Base
     public function integerUnsignedOrNull($max_digits = 10): ?int
     {
 		$n = $this->integerUnsigned($max_digits);
-		if( $n == 0 ) {
+		if ($n == 0) {
 			return null;
 		} else {
 			return $n;
@@ -54,7 +54,7 @@ class Base extends \Faker\Provider\Base
 	public function integerUnsignedNonZero($max_digits = 10): int
 	{
 		$n = $this->integerUnsigned($max_digits);
-		if( $n == 0 ) {
+		if ($n == 0) {
 			return 1;
 		} else {
 			return $n;
@@ -77,13 +77,13 @@ class Base extends \Faker\Provider\Base
 		$ret = $this->generator->randomElement(["-",""]);
 		if ($ret=="-") {
 			$max_digits--;
-			if( $max_digits == 1 ) {
+			if ($max_digits == 1) {
 				return $this->generator->randomDigitNotNull();
 			}
 		}
 		$max_digits = $this->generator->numberBetween(2, $max_digits);
 		for( $i=1; $i<$max_digits; ++$i) {
-			if( $i == $max_digits - $decimals && $decimals > 0 ) {
+			if ($i == $max_digits - $decimals && $decimals > 0) {
 				$ret .= ".";
 			}
 			$ret .= $this->generator->randomDigit();
@@ -97,7 +97,7 @@ class Base extends \Faker\Provider\Base
 		$max_digits = $this->generator->numberBetween(3, $max_digits);
 		$ret = $this->randomDigitNotNull();
 		for( $i=1; $i<$max_digits; ++$i) {
-			if( $i == $max_digits - $decimals && $decimals > 0 ) {
+			if ($i == $max_digits - $decimals && $decimals > 0) {
 				$ret .= ".";
 			}
 			$ret .= $this->generator->randomDigit();
@@ -118,7 +118,7 @@ class Base extends \Faker\Provider\Base
 				$ret .= $this->generator->randomDigit();
 			}
 		}
-		if( $decimals > 0 ) {
+		if ($decimals > 0) {
 			$ret .= ".";
 			for( $i=0; $i<$decimals; ++$i) {
 				$ret .= $this->generator->randomDigit();

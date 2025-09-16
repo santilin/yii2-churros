@@ -87,7 +87,7 @@ class DocController extends Controller
 		$comments = [];
 		foreach ($code_comments as $line) {
 			$m = [];
- 			if( preg_match("=$pat=", $line, $m) ) {
+ 			if (preg_match("=$pat=", $line, $m)) {
 				$file_parts = explode('.', $m[3]);
 				$file = mb_strtoupper(array_shift($file_parts));
 				if (empty($file_parts)) {
@@ -97,23 +97,23 @@ class DocController extends Controller
 				}
 				if (!empty($m[4])) {
 					$order = str_pad(trim($m[4]), 3, '0', STR_PAD_LEFT) . ':';
-				} else if( preg_match('/^202[0-9][0-9][0-9][0-9][0-9]$/', $m[5], $orderm) ) {
+				} else if (preg_match('/^202[0-9][0-9][0-9][0-9][0-9]$/', $m[5], $orderm)) {
 					// Changelog
 					$order = '**' . substr($order,7,2) . '/' . substr($order,5,2) . '/' . substr($order,1,4) . '** ';
-				} else if( preg_match('/^([0-9]{1,4})-([0-9][0-9])-([0-9][0-9]).*$/', $m[5], $orderm ) ) {
+				} else if (preg_match('/^([0-9]{1,4})-([0-9][0-9])-([0-9][0-9]).*$/', $m[5], $orderm )) {
 					$order = $orderm[3] . '/' . $orderm[2] . '/' . $orderm[1] . ' ';
 				} else {
 					$order = '';
 				}
 				$text = $order . trim($m[6]);
 				$file_line = "[{$m[1]}:{$m[2]}]";
-				if( !isset($comments[$file]) ) {
+				if (!isset($comments[$file])) {
 					$comments[$file] = [];
 				}
-				if( !isset($comments[$file][$header]) ) {
+				if (!isset($comments[$file][$header])) {
 					$comments[$file][$header] = [];
 				}
-				if( !isset($comments[$file][$header][$order]) ) {
+				if (!isset($comments[$file][$header][$order])) {
 					$comments[$file][$header][$order] = [];
 				}
 				$comments[$file][$header][$order][] = [ $text, $file_line ];
@@ -121,17 +121,17 @@ class DocController extends Controller
 				$this->stderr("Línea de comentario no contiene el patrón de línea: $line\n");
 			}
 		}
- 		foreach( $comments as $filename => $headers ) {
+ 		foreach( $comments as $filename => $headers) {
 			$md_contents = '';
 			ksort($headers);
-			foreach( $headers as $header => $orders ) {
+			foreach( $headers as $header => $orders) {
 				$head_levels = explode('.', $header);
 				$head_level = count($head_levels)-1;
 				$header = array_pop($head_levels);
 				$md_contents .= str_repeat('#', $head_level) . ' ' . $header . "\n";
 				ksort($orders);
-				foreach( $orders as $order ) {
-					foreach( $order as $comment_info ) {
+				foreach( $orders as $order) {
+					foreach( $order as $comment_info) {
 						$comment_info[0] = preg_replace(
 							[ '/kb\#([0-9]+)/'        , '/^:[0-9]*:/' ],
 							[ self::KANBOARD_CARD_LINK, '' ],
@@ -173,7 +173,7 @@ class DocController extends Controller
 
 	private function sortHeader($header, array $headers): string
 	{
-		if( preg_match('/^([0-9]+)([^ ].*)$/', $header, $m) ) {
+		if (preg_match('/^([0-9]+)([^ ].*)$/', $header, $m)) {
 			return str_pad($m[1], 3, '0', STR_PAD_LEFT) . '.'. $m[2];
 		} else {
 			return $headers[$header]??'500.' . $header;

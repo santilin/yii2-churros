@@ -43,7 +43,7 @@ class FrontController extends CrudController
     public function checkUserHasAccess($user_id, $action = null)
     {
 		$user = Yii::$app->user;
-		if( $user && $user_id == $user->id) {
+		if ($user && $user_id == $user->id) {
 			return true;
 		}
 		return false;
@@ -51,11 +51,11 @@ class FrontController extends CrudController
 
     public function failIfUserNotAllowed($user_id, $message = null, $action = null )
     {
-		if( $message == null ) {
+		if ($message == null) {
 			$message = User::t('churros', "{La} {title_singular} no tiene acceso"
 				. ($action == null ? '': " a la acción '$action'" ));
 		}
-		if( !$this->checkUserHasAccess($user_id, $action) ) {
+		if (!$this->checkUserHasAccess($user_id, $action)) {
 			throw UnauthorizedHttpException($message);
 		}
 	}

@@ -45,14 +45,14 @@ trait ControllerTrait
 
 	public function getRoutePrefix($route = null, bool $add_slash = true): string
 	{
-		if( $route === null ) {
+		if ($route === null) {
 			$route = Url::toRoute($this->id);
 		}
 		$request_url = '/' . Yii::$app->request->getPathInfo();
 		$route_pos = strpos($request_url, $route);
 		$prefix = substr($request_url, 0, $route_pos);
 		if ($add_slash) {
-			if( substr($prefix, -1) != '/' ) {
+			if (substr($prefix, -1) != '/') {
 				$prefix .= '/';
 			}
 		}
@@ -61,7 +61,7 @@ trait ControllerTrait
 
 	protected function getResultMessage(string $action_id): string
 	{
-		switch( $action_id ) {
+		switch( $action_id) {
 		case 'update':
 			return self::MSG_UPDATED;
 		case 'create':
@@ -142,7 +142,7 @@ trait ControllerTrait
 		if (pathinfo($file, PATHINFO_EXTENSION) === '') {
 			$file .= '.php';
 		}
-		if( !is_file($file) ) {
+		if (!is_file($file)) {
 			return null;
 		} else {
 			return $file;

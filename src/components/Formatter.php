@@ -21,7 +21,7 @@ class Formatter extends \yii\i18n\Formatter
 
 	public function asPhoneNumber($text)
 	{
-		if( trim($text) != '') {
+		if (trim($text) != '') {
 // 			return  Html::tag('span', '&nbsp;', ['class' => 'glyphicon glyphicon-phone-alt']) .
 			return Html::a($text, "tel://$text");
 		} else {
@@ -41,7 +41,7 @@ class Formatter extends \yii\i18n\Formatter
 
 	public function asHours($minutes)
 	{
-		if( $minutes == '' ) {
+		if ($minutes == '') {
 			$minutes = 0;
 		}
 		return number_format(($minutes / 60),2,',','');
@@ -64,7 +64,7 @@ class Formatter extends \yii\i18n\Formatter
 
 	public function asSeconds2Hours(?int $seconds, bool $blank_on_zero = false)
 	{
-		if (empty($seconds) ) {
+		if (empty($seconds)) {
 			if ($blank_on_zero) {
 				return '';
 			} else {
@@ -78,7 +78,7 @@ class Formatter extends \yii\i18n\Formatter
 
 	public function asSeconds2Format(string $format, ?int $seconds, bool $blank_on_zero = false)
 	{
-		if (empty($seconds) ) {
+		if (empty($seconds)) {
 			if ($blank_on_zero) {
 				return '';
 			} else {
@@ -92,20 +92,20 @@ class Formatter extends \yii\i18n\Formatter
 
 	public function asUploadedImage($images, $options = [])
 	{
-		if( !is_array($images) ) {
+		if (!is_array($images)) {
 			$tmp = @unserialize($images);
-			if( $tmp != null ) {
+			if ($tmp != null) {
 				$images = $tmp;
 			}
 		}
-		if( empty($images) ) {
+		if (empty($images)) {
 			return '';
 		}
-		if( !is_array($images) ) {
+		if (!is_array($images)) {
 			$images = [$images];
 		}
 		$ret = '';
-		foreach( $images as $image ) {
+		foreach( $images as $image) {
 			$ret .= Html::a(self::asImage(Yii::getAlias("@uploads/$image"), $options),
 			Url::to("@uploads/$image"));
 		}
@@ -116,14 +116,14 @@ class Formatter extends \yii\i18n\Formatter
 	{
 		if (empty($value)) {
 			return '';
-		} else if(is_string($value) ) {
+		} else if(is_string($value)) {
 			$l = strlen($value);
-			if( $l > 2 ) {
-				if( $value[$l-1] == $sep ) {
-					if( $value[0] == $sep ) {
+			if ($l > 2) {
+				if ($value[$l-1] == $sep) {
+					if ($value[0] == $sep) {
 						return substr($value, 1, $l-2);
 					}
-				} else if( $value[0] == $sep ) {
+				} else if ($value[0] == $sep) {
 					return substr($value,1);
 				} else {
 					return $value;

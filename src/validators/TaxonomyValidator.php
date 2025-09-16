@@ -35,7 +35,7 @@ class TaxonomyValidator extends Validator
 			$this->taxonomy['dot'] = '.';
 		}
 		$mask_groups = $this->maskToGroups($this->taxonomy['mask'], $this->taxonomy['dot']);
-		if (count($this->taxonomy['levels']) > count($mask_groups)  ) {
+		if (count($this->taxonomy['levels']) > count($mask_groups) ) {
 			throw new InvalidConfigException("The number of levels can't be greater than the number of mask groups");
 		}
 

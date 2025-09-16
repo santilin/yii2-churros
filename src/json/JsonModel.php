@@ -455,7 +455,7 @@ class JsonModel extends \yii\base\Model
      */
     public function loadAll(array $post, array $relations_in_form = [], ?string $formName = null): bool
     {
-        if( $formName === null ) {
+        if ($formName === null) {
 			$formName = $this->formName();
 		}
         if ($this->load($post, $formName)) {
@@ -476,14 +476,14 @@ class JsonModel extends \yii\base\Model
                     if ($model_relation['type'] == 'HasOne' || $model_relation['type'] == "OneToOne") {
                         // Look for embedded relations data in the main form
                         $post_data = null;
-                        if( isset($post[$formName][$rel_name]) && is_array($post[$formName][$rel_name]) ) {
+                        if (isset($post[$formName][$rel_name]) && is_array($post[$formName][$rel_name])) {
                             $post_data = $post[$formName][$rel_name];
-                        } else if( isset($post[$formName][$related_model_name]) && is_array($post[$formName][$related_model_name]) ) {
+                        } else if (isset($post[$formName][$related_model_name]) && is_array($post[$formName][$related_model_name])) {
                             $post_data = $post[$formName][$related_model_name];
-                        } else if( isset($post[$related_model_name]) && is_array($post[$related_model_name]) ) {
+                        } else if (isset($post[$related_model_name]) && is_array($post[$related_model_name])) {
                             $post_data = $post[$related_model_name];
                         }
-                        if( $post_data ) {
+                        if ($post_data) {
                             $rel_model = new $model_relation['modelClass'];
                             $rel_model->setAttributes( $post_data );
                             $this->populateRelation($rel_name, $rel_model);
@@ -539,7 +539,7 @@ class JsonModel extends \yii\base\Model
                 $relObj = new $relModelClass;
                 $relObj->setJsonModelable($this);
                 $relObj->_parent_model = $this;
-                if (!is_array($form_values) ) {
+                if (!is_array($form_values)) {
                     $form_values = [$relPKAttr[0] => $form_values];
                 }
                 if (count($form_values)) {
@@ -550,7 +550,7 @@ class JsonModel extends \yii\base\Model
             }
         } else if ($relation['type'] == 'ManyToMany') {
             foreach ($post_data as $form_values) {
-				if( is_array($form_values) ) {
+				if (is_array($form_values)) {
 					$id = $form_values[$relPKAttr[0]];
 					$relObj = empty($id) ? new $relModelClass : $relModelClass::findOne($id);
 					$relObj->load($form_values);

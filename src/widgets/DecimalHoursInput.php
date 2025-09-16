@@ -39,7 +39,7 @@ JS;
 		// https://stackoverflow.com/a/44209883
 		$js = <<<JS
 $('#{$id}').keydown( function(e) {
-	if( e.keyCode == 190 ) {
+	if (e.keyCode == 190) {
 		// change . into , (spanish hack)
         var s = $(this).val();
         var i = this.selectionStart;
@@ -56,7 +56,7 @@ $('#$id').change( function() {
 });
 $('#{$id}').focus(function (e) {
 	var that = $(this);
-	if (that.val() == 0 || isNaN(that.val()) ) {
+	if (that.val() == 0 || isNaN(that.val())) {
 		that.val('');
 	} else {
 		setTimeout(function(){that.select();},50);

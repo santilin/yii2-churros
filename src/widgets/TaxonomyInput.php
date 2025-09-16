@@ -15,30 +15,30 @@ class TaxonomyInput extends \yii\widgets\InputWidget
 
 	public function run()
     {
-		if( empty($this->taxonomy['mask']) ) {
+		if (empty($this->taxonomy['mask'])) {
 			throw new InvalidConfigException("The taxonomy mask must be set");
 		}
-		if( empty($this->taxonomy['dot']) ) {
+		if (empty($this->taxonomy['dot'])) {
 			$this->taxonomy['dot'] = '.';
 		}
 		$levels = $this->taxonomy['levels'];
 		$mask_groups = $this->maskToGroups();
-		if( count($levels) > count($mask_groups) ) {
+		if (count($levels) > count($mask_groups)) {
 			throw new InvalidConfigException("The number of levels can't be greater than the number of mask groups");
 		}
-        if( !isset($this->options['id']) ) {
+        if (!isset($this->options['id'])) {
 			$this->options['id'] = Html::getInputId($this->model, $this->attribute);
 		}
 		$html = '';
 //         $html = '<div class="row"><div class="col col-md-9 col-lg-9 col-xxl-9 px-1 mb-1"><div class="row">';
-		if( $this->showCode ) {
+		if ($this->showCode) {
 			$html .= Html::activeInput('text', $this->model, $this->attribute, $this->options);
 		} else {
 			$html .= Html::activeHiddenInput($this->model, $this->attribute);
 		}
 // 		$html .= '</div>';
 		$html .= '<div class="row taxonomy-dropdowns">';
-		if( $this->taxonomyLevel <= 0 || $this->taxonomyLevel > count($this->taxonomy['levels']) ) {
+		if ($this->taxonomyLevel <= 0 || $this->taxonomyLevel > count($this->taxonomy['levels'])) {
 			$nlevels = count($this->taxonomy['levels']);
 		} else {
 			$nlevels = $this->taxonomyLevel;
@@ -46,10 +46,10 @@ class TaxonomyInput extends \yii\widgets\InputWidget
 		$dropdown_container_classes = 'col col-md-6 col-sm-6 col-12 col-lg-4 col-xl-3';
 		$headings = [];
         foreach( $levels as $k => $level) {
-			if( $k >= $nlevels )  {
+			if ($k >= $nlevels )  {
 				break;
 			}
-			if( $k == 0 && $this->hideFirstLabel ) {
+			if ($k == 0 && $this->hideFirstLabel) {
 				$headings[$k] = '';
 			} else {
 				$headings[$k] = $level['title'];
@@ -85,8 +85,8 @@ class TaxonomyInput extends \yii\widgets\InputWidget
 	protected function getLevelValues($l, $value)
 	{
 		$values = [];
-		if( $l == 0 ) {
-			foreach( $this->taxonomy['items'] as $k => $v ) {
+		if ($l == 0) {
+			foreach( $this->taxonomy['items'] as $k => $v) {
 				$values[$k] = $v['title']??$k;
 			}
 		}
@@ -128,7 +128,7 @@ $('#$id').keyup( function(e) {
 		(e.keyCode > 95 && e.keyCode < 112)  || // numpad keys
 		(e.keyCode > 185 && e.keyCode < 193) || // ;=,-./` (in order)
 		(e.keyCode > 218 && e.keyCode < 223);   // [\]' (in order)
-	if( printable ) {
+	if (printable) {
 		matchDropDownsToInput($(this), '$id', taxonomy_$j_id, drop_ids_$j_id);
 	}
 	return true;
@@ -149,22 +149,22 @@ function taxonomy_values(taxonomy, values, level)
 	const levels = taxonomy.levels;
 	let options = taxonomy.items;
  	// find the options for input[level]
-	for( l=0; l<level; ++l ) {
-		if( values[l] === undefined ) {
+	for( l=0; l<level; ++l) {
+		if (values[l] === undefined) {
 			break;
 		}
-		if( options[values[l]] === undefined ) {
+		if (options[values[l]] === undefined) {
 			return [ [ '', 'Valor inválido' ] ];
 		}
 		console.log('Antes', options, values[l], options[values[l]]);
 		options = options[values[l]].items;
-		if( options === undefined ) {
+		if (options === undefined) {
 			break;
 		}
 	}
-	if( options !== undefined && Object.keys(options).length ) { // https://stackoverflow.com/a/6700
+	if (options !== undefined && Object.keys(options).length) { // https://stackoverflow.com/a/6700
 		let ret = [ [ '', 'Elige...' ] ];
-		for( const v in options ) {
+		for( const v in options) {
 			ret.push([ v, options[v].title ]);
 		}
 		return ret;
@@ -177,12 +177,12 @@ function matchDropDownsToInput(j_input, id, taxonomy, drop_ids)
 {
 	empty_all_dropdowns();
 	const input_values = split_by_dot(j_input.val(), taxonomy['dot']);
-	if( input_values.length ) {
-		for( level = 0; level < input_values.length && level < taxonomy.levels.length; ++level ) {
+	if (input_values.length) {
+		for( level = 0; level < input_values.length && level < taxonomy.levels.length; ++level) {
 			let dropdown = $('#' + drop_ids[level]);
 			dropdown.val( input_values[level] );
 			let next_dropdown = $('#taxon_' + (level + 1 ) + '_' + id);
-			if( next_dropdown.length != 0 ) {
+			if (next_dropdown.length != 0) {
 				update_dropdown(next_dropdown, taxonomy, input_values, level + 1);
 			}
 		}
@@ -197,7 +197,7 @@ function update_dropdown(this_dropdown, taxonomy, input_values, level)
 {
  	this_dropdown.empty();
 	const taxon_values = taxonomy_values(taxonomy, input_values, level);
-	if( taxon_values.length == 0 ) {
+	if (taxon_values.length == 0) {
 		this_dropdown.append($('<option>', {
 			value: '0',
 			text : 'No hay valores',
@@ -205,7 +205,7 @@ function update_dropdown(this_dropdown, taxonomy, input_values, level)
 		}));
 		// Cuando no hay valores, añadir {dot}0 al código si hace falta
 		const input_values = split_by_dot($('#$id').val(), taxonomy_{$j_id}['dot']);
-		if( level < taxonomy_{$j_id}['levels'].length && level == input_values.length ) {
+		if (level < taxonomy_{$j_id}['levels'].length && level == input_values.length) {
 			$('#$id').val( input_values.join(taxonomy_{$j_id}['dot']) + taxonomy_{$j_id}['dot'] + '0');
 		}
 	} else {
@@ -222,9 +222,9 @@ JS;
 		// Each dropdown has its own change handler
 		$taxonomy_levels = $this->taxonomy['levels'];
 		$js_empty_dropdown = [];
-		for( $l = 0; $l < count($taxonomy_levels); ++$l ) {
+		for( $l = 0; $l < count($taxonomy_levels); ++$l) {
 			$lplus1 = $l+1;
-			if( $l>0 ) {
+			if ($l>0) {
 				$js_empty_dropdown[] = <<<js
 $('#taxon_{$l}_{$id}').empty();
 js;
@@ -236,7 +236,7 @@ $('#taxon_{$l}_{$id}').change(function() {
 	input_values[$l] = $(this).val();
 	$('#$id').val( input_values.join(taxonomy_{$j_id}['dot']) );
 	let next_dropdown = $('#taxon_{$lplus1}_$id');
-	if( next_dropdown.length != 0 ) {
+	if (next_dropdown.length != 0) {
 		update_dropdown(next_dropdown, taxonomy_{$j_id}, input_values, $lplus1);
 	}
 });

@@ -42,7 +42,7 @@ class CrudController extends \yii\web\Controller
 	 */
 	protected function changeActionParams(array $actionParams, string $action_id, $model)
 	{
-		if (!array_key_exists('master', $actionParams) && $this->getMasterModel() ) {
+		if (!array_key_exists('master', $actionParams) && $this->getMasterModel()) {
 			$actionParams['master'] = $this->getMasterModel();
 		}
 		return $actionParams;
@@ -73,17 +73,17 @@ class CrudController extends \yii\web\Controller
 
 	public function beforeAction($action)
 	{
-        if( count($_POST) == 0 && count($_FILES) == 0 && isset($_SERVER['CONTENT_TYPE'])
-			&& substr($_SERVER['CONTENT_TYPE'], 0, 19) == 'multipart/form-data' ) {
-			if( $this->request->getMethod() === 'POST' && isset($_SERVER['CONTENT_LENGTH']) ) {
-				if( intval($_SERVER['CONTENT_LENGTH'])>0 ) {
+        if (count($_POST) == 0 && count($_FILES) == 0 && isset($_SERVER['CONTENT_TYPE'])
+			&& substr($_SERVER['CONTENT_TYPE'], 0, 19) == 'multipart/form-data') {
+			if ($this->request->getMethod() === 'POST' && isset($_SERVER['CONTENT_LENGTH'])) {
+				if (intval($_SERVER['CONTENT_LENGTH'])>0) {
 					Yii::$app->session->addFlash('error', strtr(Yii::t('churros', 'PHP discarded POST data because of request exceeding either post_max_size={post_size} or upload_max_filesize={upload_size}'), ['{post_size}' => ini_get('post_max_size'), '{upload_size}' => ini_get('upload_max_filesize')]));
 					$this->redirect($this->request->referrer ?: Yii::$app->homeUrl);
 					return false;
 				}
 			}
         }
-        if (YII_ENV_TEST && $action->id == "delete" ) {
+        if (YII_ENV_TEST && $action->id == "delete") {
 			$this->enableCsrfValidation = false;
 		}
         return parent::beforeAction($action);
@@ -204,8 +204,8 @@ class CrudController extends \yii\web\Controller
 		if ($master_model = $this->getMasterModel()) {
 			$master_model->linkDetails($this->model);
 		}
-		if ($this->model->loadAll($params, static::findRelationsInForm($params)) ) {
-			if ($this->model->saveAll(true) ) {
+		if ($this->model->loadAll($params, static::findRelationsInForm($params))) {
+			if ($this->model->saveAll(true)) {
 				if ($this->request->getIsAjax()) {
 					return json_encode($this->model->getAttributes());
 				}
@@ -235,7 +235,7 @@ class CrudController extends \yii\web\Controller
 		if ($this->model->loadAll($this->request->post(), static::findRelationsInForm($params))) {
 			$this->model->setIsNewRecord(true);
 			$this->model->resetPrimaryKeys();
-			if ($this->model->saveAll(true) ) {
+			if ($this->model->saveAll(true)) {
 				if ($this->request->getIsAjax()) {
 					Yii::$app->response->format = \yii\web\Response::FORMAT_JSON;
 					return ['model' => $this->model->getAttributes(), 'success' => $this->model->getSuccesses()];
@@ -312,7 +312,7 @@ class CrudController extends \yii\web\Controller
 			if (YII_ENV_DEV) {
 				$this->model->addError('delete_integrity', $e->getMessage());
 			}
-		} catch (\yii\web\ForbiddenHttpException $e ) {
+		} catch (\yii\web\ForbiddenHttpException $e) {
 			$this->model->addError('delete', $this->model->t('churros',
 				$this->getResultMessage('error_delete')));
 		}
@@ -329,7 +329,7 @@ class CrudController extends \yii\web\Controller
 	{
 		$params = $this->request->queryParams;
 		$this->model = $this->findModel($id, $params);
-		if( YII_DEBUG ) {
+		if (YII_DEBUG) {
             Yii::$app->getModule('debug')->instance->allowedIPs = [];
         }
 		// https://stackoverflow.com/a/54568044/8711400
@@ -342,10 +342,10 @@ class CrudController extends \yii\web\Controller
 		$margin_footer = AppHelper::yiiparam('pdfMarginFooter', 15);
 		$margin_top = AppHelper::yiiparam('pdfMarginTop', 20);
 		$margin_bottom = AppHelper::yiiparam('pdfMarginBottom', 20);
-		if( $this->findViewFile('_pdf_header') ) {
+		if ($this->findViewFile('_pdf_header')) {
 			$header_content = $this->renderPartial('_pdf_header', ['model'=>$model]);
 			// h:{00232}
-			if( strncmp($header_content,'h:{',3) === 0 ) {
+			if (strncmp($header_content,'h:{',3) === 0) {
 				$margin_top = intval(substr($header_content,3,5));
 				$header_content = substr($header_content,9);
 			}
@@ -354,7 +354,7 @@ class CrudController extends \yii\web\Controller
 			$methods['setHeader'] = date('Y-m-d H:i') . '|'
 				. $this->model->getModelInfo('title') . '|' . Yii::$app->name . ' - {PAGENO}';
 		}
-		if( $this->findViewFile('_pdf_footer') ) {
+		if ($this->findViewFile('_pdf_footer')) {
 			$methods['setFooter'] = $this->renderPartial('_pdf_footer', ['model'=>$this->model]);
 		}
 		$pdf = new \kartik\mpdf\Pdf([
@@ -472,7 +472,7 @@ class CrudController extends \yii\web\Controller
 				$redirect_params = array_merge($redirect_params, $pk);
 				// no break
 			case 'create':
-// 				if( isset($_REQUEST['_form_cancelUrl']) ) {
+// 				if (isset($_REQUEST['_form_cancelUrl'])) {
 // 					$redirect_params['_form_cancelUrl'] = $_REQUEST['_form_cancelUrl'];
 // 				}
 				break;
@@ -511,7 +511,7 @@ class CrudController extends \yii\web\Controller
 			if (is_array($action_id)) {
 				$action_id[0] = $controller_route . '/' . $action_id[0];
 				$controller_route = Url::toRoute($action_id);
-			} else if ($action_id != null ) {
+			} else if ($action_id != null) {
 				$controller_route .= '/' . $action_id;
 			}
 			return $controller_route;
@@ -527,7 +527,7 @@ class CrudController extends \yii\web\Controller
 	{
 		$params = $this->request->queryParams;
 		$this->model = $this->findModel($id, $params);
-		if( $model ) {
+		if ($model) {
             return json_encode($this->model->getAttributes());
         } /// @todo else
 	}
@@ -642,7 +642,7 @@ class CrudController extends \yii\web\Controller
 	 */
 	public function controllerRoute($master = null, $child = null): ?string
 	{
-		if( $master == null ) {
+		if ($master == null) {
 			$master = $this->master_model;
 		}
 		$master_route = $master->controllerName();
@@ -725,7 +725,7 @@ class CrudController extends \yii\web\Controller
 		$scenario = $model->scenario?:$action_id;
 		$master = $this->getMasterModel();
 		if ($master) {
-			switch( $scenario ) {
+			switch( $scenario) {
 				case 'update':
 					$breadcrumbs[] = [
 						'label' => $model->recordDesc('short', 25),
@@ -739,7 +739,7 @@ class CrudController extends \yii\web\Controller
 			}
 		} else {
 			$prefix = $this->getBaseRoute();
-			switch( $scenario ) {
+			switch( $scenario) {
 				case 'update':
 					$breadcrumbs[] = [
 						'label' => $model->t('churros', 'Updating {record_short}'),
@@ -770,7 +770,7 @@ class CrudController extends \yii\web\Controller
 	protected function linkToModel($model): string
 	{
 		$pk = $model->getPrimaryKey();
-		if( is_array($pk) ) {
+		if (is_array($pk)) {
 			$link = Url::to(array_merge([$this->getActionRoute('view')], $pk));
 		} else {
 			$link = Url::to([$this->getActionRoute('view'), 'id' => $pk]);

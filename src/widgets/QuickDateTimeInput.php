@@ -154,7 +154,7 @@ class QuickDateTimeInput extends MaskedInput
     {
 		$hid_options = ['id' => $this->orig_id];
         if ($this->hasModel()) {
-			if( empty($this->options['value']) ) {
+			if (empty($this->options['value'])) {
 				$value = Html::getAttributeValue($this->model, $this->attribute);
 				if(!empty($value)) {
 					$parsed_date = YADTC::createFromFormat($this->saveFormat, $value);
@@ -176,7 +176,7 @@ class QuickDateTimeInput extends MaskedInput
 				$this->options['value'] = $value;
 			}
 			$ret = Html::activeHiddenInput($this->model, $this->attribute, $hid_options);
-			if (isset($this->options['name']) ) {
+			if (isset($this->options['name'])) {
 				$name = strtr($this->options['name'], '[]', '__');
 			} else {
 				$name = $this->attribute;

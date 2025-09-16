@@ -27,7 +27,7 @@ class RestViewAction extends ViewAction
      */
     public function run($id)
     {
-		if ($id == 0 ) {
+		if ($id == 0) {
 			/* @var $model \yii\db\ActiveRecord */
 			$model = new $this->modelClass();
 			$model->setDefaultValues();

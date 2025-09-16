@@ -55,7 +55,7 @@ class BooleanColumn extends DataColumn
 				$error = '';
 			}
 			$options = array_merge(['prompt' => Yii::t('churros', 'All')], $this->filterInputOptions);
-			if( $model->{$this->attribute} === '' ) {
+			if ($model->{$this->attribute} === '') {
 				$options['value'] = null; // Select 'All'
 			}
 			return Html::activeDropDownList($model, $this->attribute, [
@@ -85,7 +85,7 @@ class BooleanColumn extends DataColumn
     protected function renderDataCellContent($model, $key, $index)
     {
         $value = $this->getDataCellValue($model, $key, $index);
-        if( is_bool($value) ) {
+        if (is_bool($value)) {
             return $value ? $this->onTrue : $this->onFalse;
 		}
         if (!empty($value)) {

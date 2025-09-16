@@ -20,7 +20,7 @@ class GalleryShow extends \kartik\file\FileInput
 
     public function run()
     {
-		if( $this->controller_url == '' || substr($this->controller_url,-1,1) == '/') {
+		if ($this->controller_url == '' || substr($this->controller_url,-1,1) == '/') {
 			$this->controller_url .= $this->model->controllerName();
 		}
 		$images = Html::getAttributeValue($this->model, $this->attribute);
@@ -35,7 +35,7 @@ class GalleryShow extends \kartik\file\FileInput
 				'dropZoneEnabled' => false,
 				'showClose' => false
 			];
-			if( $images != '' ) {
+			if ($images != '') {
 				$uns_images = unserialize($images);
 				foreach( $uns_images as $filename => $titleandsize) {
 					$deleteUrl = Url::to(["{$this->controller_url}/remove-image", 'field' => $this->attribute, 'id' => $this->model->getPrimaryKey(), 'filename' => $filename ]);
@@ -46,9 +46,9 @@ class GalleryShow extends \kartik\file\FileInput
 			$this->pluginOptions = $images_plugin_options;
 			$content = Html::tag('div', parent::run(), [ 'id' =>  "show-" . $this->options['id'] ]);
 			$this->registerClientScript();
-		} catch( \Exception $e ) {
+		} catch( \Exception $e) {
 			$content = $images;
-		} catch( ErrorException $e ) {
+		} catch( ErrorException $e) {
 			$content = $images;
 		}
 		if ($this->return) {

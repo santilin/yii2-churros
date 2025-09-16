@@ -44,10 +44,10 @@ class WizardForm extends FormWizard
         echo $this->createFormWizard();
 
         //sct output all the collected hidden_fields
-        if( $this->_enctype_multipart ) {
+        if ($this->_enctype_multipart) {
 			$form->options['enctype'] = 'multipart/form-data';
 		}
-        foreach( $this->_hiddenFields as $hf ) {
+        foreach( $this->_hiddenFields as $hf) {
 			echo $hf;
 		}
 
@@ -131,7 +131,7 @@ class WizardForm extends FormWizard
     {
 
 		list($form, $hidden_fields, $form_fields, $error_summary) = $stepConfig['form_parts'];
-		if( !empty($form->options['enctype'])) {
+		if (!empty($form->options['enctype'])) {
 			$this->_enctype_multipart = true;
 		}
 		$this->_hiddenFields = array_merge($this->_hiddenFields, $hidden_fields);

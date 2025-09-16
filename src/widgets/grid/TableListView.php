@@ -34,7 +34,7 @@ class TableListView extends ListView
 
 	public function __construct($config = [])
 	{
-		if (empty($config['pager']) ) {
+		if (empty($config['pager'])) {
 			$config['pager'] = [
 				'firstPageLabel' => '<<',
 				'lastPageLabel' => '>>',
@@ -47,7 +47,7 @@ class TableListView extends ListView
 
 	public function run()
 	{
-		if( !isset($this->columns) ) {
+		if (!isset($this->columns)) {
 			throw new InvalidConfigException("TableListView: the property \$columns must be set");
 		}
 		$this->options = array_merge($this->options, [ 'class' => 'table-list-view' ]);

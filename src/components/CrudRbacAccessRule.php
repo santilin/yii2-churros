@@ -70,7 +70,7 @@ class CrudRbacAccessRule extends AccessRule
 		} else {
 			$perm = $action_id;
 		}
-		if ($this->module ) {
+		if ($this->module) {
 			$perm = $this->module . ".$perm";
 		}
 		return $user->can($perm);

@@ -11,7 +11,7 @@ class UpDownControllerTrait
 		$params = Yii::$app->request->queryParams;
 		$model = $this->findModel($id);
 		$searchModel = $this->findModel(null,null,'search');
-		if( isset($params['order_field']) ) {
+		if (isset($params['order_field'])) {
 			$order_field = $params['order_field'];
 			$save_order = $model->$order_field;
 			$dp = $searchModel->search($params);
@@ -23,18 +23,18 @@ class UpDownControllerTrait
 			$query->asArray();
 			$prev = $query->scalar();
 			$model->$order_field = $prev - 1;
-			if( $model->$order_field < 0 ) {
+			if ($model->$order_field < 0) {
 				$model->$order_field = 0;
 			}
-			if( $model->$order_field != $save_order ) {
-				if( $model->save() ) {
+			if ($model->$order_field != $save_order) {
+				if ($model->save()) {
 					Yii::$app->session->addFlash('success', "Se ha guardado con el número {$model->$order_field}");
 				} else {
 					Yii::$app->session->addFlash('error', "No se ha guardado: {$model->getOneError()}");
 				}
 			}
 		}
-		if( isset($params['returnTo']) ) {
+		if (isset($params['returnTo'])) {
 			return $this->redirect($params['returnTo']);
 		}
 		$fname = $searchModel->formName();
@@ -50,7 +50,7 @@ class UpDownControllerTrait
 		$params = Yii::$app->request->queryParams;
 		$model = $this->findModel($id);
 		$searchModel = $this->findModel(null,null,'search');
-		if( isset($params['order_field']) ) {
+		if (isset($params['order_field'])) {
 			$order_field = $params['order_field'];
 			$save_order = $model->$order_field;
 			$dp = $searchModel->search($params);
@@ -62,18 +62,18 @@ class UpDownControllerTrait
 			$query->limit(1);
 			$query->asArray();
 			$next = $query->scalar();
-			if( $next != 0 ) {
+			if ($next != 0) {
 				$model->$order_field = $next + 1;
 			}
-			if( $model->$order_field != $save_order ) {
-				if( $model->save() ) {
+			if ($model->$order_field != $save_order) {
+				if ($model->save()) {
 					Yii::$app->session->addFlash('success', "Se ha guardado con el número {$model->$order_field}");
 				} else {
 					Yii::$app->session->addFlash('error', "No se ha guardado: {$model->getOneError()}");
 				}
 			}
 		}
-		if( isset($params['returnTo']) ) {
+		if (isset($params['returnTo'])) {
 			return $this->redirect($params['returnTo']);
 		}
 		$fname = $searchModel->formName();
@@ -87,23 +87,23 @@ class UpDownControllerTrait
 	{
 		$params = Yii::$app->request->queryParams;
 		$searchModel = $this->findModel(null,null,'search');
-		if( isset($params['order_field']) ) {
+		if (isset($params['order_field'])) {
 			$order_field = $params['order_field'];
 			$dp = $searchModel->search($params);
 			$dp->query->orderBy($order_field);
 			$models = $dp->getModels();
-			foreach( $models as $model ) {
+			foreach( $models as $model) {
 				$save_order = $model->$order_field;
-				if( !$model->oculto() ) {
-					if( $model->$order_field != ($start==0?1:$start) ) {
+				if (!$model->oculto()) {
+					if ($model->$order_field != ($start==0?1:$start)) {
 						$model->$order_field = ($start==0?1:$start);
 					}
 					$start += $inc;
 				} else {
 					$model->$order_field = 0;
 				}
-				if( $save_order != $model->$order_field ) {
-					if( !$model->save() ) {
+				if ($save_order != $model->$order_field) {
+					if (!$model->save()) {
 						Yii::$app->session->addFlash('error', "No se ha guardado: {$model->getOneError()}");
 						break;
 					}
@@ -111,7 +111,7 @@ class UpDownControllerTrait
 			}
 			Yii::$app->session->addFlash('success', "Se han espaciado " . count($models));
 		}
-		if( isset($params['returnTo']) ) {
+		if (isset($params['returnTo'])) {
 			return $this->redirect($params['returnTo']);
 		}
 	}

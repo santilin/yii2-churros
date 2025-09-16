@@ -16,7 +16,7 @@ class SearchInput extends \yii\bootstrap5\InputWidget
 	{
 		$attribute = $this->attribute;
 		$attr_class = str_replace('.','_',$attribute);
-		switch( $this->type ) {
+		switch( $this->type) {
 		default:
 			$control_type = 'text';
 		}

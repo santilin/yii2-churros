@@ -30,7 +30,7 @@ class ExpandableTextColumn extends DataColumn
 			$this->modalTitle = $this->getHeaderCellLabel();
 		}
 		$text = $this->getDataCellValue($model, $key, $index);
-		if ( $text === null || (is_string($text) && !trim($text)) || (is_array($text) && count($text) == 0) ) {
+		if ( $text === null || (is_string($text) && !trim($text)) || (is_array($text) && count($text) == 0)) {
 			return '';
 		}
 		if ($this->format == 'html') {
@@ -43,7 +43,7 @@ class ExpandableTextColumn extends DataColumn
 			}
 		}
 		$text = trim($text);
-		if( $this->length == 0 ) {// || strlen($text)<=$this->length) {
+		if ($this->length == 0) {// || strlen($text)<=$this->length) {
 			return $text;
 		} else {
 			$cell_key = $index . $this->attribute;

@@ -18,7 +18,7 @@ class UserNameAccessRule extends AccessRule
 			return false;
         }
         // Gives an oportunity to not have rbac tables
-		if (in_array($user->getIdentity()->username, $items) ) {
+		if (in_array($user->getIdentity()->username, $items)) {
 			return true;
 		}
 		if (parent::matchRole($user)) {

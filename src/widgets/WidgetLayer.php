@@ -288,7 +288,7 @@ js;
 				if ($layout_row['content'] === true) {
 					$layout_row['content'] = array_diff(array_keys($this->widgets), $this->widgets_used);
 				}
-				foreach ($layout_row['content'] as $widget_name ) {
+				foreach ($layout_row['content'] as $widget_name) {
 					// $col_added = false;
 					// if (!$this->lastWasCol() && $this->lastWasRow()) {
 					// 	$col_added = true;
@@ -306,7 +306,7 @@ js;
 							} else {
 								$widget_layout = $widget->layout??'large';
 							}
-							if ($layout_row['size'] == 'small' || ($cols >= 4 && $layout_row_layout != 'inline') ) {
+							if ($layout_row['size'] == 'small' || ($cols >= 4 && $layout_row_layout != 'inline')) {
 								switch ($widget_layout) {
 									case 'short':
 										$widget_layout = 'medium';

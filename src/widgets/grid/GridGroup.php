@@ -53,8 +53,8 @@ class GridGroup extends BaseObject
 	public function updateGroup($model, $key, $index)
 	{
 		// have we've got the value on willUpdateGroup?
-		if( $this->got_value == false ) {
-			if( $this->value instanceOf \Closure ) {
+		if ($this->got_value == false) {
+			if ($this->value instanceOf \Closure) {
 				$this->current_value = call_user_func($this->value, $model, $key, $index, $this->grid);
 		} else if (ArrayHelper::KeyExists($this->value, $model)) {
 				$this->current_value = $model->{$this->value};
@@ -64,8 +64,8 @@ class GridGroup extends BaseObject
 		} else {
 			$this->got_value = false;
 		}
-		if( $this->last_value !== $this->current_value) {
-			if( $this->last_value != null ) {
+		if ($this->last_value !== $this->current_value) {
+			if ($this->last_value != null) {
 				$this->group_change = self::NEW_FOOTER_AND_HEADER;
 			} else {
 				$this->group_change = self::NEW_HEADER;
@@ -79,7 +79,7 @@ class GridGroup extends BaseObject
 
 	public function willUpdateGroup($model, $key, $index)
 	{
-		if( $this->value instanceOf \Closure ) {
+		if ($this->value instanceOf \Closure) {
 			$this->current_value = call_user_func($this->value, $model, $key, $index, $this->grid);
 		} else if (ArrayHelper::KeyExists($this->value, $model)) {
 			$this->current_value = ArrayHelper::getValue($model, $this->value);
@@ -87,8 +87,8 @@ class GridGroup extends BaseObject
 			$this->current_value = $this->grid->columns[$this->value]->getDataCellValue($model, $key, $index);
 		}
 		$this->got_value = true;
-		if( $this->last_value !== $this->current_value) {
-			if( $this->last_value != null ) {
+		if ($this->last_value !== $this->current_value) {
+			if ($this->last_value != null) {
 				return true;
 			}
 		}
@@ -101,7 +101,7 @@ class GridGroup extends BaseObject
 			return '';
 		}
 		$content = $this->header;
-		if ($content instanceOf \Closure ) {
+		if ($content instanceOf \Closure) {
 			$content = call_user_func($content, $model, $key, $index, $this);
 		}
 		if ($content === true || $content === null) {
@@ -116,7 +116,7 @@ class GridGroup extends BaseObject
 					break;
 			}
 		}
-		if( $content !== false) {
+		if ($content !== false) {
 			$content = strtr($content, [
 				'{group_value}' => $this->current_value,
 				'{group_header_label}' => $this->header_label,
@@ -141,12 +141,12 @@ class GridGroup extends BaseObject
 	protected function getOnlyTotalsContent($summary_columns, $model, $key, $index, $tdoptions)
 	{
 		$ret = '';
-		foreach( $this->grid->columns as $kc => $column ) {
-			if( !isset($summary_columns[$kc]) ) {
+		foreach( $this->grid->columns as $kc => $column) {
+			if (!isset($summary_columns[$kc])) {
 				$value = $model[$kc];
 			} else {
 				$value = $this->summaryValues[$this->level][$kc];
-				if( $this->level == count($this->grid->groups) ) {
+				if ($this->level == count($this->grid->groups)) {
 					Html::addCssClass($tdoptions, "report detail");
 				} else {
 					Html::addCssClass($tdoptions, "report group-foot-$column group-foot-{$this->level}");
@@ -163,7 +163,7 @@ class GridGroup extends BaseObject
 	protected function getStandardFooterContent($summary_columns, $model, $key, $index, $tdoptions)
 	{
 		$content = $this->footer;
-		if ($content instanceOf \Closure ) {
+		if ($content instanceOf \Closure) {
 			$content = call_user_func($content, $model, $key, $index, $this);
 		}
 		if ($content === true || $content === null) {
@@ -178,7 +178,7 @@ class GridGroup extends BaseObject
 			return $this->getSummaryContent($summary_columns, $label . $this->current_value);
 		}
 		$ret = '';
-		if( $content !== false) {
+		if ($content !== false) {
 			$content = strtr($content, [
 				'{group_value}' => $this->current_value,
 				'{group_header_label}' => $this->header_label,
@@ -217,11 +217,11 @@ class GridGroup extends BaseObject
 	{
 		$colspan = 0;
 		foreach ($this->grid->columns as $kc => $column) {
-			if( $column->visible ) {
+			if ($column->visible) {
 				if (!$column instanceof $this->grid->dataColumnClass) {
 					continue;
 				}
-				if( !isset($summary_columns[$kc]) ) {
+				if (!isset($summary_columns[$kc])) {
 					$colspan++;
 				} else {
 					break;
@@ -238,7 +238,7 @@ class GridGroup extends BaseObject
 			if (!$column instanceof $this->grid->dataColumnClass) {
 				continue;
 			}
-			if( $nc++ < $colspan ) {
+			if ($nc++ < $colspan) {
 				continue;
 			}
 			$classes = [
@@ -249,7 +249,7 @@ class GridGroup extends BaseObject
 			} else if ($column->format?:'raw' != 'raw') {
 				$classes[] = "format-{$column->format}";
 			}
-			if( isset($summary_columns[$kc]) ) {
+			if (isset($summary_columns[$kc])) {
 				$classes[] = 'group-foot-' . strval($this->level);
 				$ret .= Html::tag('td',
 					$this->grid->formatter->format(
@@ -264,12 +264,12 @@ class GridGroup extends BaseObject
 
 	public function resetSummaries($summary_columns, $report_level, $max_levels)
 	{
-		for( $l = $report_level; $l <= $max_levels; ++$l ) {
-			if( !isset($this->summaryValues[$l]) ) {
+		for( $l = $report_level; $l <= $max_levels; ++$l) {
+			if (!isset($this->summaryValues[$l])) {
 				$this->summaryValues[$l] = [];
 			}
 			foreach( $summary_columns as $kc => $summary) {
-				switch( $summary ) {
+				switch( $summary) {
 				case 'sum':
 				case 'count':
 				case 'distinct_sum':
@@ -299,10 +299,10 @@ class GridGroup extends BaseObject
 	public function updateSummaries($summary_columns, $report_level, $row_values)
 	{
 		// same in GridView::updateSummaries
-		for( $l = 1; $l <= $report_level; ++$l ) {
+		for( $l = 1; $l <= $report_level; ++$l) {
 			foreach ($summary_columns as $key => $summary) {
 				// $kc = str_replace('.', '_', $key);
-				switch( $summary ) {
+				switch( $summary) {
 				case 'sum':
 					$this->summaryValues[$l][$key] += $row_values[$key];
 					break;
@@ -330,16 +330,16 @@ class GridGroup extends BaseObject
 					}
 					break;
 				case 'max':
-					if( $this->summaryValues[$l][$key] == null ) {
+					if ($this->summaryValues[$l][$key] == null) {
 						$this->summaryValues[$l][$key] = $row_values[$key];
-					} else if( $this->summaryValues[$l][$key] < $row_values[$key] ) {
+					} else if ($this->summaryValues[$l][$key] < $row_values[$key]) {
 						$this->summaryValues[$l][$key] = $row_values[$key];
 					}
 					break;
 				case 'min':
-					if( $this->summaryValues[$l][$key] == null ) {
+					if ($this->summaryValues[$l][$key] == null) {
 						$this->summaryValues[$l][$key] = $row_values[$key];
-					} else if( $this->summaryValues[$l][$key] > $row_values[$key] ) {
+					} else if ($this->summaryValues[$l][$key] > $row_values[$key]) {
 						$this->summaryValues[$l][$key] = $row_values[$key];
 					}
 					break;

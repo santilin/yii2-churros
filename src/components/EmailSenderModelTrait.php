@@ -22,16 +22,16 @@ trait EmailSenderModelTrait
 		Yii::$app->mailer->on(\yii\mail\BaseMailer::EVENT_AFTER_SEND,
 			function(\yii\mail\MailEvent $event) use ($mailer_error, $sent) {
 				$sent = $event->isSuccessful;
-				if( !$event->isSuccessful  ) {
+				if (!$event->isSuccessful ) {
 				}
 			}
 		);
-		if( !isset($view_params['model']) ) {
+		if (!isset($view_params['model'])) {
 			$view_params['model'] = $this;
 		}
 		$from = $email_params['from']??AppHelper::yiiparam('adminEmail');
 		$to = (array)$to;
-		if( YII_ENV_DEV ) {
+		if (YII_ENV_DEV) {
 			$subject = "[dev:to:" . reset($to) . "]$subject";
 			$to = [AppHelper::yiiparam('develEmail')??'no-reply@example.com'];
 		}
@@ -42,20 +42,20 @@ trait EmailSenderModelTrait
 			->setSubject($subject);
 		try {
 			$sent = $composed->send();
-		} catch ( \Swift_TransportException $e ) {
+		} catch ( \Swift_TransportException $e) {
 			$mailer_error = $e->getMessage();
-		} catch( \Swift_RfcComplianceException $e ) {
+		} catch( \Swift_RfcComplianceException $e) {
 			$mailer_error = $e->getMessage();
 		}
-		if( !$sent ) {
-			if( count($to) > 1 ) {
+		if (!$sent) {
+			if (count($to) > 1) {
 				$error_message = Yii::t('churros', 'Unable to send email to {email} and other {ndest} recipients from {from}', ['email' => array_pop($to), 'ndest' => count($to), 'from' => $from]);
 			} else {
 				$error_message = Yii::t('churros', 'Unable to send email to {email} from {from}', ['email' => array_pop($to), 'from' => $from ]);
 			}
 			if (strpos($mailer_error, 'php_network_getaddresses: getaddrinfo failed') !== FALSE) {
 				$this->addError('sendmail_network_error', $error_message);
-				if( YII_ENV_DEV ) {
+				if (YII_ENV_DEV) {
 					$mail_message_parts = $composed->getSwiftMessage()->getChildren();
 					$html_mail = $mail_message_parts[0];
 					$this->addError('mailbody', "View: $view_name<br/>Subject: $subject<br/>"

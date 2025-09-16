@@ -42,7 +42,7 @@ class ExpandableTextView extends Component
 			$this->modalTitle = $this->model->getAttributeLabel($this->attribute);
 		}
  		$text = $this->model->{$this->attribute};
-		if ( $text === null || (is_string($text) && !trim($text)) || (is_array($text) && count($text) == 0) ) {
+		if ( $text === null || (is_string($text) && !trim($text)) || (is_array($text) && count($text) == 0)) {
 			return '';
 		}
 		if (is_array($text)) {
@@ -55,7 +55,7 @@ class ExpandableTextView extends Component
 			$text = \yii\helpers\Markdown::process($text, $this->markdown_flavor);
 		}
 		$text = trim($text);
-		if( $this->rows == 0 ) {// || strlen($text)<=$this->length) {
+		if ($this->rows == 0) {// || strlen($text)<=$this->length) {
 			return $text;
 		} else {
 			$cell_key = strtr(get_class($this->model) . '.' . $this->model->getPrimaryKey() . '.' . $this->attribute, ['\\' => '_', '.' => '_']);

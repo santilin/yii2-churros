@@ -88,7 +88,7 @@ class DbController extends Controller
     public function beforeAction($action)
     {
         if (parent::beforeAction($action)) {
-			if( !in_array($this->format, self::FORMATS) ) {
+			if (!in_array($this->format, self::FORMATS)) {
                 throw new InvalidConfigException("{$this->format}: formato desconocido. Elige uno de " . join(",",self::FORMATS));
 			}
 			$this->db = Instance::ensure($this->db, Connection::className());
@@ -139,13 +139,13 @@ class DbController extends Controller
 			case 'blob':
 			case 'mediumblob':
 			case 'text':
-				if( $value == null ) {
+				if ($value == null) {
 					return "null";
 				} else {
 					return "'" . strtr($value, ["\\'" => "\\\\", "'" => "\\'"]) . "'";
 				}
 			case 'resource':
-				if( $value == null ) {
+				if ($value == null) {
 					return "null";
 				} else {
 					return "'" . base64_encode($value) . "'";
@@ -162,7 +162,7 @@ class DbController extends Controller
      */
     public function actionDumpSchema(string $schemaName, array $tables = [])
     {
-		if( $this->format != 'seeder' && $this->format != 'fixture' ) {
+		if ($this->format != 'seeder' && $this->format != 'fixture') {
 			throw new InvalidConfigException("{$this->format}: formato no contemplado. Sólo se contempla 'seeder' y 'fixture'");
 		}
 		if ($this->format == 'seeder') {
@@ -181,7 +181,7 @@ class DbController extends Controller
 			$full_dump = $preamble;
 			foreach ($table_schemas as $tableSchema) {
 				if (!count($tables) || (count($tables) && in_array($tableSchema->name, $tables))) {
-					if( $tableSchema->name != 'migration' ) {
+					if ($tableSchema->name != 'migration') {
 						echo "Dumping {$tableSchema->fullName}\n";
 						$full_dump .= $this->dumpTable($tableSchema);
 						$class_name =str_replace('.', '_', $tableSchema->fullName);
@@ -200,11 +200,11 @@ $runseeder
 }
 
 EOF;
-			if ($this->createFile ) {
+			if ($this->createFile) {
 				$write_file = true;
 				@mkdir(Yii::getAlias($this->seedersPath), 0777, true);
 				$filename = Yii::getAlias($this->seedersPath) . "/SchemaSeeder.php";
-				if (\file_exists($filename) && !$this->confirm("The file $filename already exists. Do you want to overwrite it?") ) {
+				if (\file_exists($filename) && !$this->confirm("The file $filename already exists. Do you want to overwrite it?")) {
 					$write_file = false;
 				}
 				if ($write_file) {
@@ -218,15 +218,15 @@ EOF;
 			$tables = $this->db->schema->getTableSchemas($schemaName, true);
 			foreach ($tables as $tableSchema) {
 				$table_dump = '';
-				if( $tableSchema->name != 'migration' ) {
+				if ($tableSchema->name != 'migration') {
 					echo "Dumping {$tableSchema->name}\n";
 					$table_dump .= $this->dumpTable($tableSchema);
 				}
-				if ($this->createFile ) {
+				if ($this->createFile) {
 					$write_file = true;
 					@mkdir(Yii::getAlias($this->fixturesPath), 0777, true);
 					$filename = Yii::getAlias($this->fixturesPath) . "/" . $tableSchema->name . ".php";
-					if (\file_exists($filename) && !$this->confirm("The file $filename already exists. Do you want to overwrite it?") ) {
+					if (\file_exists($filename) && !$this->confirm("The file $filename already exists. Do you want to overwrite it?")) {
 						$write_file = false;
 					}
 					if ($write_file) {
@@ -254,7 +254,7 @@ EOF;
 			throw new \Exception("$tableName not found in database");
 		}
 		$preamble = $this->getPreamble('dump-table', $tableName, $tableSchema->schemaName);
-		if ($this->createFile ) {
+		if ($this->createFile) {
 			$write_file = true;
 			if ($this->format == 'seeder') {
 				if (!is_dir(Yii::getAlias($this->seedersPath))) {
@@ -270,7 +270,7 @@ EOF;
 				}
 				$filename = Yii::getAlias($this->fixturesPath) . "/{$tableName}.php";
 			}
-			if (\file_exists($filename) && !$this->confirm("The file $filename already exists. Do you want to overwrite it?") ) {
+			if (\file_exists($filename) && !$this->confirm("The file $filename already exists. Do you want to overwrite it?")) {
 				$write_file = false;
 			}
 			if ($write_file) {
@@ -291,9 +291,9 @@ EOF;
 	public function actionSeedTable($tableName, $inputfilename = null)
 	{
 		$tableName = str_replace('.','_', $tableName);
-		switch( $this->format ) {
+		switch( $this->format) {
 		case 'seeder':
-			if( $inputfilename == null ) {
+			if ($inputfilename == null) {
 				$inputfilename = Yii::getAlias($this->seedersPath) . "/{$tableName}Seeder.php";
 			}
 			require_once($inputfilename);
@@ -314,7 +314,7 @@ EOF;
 	 */
 	public function actionSeedSchema($inputfilename = null )
 	{
-		if( $inputfilename == null ) {
+		if ($inputfilename == null) {
 			$inputfilename = Yii::getAlias($this->seedersPath) . "/SchemaSeeder.php";
 		}
 		require_once($inputfilename);
@@ -325,7 +325,7 @@ EOF;
 
 	protected function dumpTable($tableSchema, string $where = '')
 	{
-		switch( $this->format ) {
+		switch( $this->format) {
 		case 'seeder':
 			return $this->dumpTableAsSeeder($tableSchema, trim($where));
 		case 'fixture':
@@ -427,12 +427,12 @@ EOF;
 			$sql .= " LIMIT {$this->count}";
 		}
 		$raw_data = $this->db->createCommand($sql)->queryAll();
-		foreach( $raw_data as $row ) {
+		foreach( $raw_data as $row) {
 			$ncolumn = 0;
 			$txt_data .= "[";
 			$first_column = true;
 			foreach($row as $column) {
-				if( $first_column) {
+				if ($first_column) {
 					$first_column = false;
 				} else {
 					$txt_data .= ", ";
@@ -445,15 +445,15 @@ EOF;
 		$ret .= "\tpublic function run(\$db) {\n";
 		$ret .= "\t\t\$rows_$_table_name = [\n$txt_data\t\t];\n";
 		$ret .= "\n";
-		if( $this->truncateTables ) {
+		if ($this->truncateTables) {
 			$ret .= "\t\t\$db->createCommand()->checkIntegrity(false)->execute();\n";
 			$ret .= "\t\t\$db->createCommand('DELETE FROM {{%" . $table_name . "}}')->execute();\n";
 		}
 		$ret .= <<<EOF
 		echo "Seeding $table_name\\n";
-		foreach( \$rows_$_table_name as \$row ) {
-			foreach( \$this->columns as \$ck => \$cv ) {
-				if( \$cv == '' ) {
+		foreach( \$rows_$_table_name as \$row) {
+			foreach( \$this->columns as \$ck => \$cv) {
+				if (\$cv == '') {
 					unset(\$row[\$ck]);
 					unset(\$this->columns[\$ck]);
 				}
@@ -470,11 +470,11 @@ EOF;
 
 	protected function getPreamble($command, $schema, $table = null)
 	{
-		if ($table == null ) {
+		if ($table == null) {
 			$table = $schema;
 		}
 		$version = self::VERSION;
-		switch( $this->format ) {
+		switch( $this->format) {
 		case 'seeder':
 		case 'fixture':
 			$preamble = <<<PREAMBLE

@@ -143,7 +143,7 @@ Trait ModelWarningsTrait
 			$key = $key . '.';
 		}
 		foreach ($model->getWarnings() as $k => $warning) {
-			foreach ($warning as $warn_msg ) {
+			foreach ($warning as $warn_msg) {
 				$this->addWarning($key . $k, $warn_msg);
 			}
 		}
@@ -166,7 +166,7 @@ Trait ModelWarningsTrait
 	public function getOneWarning():string
 	{
 		$warnings = $this->getFirstWarnings(false);
-		if( count($warnings) ) {
+		if (count($warnings)) {
 			return reset($warnings);
 		} else {
 			return '';

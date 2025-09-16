@@ -9,7 +9,7 @@ class Taxonomy
 		$dot = $taxonomy['dot']??'.';
 		$ret = [];
 		foreach ($titles as $title) {
-			if( $title == '' && count($items) == 0 ) {
+			if ($title == '' && count($items) == 0) {
 				$ret[] = '0';
 				$found = true;
 			} else {
@@ -17,7 +17,7 @@ class Taxonomy
 				$found = false;
 				foreach ($items as $k => $v) {
 					if (mb_strtoupper($v['title']) == $mb_title
-						|| mb_strtoupper($v['abbrev']??'') == $mb_title ) {
+						|| mb_strtoupper($v['abbrev']??'') == $mb_title) {
 						$found = true;
 						$ret[] = $k;
 						break;
@@ -27,7 +27,7 @@ class Taxonomy
 					$items = $v['items']??[];
 				}
 			}
-			if( !$found ) {
+			if (!$found) {
 				return '';
 			}
 		}
@@ -40,7 +40,7 @@ class Taxonomy
 		$ret_parts = [ $value ];
 		$items = $taxonomy['items'];
 		foreach ($value_parts as $k => $v) {
-			if( count($items) ) {
+			if (count($items)) {
 				$p = $items[$v]['abbrev']??$items[$v]['title']??'????';
 				if ($p === '????' && is_numeric($v)) {
 					$vt = ltrim($v, '0');

@@ -20,7 +20,7 @@ class DeleteModelException extends \yii\web\HttpException
 	{
 		$this->model = $model;
 		$message = $model->t('churros', 'Error deleting {la} {title} {record_medium}');
-		if( $previous->getCode() == 23000 ) {
+		if ($previous->getCode() == 23000) {
 			$message .= ":\n" . $model->t('churros', "{Esta} {title} is used in other files");
 		}
         parent::__construct(400, $message, $previous->getCode(), $previous);

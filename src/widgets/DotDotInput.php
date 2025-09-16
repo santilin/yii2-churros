@@ -9,7 +9,7 @@ class DotDotInput extends \yii\widgets\InputWidget
 
 	public function run()
     {
-		if( empty($this->mask) ) {
+		if (empty($this->mask)) {
 			throw new InvalidConfigException("The DotDotInput mask must be set");
 		}
         $this->registerClientScript();
