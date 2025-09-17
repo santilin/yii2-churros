@@ -150,6 +150,10 @@ trait ModelSearchTrait
 				}
 			}
 		}
+		/// @todo move to DataProvider count()?
+		if (!empty($provider->query->join) || !empty($provider->query->joinWith)) {
+			$provider->query->distinct();
+		}
     }
 
 	/**

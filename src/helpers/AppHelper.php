@@ -496,4 +496,19 @@ class AppHelper
         return null; // Devuelve null si no se encuentra el valor en el array
     }
 
+    public static function appendToArrayKey(array &$array, $key, $value)
+	{
+		if (!isset($array[$key]) || !is_array($array[$key])) {
+			$array[$key] = [];
+		}
+		if (is_array($value)) {
+			// Merge arrays, preserving indexes
+			$array[$key] = array_merge($array[$key], $value);
+		} else {
+			$array[$key][] = $value;
+		}
+	}
+
+
+
 }
