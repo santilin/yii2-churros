@@ -25,7 +25,7 @@ trait ModelTrait
 			foreach ( (array)$scopes as $scope) {
 				$scope_args = [];
 				if (is_array($scope)) {
-					$scope_func = trim(reset($scope));
+					$scope_func = trim(array_shift($scope));
 					$scope_args = $scope;
 				} else {
 					$scope_func = trim($scope);

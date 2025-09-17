@@ -207,12 +207,12 @@ trait ControllerTrait
 		return $breadcrumbs;
 	}
 
-	public function userPermissions(): array
+	public function userPermissions(): array|bool
 	{
 		return $this->crudActions;
 	}
 
-	public function resolvePermissions(...$arrays): bool|array
+	protected function resolvePermissions(...$arrays): array|bool
 	{
 		// If there is no user component, userPermissions must return crudActions
 		$ret = array_intersect($this->crudActions, $this->userPermissions()?:[]);

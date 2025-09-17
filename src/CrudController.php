@@ -17,7 +17,7 @@ class CrudController extends \yii\web\Controller
 {
 	use ControllerTrait;
 
-	public $model;
+	public $model = null;
 	public array $modelOldAttributes = [];
 	protected static ?string $_prefix = null;
 	protected static ?string $_model_name = null;
@@ -87,11 +87,6 @@ class CrudController extends \yii\web\Controller
 			$this->enableCsrfValidation = false;
 		}
         return parent::beforeAction($action);
-	}
-
-	public function userPermissions(): bool|array
-	{
-		return $this->crudActions;
 	}
 
 	/**
@@ -199,8 +194,8 @@ class CrudController extends \yii\web\Controller
 	public function actionCreate($id = null)
 	{
 		$params = array_merge($this->request->get(), $this->request->post());
-		$params['permissions'] = $this->resolvePermissions($params['permissions']??[], $this->userPermissions());
 		$this->model = $this->findFormModel($id, null, 'create', $params);
+		$params['permissions'] = $this->resolvePermissions($params['permissions']??[], $this->userPermissions());
 		if ($master_model = $this->getMasterModel()) {
 			$master_model->linkDetails($this->model);
 		}
@@ -230,8 +225,8 @@ class CrudController extends \yii\web\Controller
 	public function actionDuplicate($id)
 	{
 		$params = array_merge($this->request->get(), $this->request->post());
-		$params['permissions'] = $this->resolvePermissions($params['permissions']??[], $this->userPermissions());
 		$this->model = $this->findFormModel($id, null, 'duplicate', $params);
+		$params['permissions'] = $this->resolvePermissions($params['permissions']??[], $this->userPermissions());
 		if ($this->model->loadAll($this->request->post(), static::findRelationsInForm($params))) {
 			$this->model->setIsNewRecord(true);
 			$this->model->resetPrimaryKeys();
@@ -260,8 +255,8 @@ class CrudController extends \yii\web\Controller
 	public function actionUpdate($id)
 	{
 		$params = array_merge($this->request->get(), $this->request->post());
-		$params['permissions'] = $this->resolvePermissions($params['permissions']??[], $this->userPermissions());
 		$this->model = $this->findFormModel($id, null, 'update', $params);
+		$params['permissions'] = $this->resolvePermissions($params['permissions']??[], $this->userPermissions());
  		if ($this->model === null && FormHelper::hasPermission($params['permissions'], 'create')) {
 			return $this->redirect(array_merge(['create'], $params));
 		}
