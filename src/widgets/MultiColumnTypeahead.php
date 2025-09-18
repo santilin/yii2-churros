@@ -3,7 +3,7 @@
 namespace santilin\churros\widgets;
 
 use Yii;
-use yii\helpers\Html;
+use yii\helpers\{Html,Url};
 use yii\base\InvalidConfigException;
 use kartik\typeahead\Typeahead;
 
@@ -39,6 +39,9 @@ class MultiColumnTypeahead extends Typeahead
 	{
 		if (count($this->formFields)==0) {
 			throw new InvalidConfigException("You must define al least one formField");
+		}
+		if (is_array($this->remoteUrl)) {
+			$this->remoteUrl = Url::to($this->remoteUrl);
 		}
 		$set_dest_fields_values = [];
 		$item_fields = [];
