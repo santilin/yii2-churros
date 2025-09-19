@@ -1,3 +1,9 @@
+.grid-view {
+  .group-head {
+    font-weight: bold;
+  }
+}
+
 .w-label-12-5 {
   width: 12.5%;
 }

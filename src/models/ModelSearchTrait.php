@@ -101,7 +101,6 @@ trait ModelSearchTrait
 			if ($sort_fldname != $attribute) {
 				/// @todo recursive tarea.paqueteTrabajo.proyecto.id
 				$related_model_class = $relation['modelClass'];
-// 				$provider->query->distinct(); // Evitar duplicidades debido a las relaciones hasmany
 				if (!isset($provider->sort->attributes[$attribute])) {
 					$related_model_search_class = $relation['searchClass']
 						?? str_replace('models\\', 'forms\\', $related_model_class) . '_Search';
