@@ -32,7 +32,6 @@ class GridGroup extends BaseObject
 	public $footer_format;
 	public $footer_label;
 	public $value;
-	public $displayValue;
 	public $format;
 	public $orderby;
 	public $show_column = true;
