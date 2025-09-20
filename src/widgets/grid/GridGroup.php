@@ -32,6 +32,7 @@ class GridGroup extends BaseObject
 	public $footer_format;
 	public $footer_label;
 	public $value;
+	public $displayValue;
 	public $format;
 	public $orderby;
 	public $show_column = true;
@@ -53,7 +54,7 @@ class GridGroup extends BaseObject
 	public function updateGroup($model, $key, $index)
 	{
 		// have we've got the value on willUpdateGroup?
-		if ($this->got_value == false) {
+		if ($this->got_value === false) {
 			if ($this->value instanceOf \Closure) {
 				$this->current_value = call_user_func($this->value, $model, $key, $index, $this->grid);
 		} else if (ArrayHelper::KeyExists($this->value, $model)) {
