@@ -285,7 +285,7 @@ js;
 				if ($subtitle) {
 					$row_html .= "<div class=row><div class=col-12><div class=\"subtitle mb-3 alert alert-warning\">$subtitle</div></div></div>";
 				}
-				if ($layout_row['content'] === true) {
+				if ($layout_row['content'] === true) { // remaining widgets
 					$layout_row['content'] = array_diff(array_keys($this->widgets), $this->widgets_used);
 				}
 				foreach ($layout_row['content'] as $widget_name) {
@@ -297,7 +297,8 @@ js;
 					// }
 					$fs = '';
 					$open_divs = 0;
-					if ($widget = $this->widgets[$widget_name]??false) {
+					$widget = $this->widgets[$widget_name]??false;
+					if ($widget) {
 						$this->widgets_used[] = $widget_name;
 						if ($widget instanceof \yii\bootstrap5\ActiveField) {
 							// bs5 ActiveFields add a row container over the whole field
