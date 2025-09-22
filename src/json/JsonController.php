@@ -463,7 +463,9 @@ class JsonController extends \yii\web\Controller
 			$route = Url::to($action_id);
 		} else {
 			$route = $this->getRoutePrefix($this->getPath(), false) . $model->getPath();
-			if ($action_id) {
+			if ($action_id == 'index') {
+				$route = AppHelper::removeLastWord($route, '/') . '/index';
+			} else if ($action_id) {
 				$route .= "/$action_id";
 			}
 		}
