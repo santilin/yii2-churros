@@ -63,7 +63,6 @@ trait ModelChangesLoggableTrait
 		}
 	}
 
-
 	// Logs the changes after the model is saved or deleted
 	protected function handleModelChanges($event)
 	{
@@ -85,7 +84,7 @@ trait ModelChangesLoggableTrait
 				if (YII_ENV_TEST && !$this->created_by) {
 					$model_change->changed_by = 1;
 				} else {
-					$model_change->changed_by = $this->created_by;
+					$model_change->changed_by = $this->created_by ?? \Yii::$app->user?->identity?->id;
 				}
 				$model_change->type = $model_change::V_TYPE_CREATE;
 				$model_change->value = $this->recordDesc('short');

@@ -757,50 +757,6 @@ trait ModelInfoTrait
 		}
 	}
 
-	/**
-	 * Get all properties that start with a given prefix.
-	 *
-	 * @param string $prefix The prefix to filter properties by.
-	 * @return array An array of property names that start with the specified prefix.
-	 */
-	public function getPropertiesWithPrefix($prefix)
-	{
-		// Get all class properties
-		$classProperties = get_object_vars($this);
-
-		// Filter properties by prefix
-		$filteredProperties = [];
-		$lp = strlen($prefix);
-		foreach ($classProperties as $kp => $p) {
-			if (strpos($kp, $prefix) === 0) {
-				$kp = substr($kp, $lp);
-				$filteredProperties[$kp] = $p;
-			}
-		}
-
-		return $filteredProperties;
-	}
-
-	/**
-	 * Get all properties that start with a given prefix.
-	 *
-	 * @param string $prefix The prefix to filter properties by.
-	 * @return array An array of property names that start with the specified prefix.
-	 */
-	public function getAttributesWithoutPrefix($prefix)
-	{
-		// Get all class properties
-		$at= get_object_vars($this);
-
-		// Filter properties by prefix
-		$filteredProperties = [];
-		foreach ($this->getAttributes() as $kp => $p) {
-			if (strpos($kp, $prefix) !== 0) {
-				$filteredProperties[$kp] = $p;
-			}
-		}
-		return $filteredProperties;
-	}
 
 	public function refreshableAttributes(): array
 	{
