@@ -575,10 +575,10 @@ class CrudController extends \yii\web\Controller
 					$fields = explode(',',$fields);
 				}
 			}
+			$model_format = '{' . implode('} {', $fields) . '}';
 		} else {
 			$fields = $searchModel->findCodeAndDescFields();
 		}
-		$model_format = '{' . implode('} {', $fields) . '}';
 		$fld_values = [];
 		foreach ($fields as $field) {
 			$fld_values[$field] = $search;
