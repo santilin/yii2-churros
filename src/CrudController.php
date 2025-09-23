@@ -528,7 +528,8 @@ class CrudController extends \yii\web\Controller
 	}
 
 	// Ajax for the MutiColumnTypeAhead control
-	public function actionMultiAutocomplete(string $search, string $fields, int $page = 1, int $per_page = 12, string $scopes = '')
+	public function actionMultiAutocomplete(string $search, string $fields, int $page = 1,
+											int $per_page = 12, string $scopes = '')
 	{
 		\Yii::$app->response->format = \yii\web\Response::FORMAT_JSON;
 		$searchModel = $this->createSearchModel();
@@ -556,12 +557,16 @@ class CrudController extends \yii\web\Controller
 	}
 
 	// Ajax
-	public function actionAutocomplete(string $search, string $format, array|string $fields = [],
-		array|string $scopes = '', string $id_field = null, string $model_format = 'long')
+	public function actionAutocomplete(string $search, string $format,
+		array|string $fields = [], array|string $scopes = '',
+		string|array $id_fields = null, string $model_format = 'long')
 	{
 		\Yii::$app->response->format = \yii\web\Response::FORMAT_JSON;
 		$ret = [];
 		$searchModel = $this->createSearchModel();
+		if ($id_fields == null) {
+			$id_fields = $searchModel->primaryKey();
+		}
 		if ($had_fields = !empty($fields)) {
 			if (is_string($fields)) {
 				if ($fields[0] == '[') {
@@ -573,6 +578,7 @@ class CrudController extends \yii\web\Controller
 		} else {
 			$fields = $searchModel->findCodeAndDescFields();
 		}
+		$model_format = '{' . implode('} {', $fields) . '}';
 		$fld_values = [];
 		foreach ($fields as $field) {
 			$fld_values[$field] = $search;
@@ -586,15 +592,25 @@ class CrudController extends \yii\web\Controller
 		}
 		$dataProvider = $searchModel->search($dp_search_params);
 		if ($had_fields) {
-			if ($id_field && !in_array($id_field, $fields)) {
-				$fields[] = $id_field;
+			foreach ($id_fields as $id_field) {
+				if (!in_array($id_field, $fields)) {
+					$fields[] = $id_field;
+				}
 			}
 			$dataProvider->query->select(implode(',',$fields))->distinct();
 		}
 		if ($format == 'select2' || $format == 'select') {
 			foreach ($dataProvider->getModels() as $record) {
-				$id = $id_field ? $record->$id_field : $record->getPrimaryKey();
-				$ret[] = [ 'id' => $id, 'text' => $record->recordDesc($model_format) ];
+				if (count($id_fields)>1) {
+					$id = json_encode($record->getAttributes($id_fields),true);
+				} else {
+					$id = $record->{$id_fields[0]};
+				}
+				if ($had_fields) {
+					$ret[] = [ 'id' => $id, 'text' => $record->recordDesc($model_format) ];
+				} else {
+					$ret[] = [ 'id' => $id, 'text' => $record->recordDesc($model_format) ];
+				}
 			}
 			if ($format == 'select2') {
 				return [ 'results' => $ret ];
