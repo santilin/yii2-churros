@@ -606,7 +606,7 @@ trait ModelInfoTrait
 		} else if ($format == 'value') {
 			return $values[$this->$field]??null;
 		} else if ($format == 'select2' || $format == 'group') {
-			return ArrayHelper::map($values, 1,2,0);
+			return ArrayHelper::map($values, 1,0,2);
 		} else if ($format == 'ungroup') {
 			return AppHelper::unGroupValues($values);
 		} else if ($format == 'selectize') {
@@ -895,6 +895,15 @@ trait ModelInfoTrait
 			}
 		}
 		return join($sep, $lines);
+	}
+
+	public function getAttributeValues(array $names): array
+	{
+		$ret = [];
+		foreach ($names as $name) {
+			$ret[] = ArrayHelper::getValue($this, $name);
+		}
+		return $ret;
 	}
 
 } // trait ModelInfoTrait

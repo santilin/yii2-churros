@@ -104,9 +104,10 @@ jsexpr
 			],
 			//  		'datumTokenizer' => "Bloodhound.tokenizers.obj.whitespace('value')",
 			'templates' => [
-				'notFound' => ($this->exactMatch
+				'notFound' => null,
+				($this->exactMatch
 				? '<div class="text-danger" style="padding:0 8px">' .Yii::t('churros', 'No results found') . '</div>'
-				: ''),
+				: null),
 				// The items in the dropdown
 				'suggestion' => new \yii\web\JsExpression($this->suggestionsDisplay)
 			],
