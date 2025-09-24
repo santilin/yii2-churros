@@ -605,7 +605,7 @@ trait ModelInfoTrait
 			return array_values($values);
 		} else if ($format == 'value') {
 			return $values[$this->$field]??null;
-		} else if ($format == 'select2' || $format == 'group') {
+		} else if ($format == 'select2' || $format == 'group' || $format == 'grouped') {
 			return ArrayHelper::map($values, 1,0,2);
 		} else if ($format == 'ungroup') {
 			return AppHelper::unGroupValues($values);
