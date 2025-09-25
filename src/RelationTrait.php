@@ -650,4 +650,15 @@ trait RelationTrait
 		return $ret;
 	}
 
+	public function reloadRelations(array $relations)
+	{
+		foreach ($relations as $relationName) {
+			// Unset cached relation data to force reload
+			unset($this->$relationName);
+			// Access relation for loading
+			$this->$relationName;
+		}
+		return $this;
+	}
+
 }

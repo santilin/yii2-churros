@@ -18,7 +18,6 @@ class CrudController extends \yii\web\Controller
 	use ControllerTrait;
 
 	public $model = null;
-	public array $modelOldAttributes = [];
 	protected static ?string $_prefix = null;
 	protected static string $_model_name;
 	protected array $crudActions = [];
