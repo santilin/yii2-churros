@@ -218,6 +218,16 @@ class AppHelper
 		return substr($sentence, $last_word_start + 1);
 	}
 
+	static public function firstWord($sentence, $sep = ' ')
+	{
+		$first_word_end = strpos($sentence, $sep);
+		if ($first_word_end === false) {
+			return $sentence;
+		}
+		// +1 so we don't include the space in our result
+		return substr($sentence, 0, $first_word_end);
+	}
+
 	public static function camelCase($str, array $noStrip = [])
 	{
 		// non-alpha and non-numeric characters become spaces
