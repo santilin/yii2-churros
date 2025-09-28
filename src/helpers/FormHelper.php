@@ -609,6 +609,19 @@ ajax;
 		}
 	}
 
+	static public function controlSize(string $layout = null, string $prepend = ''): string
+	{
+		if ($layout === "short") {
+			return $prepend . 'large';
+		} else if ($layout == 'medium') {
+			return $prepend . 'md';
+		} else if ($layout == null || $layout == 'large') {
+			return $prepend . 'sm';
+		} else {
+			throw new \Exception("$layout: unsupported layout");
+		}
+	}
+
 	public static function renderTitle(?string $supertitle, ?string $title, ?string $subtitle, bool $embedded = false): string
 	{
         $parts = [];
