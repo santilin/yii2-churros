@@ -122,22 +122,12 @@ class ActionColumn extends \yii\grid\ActionColumn
 	public function renderFilterCell()
 	{
 		return Html::tag('td', <<<html
-<div class="d-flex gap-2">
-  <a class="d-flex position-relative remove-filters" role="button" data-pjax="1" href="javascript:void(0);" onclick="ChurrosGrid.resetFilters('{$this->grid->id}'); return false;">
-  <i class="fas fa-filter text-secondary p-0 fs-6 ms-1"></i>
-  <div class=position-absolute style="
-    background: red;
-    width: 2px;
-    height: 18px;
-    transform: rotate(35deg);
-    top: -2px;
-    left: 57%;">
-  </div>
+  <a class="remove-filters" role="button" data-pjax="1" href="javascript:void(0);" onclick="ChurrosGrid.resetFilters('{$this->grid->id}'); return false;">
+  <i class="fas fa-filter-circle-xmark text-secondary p-0 fs-6 ms-1"></i>
   </a>
   <a class="run-filters" role="button" href="javascript:void(0);" >
     <i class="mb-1 fas fa-filter text-secondary p-0 fs-6 ms-1"></i>
   </a>
-</div>
 html
 		, $this->filterOptions);
 	}

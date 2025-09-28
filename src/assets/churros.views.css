@@ -218,16 +218,27 @@ legend {
   text-align: right;
 }
 
-.filters .select2-container--krajee-bs5 .select2-selection--single
-{
-  padding-top: 0.25rem !important;
-  padding-bottom: 0.25rem !important;
-  padding-left: 0.5rem !important;
-  font-size: 0.875rem !important;
-  border-radius: var(--bs-border-radius-sm) !important;
-  height: inherit !important;
-}
-
-tr.filters > td > select.form-select {
-  width: 100%;
+table.table tr.filters {
+  .select2-container--krajee-bs5 .select2-selection--single
+  {
+    padding-top: 0.25rem !important;
+    padding-bottom: 0.25rem !important;
+    padding-left: 0.5rem !important;
+    font-size: 0.875rem !important;
+    border-radius: var(--bs-border-radius-sm) !important;
+    height: inherit !important;
+  }
+  td {
+    padding:0 !important;
+  }
+  td a.remove-filters i {
+    color: red !important;
+    font-size: 1.25rem !important;
+  }
+  td a.run-filters i {
+    font-size: 1.25rem !important;
+  }
+  tr.filters > td > select.form-select {
+    width: 100%;
+  }
 }
