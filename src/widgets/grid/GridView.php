@@ -95,7 +95,7 @@ class GridView extends SimpleGridView
     // Dont show emptyText here, emptyText is managed in the summary section.
     public function renderItems()
     {
-		if ($this->filterModel && $this->dataProvider->getCount() == 0) {
+		if ($this->filterModel && $this->dataProvider->getCount() <= 1) {
 			// No mostrar la fila de filtro si no hay valores filtrados
 			$has_filters = false;
  			$filter_attrs = $this->filterModel->activeAttributes();
@@ -119,7 +119,7 @@ class GridView extends SimpleGridView
 				}
 			}
  			if (!$has_filters) {
-				$this->showHeader = false;
+				$this->filterModel = false;
 			}
 		}
 		$empty_text_save = $this->emptyText;
