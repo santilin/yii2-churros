@@ -87,18 +87,18 @@ trait ControllerTrait
 
 	protected function addSuccessFlashes(string $action_id, $model, ?string $success_message = null)
 	{
-		if ($success_message !== false) {
+		if ($success_message !== false) { // discard all messages
 			if (!$success_message) {
-				$success_messages = $model->getSuccessesSummary(true);
-				if (count($success_messages) > 0) {
-					$success_message = implode('<br/>', $success_messages);
-				} else {
-					$success_message = $model->t('churros', $this->getResultMessage($action_id));
+				$success_messages = array_merge(
+					[ 'model' => $model->t('churros', $this->getResultMessage($action_id)) ],
+					$model->getSuccessesSummary(true));
+				foreach ($success_messages as $success_message) {
+					Yii::$app->session->addFlash('success', $success_message);
 				}
 			} else {
 				$success_message = $model->t('churros', $success_message);
+				Yii::$app->session->addFlash('success', $success_message);
 			}
-			Yii::$app->session->addFlash('success', $success_message);
 		}
 		$this->addErrorFlashes($model);
 	}
