@@ -40,6 +40,11 @@ class ReadonlyDropdown extends InputWidget
      */
     protected function renderDropdown()
     {
+        // when readonly, remove form-select class
+        if (!empty($this->options['readonly'])) {
+            Html::removeCssClass($this->options, 'form-select');
+            Html::addCssClass($this->options, 'form-control');
+        }
         echo Html::activeDropDownList($this->model, $this->attribute, $this->items, array_merge([
             'class' => 'form-select',
             'disabled' => true,
