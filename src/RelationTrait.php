@@ -435,19 +435,19 @@ trait RelationTrait
             $error = false;
             foreach ($relations as $relation_name) {
 				$relation = $this->getRelation($relation_name);
-                $array = [];
-                if ($relation->ismultiple) {
+                $conds = [];
+                if ($relation->multiple) {
                     $link = $relation->link;
                     if (count($this->$relation_name)) {
                         foreach ($link as $key => $value) {
                             if (isset($this->$value)) {
-                                $array[$key] = $this->$value;
+                                $conds[$key] = $this->$value;
                             }
                         }
                         if ($isSoftDelete) {
-                            $error = !$this->{$relation_name}[0]->updateAll($this->_rt_softdelete, ['and', $array]);
+                            $error = !$this->{$relation_name}[0]->updateAll($this->_rt_softdelete, ['and', $conds]);
                         } else {
-                            $error = !$this->{$relation->name}[0]->deleteAll(['and', $array]);
+                            $error = !$this->{$relation_name}[0]->deleteAll(['and', $conds]);
                         }
                     }
                 }
