@@ -15,7 +15,6 @@ use santilin\churros\helpers\FormHelper;
 class ActionColumn extends \yii\grid\ActionColumn
 {
     public $template = '{view}&nbsp;{update}&nbsp;{delete}&nbsp;{duplicate}';
-    public $crudPerms = [];
     public $iconClassPrefix = 'fas fa';
 	public $icons = [
 		'view' => '<i class="fas fa-eye"></i>',
@@ -23,6 +22,8 @@ class ActionColumn extends \yii\grid\ActionColumn
 		'delete' => '<i class="fas fa-trash"></i>',
 		'duplicate' => '<i class="fas fa-copy"></i>',
 	];
+    public array $crudPerms = [];
+	public array $extraButtonsOptions = [];
 
     /**
      * Initializes the default button rendering callbacks.
@@ -36,13 +37,15 @@ class ActionColumn extends \yii\grid\ActionColumn
         if (FormHelper::hasPermission($this->crudPerms, 'view')) {
 			if (!isset($this->buttons['view'])) {
 				$this->initDefaultButton('view', 'view', array_merge(
-					[ 'title' => Yii::t('churros', 'View') ]));
+					['title' => Yii::t('churros', 'View')],
+					$this->extraButtonsOptions['view']??[]));
 			}
 		}
         if (FormHelper::hasPermission($this->crudPerms, 'update')) {
 			if (!isset($this->buttons['update'])) {
 				$this->initDefaultButton('update', 'update', array_merge(
-					[ 'title' => Yii::t('churros', 'Update') ]));
+					['title' => Yii::t('churros', 'Update')],
+					$this->extraButtonsOptions['update']??[]));
 			}
 		}
         if (FormHelper::hasPermission($this->crudPerms, 'delete')) {
@@ -50,14 +53,15 @@ class ActionColumn extends \yii\grid\ActionColumn
 				$this->initDefaultButton('delete', 'delete', array_merge(
 					[ 'title' => Yii::t('churros', 'Delete'),
 					  'data-confirm' => Yii::t('yii', 'Are you sure you want to delete this item?'),
-					  'data-method' => 'post'
-					]));
+					  'data-method' => 'post' ],
+					$this->extraButtonsOptions['delete']??[]));
 			}
 		}
         if (FormHelper::hasAllPermissions($this->crudPerms, ['duplicate'])) {
 			if (!isset($this->buttons['duplicate'])) {
 				$this->initDefaultButton('duplicate', 'duplicate', array_merge(
-					[ 'title' => Yii::t('churros', 'Duplicate')]));
+					[ 'title' => Yii::t('churros', 'Duplicate')],
+					$this->extraButtonsOptions['duplicate']??[]));
 			}
 		}
 		foreach( $this->buttons as $index => $button) {

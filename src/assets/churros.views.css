@@ -29,6 +29,7 @@
   --bs-btn-padding-x: 0.5rem;
   --bs-btn-font-size: 0.875rem;
   --bs-btn-border-radius: var(--bs-border-radius-sm);
+  margin-left: 0.25rem;
 }
 .grid-view .grid-header {
   display: flex;
@@ -203,11 +204,11 @@ legend {
   flex: 0 1 auto;
 }
 
-.grid-view .action-buttons {
+.grid-view .action-column {
   white-space:nowrap;
   width:1%;
 }
-.grid-view .action-buttons a {
+.grid-view .action-column a {
   width: 1.125em;
   height: 1.125em;
   font-size: 1.125em;
