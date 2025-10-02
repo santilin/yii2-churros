@@ -189,6 +189,81 @@ js;
 						$ret .= "</div>";
 					}
 					break;
+				case 'accordion':
+					$col_added = false;
+					if (!$this->lastWasCol()) {
+						$this->setLastCol($cols);
+						$col_added = true;
+						$ret .= '<div class="' . $this->columnClasses($cols) . '">';
+					}
+					$accordion_items = [];
+					foreach ($layout_row['content'] as $kc => $row_content) {
+						if ($row_content === null) continue;
+						if (!is_array($row_content)) {
+							$row_content = [
+								'label' => $kc,
+								'content' => $row_content
+							];
+						}
+						$accordion_items[] = [
+							'label' => ArrayHelper::remove($row_content, 'title', $kc),
+							'content' => $this->layoutWidgets($row_content, [
+								'layout' => $layout_row_layout,
+								'style' => $layout_row_style,
+								'type' => $layout_row_type,
+							], $kc),
+							'options' => ArrayHelper::remove($row_content, 'headerOptions', []),
+							'expanded' => ArrayHelper::remove($row_content, 'active', false),
+						];
+					}
+					if ($accordion_items) {
+						$accordion = new \yii\bootstrap5\Accordion([
+							'items' => $accordion_items,
+							'options' => $layout_row['htmlOptions'] ?? [],
+						]);
+						$ret .= $accordion->run();
+					}
+					if ($col_added) {
+						$this->removeLast();
+						$ret .= "</div>";
+					}
+					break;
+				case 'details':
+					$col_added = false;
+					if (!$this->lastWasCol()) {
+						$this->setLastCol($cols);
+						$col_added = true;
+						$ret .= '<div class="' . $this->columnClasses($cols) . '">';
+					}
+					foreach ($layout_row['content'] as $kc => $row_content) {
+						if ($row_content === null) {
+							continue;
+						}
+						if (!is_array($row_content)) {
+							$row_content = [
+								'label' => $kc,
+								'content' => $row_content,
+								'open' => false,
+							];
+						}
+						$label = ArrayHelper::remove($row_content, 'title', $row_content['label'] ?? $kc);
+						$content = $this->layoutWidgets($row_content, [
+							'layout' => $layout_row_layout,
+							'style' => $layout_row_style,
+							'type' => $layout_row_type,
+						], $kc);
+						$open = ArrayHelper::remove($row_content, 'open', false);
+
+						$ret .= Html::beginTag('details', $open ? ['open' => 'open'] : []);
+						$ret .= Html::tag('summary', $label);
+						$ret .= $content;
+						$ret .= Html::endTag('details');
+					}
+					if ($col_added) {
+						$this->removeLast();
+						$ret .= "</div>";
+					}
+					break;
 				case 'rows':
 				case 'grid-nolabels':
 					if (!$this->lastWasRow()) {

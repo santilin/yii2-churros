@@ -766,6 +766,88 @@ ajax;
 		return false;
 	}
 
+	/**
+	 * Renderiza un array como tabla Bootstrap aplicando formatos con Yii2 formatter.
+	 *
+	 * @param array $data Array de datos (fila - array asociativo).
+	 * @param array $columnFormats Clave = nombre columna, valor = tipo formato Yii2 (e.g. 'text', 'date', 'decimal').
+	 * @return string HTML tabla formateada.
+	 */
+	public static function arrayAsTable(array $data, array $columnFormats = []): string
+	{
+		if (empty($data)) {
+			return '<p>No hay datos para mostrar.</p>';
+		}
+
+		$formatter = \Yii::$app->formatter;
+		$columns = array_keys(reset($data));
+
+		$html = '<table class="table table-bordered table-striped">';
+		$html .= '<thead><tr>';
+
+		// Cabecera con nombres columnas
+		foreach ($columns as $col) {
+			$html .= Html::tag('th', Html::encode($col));
+		}
+		$html .= '</tr></thead><tbody>';
+
+		// Filas con datos
+		foreach ($data as $row) {
+			$html .= '<tr>';
+			foreach ($columns as $col) {
+				$value = $row[$col] ?? null;
+				// Si hay formato definido para la columna, aplicar usando formatter
+				if (isset($columnFormats[$col])) {
+					$formattedValue = $formatter->{'as' . ucfirst($columnFormats[$col])}($value);
+				} else {
+					// Por defecto, codificar HTML para evitar inyección
+					$formattedValue = Html::encode((string)$value);
+				}
+				$html .= Html::tag('td', $formattedValue);
+			}
+			$html .= '</tr>';
+		}
+
+		$html .= '</tbody></table>';
+
+		return $html;
+	}
+
+	/**
+	 * Renderiza un registro (array asociativo) como tabla Bootstrap con formato Yii2.
+	 *
+	 * @param array $record Array asociativo con los datos.
+	 * @param array $columnFormats Clave = nombre campo, valor = tipo formato (e.g. 'text', 'date', 'decimal').
+	 * @return string HTML tabla formateada.
+	 */
+	public static function recordAsTable(array $record, array $columnFormats = []): string
+	{
+		if (empty($record)) {
+			return '<p>No hay datos para mostrar.</p>';
+		}
+
+		$formatter = Yii::$app->formatter;
+
+		$html = '<table class="table table-bordered table-striped">';
+		$html .= '<tbody>';
+
+		foreach ($record as $key => $value) {
+			// Formatear valor según tipo dado
+			if (isset($columnFormats[$key])) {
+				$formattedValue = $formatter->{'as' . ucfirst($columnFormats[$key])}($value);
+			} else {
+				$formattedValue = Html::encode((string)$value);
+			}
+			$html .= '<tr>';
+			$html .= Html::tag('th', Html::encode($key));
+			$html .= Html::tag('td', $formattedValue);
+			$html .= '</tr>';
+		}
+
+		$html .= '</tbody></table>';
+
+		return $html;
+	}
 
 
 } // class

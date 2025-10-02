@@ -239,7 +239,13 @@ table.table tr.filters {
   td a.run-filters i {
     font-size: 1.25rem !important;
   }
-  tr.filters > td > select.form-select {
+  td > select.form-select {
     width: 100%;
   }
+  td.filters-actions {
+    display: flex;
+    align-items: center;
+    gap: 0.1em; /* Ajusta el espacio entre iconos */
+  }
+
 }
