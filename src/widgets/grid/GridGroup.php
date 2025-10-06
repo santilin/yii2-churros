@@ -23,7 +23,7 @@ class GridGroup extends BaseObject
 	/**
 	 * @var string The column we are grouping by
 	 */
-	public $column;
+	public string $column;
 	public $header = true;
 	public $labels = [];
 	public $header_format;
@@ -122,7 +122,8 @@ class GridGroup extends BaseObject
 				'{group_header_label}' => $this->header_label,
 				'{group_footer_label}' => $this->footer_label,
 			]);
-			Html::addCssClass($tdoptions, "group-head group-head-{$this->level} {$this->column}");
+			$inverse_level = count($this->grid->groups) - $this->level + 1;
+			Html::addCssClass($tdoptions, "group-head group-head-$inverse_level {$this->column}");
 			return Html::tag('td', $content, $tdoptions);
 		} else {
 			return '';
@@ -141,7 +142,7 @@ class GridGroup extends BaseObject
 	protected function getOnlyTotalsContent($summary_columns, $model, $key, $index, $tdoptions)
 	{
 		$ret = '';
-		foreach( $this->grid->columns as $kc => $column) {
+		foreach ($this->grid->columns as $kc => $column) {
 			if (!isset($summary_columns[$kc])) {
 				$value = $model[$kc];
 			} else {
@@ -268,7 +269,7 @@ class GridGroup extends BaseObject
 			if (!isset($this->summaryValues[$l])) {
 				$this->summaryValues[$l] = [];
 			}
-			foreach( $summary_columns as $kc => $summary) {
+			foreach ( $summary_columns as $kc => $summary) {
 				switch( $summary) {
 				case 'sum':
 				case 'count':

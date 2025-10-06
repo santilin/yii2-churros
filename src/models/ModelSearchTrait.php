@@ -74,7 +74,7 @@ trait ModelSearchTrait
 	/**
 	 * Adds related filters and sorts to dataproviders for grids
 	*/
-    public function addRelatedFieldsToProvider(array $gridColumns, BaseDataProvider $provider)
+    public function addRelatedFieldsToProvider(array $gridColumns, array &$gridGroups, BaseDataProvider $provider)
     {
 		foreach ($gridColumns as $col_attribute => $column_def) {
 			if ( $column_def === null // Allows for conditional definition of columns
@@ -148,6 +148,10 @@ trait ModelSearchTrait
 					}
 				}
 			}
+		}
+		foreach ($gridGroups as $kc => $grid_group) {
+			list($sort_fldname, $table_alias, $model, $relation) = $this->addRelatedFieldToJoin($kc, $provider->query);
+			$gridGroups[$kc]['orderby'] = ($table_alias ? ($table_alias . '.') : '') . $sort_fldname;
 		}
 		/// @todo move to DataProvider count()?
 		if (!empty($provider->query->join) || !empty($provider->query->joinWith)) {

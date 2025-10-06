@@ -1,6 +1,18 @@
 .grid-view {
-  .group-head {
-    font-weight: bold;
+  tbody tr {
+    td.group-head {
+      font-weight: bold;
+    }
+    td.group-head-1 {
+      color: blue;
+      font-size: 1rem;
+      margin-left: 1rem;
+    }
+    td.group-head-2 {
+      color: green;
+      font-size: 1.2rem;
+      padding-left: 1rem;
+    }
   }
 }
 
