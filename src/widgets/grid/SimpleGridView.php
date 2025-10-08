@@ -81,7 +81,7 @@ class SimpleGridView extends \yii\grid\GridView
 			if (is_array($column)) {
 				unset($column['name']);
 			}
-			if (isset($this->groups[$kc]) && !$this->groups[$kc]->show_column??false) {
+			if (isset($this->groups[$kc]) && !($this->groups[$kc]->show_column??true)) {
 				$column['visible'] = false;
 			}
 			if (empty($column['summary']) && !empty($column['pageSummaryFunc'])) {
