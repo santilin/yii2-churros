@@ -27,7 +27,7 @@ class WidgetLayer
 			$this->widgetsLayout = [
 				[
 					'type' => $type,
-					'layout' => $form_layout,
+					'layout' => $form_layout??'1col',
 					'style' => $style,
 					'content' => array_keys($this->widgets),
 				]
@@ -46,7 +46,7 @@ class WidgetLayer
 		$ret = $this->layoutWidgets($this->widgetsLayout, [
 			'size' => $size,
 			'style' => $style,
-			'layout' => $form_layout,
+			'layout' => $form_layout??'1col',
 		]);
 		$not_used = array_diff(array_keys($this->widgets), $this->widgets_used);
 		if (!empty($not_used)) {
@@ -409,7 +409,7 @@ js;
 								$col_classes = $this->columnClasses(
 									($widget_layout == 'full' || $widget_layout == 'fill') ? 1 : $cols);
 								$open_divs++;
-								$fs .=  "<div class=\"$col_classes\">";
+								$fs .= "<div class=\"$col_classes\">";
 								$fs .= $this->layoutActiveField($widget_name, $widget, $layout_row, $widget_layout, $layout_row_layout, $indexf++);
 							} else {
 								$fs .= $this->layoutActiveField($widget_name, $widget, $layout_row, $widget_layout, $layout_row_layout, $indexf++);
@@ -544,6 +544,9 @@ js;
 					$classes = $this->widget_layout_horiz_config['inline']['horizontalCssClasses'];
 				} else {
 					$classes = $this->widget_layout_horiz_config[$layout_of_row][$widget_layout]['horizontalCssClasses'];
+				}
+				if (!empty($widget->horizontalCssClasses)) {
+					$classes = array_merge_recursive($classes, $widget->horizontalCssClasses);
 				}
 				if ($row_style == 'grid-nolabels') {
 					$widget->enableLabel = false;

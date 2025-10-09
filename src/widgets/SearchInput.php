@@ -12,8 +12,12 @@ class SearchInput extends \yii\bootstrap5\InputWidget
 	public ?string $formName;
 	public array $dropDownValues = [];
 
+
 	public function run()
 	{
+		if (empty($this->field->horizontalCssClasses)) {
+			$this->field->horizontalCssClasses = [ 'wrapper' => 'd-flex' ];
+		}
 		$attribute = $this->attribute;
 		$attr_class = str_replace('.','_',$attribute);
 		switch( $this->type) {
@@ -30,8 +34,8 @@ class SearchInput extends \yii\bootstrap5\InputWidget
 
 		if ($this->type == 'dropdown') {
 			Html::removeCssClass($this->options, 'form-control');
-			Html::addCssClass($this->options, 'form-select');
-			$ret .= Html::hiddenInput("${scope}[$attribute][op]", $value['op']);
+			Html::addCssClass($this->options, 'form-select w-auto');
+			$ret .= Html::hiddenInput("{$scope}[$attribute][op]", $value['op']);
 			if (isset($value['v'])) {
 				if (is_array($value['v'])) {
 					foreach ($value['v'] as $k => $v) { // @todo se puede saber si es '' o no
@@ -45,15 +49,15 @@ class SearchInput extends \yii\bootstrap5\InputWidget
 			} else {
 				$value['v'] = null;
 			}
-			$ret .= Html::dropDownList("${scope}[$attribute][v]",
+			$ret .= Html::dropDownList("{$scope}[$attribute][v]",
 				$value['v'], $this->dropDownValues, $this->options);
 		} else {
-			$ret .= Html::dropDownList("${scope}[$attribute][op]",
+			$ret .= Html::dropDownList("{$scope}[$attribute][op]",
 				$value['op'], FormHelper::$operators, [
-				'id' => "drop-op-$attr_class", 'class' => 'form-select search-dropdown',
+				'id' => "drop-op-$attr_class", 'class' => 'form-select search-dropdown w-auto',
 				'Prompt' => 'Operador']);
 			Html::addCssClass($this->options, 'form-control');
-			$ret .= Html::input($control_type, "${scope}[$attribute][v]", $value['v'], $this->options);
+			$ret .= Html::input($control_type, "{$scope}[$attribute][v]", $value['v'], $this->options);
 		}
 		return $ret;
 	}

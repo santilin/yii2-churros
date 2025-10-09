@@ -26,7 +26,7 @@ trait ActiveFormTrait
 				$add_buttons = true;
 			}
 		} else if (is_string($this->fieldsLayout)) {
-			$layout = $this->fieldsLayout;
+			$layout = $this->fieldsLayout?:'1col';
 			$add_buttons = $add_layout = true;
 		} else {
 			$add_buttons = $add_layout = true;
