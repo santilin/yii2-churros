@@ -215,7 +215,7 @@ class FormHelper
 			if (!isset($button['htmlOptions'])) {
 				$button['htmlOptions'] = [];
 			}
-			if (!isset($button['htmlOptions']['name'])) {
+			if (!isset($button['htmlOptions']['name']) && !is_int($name)) {
 				$button['htmlOptions']['name'] = $name;
 			}
 			if (isset($button['htmlOptions']['autofocus'])) {
