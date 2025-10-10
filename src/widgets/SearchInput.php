@@ -14,9 +14,6 @@ class SearchInput extends \yii\bootstrap5\InputWidget
 
 	public function run()
 	{
-		if (empty($this->field->horizontalCssClasses)) {
-			$this->field->horizontalCssClasses = [ 'wrapper' => 'd-flex' ];
-		}
 		$attribute = $this->attribute;
 		$attr_class = str_replace('.','_',$attribute);
 		switch( $this->type) {
