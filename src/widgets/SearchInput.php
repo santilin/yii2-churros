@@ -12,7 +12,6 @@ class SearchInput extends \yii\bootstrap5\InputWidget
 	public ?string $formName;
 	public array $dropDownValues = [];
 
-
 	public function run()
 	{
 		if (empty($this->field->horizontalCssClasses)) {

@@ -30,7 +30,7 @@ class YADTC extends \DateTime
 	 * Intenta crear un DateTime a partir de cualquier tipo de variable y sin tener que especificar el formato.
 	 * Si la fecha es incorrecta o ambigua, lanza una excepción.
 	 */
-	static public function fromString($datetime, $format = null, \DateTimeZone $timezone = null): YADTC
+	static public function fromString($datetime, $format = null, \DateTimeZone $timezone = null): ?YADTC
 	{
 		if ($datetime === null || $datetime instanceof YADTC) {
 			return $datetime;
