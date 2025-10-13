@@ -55,7 +55,7 @@ trait ModelSearchTrait
 	{
 		$op = $this->related_operators[$rel_name]??false;
 		if ($op === false) {
-			$op = $this->normal_attrs[$rel_name]??false;
+			$op = $this->attrs_operators[$rel_name]??false;
 		}
 		if ($op !== false) {
 			return $op;
@@ -274,7 +274,7 @@ trait ModelSearchTrait
 	 */
 	public function transformGridFilterValues()
 	{
-		foreach (array_merge(array_keys($this->normal_attrs), array_keys($this->related_properties)) as $attr) {
+		foreach (array_merge(array_keys($this->attrs_operators), array_keys($this->related_properties)) as $attr) {
 			if (array_key_exists($attr, $this->related_properties)) {
 				$value = $this->related_properties[$attr];
 			} else {

@@ -119,7 +119,7 @@ class GridView extends SimpleGridView
 				}
 			}
  			if (!$has_filters) {
-				$this->filterModel = false;
+				$this->filterModel = null;
 			}
 		}
 		$empty_text_save = $this->emptyText;

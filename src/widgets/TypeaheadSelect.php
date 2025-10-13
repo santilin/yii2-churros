@@ -42,6 +42,9 @@ class TypeaheadSelect extends KartikTypeahead
 		if (empty($this->remoteUrl)) {
 			throw new InvalidConfigException("remoteUrl can not be empty");
 		}
+		if (is_array($this->remoteUrl)) {
+			$this->remoteUrl = Url::to($this->remoteUrl);
+		}
 		$this->hidden_id = $this->options['id']??Html::getInputId($this->model, $this->attribute);
 		$this->typeahead_id = $this->options['id'] = $this->hidden_id . '_typeahead';
 		$this->options['id'] = $this->hidden_id . '_typeadead';

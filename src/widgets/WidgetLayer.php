@@ -466,16 +466,18 @@ js;
 				break;
 
 			case 'buttons':
-				$ret .= '<div class="mt-2 clearfix row">';
-				if ($layout_row_layout != 'inline') {
-					$classes = $this->widget_layout_horiz_config[$layout_row_layout]['large']['horizontalCssClasses']['offset'];
-					$ret .= '<div class="' . implode(' ', (array)$classes) . '">';
-				} else {
-					$ret .= "<div>";
+				if (!empty($layout_row['content'])) {
+					$ret .= '<div class="mt-2 clearfix row">';
+					if ($layout_row_layout != 'inline') {
+						$classes = $this->widget_layout_horiz_config[$layout_row_layout]['large']['horizontalCssClasses']['offset'];
+						$ret .= '<div class="' . implode(' ', (array)$classes) . '">';
+					} else {
+						$ret .= "<div>";
+					}
+					$ret .= $this->layoutButtons($layout_row['content'], $layout_row_layout, $layout_row['htmlOptions']??[]);
+					$ret .= '</div><!--buttons -->' .  "\n";
+					$ret .= '</div><!--row-->';
 				}
-				$ret .= $this->layoutButtons($layout_row['content'], $layout_row_layout, $layout_row['htmlOptions']??[]);
-				$ret .= '</div><!--buttons -->' .  "\n";
-				$ret .= '</div><!--row-->';
 				break;
 			case 'subtitle':
 				$col_added = false;
