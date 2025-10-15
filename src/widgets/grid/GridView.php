@@ -111,7 +111,8 @@ class GridView extends SimpleGridView
 					$kc = $column->filterAttribute;
 				}
 				if (in_array($kc, $filter_attrs)) {
-					$v = ArrayHelper::getValue($this->filterModel, $kc);
+					$v = $this->filterModel->__get($kc);
+					// $v = ArrayHelper::getValue($this->filterModel, $kc);
 					if (!empty($v)) {
 						$has_filters = true;
 						break;

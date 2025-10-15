@@ -30,7 +30,8 @@ class SearchInput extends \yii\bootstrap5\InputWidget
 
 		if ($this->type == 'dropdown') {
 			Html::removeCssClass($this->options, 'form-control');
-			Html::addCssClass($this->options, 'form-select w-auto');
+			Html::addCssClass($this->options, 'form-select');
+			Html::addCssStyle($this->options, [ 'width' => 'fit-content' ]);
 			$ret .= Html::hiddenInput("{$scope}[$attribute][op]", $value['op']);
 			if (isset($value['v'])) {
 				if (is_array($value['v'])) {
@@ -53,6 +54,7 @@ class SearchInput extends \yii\bootstrap5\InputWidget
 				'id' => "drop-op-$attr_class", 'class' => 'form-select search-dropdown w-auto',
 				'Prompt' => 'Operador']);
 			Html::addCssClass($this->options, 'form-control');
+			Html::addCssStyle($this->options, [ 'width' => 'fit-content' ]);
 			$ret .= Html::input($control_type, "{$scope}[$attribute][v]", $value['v'], $this->options);
 		}
 		return $ret;
