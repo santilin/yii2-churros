@@ -416,7 +416,8 @@ class CrudController extends \yii\web\Controller
 						}
 						break;
 					case 'delete_error':
-						$to_action = 'parent.index';
+						$to_model = 'parent';
+						$to_action = 'index';
 						break;
 					case 'update':
 					case 'not_deleted':

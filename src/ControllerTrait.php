@@ -3,7 +3,7 @@
 namespace santilin\churros;
 
 use Yii;
-use yii\helpers\{StringHelper,Url,Html};
+use yii\helpers\{ArrayHelper,Html,StringHelper,Url};
 use santilin\churros\helpers\FormHelper;
 
 trait ControllerTrait
@@ -169,6 +169,43 @@ trait ControllerTrait
 		} else {
 			return '/' . $this->module->getUniqueId();
 		}
+	}
+
+	public function genHierarchyBreadCrumbs(string $scenario, $model, array $models_hierarchy, array $viewParams = []): array
+	{
+		$breadcrumbs = [];
+		$bread_model = $model;
+		$master_models = [];
+		$last_model_class = '';
+		foreach (array_reverse($models_hierarchy) as $hierarchy_model_name => $hierarchy_relation_name) {
+			if ($hierarchy_model_name == $model->getModelInfo('model_name')) {
+				$last_model_class = $hierarchy_model_name;
+				$master_models[] = $model;
+				continue;
+			}
+			if ($last_model_class == '') {
+				unset($models_hierarchy[$hierarchy_model_name]);
+				continue;
+			}
+			if ($bread_model = $bread_model->$hierarchy_relation_name) {
+				$master_models[] = $bread_model;
+			} else {
+				break;
+			}
+		}
+		$prefix = '';
+		for ($nbc = count($master_models) - 1; $nbc >= 0; $nbc--) {
+			$master_model = $master_models[$nbc];
+			$bc = $this->modelBreadCrumbs($master_model, $scenario, $prefix, $viewParams['permissions'] ?? [], $nbc == 0);
+			$url = $bc[1]['url'] ?? null;
+			if (is_array($url)) {
+				$url0 = ArrayHelper::remove($url, 0, '');
+				// El prefijo es sólo el path desde el padre directo
+				$prefix = Url::toRoute(array_merge([substr($url0, strlen($prefix))], $url)) . '/';
+			}
+			$breadcrumbs = array_merge($breadcrumbs, $bc);
+		}
+		return $breadcrumbs;
 	}
 
 	/**
