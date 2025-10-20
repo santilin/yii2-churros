@@ -2,102 +2,134 @@
 
 namespace santilin\churros\widgets\grid;
 
-use yii\helpers\{Html,Url,StringHelper};
-/**
- * @todo botón copiar al portapapeles
- */
+use yii\grid\DataColumn;
+use yii\helpers\{Html, Url, StringHelper, Markdown, HtmlPurifier};
+
 class ExpandableTextColumn extends DataColumn
 {
-    /**
-     * Maximun text length
-     * @var
-     */
+    /** @var int Maximum text length before truncation */
     public $length = 40;
-    public $format = 'text';
-	public $captionOptions = ['class' => 'see-more-content'];
-	public $contentOptions = ['class' => 'see-more-container'];
-	public $modalBodyOptions = [];
-	public $modalTitle = null;
 
     /**
-     * {@inheritdoc}
-     * @todo Place the hellip instead of an space
-     * @throws \yii\base\InvalidArgumentException
+     * @var string Format string. Examples:
+     *   'text'              → plain text
+     *   'html'              → purified HTML
+	 *   'markdown'          → original
+     *   'markdown:gfm'      → GitHub-Flavored Markdown
+     *   'markdown:extra'    → Markdown Extra
      */
+    public $format = 'text';
+
+    public $captionOptions = ['class' => 'see-more-content'];
+    public $contentOptions = ['class' => 'see-more-container'];
+    public $modalBodyOptions = ['class' => 'p-2'];
+    public $modalTitle = null;
+
     protected function renderDataCellContent($model, $key, $index)
     {
-		if ($this->modalTitle === null) {
-			$this->modalTitle = $this->getHeaderCellLabel();
-		}
-		$text = $this->getDataCellValue($model, $key, $index);
-		if ( $text === null || (is_string($text) && !trim($text)) || (is_array($text) && count($text) == 0)) {
-			return '';
-		}
-		if ($this->format == 'html') {
-			if (is_array($text)) {
-				$text = html_entity_decode(strip_tags(print_r($text,true)));
-			}
-		} else {
-			if (is_array($text)) {
-				$text = print_r($text, true);
-			}
-		}
-		$text = trim($text);
-		if ($this->length == 0) {// || strlen($text)<=$this->length) {
-			return $text;
-		} else {
-			$cell_key = $index . $this->attribute;
-			if ($this->length) {
-				$truncated_text = StringHelper::truncate($text, $this->length, '', null, true);
-			} else {
-				$truncated_text = $text;
-			}
-			$encoded_text = Html::tag('p', Html::encode($text), $this->modalBodyOptions);
-			$modal = <<<modal
-<div class="modal fade" id="modalSeeMore_$cell_key" tabindex="-1" aria-labelledby="modalSeeMore_$cell_key" aria-hidden="true">
-	<div class="modal-dialog modal-dialog-centered modal-dialog-scrollable modal-md">
-		<div class="modal-content">
-			<div class="modal-header bg-secondary text-white">
-				<button type="button" class="btn btn-primary p-1" data-bs-dismiss="modal" id="modalCopyClipBoardBtn_$cell_key"><i class="far fa-clipboard"></i></button>
-				&nbsp;
-				<h1 class="modal-title fs-5" id="modalSeeMoreTitle_$cell_key">$this->modalTitle</h5>
-				<button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-			</div>
-			<div class="modal-body" id="modalSeeMoreContent_$cell_key">
-$encoded_text
-			</div>
-		</div>
-	</div>
+        if ($this->modalTitle === null) {
+            $this->modalTitle = $this->getHeaderCellLabel();
+        }
+
+        $text = $this->getDataCellValue($model, $key, $index);
+        if ($text === null || (is_string($text) && !trim($text))) {
+            return '';
+        }
+
+        if (is_array($text)) {
+            $text = print_r($text, true);
+        }
+        $text = trim($text);
+
+        [$formatType, $flavor] = array_pad(explode(':', $this->format, 2), 2, null);
+
+        switch ($formatType) {
+            case 'markdown':
+                $html = Markdown::process($text, $flavor ?? 'original');
+                $html = HtmlPurifier::process($html);
+                break;
+            case 'html':
+                $html = HtmlPurifier::process($text);
+                break;
+            default:
+                $html = Html::encode($text);
+        }
+
+        if ($this->length > 0) {
+            $cellKey = $index . '_' . $this->attribute;
+            $truncated = StringHelper::truncate($text, $this->length, '…', null, true);
+
+            $modalHtml = Html::tag('div', $html, $this->modalBodyOptions);
+            $modalId = "modalSeeMore_$cellKey";
+
+            $modal = <<<MODAL
+<div class="modal fade" id="{$modalId}" tabindex="-1" aria-labelledby="{$modalId}_title" aria-hidden="true">
+  <div class="modal-dialog modal-dialog-centered modal-dialog-scrollable modal-lg">
+    <div class="modal-content">
+      <div class="modal-header bg-secondary text-white">
+        <h5 class="modal-title" id="{$modalId}_title">{$this->modalTitle}</h5>
+        <button type="button" class="btn btn-primary btn-sm me-2" id="copyBtn_$cellKey" title="Copy"><i class="far fa-clipboard"></i></button>
+        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+      </div>
+      <div class="modal-body">{$modalHtml}</div>
+    </div>
+  </div>
 </div>
 <script>
-/// todo: use class y data
-let generateQuoteBtn_$cell_key = document.querySelector('#modalCopyClipBoardBtn_$cell_key');
-generateQuoteBtn_$cell_key.addEventListener('click', () => {
-	let contenedor = document.getElementById('modalSeeMoreContent_$cell_key');
-	let text = contenedor.textContent;
-	text = text.trim();
-	var textArea = document.createElement("textarea");
-	textArea.value = text;
-	document.body.appendChild(textArea);
-	textArea.select();
-	document.execCommand('copy');
-	document.body.removeChild(textArea);
+document.addEventListener('DOMContentLoaded', () => {
+  const btn = document.getElementById('copyBtn_$cellKey');
+  if (btn) {
+    btn.addEventListener('click', async () => {
+      const content = document.querySelector('#{$modalId} .modal-body').innerText.trim();
+      async function copyToClipboard(text) {
+        // Primary (modern) method
+        if (window.isSecureContext && navigator.clipboard && navigator.clipboard.writeText) {
+          try {
+            await navigator.clipboard.writeText(text);
+            console.log('Copied via navigator.clipboard');
+            return;
+          } catch (e) {
+            console.warn('navigator.clipboard failed, fallback triggered', e);
+          }
+        }
+        // Fallback for HTTP, Safari, or unsupported environments
+        const textArea = document.createElement('textarea');
+        textArea.value = text;
+        textArea.style.position = 'fixed';
+        textArea.style.left = '-999999px';
+        document.body.appendChild(textArea);
+        textArea.focus();
+        textArea.select();
+        try {
+          document.execCommand('copy');
+          console.log('Copied via execCommand');
+        } catch (err) {
+          console.error('Copy failed:', err);
+        } finally {
+          document.body.removeChild(textArea);
+        }
+      }
+
+      copyToClipboard(content);
+    });
+  }
 });
 </script>
-modal;
+MODAL;
 
-			$text =  Html::tag('span', $truncated_text, $this->captionOptions)
-				. Html::a('<i class="fas fa-book-open"></i>', '#', [
-				'title' => 'Pincha para leer más',
-				'class' => "btn btn-outline-secondary btn-sm py-0 px-1 ms-3",
-				'style' => 'font-size:xx-small',
-				'data' => [
-					'bs-toggle' => 'modal',
-					'bs-target' => "#modalSeeMore_$cell_key",
-				],
-			]);
-			return $modal . $text;
-		}
+            $expandButton = Html::a('<i class="fas fa-book-open"></i>', '#', [
+                'title' => 'Click to read more',
+                'class' => 'btn btn-outline-secondary btn-sm py-0 px-1 ms-3',
+                'style' => 'font-size: xx-small;',
+                'data' => [
+                    'bs-toggle' => 'modal',
+                    'bs-target' => "#{$modalId}",
+                ],
+            ]);
+
+            return $modal . Html::tag('span', Html::encode($truncated), $this->captionOptions) . $expandButton;
+        }
+
+        return $html;
     }
-
 }

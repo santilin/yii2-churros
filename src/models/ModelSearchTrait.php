@@ -153,8 +153,14 @@ trait ModelSearchTrait
 			}
 		}
 		foreach ($gridGroups as $kc => $grid_group) {
-			list($sort_fldname, $table_alias, $model, $relation) = $this->addRelatedFieldToJoin($grid_group['column']??$kc, $provider->query);
-			$provider->sort->defaultOrder[$grid_group['column']??$kc] = SORT_ASC;
+			$col_name = $grid_group['column']??$kc;
+			list($sort_fldname, $table_alias, $model, $relation) = $this->addRelatedFieldToJoin(
+				$col_name, $provider->query);
+			if (isset($_GET['_sort']["-{$col_name}"])) {
+				$provider->query->orderBy([$col_name, SORT_DESC]);
+			} else { // even if no present
+				$provider->query->orderBy([$col_name, SORT_ASC]);
+			}
 		}
 		/// @todo move to DataProvider count()?
 		if (!empty($provider->query->join) || !empty($provider->query->joinWith)) {

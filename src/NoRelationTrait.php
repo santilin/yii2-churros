@@ -36,9 +36,33 @@ trait NoRelationTrait
      * @return bool
      * @throws Exception
      */
-    public function saveAll(bool $runValidation = true): bool
+    public function saveAll(bool $runValidation = true, $attributeNames = null): bool
     {
-		return $this->save($runValidation);
+		$must_commit = false;
+		$trans = $this->getDb()->getTransaction();
+		if (!$trans) {
+			$trans = $this->getDb()->beginTransaction();
+			$must_commit = true;
+		}
+		$wasNewRecord = $this->isNewRecord;
+        try {
+			$relatedRecords = $this->relatedRecords;
+			if (!$this->save(true, $attributeNames)) {
+                if ($must_commit) {
+                    $trans->rollback();
+                }
+                $this->isNewRecord = $wasNewRecord;
+                return false;
+            }
+		} catch (\yii\db\IntegrityException $e) {
+			if ($must_commit) {
+				$trans->rollBack();
+			}
+            $this->isNewRecord = $wasNewRecord;
+            $this->addErrorFromException($e);
+			return false;
+        }
+        return true;
     }
 
     public function usedInRelation(string $rel_name): int
