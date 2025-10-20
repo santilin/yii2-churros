@@ -444,6 +444,9 @@ trait RelationTrait
                                 $conds[$key] = $this->$value;
                             }
                         }
+                        if (empty($conds)) {
+							throw new \Exception("Removing from `$relation_name` relation is not possible");
+						}
                         if ($isSoftDelete) {
                             $error = !$this->{$relation_name}[0]->updateAll($this->_rt_softdelete, ['and', $conds]);
                         } else {

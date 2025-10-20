@@ -348,7 +348,7 @@ ajax;
 				} else {
 					$full_url = null;
 				}
-				if ($button['type'] == 'button_post') {
+				if ($button['type'] == 'button-post') {
 					$button['htmlOptions']['data']['method'] = 'post';
 				}
 				if ($button['type'] == 'button-trigger') {
