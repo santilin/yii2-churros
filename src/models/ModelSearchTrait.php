@@ -23,7 +23,11 @@ trait ModelSearchTrait
 	public function __get($name)
 	{
 		// GridView::renderFilter: needs activeAttribute when related property
-		if (property_exists($this, 'related_properties')) {
+		if (property_exists($this, $name)) {
+			$r = new \ReflectionProperty($this, $name);
+			$r->setAccessible(true);
+			return $r->getValue($this);
+		} elseif (property_exists($this, 'related_properties')) {
 			if (array_key_exists($name, $this->related_properties)) {
 				if (!isset(static::$relations[$name])) {
 					return $this->related_properties[$name];
@@ -128,7 +132,6 @@ trait ModelSearchTrait
 							if (!$related_default_order) {
 								$related_default_order = [ $related_model->findCodeField() => SORT_ASC ];
 							}
-							$sort_attributes = [];
 							foreach ($related_default_order as $sort_attribute => $sort_direction) {
 								if (isset($related_model_provider->sort->attributes[$sort_attribute])) {
 									foreach ($related_model_provider->sort->attributes[$sort_attribute]['asc'] as $fld_asc => $fld_asc_direction) {
@@ -150,8 +153,8 @@ trait ModelSearchTrait
 			}
 		}
 		foreach ($gridGroups as $kc => $grid_group) {
-			list($sort_fldname, $table_alias, $model, $relation) = $this->addRelatedFieldToJoin($kc, $provider->query);
-			$gridGroups[$kc]['orderby'] = ($table_alias ? ($table_alias . '.') : '') . $sort_fldname;
+			list($sort_fldname, $table_alias, $model, $relation) = $this->addRelatedFieldToJoin($grid_group['column'], $provider->query);
+			$provider->sort->defaultOrder[$grid_group['column']] = SORT_ASC;
 		}
 		/// @todo move to DataProvider count()?
 		if (!empty($provider->query->join) || !empty($provider->query->joinWith)) {
