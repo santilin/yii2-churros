@@ -44,7 +44,7 @@ class Taxonomy
 				$p = $items[$v]['abbrev']??$items[$v]['title']??'????';
 				if ($p === '????' && is_numeric($v)) {
 					$vt = ltrim($v, '0');
-					if ($vt != $v) {
+					if ($vt !== $v) {
 						$p = $items[$vt]['abbrev']??$items[$vt]['title']??'????';
 					}
 				}

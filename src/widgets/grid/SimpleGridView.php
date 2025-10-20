@@ -251,7 +251,6 @@ class SimpleGridView extends \yii\grid\GridView
 	{
 		$this->current_level = 0; // details
 		$level = 1;
- 		$grid_orderby = [];
 		foreach ($this->groups as $kg => $group_def) {
 			$group = Yii::createObject(array_merge([
 				'class' => GridGroup::className(),
@@ -269,21 +268,14 @@ class SimpleGridView extends \yii\grid\GridView
 				$group->value = $this->columns[$group->column]['value']??$this->columns[$group->column]['attribute']??$group->column;
 			}
             $this->groups[$kg] = $group;
-			if (!$group->orderby) {
+			if (empty($group->orderby)) {
 				$group->orderby[$group->column] = SORT_ASC;
 			} else if (is_string($group->orderby)) {
 				$tmp_order = $group->orderby;
 				$group->orderby = [];
 				$group->orderby[$tmp_order] = SORT_ASC;
 			}
-			$grid_orderby = array_merge($grid_orderby, $group->orderby);
         }
-        if ($this->dataProvider instanceof \yii\data\ActiveDataProvider && count($grid_orderby)) {
-			if (!empty($this->dataProvider->query->orderBy)) {
-				$grid_orderby = array_merge($grid_orderby, (array)$this->dataProvider->query->orderBy);
-			}
-			$this->dataProvider->query->orderBy($grid_orderby);
-		}
 	}
 
 	protected function groupHeader($model, $key, $index, $grid)
