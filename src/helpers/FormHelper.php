@@ -373,7 +373,10 @@ ajax;
 					$button['options'], $button['htmlOptions']);
 				break;
 			case "submitPostForm":
-				$post_form = Html::beginForm(self::prepareButtonUrl($button['url'], $url_return_to), 'post', $button['formOptions']??[]);
+				$post_form = Html::beginForm(
+					self::prepareButtonUrl($button['url'], $url_return_to),
+					'post',
+					$button['formOptions']??['class' => 'd-inline']);
 				foreach ($button['hiddenInputs']??[] as $hidden_name => $hidden_value) {
 					$post_form .= Html::hiddenInput($hidden_name, $hidden_value);
 				}
@@ -383,6 +386,8 @@ ajax;
 				break;
 			case 'html':
 				$ret[] = $button['html'];
+			default:
+				throw new \Exception($button['type'] . ': button type not supported');
 			}
 		}
 		return implode($sep, $ret);
