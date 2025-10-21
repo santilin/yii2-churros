@@ -154,12 +154,13 @@ trait ModelSearchTrait
 		}
 		foreach ($gridGroups as $kc => $grid_group) {
 			$col_name = $grid_group['column']??$kc;
-			list($sort_fldname, $table_alias, $model, $relation) = $this->addRelatedFieldToJoin(
-				$col_name, $provider->query);
+			list($sort_fldname, $table_alias, $model, $relation)
+				= $this->addRelatedFieldToJoin($col_name, $provider->query);
+			$sort_attr = ($table_alias?($table_alias.'.'):'') . $sort_fldname;
 			if (isset($_GET['_sort']["-{$col_name}"])) {
-				$provider->query->orderBy([$col_name => SORT_DESC]);
+				$provider->query->addOrderBy([$sort_attr => SORT_DESC]);
 			} else { // even if no present
-				$provider->query->orderBy([$col_name => SORT_ASC]);
+				$provider->query->addOrderBy([$sort_attr => SORT_ASC]);
 			}
 		}
 		/// @todo move to DataProvider count()?
@@ -226,7 +227,11 @@ trait ModelSearchTrait
 					$model = $model_class::instance();
 					$nested_relations[$table_alias] = $relation['relatedTablename'];
 					$this->addJoinIfNotExists($query, $nested_relations, "LEFT JOIN", [ $table_alias => $model->tableName()], $relation['join']);
-					$final_attribute = $attribute;
+					if (!$attribute) {
+						$final_attribute = $model->findCodeField();
+					} else {
+						$final_attribute = $attribute;
+					}
 				}
 			} else {
 				throw new InvalidArgumentException($relation_name . ": relation not found in model " . self::class . ' (SearchModel::filterWhereRelated)');
