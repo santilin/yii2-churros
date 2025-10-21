@@ -18,7 +18,7 @@ class ExpandableTextColumn extends DataColumn
      *   'markdown:gfm'      → GitHub-Flavored Markdown
      *   'markdown:extra'    → Markdown Extra
      */
-    public $format = 'text';
+    public $textFormat = 'text';
 
     public $captionOptions = ['class' => 'see-more-content'];
     public $contentOptions = ['class' => 'see-more-container'];
@@ -41,7 +41,7 @@ class ExpandableTextColumn extends DataColumn
         }
         $text = trim($text);
 
-        [$formatType, $flavor] = array_pad(explode(':', $this->format, 2), 2, null);
+        [$formatType, $flavor] = array_pad(explode(':', $this->textFormat, 2), 2, null);
 
         switch ($formatType) {
             case 'markdown':
@@ -51,8 +51,11 @@ class ExpandableTextColumn extends DataColumn
             case 'html':
                 $html = HtmlPurifier::process($text);
                 break;
-            default:
+            case 'text':
                 $html = Html::encode($text);
+                break;
+            default:
+                throw new \Exception($formatType . ': format not supported');
         }
 
         if ($this->length > 0) {
