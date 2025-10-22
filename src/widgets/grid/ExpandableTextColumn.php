@@ -69,10 +69,14 @@ class ExpandableTextColumn extends DataColumn
 <div class="modal fade" id="{$modalId}" tabindex="-1" aria-labelledby="{$modalId}_title" aria-hidden="true">
   <div class="modal-dialog modal-dialog-centered modal-dialog-scrollable modal-lg">
     <div class="modal-content">
-      <div class="modal-header bg-secondary text-white">
-        <h5 class="modal-title" id="{$modalId}_title">{$this->modalTitle}</h5>
-        <button type="button" class="btn btn-primary btn-sm me-2" id="copyBtn_$cellKey" title="Copy"><i class="far fa-clipboard"></i></button>
-        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+      <div class="modal-header bg-secondary text-white d-flex justify-content-between align-items-center">
+        <h5 class="modal-title mb-0" id="{$modalId}_title">{$this->modalTitle}</h5>
+        <div class="d-flex align-items-center">
+          <button type="button" class="btn btn-primary btn-sm me-2" id="copyBtn_$cellKey" title="Copy">
+            <i class="far fa-clipboard"></i>
+          </button>
+          <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+        </div>
       </div>
       <div class="modal-body">{$modalHtml}</div>
     </div>
