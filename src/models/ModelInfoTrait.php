@@ -56,7 +56,7 @@ trait ModelInfoTrait
 		"Otras" => "Other",
 	];
 
-	public function t($category, $message, $params = [], $language = null )
+	public function t($category, $message, $params = [], $language = null ): string
 	{
 		$t_params = array_filter($params, function($value) { return is_string($value); });
 		$translated = Yii::t($category, $message, $t_params, $language);

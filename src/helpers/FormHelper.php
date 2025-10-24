@@ -1,10 +1,5 @@
 <?php
 
-/**
- * @copyright 2022, santilín
- * @license gpl
- */
-
 namespace santilin\churros\helpers;
 
 use Yii;
@@ -85,12 +80,25 @@ class FormHelper
 		return $views[$index];
 	}
 
-	/// @return [ view_name, title, $permissions, $view_params ]
+	/**
+	 * Selects a view from the provided views array based on request parameters.
+	 *
+	 * @param array<string, array{0: string, 1?: array, 2?: string}> $views Array mapping view keys to arrays with:
+	 *   - [0]: string (required)
+	 *   - [1]: optional array
+	 *   - [2]: optional string
+	 * @param array<string, mixed> $params Request parameters including self::VIEWS_NVIEW_PARAM key which can be int|string|null
+	 *
+	 * @return array{0: string, 1: string, 2: array, 3: string} Returns a tuple with:
+	 *   - [0]: view key (string)
+	 *   - [1]: first element of view info (string)
+	 *   - [2]: second element of view info or empty array (array)
+	 *   - [3]: third element of view info or empty string (string)
+	 */
 	static public function viewFromRequest(array $views, array $params): array
 	{
  		$_nv=$params[self::VIEWS_NVIEW_PARAM]??0;
-		assert(!is_bool($_nv));
-		if (empty($_nv)) {
+		if ($_nv === '' || $_nv === 'false') {
 			$_nv = 0;
 		}
 		if (is_string($_nv)) {
