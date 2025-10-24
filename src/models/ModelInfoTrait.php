@@ -56,7 +56,7 @@ trait ModelInfoTrait
 		"Otras" => "Other",
 	];
 
-	public function t($category, $message, $params = [], $language = null ): string
+	public function t($category, $message, $params = [], $language = null): string
 	{
 		$t_params = array_filter($params, function($value) { return is_string($value); });
 		$translated = Yii::t($category, $message, $t_params, $language);
@@ -72,7 +72,7 @@ trait ModelInfoTrait
 				$bracket_match = '{'.$match.'}';
 				if (substr($match,0,6) == 'model.') {
 					$fld = substr($match, 6);
-					$placeholders[$bracket_match] = ArrayHelper::getValue($this,$fld,'');
+					$placeholders[$bracket_match] = ArrayHelper::getValue($this, $fld, '');
 				} else switch( $match) {
 				case 'title':
 					$placeholders[$bracket_match] = lcfirst(static::getModelInfo('title'));
@@ -622,7 +622,7 @@ trait ModelInfoTrait
 
 	public function asDate($fldname): ?YADTC
 	{
-		return YADTC::fromSql($this->$fldname);
+		return YADTC::fromSQL($this->$fldname);
 	}
 
 
