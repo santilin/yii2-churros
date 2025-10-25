@@ -155,7 +155,7 @@ trait ModelChangesLoggableTrait
 			case self::$V_SUBTYPE_CHANGECASE:
 				return  " retocó las mayúsculas de `" . $changed_label . '`';
 			case self::$V_SUBTYPE_CHANGESPACES:
-				return  " retocó los espacios de `" . $changed_label;
+				return  " retocó los espacios de `" . $changed_label . '`';
 			case self::$V_SUBTYPE_UNEMPTY:
 				return  " rellenó `" . $changed_label
 				. '` con `' . strval($new_value) . '`';

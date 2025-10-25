@@ -394,6 +394,7 @@ ajax;
 				break;
 			case 'html':
 				$ret[] = $button['html'];
+				break;
 			default:
 				throw new \Exception($button['type'] . ': button type not supported');
 			}

@@ -453,14 +453,18 @@ class CrudController extends \yii\web\Controller
 		if ($to_model) {
 			if ($to_model == 'parent') {
 				if ($this->getMasterModel()) {
-					$this->model = $this->masterModel;
+					$model = $this->masterModel;
+				} else {
+					if ($to_action == 'view' && $from == 'delete') {
+						$to_action = 'index'; // if not parent.view, then this.index.
+					}
 				}
 			} else if ($to_model == 'model') {
 			} else {
-				$this->model = $$to_model;
+				$model = $$to_model;
 			}
 		}
-		$pk = $this->model->getPrimaryKey(true);
+		$pk = $model->getPrimaryKey(true);
 		switch($to_action) {
 			case 'update':
 			case 'duplicate':
@@ -478,7 +482,7 @@ class CrudController extends \yii\web\Controller
 				$redirect_params = array_merge($redirect_params, $pk);
 		}
 		if ($to_model) {
-			$redirect_params[0] = Url::to('/' . $this->getBaseRoute() . '/' . $this->model->controllerName()
+			$redirect_params[0] = Url::to('/' . $this->getBaseRoute() . '/' . $model->controllerName()
 				. '/' . $to_action, $pk);
 		} else {
 			$redirect_params[0] = $this->getActionRoute($to_action);

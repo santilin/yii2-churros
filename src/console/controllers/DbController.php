@@ -343,11 +343,23 @@ EOF;
 		$db_columns = [];
 		$table_name = $tableSchema->fullName;
 
-		if (Yii::$app->db->driverName == "sqlite") {
+		if (Yii::$app->db->driverName === "sqlite") {
 			$show_create_table = "SELECT * FROM pragma_table_xinfo('{$tableSchema->name}') WHERE hidden=0";
 			$db_columns = ArrayHelper::index($this->db->createCommand($show_create_table)->queryAll(), 'name');
-		} /// @todo mysql
-		foreach($tableSchema->columns as $column) {
+		} else {
+			$show_create_table = <<<sql
+SELECT COLUMN_NAME AS name, DATA_TYPE, IS_NULLABLE, COLUMN_DEFAULT, COLUMN_KEY, EXTRA
+FROM INFORMATION_SCHEMA.COLUMNS
+WHERE TABLE_SCHEMA = :schema
+	AND TABLE_NAME = :table
+	AND EXTRA NOT LIKE '%VIRTUAL%'
+sql;
+			$db_columns = ArrayHelper::index(
+				Yii::$app->db->createCommand($show_create_table,
+					[':table' => $tableSchema->name, ':schema' => $tableSchema->schemaName])->queryAll(), 'name'
+			);
+		}
+		foreach ($tableSchema->columns as $column) {
 			if (count($db_columns) && !isset($db_columns[$column->name])) {
 				continue;
 			}
