@@ -37,9 +37,10 @@ class ExpandableTextColumn extends DataColumn
         }
 
         if (is_array($text)) {
-            $text = print_r($text, true);
+            $text = json_encode($text);
+        } else {
+            $text = trim($text);
         }
-        $text = trim($text);
 
         [$formatType, $flavor] = array_pad(explode(':', $this->textFormat, 2), 2, null);
 
@@ -53,6 +54,9 @@ class ExpandableTextColumn extends DataColumn
                 break;
             case 'text':
                 $html = Html::encode($text);
+                break;
+            case 'json':
+                $html = $text;
                 break;
             default:
                 throw new \Exception($formatType . ': format not supported');

@@ -188,6 +188,51 @@ class AuthHelper
 		static::$lastMessage = join("\n", $msgs);
     }
 
+	static public function revokeFromUser($user_id_or_name, array $perms, $auth = null)
+	{
+		if ($auth == null) {
+			$auth = \Yii::$app->authManager;
+		}
+		if (is_numeric($user_id_or_name)) {
+			$user_name = $user_id = $user_id_or_name;
+		} else {
+			$class = Yii::$app->user->identityClass;
+			$identity = $class::find()->whereUserName($user_id_or_name)->one();
+			if ($identity == null) {
+				throw new \Exception("$user_id_or_name: user not found");
+			}
+			$user_id = $identity->id;
+			$user_name = $user_id_or_name;
+		}
+		$msgs = [];
+		foreach ($perms as $perm_name) {
+			if ($perm_name instanceof Role) {
+				$perm_name = $perm_name->name;
+			}
+			$perm = $auth->getItem($perm_name);
+			if (!$perm) {
+				throw new \Exception("$perm_name: permission or role not found");
+			}
+			$assignment = $auth->getAssignment($perm_name, $user_id);
+			if ($assignment) {
+				$auth->revoke($perm, $user_id);
+				if ($perm->type == Item::TYPE_ROLE) {
+					$msgs[] = '- ' . "role $perm_name revoked from user $user_name";
+				} else {
+					$msgs[] = '- ' . "permission $perm_name revoked from user $user_name";
+				}
+			} else {
+				if ($perm->type == Item::TYPE_ROLE) {
+					$msgs[] = '= ' . "$perm_name: role was not assigned to user $user_name";
+				} else {
+					$msgs[] = '= ' . "$perm_name: permission was not assigned to user $user_name";
+				}
+			}
+		}
+		static::$lastMessage = join("\n", $msgs);
+	}
+
+
     static public function removeFromRole($role_name, array|string $perm_names, $auth = null)
     {
 		if ($auth == null) {
@@ -233,11 +278,11 @@ class AuthHelper
 		if ($auth == null) {
 			$auth = \Yii::$app->authManager;
 		}
-		foreach( $perm_names as $perm_name) {
-			$role = $auth->getItem($perm_name);
-			if ($role == null) {
+		foreach ($perm_names as $perm_name) {
+			$perm = $auth->getItem($perm_name);
+			if ($perm == null) {
 				static::$lastMessage = "x $perm_name: permission not found";
-			} else if ($auth->remove($role)) {
+			} else if ($auth->remove($perm)) {
 				static::$lastMessage = "- `$perm_name` permission removed";
 			}
 		}
