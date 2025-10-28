@@ -1,5 +1,32 @@
 const ChurrosGrid = (function() {
 	return {
+		generateBs5Table(data, excludeKeys = []) {
+			if (!data.length) return '<table class="table"><thead></thead><tbody></tbody></table>';
+
+			// Extract headers, excluding specified keys
+			const headers = Object.keys(data[0]).filter(key => !excludeKeys.includes(key));
+
+			// Create thead
+			let thead = '<thead><tr>';
+			headers.forEach(header => {
+				thead += `<th scope="col">\${header}</th>`;
+			});
+			thead += '</tr></thead>';
+
+			// Create tbody rows excluding excluded keys
+			let tbody = '<tbody>';
+			data.forEach(row => {
+				tbody += '<tr>';
+				headers.forEach(header => {
+					tbody += `<td>\${row[header]}</td>`;
+				});
+				tbody += '</tr>';
+			});
+			tbody += '</tbody>';
+
+			// Compose full table
+			return `<table class="table">\${thead}\${tbody}</table>`;
+		},
 		resetFilters(grid_id) {
 			console.log('Resetting filters on ' + grid_id);
 			const grid = document.getElementById(grid_id);
@@ -175,9 +202,6 @@ const ChurrosGrid = (function() {
 			.replace(/"/g, "&quot;")
 			.replace(/'/g, "&apos;");
 		},
-
-
-
 		generateManifestXML() {
 			return `<?xml version="1.0" encoding="UTF-8"?>
 			<manifest:manifest xmlns:manifest="urn:oasis:names:tc:opendocument:xmlns:manifest:1.0">
