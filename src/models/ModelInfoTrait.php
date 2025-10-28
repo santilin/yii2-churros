@@ -605,8 +605,14 @@ trait ModelInfoTrait
 			return array_values($values);
 		} else if ($format == 'value') {
 			return $values[$this->$field]??null;
-		} else if ($format == 'select2' || $format == 'group' || $format == 'grouped') {
-			return ArrayHelper::map($values, 1,0,2);
+		} else if ($format == 'select2') {
+			return ArrayHelper::map($values, 1, 0, 2);
+		} else if ($format == 'group' || $format == 'grouped') {
+			$ret = [];
+			foreach ($values as $k => $v) {
+				$ret[$v[1]][$k] = $v[0];
+			}
+			return $ret;
 		} else if ($format == 'ungroup') {
 			return AppHelper::unGroupValues($values);
 		} else if ($format == 'selectize') {
