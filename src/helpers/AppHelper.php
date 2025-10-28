@@ -13,7 +13,6 @@ use League\HTMLToMarkdown\HtmlConverter;
 
 class AppHelper
 {
-
 	static public function unGroupValues($options)
 	{
 		$values = [];
