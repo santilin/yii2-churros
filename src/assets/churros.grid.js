@@ -9,7 +9,7 @@ const ChurrosGrid = (function() {
 			// Create thead
 			let thead = '<thead><tr>';
 			headers.forEach(header => {
-				thead += `<th scope="col">\${header}</th>`;
+				thead += `<th scope="col">${header}</th>`;
 			});
 			thead += '</tr></thead>';
 
@@ -18,14 +18,14 @@ const ChurrosGrid = (function() {
 			data.forEach(row => {
 				tbody += '<tr>';
 				headers.forEach(header => {
-					tbody += `<td>\${row[header]}</td>`;
+					tbody += `<td>${row[header]}</td>`;
 				});
 				tbody += '</tr>';
 			});
 			tbody += '</tbody>';
 
 			// Compose full table
-			return `<table class="table">\${thead}\${tbody}</table>`;
+			return `<table class="table">${thead}${tbody}</table>`;
 		},
 		resetFilters(grid_id) {
 			console.log('Resetting filters on ' + grid_id);

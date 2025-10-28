@@ -52,7 +52,6 @@ window.yii.churros = (function ($) {
 					re_str += reg_exps[j];
 				}
 			}
-			console.log(re_str);
 			var rgx = new RegExp("^(" + re_str + ")$");
 			if (value.match(rgx)) {
 				var parts = value.split(dot);
@@ -137,7 +136,6 @@ window.yii.churros = (function ($) {
 			}
 		},
         moveCaretToEnd(input) {
-			console.log(input);
 			const val = input.value;
 			input.value = '';
 			input.value = val;
