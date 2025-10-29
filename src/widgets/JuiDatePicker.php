@@ -1,8 +1,8 @@
 <?php
 namespace santilin\churros\widgets;
 
-use yii\base\Widget;
-use yii\helpers\Html;
+use yii\widgets\InputWidget;
+use yii\helpers\{Html, Json};
 use yii\jui\DatePicker;
 use yii\web\View;
 use Yii;
@@ -11,70 +11,85 @@ use Yii;
  * Widget que crea un campo DatePicker visible con formato personalizado,
  * sincronizando un campo oculto con fecha en formato SQL.
  */
-class JuiDatePicker extends Widget
+class JuiDatePicker extends InputWidget
 {
-    public Model $model;
-    public string $attribute;
-    public string $language = '';
-    public string $displayFormat = 'php:d/m/Y'; // Formato visual por defecto
+    public string $displayFormat = 'd/m/Y';
+    public string $dbFormat = 'Y-m-d';
+    public string $language = 'es';
+    public array $clientOptions = [];
+    public array $inputOptions = [];
 
-    public function init(): void
+    public function run()
     {
-        parent::init();
-        if ($this->language === '') {
-            $this->language = substr(Yii::$app->language, 0, 2);
-        }
-    }
+        // Register jQuery UI assets for datepicker
+        \yii\jui\JuiAsset::register($this->view);
+        $idHidden = $this->options['id'];
+        $idVisible = $idHidden . '_display';
 
-    public function run(): string
-    {
-        $attributeVisible = $this->attribute . '_visible';
-        $attributeHidden = $this->attribute;
-
-        $valueHidden = Html::getAttributeValue($this->model, $attributeHidden);
+        // Display value conversion (db to user format)
+        $valueHidden = $this->hasModel() ? Html::getAttributeValue($this->model, $this->attribute) : $this->value;
         $valueVisible = '';
-        if ($valueHidden !== null && $valueHidden !== '') {
-            // Eliminar PHP prefix de displayFormat para DateTime::format
-            $format = str_replace('php:', '', $this->displayFormat);
-            $date = \DateTime::createFromFormat('Y-m-d', $valueHidden);
-            if ($date !== false) {
-                $valueVisible = $date->format($format);
+        if ($valueHidden) {
+            $date = \DateTime::createFromFormat($this->dbFormat, $valueHidden);
+            if ($date) {
+                $valueVisible = $date->format($this->displayFormat);
             }
         }
 
-        $idHidden = Html::getInputId($this->model, $attributeHidden);
-        $idVisible = Html::getInputId($this->model, $attributeVisible);
+        // Render hidden and visible inputs
+        $output = Html::activeHiddenInput($this->model, $this->attribute, ['id' => $idHidden]);
+        $output .= Html::textInput(null, $valueVisible, array_merge([
+            'id' => $idVisible,
+            'class' => 'form-control',
+            'autocomplete' => 'off',
+            'placeholder' => 'Selecciona la fecha',
+        ], $this->inputOptions));
 
-        $output = Html::activeHiddenInput($this->model, $attributeHidden, ['id' => $idHidden]);
-        $output .= DatePicker::widget([
-            'model' => $this->model,
-            'attribute' => $attributeVisible,
-            'language' => $this->language,
-            'dateFormat' => $this->displayFormat,
-            'value' => $valueVisible,
-            'clientOptions' => [
-                'changeMonth' => true,
-                'changeYear' => true,
-                'autoSize' => true,
-                'onSelect' => new \yii\web\JsExpression(<<<JS
+        // Prepare merged JS options
+        $clientOptions = array_merge([
+            'dateFormat' => str_replace(['Y', 'm', 'd'], ['yy', 'mm', 'dd'], $this->displayFormat),
+            'changeMonth' => true,
+            'changeYear' => true,
+            'autoSize' => true,
+            'onSelect' => new \yii\web\JsExpression(<<<JS
 
 function(dateText, inst) {
-	var parts = dateText.split('/');
-	if(parts.length === 3) {
-		var sqlDate = parts[2] + '-' + parts[1] + '-' + parts[0];
-		$('#$idHidden').val(sqlDate);
-	}
+    console.log(dateText);
+    var parts = dateText.split('/');
+    if(parts.length === 3) {
+        var sqlDate = parts[2] + '-' + parts[1] + '-' + parts[0];
+        $('#$idHidden').val(sqlDate);
+        console.log(sqlDate);
+    }
 }
 JS
-                ),
-            ],
-            'options' => [
-                'class' => 'form-control',
-                'autocomplete' => 'off',
-                'placeholder' => 'Selecciona la fecha',
-                'id' => $idVisible,
-            ],
-        ]);
+            ),
+        ], $this->clientOptions);
+
+        // Encode and register JS
+        $optionsJson = Json::htmlEncode($clientOptions);
+        $this->view->registerJs(<<<JS
+
+$('#$idVisible').datepicker($optionsJson).on('change', function() {
+    var dateText = $(this).val();
+    console.log(dateText);
+    var parts = dateText.split('/');
+    if(parts.length === 3) {
+        var sqlDate = parts[2] + '-' + parts[1] + '-' + parts[0];
+        $('#$idHidden').val(sqlDate);
+    }
+});
+
+// On page load, sync the hidden field if visible has value
+if ($('#$idVisible').val() !== '') {
+    var parts = $('#$idVisible').val().split('/');
+    if(parts.length === 3) {
+        var sqlDate = parts[2] + '-' + parts[1] + '-' + parts[0];
+        $('#$idHidden').val(sqlDate);
+    }
+}
+JS
+        , View::POS_READY);
 
         return $output;
     }
