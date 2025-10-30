@@ -256,9 +256,9 @@ class GridView extends SimpleGridView
 		$configItems = [
 			'item' => $this->itemLabelSingle,
 			'items' => $this->itemLabelPlural,
-			'items-few' => $this->itemLabelFew,
-			'items-many' => $this->itemLabelMany,
-			'items-acc' => $this->itemLabelAccusative,
+			'items-few' =>  $this->itemLabelPlural,
+			'items-many' =>  $this->itemLabelPlural,
+			'items-acc' => $this->itemLabelSingle,
 		];
 		$summary = '';
 		$count = $this->dataProvider->getCount(); // records in current page
@@ -315,7 +315,7 @@ class GridView extends SimpleGridView
 					'pageCount' => $pageCount,
 				];
 				if (($summaryContent = $this->summary) === null) {
-					$summary = Yii::t('churros', 'Total <b>{count, number}</b>', $configSummary + $configItems);;
+					$summary = Yii::t('churros', 'Total <b>{count, number}</b> {count, plural, one{{item}} other{{items}}}.', $configSummary + $configItems);
 				} else if ($summaryContent !== false) {
 					$summary = Yii::$app->getI18n()->format($summaryContent, $configSummary, Yii::$app->language);
 				}
