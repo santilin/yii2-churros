@@ -377,12 +377,12 @@ js;
 						$this->widgets_used[] = $widget_name;
 						if ($widget instanceof \yii\bootstrap5\ActiveField) {
 							// bs5 ActiveFields add a row container over the whole field
-							if ($widget->horizontalCssClasses['layout']??false) {
-								$widget_layout = ArrayHelper::remove($widget->horizontalCssClasses, 'layout');
+							if ($widget->inputOptions['layout']??false) {
+								$widget_layout = ArrayHelper::remove($widget->inputOptions, 'layout');
 							} else {
 								$widget_layout = $widget->layout??'large';
 							}
-							if ($layout_row['size'] == 'small' || ($cols >= 4 && $layout_row_layout != 'inline')) {
+							if ($layout_row['size'] == 'small'/* || ($cols >= 4 && $layout_row_layout != 'inline')*/) {
 								switch ($widget_layout) {
 									case 'short':
 										$widget_layout = 'medium';
@@ -403,11 +403,17 @@ js;
 							}
 							if ($layout_row_layout != 'inline') {
 								Html::addCssClass($widget->options, "row layout-$layout_row_layout");
-								if ($widget_layout != 'full') {
+								if ($widget_layout === 'full') {
+									$col_classes = $this->columnClasses(1);
+								} else {
 									Html::addCssClass($widget->options, 'w-100');
+									if ($widget_layout == 'fill') {
+										$col_classes = $this->columnClasses($cols - ($indexf % $cols));
+										$widget_layout = 'large';
+									} else {
+										$col_classes = $this->columnClasses($cols);
+									}
 								}
-								$col_classes = $this->columnClasses(
-									($widget_layout == 'full' || $widget_layout == 'fill') ? 1 : $cols);
 								$open_divs++;
 								$fs .= "<div class=\"$col_classes\">";
 								$fs .= $this->layoutActiveField($widget_name, $widget, $layout_row, $widget_layout, $layout_row_layout, $indexf++);
@@ -553,7 +559,7 @@ js;
 				if ($row_style == 'grid-nolabels') {
 					$widget->enableLabel = false;
 				} else {
-					$widget->labelOptions['class'] = implode(' ', $classes['label']) . " fld-$widget_name col-form-label";
+					$widget->labelOptions['class'] = implode(' ', $classes['label']) . " fld-$widget_name ";
 					if (YII_ENV_DEV) {
 						$widget->labelOptions['class'] .= " {$layout_of_row}x$widget_layout";
 					}

@@ -63,7 +63,7 @@ class ActiveForm extends Bs5ActiveForm
 			'checkbox' => [
 				'horizontalCssClasses' => [
 					'offset' => 'offset-md-2 offset-sm-3',
-					'label' => [ 'col-form-label col-12', 'text-start'],
+					'label' => [ 'col-12', 'text-start'],
 					'wrapper' => ['col-12'],
 					'error' => '',
 					'hint' => '',
@@ -115,7 +115,7 @@ class ActiveForm extends Bs5ActiveForm
 			'checkbox' => [
 				'horizontalCssClasses' => [
 					'offset' => 'offset-md-2 offset-sm-3',
-					'label' => [ 'col-form-label col-12', 'text-start'],
+					'label' => [ 'col-12', 'text-start'],
 					'wrapper' => ['col-6'],
 					'error' => '',
 					'hint' => '',
@@ -167,7 +167,7 @@ class ActiveForm extends Bs5ActiveForm
 			'checkbox' => [
 				'horizontalCssClasses' => [
 					'offset' => '',
-					'label' => [ 'col-form-label col-lg-3 col-md-4 col-6', 'form-check-label text-start'],
+					'label' => [ 'col-lg-3 col-md-4 col-6', 'form-check-label text-start'],
 					'wrapper' => ['offset-lg-3 offset-md-4 offset-6 col-12'],
 					'error' => '',
 					'hint' => '',
@@ -230,7 +230,7 @@ class ActiveForm extends Bs5ActiveForm
 			'checkbox' => [
 				'horizontalCssClasses' => [
 					'offset' => '',
-					'label' => [ 'col-form-label col-12', 'form-check-label text-start'],
+					'label' => [ 'col-12', 'form-check-label text-start'],
 					'wrapper' => ['offset-lg-3 offset-md-2 offset-0 col-12'],
 					'error' => '',
 					'hint' => '',
@@ -283,7 +283,7 @@ class ActiveForm extends Bs5ActiveForm
 			'checkbox' => [
 				'horizontalCssClasses' => [
 					'offset' => 'offset-md-2 offset-sm-3',
-					'label' => [ 'col-form-label col-lg-3 col-md-4 col-6', 'text-start text-md-end'],
+					'label' => [ 'col-lg-3 col-md-4 col-6', 'text-start text-md-end'],
 					'wrapper' => ['col-lg-3 col-md-4 col-6'],
 					'error' => '',
 					'hint' => '',
@@ -337,7 +337,7 @@ class ActiveForm extends Bs5ActiveForm
 			'checkbox' => [
 				'horizontalCssClasses' => [
 					'offset' => 'offset-md-2 offset-sm-3',
-					'label' => [ 'col-form-label col-lg-3 col-md-4 col-6', 'text-start text-md-end'],
+					'label' => [ 'col-lg-3 col-md-4 col-6', 'text-start text-md-end'],
 					'wrapper' => ['col-lg-3 col-md-4 col-6'],
 					'error' => '',
 					'hint' => '',
