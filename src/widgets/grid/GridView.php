@@ -161,7 +161,6 @@ class GridView extends SimpleGridView
 
     public function renderSummaryWithSelectViews()
     {
-		$embedded = $this->embedded;
 		$title = $this->title;
 		$selectViewsContent = $this->renderSelectViews();
         $count = $this->dataProvider->getCount(); // records in current page
@@ -209,7 +208,7 @@ class GridView extends SimpleGridView
 					if ($selectViewsContent) {
 						$counts .= ' ' . $selectViewsContent;
 					}
-					if ($embedded && $title) {
+					if ($this->embedded && $title) {
 						$counts = Html::tag('div', $counts, ['class' => 'supertitle']) . $title;
 					}
 					return Html::tag($tag, $counts, $summaryOptions);
@@ -324,7 +323,7 @@ class GridView extends SimpleGridView
 		}
 		$title = $this->renderTitle();
 		return Html::tag('div', Html::tag($tag, $summary, $summaryOptions)
-			. Html::tag('div', $title), [ 'class' => 'title-container']);
+			. Html::tag('div', $title), [ 'class' => 'panel-heading']);
 	}
 
     /**
