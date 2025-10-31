@@ -682,7 +682,6 @@ $buttons
 html;
 	}
 
-
 	public function columnClasses(int $cols): string
 	{
 		switch ($cols) {
