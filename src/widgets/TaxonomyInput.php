@@ -178,9 +178,15 @@ function matchDropDownsToInput(j_input, id, taxonomy, drop_ids)
 	empty_all_dropdowns();
 	const input_values = split_by_dot(j_input.val(), taxonomy['dot']);
 	if (input_values.length) {
-		for( level = 0; level < input_values.length && level < taxonomy.levels.length; ++level) {
+		for (level = 0; level < input_values.length && level < taxonomy.levels.length; ++level) {
 			let dropdown = $('#' + drop_ids[level]);
-			dropdown.val( input_values[level] );
+			let v = input_values[level];
+			dropdown.val(v);
+			if (dropdown.val() != v) {
+				v = v.replace(/^0+/, '');
+				dropdown.val(v);
+				input_values[level] = v;
+			}
 			let next_dropdown = $('#taxon_' + (level + 1 ) + '_' + id);
 			if (next_dropdown.length != 0) {
 				update_dropdown(next_dropdown, taxonomy, input_values, level + 1);
