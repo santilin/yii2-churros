@@ -140,7 +140,6 @@ class AuthController extends Controller
 		}
 	}
 
-
 	/**
 	 * Creates the permissions for a model inside a module
 	 */
@@ -194,14 +193,11 @@ class AuthController extends Controller
  					echo "= Permission '{$permission->name}' already exists in role {$model_visora->name}\n";
 				}
 			}
-			if ($perm_name == 'update' || $perm_name == 'create' || $perm_name == 'duplicate'
-				|| $perm_name == 'delete') {
-				if (!$auth->hasChild($model_editora, $permission)) {
-					$auth->addChild($model_editora, $permission);
-					echo "+ Permission '{$permission->name}' added to role '{$model_editora->name}'\n";
-				} else {
-					echo "= Permission '{$permission->name}' already exists in role '{$model_editora->name}'\n";
-				}
+			if (!$auth->hasChild($model_editora, $permission)) {
+				$auth->addChild($model_editora, $permission);
+				echo "+ Permission '{$permission->name}' added to role '{$model_editora->name}'\n";
+			} else {
+				echo "= Permission '{$permission->name}' already exists in role '{$model_editora->name}'\n";
 			}
 		}
 	}
