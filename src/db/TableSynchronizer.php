@@ -13,10 +13,10 @@ class TableSynchronizer
 		public string $tblOrigen,
 		public string $tblDest,
 		public Query|string|null $where = null,
-		public int $limit = 0
+		public int $limit = 0,
 	) {}
 
-	public function synchronize()
+	protected function createSourceQuery(): Query
 	{
 		if (is_string($this->where)) {
 			$sourceQuery = (new Query())
@@ -32,17 +32,34 @@ class TableSynchronizer
 		if ($this->limit > 0 && $sourceQuery->limit == 0) {
 			$sourceQuery->limit($this->limit);
 		}
+		return $sourceQuery;
+	}
 
+	public function syncronize(array $fields_match = [])
+	{
+		$sourceQuery = $this->createSourceQuery();
 		$schema_origen = $this->dbOrigen->getTableSchema($this->tblOrigen);
-		$schema_destino = $this->dbDest->getTableSchema($this->tblDest); // Nuevo: esquema destino
+		$dest_scheme = $this->dbDest->getTableSchema($this->tblDest);
+		$sourceRecords = $sourceQuery->all($this->dbOrigen);
+		$count_result = $this->dbDest->createCommand("SELECT COUNT(*) FROM {$this->tblDest}")->queryOne();
+		$dest_count = intval(reset($count_result));
+		echo "Overwriting $dest_count records into $this->tblDest\n";
+		echo "Read " . count($sourceRecords) . " records from $this->tblOrigen\n";
+
+	}
+
+	public function overwrite()
+	{
+		$sourceQuery = $this->createSourceQuery();
+		$dest_scheme = $this->dbDest->getTableSchema($this->tblDest);
 		$sourceRecords = $sourceQuery->all($this->dbOrigen);
 		$result = $this->dbDest->createCommand("SELECT COUNT(*) FROM {$this->tblDest}")->queryOne();
 		$dest_count = intval(reset($result));
-		echo "Syncronizing $dest_count records into $this->tblDest\n";
+		echo "Overwriting $dest_count records into $this->tblDest\n";
 		echo "Read " . count($sourceRecords) . " records from $this->tblOrigen\n";
 
 		// Preprocesar PKs destino
-		$destPk = $schema_destino->primaryKey;
+		$destPk = $dest_scheme->primaryKey;
 		$sourcePkValues = [];
 		$existing_count = $new_count = 0;
 
@@ -55,7 +72,7 @@ class TableSynchronizer
 				$pk_conds[$pk] = $record[$pk];
 			}
 			foreach (array_keys($record) as $fname) {
-				if (!$schema_destino->getColumn($fname)) {
+				if (!$dest_scheme->getColumn($fname)) {
 					unset($record[$fname]);
 				}
 			}

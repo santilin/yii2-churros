@@ -53,7 +53,7 @@ class SearchInput extends \yii\bootstrap5\InputWidget
 				$value['op'], FormHelper::$operators, [
 				'id' => "drop-op-$attr_class", 'class' => 'form-select search-dropdown w-auto',
 				'Prompt' => 'Operador']);
-			Html::addCssClass($this->options, 'form-control');
+			Html::addCssClass($this->options, 'd-flex form-control');
 			Html::addCssStyle($this->options, [ 'width' => 'fit-content' ]);
 			$ret .= Html::input($control_type, "{$scope}[$attribute][v]", $value['v'], $this->options);
 		}
