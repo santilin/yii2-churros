@@ -62,6 +62,9 @@ trait NoRelationTrait
             $this->addErrorFromException($e);
 			return false;
         }
+        if ($must_commit) {
+            $trans->commit();
+        }
         return true;
     }
 
