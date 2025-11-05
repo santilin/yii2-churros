@@ -1,5 +1,14 @@
 window.yii.churros = (function ($) {
 	return {
+		round: function(value, decimals) {
+			console.log(typeof value);
+			console.log(typeof decimals);
+			if (typeof value !== 'number' || typeof decimals !== 'number') {
+				throw new TypeError('Both arguments must be numbers');
+			}
+			const factor = Math.pow(10, decimals);
+			return Math.round(value * factor) / factor;
+		},
 		email: function (value, messages, options) {
 			value = $.trim(value);
 			if (yii.validation.isEmpty(value)) {

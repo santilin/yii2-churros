@@ -522,13 +522,16 @@ class CrudController extends \yii\web\Controller
 	}
 
 	// Ajax
-	public function actionRawModel($id)
+	public function actionRawModel($id, array $with = [])
 	{
+		\Yii::$app->response->format = \yii\web\Response::FORMAT_JSON;
 		$params = $this->request->queryParams;
-		$this->model = $this->findModel($id, $params);
-		if ($model) {
-            return json_encode($this->model->getAttributes());
-        } /// @todo else
+		$this->model = $this->findModel($id, 'default', $params);
+		if ($this->model) {
+            return array_merge($this->model->getAttributes(), $this->model->getRelatedRecords());
+        } else {
+			throw new \Exception("Raw model failed");
+		}
 	}
 
 	// Ajax for the MutiColumnTypeAhead control

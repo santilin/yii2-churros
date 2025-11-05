@@ -265,7 +265,6 @@ js;
 					}
 					break;
 				case 'rows':
-				case 'grid-nolabels':
 					if (!$this->lastWasRow()) {
 						throw "Error en anidamiento de widgets";
 					}
@@ -546,6 +545,9 @@ js;
 			case 'grid':
 			case 'rows':
 			case 'grid-nolabels':
+				if ($row_style == 'grid-nolabels') {
+					$widget_layout = 'full';
+				}
 				if ('static' == $widget_layout) {
 					$classes = $this->widget_layout_horiz_config['static']['horizontalCssClasses'];
 				} else if ('inline' == $layout_of_row) {
@@ -558,6 +560,7 @@ js;
 				}
 				if ($row_style == 'grid-nolabels') {
 					$widget->enableLabel = false;
+					$widget->labelOptions = false;
 				} else {
 					$widget->labelOptions['class'] = implode(' ', $classes['label']) . " fld-$widget_name ";
 					if (YII_ENV_DEV) {
