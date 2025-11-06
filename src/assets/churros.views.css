@@ -236,6 +236,15 @@ table.table tr.filters {
   td {
     padding: 1px !important;
     margin-bottom: 1px !important;
+    a.remove-filters i {
+      color: red !important;
+    }
+    a.run-filters i {
+      font-size: 1.25rem !important;
+    }
+  }
+  td.filters-actions {
+    text-wrap: nowrap;
   }
   font-size: 1.25rem !important;
   input, select {
@@ -249,12 +258,6 @@ table.table tr.filters {
     font-size: 0.875rem !important;
     border-radius: var(--bs-border-radius-sm) !important;
     height: inherit !important;
-  }
-  td a.remove-filters i {
-    color: red !important;
-  }
-  td a.run-filters i {
-    font-size: 1.25rem !important;
   }
   td > select.form-select {
     width: 100%;
