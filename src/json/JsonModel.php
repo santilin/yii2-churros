@@ -419,14 +419,14 @@ class JsonModel extends \yii\base\Model
         if (!$form_class_name || $rel_model_class == $form_class_name) {
             return $this->$relation_name;
         }
-        $child = new $rel_model_class;
+        $child = new $rel_model_class();
         if (!($child instanceof $rel_model_class)) {
             throw new InvalidConfigException("$form_class_name is not derived from $rel_model_class");
         }
         if ($rel_info['type'] == 'HasMany') {
             $related_models = [];
             foreach ($this->$relation_name as $kr => $rel_model) {
-                $child = new $form_class_name;
+                $child = new $form_class_name();
                 $child->_parent_model = $this;
                 $child->setPath($this->getPath() . '/' . $child->jsonPath());
                 $child->setJsonModelable($this);

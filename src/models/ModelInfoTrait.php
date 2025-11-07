@@ -792,7 +792,7 @@ trait ModelInfoTrait
 
 	public function copy($other)
 	{
-		$this->setAttributes($other->getAttributes());
+		$this->setAttributes($other->getAttributes(), false);
 		$this->setIsNewRecord($other->getIsNewRecord());
 		$this->setPrimarykey($other->getPrimaryKey(true));
 	}
