@@ -22,7 +22,7 @@ use yii\console\Controller;
  * sudo apt install mkdocs-material-extensions
  */
 
-class DocController extends Controller
+class MkDocController extends Controller
 {
 	/** The version of this command */
 	const VERSION = '0.1';
