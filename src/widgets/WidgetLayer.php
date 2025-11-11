@@ -60,32 +60,28 @@ class WidgetLayer
 	/**
 	 * Recursivelly lays out the widgets
 	 */
-	protected function layoutWidgets(array $layout_row, array $parent_options = [], int|string $row_key = null): string
+	protected function layoutWidgets(array $layout_row, array $parentOptions = [],
+		int|string $rowKey = null, array $htmlOptions = []): string
 	{
 		$ret = '';
+		// firstly, check if this is an array of containers (missing content) and
+		// convert it to a proper container
 		if (!isset($layout_row['content'])) {
 			if (ArrayHelper::isIndexed($layout_row)) {
-				$av = reset($layout_row);
-				if (!is_array($av)) {
+				$first_layout_row = reset($layout_row);
+				if (!is_array($first_layout_row)) {
 					$layout_row = [
 						'type' => 'fields',
 						'content' => $layout_row,
-						'layout' => $parent_options['layout']??'1col',
-						'size' => $parent_options['size']??'large',
+						'layout' => $parentOptions['layout']??'1col',
+						'size' => $parentOptions['size']??'large',
 						'style' => 'grid'
 					];
 				} else {
 					foreach (array_filter($layout_row) as $klr => $lr) {
-						$ret .= $this->layoutWidgets($lr, $parent_options, $klr);
+						$ret .= $this->layoutWidgets($lr, $parentOptions, $klr, $htmlOptions);
 					}
 					return $ret;
-					// $layout_row = [
-					// 	'type' => 'container',
-					// 	'content' => $layout_row,
-					// 	'layout' => '1col',
-					// 	'size' => $parent_options['size']??'large',
-					// 	'style' => 'rows',
-					// ];
 				}
 			} else if (count($layout_row) == 1) {
 				$ret .= '<!--' . array_key_first($layout_row) . "-->\n";
@@ -95,42 +91,30 @@ class WidgetLayer
 					'type' => 'container',
 					'content' => $layout_row,
 					'layout' => '1col',
-					'size' => $parent_options['size']??'large',
+					'size' => $parentOptions['size']??'large',
 					'style' => 'rows',
 				];
 			}
 		}
-		$layout_row_layout = $layout_row['layout'] ?? '1col';
-		if (empty($layout_row['type'])) {
-			if (is_array($layout_row['content'])) {
-				$layout_row_type = 'container';
-			} else {
-				$layout_row_type = 'row';
-			}
+		if (!array_key_exists('type', $layout_row)) {
+			$layout_row_type = 'fields';
 		} else {
 			$layout_row_type = $layout_row['type'];
 		}
-		if (empty($layout_row['style'])) {
-			if ($layout_row_layout == '1col') {
-				$layout_row_style = 'rows';
-			} else if (strpos($layout_row_layout, 'cols')) {
-				$layout_row_style = 'cols';
-			} else {
-				$layout_row_style = 'rows';
-			}
-		} else {
-			$layout_row_style = $layout_row['style'];
-		}
+		$layout_row_layout = $layout_row['layout'] ?? '1col';
+		$layout_row_style = empty($layout_row['style'])
+			? (str_contains($layout_row_layout, 'col') ? 'cols' : 'rows')
+			: $layout_row['style'];
 		if (empty($layout_row['size'])) {
-			$layout_row['size'] = $parent_options['size']??'large';
+			$layout_row['size'] = $parentOptions['size']??'large';
 		}
 		if ($layout_row_layout == 'inline') {
 			$cols = 10000;
 		} else {
-			$cols = intval($layout_row_layout); // ?:max(count($layout_row['content']), 4);
+			$cols = intval($layout_row_layout);
 		}
-		if ($layout_row_type == 'container') {
-			$ret .= "<!--container $layout_row_style: $row_key-->";
+		if ($layout_row_type === 'container') {
+			$ret .= "<!--container $layout_row_style: $rowKey-->";
 			$row_added = false;
 			if (!$this->lastWasRow()) {
 				$ret .= "<div class=\"row lay-$cols-cols lay-{$this->lastLevel()}-lvl\">";
@@ -147,24 +131,24 @@ class WidgetLayer
 					}
 					$tab_items = [];
 					$has_active = false;
-					foreach ($layout_row['content'] as $kc => $row_content) {
-						if ($row_content === null) {
+					foreach ($layout_row['content'] as $kc => $tab_content) {
+						if ($tab_content === null) {
 							continue;
 						}
-						if (!is_array($row_content)) {
-							$row_content = [
-								'label' => $kc,
-								'content' => $row_content
+						if (!is_array($tab_content)) {
+							$tab_content = [
+								'title' => $kc,
+								'content' => $tab_content
 							];
 						}
-						if ($row_content['active']??false == true) {
+						if (($tab_content['active']??false) == true) {
 							$has_active = true;
 						}
 						$tab_items[] = [
-							'label' => ArrayHelper::remove($row_content, 'title', $kc),
-							'active' => ArrayHelper::remove($row_content, 'active', false),
-							'headerOptions' => ArrayHelper::remove($row_content, 'headerOptions', []),
-							'content' => $this->layoutWidgets($row_content, [
+							'label' => ArrayHelper::remove($tab_content, 'title', $kc),
+							'active' => ArrayHelper::remove($tab_content, 'active', false),
+							'headerOptions' => ArrayHelper::remove($tab_content, 'headerOptions', []),
+							'content' => $this->layoutWidgets($tab_content, [
 								'layout' => $layout_row_layout,
 								'style' => $layout_row_style,
 								'type' => $layout_row_type,
@@ -278,20 +262,12 @@ js;
 					$layout_row_content = array_filter($layout_row['content']);
 					foreach ($layout_row_content as $kc => $row_content) {
 						$rows_content .= "<!--row: $kc-->";
-						// if (count($layout_row_content) > 1) {
-						// 	$this->setLastRow($cols);
-						// 	$ret .= '<div class="row w-100">';
-						// }
 						$rows_content .= $this->layoutWidgets((array)$row_content, [
 							'layout' => $layout_row_layout,
 							'style' => $layout_row_style,
 							'type' => $layout_row_type,
 							'size' => $layout_row['size'],
 						], $kc);
-						// if (count($layout_row_content) > 1) {
-						// 	$this->removeLast();
-						// 	$ret .= "</div>";
-						// }
 					}
 					$ret .= $rows_content;
 					if ($col_added) {
@@ -302,21 +278,22 @@ js;
 					}
 					break;
 				case 'cols':
-					// $cols = min(count($layout_row['content']), 4);
 					if (!$this->lastWasRow()) {
 						throw "Error en anidamiento de widgets";
 					}
 					foreach ($layout_row['content'] as $kc => $row_content) {
+						$cols = intval($row_content['layout']??$layout_row_layout);
 						$row_options = $row_content['htmlOptions']??[];
-						Html::addCssClass($row_options, $this->columnClasses($cols));
-						$this->setLastCol($cols);
-						$ret .= Html::tag('div',
-							$this->layoutWidgets((array)$row_content, [
-								'layout' => $layout_row_layout,
-								'style' => $layout_row_style,
-								'type' => $layout_row_type, ], $kc),
-							$row_options);
-						$this->removeLast();
+						if (!empty($row_options)) {
+							throw new \Exception("check row_options");
+						}
+						// Html::addCssClass($row_options, $this->columnClasses($cols));
+						// $this->setLastCol($cols);
+						$ret .= $this->layoutWidgets((array)$row_content, [
+							'layout' => $row_content['layout']??$layout_row_layout,
+							'style' => $layout_row_style,
+							'type' => $layout_row_type, ], $kc, $row_options);
+						// $this->removeLast();
 					}
 					break;
 				default:
@@ -326,7 +303,7 @@ js;
 				$ret .= "</div>";
 				$this->removeLast();
 			}
-			$ret .= "<!--end container $layout_row_style: $row_key-->";
+			$ret .= "<!--end container $layout_row_style: $rowKey-->";
 		} else {
 			$row_added = false;
 			if ($this->noLast()) {

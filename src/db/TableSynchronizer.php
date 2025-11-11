@@ -17,7 +17,7 @@ class TableSynchronizer
 		public bool $verbose = true,
 	) {}
 
-	protected function createSourceQuery(array $keys): Query
+	protected function createSourceQuery(array $keys = []): Query
 	{
 		if (is_string($this->where)) {
 			$source_query = (new Query())
@@ -154,8 +154,9 @@ class TableSynchronizer
 
 	public function overwrite()
 	{
-		$source_query = $this->createSourceQuery();
 		$dest_scheme = $this->dbDest->getTableSchema($this->tblDest);
+		$dest_pks = $dest_scheme->primaryKey;
+		$source_query = $this->createSourceQuery();
 		$source_records = $source_query->all($this->dbSource);
 		$result = $this->dbDest->createCommand("SELECT COUNT(*) FROM {$this->tblDest}")->queryOne();
 		$dest_count = intval(reset($result));
@@ -163,7 +164,6 @@ class TableSynchronizer
 		echo "Read " . count($source_records) . " records from $this->tblSource\n";
 
 		// Preprocess dest pks
-		$dest_pks = $dest_scheme->primaryKey;
 		$source_records_pks = [];
 		$existing_count = $new_count = 0;
 

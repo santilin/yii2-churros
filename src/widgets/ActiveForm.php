@@ -210,8 +210,8 @@ class ActiveForm extends Bs5ActiveForm
 			'medium' => [
 				'horizontalCssClasses' => [
 					'offset' => 'offset-md-2 offset-sm-3',
-					'label' => [ 'col-form-label col-lg-3 col-md-6 col-12', 'text-start text-md-end'],
-					'wrapper' => ['col-lg-5 col-md-7 col-12'],
+					'label' => [ 'col-form-label col-lg-6 col-12', 'text-start text-md-end'],
+					'wrapper' => ['col-lg-6 col-12'],
 					'error' => '',
 					'hint' => '',
 					'field' => 'form-group',
