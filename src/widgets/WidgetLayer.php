@@ -500,6 +500,15 @@ js;
 					$ret .= "<!--html row $html_key-->";
 				}
 				break;
+			case 'ajax':
+				$col_added = false;
+				if (!$this->lastWasCol()) {
+					$this->setLastCol($cols);
+					$col_added = true;
+					$ret .= '<div class="' . $this->columnClasses($cols) . '">';
+				}
+				$ret .= $this->layoutAjaxContent($layout_row, $layout_row_layout);
+				break;
 			}
 			if ($col_added) {
 				$this->removeLast();
@@ -661,6 +670,70 @@ $buttons
 </div><!--buttons-->
 html;
 	}
+
+    /**
+     * Renders AJAX content
+     */
+    protected function layoutAjaxContent(array $layout_row, string $layout_of_row): string
+    {
+        $url = ArrayHelper::getValue($layout_row, 'url');
+        $method = ArrayHelper::getValue($layout_row, 'method', 'GET');
+        $data = ArrayHelper::getValue($layout_row, 'data', []);
+        $loadingText = ArrayHelper::getValue($layout_row, 'loadingText', 'Loading...');
+        $errorText = ArrayHelper::getValue($layout_row, 'errorText', 'Error loading content');
+        $containerId = ArrayHelper::getValue($layout_row, 'containerId', 'ajax-container-' . uniqid());
+
+        if (!$url) {
+            Yii::error("AJAX row type requires a 'url' parameter");
+            return Html::tag('div', 'Missing URL for AJAX content', ['class' => 'alert alert-danger']);
+        }
+
+        // Ensure URL is absolute
+        $url = Url::to($url);
+
+        $containerOptions = ArrayHelper::getValue($layout_row, 'containerOptions', []);
+        Html::addCssClass($containerOptions, 'ajax-content-container');
+        $containerOptions['id'] = $containerId;
+
+        // Initial loading state
+        $content = Html::tag('div', $loadingText, ['class' => 'ajax-loading']);
+
+        $ret = Html::tag('div', $content, $containerOptions);
+
+// Escape all dynamic values
+    $escapedUrl = Html::encodeJsString($url);
+    $escapedMethod = Html::encodeJsString($method);
+    $escapedContainerId = Html::encodeJsString($containerId);
+    $escapedErrorText = Html::encodeJsString($errorText);
+
+    $script = <<<JS
+    (function() {
+        const container = document.getElementById('{$escapedContainerId}');
+        if (!container) return;
+
+        fetch('{$escapedUrl}', {
+            method: '{$escapedMethod}',
+            headers: {
+                'X-Requested-With': 'XMLHttpRequest',
+                'Accept': 'text/html'
+            }
+        })
+        .then(response => {
+            if (!response.ok) throw new Error('Network response was not ok');
+            return response.text();
+        })
+        .then(html => {
+            container.innerHTML = html;
+        })
+        .catch(error => {
+            console.error('AJAX loading error:', error);
+            container.innerHTML = '<div class="alert alert-danger">{$escapedErrorText}</div>';
+        });
+    })();
+JS;
+		$ret .= Html::script($script, ['type' => 'text/javascript']);
+        return $ret;
+    }
 
 	public function columnClasses(int $cols): string
 	{
