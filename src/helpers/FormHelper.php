@@ -659,8 +659,10 @@ ajax;
         if (count($parts)) {
             if (!$embedded) {
                 $parts['title'] = Html::tag('h1', $parts['title']);
-            }
-            $ret = "<div class=title>" . implode('', $parts) . '</div>';
+				$ret = "<div class=panel-heading><div class=title>" . implode('', $parts) . '</div></div>';
+            } else {
+				$ret = "<div class=title>" . implode('', $parts) . '</div>';
+			}
 			return $ret;
         } else {
 			return '';

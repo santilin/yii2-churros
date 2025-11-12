@@ -45,13 +45,13 @@ class TableSynchronizer
 		$source_query = $this->createSourceQuery(array_values($keys_match));
 		$source_records = $source_query->all($this->dbSource);
 		$dest_scheme = $this->dbDest->getTableSchema($this->tblDest);
-		$dest_pks = $dest_scheme->primaryKey;
+		$dest_pks = array_keys($keys_match);
 		if ($this->verbose) {
 			echo "Read " . count($source_records) . " records from $this->tblSource\n";
 		}
 
-		$source_records_pks = [];
-		$existing_count = $new_count = $deleted_count = 0;
+		$source_records_pks = $changes = [];
+		$existing_count = $inserted_count = $deleted_count = 0;
 
 		foreach ($source_records as $source_record) {
 			$dest_conds = [];
@@ -65,7 +65,7 @@ class TableSynchronizer
 				$dest_conds[$dest_pk] = $source_record[$source_pk];
 			}
 
-			// store pks to be deleted at the end
+			// store pks to not be deleted at the end
 			$source_records_pks[] = $dest_conds;
 
 			$existingRecord = (new Query())
@@ -93,7 +93,7 @@ class TableSynchronizer
 				}
 			}
 			if ($before_save) {
-				$destRecord = call_user_func($before_save, $destRecord, $existingRecord === null);
+				$destRecord = call_user_func($before_save, $destRecord, $existingRecord === false);
 				if ($destRecord === false) {
 					continue;
 				}
@@ -101,21 +101,21 @@ class TableSynchronizer
 			if ($existingRecord) {
 				$existing_count++;
 				$diff = array_diff_assoc($destRecord, $existingRecord);
-				if ($this->verbose) {
-					echo "Synchronizing existing $dest_index: " . json_encode($diff) . "\n";
-				}
 				if (count($diff) !== 0) {
-					$changes[$dest_index] = $changes;
+					if ($this->verbose) {
+						echo "Synchronizing existing $dest_index: " . json_encode($diff) . "\n";
+					}
+					$changes[$dest_index] = $diff;
 					$this->dbDest->createCommand()
 						->update($this->tblDest, $destRecord, $dest_conds)
 						->execute();
 				}
 			} else {
-				$new_count++;
+				$inserted_count++;
 				if ($this->verbose) {
 					echo "Inserting $dest_index: " . json_encode($destRecord) . "\n";
 				}
-				$changes[$dest_index] = 'New record';
+				$changes[$dest_index] = true;
 				$this->dbDest->createCommand()
 					->insert($this->tblDest, $destRecord)
 					->execute();
@@ -138,7 +138,7 @@ class TableSynchronizer
 				} else {
 					$dest_index = $to_delete[$dest_pks[0]];
 				}
-				$changes[$dest_index] = 'Deleted';
+				$changes[$dest_index] = false;
 				$pk_condition = [];
 				foreach ($dest_pks as $pk_field) {
 					$pk_condition[$pk_field] = $to_delete[$pk_field];
@@ -165,7 +165,7 @@ class TableSynchronizer
 
 		// Preprocess dest pks
 		$source_records_pks = [];
-		$existing_count = $new_count = 0;
+		$existing_count = $inserted_count = 0;
 
 		foreach ($source_records as $source_record) {
 			$dest_conds = [];
@@ -195,7 +195,7 @@ class TableSynchronizer
 					->update($this->tblDest, $source_record, $dest_conds)
 					->execute();
 			} else {
-				$new_count++;
+				$inserted_count++;
 				if (intval($this->dbDest->createCommand()
 					->insert($this->tblDest, $source_record)
 					->execute()) == 0) {
@@ -210,10 +210,31 @@ class TableSynchronizer
 				->delete($this->tblDest, ['NOT IN', $dest_pks, $source_records_pks])
 				->execute();
 		}
-		echo "Inserted " . $new_count . " records into {$this->tblDest}\n";
+		echo "Inserted " . $inserted_count . " records into {$this->tblDest}\n";
 		echo "Updated " . $existing_count . " records in {$this->tblDest}\n";
 		echo "Deleted " . $deleted_count . " records from {$this->tblDest}\n";
 
 		return count($source_records);
 	}
+
+	public function dumpChanges(array $changes, string $sep = "\n"): void
+	{
+		$inserted_count = $updated_count = $deleted_count = 0;
+		$deleted = $inserted = [];
+		foreach ($changes as $key => $change) {
+			if ($change === false ) {
+				$deleted_count++;
+				$deleted[] = $key;
+			} else if ($change === true ) {
+				$inserted_count++;
+				$inserted[] = $key;
+			} else {
+				$updated_count++;
+			}
+		}
+		echo "Updated $updated_count records$sep";
+		echo "Inserted $inserted_count records: " . implode(',', $inserted) . $sep;
+		echo "Deleted $deleted_count records: " . implode(',', $deleted) . $sep;
+	}
+
 }
