@@ -2,7 +2,6 @@
 
 namespace santilin\churros\widgets\grid;
 
-use yii\grid\DataColumn;
 use yii\helpers\{Html, Url, StringHelper, Markdown, HtmlPurifier};
 
 class ExpandableTextColumn extends DataColumn
