@@ -20,6 +20,7 @@ class JsonController extends \yii\web\Controller
 {
 	use \santilin\churros\ControllerTrait;
 
+	public $model = null;
 	protected $crudActions = [];
 	protected $root_model = false;
 	protected $_root_id = null;
@@ -146,11 +147,11 @@ class JsonController extends \yii\web\Controller
 	{
 		$params = Yii::$app->request->queryParams;
 		$params['permissions'] = FormHelper::resolvePermissions($params['permissions']??[], $this->crudActions);
-		$model = $this->findModel($this->getPath(), $id, 'view', $params);
+		$this->model = $this->findModel($this->getPath(), $id, 'view', $params);
 		return $this->render('view', [
-			'model' => $model,
+			'model' => $this->model,
 			'viewForms' => [ '_view' => [ '', null, [], '' ] ],
-			'viewParams' => $this->changeActionParams($params, 'view', $model)
+			'viewParams' => $this->changeActionParams($params, 'view', $this->model)
 		]);
 	}
 
@@ -163,23 +164,24 @@ class JsonController extends \yii\web\Controller
 		$req = Yii::$app->request;
 		$params = array_merge($req->get(), $req->post());
 		$params['permissions'] = FormHelper::resolvePermissions($params['permissions']??[], $this->crudActions);
-		$model = $this->findFormModel($this->getPath(), null, null, 'create', $params);
-		$model->scenario = 'create';
-		if ($model->loadAll($params, static::findRelationsInForm($params))) {
-			$model->setIsnewRecord(true);
-			if ($model->validate() && $model->save(false)) {
+		$this->model = $this->findFormModel($this->getPath(), null, null, 'create', $params);
+		$this->model->scenario = 'create';
+		if ($this->model->loadAll($params, static::findRelationsInForm($params))) {
+			$this->model->setIsnewRecord(true);
+			if ($this->model->validate() && $this->model->save(false)) {
 				if ($req->getIsAjax()) {
 					Yii::$app->response->format = \yii\web\Response::FORMAT_JSON;
-					return ['model' => $model->getAttributes(), 'success' => $model->getSuccesses()];
+					return ['model' => $this->model->getAttributes(), 'success' => $this->model->getSuccesses()];
 				}
-				$this->addSuccessFlashes('create', $model);
-				return $this->redirect($this->returnTo(null, 'create', $model));
+				$this->addSuccessFlashes('create', $this->model);
+				$this->addWarningFlashes($this->model);
+				return $this->redirect($this->returnTo(null, 'create', $this->model));
 			}
 		}
 		return $this->render('create', [
-			'model' => $model,
+			'model' => $this->model,
 			'viewForms' => [ '_form' => [ '', null, [], '' ] ],
-			'formParams' => $this->changeActionParams($params, 'create', $model)
+			'formParams' => $this->changeActionParams($params, 'create', $this->model)
 		]);
 	}
 
@@ -194,24 +196,25 @@ class JsonController extends \yii\web\Controller
 		$req = Yii::$app->request;
 		$params = array_merge($req->get(), $req->post());
 		$params['permissions'] = FormHelper::resolvePermissions($params['permissions']??[], $this->crudActions);
-		$model = $this->findFormModel($this->getPath(), $id, null, 'duplicate', $params);
-		$model->setDefaultValues(); // duplicating
-		$model->scenario = 'duplicate';
-		if ($model->loadAll($params, static::findRelationsInForm($params))) {
-			$model->setIsNewRecord(true);
-			if ($model->validate() && $model->save(false)) {
+		$this->model = $this->findFormModel($this->getPath(), $id, null, 'duplicate', $params);
+		$this->model->setDefaultValues(); // duplicating
+		$this->model->scenario = 'duplicate';
+		if ($this->model->loadAll($params, static::findRelationsInForm($params))) {
+			$this->model->setIsNewRecord(true);
+			if ($this->model->validate() && $this->model->save(false)) {
 				if ($req->getIsAjax()) {
 					Yii::$app->response->format = \yii\web\Response::FORMAT_JSON;
-					return ['model' => $model->getAttributes(), 'success' => $model->getSuccesses()];
+					return ['model' => $this->model->getAttributes(), 'success' => $this->model->getSuccesses()];
 				}
-				$this->addSuccessFlashes('duplicate', $model);
-				return $this->redirect($this->returnTo(null, 'duplicate', $model));
+				$this->addSuccessFlashes('duplicate', $this->model);
+				$this->addWarningFlashes($this->model);
+				return $this->redirect($this->returnTo(null, 'duplicate', $this->model));
 			}
 		}
 		return $this->render('duplicate', [
-			'model' => $model,
+			'model' => $this->model,
 			'viewForms' => [ '_form' => [ '', null, [], '' ] ],
-			'formParams' => $this->changeActionParams($params, 'duplicate', $model)
+			'formParams' => $this->changeActionParams($params, 'duplicate', $this->model)
 		]);
 	}
 
@@ -226,22 +229,23 @@ class JsonController extends \yii\web\Controller
 		$req = Yii::$app->request;
 		$params = array_merge($req->get(), $req->post());
 		$params['permissions'] = FormHelper::resolvePermissions($params['permissions']??[], $this->crudActions);
-		$model = $this->findFormModel($this->getPath(), $id, null, 'update', $params);
+		$this->model = $this->findFormModel($this->getPath(), $id, null, 'update', $params);
 
-		if ($model->loadAll($params, static::findRelationsInForm($params)) && $req->isPost) {
-			if ($model->validate() && $model->save(false)) {
+		if ($this->model->loadAll($params, static::findRelationsInForm($params)) && $req->isPost) {
+			if ($this->model->validate() && $this->model->save(false)) {
 				if ($req->getIsAjax()) {
 					Yii::$app->response->format = \yii\web\Response::FORMAT_JSON;
-					return ['model' => $model->getAttributes(), 'success' => $model->getSuccesses()];
+					return ['model' => $this->model->getAttributes(), 'success' => $this->model->getSuccesses()];
 				}
-				$this->addSuccessFlashes('update', $model);
-				return $this->redirect($this->returnTo(null, 'update', $model));
+				$this->addSuccessFlashes('update', $this->model);
+				$this->addWarningFlashes($this->model);
+				return $this->redirect($this->returnTo(null, 'update', $this->model));
 			}
 		}
 		return $this->render('update', [
-			'model' => $model,
+			'model' => $this->model,
 			'viewForms' => [ '_form' => [ '', null, [], '' ] ],
-			'formParams' => $this->changeActionParams($params, 'update', $model)
+			'formParams' => $this->changeActionParams($params, 'update', $this->model)
 		]);
 	}
 
@@ -252,31 +256,33 @@ class JsonController extends \yii\web\Controller
 	*/
 	public function actionDelete(string $id)
 	{
-		$model = $this->findFormModel($this->getPath(), $id, null, 'delete');
+		$this->model = $this->findFormModel($this->getPath(), $id, null, 'delete');
 		if (!in_array('delete', $this->crudActions)) {
-			throw new ForbiddenHttpException($model->t('churros',
+			throw new ForbiddenHttpException($this->model->t('churros',
 				$this->getResultMessage('access_denied')));
 		}
 		try {
-			if ($model->delete()) {
+			if ($this->model->delete()) {
 				if (Yii::$app->request->getIsAjax()) {
 					Yii::$app->response->format = \yii\web\Response::FORMAT_JSON;
-					return ['model' => $model->getAttributes(), 'success' => $model->getSuccesses()];
+					return ['model' => $this->model->getAttributes(), 'success' => $this->model->getSuccesses()];
 				}
-				$this->addSuccessFlashes('delete', $model);
-				return $this->redirect($this->returnTo(null, 'delete', $model));
+				$this->addSuccessFlashes('delete', $this->model);
+				$this->addWarningFlashes($this->model);
+
+				return $this->redirect($this->returnTo(null, 'delete', $this->model));
 			} else {
-				Yii::$app->session->addFlash('error', $model->t('churros', $this->getResultMessage('error_delete')));
+				Yii::$app->session->addFlash('error', $this->model->t('churros', $this->getResultMessage('error_delete')));
 			}
 		} catch (\yii\db\IntegrityException $e) {
-			$model->addError('delete', $model->t('churros',
+			$this->model->addError('delete', $this->model->t('churros',
 				$this->getResultMessage('error_delete_integrity')));
 		} catch (\yii\web\ForbiddenHttpException $e) {
-			$model->addError('delete', $model->t('churros',
+			$this->model->addError('delete', $this->model->t('churros',
 				$this->getResultMessage('error_delete')));
 		}
-		$this->addErrorFlashes($model);
-		return $this->redirect($this->returnTo(null, 'delete_error', $model));
+		$this->addErrorFlashes($this->model);
+		return $this->redirect($this->returnTo(null, 'delete_error', $this->model));
 	}
 
 	/**
@@ -287,14 +293,14 @@ class JsonController extends \yii\web\Controller
 	public function actionPdf($id)
 	{
 		$params = Yii::$app->request->queryParams;
-		$model = $this->findModel($id, $params);
+		$this->model = $this->findModel($id, $params);
 		if (YII_DEBUG) {
             Yii::$app->getModule('debug')->instance->allowedIPs = [];
         }
 		// https://stackoverflow.com/a/54568044/8711400
 		$content = $this->renderAjax('_pdf', [
-			'model' => $model,
-			'viewParams' => $this->changeActionParams($params, 'pdf', $model)
+			'model' => $this->model,
+			'viewParams' => $this->changeActionParams($params, 'pdf', $this->model)
 		]);
 		$methods = [];
 		$margin_header = AppHelper::yiiparam('pdfMarginHeader', 15);
@@ -302,7 +308,7 @@ class JsonController extends \yii\web\Controller
 		$margin_top = AppHelper::yiiparam('pdfMarginTop', 20);
 		$margin_bottom = AppHelper::yiiparam('pdfMarginBottom', 20);
 		if ($this->findViewFile('_pdf_header')) {
-			$header_content = $this->renderPartial('_pdf_header', ['model'=>$model]);
+			$header_content = $this->renderPartial('_pdf_header', ['model'=>$this->model]);
 			// h:{00232}
 			if (strncmp($header_content,'h:{',3) === 0) {
 				$margin_top = intval(substr($header_content,3,5));
@@ -311,10 +317,10 @@ class JsonController extends \yii\web\Controller
 			$methods['setHeader'] = $header_content;
 		} else {
 			$methods['setHeader'] = date('Y-m-d H:i') . '|'
-				. $model->getModelInfo('title') . '|' . Yii::$app->name . ' - {PAGENO}';
+				. $this->model->getModelInfo('title') . '|' . Yii::$app->name . ' - {PAGENO}';
 		}
 		if ($this->findViewFile('_pdf_footer')) {
-			$methods['setFooter'] = $this->renderPartial('_pdf_footer', ['model'=>$model]);
+			$methods['setFooter'] = $this->renderPartial('_pdf_footer', ['model'=>$this->model]);
 		}
 		$pdf = new \kartik\mpdf\Pdf([
 			'mode' => \kartik\mpdf\Pdf::MODE_CORE,
@@ -328,7 +334,7 @@ class JsonController extends \yii\web\Controller
 			'content' => $content,
 			'cssFile' => '@vendor/kartik-v/yii2-mpdf/src/assets/kv-mpdf-bootstrap.min.css',
 			'cssInline' => file_get_contents(Yii::getAlias('@app') . '/web/css/print.css'),
-			'options' => ['title' => $model->recordDesc()],
+			'options' => ['title' => $this->model->recordDesc()],
 			'methods' => $methods,
 		]);
 		return $pdf->render();
@@ -494,9 +500,9 @@ class JsonController extends \yii\web\Controller
 	public function actionRawModel($id)
 	{
 		$params = Yii::$app->request->queryParams;
-		$model = $this->findModel($id, $params);
-		if ($model) {
-            return json_encode($model->getAttributes());
+		$this->model = $this->findModel($id, $params);
+		if ($this->model) {
+            return json_encode($this->model->getAttributes());
         } /// @todo else
 	}
 

@@ -85,43 +85,57 @@ trait ControllerTrait
 		}
 	}
 
-	protected function addSuccessFlashes(string $action_id, $model, ?string $success_message = null)
+	protected function addSuccessFlashes(string $action_id, $model, ?string $success_message = null): void
 	{
 		if ($success_message !== false) { // discard all messages
 			if (!$success_message) {
 				$success_messages = array_merge(
 					[ 'model' => $model->t('churros', $this->getResultMessage($action_id)) ],
-					$model->getSuccessesSummary(true));
+					$model->getSuccessSummary(true));
 				foreach ($success_messages as $success_message) {
 					Yii::$app->session->addFlash('success', $success_message);
 				}
 			} else {
-				$success_message = $model->t('churros', $success_message);
 				Yii::$app->session->addFlash('success', $success_message);
 			}
 		}
-		$this->addErrorFlashes($model);
 	}
 
-	protected function addErrorFlashes($model)
+	protected function addErrorFlashes($model, ?string $error_message = null): void
 	{
-		$errors = [];
-		foreach($model->getErrors() as $error_fld => $error_msgs) {
-			foreach ($error_msgs as $error) {
-				$errors[] = $error;
+		if ($error_message !== false) { // discard all messages
+			if (!$error_message) {
+				$errors = [];
+				foreach($model->getErrors() as $error_fld => $error_msgs) {
+					foreach ($error_msgs as $error) {
+						$errors[] = $error;
+					}
+				}
+				if (count($errors)) {
+					Yii::$app->session->addFlash('error', implode("<br/>\n",$errors));
+				}
+			} else {
+				Yii::$app->session->addFlash('error', $error_message);
 			}
 		}
-		if (count($errors)) {
-			Yii::$app->session->addFlash('error', implode("<br/>\n",$errors));
-		}
-		$warnings = [];
-		foreach($model->getWarnings() as $warning_fld => $warning_msgs) {
-			foreach ($warning_msgs as $warning) {
-				$warnings[] = $warning;
+	}
+
+	protected function addWarningFlashes($model, ?string $warning_message = null): void
+	{
+		if ($warning_message !== false) { // discard all messages
+			if (!$warning_message) {
+				$warnings = [];
+				foreach($model->getWarnings() as $warning_fld => $warning_msgs) {
+					foreach ($warning_msgs as $warning) {
+						$warnings[] = $warning;
+					}
+				}
+				if (count($warnings)) {
+					Yii::$app->session->addFlash('warning', implode("<br/>\n",$warnings));
+				}
+			} else {
+				Yii::$app->session->addFlash('warning', $warning_message);
 			}
-		}
-		if (count($warnings)) {
-			Yii::$app->session->addFlash('warning', implode("<br/>\n",$warnings));
 		}
 	}
 
@@ -278,5 +292,44 @@ trait ControllerTrait
 		}
 		return '';
 	}
+
+	public function modelSuccessAjaxResponse($model, string|bool|null $success_message, array $params = []): array
+	{
+		if ($success_message !== false) {
+			$success_messages = array_values(
+				array_merge(
+					['model' => $success_message ?: $model->t('churros', $this->getResultMessage($this->action->id))],
+					$this->model->getSuccessSummary(true))
+				);
+		} else {
+			$success_messages = [];
+		}
+		return array_merge([
+			'result' => 'success',
+			'model' => $model->getAttributes(),
+			'success' => $success_messages,
+			'warning' => $model->getWarningSummary(true),
+		], $params);
+	}
+
+	public function modelErrorAjaxResponse($model, string|bool|null $error_message, array $params = []): array
+	{
+		if ($error_message !== false) {
+			$error_messages = array_values(
+				array_merge(
+					['model' => $error_message ?: $model->t('churros', $this->getResultMessage($this->action->id))],
+					$this->model->getErrorSummary(true))
+				);
+		} else {
+			$error_messages = [];
+		}
+		return array_merge([
+			'result' => 'error',
+			'model' => $model->getAttributes(),
+			'error' => $error_messages,
+			'warning' => $model->getWarningSummary(true),
+		], $params);
+	}
+
 
 } // trait

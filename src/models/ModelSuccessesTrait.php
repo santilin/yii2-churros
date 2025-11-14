@@ -75,7 +75,7 @@ Trait ModelSuccessesTrait
 	 * @see getFirstWarnings()
 	 * @since 2.0.14
 	 */
-	public function getSuccessesSummary($showAllSuccesses = true)
+	public function getSuccessSummary($showAllSuccesses = true)
 	{
 		$lines = [];
 		$successes = $showAllSuccesses ? $this->getSuccesses() : $this->getFirstSuccess();

@@ -204,6 +204,7 @@ class CrudController extends \yii\web\Controller
 					return json_encode($this->model->getAttributes());
 				}
 				$this->addSuccessFlashes('create', $this->model);
+				$this->addWarningFlashes($this->model);
 				return $this->redirect($this->returnTo(null, 'create', $this->model));
 			}
 		}
@@ -235,6 +236,7 @@ class CrudController extends \yii\web\Controller
 					return ['model' => $this->model->getAttributes(), 'success' => $this->model->getSuccesses()];
 				}
 				$this->addSuccessFlashes('duplicate', $this->model);
+				$this->addWarningFlashes($this->model);
 				return $this->redirect($this->returnTo(null, 'duplicate', $this->model));
 			}
 		}
@@ -266,6 +268,7 @@ class CrudController extends \yii\web\Controller
 					return ['model' => $this->model->getAttributes(), 'success' => $this->model->getSuccesses()];
 				}
 				$this->addSuccessFlashes('update', $this->model);
+				$this->addWarningFlashes($this->model);
 				return $this->redirect($this->returnTo(null, 'update', $this->model));
 			}
 		}
@@ -295,6 +298,7 @@ class CrudController extends \yii\web\Controller
 					return ['model' => $this->model->getAttributes(), 'success' => $this->model->getSuccesses()];
 				}
 				$this->addSuccessFlashes('delete', $this->model);
+				$this->addWarningFlashes($this->model);
 				return $this->redirect($this->returnTo(null, 'delete', $this->model));
 			} else {
 				Yii::$app->session->addFlash('error', $this->model->t('churros', $this->getResultMessage('error_delete')));
