@@ -238,11 +238,7 @@ class GridView extends SimpleGridView
     public function renderTitle()
 	{
 		if ($this->title) {
-			if (!$this->embedded) {
-				return Html::tag('h1', $this->title, ['class' => 'title']);
-			} else {
-				return Html::tag('div', $this->title, ['class' => 'title']);
-			}
+			return Html::tag('div', $this->title, ['class' => 'title']);
 		} else {
 			return '';
 		}
@@ -321,9 +317,8 @@ class GridView extends SimpleGridView
 				}
 			}
 		}
-		$title = $this->renderTitle();
 		return Html::tag('div', Html::tag($tag, $summary, $summaryOptions)
-			. Html::tag('div', $title), [ 'class' => 'panel-heading']);
+			. $this->renderTitle(), [ 'class' => 'grid-title']);
 	}
 
     /**

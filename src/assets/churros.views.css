@@ -1,3 +1,36 @@
+.record-view .record-title, .grid-view .grid-title, .crud-form .form-title {
+  display: flex;
+  flex-direction: column;
+  .title {
+    margin-bottom: 2px;
+    font-size: 1.5rem;
+  }
+  .supertitle {
+    padding-top: 0.125rem !important;
+    padding-left: 2px;
+  }
+  .toolbar {
+    a, button {
+      font-size: smaller;
+    }
+  }
+}
+
+.record-view {
+  .record-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+  }
+}
+
+
+/*.grid-view .grid-header .grid-toolbar {
+  margin-bottom: 0.25rem;
+  margin-right: 3px;
+  display: flex;
+}*/
+
 .grid-view {
   tbody tr {
     td.group-head {
@@ -13,6 +46,11 @@
       font-size: 1.2rem;
       padding-left: 1rem;
     }
+  }
+  .grid-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
   }
 }
 
@@ -43,17 +81,9 @@
   --bs-btn-border-radius: var(--bs-border-radius-sm);
   margin-left: 0.25rem;
 }
-.grid-view .grid-header {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-}
 
-.grid-view .grid-header .grid-toolbar {
-  margin-bottom: 0.25rem;
-  margin-right: 3px;
-  display: flex;
-}
+
+
 
 [data-bs-theme="light"] .table tbody tr td.main-column a {
   text-decoration: underline !important;

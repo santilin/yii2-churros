@@ -1,31 +1,156 @@
 const ChurrosGrid = (function() {
 	return {
-		generateBs5Table(data, excludeKeys = []) {
+		generateBs5Table(data, excludeKeys = [], columnsConfig = {}) {
 			if (!data.length) return '<table class="table"><thead></thead><tbody></tbody></table>';
 
-			// Extract headers, excluding specified keys
-			const headers = Object.keys(data[0]).filter(key => !excludeKeys.includes(key));
+			// Common format presets
+			const formatPresets = {
+				date: (value) => {
+					if (!value) return '';
+					const date = new Date(value);
+					return isNaN(date) ? value : date.toLocaleDateString();
+				},
+				time: (value) => {
+					if (!value) return '';
+					const date = new Date(value);
+					return isNaN(date) ? value : date.toLocaleTimeString();
+				},
+				datetime: (value) => {
+					if (!value) return '';
+					const date = new Date(value);
+					return isNaN(date) ? value : date.toLocaleString();
+				},
+				integer: (value) => {
+					if (value === null || value === undefined) return '';
+					const num = Number(value);
+					return isNaN(num) ? value : Math.round(num).toLocaleString();
+				},
+				float: (value) => {
+					if (value === null || value === undefined) return '';
+					const num = Number(value);
+					return isNaN(num) ? value : num.toLocaleString(undefined, {
+						minimumFractionDigits: 2,
+						maximumFractionDigits: 2
+					});
+				},
+				currency: (value) => {
+					if (value === null || value === undefined) return '';
+					const num = Number(value);
+					return isNaN(num) ? value : num.toLocaleString(undefined, {
+						style: 'currency',
+						currency: '€'
+					});
+				},
+				percentage: (value) => {
+					if (value === null || value === undefined) return '';
+					const num = Number(value);
+					return isNaN(num) ? value : `${(num).toFixed(2)}%`;
+				},
+				boolean: (value) => {
+					if (value === null || value === undefined) return '';
+					return value ? '✓' : '✗';
+				}
+			};
+
+			// Process columns configuration
+			let headers = [];
+			let columnConfigMap = {};
+
+			if (Object.keys(columnsConfig).length > 0) {
+				// Use columnsConfig object to determine which columns to show and their properties
+				Object.entries(columnsConfig).forEach(([columnName, columnSettings]) => {
+					if (typeof columnSettings === 'string' && columnSettings === 'show') {
+						// String "show" - show this column with default settings
+						headers.push(columnName);
+						columnConfigMap[columnName] = { visible: true };
+					} else if (typeof columnSettings === 'object') {
+						// Object configuration - check visibility
+						if (columnSettings.visible !== false) {
+							headers.push(columnName);
+
+							// Handle format presets
+							let finalSettings = { ...columnSettings };
+							if (typeof columnSettings.format === 'string' && formatPresets[columnSettings.format]) {
+								finalSettings.format = formatPresets[columnSettings.format];
+							} else if (typeof columnSettings.format === 'string' && columnSettings.format.startsWith('float:')) {
+								// Custom float precision: 'float:3' for 3 decimal places
+								const precision = parseInt(columnSettings.format.split(':')[1]) || 2;
+								finalSettings.format = (value) => {
+									if (value === null || value === undefined) return '';
+									const num = Number(value);
+									return isNaN(num) ? value : num.toLocaleString(undefined, {
+										minimumFractionDigits: precision,
+										maximumFractionDigits: precision
+									});
+								};
+							} else if (typeof columnSettings.format === 'string' && columnSettings.format.startsWith('currency:')) {
+								// Custom currency: 'currency:EUR' for Euro
+								const currency = columnSettings.format.split(':')[1] || 'USD';
+								finalSettings.format = (value) => {
+									if (value === null || value === undefined) return '';
+									const num = Number(value);
+									return isNaN(num) ? value : num.toLocaleString(undefined, {
+										style: 'currency',
+										currency: currency
+									});
+								};
+							}
+
+							columnConfigMap[columnName] = finalSettings;
+						}
+					}
+				});
+			} else {
+				// Fallback to original behavior - extract headers, excluding specified keys
+				headers = Object.keys(data[0]).filter(key => !excludeKeys.includes(key));
+				headers.forEach(header => {
+					columnConfigMap[header] = { visible: true };
+				});
+			}
 
 			// Create thead
 			let thead = '<thead><tr>';
 			headers.forEach(header => {
-				thead += `<th scope="col">${header}</th>`;
+				const config = columnConfigMap[header] || {};
+				const headerText = config.header || header;
+				thead += `<th scope="col">${headerText}</th>`;
 			});
 			thead += '</tr></thead>';
 
-			// Create tbody rows excluding excluded keys
+			// Create tbody rows
 			let tbody = '<tbody>';
 			data.forEach(row => {
 				tbody += '<tr>';
 				headers.forEach(header => {
-					tbody += `<td>${row[header]}</td>`;
+					const config = columnConfigMap[header] || {};
+					let cellContent = row[header];
+
+					// Apply formatting if specified
+					if (config.format && typeof config.format === 'function') {
+						cellContent = config.format(row[header], row);
+					}
+
+					tbody += `<td>${cellContent}</td>`;
 				});
 				tbody += '</tr>';
 			});
 			tbody += '</tbody>';
 
+			// Add footer if any column has footer configuration
+			let tfoot = '';
+			const hasFooter = headers.some(header => columnConfigMap[header]?.footer);
+			if (hasFooter) {
+				tfoot = '<tfoot><tr>';
+				headers.forEach(header => {
+					const config = columnConfigMap[header] || {};
+					const footerText = config.footer || '';
+					tfoot += `<td>${footerText}</td>`;
+				});
+				tfoot += '</tr></tfoot>';
+			}
+
 			// Compose full table
-			return `<table class="table">${thead}${tbody}</table>`;
+			return `<table class="table">${thead}${tbody}${tfoot}</table>`;
 		},
 		resetFilters(grid_id) {
 			console.log('Resetting filters on ' + grid_id);
