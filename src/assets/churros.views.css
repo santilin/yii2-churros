@@ -1,15 +1,18 @@
-.record-view .record-title, .grid-view .grid-title, .crud-form .form-title {
-  display: flex;
-  flex-direction: column;
-  .title {
-    margin-bottom: 2px;
-    font-size: 1.5rem;
+.record-view .record-header, .grid-view .grid-header, .crud-form .form-header {
+  .header-title {
+    display: flex;
+    flex-direction: column;
+    .title {
+      margin-bottom: 2px;
+      font-size: 1.5rem;
+    }
+    .supertitle {
+      padding-top: 0.125rem;
+      padding-left: 2px;
+    }
   }
-  .supertitle {
-    padding-top: 0.125rem !important;
-    padding-left: 2px;
-  }
-  .toolbar {
+  .header-toolbar {
+    margin-bottom: 0.125rem;
     a, button {
       font-size: smaller;
     }
@@ -23,13 +26,6 @@
     align-items: center;
   }
 }
-
-
-/*.grid-view .grid-header .grid-toolbar {
-  margin-bottom: 0.25rem;
-  margin-right: 3px;
-  display: flex;
-}*/
 
 .grid-view {
   tbody tr {
@@ -81,9 +77,6 @@
   --bs-btn-border-radius: var(--bs-border-radius-sm);
   margin-left: 0.25rem;
 }
-
-
-
 
 [data-bs-theme="light"] .table tbody tr td.main-column a {
   text-decoration: underline !important;

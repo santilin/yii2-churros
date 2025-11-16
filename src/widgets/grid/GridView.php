@@ -150,7 +150,7 @@ class GridView extends SimpleGridView
 				JSZipAsset::register($this->getView());
 			}
 			$toolbarButtonsOptions = $this->toolbarButtonsOptions;
-			Html::addCssClass($toolbarButtonsOptions, 'toolbar');
+			Html::addCssClass($toolbarButtonsOptions, 'grid-toolbar');
 			$tag = ArrayHelper::remove($toolbarButtonsOptions, 'tag', 'div');
 			$toolbarButtonsContent = FormHelper::displayButtons($this->toolbarButtons,'');
 			return Html::tag($tag, $toolbarButtonsContent, $toolbarButtonsOptions);
@@ -318,7 +318,7 @@ class GridView extends SimpleGridView
 			}
 		}
 		return Html::tag('div', Html::tag($tag, $summary, $summaryOptions)
-			. $this->renderTitle(), [ 'class' => 'grid-title']);
+			. $this->renderTitle(), [ 'class' => 'header-title']);
 	}
 
     /**
