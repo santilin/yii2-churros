@@ -11,48 +11,24 @@ use Yii;
  * Widget que crea un campo DatePicker visible con formato personalizado,
  * sincronizando un campo oculto con fecha en formato SQL.
  */
-class JuiDatePicker extends InputWidget
+class JuiDatePicker extends DatePicker
 {
-    public string $displayFormat = 'd/m/Y';
     public string $dbFormat = 'Y-m-d';
-    public string $language = 'es';
-    public array $clientOptions = [];
-    public array $inputOptions = [];
 
     public function run()
     {
-        // Register jQuery UI assets for datepicker
-        \yii\jui\JuiAsset::register($this->view);
-        $idHidden = $this->options['id'];
-        $idVisible = $idHidden . '_display';
-
-        // Display value conversion (db to user format)
-        $valueHidden = $this->hasModel() ? Html::getAttributeValue($this->model, $this->attribute) : $this->value;
-        $valueVisible = '';
-        if ($valueHidden) {
-            $date = \DateTime::createFromFormat($this->dbFormat, $valueHidden);
-            if ($date) {
-                $valueVisible = $date->format($this->displayFormat);
-            }
-        }
-
-        // Render hidden and visible inputs
-        $output = Html::activeHiddenInput($this->model, $this->attribute, ['id' => $idHidden]);
-        $output .= Html::textInput(null, $valueVisible, array_merge([
-            'id' => $idVisible,
-            'class' => 'form-control',
-            'autocomplete' => 'off',
-            'placeholder' => 'Selecciona la fecha',
-        ], $this->inputOptions));
+        $idVisible = $this->options['id'];
+        $idHidden = $idVisible . '_value';
 
         // Prepare merged JS options
         $clientOptions = array_merge([
-            'dateFormat' => str_replace(['Y', 'm', 'd'], ['yy', 'mm', 'dd'], $this->displayFormat),
+            'dateFormat' => str_replace(['Y', 'm', 'd', 'php:'], ['yy', 'mm', 'dd', ''],
+                                        $this->dateFormat),
             'changeMonth' => true,
             'changeYear' => true,
             'autoSize' => true,
             'onSelect' => new \yii\web\JsExpression(<<<JS
-
+/// @todo make this valid for any language
 function(dateText, inst) {
     console.log(dateText);
     var parts = dateText.split('/');
@@ -91,6 +67,70 @@ if ($('#$idVisible').val() !== '') {
 JS
         , View::POS_READY);
 
-        return $output;
+        return parent::run();
     }
+
+
+    /**
+     * Renders the DatePicker widget.
+     * @return string the rendering result.
+     */
+    protected function renderWidget()
+    {
+        $contents = [];
+
+        // get formatted date value
+        if ($this->hasModel()) {
+            $value = Html::getAttributeValue($this->model, $this->attribute);
+        } else {
+            $value = $this->value;
+        }
+        $value_disp = '';
+        if ($value !== null && $value !== '') {
+            // format value according to dateFormat
+            try {
+                $value_disp = Yii::$app->formatter->asDate($value, $this->dateFormat);
+            } catch(\yii\base\InvalidArgumentException $e) {
+                // ignore exception and keep original value if it is not a valid date
+            }
+        }
+        $options = $this->options;
+
+        if ($this->inline === false) {
+            // render a text input
+            $save_options = $options;
+            unset($options['class']);
+            $options['id'] .= '_value';
+            if ($this->hasModel()) {
+                $contents[] = Html::activeHiddenInput($this->model, $this->attribute, $options);
+            } else {
+                $contents[] = Html::hiddenInput($this->name, $value, $options);
+            }
+            $options = $save_options;
+            $options['value'] = $value_disp;
+            $options['name'] = Html::getInputName($this->model, $this->attribute . '_disp');
+            if ($this->hasModel()) {
+                $contents[] = Html::activeTextInput($this->model, $this->attribute, $options);
+            } else {
+                $contents[] = Html::textInput($this->name, $value, $options);
+            }
+            // $this->clientOptions['defaultDate'] = $value_disp;
+            // $this->clientOptions['altField'] = '#' . $this->options['id'];
+            $contents[] = Html::tag('div', null, $this->containerOptions);
+        } else {
+            // render an inline date picker with hidden input
+            $options['value'] = $value;
+            if ($this->hasModel()) {
+                $contents[] = Html::activeHiddenInput($this->model, $this->attribute, $options);
+            } else {
+                $contents[] = Html::hiddenInput($this->name, $value, $options);
+            }
+            $this->clientOptions['defaultDate'] = $value;
+            $this->clientOptions['altField'] = '#' . $this->options['id'];
+            $contents[] = Html::tag('div', null, $this->containerOptions);
+        }
+
+        return implode("\n", $contents);
+    }
+
 }
