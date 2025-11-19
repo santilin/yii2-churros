@@ -304,12 +304,12 @@ trait ControllerTrait
 		} else {
 			$success_messages = [];
 		}
-		return array_merge([
+		return [
 			'result' => 'success',
-			'model' => $model->getAttributes(),
+			'model' => array_merge($model->getAttributes(), $params),
 			'success' => $success_messages,
 			'warning' => $model->getWarningSummary(true),
-		], $params);
+		];
 	}
 
 	public function modelErrorAjaxResponse($model, string|bool|null $error_message, array $params = []): array
