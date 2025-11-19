@@ -546,7 +546,7 @@ js;
 				}
 				if ($row_style == 'grid-nolabels') {
 					$widget->enableLabel = false;
-					$widget->labelOptions = false;
+					$widget->labelOptions = [ 'class' => 'd-none' ];
 				} else {
 					$widget->labelOptions['class'] = implode(' ', $classes['label']) . " fld-$widget_name ";
 					if (YII_ENV_DEV) {
@@ -603,7 +603,7 @@ js;
 				} else {
 					$classes = $this->widget_layout_horiz_config[$layout_of_row][$widget_layout]['horizontalCssClasses'];
 					if ($row_style == 'grid-nolabels') {
-						$classes['labelOptions'] = false;
+						$classes['labelOptions']['class'] = 'd-none';
 					} else {
 						$classes['labelOptions']['class'] = implode(' ', $classes['label']) . " fld-$widget_name";
 						if (YII_ENV_DEV) {
