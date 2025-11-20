@@ -133,7 +133,7 @@ class GridView extends SimpleGridView
 	protected function renderSelectViews()
 	{
 		if (count($this->selectViews)) {
-			$selectViewsOptions = array_merge(['class' => 'mb-2'], $this->selectViewsOptions);
+			$selectViewsOptions = $this->selectViewsOptions;
 			$tag = ArrayHelper::remove($selectViewsOptions, 'tag', 'div');
 			return Html::tag($tag,
 				FormHelper::displayButtons([$this->selectViews]),
