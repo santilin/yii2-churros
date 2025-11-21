@@ -152,6 +152,31 @@ const ChurrosGrid = (function() {
 			// Compose full table
 			return `<table class="table">${thead}${tbody}${tfoot}</table>`;
 		},
+		exportToCSV(id, fileName, excludedClasses = [], excludedRows = [], excludedCols = []) {
+			const table = document.getElementById(id);
+			let csvRows = [];
+			for(let i = 0; i < table.rows.length; i++) {
+				if(excludedRows.includes(i)) continue;
+				if(excludedClasses.some(cl => table.rows[i].classList.contains(cl))) continue;
+				let row = [];
+				for(let j = 0; j < table.rows[i].cells.length; j++) {
+					if(excludedCols.includes(j)) continue;
+					let cellContent = table.rows[i].cells[j].textContent || '';
+					// Escapado para CSV: comillas, saltos de línea, etc
+					cellContent = '"' + cellContent.replace(/"/g, '""') + '"';
+					row.push(cellContent);
+				}
+				csvRows.push(row.join(','));
+			}
+			const csvContent = csvRows.join('\n');
+			const blob = new Blob([csvContent], {type: 'text/csv'});
+			const link = document.createElement('a');
+			link.href = window.URL.createObjectURL(blob);
+			link.download = fileName.endsWith('.csv') ? fileName : fileName + '.csv';
+			document.body.appendChild(link);
+			link.click();
+			document.body.removeChild(link);
+		},
 		resetFilters(grid_id) {
 			console.log('Resetting filters on ' + grid_id);
 			const grid = document.getElementById(grid_id);
