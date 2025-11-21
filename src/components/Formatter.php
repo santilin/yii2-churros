@@ -65,16 +65,15 @@ class Formatter extends \yii\i18n\Formatter
 	public function asSeconds2Hours(?int $seconds, bool $blank_on_zero = false)
 	{
 		if (empty($seconds)) {
-			if ($blank_on_zero) {
-				return '';
-			} else {
-				return "00:00";
-			}
-		} else {
-			return str_pad(floor($seconds / 60 / 60), 2, "0", STR_PAD_LEFT)
-				. ":" . substr("00" . (floor($seconds / 60) % 60), -2);
+			return $blank_on_zero ? '' : "00:00";
 		}
+		$sign = $seconds < 0 ? '-' : '';
+		$absSeconds = abs($seconds);
+		$hours = str_pad(floor($absSeconds / 3600), 2, "0", STR_PAD_LEFT);
+		$minutes = str_pad(floor($absSeconds / 60) % 60, 2, "0", STR_PAD_LEFT);
+		return $sign . $hours . ':' . $minutes;
 	}
+
 
 	public function asSeconds2Format(string $format, ?int $seconds, bool $blank_on_zero = false)
 	{
