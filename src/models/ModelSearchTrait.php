@@ -80,6 +80,7 @@ trait ModelSearchTrait
 	*/
     public function addRelatedFieldsToProvider(array $gridColumns, array &$gridGroups, BaseDataProvider $provider)
     {
+		$add_distinct = false;
 		foreach ($gridColumns as $col_attribute => $column_def) {
 			if ( $column_def === null // Allows for conditional definition of columns
 // 				|| is_int($attribute)
@@ -101,7 +102,9 @@ trait ModelSearchTrait
 				continue; // No searchable
 			}
 			list($sort_fldname, $table_alias, $model, $relation) = $this->addRelatedFieldToJoin($attribute, $provider->query);
-			// continue;
+			if ($relation['type'] === 'HASMANY' || $relation['type'] === "MANY2MANY") {
+				$add_distinct = true;
+			}
 			if ($sort_fldname != $attribute) {
 				/// @todo recursive tarea.paqueteTrabajo.proyecto.id
 				$related_model_class = $relation['modelClass'];
@@ -164,7 +167,7 @@ trait ModelSearchTrait
 			}
 		}
 		/// @todo move to DataProvider count()?
-		if (!empty($provider->query->join) || !empty($provider->query->joinWith)) {
+		if ($add_distinct) {
 			$provider->query->distinct();
 		}
     }
