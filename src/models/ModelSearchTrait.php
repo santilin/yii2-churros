@@ -102,7 +102,8 @@ trait ModelSearchTrait
 				continue; // No searchable
 			}
 			list($sort_fldname, $table_alias, $model, $relation) = $this->addRelatedFieldToJoin($attribute, $provider->query);
-			if ($relation['type'] === 'HASMANY' || $relation['type'] === "MANY2MANY") {
+			if ($relation &&
+				($relation['type'] === 'HASMANY' || $relation['type'] === "MANY2MANY")) {
 				$add_distinct = true;
 			}
 			if ($sort_fldname != $attribute) {
