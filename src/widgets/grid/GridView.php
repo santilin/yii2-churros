@@ -248,7 +248,6 @@ class GridView extends SimpleGridView
 	{
 		$summaryOptions = $this->summaryOptions;
 		$tag = ArrayHelper::remove($summaryOptions, 'tag', 'div');
-		Html::addCssClass($summaryOptions, 'supertitle');
 		$configItems = [
 			'item' => $this->itemLabelSingle,
 			'items' => $this->itemLabelPlural,
@@ -317,8 +316,15 @@ class GridView extends SimpleGridView
 				}
 			}
 		}
-		return Html::tag('div', Html::tag($tag, $summary, $summaryOptions)
-			. $this->renderTitle(), [ 'class' => 'header-title']);
+		$title = $this->renderTitle();
+		if (!empty($title)) {
+			Html::addCssClass($summaryOptions, 'supertitle');
+			$title = Html::tag($tag, $summary, $summaryOptions) . $title;
+		} else {
+			Html::addCssClass($summaryOptions, 'title');
+			$title = Html::tag($tag, $summary, $summaryOptions);
+		}
+		return Html::tag('div', $title, [ 'class' => 'header-title']);
 	}
 
     /**
