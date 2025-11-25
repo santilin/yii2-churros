@@ -669,4 +669,18 @@ trait RelationTrait
 		return $this;
 	}
 
+	public function maybeOtherModel($model)
+	{
+		$model_class = get_class($model);
+		foreach (static::$relations as $relname => $relation) {
+			$rel_model_class = $relation['modelClass'];
+			if ( $rel_model_class != $model_class
+				&& array_key_exists('join', $relation)
+				&& $relation['type'] == 'HasOne') {
+				return new $rel_model_class();
+				}
+		}
+		return null;
+	}
+
 }
