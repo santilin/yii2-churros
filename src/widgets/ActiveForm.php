@@ -168,7 +168,7 @@ class ActiveForm extends Bs5ActiveForm
 				'horizontalCssClasses' => [
 					'offset' => '',
 					'label' => [ 'col-lg-3 col-md-4 col-6', 'form-check-label text-start'],
-					'wrapper' => ['offset-lg-3 offset-md-4 offset-6 col-12'],
+					'wrapper' => ['offset-lg-3 offset-md-3 offset-6 col-12'],
 					'error' => '',
 					'hint' => '',
 					'field' => 'form-group form-check-input',
@@ -263,8 +263,8 @@ class ActiveForm extends Bs5ActiveForm
 			'medium' => [
 				'horizontalCssClasses' => [
 					'offset' => 'offset-3',
-					'label' => [ 'col-form-label col-md-3 col-12', 'text-start text-md-end text-break'],
-					'wrapper' => ['col-lg-5 col-md-6 col-12'],
+					'label' => [ 'col-form-label col-md-4 col-12', 'text-start text-md-end text-break'],
+					'wrapper' => ['col-lg-5 col-md-8 col-12'],
 					'error' => '',
 					'hint' => '',
 					'field' => '',
@@ -273,8 +273,8 @@ class ActiveForm extends Bs5ActiveForm
 			'short' => [
 				'horizontalCssClasses' => [
 					'offset' => 'offset-3',
-					'label' => [ 'col-form-label col-md-3 col-12', 'text-start text-md-end text-break'],
-					'wrapper' => ['col-lg-5 col-md-6 col-12'],
+					'label' => [ 'col-form-label col-md-4 col-12', 'text-start text-md-end text-break'],
+					'wrapper' => ['col-lg-4 col-md-6 col-12'],
 					'error' => '',
 					'hint' => '',
 					'field' => '',

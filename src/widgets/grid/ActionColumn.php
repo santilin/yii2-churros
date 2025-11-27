@@ -14,7 +14,7 @@ use santilin\churros\helpers\FormHelper;
 
 class ActionColumn extends \yii\grid\ActionColumn
 {
-    public $template = '{view}&nbsp;{update}&nbsp;{delete}&nbsp;{duplicate}';
+    public $template = '{view}{update}{delete}{duplicate}';
     public $iconClassPrefix = 'fas fa';
 	public $icons = [
 		'view' => '<i class="fas fa-eye"></i>',
@@ -126,12 +126,8 @@ class ActionColumn extends \yii\grid\ActionColumn
 	public function renderFilterCell()
 	{
 		return Html::tag('td', <<<html
-  <a class="remove-filters" role="button" data-pjax="1" href="javascript:void(0);" onclick="ChurrosGrid.resetFilters('{$this->grid->id}'); return false;">
-  <i class="fas fa-filter-circle-xmark text-secondary p-0 fs-6 ms-1"></i>
-  </a>
-  <a class="run-filters" role="button" href="javascript:void(0);" >
-    <i class="mb-1 fas fa-filter text-secondary p-0 fs-6 ms-1"></i>
-  </a>
+<a class="remove-filters me-1 ms-1" role="button" data-pjax="1" href="javascript:void(0);"
+	onclick="ChurrosGrid.resetFilters('{$this->grid->id}'); return false;"><i class="fas fa-filter-circle-xmark text-secondary"></i></a><a class="run-filters me-1" role="button" href="javascript:void(0);"><i class="fas fa-filter text-secondary"></i></a>
 html
 		, $this->filterOptions);
 	}

@@ -59,10 +59,11 @@ class TaxonomyInput extends \yii\widgets\InputWidget
 		$options = $this->options;
 		$name = $options['name']??Html::getInputName($this->model, $this->attribute);
 		$options['id'] = "taxon_0_{$this->options['id']}";
+		$options['class'] = 'form-select';
 		$this->drop_ids[] = $options['id'];
 		$options['name'] = "taxon_{$name}[]";
 		$options['data']['level'] = 0;
-		$options['prompt'] = $levels[0]['prompt']??'Elige';
+		$options['prompt'] = $levels[0]['prompt']??'Elige...';
 		$value = $this->getValueForLevel(0);
 		$level0_values = $this->getLevelValues(0, $value);
  		$html .= "<label class=\"taxonomy level-0\">{$headings[0]}</label> " . Html::dropDownList("taxon_0_{$name}", $value, $level0_values, $options);
@@ -72,7 +73,7 @@ class TaxonomyInput extends \yii\widgets\InputWidget
 			$this->drop_ids[] = $options['id'];
 			$options['name'] = "taxon_{$name}[]";
 			$options['data']['level'] = $l;
-			$options['prompt'] = $levels[$l]['prompt']??'Elige';
+			$options['prompt'] = $levels[$l]['prompt']??'Elige...';
  			$html .= "<div class=\"$dropdown_container_classes\"><label class=\"taxonomy level-$l\">{$headings[$l]}</label> "
 				. Html::dropDownList(null, [], [], $options) . '</div>';
 		}

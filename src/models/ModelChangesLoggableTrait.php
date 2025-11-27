@@ -43,23 +43,27 @@ trait ModelChangesLoggableTrait
 
 	public function enableModelChangesLog(bool $enabled = true)
 	{
-		if ($this->_model_changes_log = $enabled) {
-			$this->on(self::EVENT_AFTER_INSERT, [$this, 'handleModelChanges']);
-			$this->on(self::EVENT_AFTER_UPDATE, [$this, 'handleModelChanges']);
-			$this->on(self::EVENT_AFTER_DELETE, [$this, 'handleModelChanges']);
-		} else {
-			$this->off(self::EVENT_AFTER_INSERT);
-			$this->off(self::EVENT_AFTER_UPDATE);
-			$this->off(self::EVENT_AFTER_DELETE);
+		if ($this->_model_changes_log !== $enabled) {
+			if ($this->_model_changes_log = $enabled) {
+				$this->on(self::EVENT_AFTER_INSERT, [$this, 'handleModelChanges']);
+				$this->on(self::EVENT_AFTER_UPDATE, [$this, 'handleModelChanges']);
+				$this->on(self::EVENT_AFTER_DELETE, [$this, 'handleModelChanges']);
+			} else {
+				$this->off(self::EVENT_AFTER_INSERT);
+				$this->off(self::EVENT_AFTER_UPDATE);
+				$this->off(self::EVENT_AFTER_DELETE);
+			}
 		}
 	}
 
 	public function enableModelChangesNotifications(bool $enabled = true)
 	{
-		if ($this->_model_changes_notifications = $enabled) {
-			$this->on(ModelChangesEvent::EVENT_CHANGES_SAVED, [$this, 'sendModelChangesNotification']);
-		} else {
-			$this->off(ModelChangesEvent::EVENT_CHANGES_SAVED);
+		if ($this->_model_changes_notifications !== $enabled) {
+			if ($this->_model_changes_notifications = $enabled) {
+				$this->on(ModelChangesEvent::EVENT_CHANGES_SAVED, [$this, 'sendModelChangesNotification']);
+			} else {
+				$this->off(ModelChangesEvent::EVENT_CHANGES_SAVED);
+			}
 		}
 	}
 

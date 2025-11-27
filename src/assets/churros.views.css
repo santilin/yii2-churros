@@ -65,8 +65,8 @@
   font-size: smaller;
 }
 
-.crud-grid-container.embedded .title {
-  font-size: initial;
+.crud-grid-container.embedded .grid-header  {
+  font-size: smaller !important;
 }
 
 .crud-grid-container.embedded .btn {
@@ -239,6 +239,26 @@ legend {
   height: 1.125em;
   font-size: 1.125em;
   vertical-align: middle;
+  margin-right: 5px;
+}
+
+grid-view .action-column a:last-child {
+  margin-right: 0;
+}
+
+.grid-view .action-column a i {
+  transition: all 0.2s ease;
+  transform: translateZ(0); /* Enable hardware acceleration */
+}
+
+.grid-view .action-column a:hover i {
+  color: #007cba !important;
+  text-shadow: 0 0 4px rgba(0,124,186,0.6);
+  transform: translateZ(8px) rotateX(10deg) scale(1.15); /* 3D lift + tilt */
+}
+
+.grid-view .action-column a.action-button.delete {
+  color: darkred;
 }
 
 .format-currency {
@@ -247,20 +267,24 @@ legend {
 
 table.table tr.filters {
   border: 1px solid black !important;
+  font-size: 1.25rem !important;
   td {
     padding: 1px !important;
+    vertical-align: middle;
     margin-bottom: 1px !important;
-    a.remove-filters i {
-      color: red !important;
-    }
-    a.run-filters i {
-      font-size: 1.25rem !important;
-    }
   }
   td.filters-actions {
+    padding: 0px !important;
+    a.remove-filters i, a.run-filters i {
+      font-size: 1.125em !important; /* UNIFY SIZE - replace individual sizes */
+      vertical-align: middle !important; /* CENTER ALIGN */
+    }
+    a.remove-filters i {
+      color: darkred !important;
+      margin-top: 3px !important;
+    }
     text-wrap: nowrap;
   }
-  font-size: 1.25rem !important;
   input, select {
     border: 1px solid darkgray !important;
   }
