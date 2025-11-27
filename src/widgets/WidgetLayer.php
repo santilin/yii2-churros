@@ -547,6 +547,7 @@ js;
 				if ($row_style == 'grid-nolabels') {
 					$widget->enableLabel = false;
 					$widget->labelOptions = [ 'class' => 'd-none' ];
+					$classes[] = 'no-label';
 				} else {
 					$widget->labelOptions['class'] = implode(' ', $classes['label']) . " fld-$widget_name ";
 					if (YII_ENV_DEV) {
@@ -604,6 +605,7 @@ js;
 					$classes = $this->widget_layout_horiz_config[$layout_of_row][$widget_layout]['horizontalCssClasses'];
 					if ($row_style == 'grid-nolabels') {
 						$classes['labelOptions']['class'] = 'd-none';
+						$classes['wrapper'][] = 'no-label';
 					} else {
 						$classes['labelOptions']['class'] = implode(' ', $classes['label']) . " fld-$widget_name";
 						if (YII_ENV_DEV) {
