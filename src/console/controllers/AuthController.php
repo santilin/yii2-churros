@@ -82,10 +82,8 @@ class AuthController extends Controller
 		}
 	}
 
-
 	/**
 	 * Creates the permissions for a model inside a module
-	 */
 	protected function createModelPermissions(string $model_class, Role $viewer, Role $editor)
 	{
 		$auth = $this->authManager;
@@ -139,33 +137,49 @@ class AuthController extends Controller
 			}
 		}
 	}
-
+*/
 	/**
 	 * Creates the permissions for a model inside a module
 	 */
 	public function createControllerPermissions(string $module_id, string $model_name,
-		array $controller, Role $viewer, Role $editor, Role $deleter)
+		array $controller, Role $viewer, Role $editor, Role $deleter, Role $admin)
 	{
 		$model_class = $controller['class'];
 		if (!class_exists($model_class)) {
 			return;
 		}
 		$auth = $this->authManager;
+		$module_desc = '*' . ucfirst($module_info['title']??$module_id);
 		$model = $model_class::instance();
-		$model_title = $model->t('app', "{title_plural}");
-		$model_perm_name = $module_id . '.' . $model_name;
+		$model_title = $model->t('app', "{Title_plural}");
 
-		$model_editor = AuthHelper::createOrUpdateRole(
-			str_replace('.', ".{$model_name}.", $editor->name),
-			Yii::t('churros', '{model} editor', ['model' => $model_title]), $auth);
-		AuthHelper::echoLastMessage();
+		$menu_perm = AuthHelper::createOrUpdatePermission(
+			"{$module_id}.{$model_name}.menu", Yii::t('churros', '{module}: {model} menú', ['module' => $module_desc, 'model' => $model_title]), $auth);
 		$model_viewer = AuthHelper::createOrUpdateRole(
 			str_replace('.', ".{$model_name}.", $viewer->name),
-			Yii::t('churros', '{model} viewer', ['model' => $model_title]), $auth);
+			Yii::t('churros', '{module}: {model}: visor/a', [
+				'module' => $module_desc, 'model' => $model_title
+			]), $auth);
+		$auth->addChild($model_viewer, $menu_perm);
+		echo "+ Perm '{menu_perm->name}' added to role '{$model_viewer->name}'\n";
+		AuthHelper::echoLastMessage();
+		$model_editor = AuthHelper::createOrUpdateRole(
+			str_replace('.', ".{$model_name}.", $editor->name),
+			Yii::t('churros', '{module}: {model}: editor/a', [
+				'module' => $module_desc, 'model' => $model_title
+			]), $auth);
 		AuthHelper::echoLastMessage();
 		$model_deleter = AuthHelper::createOrUpdateRole(
 			str_replace('.', ".{$model_name}.", $deleter->name),
-			Yii::t('churros', '{model} deleter', ['model' => $model_title]), $auth);
+			Yii::t('churros', '{module}: {model}: eliminador/a', [
+				'module' => $module_desc, 'model' => $model_title
+			]), $auth);
+		AuthHelper::echoLastMessage();
+		$model_admin = AuthHelper::createOrUpdateRole(
+			str_replace('.', ".{$model_name}.", $admin->name),
+			Yii::t('churros', '{module}: {model}: administrador/a', [
+				'module' => $module_desc, 'model' => $model_title
+			]), $auth);
 		AuthHelper::echoLastMessage();
 
 		if (!$auth->hasChild($viewer, $model_viewer)) {
@@ -187,11 +201,15 @@ class AuthController extends Controller
 			echo "= Role '{$model_deleter->name}' already exists in role {$deleter->name}\n";
 		}
 
+		$model_perm_name = $module_id . '.' . $model_name;
+
 		foreach ($controller['perms'] as $perm_name) {
-			$perm_desc = Yii::t('churros', ucfirst($perm_name));
+			$perm_desc = Yii::t('churros', '{module}: {model}: {perm}', [
+				'module' => $module_desc,
+				'model' => $model_title,
+				'perm' => ucfirst($perm_name)]);
 			$permission = AuthHelper::createOrUpdatePermission(
-				$model_perm_name . "." . lcFirst($perm_name),
-				$perm_desc . ' ' . $model_title, $auth);
+				$model_perm_name . "." . lcFirst($perm_name), $perm_desc, $auth);
 			AuthHelper::echoLastMessage();
 
 			$add_to_visora = ($perm_name == 'view' || $perm_name == 'index' || $perm_name == 'menu');
@@ -226,24 +244,21 @@ class AuthController extends Controller
 	public function createModuleRbacPermissions(string $module_id, array $module_info)
 	{
 		$auth = $this->authManager;
-		$module_desc = $module_info['title']??$module_id;
+		$module_desc = '*' . ucfirst($module_info['title']??$module_id);
 		$viewer = AuthHelper::createOrUpdateRole("$module_id.viewer",
-			Yii::t('churros', '{perm_desc} module viewer', ['perm_desc' => $module_desc]), $auth);
+			Yii::t('churros', '{module}: _Todo: visor/a ', ['module' => $module_desc]), $auth);
 		AuthHelper::echoLastMessage();
 		$editor = AuthHelper::createOrUpdateRole("$module_id.editor",
-			Yii::t('churros', '{perm_desc} module editor', ['perm_desc' => $module_desc]), $auth);
+			Yii::t('churros', '{module}: _Todo: editor/a', ['module' => $module_desc]), $auth);
 		AuthHelper::echoLastMessage();
 		$deleter = AuthHelper::createOrUpdateRole("$module_id.deleter",
-			Yii::t('churros', '{perm_desc} module deleter', ['perm_desc' => $module_desc]), $auth);
+			Yii::t('churros', '{module}: _Todo: eliminador/a', ['module' => $module_desc]), $auth);
 		AuthHelper::echoLastMessage();
 		$admin = AuthHelper::createOrUpdateRole("$module_id.admin",
-			Yii::t('churros', '{perm_desc} module admin', ['perm_desc' => $module_desc]), $auth);
+			Yii::t('churros', '{module}: _Todo: administrador/a', ['module' => $module_desc]), $auth);
 		AuthHelper::echoLastMessage();
 		foreach ($module_info['controllers']??[] as $cname => $controller) {
-			$this->createControllerPermissions($module_id, $cname, $controller, $viewer, $editor, $deleter);
-			$module_desc = $cname . ' in ' . $module_info['title']??$module_id;
-			$permission = AuthHelper::createOrUpdatePermission(
-				"{$module_id}.{$cname}.menu", Yii::t('churros', '{perm_desc} controller menu', ['perm_desc' => $module_desc]), $auth);
+			$this->createControllerPermissions($module_id, $cname, $controller, $viewer, $editor, $deleter, $admin);
 			AuthHelper::echoLastMessage();
 		}
 	}
