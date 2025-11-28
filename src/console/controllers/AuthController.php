@@ -72,13 +72,13 @@ class AuthController extends Controller
 	public function createModelsPermissions(array $model_classes, string $viewer_desc = 'viewer', string $editor_desc = 'editor')
 	{
 		$auth = $this->authManager;
-		$visora = AuthHelper::createOrUpdateRole($viewer_desc,
+		$viewer = AuthHelper::createOrUpdateRole($viewer_desc,
 			Yii::t('churros', "View all"), $auth);
 		AuthHelper::echoLastMessage();
-		$editora = AuthHelper::createOrUpdateRole($editor_desc,
+		$editor = AuthHelper::createOrUpdateRole($editor_desc,
 			Yii::t('churros', "Edit all"), $auth);
 		foreach ($model_classes as $model_class) {
-			$this->createModelPermissions($model_class, $visora, $editora);
+			$this->createModelPermissions($model_class, $viewer, $editor);
 		}
 	}
 
@@ -86,33 +86,33 @@ class AuthController extends Controller
 	/**
 	 * Creates the permissions for a model inside a module
 	 */
-	public function createModelPermissions(string $model_class, Role $visora, Role $editora)
+	protected function createModelPermissions(string $model_class, Role $viewer, Role $editor)
 	{
 		$auth = $this->authManager;
 		$model = $model_class::instance();
 		$model_title = $model->t('app', "{title_plural}");
 		$model_perm_name = AppHelper::lastWord($model_class, '\\');
 
-		$model_editora = AuthHelper::createOrUpdateRole(
-			$model_perm_name . '.' . $editora->name,
+		$model_editor = AuthHelper::createOrUpdateRole(
+			$model_perm_name . '.' . $editor->name,
 			Yii::t('churros', '{model} editor', ['model' => $model_title]), $auth);
 		AuthHelper::echoLastMessage();
-		$model_visora = AuthHelper::createOrUpdateRole(
-			$model_perm_name . '.' . $visora->name,
+		$model_viewer = AuthHelper::createOrUpdateRole(
+			$model_perm_name . '.' . $viewer->name,
 			Yii::t('churros', '{model} viewer', ['model' => $model_title]), $auth);
 		AuthHelper::echoLastMessage();
 
-		if (!$auth->hasChild($visora, $model_visora)) {
-			$auth->addChild($visora, $model_visora);
-			echo "+ Role '{$model_visora->name}' added to role '{$visora->name}'\n";
+		if (!$auth->hasChild($viewer, $model_viewer)) {
+			$auth->addChild($viewer, $model_viewer);
+			echo "+ Role '{$model_viewer->name}' added to role '{$viewer->name}'\n";
 		} else {
-			echo "= Role '{$model_visora->name}' already exists in role {$visora->name}\n";
+			echo "= Role '{$model_viewer->name}' already exists in role {$viewer->name}\n";
 		}
-		if (!$auth->hasChild($editora, $model_editora)) {
-			$auth->addChild($editora, $model_editora);
-			echo "+ Role '{$model_editora->name}' added to role '{$editora->name}'\n";
+		if (!$auth->hasChild($editor, $model_editor)) {
+			$auth->addChild($editor, $model_editor);
+			echo "+ Role '{$model_editor->name}' added to role '{$editor->name}'\n";
 		} else {
-			echo "= Role '{$model_editora->name}' already exists in role {$editora->name}\n";
+			echo "= Role '{$model_editor->name}' already exists in role {$editor->name}\n";
 		}
 
 		foreach (['index','view','create','update','duplicate','delete','print'] as $perm_name) {
@@ -124,18 +124,18 @@ class AuthController extends Controller
 
 			$add_to_visora = ($perm_name == 'view' || $perm_name == 'index' || $perm_name == 'menu' );
 			if ($add_to_visora) {
-				if (!$auth->hasChild($model_visora, $permission)) {
-					$auth->addChild($model_visora, $permission);
-					echo "+ Permission '{$permission->name}' added to role '{$model_visora->name}'\n";
+				if (!$auth->hasChild($model_viewer, $permission)) {
+					$auth->addChild($model_viewer, $permission);
+					echo "+ Permission '{$permission->name}' added to role '{$model_viewer->name}'\n";
 				} else {
-					echo "= Permission '{$permission->name}' already exists in role {$model_visora->name}\n";
+					echo "= Permission '{$permission->name}' already exists in role {$model_viewer->name}\n";
 				}
 			}
-			if (!$auth->hasChild($model_editora, $permission)) {
-				$auth->addChild($model_editora, $permission);
-				echo "+ Permission '{$permission->name}' added to role '{$model_editora->name}'\n";
+			if (!$auth->hasChild($model_editor, $permission)) {
+				$auth->addChild($model_editor, $permission);
+				echo "+ Permission '{$permission->name}' added to role '{$model_editor->name}'\n";
 			} else {
-				echo "= Permission '{$permission->name}' already exists in role '{$model_editora->name}'\n";
+				echo "= Permission '{$permission->name}' already exists in role '{$model_editor->name}'\n";
 			}
 		}
 	}
@@ -144,7 +144,7 @@ class AuthController extends Controller
 	 * Creates the permissions for a model inside a module
 	 */
 	public function createControllerPermissions(string $module_id, string $model_name,
-		array $controller, Role $visora, Role $editora)
+		array $controller, Role $viewer, Role $editor, Role $deleter)
 	{
 		$model_class = $controller['class'];
 		if (!class_exists($model_class)) {
@@ -155,26 +155,36 @@ class AuthController extends Controller
 		$model_title = $model->t('app', "{title_plural}");
 		$model_perm_name = $module_id . '.' . $model_name;
 
-		$model_editora = AuthHelper::createOrUpdateRole(
-			str_replace('.', ".{$model_name}.", $editora->name),
+		$model_editor = AuthHelper::createOrUpdateRole(
+			str_replace('.', ".{$model_name}.", $editor->name),
 			Yii::t('churros', '{model} editor', ['model' => $model_title]), $auth);
 		AuthHelper::echoLastMessage();
-		$model_visora = AuthHelper::createOrUpdateRole(
-			str_replace('.', ".{$model_name}.", $visora->name),
+		$model_viewer = AuthHelper::createOrUpdateRole(
+			str_replace('.', ".{$model_name}.", $viewer->name),
 			Yii::t('churros', '{model} viewer', ['model' => $model_title]), $auth);
 		AuthHelper::echoLastMessage();
+		$model_deleter = AuthHelper::createOrUpdateRole(
+			str_replace('.', ".{$model_name}.", $deleter->name),
+			Yii::t('churros', '{model} deleter', ['model' => $model_title]), $auth);
+		AuthHelper::echoLastMessage();
 
-		if (!$auth->hasChild($visora, $model_visora)) {
-			$auth->addChild($visora, $model_visora);
-			echo "+ Role '{$model_visora->name}' added to role '{$visora->name}'\n";
+		if (!$auth->hasChild($viewer, $model_viewer)) {
+			$auth->addChild($viewer, $model_viewer);
+			echo "+ Role '{$model_viewer->name}' added to role '{$viewer->name}'\n";
 		} else {
-			echo "= Role '{$model_visora->name}' already exists in role {$visora->name}\n";
+			echo "= Role '{$model_viewer->name}' already exists in role {$viewer->name}\n";
 		}
-		if (!$auth->hasChild($editora, $model_editora)) {
-			$auth->addChild($editora, $model_editora);
-			echo "+ Role '{$model_editora->name}' added to role '{$editora->name}'\n";
+		if (!$auth->hasChild($editor, $model_editor)) {
+			$auth->addChild($editor, $model_editor);
+			echo "+ Role '{$model_editor->name}' added to role '{$editor->name}'\n";
 		} else {
-			echo "= Role '{$model_editora->name}' already exists in role {$editora->name}\n";
+			echo "= Role '{$model_editor->name}' already exists in role {$editor->name}\n";
+		}
+		if (!$auth->hasChild($deleter, $model_deleter)) {
+			$auth->addChild($deleter, $model_deleter);
+			echo "+ Role '{$model_deleter->name}' added to role '{$deleter->name}'\n";
+		} else {
+			echo "= Role '{$model_deleter->name}' already exists in role {$deleter->name}\n";
 		}
 
 		foreach ($controller['perms'] as $perm_name) {
@@ -186,18 +196,26 @@ class AuthController extends Controller
 
 			$add_to_visora = ($perm_name == 'view' || $perm_name == 'index' || $perm_name == 'menu');
 			if ($add_to_visora) {
-				if (!$auth->hasChild($model_visora, $permission)) {
-					$auth->addChild($model_visora, $permission);
-					echo "+ Permission '{$permission->name}' added to role '{$model_visora->name}'\n";
+				if (!$auth->hasChild($model_viewer, $permission)) {
+					$auth->addChild($model_viewer, $permission);
+					echo "+ Permission '{$permission->name}' added to role '{$model_viewer->name}'\n";
  				} else {
- 					echo "= Permission '{$permission->name}' already exists in role {$model_visora->name}\n";
+ 					echo "= Permission '{$permission->name}' already exists in role {$model_viewer->name}\n";
 				}
-			}
-			if (!$auth->hasChild($model_editora, $permission)) {
-				$auth->addChild($model_editora, $permission);
-				echo "+ Permission '{$permission->name}' added to role '{$model_editora->name}'\n";
+			} else if ($perm_name == 'delete') {
+				if (!$auth->hasChild($model_deleter, $permission)) {
+					$auth->addChild($model_deleter, $permission);
+					echo "+ Permission '{$permission->name}' added to role '{$model_deleter->name}'\n";
+				} else {
+					echo "= Permission '{$permission->name}' already exists in role {$model_deleter->name}\n";
+				}
 			} else {
-				echo "= Permission '{$permission->name}' already exists in role '{$model_editora->name}'\n";
+				if (!$auth->hasChild($model_editor, $permission)) {
+					$auth->addChild($model_editor, $permission);
+					echo "+ Permission '{$permission->name}' added to role '{$model_editor->name}'\n";
+				} else {
+					echo "= Permission '{$permission->name}' already exists in role '{$model_editor->name}'\n";
+				}
 			}
 		}
 	}
@@ -208,21 +226,24 @@ class AuthController extends Controller
 	public function createModuleRbacPermissions(string $module_id, array $module_info)
 	{
 		$auth = $this->authManager;
-		$perm_desc = $module_info['title']??$module_id;
-		$permission = AuthHelper::createOrUpdatePermission(
-			$module_id . ".admin", Yii::t('churros', '{perm_desc} module admin', ['perm_desc' => $perm_desc]), $auth);
+		$module_desc = $module_info['title']??$module_id;
+		$viewer = AuthHelper::createOrUpdateRole("$module_id.viewer",
+			Yii::t('churros', '{perm_desc} module viewer', ['perm_desc' => $module_desc]), $auth);
 		AuthHelper::echoLastMessage();
-		$visora = AuthHelper::createOrUpdateRole("$module_id.viewer",
-			Yii::t('churros', "View all $module_id records"), $auth);
+		$editor = AuthHelper::createOrUpdateRole("$module_id.editor",
+			Yii::t('churros', '{perm_desc} module editor', ['perm_desc' => $module_desc]), $auth);
 		AuthHelper::echoLastMessage();
-		$editora = AuthHelper::createOrUpdateRole("$module_id.editor",
-			Yii::t('churros', "Edit all $module_id records"), $auth);
+		$deleter = AuthHelper::createOrUpdateRole("$module_id.deleter",
+			Yii::t('churros', '{perm_desc} module deleter', ['perm_desc' => $module_desc]), $auth);
+		AuthHelper::echoLastMessage();
+		$admin = AuthHelper::createOrUpdateRole("$module_id.admin",
+			Yii::t('churros', '{perm_desc} module admin', ['perm_desc' => $module_desc]), $auth);
 		AuthHelper::echoLastMessage();
 		foreach ($module_info['controllers']??[] as $cname => $controller) {
-			$this->createControllerPermissions($module_id, $cname, $controller, $visora, $editora);
-			$perm_desc = $cname . ' in ' . $module_info['title']??$module_id;
+			$this->createControllerPermissions($module_id, $cname, $controller, $viewer, $editor, $deleter);
+			$module_desc = $cname . ' in ' . $module_info['title']??$module_id;
 			$permission = AuthHelper::createOrUpdatePermission(
-				"{$module_id}.{$cname}.menu", Yii::t('churros', '{perm_desc} controller menu	', ['perm_desc' => $perm_desc]), $auth);
+				"{$module_id}.{$cname}.menu", Yii::t('churros', '{perm_desc} controller menu', ['perm_desc' => $module_desc]), $auth);
 			AuthHelper::echoLastMessage();
 		}
 	}
@@ -390,14 +411,22 @@ class AuthController extends Controller
 		AuthHelper::echoLastMessage();
 	}
 
-	public function actionRemoveRole($role_name)
+	public function actionRemoveRoles(array|string $role_name): void
 	{
 		AuthHelper::removeRoles($role_name, $this->authManager);
+		AuthHelper::echoLastMessage();
+	}
+
+	public function actionRemovePermissions(array|string $role_name): void
+	{
+		AuthHelper::removeRoles($role_name, $this->authManager);
+		AuthHelper::echoLastMessage();
 	}
 
 	public function actionRemoveAll()
 	{
 		$this->authManager->removeAll();
+		AuthHelper::echoLastMessage();
 	}
 
 

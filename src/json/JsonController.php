@@ -385,6 +385,8 @@ class JsonController extends \yii\web\Controller
 					}
 					break;
 				case 'update':
+					$to = 'view';
+					break;
 				case 'delete':
 				case 'delete_error':
 					$to = 'parent.view';
@@ -617,16 +619,6 @@ class JsonController extends \yii\web\Controller
  				'url' => $partial_path . ( ($p%2)? 'index' : 'view')
 			];
 		}
- 		// if ($action_id != 'index' && $action_id != 'create' && $action_id != 'duplicate') {
- 		// 	$breadcrumbs[] = [
- 		// 		'label' => $model->getJsonId(),
- 		// 		'url' => $action_id!='view' ? array_merge([$this->getActionRoute('view', $model)], $model->getPrimaryKey(true)) : null,
- 		// 	];
- 		// } else {
-			// $breadcrumbs[] = [
-			// 	'label' => $path_parts[$p],
-			// ];
-		// }
 		return $breadcrumbs;
 	}
 

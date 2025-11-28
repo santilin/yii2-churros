@@ -263,7 +263,7 @@ class AuthHelper
 		if ($auth == null) {
 			$auth = \Yii::$app->authManager;
 		}
-		foreach( $role_names as $role_name) {
+		foreach ($role_names as $role_name) {
 			$role = $auth->getItem($role_name);
 			if ($role == null) {
 				static::$lastMessage = "= `$role_name` role not found";
