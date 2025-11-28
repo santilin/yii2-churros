@@ -89,8 +89,8 @@
             transition: all 0.2s ease;
             transform: translateZ(0); /* Enable hardware acceleration */
           }
-          .action-button.delete {
-            color: darkred;
+          &.action-button.delete {
+            color: darkred !important;
           }
         }
         a:last-child {
