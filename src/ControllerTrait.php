@@ -89,9 +89,11 @@ trait ControllerTrait
 	{
 		if ($success_message !== false) { // discard all messages
 			if (!$success_message) {
-				$success_messages = array_merge(
-					[ 'model' => $model->t('churros', $this->getResultMessage($action_id)) ],
-					$model->getSuccessSummary(true));
+				if (!$model->hasSuccesses()) {
+					$success_messages = [ 'model' => $model->t('churros', $this->getResultMessage($action_id)) ];
+				} else {
+					$success_messages = $model->getSuccessSummary(true);
+				}
 				foreach ($success_messages as $success_message) {
 					Yii::$app->session->addFlash('success', $success_message);
 				}

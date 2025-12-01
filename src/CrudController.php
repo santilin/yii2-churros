@@ -423,12 +423,12 @@ class CrudController extends \yii\web\Controller
 						$to_model = 'parent';
 						$to_action = 'index';
 						break;
+					case 'view':
 					case 'update':
 					case 'not_deleted':
 						$to_action = 'view';
 						break;
 					case 'delete':
-					case 'view':
 					case 'index':
 					case '':
 						$to_action = 'index';
