@@ -526,17 +526,22 @@ trait ModelInfoTrait
 		$devel_info = YII_ENV_PROD ? '' : "\n$message";
 		$error = "Data was not saved in order to maintain the database integrity.";
 		$error_data = [ 'offending' => '' ];
-		if  ($e instanceof \yii\db\IntegrityException) {
+		$error_key = get_class($e);
+		if ($e instanceof \yii\db\IntegrityException) {
 			switch (intval($e->getCode())) {
 				case 23000:
+					$error_key = 'duplicated';
 					if (preg_match('/UNIQUE constraint failed:\s*(.*)/i', $message, $matches)) {
+						$error = "The '{offending}' data is duplicated";
+						$error_data = [ 'offending' => $matches[1] ];
+					} elseif (preg_match("/1062 Duplicate entry '(.*)' for key '(.*)'/i", $message, $matches)) {
 						$error = "The '{offending}' data is duplicated";
 						$error_data = [ 'offending' => $matches[1] ];
 					}
 					break;
 			}
 		}
-		$this->addError(get_class($e), Yii::t('churros', $error, $error_data) . $devel_info);
+		$this->addError($error_key, Yii::t('churros', $error, $error_data) . $devel_info);
 	}
 
 	public function getOneError():string
