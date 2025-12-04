@@ -13,9 +13,9 @@ use yii\rbac\{Item,Role};
 
 class AuthHelper
 {
-	static protected $lastMessage = '';
+	static protected string $lastMessage = '';
 
-	static public function echoLastMessage($eol = "\n")
+	static public function echoLastMessage(string $eol = "\n")
 	{
 		if (trim(static::$lastMessage) != '') {
 			echo static::$lastMessage . $eol;
@@ -27,7 +27,8 @@ class AuthHelper
 		return trim(self::$lastMessage);
 	}
 
-	static public function createOrUpdatePermission($perm_name, $perm_desc, $auth = null)
+	static public function createOrUpdatePermission(string $perm_name, string $perm_desc,
+													bool $is_default = false, $auth = null)
 	{
 		if ($auth == null) {
 			$auth = \Yii::$app->authManager;
@@ -37,6 +38,9 @@ class AuthHelper
 		if (!$permission) {
 			$permission = $auth->createPermission($perm_name);
 			$permission->description = $perm_desc;
+			if ($is_default) {
+				$permission->createdAt = 0;
+			}
 			$auth->add($permission);
 			static::$lastMessage = '+ ' . $permission->name . ' => ' . $permission->description
 				. ': ' . Yii::t('churros', 'permission created');
@@ -51,7 +55,8 @@ class AuthHelper
 		return $permission;
 	}
 
-	static public function createOrUpdateRole($role_name, $role_desc, $auth = null)
+	static public function createOrUpdateRole(string $role_name, string $role_desc,
+											 bool $is_default = false, $auth = null)
 	{
 		if ($auth == null) {
 			$auth = \Yii::$app->authManager;
@@ -65,6 +70,9 @@ class AuthHelper
 			}
 			$role = $auth->createRole($role_name);
 			$role->description = $role_desc;
+			if ($is_default) {
+				$role->createdAt = 0;
+			}
 			$auth->add($role);
 			static::$lastMessage = '+ ' . $role->name . ' => ' . $role->description
 				. ': ' . Yii::t('churros', 'role created');
