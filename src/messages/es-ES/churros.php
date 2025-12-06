@@ -101,6 +101,7 @@ return [
 
 	'Report totals' => 'Totales del informe',
     'Totals' => 'Totales',
+	'Totals {value_desc} {value}' => 'Totales {value_desc} {value}',
 	'{search_model_name}: model not found in report "{record}"'
 		=> '{search_model_name}: modelo no encontrado en el informe "{record}"',
 	'The report "{record}" has been successfully saved'

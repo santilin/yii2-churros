@@ -302,7 +302,8 @@ class SimpleGridView extends \yii\grid\GridView
 				if ($group->footer !== false) {
 					$ret .= Html::tag('tr',
 						$group->getFooterContent($this->summaryColumns,
-						$this->previousModel, $key, $index, $tdoptions));
+						$this->previousModel, $key, $index, $tdoptions),
+					[ 'class' => 'group-foot-' . strval($group->level)]);
 				}
 				$group->resetSummaries($this->summaryColumns, $this->current_level, count($this->groups));
 				$this->current_level--;

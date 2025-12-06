@@ -176,7 +176,7 @@ class GridGroup extends BaseObject
 					$label = ' '  . mb_strtolower($label) . ' ';
 				}
 			}
-			return $this->getSummaryContent($summary_columns, $label . $this->current_value);
+			return $this->getSummaryContent($summary_columns, $label . $this->last_value);
 		}
 		$ret = '';
 		if ($content !== false) {
@@ -230,10 +230,10 @@ class GridGroup extends BaseObject
 			}
 		}
 		$tdoptions = [
-			'class' => 'group-total-label group-foot-' . strval($this->level),
+			'class' => 'group-total-label',
 			'colspan' => $colspan,
 		];
-		$ret = Html::tag('td', Yii::t('churros', 'Totals') . ' ' . $current_group_value, $tdoptions);
+		$ret = Html::tag('td', Yii::t('churros', 'Totals {value_desc} {value}', [ 'value_desc' => $this->value, 'value' => $current_group_value]), $tdoptions);
 		$nc = 0;
 		foreach ($this->grid->columns as $kc => $column) {
 			if (!$column instanceof $this->grid->dataColumnClass) {
