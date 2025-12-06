@@ -24,6 +24,7 @@ class ChurrosAsset extends AssetBundle
     public $js = [
         'churros.form.js',
         'churros.grid.js',
+        'open-sans-condensed.css'
     ];
     public $depends = [
         'yii\web\YiiAsset',

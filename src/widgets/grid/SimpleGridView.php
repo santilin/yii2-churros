@@ -187,7 +187,7 @@ class SimpleGridView extends \yii\grid\GridView
 		// same in GridGroup::updateSummaries
 		foreach ($this->summaryColumns as $kc => $summary) {
 			$value = $this->savedRowData[$kc];
-			switch( $summary) {
+			switch ($summary) {
 			case 'sum':
 				$this->summaryValues[$kc] += $value;
 				break;
