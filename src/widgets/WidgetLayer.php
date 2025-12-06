@@ -441,7 +441,7 @@ js;
 				}
 				if (($title = $layout_row['title']??false) != false) {
 					$legend = Html::tag('legend', $title, $layout_row['title_options']??[]);
-					$ret .= Html::tag('fieldset', "<div class=row>$legend<hr/>$row_html</div>", $layout_row['htmlOptions']??[]);
+					$ret .= Html::tag('fieldset', "$legend<hr/><div class=row>$row_html</div>", $layout_row['htmlOptions']??[]);
 				} else {
 					$ret .= $row_html;
 				}

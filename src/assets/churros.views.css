@@ -1,3 +1,4 @@
+
 .header-title {
   display: flex;
   flex-direction: column;
@@ -20,6 +21,9 @@
     display: flex;
     justify-content: space-between;
     align-items: center;
+  }
+  &.no-border fieldset {
+    border: none !important;
   }
 }
 
@@ -147,39 +151,102 @@
   margin-left: 0.25rem;
 }
 
-
+/* Grid footer con Bootstrap 5 puro */
 .grid-footer {
   display: flex;
   justify-content: space-between;
-  .grid-items-per-page {
-    padding-left: 0;
-    display: flex;
-    align-items: center !important;
-    min-width: 35px;
-    max-height: 26px;
-    list-style: none;
+  align-items: center;
+  margin-top: 1.5rem;
+  padding-top: 1rem;
+  border-top: 1px solid var(--bs-border-color);
+  gap: 1rem;
+}
+
+.grid-items-per-page {
+  padding-left: 0 !important;
+  margin: 0;
+  display: flex !important;
+  align-items: center;
+  list-style: none;
+
+  li:first-child {
+    @extend .text-muted;
+    font-size: 0.875rem;
+    white-space: nowrap;
+    padding: 0.375rem 0.5rem;
   }
-  .grid-items-per-page li:first-child {
-    cursor: default;
-    background: #f8f8ff;
-    border: 0px;
-    cursor: default;
+
+  li {
+    margin-left: 0.25rem !important;
   }
-  .grid-items-per-page li {
-    color: #000;
-    cursor: pointer;
-    margin-left: 6px;
-    border: 1px solid gray;
+
+  .page-link {
+    color: var(--bs-body-color);
+    background-color: var(--bs-white);
+    border: 1px solid var(--bs-border-color);
+    padding: 0.375rem 0.75rem;
+    font-size: 0.875rem;
+    border-radius: var(--bs-border-radius-sm);
+    transition: var(--bs-transition-base);
+
+    &:hover {
+      color: var(--bs-link-hover-color);
+      background-color: var(--bs-gray-100);
+      border-color: var(--bs-gray-400);
+      text-decoration: none;
+    }
   }
-  .grid-items-per-page li a {
-    display: block;
-    color: #000;
-    padding-left: 8px;
-    padding-right: 8px;
+
+  .page-item.active .page-link {
+    color: var(--bs-white);
+    background-color: var(--bs-primary);
+    border-color: var(--bs-primary);
   }
-  .grid-items-per-page li.current {
-    background-color: rgba(156, 10, 125, 0.25);
-    color: #f8f8ff;
+
+  .page-item.disabled .page-link {
+    color: var(--bs-secondary-color);
+    background-color: var(--bs-gray-100);
+    border-color: var(--bs-gray-300);
+    cursor: not-allowed;
+  }
+}
+
+/* Responsive Bootstrap */
+@media (max-width: 576px) {
+  .grid-footer {
+    flex-direction: column;
+    gap: 1rem;
+    text-align: center;
+
+    .grid-items-per-page {
+      justify-content: center;
+      flex-wrap: wrap;
+    }
+  }
+}
+
+/* Dark mode support */
+[data-bs-theme="dark"] {
+  .grid-footer {
+    border-top-color: var(--bs-border-color-translucent);
+
+    .grid-items-per-page {
+      .page-link {
+        color: var(--bs-body-color);
+        background-color: var(--bs-gray-dark);
+        border-color: var(--bs-border-color-translucent);
+
+        &:hover {
+          background-color: var(--bs-gray-700);
+          border-color: var(--bs-gray-500);
+        }
+      }
+
+      .page-item.active .page-link {
+        background-color: var(--bs-primary);
+        border-color: var(--bs-primary);
+      }
+    }
   }
 }
 
@@ -213,30 +280,6 @@
     background-color: RGBA(var(--bs-warning-rgb), var(--bs-bg-opacity, 1)) !important;
 }
 
-div.app-subtitle {
-	width: auto;
-	margin-left: 10px;
-	padding: 0em 0.4em;
-}
-
-fieldset {
-	border: 2px solid var(--bs-primary-border-subtle);
-	border-radius: 8px;
-	padding: 0.25rem;
-	margin-bottom: 0.25rem;
-	background-color: var(--bs-primary-bg);
-	box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
-}
-
-legend {
-    background-color: var(--bs-primary);   /* Bootstrap primary background */
-    color: var(--bs-light);
-	padding: 5px 10px;
-	border-radius: 4px;
-	font-weight: bold;
-	font-size: 1.1em;
-}
-
 .record-fields > div.row > div > div.row {
   padding-top: 2px;
   padding-bottom: 2px;
@@ -255,6 +298,13 @@ legend {
 .format-currency {
   text-align: right;
 }
+
+form.no-border > fieldset {
+  border: none !important;
+  padding-top: 0 !important;
+  padding-bottom: 0 !important;
+}
+
 
 [data-bs-theme="light"] {
   .grid-view {
