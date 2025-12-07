@@ -237,6 +237,7 @@ class GridGroup extends BaseObject
 		$nc = 0;
 		foreach ($this->grid->columns as $kc => $column) {
 			if (!$column instanceof $this->grid->dataColumnClass) {
+				$ret .= '<td></td>';
 				continue;
 			}
 			if ($nc++ < $colspan) {

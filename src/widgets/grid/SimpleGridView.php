@@ -348,7 +348,7 @@ class SimpleGridView extends \yii\grid\GridView
 			}
 		}
 		if ($this->totalsRow) {
-			$fs = $this->getFooterSummary($this->summaryColumns, $tdoptions);
+			$fs = $this->getGrandTotalSummary($this->summaryColumns, $tdoptions);
 			if ($fs) {
 				$ret .= Html::tag('tr', $fs, ['class' => 'grand-total']);
 			}
@@ -359,7 +359,7 @@ class SimpleGridView extends \yii\grid\GridView
 	/*
 	 * Grand total
 	 */
-	public function getFooterSummary($summary_columns, $tdoptions)
+	public function getGrandTotalSummary($summary_columns, $tdoptions)
 	{
 		if (count($summary_columns) == 0) {
 			return '';
@@ -370,37 +370,38 @@ class SimpleGridView extends \yii\grid\GridView
 		}
 		$colspan = 0;
 		foreach ($this->columns as $kc => $column) {
-			if ($column instanceof DataColumn) {
-				if (!array_key_exists($column->attribute?:$kc, $summary_columns)) {
+			if ($column->visible) {
+				if (!$column instanceof $this->dataColumnClass) {
+					continue;
+				}
+				if (!isset($summary_columns[$kc])) {
 					$colspan++;
 				} else {
 					break;
 				}
-			} else {
-				$colspan++;
 			}
 		}
 		if ($colspan==0) {
 			$ret = '</tr><tr>';
 			$ret .= Html::tag('td', $this->grandTotalLabel?:Yii::t('churros', 'Totals') . ' ',
-				[ 'class' => 'total-label', 'colspan' => 42] );
+				[ 'class' => 'total-label', 'colspan' => count($this->columns) + 1] );
 			$ret .= '</tr><tr>';
 		} else {
 			$ret = Html::tag('td', $this->grandTotalLabel?:Yii::t('churros', 'Totals') . ' ',
 				[ 'class' => 'total-label', 'colspan' => $colspan ] );
 		}
 		$nc = 0;
-		foreach ($this->columns as $column) {
+		foreach ($this->columns as $kc => $column) {
 			if (!($column instanceof DataColumn)) {
+				$ret .= '<td></td>';
 				$nc++;
 				continue;
 			}
 			if ($nc++ < $colspan) {
 				continue;
 			}
-			$kc = $column->attribute;
 			$classes = [];
-			if (($column->format?:'raw') != 'raw') {
+			if (($column->format?:'raw') !== 'raw') {
 				if (is_array($column->format)) {
 					$classes[] = "format-" . reset($column->format);
 				} else {
