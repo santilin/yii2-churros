@@ -106,7 +106,7 @@ class GridGroup extends BaseObject
 		}
 		if ($content === true || $content === null) {
 			$content = $this->header_label . ' ';
-			$format = $this->header_format?:$this->format?:'raw';
+			$format = $this->header_format?:$this->formatClass()?:'raw';
 			switch($format) {
 				case 'raw':
 					$content .= $this->current_value;
@@ -246,10 +246,8 @@ class GridGroup extends BaseObject
 			$classes = [
 				'w1'
 			];
-			if (is_array($column->format)) {
-				$classes[] = "format-{$column->format[0]}";
-			} else if ($column->format?:'raw' != 'raw') {
-				$classes[] = "format-{$column->format}";
+			if ($column->formatClass() !== '') {
+				$classes[] = "format-{$column->formatClass()}";
 			}
 			if (isset($summary_columns[$kc])) {
 				$classes[] = 'group-foot-' . strval($this->level);

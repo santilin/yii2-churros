@@ -66,9 +66,6 @@ class ActionColumn extends \yii\grid\ActionColumn
 		}
 		foreach( $this->buttons as $index => $button) {
 			if (!str_contains($this->template, '{'.$index.'}')) {
-				if ($this->template !='') {
-					$this->template .= ' ';
-				}
 				$this->template .= '{'.$index.'}';
 			}
 		}

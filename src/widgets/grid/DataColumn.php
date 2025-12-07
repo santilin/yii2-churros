@@ -29,6 +29,20 @@ class DataColumn extends \yii\grid\DataColumn
         parent::init();
     }
 
+    public function formatClass(): string
+    {
+        if (is_array($this->format)) {
+            $format = trim(reset($this->format));
+        } else {
+            $format = trim($this->format);
+        }
+        if ($format === 'text' || $format === 'raw') {
+            return '';
+        } else {
+            return $format;
+        }
+    }
+
 	// Da preferencia a las labels del searchmodel
     protected function getHeaderCellLabel()
     {
@@ -67,31 +81,31 @@ class DataColumn extends \yii\grid\DataColumn
 
     /**
      * {@inheritdoc}
-     * Inherited to show the column thas has an error
+     * Inherited to show the column thas has an error in DEVEL environment
      */
-    protected function renderDataCellContent($model, $key, $index)
+    public function renderDataCell($model, $key, $index)
     {
+        if ($this->contentOptions instanceof Closure) {
+            $options = call_user_func($this->contentOptions, $model, $key, $index, $this);
+        } else {
+            $options = $this->contentOptions;
+        }
+
+        if ($this->formatClass() !== '') {
+            Html::addCssClass($options, 'format-' . $this->formatClass());
+        }
         if (YII_ENV_DEV) {
             try {
-                if ($this->content === null) {
-                    return $this->grid->formatter->format($this->getDataCellValue($model, $key, $index), $this->format);
-                }
-                return parent::renderDataCellContent($model, $key, $index);
+                return Html::tag('td', $this->renderDataCellContent($model, $key, $index), $options);
             } catch (\yii\base\ErrorException $e) {
                 \Yii::warning($e->getMessage() . " in column {$this->attribute}");
             } catch (\yii\base\InvalidArgumentException $e) {
                 \Yii::warning($e->getMessage() . " in column {$this->attribute}");
             }
-            return '###Error###';
+            return '<td class=error>###Error###</td>';
         } else {
-            if ($this->content === null) {
-                return $this->grid->formatter->format($this->getDataCellValue($model, $key, $index), $this->format);
-            }
-
-            return parent::renderDataCellContent($model, $key, $index);
+            return Html::tag('td', $this->renderDataCellContent($model, $key, $index), $options);
         }
-
     }
-
 
 }

@@ -111,6 +111,9 @@ fieldset {
       font-family: 'Open Sans Condensed', 'Open Sans', sans-serif;
     }
     tr {
+      td.format-seconds2Hours {
+        text-align: end;
+      }
       td.action-column {
         white-space:nowrap;
         width:1%;

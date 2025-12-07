@@ -400,13 +400,8 @@ class SimpleGridView extends \yii\grid\GridView
 			if ($nc++ < $colspan) {
 				continue;
 			}
-			$classes = [];
-			if (($column->format?:'raw') !== 'raw') {
-				if (is_array($column->format)) {
-					$classes[] = "format-" . reset($column->format);
-				} else {
-					$classes[] = "format-$column->format";
-				}
+			if ($column->formatClass() !== '') {
+				$classes = [ 'format-' . $column->formatClass()];
 			}
 			if (isset($summary_columns[$kc])) {
 				$value = 0.0;
