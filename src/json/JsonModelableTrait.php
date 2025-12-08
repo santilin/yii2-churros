@@ -15,9 +15,7 @@ trait JsonModelableTrait
 		if ($this->_root_json === null) {
 			throw new InvalidConfigException("getJsonValue::_root_json == null");
 		}
-		if (substr($path, -1) == '/') {
-			$path = substr($path, -1);
-		}
+		$path = rtrim($path, '/');
 		if ($id) { // The id takes precedence over the locator
 			$ret = $this->_root_json->getJsonObjects('$' . str_replace('/','.',$path)
 				. "['$id']");
