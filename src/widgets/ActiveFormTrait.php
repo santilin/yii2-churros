@@ -43,14 +43,12 @@ trait ActiveFormTrait
 				],
 			];
 		}
-		if ($add_buttons) {
-			if (!empty($buttons)) {
-				$this->fieldsLayout[] = [
-					'type' => 'buttons',
-					'layout' => '1col',
-					'content' => $buttons
-				];
-			}
+		if ($add_buttons && !empty($buttons)) {
+			$this->fieldsLayout[] = [
+				'type' => 'buttons',
+				'layout' => '1col',
+				'content' => $buttons
+			];
 		}
 	}
 
@@ -73,7 +71,7 @@ trait ActiveFormTrait
 		return $layer->layout('widgets', $this->layout, $size, $style);
 	}
 
-	public function renderFormField($widget, array $options, int $index)
+	public function renderFormField($widget, array $horizontalCssClasses, int $index)
 	{
 		return $widget->render();
 	}

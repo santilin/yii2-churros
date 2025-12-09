@@ -106,6 +106,7 @@ return [
 
 	'Report totals' => 'Totales del informe',
     'Totals' => 'Totales',
+	'Totals {value_desc} {value}' => 'Totales {value_desc} {value}',
 	'{search_model_name}: model not found in report "{record}"'
 		=> '{search_model_name}: modelo no encontrado en el informe "{record}"',
 	'The report "{record}" has been successfully saved'
@@ -135,7 +136,7 @@ return [
 	'Showing <b>{begin, number}-{end, number}</b> of <b>{totalCount, number}</b> {totalCount, plural, one{item} other{items}}.' => 'Mostrando <b>{begin, number}-{end, number}</b> de <b>{totalCount, number}</b> {totalCount, plural, one{item} other{items}}.',
 	'Total <b>{count, number}</b> {count, plural, one{{item}} other{{items}}}.' => 'Hay <b>{count, number}</b> {count, plural, one{{item}} other{{items}}}.',
 	'Showing <b>{totalCount, number}</b>' => 'Mostrando <b>{totalCount, number}</b>',
-	'Access denied to this {title}.' => 'Acceso denegado a est{a} {title}.',
+	'Access denied to this {title}.' => 'Acceso denegado a {esta} {title}.',
 	'{Title} with primary key {id} not found.' => 'No se ha encontrado {la} {title} con clave {id}.',
 	'Data was not saved in order to maintain the database integrity' => 'Los datos no se han guardado para preservar la integridad de la base de datos',
 

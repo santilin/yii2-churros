@@ -105,9 +105,7 @@ class WidgetLayer
 		$layout_row_style = empty($layout_row['style'])
 			? (str_contains($layout_row_layout, 'col') ? 'cols' : 'rows')
 			: $layout_row['style'];
-		if (empty($layout_row['size'])) {
-			$layout_row['size'] = $parentOptions['size']??'large';
-		}
+		$layout_row['size'] ??= $parentOptions['size'] ?? 'large';
 		if ($layout_row_layout == 'inline') {
 			$cols = 10000;
 		} else {
@@ -307,16 +305,15 @@ js;
 		} else {
 			$row_added = false;
 			if ($this->noLast()) {
-				$ret .= "<div class=\"row lay-$cols-cols lay-{$this->lastLevel()}-lvl\">";
-				$this->setLastRow($cols);
-				$row_added = true;
+				if (($parentOptions['layout'] ?? $layout_row_layout) === 'inline') {
+					$ret .= "<div class=\"d-flex lay-$cols-cols lay-{$this->lastLevel()}-lvl\">";
+				} else {
+					$ret .= "<div class=\"row d-flex lay-$cols-cols lay-{$this->lastLevel()}-lvl\">";
+					$this->setLastRow($cols);
+					$row_added = true;
+				}
 			}
 			$col_added = false;
-			// if ($this->lastWasRow()) {
-			// 	$col_added = true;
-			// 	$this->setLastCol($cols);
-			// 	$ret .= '<div class="' . $this->columnClasses($cols) . '">';
-			// }
 			switch ($layout_row_type) {
 			case 'widgets':
 			case 'fields':
@@ -332,7 +329,7 @@ js;
 					$layout_row = ['type' => $layout_row_type, 'content' => $layout_row, 'style' => 'rows'];
 				}
 				$row_html = '';
-				$subtitle = $layout_row['subtitle']??null;
+				$subtitle = $layout_row['subtitle'] ?? null;
 				if ($subtitle) {
 					$row_html .= "<div class=row><div class=col-12><div class=\"subtitle mb-3 alert alert-warning\">$subtitle</div></div></div>";
 				}
@@ -340,12 +337,6 @@ js;
 					$layout_row['content'] = array_diff(array_keys($this->widgets), $this->widgets_used);
 				}
 				foreach ($layout_row['content'] as $widget_name) {
-					// $col_added = false;
-					// if (!$this->lastWasCol() && $this->lastWasRow()) {
-					// 	$col_added = true;
-					// 	$this->setLastCol($cols);
-					// 	$row_html.= '<div class="' . $this->columnClasses($cols) . '">';
-					// }
 					$fs = '';
 					$open_divs = 0;
 					$widget = $this->widgets[$widget_name]??false;
@@ -353,7 +344,7 @@ js;
 						$this->widgets_used[] = $widget_name;
 						if ($widget instanceof \yii\bootstrap5\ActiveField) {
 							// bs5 ActiveFields add a row container over the whole field
-							if ($widget->inputOptions['layout']??false) {
+							if ($widget->inputOptions['layout'] ?? false) {
 								$widget_layout = ArrayHelper::remove($widget->inputOptions, 'layout');
 							} else {
 								$widget_layout = $widget->layout??'large';
@@ -377,8 +368,8 @@ js;
 										break;
 								}
 							}
-							if ($layout_row_layout != 'inline') {
-								Html::addCssClass($widget->options, "row layout-$layout_row_layout");
+							if ($layout_row_layout !== 'inline') {
+								Html::addCssClass($widget->options, "layout-$layout_row_layout");
 								if ($widget_layout === 'full') {
 									$col_classes = $this->columnClasses(1);
 								} else {
@@ -441,7 +432,7 @@ js;
 				}
 				if (($title = $layout_row['title']??false) != false) {
 					$legend = Html::tag('legend', $title, $layout_row['title_options']??[]);
-					$ret .= Html::tag('fieldset', "<div class=row>$legend<hr/>$row_html</div>", $layout_row['htmlOptions']??[]);
+					$ret .= Html::tag('fieldset', "$legend<hr/><div class=row>$row_html</div>", $layout_row['htmlOptions']??[]);
 				} else {
 					$ret .= $row_html;
 				}
@@ -449,16 +440,17 @@ js;
 
 			case 'buttons':
 				if (!empty($layout_row['content'])) {
-					$ret .= '<div class="mt-2 clearfix row">';
-					if ($layout_row_layout != 'inline') {
+					if (($parentOptions['layout'] ?? $layout_row_layout) !== 'inline') {
+						$ret .= '<div class="mt-2 clearfix row">';
 						$classes = $this->widget_layout_horiz_config[$layout_row_layout]['large']['horizontalCssClasses']['offset'];
 						$ret .= '<div class="' . implode(' ', (array)$classes) . '">';
+						$ret .= $this->layoutButtons($layout_row['content'], $layout_row_layout, $layout_row['htmlOptions']??[]);
+						$ret .= '</div><!--buttons -->' .  "\n";
+						$ret .= '</div><!--row-->';
 					} else {
-						$ret .= "<div>";
+						$ret .= $this->layoutButtons($layout_row['content'], $layout_row_layout,
+													$layout_row['htmlOptions']??[]);
 					}
-					$ret .= $this->layoutButtons($layout_row['content'], $layout_row_layout, $layout_row['htmlOptions']??[]);
-					$ret .= '</div><!--buttons -->' .  "\n";
-					$ret .= '</div><!--row-->';
 				}
 				break;
 			case 'subtitle':
@@ -665,7 +657,7 @@ js;
 	public function layoutButtons(array $buttons, string $layout, array $options = []): string
 	{
 		$buttons = FormHelper::displayButtons($buttons);
-		Html::addCssClass($options, 'btn-group');
+		Html::addCssClass($options, 'btn-group-sm d-flex flex-row align-items-center ms-1');
 		return <<<html
 <div class="{$options['class']}">
 $buttons

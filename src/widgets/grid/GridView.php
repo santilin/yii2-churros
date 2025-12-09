@@ -150,7 +150,7 @@ class GridView extends SimpleGridView
 				JSZipAsset::register($this->getView());
 			}
 			$toolbarButtonsOptions = $this->toolbarButtonsOptions;
-			Html::addCssClass($toolbarButtonsOptions, 'grid-toolbar');
+			Html::addCssClass($toolbarButtonsOptions, 'header-toolbar');
 			$tag = ArrayHelper::remove($toolbarButtonsOptions, 'tag', 'div');
 			$toolbarButtonsContent = FormHelper::displayButtons($this->toolbarButtons,'');
 			return Html::tag($tag, $toolbarButtonsContent, $toolbarButtonsOptions);

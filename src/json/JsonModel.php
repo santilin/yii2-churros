@@ -173,7 +173,7 @@ class JsonModel extends \yii\base\Model
             if (!$this->_path) {
                 return null;
             }
-            $parts = array_filter(static::split_by_slash_outside_brackets($this->path));
+            $parts = array_filter($this->pathParts());
             if ((count($parts) % 2) == 0) {
                 array_pop($parts);
             }
@@ -302,10 +302,14 @@ class JsonModel extends \yii\base\Model
 	public function loadJson(JsonModelable $json_modelable, string $json_path = null, string $id = null, string $locator = null):?JsonObject
     {
         $this->_json_modelable = $json_modelable;
-        if (str_ends_with($json_path, '/' . $this->jsonPath() . '/' . $id)) {
-            $json_path = substr($json_path, 0, -strlen("/$id"));
+        if ($id) {
+            if (str_ends_with($json_path, '/' . $this->jsonPath() . '/' . $id)) {
+                $json_path = substr($json_path, 0, -strlen("/$id"));
+            }
+            $this->_path = $json_path . "['" . $id . "']";
+        } else {
+            $this->_path = $json_path;
         }
-        $this->_path = $json_path . '/' . $id;
         if ($locator === null) {
             $locator = static::$_locator;
         }
@@ -638,33 +642,66 @@ class JsonModel extends \yii\base\Model
 	}
 
 
-	private static function split_by_slash_outside_brackets($str)
+	protected function pathParts(?string $str = null): array
     {
+        if ($str === null) {
+            $str = $this->_path;
+        }
+
         $result = [];
         $buffer = '';
-        $bracket_level = 0;
+        $in_single_quote = false;
+        $in_bracket = false;
 
         $len = strlen($str);
         for ($i = 0; $i < $len; $i++) {
             $c = $str[$i];
 
-            if ($c === '[') {
-                $bracket_level++;
-            } elseif ($c === ']') {
-                if ($bracket_level > 0) $bracket_level--;
+            // Toggle single quote state
+            if ($c === "'" && !($i > 0 && $str[$i-1] === '\\')) {
+                $in_single_quote = !$in_single_quote;
+            } else if ($c === '[' && !$in_single_quote) {
+                // Split on [ when outside quotes
+                $in_bracket = true;
+                $result[] = $buffer;
+                $buffer = '';
+            } elseif ($c === ']' && $in_bracket && !$in_single_quote) {
+                $in_bracket = false;
             }
-
-            if ($c === '/' && $bracket_level === 0) {
+            elseif ($c === '/' && !$in_single_quote) {
+                // Split on / when outside quotes
                 $result[] = $buffer;
                 $buffer = '';
             } else {
                 $buffer .= $c;
             }
         }
-        // Push the last chunk
-        $result[] = $buffer;
+
+        // Last chunk
+        if (!empty($buffer)) {
+            $cleanPart = $this->cleanPathPart(trim($buffer));
+            if ($cleanPart !== '') {
+                $result[] = $cleanPart;
+            }
+        }
+
         return $result;
     }
+
+    private function cleanPathPart(string $part): string
+    {
+        $part = trim($part);
+
+        // Handle "['Tarea']" → "Tarea"
+        if (strlen($part) > 4 &&
+            $part[0] === "'" && $part[1] === '[' &&
+            substr($part, -2) === "']") {
+            return substr($part, 2, -2);
+            }
+
+            return $part;
+    }
+
 
 
 } // class

@@ -106,7 +106,7 @@ class GridGroup extends BaseObject
 		}
 		if ($content === true || $content === null) {
 			$content = $this->header_label . ' ';
-			$format = $this->header_format?:$this->format?:'raw';
+			$format = $this->header_format?:$this->formatClass()?:'raw';
 			switch($format) {
 				case 'raw':
 					$content .= $this->current_value;
@@ -176,7 +176,7 @@ class GridGroup extends BaseObject
 					$label = ' '  . mb_strtolower($label) . ' ';
 				}
 			}
-			return $this->getSummaryContent($summary_columns, $label . $this->current_value);
+			return $this->getSummaryContent($summary_columns, $label . $this->last_value);
 		}
 		$ret = '';
 		if ($content !== false) {
@@ -185,7 +185,7 @@ class GridGroup extends BaseObject
 				'{group_header_label}' => $this->header_label,
 				'{group_footer_label}' => $this->footer_label,
 			]);
-			Html::addCssClass($tdoptions, "report group-foot-total-$column group-foot-total-{$this->level}");
+			Html::addCssClass($tdoptions, "report group-foot-total-{$this->column} group-foot-total-{$this->level}");
 			$ret = Html::tag('td', $content, $tdoptions);
 		}
 		return $ret;
@@ -230,13 +230,14 @@ class GridGroup extends BaseObject
 			}
 		}
 		$tdoptions = [
-			'class' => 'group-total-label group-foot-' . strval($this->level),
+			'class' => 'group-total-label',
 			'colspan' => $colspan,
 		];
-		$ret = Html::tag('td', Yii::t('churros', 'Totals') . ' ' . $current_group_value, $tdoptions);
+		$ret = Html::tag('td', Yii::t('churros', 'Totals {value_desc} {value}', [ 'value_desc' => $this->footer_label, 'value' => $current_group_value]), $tdoptions);
 		$nc = 0;
 		foreach ($this->grid->columns as $kc => $column) {
 			if (!$column instanceof $this->grid->dataColumnClass) {
+				$ret .= '<td></td>';
 				continue;
 			}
 			if ($nc++ < $colspan) {
@@ -245,10 +246,8 @@ class GridGroup extends BaseObject
 			$classes = [
 				'w1'
 			];
-			if (is_array($column->format)) {
-				$classes[] = "format-{$column->format[0]}";
-			} else if ($column->format?:'raw' != 'raw') {
-				$classes[] = "format-{$column->format}";
+			if ($column->formatClass() !== '') {
+				$classes[] = "format-{$column->formatClass()}";
 			}
 			if (isset($summary_columns[$kc])) {
 				$classes[] = 'group-foot-' . strval($this->level);

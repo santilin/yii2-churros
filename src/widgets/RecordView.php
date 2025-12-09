@@ -36,7 +36,7 @@ class RecordView extends Widget
 <div class="record-header">
     <div class=header-title>
 {title}
-    </div><div class=toolbar>
+    </div><div class=header-toolbar>
 {buttons}
     </div>
 </div>
