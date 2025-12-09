@@ -82,6 +82,7 @@ class AuthController extends Controller
 		$model = $model_class::instance();
 		$model_title = $model->t('app', "{Title_plural}");
 
+		// Create model roles
 		if ($viewer) {
 			$model_viewer = AuthHelper::createOrUpdateRole(
 				str_replace('.', ".{$model_name}.", $viewer->name),
@@ -179,30 +180,6 @@ class AuthController extends Controller
 			} else {
 				echo "= Role '{$model_admin->name}' already exists in role {$admin->name}\n";
 			}
-			if ($granter) {
-				if (!$auth->hasChild($model_admin, $model_granter)) {
-					$auth->addChild($model_admin, $model_granter);
-					echo "+ Role '{$model_granter->name}' added to role '{$model_admin->name}'\n";
-				} else {
-					echo "= Role '{$model_granter->name}' already exists in role {$model_admin->name}\n";
-				}
-			}
-			if ($deleter) {
-				if (!$auth->hasChild($model_admin, $model_deleter)) {
-					$auth->addChild($model_admin, $model_deleter);
-					echo "+ Role '{$model_deleter->name}' added to role '{$model_admin->name}'\n";
-				} else {
-					echo "= Role '{$model_deleter->name}' already exists in role {$model_admin->name}\n";
-				}
-			}
-			if ($creator) {
-				if (!$auth->hasChild($model_admin, $model_creator)) {
-					$auth->addChild($model_admin, $model_creator);
-					echo "+ Role '{$model_creator->name}' added to role '{$model_admin->name}'\n";
-				} else {
-					echo "= Role '{$model_creator->name}' already exists in role {$model_admin->name}\n";
-				}
-			}
 			if ($full_editor) {
 				if (!$auth->hasChild($model_admin, $model_full_editor)) {
 					$auth->addChild($model_admin, $model_full_editor);
@@ -219,6 +196,22 @@ class AuthController extends Controller
 					echo "= Role '{$model_editor->name}' already exists in role {$model_admin->name}\n";
 				}
 			}
+			if ($creator) {
+				if (!$auth->hasChild($model_admin, $model_creator)) {
+					$auth->addChild($model_admin, $model_creator);
+					echo "+ Role '{$model_creator->name}' added to role '{$model_admin->name}'\n";
+				} else {
+					echo "= Role '{$model_creator->name}' already exists in role {$model_admin->name}\n";
+				}
+			}
+			if ($deleter) {
+				if (!$auth->hasChild($model_admin, $model_deleter)) {
+					$auth->addChild($model_admin, $model_deleter);
+					echo "+ Role '{$model_deleter->name}' added to role '{$model_admin->name}'\n";
+				} else {
+					echo "= Role '{$model_deleter->name}' already exists in role {$model_admin->name}\n";
+				}
+			}
 			if ($viewer) {
 				if (!$auth->hasChild($model_admin, $model_viewer)) {
 					$auth->addChild($model_admin, $model_viewer);
@@ -227,41 +220,105 @@ class AuthController extends Controller
 					echo "= Role '{$model_viewer->name}' already exists in role {$model_admin->name}\n";
 				}
 			}
+			if ($granter) {
+				if (!$auth->hasChild($model_admin, $model_granter)) {
+					$auth->addChild($model_admin, $model_granter);
+					echo "+ Role '{$model_granter->name}' added to role '{$model_admin->name}'\n";
+				} else {
+					echo "= Role '{$model_granter->name}' already exists in role {$model_admin->name}\n";
+				}
+			}
 		}
-		$model_perm_name = $module_id . '.' . $model_name;
 
+		if ($full_editor) {
+			if ($creator) {
+				if (!$auth->hasChild($model_full_editor, $model_creator)) {
+					$auth->addChild($model_full_editor, $model_creator);
+					echo "+ Role '{$model_creator->name}' added to role '{$model_full_editor->name}'\n";
+				} else {
+					echo "= Role '{$model_creator->name}' already exists in role {$model_full_editor->name}\n";
+				}
+			}
+			if ($deleter) {
+				if (!$auth->hasChild($model_full_editor, $model_deleter)) {
+					$auth->addChild($model_full_editor, $model_deleter);
+					echo "+ Role '{$model_deleter->name}' added to role '{$model_full_editor->name}'\n";
+				} else {
+					echo "= Role '{$model_deleter->name}' already exists in role {$model_full_editor->name}\n";
+				}
+			}
+			if ($editor) {
+				if (!$auth->hasChild($model_full_editor, $model_editor)) {
+					$auth->addChild($model_full_editor, $model_editor);
+					echo "+ Role '{$model_editor->name}' added to role '{$model_full_editor->name}'\n";
+				} else {
+					echo "= Role '{$model_editor->name}' already exists in role {$model_full_editor->name}\n";
+				}
+			}
+		}
+
+		if ($editor) {
+			if ($viewer) {
+				if (!$auth->hasChild($model_editor, $model_viewer)) {
+					$auth->addChild($model_editor, $model_viewer);
+					echo "+ Role '{$model_viewer->name}' added to role '{$model_editor->name}'\n";
+				} else {
+					echo "= Role '{$model_viewer->name}' already exists in role {$model_editor->name}\n";
+				}
+			}
+		}
+
+		if ($deleter) {
+			if ($viewer) {
+				if (!$auth->hasChild($model_deleter, $model_viewer)) {
+					$auth->addChild($model_deleter, $model_viewer);
+					echo "+ Role '{$model_viewer->name}' added to role '{$model_deleter->name}'\n";
+				} else {
+					echo "= Role '{$model_viewer->name}' already exists in role {$model_deleter->name}\n";
+				}
+			}
+		}
+
+		if ($creator) {
+			if ($viewer) {
+				if (!$auth->hasChild($model_creator, $model_viewer)) {
+					$auth->addChild($model_creator, $model_viewer);
+					echo "+ Role '{$model_viewer->name}' added to role '{$model_creator->name}'\n";
+				} else {
+					echo "= Role '{$model_viewer->name}' already exists in role {$model_creator->name}\n";
+				}
+			}
+		}
+
+		$model_perm_name = $module_id . '.' . $model_name;
 		foreach ($controller['perms'] as $perm_name) {
-			$perm_name = lcFirst($perm_name);
+			$perm_name = mb_lcfirst($perm_name);
 			$perm_desc = Yii::t('churros', '{module}: {model}: {perm}', [
 				'module' => $module_desc,
 				'model' => $model_title,
-				'perm' => $perm_name]);
+				'perm' => Yii::t('churros', $perm_name)]);
 			$permission = AuthHelper::createOrUpdatePermission(
-				$model_perm_name . "." . lcFirst($perm_name), $perm_desc, true, $auth);
+				$model_perm_name . "." . $perm_name, $perm_desc, true, $auth);
 			AuthHelper::echoLastMessage();
 			$roles_to_add = [];
 			switch ($perm_name) {
 				case 'view':
 				case 'index':
 				case 'informes':
-					$roles_to_add = [$model_viewer, $model_creator, $model_deleter, $model_editor, $model_full_editor, $model_admin];
+					$roles_to_add = [ $model_viewer, $model_editor, $model_full_editor, $model_admin ];
 					break;
 				case 'delete':
-					if ($deleter) {
-						$roles_to_add = [$model_deleter, $model_full_editor, $model_admin];
-					} else {
-						$roles_to_add = [$model_editor, $model_full_editor, $model_admin];
-					}
+					$roles_to_add = [ $model_deleter, $model_full_editor, $model_admin ];
 					break;
 				case 'create':
 				case 'duplicate':
-					$roles_to_add = [$model_creator, $model_editor, $model_full_editor, $model_admin];
+					$roles_to_add = [ $model_creator, $model_editor, $model_full_editor, $model_admin ];
 					break;
 				case 'update':
-					$roles_to_add = [$model_editor, $model_full_editor, $model_admin];
+					$roles_to_add = [ $model_editor, $model_full_editor, $model_admin];
 					break;
 				default:
-					$roles_to_add = [$model_admin];
+					$roles_to_add = [ $model_admin ];
 					break;
 			}
 			foreach (array_filter($roles_to_add) as $role_to_add) {
@@ -271,8 +328,39 @@ class AuthController extends Controller
 				} else {
 					echo "= Permission '{$permission->name}' already exists in role {$role_to_add->name}\n";
 				}
+				break; // only the first one
 			}
 		}
+
+		$module_access_role = AuthHelper::createOrUpdateRole(
+			$module_id,
+			Yii::t('churros', '{module}: acceso al módulo', [
+				'module' => $module_desc
+			]), true, $auth);
+		AuthHelper::echoLastMessage();
+		$module_access_permission = AuthHelper::createOrUpdatePermission(
+			$module_id . ".module.index",
+				Yii::t('churros', '{module}: acceso al inicio del módulo', [
+					'module' => $module_desc
+				]), true, $auth);
+		if (!$auth->hasChild($module_access_role, $module_access_permission)) {
+			$auth->addChild($module_access_role, $module_access_permission);
+			echo "+ Permission '{$module_access_permission->name}' added to role '{$module_access_role->name}'\n";
+		} else {
+			echo "= Permission '{$module_access_permission->name}' already exists in role {$module_access_role->name}\n";
+		}
+
+		foreach (array_filter([$viewer, $editor,]) as $role_to_add) {
+			if (!$auth->hasChild($role_to_add, $module_access_permission)) {
+				$auth->addChild($role_to_add, $module_access_permission);
+				echo "+ Permission '{$permission->name}' added to role '{$role_to_add->name}'\n";
+			} else {
+				echo "= Permission '{$permission->name}' already exists in role {$role_to_add->name}\n";
+			}
+			break; // only the first one
+		}
+
+
 	}
 
 	/**
