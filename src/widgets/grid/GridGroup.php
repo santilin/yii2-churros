@@ -185,7 +185,7 @@ class GridGroup extends BaseObject
 				'{group_header_label}' => $this->header_label,
 				'{group_footer_label}' => $this->footer_label,
 			]);
-			Html::addCssClass($tdoptions, "report group-foot-total-$column group-foot-total-{$this->level}");
+			Html::addCssClass($tdoptions, "report group-foot-total-{$this->column} group-foot-total-{$this->level}");
 			$ret = Html::tag('td', $content, $tdoptions);
 		}
 		return $ret;
@@ -233,7 +233,7 @@ class GridGroup extends BaseObject
 			'class' => 'group-total-label',
 			'colspan' => $colspan,
 		];
-		$ret = Html::tag('td', Yii::t('churros', 'Totals {value_desc} {value}', [ 'value_desc' => $this->value, 'value' => $current_group_value]), $tdoptions);
+		$ret = Html::tag('td', Yii::t('churros', 'Totals {value_desc} {value}', [ 'value_desc' => $this->footer_label, 'value' => $current_group_value]), $tdoptions);
 		$nc = 0;
 		foreach ($this->grid->columns as $kc => $column) {
 			if (!$column instanceof $this->grid->dataColumnClass) {
