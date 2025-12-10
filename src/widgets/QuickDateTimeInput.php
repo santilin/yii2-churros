@@ -83,7 +83,7 @@ class QuickDateTimeInput extends MaskedInput
 				break;
 			case 'time':
 				if ($dcm) {
-					$this->saveFormat = $dcm->getSaveFormat('date');
+					$this->saveFormat = $dcm->getSaveFormat('time');
 				}
 				if (!$this->saveFormat) {
 					$this->saveFormat = YADTC::SQL_TIME_FORMAT;
