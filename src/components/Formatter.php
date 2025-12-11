@@ -73,6 +73,17 @@ class Formatter extends \yii\i18n\Formatter
 		return $sign . $hours . ':' . $minutes;
 	}
 
+	public function asSeconds2HoursPlus(?int $seconds, bool $blank_on_zero = false)
+	{
+		if (empty($seconds)) {
+			return $blank_on_zero ? '' : "00:00";
+		}
+		$sign = $seconds < 0 ? '-' : '+';
+		$absSeconds = abs($seconds);
+		$hours = str_pad(floor($absSeconds / 3600), 2, "0", STR_PAD_LEFT);
+		$minutes = str_pad(floor($absSeconds / 60) % 60, 2, "0", STR_PAD_LEFT);
+		return $sign . $hours . ':' . $minutes;
+	}
 
 	public function asSeconds2Format(string $format, ?int $seconds, bool $blank_on_zero = false)
 	{
