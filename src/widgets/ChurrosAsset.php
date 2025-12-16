@@ -20,11 +20,11 @@ class ChurrosAsset extends AssetBundle
     public $sourcePath = '@churros/assets';
     public $css = [
         'churros.views.css',
+        'open-sans-condensed.css',
     ];
     public $js = [
         'churros.form.js',
         'churros.grid.js',
-        'open-sans-condensed.css'
     ];
     public $depends = [
         'yii\web\YiiAsset',
