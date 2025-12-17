@@ -53,8 +53,8 @@ fieldset {
 }
 
 .grid-view {
-  table.condensed tbody td {
-    font-family: 'Open Sans Condensed', 'Open Sans', sans-serif !important;
+  .condensed {
+    font-family: 'Open Sans', sans-serif !important;
   }
   .grid-header {
     align-items: flex-end;
@@ -71,6 +71,12 @@ fieldset {
     }
   }
   thead {
+    th {
+      &.condensed {
+        padding-left: 2px;
+        padding-right: 2px;
+      }
+    }
     tr.filters {
       td {
         padding: 1px !important;
@@ -107,10 +113,13 @@ fieldset {
     }
   }
   tbody {
-    & td.condensed {
-      font-family: 'Open Sans Condensed', 'Open Sans', sans-serif;
-    }
     tr {
+      td {
+        &.condensed {
+          padding-left: 2px;
+          padding-right: 2px;
+        }
+      }
       td.format-seconds2Hours, td.format-seconds2HoursPlus {
         text-align: end;
       }
