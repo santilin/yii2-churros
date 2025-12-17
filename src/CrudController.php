@@ -108,7 +108,7 @@ class CrudController extends \yii\web\Controller
 		// } else {
 		// 	Yii::$app->session->set($form_name . '.grid-filters', $params[$form_name]);
 		// }
-		$params['permissions'] = $this->resolvePermissions($params['permissions']??[], $this->userPermissions());
+		$params['permissions'] = $this->resolvePermissions($params['permissions'] ?? [], $this->userPermissions());
 		if ($master_model = $this->getMasterModel()) {
 			$relation_info = $searchModel->relationToModel($master_model);
 			$relation_name = "get" . ucfirst($relation_info['name']);
@@ -143,7 +143,7 @@ class CrudController extends \yii\web\Controller
 		if (!$detail) {
 			throw new \Exception("No {$search_model_class}_Search nor $search_model_class{$view}_Search class found in " . __METHOD__);
 		}
-		$params['permissions'] = $this->resolvePermissions([], $this->userPermissions());
+		$params['permissions'] = $this->resolvePermissions($params['permissions'] ?? [], $this->userPermissions());
 		$params['_search_relation'] = $relation_name;
 		$params['master'] = $master;
 		$params['embedded'] = true;
@@ -168,19 +168,19 @@ class CrudController extends \yii\web\Controller
 	{
 		$params = $this->request->queryParams;
 		$this->model = $this->findModel($id, $params);
-		$params['permissions'] = $this->resolvePermissions($params['permissions']??[], $this->userPermissions());
+		$params['permissions'] = $this->resolvePermissions($params['permissions'] ?? [], $this->userPermissions());
 		if ($this->request->getIsAjax()) {
 			$this->layout = false;
 			return $this->render('_view', [
 				'model' => $this->model,
 				'title' => 'View',
-				'viewForms' => [ '_view' => [ '', null, [], '' ] ],
+				'viewViews' => [ '_view' => [ '', null, [], '' ] ],
 				'viewParams' => $this->changeActionParams($params, 'view', $this->model)
 			]);
 		} else {
 			return $this->render('view', [
 				'model' => $this->model,
-				'viewForms' => [ '_view' => [ '', null, [], '' ] ],
+				'viewViews' => [ '_view' => [ '', null, [], '' ] ],
 				'viewParams' => $this->changeActionParams($params, 'view', $this->model)
 			]);
 		}
@@ -194,7 +194,7 @@ class CrudController extends \yii\web\Controller
 	{
 		$params = array_merge($this->request->get(), $this->request->post());
 		$this->model = $this->findFormModel($id, null, 'create', $params);
-		$params['permissions'] = $this->resolvePermissions($params['permissions']??[], $this->userPermissions());
+		$params['permissions'] = $this->resolvePermissions($params['permissions'] ?? [], $this->userPermissions());
 		if ($master_model = $this->getMasterModel()) {
 			$master_model->linkDetails($this->model);
 		}
@@ -226,7 +226,7 @@ class CrudController extends \yii\web\Controller
 	{
 		$params = array_merge($this->request->get(), $this->request->post());
 		$this->model = $this->findFormModel($id, null, 'duplicate', $params);
-		$params['permissions'] = $this->resolvePermissions($params['permissions']??[], $this->userPermissions());
+		$params['permissions'] = $this->resolvePermissions($params['permissions'] ?? [], $this->userPermissions());
 		if ($this->model->loadAll($this->request->post(), static::findRelationsInForm($params))) {
 			$this->model->setIsNewRecord(true);
 			$this->model->resetPrimaryKeys();
@@ -257,7 +257,7 @@ class CrudController extends \yii\web\Controller
 	{
 		$params = array_merge($this->request->get(), $this->request->post());
 		$this->model = $this->findFormModel($id, null, 'update', $params);
-		$params['permissions'] = $this->resolvePermissions($params['permissions']??[], $this->userPermissions());
+		$params['permissions'] = $this->resolvePermissions($params['permissions'] ?? [], $this->userPermissions());
  		if ($this->model === null && FormHelper::hasPermission($params['permissions'], 'create')) {
 			return $this->redirect(array_merge(['create'], $params));
 		}
@@ -679,7 +679,7 @@ class CrudController extends \yii\web\Controller
 	{
 		$bcs_style = $this->breadCrumbsStyle ?? ['standard'];
 		$scenario = $model->scenario?:$action_id;
-		$permissions = $view_params['permissions']??[];
+		$permissions = $view_params['permissions'] ?? [];
 		$breadcrumbs = [];
 		$master = $this->getMasterModel();
 		if ($master) {
