@@ -223,7 +223,8 @@ class FormHelper
 			if (!isset($button['htmlOptions'])) {
 				$button['htmlOptions'] = [];
 			}
-			if (!isset($button['htmlOptions']['name']) && !is_int($name)) {
+			if (!isset($button['htmlOptions']['name']) && !is_int($name)
+				&& $name !== 'submit') {
 				$button['htmlOptions']['name'] = $name;
 			}
 			if (isset($button['htmlOptions']['autofocus'])) {
@@ -308,7 +309,7 @@ $ajax_error;
 	}
 });
 ajax;
-				$ret[] = Html::button( $title, $button['htmlOptions']);
+				$ret[] = Html::button($title, $button['htmlOptions']);
 				break;
 			case 'ajax-post':
 				if (!is_array($button['url'])) {
