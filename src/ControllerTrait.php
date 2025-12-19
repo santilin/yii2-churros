@@ -43,6 +43,18 @@ trait ControllerTrait
 		return $ret;
 	}
 
+	// mainly for breadcrumbs
+	public function getBaseRoute(): string
+	{
+		if ($this->module instanceof \yii\base\Application) {
+			return '';
+		} else if (static::$_prefix) {
+			return '/' . static::$_prefix;
+		} else {
+			return '/' . $this->module->getUniqueId();
+		}
+	}
+
 	public function getRoutePrefix($route = null, bool $add_slash = true): string
 	{
 		if ($route === null) {
@@ -175,18 +187,6 @@ trait ControllerTrait
         return Url::to($params);
     }
 
-
-	public function getBaseRoute(): string
-	{
-		if ($this->module instanceof \yii\base\Application) {
-			return '';
-		} else if (static::$_prefix) {
-			return '/' . static::$_prefix;
-		} else {
-			return '/' . $this->module->getUniqueId();
-		}
-	}
-
 	public function genHierarchyBreadCrumbs(string $scenario, $model, array $models_hierarchy, array $viewParams = []): array
 	{
 		$breadcrumbs = [];
@@ -260,20 +260,26 @@ trait ControllerTrait
 		return $breadcrumbs;
 	}
 
-	public function userPermissions(): array|bool
+	protected function userPermissions(): bool|array
 	{
-		return $this->crudActions;
+		$ret = [];
+		foreach ($this->controllerPermissions as $action_permissions) {
+			foreach ((array)$action_permissions as $action_permission) {
+				$ret[$action_permission] = true;
+			}
+		}
+		return array_keys($ret);
 	}
 
 	protected function resolvePermissions(...$arrays): array
 	{
-		// If there is no user component, userPermissions must return crudActions
-		$ret = [];
+		$ret = $this->userPermissions();
 		foreach ($arrays as $array) {
 			if ($array === false) {
 				return [];
-			}
-			if (!empty($array) && is_array($array)) {
+			} elseif ($array === true) {
+				continue;
+			} elseif (!empty($array) && is_array($array)) {
 				$ret = array_intersect($ret, $array);
 			}
 		}

@@ -11,7 +11,6 @@ use santilin\churros\models\ModelTracesTrait;
 
 
 class JsonModel extends \yii\base\Model
-// implements \yii\db\ActiveRecordInterface
 {
     use ModelTracesTrait;
 
@@ -304,11 +303,16 @@ class JsonModel extends \yii\base\Model
         $this->_json_modelable = $json_modelable;
         if ($id) {
             if (str_ends_with($json_path, '/' . $this->jsonPath() . '/' . $id)) {
-                $json_path = substr($json_path, 0, -strlen("/$id"));
+                $this->path = $json_path;
+                $json_path = substr($json_path, 0, -strlen('/' . $id));
+            } else if (str_ends_with($json_path, '/' . $this->jsonPath() . "/['$id']")) {
+                $this->path = $json_path;
+                $json_path = substr($json_path, 0, -strlen("/['$id']"));
+            } elseif (str_contains($id, '/')) {
+                $this->_path = $json_path . "['" . $id . "']";
+            } else {
+                $this->_path = $json_path . '/' . $id;
             }
-            $this->_path = $json_path . "['" . $id . "']";
-        } else {
-            $this->_path = $json_path;
         }
         if ($locator === null) {
             $locator = static::$_locator;
@@ -429,7 +433,7 @@ class JsonModel extends \yii\base\Model
         }
         if ($rel_info['type'] == 'HasMany') {
             $related_models = [];
-            foreach ($this->$relation_name as $kr => $rel_model) {
+            foreach ($this->loadRelatedModels($relation_name) as $kr => $rel_model) {
                 $child = new $form_class_name();
                 $child->_parent_model = $this;
                 $child->setPath($this->getPath() . '/' . $child->jsonPath());
@@ -642,7 +646,7 @@ class JsonModel extends \yii\base\Model
 	}
 
 
-	protected function pathParts(?string $str = null): array
+	public function pathParts(?string $str = null): array
     {
         if ($str === null) {
             $str = $this->_path;
@@ -679,7 +683,7 @@ class JsonModel extends \yii\base\Model
 
         // Last chunk
         if (!empty($buffer)) {
-            $cleanPart = $this->cleanPathPart(trim($buffer));
+            $cleanPart = static::cleanPathPart(trim($buffer));
             if ($cleanPart !== '') {
                 $result[] = $cleanPart;
             }
@@ -688,20 +692,16 @@ class JsonModel extends \yii\base\Model
         return $result;
     }
 
-    private function cleanPathPart(string $part): string
+    private static function cleanPathPart(string $part): string
     {
         $part = trim($part);
-
         // Handle "['Tarea']" → "Tarea"
         if (strlen($part) > 4 &&
             $part[0] === "'" && $part[1] === '[' &&
             substr($part, -2) === "']") {
             return substr($part, 2, -2);
-            }
-
-            return $part;
+        }
+        return $part;
     }
-
-
 
 } // class

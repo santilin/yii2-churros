@@ -516,23 +516,6 @@ ajax;
 		return $final_perms;
 	}
 
-	static public function resolvePermissions(array|bool $all_disabled, array|bool $available, array|bool $granted = []): array|false
-	{
-		if ($available === false) {
-			return false;
-		}
-		if ($all_disabled === false || $granted === false) {
-			return [];
-		}
-		if ($granted == [] && $all_disabled == []) { // todos
-			return $available;
-		} else if ($granted == []) {
-			return array_intersect($available, $all_disabled);
-		} else {
-			return array_intersect($available, $granted);
-		}
-	}
-
 	static public function detailsTag(string $summary, string $body, bool $open = false,
 						array $detail_options = [], array $summary_options = [])
 	{

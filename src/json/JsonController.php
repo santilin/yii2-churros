@@ -21,7 +21,6 @@ class JsonController extends \yii\web\Controller
 	use \santilin\churros\ControllerTrait;
 
 	public $model = null;
-	protected $crudActions = [];
 	protected $root_model = false;
 	protected $_root_id = null;
 	protected $_path = null;
@@ -29,7 +28,6 @@ class JsonController extends \yii\web\Controller
 
  	/** @var The start of the json path in the current url. If null, the url is substracted the root part */
 	protected $_path_start = null;
-
 
 	const MSG_DEFAULT = 'The action on {la} {title} <a href="{record_url}">{record_medium}</a> has been successful.';
 	const MSG_NO_ACTION = 'The action on {La} {title} <a href="{record_url}">{record_medium}</a> has been successful.';
@@ -97,7 +95,7 @@ class JsonController extends \yii\web\Controller
 		if (!$searchModel) {
 			throw new InvalidArgumentException("No searchModel found for " . $this->id . " controller");
 		}
-		$params['permissions'] = FormHelper::resolvePermissions($params['permissions']??[], $this->crudActions);
+		$params['permissions'] = $this->resolvePermissions($params['permissions'] ?? []);
 		$params = $this->changeActionParams($params, 'index', $searchModel);
 		return $this->render('index', [
 			'searchModel' => $searchModel,
@@ -146,7 +144,7 @@ class JsonController extends \yii\web\Controller
 	public function actionView($id)
 	{
 		$params = Yii::$app->request->queryParams;
-		$params['permissions'] = FormHelper::resolvePermissions($params['permissions']??[], $this->crudActions);
+		$params['permissions'] = $this->resolvePermissions($params['permissions'] ?? []);
 		$this->model = $this->findModel($this->getPath(), $id, 'view', $params);
 		return $this->render('view', [
 			'model' => $this->model,
@@ -163,7 +161,7 @@ class JsonController extends \yii\web\Controller
 	{
 		$req = Yii::$app->request;
 		$params = array_merge($req->get(), $req->post());
-		$params['permissions'] = FormHelper::resolvePermissions($params['permissions']??[], $this->crudActions);
+		$params['permissions'] = $this->resolvePermissions($params['permissions'] ?? []);
 		$this->model = $this->findFormModel($this->getPath(), null, null, 'create', $params);
 		$this->model->scenario = 'create';
 		if ($this->model->loadAll($params, static::findRelationsInForm($params))) {
@@ -195,7 +193,7 @@ class JsonController extends \yii\web\Controller
 	{
 		$req = Yii::$app->request;
 		$params = array_merge($req->get(), $req->post());
-		$params['permissions'] = FormHelper::resolvePermissions($params['permissions']??[], $this->crudActions);
+		$params['permissions'] = $this->resolvePermissions($params['permissions'] ?? []);
 		$this->model = $this->findFormModel($this->getPath(), $id, null, 'duplicate', $params);
 		$this->model->setDefaultValues(); // duplicating
 		$this->model->scenario = 'duplicate';
@@ -228,9 +226,8 @@ class JsonController extends \yii\web\Controller
 	{
 		$req = Yii::$app->request;
 		$params = array_merge($req->get(), $req->post());
-		$params['permissions'] = FormHelper::resolvePermissions($params['permissions']??[], $this->crudActions);
+		$params['permissions'] = $this->resolvePermissions($params['permissions'] ?? []);
 		$this->model = $this->findFormModel($this->getPath(), $id, null, 'update', $params);
-
 		if ($this->model->loadAll($params, static::findRelationsInForm($params)) && $req->isPost) {
 			if ($this->model->validate() && $this->model->save(false)) {
 				if ($req->getIsAjax()) {
@@ -257,10 +254,6 @@ class JsonController extends \yii\web\Controller
 	public function actionDelete(string $id)
 	{
 		$this->model = $this->findFormModel($this->getPath(), $id, null, 'delete');
-		if (!in_array('delete', $this->crudActions)) {
-			throw new ForbiddenHttpException($this->model->t('churros',
-				$this->getResultMessage('access_denied')));
-		}
 		try {
 			if ($this->model->delete()) {
 				if (Yii::$app->request->getIsAjax()) {
@@ -462,7 +455,7 @@ class JsonController extends \yii\web\Controller
 	public function getActionRoute(string|array|null $action_id, $model, $master_model = null): string
 	{
 		if (is_array($action_id)) {
-			$path_parts = array_filter(explode('/', $model->getPath()));
+			$path_parts = array_filter($model->pathParts());
 			if (count($path_parts) % 2 == 0) {
 				array_pop($path_parts);
 			}
@@ -584,7 +577,6 @@ class JsonController extends \yii\web\Controller
 		$permissions = $view_params['permissions']??[];
 		$breadcrumbs = [];
 		$master = $this->getMasterModel();
-		$path_parts = explode('/',$model->getPath());
 		if ($master) {
 			$prefix = $this->getBaseRoute() . '/' . $master->controllerName(). '/';
 			$breadcrumbs['root'] = [
@@ -612,6 +604,7 @@ class JsonController extends \yii\web\Controller
 			}
 		}
 		$partial_path = Url::to($keys) . '/';
+		$path_parts = $model->pathParts();
 		for ($p=1; $p<count($path_parts); $p++) {
 			$partial_path .= $path_parts[$p] . '/';
 			$breadcrumbs[] = [

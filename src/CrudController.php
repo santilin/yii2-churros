@@ -7,22 +7,23 @@ use yii\helpers\{Url,StringHelper};
 use yii\filters\VerbFilter;
 use yii\web\{NotFoundHttpException,ForbiddenHttpException,HttpException};
 use yii\base\ErrorException;
+use yii\db\ActiveRecordInterface as CrudModel;
 use santilin\churros\exceptions\{DeleteModelException,SaveModelException};
 use santilin\churros\helpers\{AppHelper,FormHelper};
 
 /**
  * CrudController implements the CRUD actions for yii2 models
  */
-class CrudController extends \yii\web\Controller
+abstract class CrudController extends \yii\web\Controller
 {
 	use ControllerTrait;
 
-	public $model = null;
-	protected static ?string $_prefix = null;
-	protected static string $_model_name;
-	protected array $crudActions = [];
-	protected $masterModel = false;
-	protected $masterController = null;
+	protected static ?string $_prefix = null; // to be overrided
+	protected static string $_model_name; // to be overrided
+	protected array $controllerPermissions = []; // to be overrided
+
+	public ?CrudModel $model = null;
+	protected CrudModel|bool|null $masterModel = false; /// Initially false to distinguish from null
 
 	const MSG_DEFAULT = 'The action on {la} {title} <a href="{record_url}">{record_medium}</a> has been successful.';
 	const MSG_NO_ACTION = 'The action on {La} {title} <a href="{record_url}">{record_medium}</a> has been successful.';
@@ -108,7 +109,7 @@ class CrudController extends \yii\web\Controller
 		// } else {
 		// 	Yii::$app->session->set($form_name . '.grid-filters', $params[$form_name]);
 		// }
-		$params['permissions'] = $this->resolvePermissions($params['permissions'] ?? [], $this->userPermissions());
+		$params['permissions'] = $this->resolvePermissions($params['permissions'] ?? []);
 		if ($master_model = $this->getMasterModel()) {
 			$relation_info = $searchModel->relationToModel($master_model);
 			$relation_name = "get" . ucfirst($relation_info['name']);
@@ -143,7 +144,7 @@ class CrudController extends \yii\web\Controller
 		if (!$detail) {
 			throw new \Exception("No {$search_model_class}_Search nor $search_model_class{$view}_Search class found in " . __METHOD__);
 		}
-		$params['permissions'] = $this->resolvePermissions($params['permissions'] ?? [], $this->userPermissions());
+		$params['permissions'] = $this->resolvePermissions($params['permissions'] ?? []);
 		$params['_search_relation'] = $relation_name;
 		$params['master'] = $master;
 		$params['embedded'] = true;
@@ -168,7 +169,7 @@ class CrudController extends \yii\web\Controller
 	{
 		$params = $this->request->queryParams;
 		$this->model = $this->findModel($id, $params);
-		$params['permissions'] = $this->resolvePermissions($params['permissions'] ?? [], $this->userPermissions());
+		$params['permissions'] = $this->resolvePermissions($params['permissions'] ?? []);
 		if ($this->request->getIsAjax()) {
 			$this->layout = false;
 			return $this->render('_view', [
@@ -194,7 +195,7 @@ class CrudController extends \yii\web\Controller
 	{
 		$params = array_merge($this->request->get(), $this->request->post());
 		$this->model = $this->findFormModel($id, null, 'create', $params);
-		$params['permissions'] = $this->resolvePermissions($params['permissions'] ?? [], $this->userPermissions());
+		$params['permissions'] = $this->resolvePermissions($params['permissions'] ?? []);
 		if ($master_model = $this->getMasterModel()) {
 			$master_model->linkDetails($this->model);
 		}
@@ -210,7 +211,7 @@ class CrudController extends \yii\web\Controller
 		}
 		return $this->render('create', [
 			'model' => $this->model,
-			'viewForms' => [ '_form' => [ '', null, $this->crudActions, '' ] ],
+			'viewForms' => [ '_form' => [ '', null, [], '' ] ],
 			'formParams' => $this->changeActionParams($params, 'create', $this->model)
 		]);
 	}
@@ -226,7 +227,7 @@ class CrudController extends \yii\web\Controller
 	{
 		$params = array_merge($this->request->get(), $this->request->post());
 		$this->model = $this->findFormModel($id, null, 'duplicate', $params);
-		$params['permissions'] = $this->resolvePermissions($params['permissions'] ?? [], $this->userPermissions());
+		$params['permissions'] = $this->resolvePermissions($params['permissions'] ?? []);
 		if ($this->model->loadAll($this->request->post(), static::findRelationsInForm($params))) {
 			$this->model->setIsNewRecord(true);
 			$this->model->resetPrimaryKeys();
@@ -257,7 +258,7 @@ class CrudController extends \yii\web\Controller
 	{
 		$params = array_merge($this->request->get(), $this->request->post());
 		$this->model = $this->findFormModel($id, null, 'update', $params);
-		$params['permissions'] = $this->resolvePermissions($params['permissions'] ?? [], $this->userPermissions());
+		$params['permissions'] = $this->resolvePermissions($params['permissions'] ?? []);
  		if ($this->model === null && FormHelper::hasPermission($params['permissions'], 'create')) {
 			return $this->redirect(array_merge(['create'], $params));
 		}
@@ -287,10 +288,6 @@ class CrudController extends \yii\web\Controller
 	public function actionDelete($id)
 	{
 		$this->model = $this->findModel($id);
-		if (!in_array('delete', $this->crudActions)) {
-			throw new ForbiddenHttpException($this->model->t('churros',
-				$this->getResultMessage('access_denied')));
-		}
 		try {
 			if ($this->model->deleteWithRelated()) {
 				if ($this->request->getIsAjax()) {
@@ -641,38 +638,20 @@ class CrudController extends \yii\web\Controller
 		if ($this->masterModel === false) {
 			$master_id = intval($this->request->get('parent_id', 0));
 			if ($master_id !== 0) {
-				$this->masterController = $this->request->get('parent_controller');
-				assert($this->masterController != '');
-				$master_model_name = 'app\\models\\'. AppHelper::camelCase($this->masterController);
-				$this->masterModel = $master_model_name::findOne($master_id);
-				if ($this->masterModel == null) {
-					throw new NotFoundHttpException(Yii::t('churros',
-						"The master record of {title} with '{id}' id does not exist",
-						[ 'id' => $master_id, 'title' => $master_model_name ]));
-				}
-			} else {
 				$this->masterModel = null;
+				$parent_controller = $this->request->get('parent_controller');
+				if ($parent_controller) {
+					$master_model_name = 'app\\models\\'. AppHelper::camelCase($this->masterController);
+					$this->masterModel = $master_model_name::findOne($master_id);
+					if ($this->masterModel === null) {
+						throw new NotFoundHttpException(Yii::t('churros',
+							"The master record of {title} with '{id}' primary key does not exist",
+							[ 'id' => $master_id, 'title' => $master_model_name ]));
+					}
+				}
 			}
 		}
 		return $this->masterModel;
-	}
-
-	/**
-	 * @param Model $master The master model (for detail_grids)
-	 * @param Model $child The child model (for detail_grids)
-	 * @todo Eliminar
-	 */
-	public function controllerRoute($master = null, $child = null): ?string
-	{
-		if ($master == null) {
-			$master = $this->master_model;
-		}
-		$master_route = $master->controllerName();
-		$ret = $this->getRoutePrefix($master_route);
-		$ret .= $master->controllerName() . '/'
-			. $master->getPrimaryKey() . '/';
-		$ret .= $child->controllerName();
-		return $ret;
 	}
 
     public function genBaseBreadCrumbs(string $action_id, $model, array $view_params = []): array
