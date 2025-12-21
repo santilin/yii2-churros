@@ -641,7 +641,7 @@ abstract class CrudController extends \yii\web\Controller
 				$this->masterModel = null;
 				$parent_controller = $this->request->get('parent_controller');
 				if ($parent_controller) {
-					$master_model_name = 'app\\models\\'. AppHelper::camelCase($this->masterController);
+					$master_model_name = 'app\\models\\'. AppHelper::camelCase($parent_controller);
 					$this->masterModel = $master_model_name::findOne($master_id);
 					if ($this->masterModel === null) {
 						throw new NotFoundHttpException(Yii::t('churros',

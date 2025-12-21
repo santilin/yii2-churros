@@ -313,6 +313,8 @@ class JsonModel extends \yii\base\Model
             } else {
                 $this->_path = $json_path . '/' . $id;
             }
+        } else {
+            $this->_path = $json_path;
         }
         if ($locator === null) {
             $locator = static::$_locator;

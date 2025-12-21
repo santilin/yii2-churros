@@ -520,8 +520,8 @@ class JsonController extends \yii\web\Controller
 			return $this->root_model;
 		}
 		$req = Yii::$app->request;
-		$this->_root_id = $req->post('root_id')?:$req->get('root_id');
-		$root_model_name = $req->post('root_model')?:$req->get('root_model');
+		$this->_root_id = $req->post('root_id') ?: $req->get('root_id');
+		$root_model_name = $req->post('root_model') ?: $req->get('root_model');
 		if ($root_model_name) {
 			$root_model_name = 'app\\models\\'. AppHelper::camelCase($root_model_name);
 		}
