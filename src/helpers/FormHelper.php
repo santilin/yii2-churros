@@ -438,7 +438,7 @@ ajax;
 		if (is_bool($perms)) {
 			return $perms;
 		}
-		if ($perm == '' || $perms == null) {
+		if ($perm === '' || $perms === null) {
 			return true;
 		}
 		if ($perms === []) {
@@ -447,8 +447,11 @@ ajax;
 		return in_array($perm, $perms);
 	}
 
-	static public function removePermission(?array $perms, string $perm): array
+	static public function removePermission(array|bool|null $perms, string $perm): array
 	{
+		if (empty($perms) || $perms === true) {
+			return [];
+		}
 		$k = array_search($perm, $perms);
 		if ($k !== false) {
 			unset ($perms[$k]);
@@ -456,10 +459,10 @@ ajax;
 		return $perms;
 	}
 
-	static public function hasAllPermissions($perms, array $req_perms = []): bool
+	static public function hasAllPermissions(array|bool $perms, array $req_perms = []): bool
 	{
-		if ($perms === false) {
-			return false;
+		if (is_bool($perms)) {
+			return $perms;
 		}
 		if ($req_perms === []) {
 			return true;
@@ -467,7 +470,7 @@ ajax;
 		if ($perms === []) {
 			return true;
 		}
-		foreach( $req_perms as $req_perm) {
+		foreach ($req_perms as $req_perm) {
 			if (!in_array($req_perm, $perms)) {
 				return false;
 			}

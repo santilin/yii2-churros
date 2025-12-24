@@ -22,7 +22,7 @@ class ActionColumn extends \yii\grid\ActionColumn
 		'delete' => '<i class="fas fa-trash"></i>',
 		'duplicate' => '<i class="fas fa-copy"></i>',
 	];
-    public array $crudPerms = [];
+    public array|bool $crudPerms = [];
 	public array $extraButtonsOptions = [];
 
     /**
