@@ -464,9 +464,9 @@ js;
 				break;
 			case 'label&content':
 				if (isset($layout_row['htmlOptions'])) {
-					Html::addCssClass($layout_row['htmlOptions'], 'fake-readonly-control');
+					Html::addCssClass($layout_row['htmlOptions'], 'form-control readonly');
 				} else {
-					$layout_row['htmlOptions']['class'] = 'fake-readonly-control';
+					$layout_row['htmlOptions']['class'] = 'form-control readonly';
 				}
 				$ret .= $this->layoutContent($layout_row['label'], $layout_row['content'], $layout_row_layout, 'large', $layout_row['htmlOptions']);
 				break;

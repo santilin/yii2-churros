@@ -110,7 +110,7 @@ class JsonController extends \yii\web\Controller
 	public function indexDetails($master, string $relation_name, string $view, array $params,
 								 $previous_context = null, string $search_model_class = null)
 	{
-		unset($params['permissions']);
+		$params['permissions'] = $params['masterPermissions'] ?? true;
 		$this->action = $this->createAction($previous_context->action->id);
 		$detail = $this->createSearchModel($master->getPath(), "$search_model_class{$view}_Search");
 		if (!$detail) {

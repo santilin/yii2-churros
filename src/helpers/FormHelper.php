@@ -468,7 +468,7 @@ ajax;
 			return true;
 		}
 		if ($perms === []) {
-			return true;
+			return false;
 		}
 		foreach ($req_perms as $req_perm) {
 			if (!in_array($req_perm, $perms)) {

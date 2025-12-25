@@ -260,7 +260,7 @@ trait ControllerTrait
 		return $breadcrumbs;
 	}
 
-	protected function userPermissions(): bool|array
+	protected function userPermissions(): array|bool
 	{
 		$ret = [];
 		foreach ($this->controllerPermissions as $action_permissions) {
@@ -271,7 +271,7 @@ trait ControllerTrait
 		return array_keys($ret);
 	}
 
-	protected function resolvePermissions(...$arrays): array
+	protected function resolvePermissions(...$arrays): array|bool
 	{
 		$ret = $this->userPermissions();
 		foreach ($arrays as $array) {
