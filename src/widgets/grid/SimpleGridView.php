@@ -123,7 +123,10 @@ class SimpleGridView extends \yii\grid\GridView
 	public function findColumn(string $attribute): ?DataColumn
 	{
 		$targetColumn = null;
-		foreach ($this->columns as $column) {
+		foreach ($this->columns as $kc => $column) {
+			if ($kc === $attribute) { /// for several columns with the same attribute
+				return $column;
+			}
 			if ($column instanceof DataColumn && $column->attribute === $attribute) {
 				return $column;
 			}
@@ -258,22 +261,16 @@ class SimpleGridView extends \yii\grid\GridView
 				'column' => $kg,
 			], $group_def));
             $group->level = $level++;
-			$group->labels = (array)$group->labels;
-			if (count($group->labels) >= 2) {
-				list($group->header_label, $group->footer_label) = $group->labels;
-			} else if (count($group->labels) == 1) {
-				$group->header_label = $group->footer_label = $group->labels[0];
-			}
 			if ($group->value === null) {
 				$group->value = $this->columns[$group->column]['value']??$this->columns[$group->column]['attribute']??$group->column;
 			}
             $this->groups[$kg] = $group;
 			if (empty($group->orderby)) {
-				$group->orderby[$group->column] = SORT_ASC;
+				$group->orderBy[$group->column] = SORT_ASC;
 			} else if (is_string($group->orderby)) {
 				$tmp_order = $group->orderby;
-				$group->orderby = [];
-				$group->orderby[$tmp_order] = SORT_ASC;
+				$group->orderBy = [];
+				$group->orderBy[$tmp_order] = SORT_ASC;
 			}
         }
 	}
@@ -284,7 +281,6 @@ class SimpleGridView extends \yii\grid\GridView
 			$this->previousModel = $model;
 		}
 		$ret = '';
-		$tdoptions = [ 'colspan' => count($this->columns) ];
 		$this->recno++;
 		// close previous footers on group change
 		$updated_groups = [];
@@ -300,10 +296,7 @@ class SimpleGridView extends \yii\grid\GridView
 		foreach (array_reverse($this->groups) as $kg => $group) {
 			if ($updated_groups[$kg]) {
 				if ($group->footer !== false) {
-					$ret .= Html::tag('tr',
-						$group->getFooterContent($this->summaryColumns,
-						$this->previousModel, $key, $index, $tdoptions),
-					[ 'class' => 'group-foot-' . strval($group->level)]);
+					$ret .= $group->getFooterRow($this->summaryColumns, $this->previousModel, []);
 				}
 				$group->resetSummaries($this->summaryColumns, $this->current_level, count($this->groups));
 				$this->current_level--;
@@ -317,6 +310,7 @@ class SimpleGridView extends \yii\grid\GridView
 			$updated_groups[$kg] = $group->updateGroup($model, $key, $index);
 		}
 		$first_header_shown = false;
+		$tdoptions = [ 'colspan' => count($this->columns) ];
 		foreach ($this->groups as $kg => $group) {
 			if ($updated_groups[$kg] || $first_header_shown) {
 				$first_header_shown = true;
@@ -339,16 +333,15 @@ class SimpleGridView extends \yii\grid\GridView
 	public function finalRow($model, $key, $index, $grid)
 	{
 		// Once the dataprovider has been consumed, print all the group footers and the grand total
-		$tdoptions = [ 'colspan' => count($this->columns) ];
+		$colspan = count($this->columns);
 		$ret = '';
 		foreach (array_reverse($this->groups) as $kg => $group) {
 			if ($group->footer) {
-				$ret .= Html::tag('tr',
-					$group->getFooterContent($this->summaryColumns, $model, $key, $index, $tdoptions));
+				$ret .= $group->getFooterRow($this->summaryColumns, $model, []);
 			}
 		}
 		if ($this->totalsRow) {
-			$fs = $this->getGrandTotalSummary($this->summaryColumns, $tdoptions);
+			$fs = $this->getGrandTotalSummary($this->summaryColumns, 0);
 			if ($fs) {
 				$ret .= Html::tag('tr', $fs, ['class' => 'grand-total']);
 			}

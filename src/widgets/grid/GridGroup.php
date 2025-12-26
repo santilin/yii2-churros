@@ -24,28 +24,33 @@ class GridGroup extends BaseObject
 	 * @var string The column we are grouping by
 	 */
 	public string $column;
-	public $header = true;
-	public $labels = [];
-	public $header_format;
-	public $header_label;
-	public $footer = true;
-	public $footer_format;
-	public $footer_label;
+	public bool|array|null $header = true;
+	public bool|array|null $footer = true;
 	public $value;
-	public $format;
-	public $orderby;
 	public $show_column = true;
+	public array $orderBy = [];
 
-	public $level = 0;
+	protected int $level = 0;
 	protected $group_change = false;
 	protected $got_value = false, $last_value = null, $current_value = null;
 	protected $summaryValues = [];
 	protected $last_group_changed = false;
 
+	public function getLevel(): int
+	{
+		return $this->level;
+	}
+
+	public function setLevel(int $level): void
+	{
+		$this->level = $level;
+	}
+
 	public function getCurrentValue()
 	{
 		return $this->current_value;
 	}
+
 	public function getLastValue()
 	{
 		return $this->last_value;
@@ -95,18 +100,21 @@ class GridGroup extends BaseObject
 		return false;
 	}
 
-	public function getHeaderContent($model, $key, $index, $tdoptions)
+	public function getHeaderContent($model, $key, $index, array $tdoptions): string
 	{
 		if ($this->grid->onlySummary && $this->level < count($this->grid->groups)) {
 			return '';
 		}
-		$content = $this->header;
+		$content = $this->header['value'] ?? null;
 		if ($content instanceOf \Closure) {
 			$content = call_user_func($content, $model, $key, $index, $this);
 		}
 		if ($content === true || $content === null) {
-			$content = $this->header_label . ' ';
-			$format = $this->header_format?:$this->formatClass()?:'raw';
+			$content = ($this->header['label'] ?? '');
+			if ($content) {
+				$content .= ' ';
+			}
+			$format = $this->header['format'] ?? $this->formatClass() ?: 'raw';
 			switch($format) {
 				case 'raw':
 					$content .= $this->current_value;
@@ -119,10 +127,18 @@ class GridGroup extends BaseObject
 		if ($content !== false) {
 			$content = strtr($content, [
 				'{group_value}' => $this->current_value,
-				'{group_header_label}' => $this->header_label,
-				'{group_footer_label}' => $this->footer_label,
+				'{group_header_label}' => $this->header['label'] ?? '',
+				'{group_footer_label}' => $this->footer['label'] ?? '',
 			]);
 			$inverse_level = count($this->grid->groups) - $this->level + 1;
+			if ($this->header && isset($this->header['rowOptions'])) {
+				if ($this->header['rowOptions'] instanceof \Closure) {
+					$options = call_user_func($this->header['rowOptions'], $this->combineSummaryValues($this->level), $this);
+				} else {
+					$options = $this->header['rowOptions'];
+				}
+			}
+			$tdoptions = array_merge($tdoptions, $options);
 			Html::addCssClass($tdoptions, "group-head group-head-$inverse_level {$this->column}");
 			return Html::tag('td', $content, $tdoptions);
 		} else {
@@ -130,42 +146,52 @@ class GridGroup extends BaseObject
 		}
 	}
 
-	public function getFooterContent($summary_columns, $model, $key, $index, $tdoptions)
+	public function getFooterRow(array $summary_columns, $model, array $row_options = []): string
 	{
+        if ($this->footer && isset($this->footer['rowOptions'])) {
+			if ($this->footer['rowOptions'] instanceof \Closure) {
+				$options = call_user_func($this->footer['rowOptions'], $this->combineSummaryValues($this->level), $this);
+			} else {
+				$options = $this->footer['rowOptions'];
+			}
+			$row_options = array_merge($row_options, $options);
+        }
+		Html::addCssClass($row_options, 'group-foot-' . strval($this->level));
 		if ($this->grid->onlySummary && $this->level > count($this->grid->groups)) {
-			return $this->getOnlyTotalsContent($summary_columns, $model, $key, $index, $tdoptions);
+			return Html::tag('tr', $this->getOnlyTotalsContent($tsummary_columns, $model), $row_options);
 		} else {
-			return $this->getStandardFooterContent($summary_columns, $model, $key, $index, $tdoptions);
+			return Html::tag('tr', $this->getStandardFooterContent($summary_columns, $model), $row_options);
 		}
 	}
 
-	protected function getOnlyTotalsContent($summary_columns, $model, $key, $index, $tdoptions)
+	protected function getOnlyTotalsContent($summary_columns, $model): string
 	{
 		$ret = '';
+		$first_td_options = [];
 		foreach ($this->grid->columns as $kc => $column) {
 			if (!isset($summary_columns[$kc])) {
 				$value = $model[$kc];
 			} else {
 				$value = $this->summaryValues[$this->level][$kc];
 				if ($this->level == count($this->grid->groups)) {
-					Html::addCssClass($tdoptions, "report detail");
+					Html::addCssClass($first_td_options, "detail");
 				} else {
-					Html::addCssClass($tdoptions, "report group-foot-$column group-foot-{$this->level}");
+					Html::addCssClass($first_td_options, "group-foot-$column group-foot-{$this->level}");
 				}
 			}
 			$ret .= Html::tag('td',
 				$this->grid->formatter->format($value, $column->format),
-					GridView::fetchColumnOptions($column, $tdoptions));
+					GridView::fetchColumnOptions($column, $first_td_options));
 		}
 		return $ret;
 	}
 
 
-	protected function getStandardFooterContent($summary_columns, $model, $key, $index, $tdoptions)
+	protected function getStandardFooterContent($summary_columns, $model)
 	{
-		$content = $this->footer;
+		$content = $this->footer['value'] ?? null;
 		if ($content instanceOf \Closure) {
-			$content = call_user_func($content, $model, $key, $index, $this);
+			$content = call_user_func($content, $this->combineSummaryValues($this->level), $this);
 		}
 		if ($content === true || $content === null) {
 			$group_column = $this->grid->findColumn($this->column);
@@ -182,11 +208,12 @@ class GridGroup extends BaseObject
 		if ($content !== false) {
 			$content = strtr($content, [
 				'{group_value}' => $this->current_value,
-				'{group_header_label}' => $this->header_label,
-				'{group_footer_label}' => $this->footer_label,
+				'{group_header_label}' => $this->header['label'] ?? '',
+				'{group_footer_label}' => $this->footer['label'] ?? '',
 			]);
-			Html::addCssClass($tdoptions, "report group-foot-total-{$this->column} group-foot-total-{$this->level}");
-			$ret = Html::tag('td', $content, $tdoptions);
+			$first_td_options = GridView::fetchColumnOptions($column, []);
+			Html::addCssClass($first_td_options, "report group-foot-total-{$this->column} group-foot-total-{$this->level}");
+			$ret = Html::tag('td', $content, $first_td_options);
 		}
 		return $ret;
 	}
@@ -233,7 +260,10 @@ class GridGroup extends BaseObject
 			'class' => 'group-total-label',
 			'colspan' => $colspan,
 		];
-		$ret = Html::tag('td', Yii::t('churros', 'Totals {value_desc} {value}', [ 'value_desc' => $this->footer_label, 'value' => $current_group_value]), $tdoptions);
+		$ret = Html::tag('td', Yii::t('churros', 'Totals {value_desc} {value}', [
+			'value_desc' => $this->footer['label'] ?? '',
+			'value' => $current_group_value
+		]), $tdoptions);
 		$nc = 0;
 		foreach ($this->grid->columns as $kc => $column) {
 			if (!$column instanceof $this->grid->dataColumnClass) {
@@ -355,4 +385,15 @@ class GridGroup extends BaseObject
 			}
 		}
 	}
+
+	public function combineSummaryValues(int $level): array
+	{
+		$ret = [];
+		$grid_columns = $this->grid->columns;
+		foreach ($this->summaryValues[$level] as $kc => $value) {
+			$ret[$grid_columns[$kc]->attribute] = $value;
+		}
+		return $ret;
+	}
+
 }
