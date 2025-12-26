@@ -640,7 +640,7 @@ class JsonModel extends \yii\base\Model
 		}
 		$link = $base_route . $this->pathToUrl($action);
         $url = Url::to([$link, 'id' => $this->getPrimaryKey()], $global);
-		if ($format == false) {
+		if ($format === false) {
 			return $url;
 		} else {
 			return \yii\helpers\Html::a($this->recordDesc($format, 0), $url);
