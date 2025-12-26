@@ -114,6 +114,12 @@ fieldset {
   }
   tbody {
     tr {
+      .group-foot-1 {
+        font-weight: 700;
+      }
+      .group-total-label {
+        text-align: right;
+      }
       td {
         &.condensed {
           padding-left: 2px;
@@ -146,7 +152,7 @@ fieldset {
         a:hover i {
           color: #007cba !important;
           text-shadow: 0 0 4px rgba(0,124,186,0.6);
-          transform: translateZ(8px) rotateX(10deg) scale(1.15); /* 3D lift + tilt */
+          transform: translateZ(8px) rotateX(10deg) scale(1.15);
         }
         td.group-head {
           font-weight: bold;
