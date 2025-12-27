@@ -280,7 +280,11 @@ trait ControllerTrait
 			} elseif ($array === true) {
 				continue;
 			} elseif (!empty($array) && is_array($array)) {
-				$ret = array_intersect($ret, $array);
+				if ($ret === true) {
+					$ret = $array;
+				} else {
+					$ret = array_intersect($ret, $array);
+				}
 			}
 		}
 		return $ret;

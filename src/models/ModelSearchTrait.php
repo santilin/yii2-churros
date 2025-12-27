@@ -93,11 +93,11 @@ trait ModelSearchTrait
 			if (array_key_exists($col_attribute, $this->attributes)) { // for sorting
 				continue;
 			}
-			$attribute = $column_def['attribute']??null;
+			$attribute = $column_def['attribute'] ?? null;
 			if ($attribute === null) {
 				continue;
 			}
-			if ($col_attribute != $attribute) {
+			if ($col_attribute !== $attribute) {
 				Yii::warning("No searchable: $col_attribute != " . ($column_def['attribute']??null));
 				continue; // No searchable
 			}
@@ -179,7 +179,7 @@ trait ModelSearchTrait
 	 */
 	protected function addRelatedFieldToJoin(string $field_name, $query): array
 	{
-		$model = $this;
+
 		$attribute = $field_name;
 		$nested_relations = [];
 		$model = $this;
@@ -192,7 +192,7 @@ trait ModelSearchTrait
 			} else {
 				list($relation_name, $attribute) = AppHelper::splitString($attribute, '.');
 			}
-			$relation = $model::$relations[$relation_name]??null;
+			$relation = $model::$relations[$relation_name] ?? null;
 			if ($relation) {
 				if ($relation['type'] == 'ManyToMany') {
 					$junction_relation = $model::$relations[$relation['join']];

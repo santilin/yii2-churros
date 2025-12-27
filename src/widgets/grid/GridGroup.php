@@ -105,24 +105,24 @@ class GridGroup extends BaseObject
 		if ($this->grid->onlySummary && $this->level < count($this->grid->groups)) {
 			return '';
 		}
-		$content = $this->header['value'] ?? null;
-		if ($content instanceOf \Closure) {
-			$content = call_user_func($content, $model, $key, $index, $this);
-		}
-		if ($content === true || $content === null) {
-			$content = ($this->header['label'] ?? '');
-			if ($content) {
-				$content .= ' ';
+		$content = $this->header ?? null;
+		if ($content !== false ) {
+			$content = ($this->header['label'] ?? null);
+			if ($content instanceof \Closure) {
+				$content = call_user_func($content, $model, $this);
 			}
-			$format = $this->header['format'] ?? $this->formatClass() ?: 'raw';
-			switch($format) {
-				case 'raw':
-					$content .= $this->current_value;
-					break;
-				default:
-					$content .= Yii::$app->formatter->format($this->current_value, $format);
-					break;
+			if ($content === null) {
+				$content = "{group_value}";
 			}
+			// $format = $this->header['format'] ?? $this->formatClass() ?: 'raw';
+			// switch($format) {
+			// 	case 'raw':
+			// 		$content .= $this->current_value;
+			// 		break;
+			// 	default:
+			// 		$content .= Yii::$app->formatter->format($this->current_value, $format);
+			// 		break;
+			// }
 		}
 		if ($content !== false) {
 			$content = strtr($content, [
@@ -137,8 +137,8 @@ class GridGroup extends BaseObject
 				} else {
 					$options = $this->header['rowOptions'];
 				}
+				$tdoptions = array_merge($tdoptions, $options);
 			}
-			$tdoptions = array_merge($tdoptions, $options);
 			Html::addCssClass($tdoptions, "group-head group-head-$inverse_level {$this->column}");
 			return Html::tag('td', $content, $tdoptions);
 		} else {
