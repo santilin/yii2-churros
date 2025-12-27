@@ -83,7 +83,7 @@ class JsonModel extends \yii\base\Model
         $this->_json_modelable = $other->_json_modelable;
     }
 
-    public function jsonArrayToModels(array $json_array, string $child_class = null): array
+    public function jsonArrayToModels(array $json_array, ?string $child_class = null): array
     {
         $models = [];
         foreach ($json_array as $rk => $rm) {
@@ -305,9 +305,9 @@ class JsonModel extends \yii\base\Model
             if (str_ends_with($json_path, '/' . $this->jsonPath() . '/' . $id)) {
                 $this->path = $json_path;
                 $json_path = substr($json_path, 0, -strlen('/' . $id));
-            } else if (str_ends_with($json_path, '/' . $this->jsonPath() . "/['$id']")) {
+            } else if (str_ends_with($json_path, '/' . $this->jsonPath() . "['$id']")) {
                 $this->path = $json_path;
-                $json_path = substr($json_path, 0, -strlen("/['$id']"));
+                $json_path = substr($json_path, 0, -strlen("['$id']"));
             } elseif (str_contains($id, '/')) {
                 $this->_path = $json_path . "['" . $id . "']";
             } else {

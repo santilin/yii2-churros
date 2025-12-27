@@ -30,8 +30,13 @@ fieldset {
     justify-content: space-between;
     align-items: center;
   }
-  & .header-toolbar a {
-    font-size: 0.9em !important;
+  & .embedded .header-toolbar a {
+    font-size: 1.25em !important;
+  }
+  & .header-toolbar {
+    & a, button {
+       font-size: 0.9em !important;
+    }
   }
   &.no-border fieldset {
     border: none !important;

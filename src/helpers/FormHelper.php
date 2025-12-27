@@ -385,7 +385,7 @@ ajax;
 				$post_form = Html::beginForm(
 					self::prepareButtonUrl($button['url'], $url_return_to),
 					'post',
-					$button['formOptions']??['class' => 'd-inline']);
+					$button['formOptions']??['class' => 'd-flex align-items-baseline']);
 				foreach ($button['hiddenInputs']??[] as $hidden_name => $hidden_value) {
 					$post_form .= Html::hiddenInput($hidden_name, $hidden_value);
 				}
