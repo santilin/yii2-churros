@@ -574,7 +574,7 @@ class JsonController extends \yii\web\Controller
 	public function genBaseBreadCrumbs(string $action_id, $model, array $view_params = []): array
 	{
 		$scenario = $model->scenario?:$action_id;
-		$permissions = $view_params['permissions']??[];
+		$permissions = $view_params['permissions'] ?? true;
 		$breadcrumbs = [];
 		$master = $this->getMasterModel();
 		if ($master) {

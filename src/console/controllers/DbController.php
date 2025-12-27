@@ -335,7 +335,7 @@ EOF;
 		}
 	}
 
-	protected function dumpTableAsFixture($tableSchema, string $where = null): string
+	protected function dumpTableAsFixture($tableSchema, ?string $where = null): string
     {
 		$txt_data = "return [\n";
 		$php_types = [];
@@ -404,7 +404,7 @@ sql;
 	}
 
 
-	protected function dumpTableAsSeeder($tableSchema, string $where = null): string
+	protected function dumpTableAsSeeder($tableSchema, ?string $where = null): string
     {
 		$txt_data = '';
 		$php_types = [];

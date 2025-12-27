@@ -127,7 +127,7 @@ trait ModelInfoTrait
 		return strtr($translated, $placeholders);
 	}
 
-	public function recordDesc(string $format=null, int $max_len = 0, $context = null): string
+	public function recordDesc(?string $format = null, int $max_len = 0, $context = null): string
 	{
 		$ret = $_format = '';
 		if (!$format || $format == 'short') {
@@ -195,7 +195,7 @@ trait ModelInfoTrait
 		return $ret;
 	}
 
-	public function relatedRecordDescs(array $relations, string $format=null, int $max_len = 0): array
+	public function relatedRecordDescs(array $relations, ?string $format = null, int $max_len = 0): array
 	{
 		return [
 			$this->getPrimaryKey() => [
@@ -205,7 +205,7 @@ trait ModelInfoTrait
 		];
 	}
 
-	public function recRelatedRecordDescs(array $relations, $model, int $level, string $format=null, int $max_len = 0): array
+	public function recRelatedRecordDescs(array $relations, $model, int $level, ?string $format=null, int $max_len = 0): array
 	{
 		$ret = [];
 		if ($level < count($relations)) {
@@ -223,7 +223,7 @@ trait ModelInfoTrait
 		return $ret;
 	}
 
-	public function linkToMe(string $format = 'long', string $action = 'view', bool $global = false, string $base_route = null): string
+	public function linkToMe(string $format = 'long', string $action = 'view', bool $global = false, ?string $base_route = null): string
 	{
 		if ($base_route === null) {
 			$base_route = Yii::$app->module?->id;
@@ -568,7 +568,7 @@ trait ModelInfoTrait
 		}
 	}
 
-	static public function findCodeAndDescFields(string $relname = null): array
+	static public function findCodeAndDescFields(?string $relname = null): array
 	{
 		if ($relname == null) {
 			$r0 = array_filter(explode(',',static::getModelInfo('code_field')));
@@ -583,7 +583,7 @@ trait ModelInfoTrait
 		}
 	}
 
-	static public function findDescFields(string $relname = null): array
+	static public function findDescFields(?string $relname = null): array
 	{
 		if ($relname == null) {
 			return array_filter(explode(',',static::getModelInfo('desc_field')));

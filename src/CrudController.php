@@ -658,7 +658,7 @@ abstract class CrudController extends \yii\web\Controller
 	{
 		$bcs_style = $this->breadCrumbsStyle ?? ['standard'];
 		$scenario = $model->scenario?:$action_id;
-		$permissions = $view_params['permissions'] ?? [];
+		$permissions = $view_params['permissions'] ?? true;
 		$breadcrumbs = [];
 		$master = $this->getMasterModel();
 		if ($master) {
@@ -720,8 +720,9 @@ abstract class CrudController extends \yii\web\Controller
 		return $breadcrumbs;
 	}
 
-	public function genBreadCrumbs(string $action_id, $model, array $permissions = []): array
+	public function genBreadCrumbs(string $action_id, $model, array $view_params = []): array
 	{
+		$permissions = $view_params['permissions'] ?? true;
 		$breadcrumbs = $this->genBaseBreadCrumbs($action_id, $model, $permissions);
 		$scenario = $model->scenario?:$action_id;
 		$master = $this->getMasterModel();
