@@ -596,31 +596,31 @@ trait ModelInfoTrait
 		}
 	}
 
-	public function handyFieldValues(string $field, string $format,
-		string $model_format = 'medium', array|string|null $scope = null, ?string $filter_fields = null)
+	public function customFieldValues(string $fldname, array|string|null $scope = null,
+		?string $filter_fields = null): array
 	{
-		throw new \Exception("field '$field' not supported in " . get_called_class() . "::handyFieldValues() ");
+		throw new \Exception("field '$fldname' not supported in " . get_called_class() . "::customFieldValues() ");
 	}
 
-	public function formatHandyFieldValues($field, $values, $format)
+	public function formatHandyFieldValues(string $fldname, array $values, string $format): array
 	{
-		if ($format == 'ids') {
+		if ($format === 'ids') {
 			return array_keys($values);
-		} else if ($format == 'values') {
+		} else if ($format === 'values') {
 			return array_values($values);
-		} else if ($format == 'value') {
-			return $values[$this->$field]??null;
-		} else if ($format == 'select2') {
+		} else if ($format === 'value') {
+			return $values[$this->$fldname] ?? null;
+		} else if ($format === 'select2') {
 			return ArrayHelper::map($values, 1, 0, 2);
-		} else if ($format == 'group' || $format == 'grouped') {
+		} else if ($format === 'group' || $format == 'grouped') {
 			$ret = [];
 			foreach ($values as $k => $v) {
 				$ret[$v[1]][$k] = $v[0];
 			}
 			return $ret;
-		} else if ($format == 'ungroup') {
+		} else if ($format === 'ungroup') {
 			return AppHelper::unGroupValues($values);
-		} else if ($format == 'selectize') {
+		} else if ($format === 'selectize') {
 			$ret = [];
 			foreach( $values as $k => $v) {
 				$ret[] = [ 'value' => $k, 'text' => $v ];

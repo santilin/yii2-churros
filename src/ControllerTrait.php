@@ -44,6 +44,7 @@ trait ControllerTrait
 	}
 
 	// mainly for breadcrumbs
+	// Gets the whole request path, not this controllers path
 	public function getBaseRoute(): string
 	{
 		if ($this->module instanceof \yii\base\Application) {
