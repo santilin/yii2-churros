@@ -577,7 +577,16 @@ class JsonModel extends \yii\base\Model
 	public function handyFieldValues(string $field, string $format,
 		string $model_format = 'medium', array|string|null $scope = [], ?string $filter_fields = null)
 	{
-		throw new \Exception("field '$field' not supported in " . get_called_class() . "::handyFieldValues() ");
+        return $this->customFieldValues($field, $format, $model_format, $scope, $filter_fields);
+	}
+
+	public function customFieldValues(string $fldname,
+		string|null $format = null,
+		string|null $model_format = null,
+		array|string|null $scope = null,
+		?string $filter_fields = null): ?array
+	{
+		throw new \Exception("field '$fldname' not supported in " . get_called_class() . "::customFieldValues() ");
 	}
 
 	public function setAttributesFromNoArray($any)
