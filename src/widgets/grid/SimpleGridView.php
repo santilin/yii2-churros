@@ -33,6 +33,7 @@ class SimpleGridView extends \yii\grid\GridView
 	protected $savedRowData = [];
 	protected $summaryValues = [];
 	protected $previousModel = null;
+	protected $previousKey = null;
 	protected $recno;
 	protected $current_level = 0;
 
@@ -278,6 +279,7 @@ class SimpleGridView extends \yii\grid\GridView
 	protected function groupHeader($model, $key, $index, $grid)
 	{
 		if ($this->previousModel === null) {
+			$this->previousKey = $key;
 			$this->previousModel = $model;
 		}
 		$ret = '';
@@ -296,7 +298,7 @@ class SimpleGridView extends \yii\grid\GridView
 		foreach (array_reverse($this->groups) as $kg => $group) {
 			if ($updated_groups[$kg]) {
 				if ($group->footer !== false) {
-					$ret .= $group->getFooterRow($this->summaryColumns, $this->previousModel, []);
+					$ret .= $group->getFooterRow($this->summaryColumns, $this->previousModel, $this->previousKey, []);
 				}
 				$group->resetSummaries($this->summaryColumns, $this->current_level, count($this->groups));
 				$this->current_level--;
@@ -327,6 +329,7 @@ class SimpleGridView extends \yii\grid\GridView
 			$group->updateSummaries($this->summaryColumns, $this->current_level, $this->savedRowData);
 		}
 		$this->previousModel = $model;
+		$this->previousKey = $key;
 		return $ret;
 	}
 

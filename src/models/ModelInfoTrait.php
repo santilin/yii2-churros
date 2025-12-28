@@ -602,7 +602,8 @@ trait ModelInfoTrait
 		array|string|null $scope = null,
 		?string $filter_fields = null): ?array
 	{
-		return $this->customFieldValues($fldname, $format, $model_format, $scope, $filter_fields);
+		throw new \Exception("field '$fldname' not supported in " . get_called_class() . "::customFieldValues() ");
+		// return $this->customFieldValues($fldname, $format, $model_format, $scope, $filter_fields);
 	}
 
 	public function customFieldValues(string $fldname,
@@ -611,7 +612,7 @@ trait ModelInfoTrait
 		array|string|null $scope = null,
 		?string $filter_fields = null): ?array
 	{
-		throw new \Exception("field '$fldname' not supported in " . get_called_class() . "::customFieldValues() ");
+		return null;
 	}
 
 	public function formatHandyFieldValues(string $fldname, array $values, string $format): array

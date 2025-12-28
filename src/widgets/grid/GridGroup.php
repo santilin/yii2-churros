@@ -61,7 +61,7 @@ class GridGroup extends BaseObject
 		if ($this->got_value === false) {
 			if ($this->value instanceOf \Closure) {
 				$this->current_value = call_user_func($this->value, $model, $key, $index, $this->grid);
-		} else if (ArrayHelper::KeyExists($this->value, $model)) {
+			} else if (ArrayHelper::KeyExists($this->value, $model)) {
 				$this->current_value = $model->{$this->value};
 			} else {
 				$this->current_value = $this->grid->columns[$this->value]->getDataCellValue($model, $key, $index);
@@ -146,7 +146,7 @@ class GridGroup extends BaseObject
 		}
 	}
 
-	public function getFooterRow(array $summary_columns, $model, array $row_options = []): string
+	public function getFooterRow(array $summary_columns, $model, $key, array $row_options = []): string
 	{
         if ($this->footer && isset($this->footer['rowOptions'])) {
 			if ($this->footer['rowOptions'] instanceof \Closure) {
@@ -158,13 +158,13 @@ class GridGroup extends BaseObject
         }
 		Html::addCssClass($row_options, 'group-foot-' . strval($this->level));
 		if ($this->grid->onlySummary && $this->level > count($this->grid->groups)) {
-			return Html::tag('tr', $this->getOnlyTotalsContent($tsummary_columns, $model), $row_options);
+			return Html::tag('tr', $this->getOnlyTotalsContent($tsummary_columns, $model, $key), $row_options);
 		} else {
-			return Html::tag('tr', $this->getStandardFooterContent($summary_columns, $model), $row_options);
+			return Html::tag('tr', $this->getStandardFooterContent($summary_columns, $model, $key), $row_options);
 		}
 	}
 
-	protected function getOnlyTotalsContent($summary_columns, $model): string
+	protected function getOnlyTotalsContent($summary_columns, $model, $key): string
 	{
 		$ret = '';
 		$first_td_options = [];
@@ -186,7 +186,7 @@ class GridGroup extends BaseObject
 	}
 
 
-	protected function getStandardFooterContent($summary_columns, $model)
+	protected function getStandardFooterContent($summary_columns, $model, $key)
 	{
 		$colspan = 0;
 		foreach ($this->grid->columns as $kc => $column) {
@@ -207,7 +207,7 @@ class GridGroup extends BaseObject
 		];
 		$content = $this->footer['label'] ?? null;
 		if ($content instanceOf \Closure) {
-			$content = call_user_func($content, $this->combineSummaryValues($this->level), $model, $this);
+			$content = call_user_func($content, $this->combineSummaryValues($this->level), $model, $key, $this);
 		}
 		if ($content === true || $content === null) {
 			$group_column = $this->grid->findColumn($this->column);
@@ -222,7 +222,7 @@ class GridGroup extends BaseObject
 		$ret = '';
 		if ($content !== false) {
 			$content = strtr($content, [
-				'{group_value}' => $this->current_value,
+				'{group_value}' => $this->last_value,
 				'{group_header_label}' => $this->header['label'] ?? '',
 				'{group_footer_label}' => $this->footer['label'] ?? '',
 			]);
@@ -257,9 +257,8 @@ class GridGroup extends BaseObject
 	 */
 	public function getSummaryContent($summary_columns, string $label, int $colspan, array $tdoptions)
 	{
-		$ret = Html::tag('td', Yii::t('churros', 'Totals {value_desc} {value}', [
-			'value_desc' => $label ?: $this->footer['label'] ?? '',
-			'value' => $this->last_value,
+		$ret = Html::tag('td', Yii::t('churros', 'Totals {label}', [
+			'label' => $label ?: '',
 		]), $tdoptions);
 		$nc = 0;
 		foreach ($this->grid->columns as $kc => $column) {
