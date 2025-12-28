@@ -260,7 +260,7 @@ class FormHelper
 				if (!isset($button['htmlOptions']['title'])) {
 					$button['htmlOptions']['title'] = $caption;
 				}
-				Html::addCssClass($button['htmlOptions'], [$name, 'd-flex align-items-baseline']);
+				Html::addCssClass($button['htmlOptions'], [$name, 'flex align-items-baseline']);
 				if (empty($htmlOptions['role'])) {
 					$button['htmlOptions']['role'] = 'button';
 				}

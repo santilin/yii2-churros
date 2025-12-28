@@ -11,7 +11,7 @@
 .header-toolbar {
   margin-bottom: 0.125rem;
   display: flex;
-  align-items: baseline;
+/*   align-items: baseline; */
   a, button {
     & i {
       margin-right: .2rem;

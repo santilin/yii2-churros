@@ -230,8 +230,8 @@ trait ControllerTrait
 	 * a) the parent on a hiearchy
 	 * b) the parent in a master/detail
 	 */
- 	public function modelBreadCrumbs($model, string $scenario, string $prefix, array $permissions = [],
-									 bool $last_one = false): array
+ 	public function modelBreadCrumbs($model, string $scenario, string $prefix,
+		array|bool $permissions = [], bool $last_one = false): array
 	{
 		$breadcrumbs = [];
 		if ($prefix == '') {
