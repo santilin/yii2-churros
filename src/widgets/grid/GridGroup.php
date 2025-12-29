@@ -201,15 +201,15 @@ class GridGroup extends BaseObject
 				}
 			}
 		}
-		$tdoptions = [
+		$label_options = [
 			'class' => 'group-total-label',
 			'colspan' => $colspan,
 		];
-		$content = $this->footer['label'] ?? null;
-		if ($content instanceOf \Closure) {
-			$content = call_user_func($content, $this->combineSummaryValues($this->level), $model, $key, $this);
+		$label = $this->footer['label'] ?? null;
+		if ($label instanceOf \Closure) {
+			$label = call_user_func($label, $this->combineSummaryValues($this->level), $model, $key, $this);
 		}
-		if ($content === true || $content === null) {
+		if ($label === true || $label === null) {
 			$group_column = $this->grid->findColumn($this->column);
 			if ($group_column) {
 				$label = $group_column->label ?: $this->column;
@@ -217,19 +217,14 @@ class GridGroup extends BaseObject
 					$label = ' '  . mb_strtolower($label) . ' ';
 				}
 			}
-			return $this->getSummaryContent($summary_columns, $label, $colspan, $tdoptions);
-		}
-		$ret = '';
-		if ($content !== false) {
-			$content = strtr($content, [
+		} else {
+			$label = strtr($label, [
 				'{group_value}' => $this->last_value,
 				'{group_header_label}' => $this->header['label'] ?? '',
 				'{group_footer_label}' => $this->footer['label'] ?? '',
 			]);
-			Html::addCssClass($tdoptions, "group-foot-total-{$this->column} group-foot-total-{$this->level}");
-			$ret = Html::tag('td', $content, $tdoptions);
 		}
-		return $ret;
+		return $this->getSummaryContent($summary_columns, $label, $colspan, $label_options);
 	}
 
 	/**
@@ -255,11 +250,11 @@ class GridGroup extends BaseObject
 	 * - Whether the column is summarized
 	 *
 	 */
-	public function getSummaryContent($summary_columns, string $label, int $colspan, array $tdoptions)
+	public function getSummaryContent($summary_columns, string $label, int $colspan, array $label_options)
 	{
 		$ret = Html::tag('td', Yii::t('churros', 'Totals {label}', [
 			'label' => $label ?: '',
-		]), $tdoptions);
+		]), $label_options);
 		$nc = 0;
 		foreach ($this->grid->columns as $kc => $column) {
 			if (!$column instanceof $this->grid->dataColumnClass) {

@@ -535,7 +535,7 @@ trait RelationTrait
         }
     }
 
-    public function createChild(string $relation_name, string $form_class_name = null)
+    public function createChild(string $relation_name, ?string $form_class_name = null)
     {
         if (isset(static::$relations[$relation_name])) {
             $r = static::$relations[$relation_name];
@@ -554,7 +554,7 @@ trait RelationTrait
         }
     }
 
-    public function createChildren($relation_name, $form_class_name)
+    public function createChildren(string $relation_name, ?string $form_class_name = null)
 	{
 		// Get the relation query
 		$relation = $this->getRelation($relation_name);
@@ -573,7 +573,7 @@ trait RelationTrait
 
 
     public function createRelatedModels(string $relation_name, array $current_values = [],
-                                      string $form_class_name = null): array|JsonModel
+                                      ?string $form_class_name = null): array|JsonModel
     {
         $rel_info = static::$relations[$relation_name];
         $rel_model_class = $rel_info['modelClass'];

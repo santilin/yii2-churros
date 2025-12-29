@@ -13,7 +13,7 @@ class YADTC extends \DateTime
 	const NOW = '\\app\\lib\\YADTC::NOW';
 
 	#[\ReturnTypeWillChange]
-    static public function createFromFormat($format, $time, \DateTimeZone $timezone = null): ?YADTC
+    static public function createFromFormat($format, $time, ?\DateTimeZone $timezone = null): ?YADTC
     {
         $ext_dt = new static();
         $parent_dt = parent::createFromFormat($format, $time, $timezone);
@@ -30,7 +30,7 @@ class YADTC extends \DateTime
 	 * Intenta crear un DateTime a partir de cualquier tipo de variable y sin tener que especificar el formato.
 	 * Si la fecha es incorrecta o ambigua, lanza una excepción.
 	 */
-	static public function fromString($datetime, $format = null, \DateTimeZone $timezone = null): ?YADTC
+	static public function fromString($datetime, $format = null, ?\DateTimeZone $timezone = null): ?YADTC
 	{
 		if ($datetime === null || $datetime instanceof YADTC) {
 			return $datetime;
@@ -87,7 +87,7 @@ class YADTC extends \DateTime
  		throw new \Exception("Invalid format of date '" . strval($sdate) . "'");
 	}
 
-	static public function fromWeek(int $week, int $year, \DateTimeZone $timezone = null): YADTC
+	static public function fromWeek(int $week, int $year, ?\DateTimeZone $timezone = null): YADTC
 	{
 		$date = new self("now", $timezone);
 		$date->setISODate($year, $week);
@@ -136,7 +136,7 @@ class YADTC extends \DateTime
 		}
 	}
 
-	static public function today($modify = null, \DateTimeZone $timezone = NULL)
+	static public function today($modify = null, ?\DateTimeZone $timezone = null)
 	{
 		$dt = new \DateTime("now", $timezone);
 		if ($modify != null) {
@@ -149,7 +149,7 @@ class YADTC extends \DateTime
 		return $ext_dt;
 	}
 
-	static public function now(string|\DateTimeZone $timezone = null)
+	static public function now(string|\DateTimeZone|null $timezone = null)
 	{
 		if (is_string($timezone)) {
 			$timezone = new \DateTimeZone($timezone);
@@ -158,8 +158,8 @@ class YADTC extends \DateTime
 		return $dt;
 	}
 
-	static public function dateOrToday(int|string|\DateTime|YADTC $date = null,
-									   \DateTimeZone $timezone = null): YADTC
+	static public function dateOrToday(int|string|\DateTime|YADTC|null $date = null,
+									   ?\DateTimeZone $timezone = null): YADTC
 	{
 		if ($date instanceof YADTC) {
 			return $date;
@@ -451,7 +451,7 @@ class YADTC extends \DateTime
 		return self::date_format_to( $date_format, 'strf' );
 	}
 
-	static public function edad(\DateTime $nacimiento, \DateTime $adiade = null )
+	static public function edad(\DateTime $nacimiento, ?\DateTime $adiade = null )
 	{
 		if ($adiade == null) {
 			$adiade = new \DateTime("now", $nacimiento->getTimezone());

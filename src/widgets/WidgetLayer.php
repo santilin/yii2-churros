@@ -463,12 +463,18 @@ js;
 				$ret .= $this->layoutSubtitle($layout_row['content'], $layout_row_layout, 'large', $layout_row['htmlOptions']??[]);
 				break;
 			case 'label&content':
-				if (isset($layout_row['htmlOptions'])) {
-					Html::addCssClass($layout_row['htmlOptions'], 'form-control readonly');
-				} else {
-					$layout_row['htmlOptions']['class'] = 'form-control readonly';
+				$col_added = false;
+				if (!$this->lastWasCol()) {
+					$this->setLastCol($cols);
+					$col_added = true;
+					$ret .='<div class="' . $this->columnClasses($cols) . ' " style="display: flex; flex-direction: column">';
 				}
-				$ret .= $this->layoutContent($layout_row['label'], $layout_row['content'], $layout_row_layout, 'large', $layout_row['htmlOptions']);
+				if (!isset($layout_row['htmlOptions'])) {
+					$layout_row['htmlOptions'] = [];
+				}
+				$layout_row['htmlOptions']['class'] = 'form-control readonly';
+				$ret .= $this->layoutContent($layout_row['label'], $layout_row['content'], $layout_row_layout,
+											 'large', $layout_row['htmlOptions']);
 				break;
 			case 'html':
 				$label = ArrayHelper::remove($layout_row, 'label', null);
@@ -632,16 +638,16 @@ js;
 	}
 
 	protected function layoutContent(string $label, string $content, string $layout_of_row,
-									 string $widget_layout, array $options = []):string
+									 string $widget_layout, array $contentOptions = []):string
 	{
 		$ret = '';
 		$classes = $this->widget_layout_horiz_config[$layout_of_row][$widget_layout]['horizontalCssClasses'];
-		$ret .= '<div class="row w-100">';
+		$ret .= '<div class="row w-100 mb-3">';
 		if (!empty($label)) {
 			$ret .= Html::tag('label', $label, [ 'class' => $classes['label']]);
 		}
-		Html::addCssClass($options, 'field');
-		$ret .= Html::tag('div', Html::tag('div', $content, $options), ['class' => $classes['wrapper']]);
+		Html::addCssClass($contentOptions, 'field');
+		$ret .= Html::tag('div', Html::tag('div', $content, $contentOptions), ['class' => $classes['wrapper']]);
 		$ret .= '</div>';
 		return $ret;
 	}

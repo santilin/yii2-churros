@@ -29,6 +29,7 @@ class DateRangeValidator extends Validator
      */
     public $formatDate = 'php:' . YADTC::SQL_DATE_FORMAT;
     public $formatDateTime = 'php:' . YADTC::SQL_DATETIME_FORMAT;
+    public $formatTime = 'php:' . YADTC::SQL_TIME_FORMAT;
 
     /**
      * @var string attribute name of the model passed where the until date timestamp will be assigned
@@ -43,7 +44,12 @@ class DateRangeValidator extends Validator
 		if ($this->untilAttribute == '') {
 			throw new InvalidConfigException('DateRangeValidator: untilAttribute not set');
 		}
-		$format = $this->type == DateValidator::TYPE_DATE ? $this->formatDate : $this->formatDateTime;
+		$format = match($this->type) {
+			DateValidator::TYPE_DATE => $this->formatDate,
+			DateValidator::TYPE_TIME => $this->formatTime,
+			default                  => $this->formatDateTime,
+		};
+
 		$fromDate = $model->$attribute;
 		$untilDate = $model->{$this->untilAttribute};
 

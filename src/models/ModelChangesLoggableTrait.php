@@ -181,7 +181,7 @@ trait ModelChangesLoggableTrait
 
 
 	public function createChangesLog(int $type, int $subtype, string $field, mixed $old_value,
-									 ?int $changed_by = null, ?string $fecha = null, string $comments = null): false|\yii\db\ActiveRecord
+									 ?int $changed_by = null, ?string $fecha = null, ?string $comments = null): false|\yii\db\ActiveRecord
 	{
 		$relation = static::$relations[static::$_log_model_changes_relation]??false;
 		if ($relation) {
