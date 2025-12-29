@@ -636,9 +636,9 @@ abstract class CrudController extends \yii\web\Controller
 	public function getMasterModel()
 	{
 		if ($this->masterModel === false) {
+			$this->masterModel = null;
 			$master_id = intval($this->request->get('parent_id', 0));
 			if ($master_id !== 0) {
-				$this->masterModel = null;
 				$parent_controller = $this->request->get('parent_controller');
 				if ($parent_controller) {
 					$master_model_name = 'app\\models\\'. AppHelper::camelCase($parent_controller);
