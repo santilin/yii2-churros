@@ -625,7 +625,7 @@ trait ModelInfoTrait
 		} else if ($format === 'values') {
 			return array_values($values);
 		} else if ($format === 'value') {
-			return $values[$this->$fldname] ?? null;
+			return [$values[$this->$fldname] ?? null];
 		} else if ($format === 'select2') {
 			return ArrayHelper::map($values, 1, 0, 2);
 		} else if ($format === 'group' || $format == 'grouped') {

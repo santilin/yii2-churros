@@ -91,20 +91,20 @@ class FormHelper
 	 *
 	 * @return array{0: string, 1: string, 2: array, 3: string} Returns a tuple with:
 	 *   - [0]: view key (string)
-	 *   - [1]: first element of view info (string)
-	 *   - [2]: second element of view info or empty array (array)
-	 *   - [3]: third element of view info or empty string (string)
+	 *   - [1]: title (string)
+	 *   - [2]: view_permissions (array)
+	 *   - [3]: form_params (string)
 	 */
 	static public function viewFromRequest(array $views, array $params): array
 	{
- 		$_nv=$params[self::VIEWS_NVIEW_PARAM]??0;
+ 		$_nv=$params[self::VIEWS_NVIEW_PARAM] ?? 0;
 		if ($_nv === '' || $_nv === 'false') {
 			$_nv = 0;
 		}
 		if (is_string($_nv)) {
 			foreach ($views as $view => $view_info) {
 				if ($view == $_nv || AppHelper::lastWord($view,'/') == $_nv) {
-					return [ $view, $view_info[0], $view_info[1]??[], $view_info[2]??''];
+					return [ $view, $view_info[0], $view_info[1]??[], $view_info[2] ?? ''];
 				}
 			}
 			$_nv = 0;
