@@ -604,7 +604,7 @@ trait ModelInfoTrait
 	{
 		$ret = self::customFieldValues($fldname, $format, $model_format, $scope, $filter_fields);
 		if ($ret === null) {
-			throw new \Exception("field '$fldname' not supported in " . get_called_class() . "::customFieldValues() ");
+			throw new \Exception("field '$fldname' not supported in " . get_called_class() . "::handyFieldValues() ");
 		}
 		return $ret;
 	}
