@@ -230,8 +230,10 @@ $('#$id').blur(function(e) {
 	return true;
 });
 $('#$id').keydown(function(e) {
-	mctahead_changed_$js_id = true;
-	if ((e.keyCode === 13 || e.keyCode == 8 || e.key == "Delete") && mctahead_changed_$js_id) {
+	if ( e.keyCode == 13) {
+		debugger;
+	}
+	if ((e.keyCode == 13 || e.keyCode == 8 || e.key == "Delete") && mctahead_changed_$js_id) {
 		let selectedDatum = $(this).data('ttTypeahead').menu.getActiveSelectable();
 		if (!selectedDatum) {
 			selectedDatum = $(this).data('ttTypeahead').menu.getTopSelectable();
@@ -244,7 +246,12 @@ $('#$id').keydown(function(e) {
 			}
 		}
 		mctahead_changed_$js_id = false;
+		if (e.keyCode === 13) {
+			return false;
+		}
+		return true;
 	}
+	mctahead_changed_$js_id = true;
 	return true;
 });
 js

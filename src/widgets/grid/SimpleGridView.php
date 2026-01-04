@@ -357,7 +357,7 @@ class SimpleGridView extends \yii\grid\GridView
 	 */
 	public function getGrandTotalSummary($summary_columns, $tdoptions)
 	{
-		if (count($summary_columns) == 0) {
+		if (count($summary_columns) === 0) {
 			return '';
 		}
 		$p = $this->dataProvider->getPagination();
@@ -366,10 +366,7 @@ class SimpleGridView extends \yii\grid\GridView
 		}
 		$colspan = 0;
 		foreach ($this->columns as $kc => $column) {
-			if ($column->visible) {
-				if (!$column instanceof $this->dataColumnClass) {
-					continue;
-				}
+			if ($column instanceof $this->dataColumnClass && $column->visible) {
 				if (!isset($summary_columns[$kc])) {
 					$colspan++;
 				} else {
@@ -377,27 +374,29 @@ class SimpleGridView extends \yii\grid\GridView
 				}
 			}
 		}
-		if ($colspan==0) {
+		if ($colspan === 0) {
 			$ret = '</tr><tr>';
 			$ret .= Html::tag('td', $this->grandTotalLabel?:Yii::t('churros', 'Totals') . ' ',
 				[ 'class' => 'total-label', 'colspan' => count($this->columns) + 1] );
 			$ret .= '</tr><tr>';
 		} else {
 			$ret = Html::tag('td', $this->grandTotalLabel?:Yii::t('churros', 'Totals') . ' ',
-				[ 'class' => 'total-label', 'colspan' => $colspan ] );
+				[ 'class' => 'total-label', 'colspan' => $colspan + 1 ] );
 		}
 		$nc = 0;
 		foreach ($this->columns as $kc => $column) {
-			if (!($column instanceof DataColumn)) {
-				$ret .= '<td></td>';
-				$nc++;
-				continue;
-			}
-			if ($nc++ < $colspan) {
+			// if ($column instanceof $this->dataColumnClass && $column->visible) {
+			// 	$ret .= '<td></td>';
+			// 	$nc++;
+			// 	continue;
+			// }
+			if ($nc++ <= $colspan) {
 				continue;
 			}
 			if ($column->formatClass() !== '') {
-				$classes = [ 'format-' . $column->formatClass()];
+				$classes = [ 'format-' . $column->formatClass(), 'text-end' ];
+			} else {
+				$classes = [ 'format-decimal', 'text-end' ];
 			}
 			if (isset($summary_columns[$kc])) {
 				$value = 0.0;

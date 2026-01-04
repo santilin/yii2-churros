@@ -660,7 +660,7 @@ trait ModelInfoTrait
 
 	public function resetPrimaryKeys()
 	{
-		foreach( $this->primaryKey() as $key_name) {
+		foreach ($this->primaryKey() as $key_name) {
 			$this->$key_name = null;
 		}
 	}

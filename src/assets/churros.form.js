@@ -305,10 +305,14 @@ window.yii.FormController = (function() {
 
     function FormController(form) {
         if (typeof form === 'string') {
-            form = document.getElementById(form);
-        }
-        if (!form) throw new Error('Form not found');
-        this.form = form;
+            form_element = document.getElementById(form);
+			if (!form_element) {
+				throw new Error('Form ' + form + ' not found');
+			}
+			this.form = form_element;
+        } else {
+			this.form = form;
+		}
 		form.controller = this;
     }
 

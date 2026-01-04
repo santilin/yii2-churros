@@ -230,7 +230,7 @@ abstract class CrudController extends \yii\web\Controller
 		$params['permissions'] = $this->resolvePermissions($params['permissions'] ?? []);
 		if ($this->model->loadAll($this->request->post(), static::findRelationsInForm($params))) {
 			$this->model->setIsNewRecord(true);
-			$this->model->resetPrimaryKeys();
+			$saved_pks = $this->model->getPrimaryKey(true);
 			if ($this->model->saveAll(true)) {
 				if ($this->request->getIsAjax()) {
 					Yii::$app->response->format = \yii\web\Response::FORMAT_JSON;
@@ -239,6 +239,8 @@ abstract class CrudController extends \yii\web\Controller
 				$this->addSuccessFlashes('duplicate', $this->model);
 				$this->addWarningFlashes($this->model);
 				return $this->redirect($this->returnTo(null, 'duplicate', $this->model));
+			} else {
+				$this->model->setAttributes($saved_pks);
 			}
 		}
 		return $this->render('duplicate', [
