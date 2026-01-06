@@ -174,7 +174,6 @@ abstract class CrudController extends \yii\web\Controller
 			$this->layout = false;
 			return $this->render('_view', [
 				'model' => $this->model,
-				'title' => 'View',
 				'viewViews' => [ '_view' => [ '', null, [], '' ] ],
 				'viewParams' => $this->changeActionParams($params, 'view', $this->model)
 			]);

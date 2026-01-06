@@ -557,7 +557,11 @@ ajax;
 	static public function jsonColumnUrlCreatorWithReturnTo($action, $model, $key, $index, $column)
 	{
 		if ($column->controller) {
-			$params = [ $column->controller . "['$key']/" . $action];
+			if (str_contains($key, '/')) {
+				$params = [ $column->controller . "['$key']/$action"];
+			} else {
+				$params = [ $column->controller . "/$key/$action"];
+			}
 		} else {
 			$params = is_array($key) ? $key : ['id' => (string) $key];
 		}
