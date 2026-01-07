@@ -46,6 +46,14 @@ use santilin\churros\helpers\AppHelper;
 
 trait RelationTrait
 {
+
+	public $_parent_model = null;
+
+	public function getParentModel()
+	{
+		return $this->_parent_model;
+	}
+
     /**
      * Load all attributes including related attributes
      * @param $post
@@ -548,13 +556,14 @@ trait RelationTrait
             } else {
                 $child = new $rel_model_class;
             }
+			$child->_parent_model = $this;
             return $child;
         } else {
             return null;
         }
     }
 
-    public function createChildren(string $relation_name, ?string $form_class_name = null)
+    public function createChildren(string $relation_name, ?string $form_class_name = null): array
 	{
 		// Get the relation query
 		$relation = $this->getRelation($relation_name);
@@ -567,7 +576,11 @@ trait RelationTrait
 		$query->modelClass = $form_class_name;
 
 		// Return all related records as instances of $form_class_name
-		return $query->all();
+		$children = $query->all();
+		foreach ($children as $child) {
+			$child->_parent_model = $this;
+		}
+		return $children;
 	}
 
 
@@ -589,6 +602,7 @@ trait RelationTrait
                 foreach ($related_models as $nr => $rm) {
                     if (isset($current_values[$nr])) {
                         $related_models[$nr]->setAttributes($current_values[$nr]);
+						$related_models[$nr]->_parent_model = $this;
                     }
                 }
             }
@@ -601,6 +615,7 @@ trait RelationTrait
                 }
             } else {
                 $child = new $rel_model_class;
+				$child->_parent_model = $this;
             }
             return $child;
         }

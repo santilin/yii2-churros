@@ -393,8 +393,9 @@ class SimpleGridView extends \yii\grid\GridView
 			if ($nc++ <= $colspan) {
 				continue;
 			}
-			if ($column->formatClass() !== '') {
-				$classes = [ 'format-' . $column->formatClass(), 'text-end' ];
+			$format = $this->formatOfColumn($column);
+			if ($format !== '') {
+				$classes = [ "format-$format", 'text-end' ];
 			} else {
 				$classes = [ 'format-decimal', 'text-end' ];
 			}
@@ -414,6 +415,24 @@ class SimpleGridView extends \yii\grid\GridView
 			}
 		}
 		return $ret;
+	}
+
+	public function formatOfColumn($column): string
+	{
+		if ($column instanceof \yii\grid\ActionColumn) {
+			return '';
+		} else {
+			if (is_array($column->format)) {
+				$format = trim(reset($column->format));
+			} else {
+				$format = trim($column->format);
+			}
+			if ($format === 'text' || $format === 'raw') {
+				return '';
+			} else {
+				return $format;
+			}
+		}
 	}
 
 

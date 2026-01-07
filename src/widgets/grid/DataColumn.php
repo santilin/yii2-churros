@@ -29,20 +29,6 @@ class DataColumn extends \yii\grid\DataColumn
         parent::init();
     }
 
-    public function formatClass(): string
-    {
-        if (is_array($this->format)) {
-            $format = trim(reset($this->format));
-        } else {
-            $format = trim($this->format);
-        }
-        if ($format === 'text' || $format === 'raw') {
-            return '';
-        } else {
-            return $format;
-        }
-    }
-
 	// Da preferencia a las labels del searchmodel
     protected function getHeaderCellLabel()
     {
@@ -91,8 +77,9 @@ class DataColumn extends \yii\grid\DataColumn
             $options = $this->contentOptions;
         }
 
-        if ($this->formatClass() !== '') {
-            Html::addCssClass($options, 'format-' . $this->formatClass());
+        $format = $this->grid->formatOfColumn($this);
+        if ($format !== '') {
+            Html::addCssClass($options, "format-$format");
         }
         if (YII_ENV_DEV) {
             try {

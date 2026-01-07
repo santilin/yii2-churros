@@ -114,15 +114,6 @@ class GridGroup extends BaseObject
 			if ($content === null) {
 				$content = "{group_value}";
 			}
-			// $format = $this->header['format'] ?? $this->formatClass() ?: 'raw';
-			// switch($format) {
-			// 	case 'raw':
-			// 		$content .= $this->current_value;
-			// 		break;
-			// 	default:
-			// 		$content .= Yii::$app->formatter->format($this->current_value, $format);
-			// 		break;
-			// }
 		}
 		if ($content !== false) {
 			$content = strtr($content, [
@@ -267,8 +258,9 @@ class GridGroup extends BaseObject
 			$classes = [
 				'w1'
 			];
-			if ($column->formatClass() !== '') {
-				$classes[] = "format-{$column->formatClass()}";
+			$format = $this->grid->formatOfColumn($column);
+			if ($format !== '') {
+				$classes[] = "format-$format";
 			}
 			if (isset($summary_columns[$kc])) {
 				$classes[] = 'group-foot-' . strval($this->level);

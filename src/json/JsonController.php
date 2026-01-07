@@ -37,7 +37,7 @@ class JsonController extends \yii\web\Controller
 	const MSG_ERROR_DELETE = 'There has been an error deleting {la} {title} <a href="{record_url}">{record_medium}</a>';
 	const MSG_DUPLICATED = '{La} {title} <a href="{record_url}">{record_medium}</a> has been successfully duplicated.';
 	const MSG_ERROR_DELETE_INTEGRITY = 'Unable to delete {la} {title} <a href="{record_url}">{record_medium}</a> because it has related data.';
-	const MSG_ERROR_DELETE_USED_IN_RELATION = 'Unable to delete {la} {title} <a href="{record_url}">{record_medium}</a> because it is used by at least one {relation_title}.';
+	const MSG_ERROR_DELETE_USED_IN_RELATION = 'Unable to delete {la} {title} <a href="{record_url}">{record_medium}</a> because it is related to at least one {relation_title}.';
 	const MSG_ACCESS_DENIED = 'Access denied to this {title}.';
 	const MSG_NOT_FOUND = '{Title} with path {path}/{id} not found.';
 
