@@ -226,12 +226,12 @@ class YADTC extends \DateTime
 	}
 	public function setYear($year)
 	{
-		$this->setDate( $year, $this->month(), $this->day());
+		$this->setDate($year, $this->month(), $this->day());
 		return $this;
 	}
 	public function setMonth($month)
 	{
-		$this->setDate( $this->year(), $month, $this->day());
+		$this->setDate($this->year(), $month, $this->day());
 		return $this;
 	}
 	public function setDay($day)
