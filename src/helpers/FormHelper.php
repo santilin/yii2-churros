@@ -669,7 +669,7 @@ ajax;
 			}
 		}
 		foreach ($models as $model) {
-			if ($model != null) {
+			if ($model !== null) {
 				if ($make_links) {
 					$url = $route . strval($model->getPrimaryKey());
 					$attrs[] = "<a href='$url'>" .  $model->recordDesc($record_format, 0, $context) . "</a>";
