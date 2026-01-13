@@ -87,7 +87,7 @@ class AuthHelper
 		return $role;
 	}
 
-    static public function addToRole($role_name, array|string $perm_names, $auth = null)
+    static public function addPermissionsToRole($role_name, array|string $perm_names, $auth = null)
     {
 		if ($auth == null) {
 			$auth = \Yii::$app->authManager;
@@ -153,7 +153,7 @@ class AuthHelper
 		static::$lastMessage = join("\n", $msgs);
     }
 
-    static public function assignToUser($user_id_or_name, array $perms, $auth = null)
+    static public function assignToUser($user_id_or_name, array|string $perms, $auth = null)
     {
 		if ($auth == null) {
 			$auth = \Yii::$app->authManager;
@@ -170,7 +170,7 @@ class AuthHelper
 			$user_name = $user_id_or_name;
 		}
 		$msgs = [];
-		foreach ($perms as $perm_name) {
+		foreach ((array) $perms as $perm_name) {
 			if ($perm_name instanceof Role) {
 				$perm_name = $perm_name->name;
 			}

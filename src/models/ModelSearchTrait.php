@@ -57,9 +57,9 @@ trait ModelSearchTrait
 
     public function operatorForAttr(?string $rel_name, string $attr): string
 	{
-		$op = $this->related_operators[$rel_name]??false;
+		$op = $this->related_operators[$rel_name] ?? false;
 		if ($op === false) {
-			$op = $this->attrs_operators[$rel_name]??false;
+			$op = $this->attrs_operators[$rel_name] ?? false;
 		}
 		if ($op !== false) {
 			return $op;
@@ -103,7 +103,7 @@ trait ModelSearchTrait
 			}
 			list($sort_fldname, $table_alias, $model, $relation) = $this->addRelatedFieldToJoin($attribute, $provider->query);
 			if ($relation &&
-				($relation['type'] === 'HASMANY' || $relation['type'] === "MANY2MANY")) {
+				($relation['type'] === 'HasMany' || $relation['type'] === "ManyToMany")) {
 				$add_distinct = true;
 			}
 			if ($sort_fldname != $attribute) {
