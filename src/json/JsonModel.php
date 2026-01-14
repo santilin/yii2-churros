@@ -265,8 +265,8 @@ class JsonModel extends \yii\base\Model
 
     public function setPrimaryKey($id = null)
     {
-        $locator = static::$_locator??null;
-        if ($id===null) {
+        $locator = static::$_locator ?? null;
+        if ($id === null) {
             if ($locator) {
                 if (empty($this->$locator)) {
                     $this->$locator = $this->_id;
@@ -622,7 +622,7 @@ class JsonModel extends \yii\base\Model
 		}
 	}
 
-	public function linkToMe(string $format = 'long', string $action = 'view', bool $global = false, string $base_route = null): string
+	public function linkToMe(string|bool $format = 'long', string $action = 'view', bool $global = false, string $base_route = null): string
 	{
 
 		if ($base_route === null) {

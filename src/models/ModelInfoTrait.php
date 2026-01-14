@@ -97,7 +97,7 @@ trait ModelInfoTrait
 					}
 					break;
 				case 'record_url':
-					$placeholders[$bracket_match] = $this->linkToMe(false);
+					$placeholders[$bracket_match] = $this->linkToMe(false, 'view');
 					break;
 				case 'record_long':
 					$placeholders[$bracket_match] = $this->recordDesc('long');
@@ -223,7 +223,7 @@ trait ModelInfoTrait
 		return $ret;
 	}
 
-	public function linkToMe(string $format = 'long', string $action = 'view', bool $global = false, ?string $base_route = null): string
+	public function linkToMe(string|bool $format = 'long', string $action = 'view', bool $global = false, ?string $base_route = null): string
 	{
 		if ($base_route === null) {
 			$base_route = Yii::$app->module?->id;
