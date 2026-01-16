@@ -103,8 +103,8 @@ trait RelationTrait
 						if (is_array($model_relation['left'])) {
 							// Sets the foreign keys of this model if multiple keys
 							if (is_string($post_data)) {
-								$post_data = json_decode($post_data);
-								$this->setAttributes(array_combine($rel_model->primaryKey(),$post_data), false); // not safe
+								$post_data = json_decode($post_data, true);
+								$this->setAttributes($post_data, false); // not safe
 							} else {
 								throw new \Exception("stop");
 							}

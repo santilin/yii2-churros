@@ -130,7 +130,8 @@ abstract class CrudController extends \yii\web\Controller
 	/**
 	 * @param array $params 'parentPermissions' => parent permissions
 	 */
-	public function indexDetails($master, string $relation_name, string $view, array $params, $previous_context = null, string $search_model_class = null)
+	public function indexDetails($master, string $relation_name, string $view, array $params,
+								 $previous_context = null, ?string $search_model_class = null)
 	{
 		$this->action = $this->createAction('index');
 		// Tiene preferencia la clase más específica
@@ -568,7 +569,7 @@ abstract class CrudController extends \yii\web\Controller
 	// Ajax
 	public function actionAutocomplete(string $search, string $format,
 		array|string $fields = [], array|string $scopes = '',
-		array|string $id_fields = null, string $model_format = 'long')
+		array|string|null $id_fields = null, string $model_format = 'long')
 	{
 		\Yii::$app->response->format = \yii\web\Response::FORMAT_JSON;
 		$ret = [];
