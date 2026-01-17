@@ -17,14 +17,14 @@ window.yii.churros = (function ($) {
 		dot_dot_groups: function(mask, dot) {
 			const parts = mask.split(dot);
 			let ret = [];
-			for( i=0; i<parts.length; ++i) {
+			for (let i=0; i<parts.length; ++i) {
 				ret.push(parts[i].length);
 			}
 			return ret;
 		},
 		dot_dot_validate_input: function($form, attribute, messages, mask, dot, options) {
 			var $input = $form.find(attribute.input);
-			value = pub.dot_dot_validate($input.val(), mask, dot, options);
+			let value = window.yii.churros.dot_dot_validate($input.val(), mask, dot, options);
 			if (value !== false) {
 				$input.val(value);
 			} else {
@@ -32,8 +32,8 @@ window.yii.churros = (function ($) {
 			}
 		},
 		dot_dot_validate(value, mask, dot, options) {
-			const groups = pub.dot_dot_groups(mask, dot);
-			var regexp_dot;
+			const groups = window.yii.churros.dot_dot_groups(mask, dot);
+			let regexp_dot;
 			if (dot == '.') {
 				regexp_dot = '\\.';
 			} else {
@@ -43,7 +43,7 @@ window.yii.churros = (function ($) {
 				return true;
 			}
 			let reg_exps = [];
-			for( i=0; i<groups.length; ++i) {
+			for ( let i=0; i<groups.length; ++i) {
 				if (i==0) {
 					reg_exps.push("[0-9]{1," + groups[i] + "}");
 				} else {
@@ -51,11 +51,11 @@ window.yii.churros = (function ($) {
 				}
 			}
 			let re_str = '';
-			for( i=0; i<reg_exps.length; ++i) {
+			for ( let i=0; i<reg_exps.length; ++i) {
 				if (i>0) {
 					re_str += '|';
 				}
-				for( j=0; j<=i; ++j) {
+				for (let j=0; j<=i; ++j) {
 					re_str += reg_exps[j];
 				}
 			}
@@ -63,7 +63,7 @@ window.yii.churros = (function ($) {
 			if (value.match(rgx)) {
 				var parts = value.split(dot);
 				let ret = '';
-				for( i=0; i<parts.length; ++i) {
+				for (let i=0; i<parts.length; ++i) {
 					if (i!=0) {
 						ret += dot;
 					}
@@ -89,17 +89,17 @@ window.yii.churros = (function ($) {
 		dateParseFromFormat(datestr, format) {
 			// https://stackoverflow.com/questions/60759006/is-there-a-way-to-prevent-the-date-object-in-js-from-overflowing-days-months
 // 			console.log("Matching datestr `" + datestr + "` against regexp `/^" + format + "$/`");
-			matches = datestr.match('^' + format + '$');
+			let matches = datestr.match('^' + format + '$');
 			if (matches === null) {
 				return false;
 			}
 			let today = new Date();
 			if (matches.groups.year_long !== undefined) {
-				year = parseInt(matches.groups.year_long);
+				let year = parseInt(matches.groups.year_long);
 			} else if (matches.groups.year_short !== undefined) {
-				year = parseInt(matches.groups.year_short);
+				let year = parseInt(matches.groups.year_short);
 			} else {
-				year = today.getFullYear();;
+				let year = today.getFullYear();;
 			}
 			if (isNaN(year)) {
 				year = today.getFullYear();
@@ -107,14 +107,14 @@ window.yii.churros = (function ($) {
 				year += 2000;
 			}
 			if (matches.groups.month !== undefined) {
-				month = parseInt(matches.groups.month);
+				let month = parseInt(matches.groups.month);
 			} else {
-				month = today.getMonth() + 1;
+				let month = today.getMonth() + 1;
 			}
 			if (matches.groups.day !== undefined) {
-				day = parseInt(matches.groups.day);
+				let day = parseInt(matches.groups.day);
 			} else {
-				day = today.getDate();
+				let day = today.getDate();
 			}
 			if (matches.groups.hour !== undefined) {
 				hour = parseInt(matches.groups.hour);
@@ -181,9 +181,27 @@ window.yii.churros = (function ($) {
 				}
 				return false;
 			} else {
-				var fmt = new DateFormatter();
-				date_input.val(fmt.formatDate(date_js, format));
-				$('#' + orig_id).val(fmt.formatDate(date_js, saveFormat));
+				// ✅ Reemplazo inline de DateFormatter
+				function formatDate(date, format) {
+					const pad = (n) => n.toString().padStart(2, '0');
+					const year = date.getFullYear();
+					const month = pad(date.getMonth() + 1);
+					const day = pad(date.getDate());
+					const hours = pad(date.getHours());
+					const minutes = pad(date.getMinutes());
+					const seconds = pad(date.getSeconds());
+
+					return format
+					.replace(/YYYY/g, year)
+					.replace(/MM/g, month)
+					.replace(/DD/g, day)
+					.replace(/HH/g, hours)
+					.replace(/mm/g, minutes)
+					.replace(/ss/g, seconds);
+				}
+
+				date_input.val(formatDate(date_js, format));
+				$('#' + orig_id).val(formatDate(date_js, saveFormat));
 				if (error_el) {
 					error_el.text("");
 				}
@@ -200,7 +218,7 @@ window.yii.churros = (function ($) {
 
 			var pattern = options.pattern;
 
-			if (options.enableIDN) {
+			if (typeof punycode !== 'undefined' && options.enableIDN) {
 				value = punycode.toASCII(value);
 			}
 
@@ -305,7 +323,7 @@ window.yii.FormController = (function() {
 
     function FormController(form) {
         if (typeof form === 'string') {
-            form_element = document.getElementById(form);
+            let form_element = document.getElementById(form);
 			if (!form_element) {
 				throw new Error('Form ' + form + ' not found');
 			}
@@ -318,18 +336,19 @@ window.yii.FormController = (function() {
 
     FormController.prototype = {
         // Initialize core features (Enter as Tab, focus, etc.)
-        init: function({ enterAsTab = true, setFocus = true, preventBackspace = true } = {}) {
-            if (setFocus) {
-                this.setFocusToFirstInput();
-            }
-            if (preventBackspace) {
-                this.form.addEventListener('keydown', this.preventBackspaceNavigation);
-            }
-            if (enterAsTab) {
-                this.form.addEventListener('keydown', this.handleEnterAsTab);
-            }
-            return this; // Allow chaining
-        },
+		init: function({ enterAsTab = true, setFocus = true, preventBackspace = true } = {}) {
+			if (setFocus) {
+				this.setFocusToFirstInput();
+			}
+			if (preventBackspace) {
+				this.form.addEventListener('keydown', this.preventBackspaceNavigation.bind(this));
+			}
+			if (enterAsTab) {
+				this.form.addEventListener('keydown', this.formEnterAsTab.bind(this));
+			}
+			return this;
+		},
+
 
         // Track changes for this specific form
         trackChanges: function() {
@@ -366,7 +385,7 @@ window.yii.FormController = (function() {
         // Existing methods adapted for instance use
         setFocusToFirstInput: function() {
 			if (this.form.elements.length > 0) {
-				index = 0;
+				let index = 0;
 				while( (this.form.elements[index].type === "hidden"
 					|| window.getComputedStyle(this.form.elements[index]).display === "none"
 					|| this.form.elements[index].tabIndex == -1 )) {
@@ -381,32 +400,31 @@ window.yii.FormController = (function() {
 			return this;
 		},
 		formEnterAsTab: function(event) {
-			if (event.keyCode === 13 && ( event.target.nodeName === 'INPUT' || event.target.nodeName === 'SELECT')) {
-				var form = event.target.form;
-				var index = Array.prototype.indexOf.call(form, event.target);
-				index++;
-				if (form.elements.length > 0) {
-					while( (form.elements[index].type === "hidden"
-						|| window.getComputedStyle(form.elements[index]).display === "none"
-						|| form.elements[index].tabIndex == -1 )) {
-						if (++index == form.elements.length) {
-							break;
-						}
-					}
-					if (index < form.elements.length) {
-						form.elements[index].focus();
-					}
-				}
-				event.preventDefault();
-				return false;
-			} else {
-				return true;
+			if (event.key !== 'Enter' || !['INPUT','SELECT'].includes(event.target.nodeName)) {
+				return;
 			}
+			const elems = Array.from(this.form.elements);  // Convierte a array
+			const index = elems.indexOf(event.target);
+			if (index === -1) return;
+
+			let nextIndex = index + 1;
+			while (nextIndex < elems.length) {
+				const nextEl = elems[nextIndex];
+				if (nextEl.type !== 'hidden' &&
+					window.getComputedStyle(nextEl).display !== 'none' &&
+					nextEl.tabIndex !== -1 &&
+					nextEl.offsetParent !== null) {  // Visible en DOM
+						nextEl.focus();
+						break;
+					}
+					nextIndex++;
+			}
+			event.preventDefault();
 		},
 
 		preventBackspaceNavigation: function(event) {
 			var doPrevent = false;
-			if (event.keyCode === 8) {
+			if (event.key === 'Backspace') {
 				var d = event.srcElement || event.target;
 				if ((d.tagName.toUpperCase() === 'INPUT' &&
 					(d.type.toUpperCase() === 'TEXT' ||
@@ -420,6 +438,9 @@ window.yii.FormController = (function() {
 					doPrevent = d.readOnly || d.disabled;
 				} else {
 					doPrevent = true;
+				}
+				if (doPrevent) {
+					event.preventDefault();
 				}
 			}
 		},
