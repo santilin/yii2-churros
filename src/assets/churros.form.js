@@ -94,12 +94,15 @@ window.yii.churros = (function ($) {
 				return false;
 			}
 			let today = new Date();
+			let year = null;
+			let month = null;
+			let day = null;
 			if (matches.groups.year_long !== undefined) {
-				let year = parseInt(matches.groups.year_long);
+				year = parseInt(matches.groups.year_long);
 			} else if (matches.groups.year_short !== undefined) {
-				let year = parseInt(matches.groups.year_short);
+				year = parseInt(matches.groups.year_short);
 			} else {
-				let year = today.getFullYear();;
+				year = today.getFullYear();;
 			}
 			if (isNaN(year)) {
 				year = today.getFullYear();
@@ -107,14 +110,14 @@ window.yii.churros = (function ($) {
 				year += 2000;
 			}
 			if (matches.groups.month !== undefined) {
-				let month = parseInt(matches.groups.month);
+				month = parseInt(matches.groups.month);
 			} else {
-				let month = today.getMonth() + 1;
+				month = today.getMonth() + 1;
 			}
 			if (matches.groups.day !== undefined) {
-				let day = parseInt(matches.groups.day);
+				day = parseInt(matches.groups.day);
 			} else {
-				let day = today.getDate();
+				day = today.getDate();
 			}
 			if (matches.groups.hour !== undefined) {
 				hour = parseInt(matches.groups.hour);
@@ -192,14 +195,14 @@ window.yii.churros = (function ($) {
 					const seconds = pad(date.getSeconds());
 
 					return format
-					.replace(/YYYY/g, year)
-					.replace(/MM/g, month)
-					.replace(/DD/g, day)
-					.replace(/HH/g, hours)
-					.replace(/mm/g, minutes)
-					.replace(/ss/g, seconds);
+					.replace(/YY/g, year)
+					.replace(/Y/g, year)
+					.replace(/m/g, month)
+					.replace(/d/g, day)
+					.replace(/H/g, hours)
+					.replace(/I/g, minutes)
+					.replace(/s/g, seconds);
 				}
-
 				date_input.val(formatDate(date_js, format));
 				$('#' + orig_id).val(formatDate(date_js, saveFormat));
 				if (error_el) {
@@ -415,6 +418,20 @@ window.yii.FormController = (function() {
 					nextEl.tabIndex !== -1 &&
 					nextEl.offsetParent !== null) {  // Visible en DOM
 						nextEl.focus();
+						// ✅ FIX only if positionCaretOnTab = 'radixFocus'
+						setTimeout(() => {
+							const maskData = nextEl.dataset.pluginInputmask;
+							if (maskData) {
+								const maskConfig = window[maskData];
+								if (maskConfig && maskConfig.positionCaretOnTab === 'radixFocus' && nextEl.inputmask) {
+									const digits = maskConfig.digits || 2;  // 2 decimales normalmente
+									const totalLength = nextEl.value.length;
+									const caretPos = totalLength - digits - 1;  // Antes del "."
+
+									window.yii.churros.inputSetSelectionRange(nextEl, caretPos, caretPos);
+								}
+							}
+						}, 50);
 						break;
 					}
 					nextIndex++;
