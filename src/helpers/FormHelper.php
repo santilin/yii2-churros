@@ -3,7 +3,7 @@
 namespace santilin\churros\helpers;
 
 use Yii;
-use yii\helpers\{ArrayHelper,Html,StringHelper,Url};
+use yii\helpers\{ArrayHelper, Html, Json, StringHelper, Url};
 use yii\base\InvalidConfigException;
 use yii\bootstrap5\Modal;
 
@@ -396,6 +396,45 @@ ajax;
 			case 'html':
 				$ret[] = $button['html'];
 				break;
+			case 'dropdown':
+				$selections = $button['selections'];
+				$dropdownId = 'dd_' . uniqid();
+
+				// Dropdown trigger button (looks like regular btn)
+				$triggerBtn = Html::button($title, array_merge($button['htmlOptions'] ?? [], [
+					'class' => trim(($button['htmlOptions']['class'] ?? 'btn btn-primary btn-sm') . ' dropdown-toggle no-caret'),
+					'type' => 'button',
+					'data-bs-toggle' => 'dropdown',
+					'aria-expanded' => 'false',
+					'id' => $dropdownId,
+				]));
+
+				// Dropdown menu items as normal POST links
+				$menuItems = [];
+				foreach ($selections as $value => $label) {
+					$url_params = (array) $button['url'];
+					$url_params['target'] = $value;;
+					if (isset($button['htmlOptions']['name'])) {
+						$url_params[$button['htmlOptions']['name']] = $value;
+					}
+					$requestUrl = Url::to($url_params);
+					$menuItems[] = Html::a($label, $requestUrl, [
+						'class' => 'dropdown-item',
+						'data-confirm' => $button['confirm'] ?? 'Confirm action?',
+					]);
+				}
+
+				$dropdownMenu = Html::ul($menuItems, [
+					'class' => 'dropdown-menu',
+					'aria-labelledby' => $dropdownId,
+					'encode' => false  // Important: don't encode onclick handlers
+				]);
+
+				$ret[] = Html::tag('div', $triggerBtn . $dropdownMenu, [
+					'class' => 'dropdown d-inline-block me-1'
+				]);
+				break;
+
 			default:
 				throw new \Exception($button['type'] . ': button type not supported');
 			}
@@ -403,7 +442,7 @@ ajax;
 		return implode($sep, $ret);
 	}
 
-	static private function prepareButtonUrl(string|array $url, ?string $url_return_to): string
+	static private function prepareButtonUrl(string|array $url, ?string $url_return_to, array $params = []): string
 	{
 		switch ($url_return_to) {
 			case 'current':

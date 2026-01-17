@@ -20,7 +20,7 @@ class ActionColumn extends \yii\grid\ActionColumn
 		'view' => '<i class="fas fa-eye"></i>',
 		'update' => '<i class="fas fa-pencil-alt"></i>',
 		'delete' => '<i class="fas fa-trash"></i>',
-		'duplicate' => '<i class="fas fa-copy"></i>',
+		'duplicate' => '<i class="fas fa-clone"></i>',
 	];
     public array|bool $crudPerms = true; // by default, all perms are granted
 	public array $extraButtonsOptions = [];
