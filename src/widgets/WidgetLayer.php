@@ -6,6 +6,7 @@ use yii\base\InvalidConfigException;
 use yii\helpers\{ArrayHelper,Html};
 use yii\bootstrap5\Tabs;
 use santilin\churros\helpers\FormHelper;
+use santilin\churros\widgets\ActiveForm;
 
 class WidgetLayer
 {
@@ -18,6 +19,18 @@ class WidgetLayer
 		protected $widget_painter,
 		protected array $widget_layout_horiz_config)
 	{
+	}
+
+	public static function renderLayout(array $content, string $layout = '1col',
+										string $size = 'large', string $style = 'grid'): string
+	{
+		$layer = new WidgetLayer($content, [], null, ActiveForm::FORM_FIELD_HORIZ_CLASSES);
+		$ret = $layer->layoutWidgets($content, [
+			'size' => $size,
+			'style' => $style,
+			'layout' => $layout,
+		]);
+		return $ret;
 	}
 
 	public function layout(string $type, string $form_layout = '1col',
@@ -55,7 +68,6 @@ class WidgetLayer
 		$this->widgets_used = [];
 		return $ret;
 	}
-
 
 	/**
 	 * Recursivelly lays out the widgets
