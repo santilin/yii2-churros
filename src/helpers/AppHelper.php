@@ -267,7 +267,7 @@ class AppHelper
         . mb_substr($str, 1, mb_strlen($str), $encoding);
     }
 
-	static public function mb_strcasecmp(string $str1, string $str2, string $encoding = null)
+	static public function mb_strcasecmp(string $str1, string $str2, ?string $encoding = null)
 	{
 		if (null === $encoding) { $encoding = mb_internal_encoding(); }
 		return strcmp(mb_strtoupper($str1, $encoding), mb_strtoupper($str2, $encoding));

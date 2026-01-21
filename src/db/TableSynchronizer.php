@@ -40,7 +40,7 @@ class TableSynchronizer
 	}
 
 	public function synchronize(array $keys_match, array $fields_match = [],
-								callable $before_save = null, callable $before_delete = null): array
+								?callable $before_save = null, ?callable $before_delete = null): array
 	{
 		$source_query = $this->createSourceQuery(array_values($keys_match));
 		$source_records = $source_query->all($this->dbSource);

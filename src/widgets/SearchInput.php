@@ -30,6 +30,9 @@ class SearchInput extends \yii\bootstrap5\InputWidget
 
 		if ($this->type == 'dropdown') {
 			Html::removeCssClass($this->options, 'form-control');
+			if (!isset($this->options['prompt'])) {
+				$this->options['prompt'] = 'Cualquiera';
+			}
 			Html::addCssClass($this->options, 'form-select');
 			Html::addCssStyle($this->options, [ 'width' => 'fit-content' ]);
 			$ret .= Html::hiddenInput("{$scope}[$attribute][op]", $value['op']);
