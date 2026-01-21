@@ -351,7 +351,7 @@ js;
 				foreach ($layout_row['content'] as $widget_name) {
 					$fs = '';
 					$open_divs = 0;
-					$widget = $this->widgets[$widget_name]??false;
+					$widget = $this->widgets[$widget_name] ?? false;
 					if ($widget) {
 						$this->widgets_used[] = $widget_name;
 						if ($widget instanceof \yii\bootstrap5\ActiveField) {
