@@ -200,7 +200,7 @@ window.yii.churros = (function ($) {
 					.replace(/m/g, month)
 					.replace(/d/g, day)
 					.replace(/H/g, hours)
-					.replace(/I/g, minutes)
+					.replace(/i/g, minutes)
 					.replace(/s/g, seconds);
 				}
 				date_input.val(formatDate(date_js, format));
