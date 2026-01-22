@@ -134,7 +134,7 @@ class JsonModel extends \yii\base\Model
         $rel_info = static::$relations[$relation_name];
         $rel_name = $rel_info['relatedTablename'];
         $rel_model_class = $rel_info['modelClass'];
-        if ($rel_info['type'] == 'HasMany') {
+        if ($rel_info['type'] === 'HasMany') {
             $json_objects = $this->_json_object?->get("$.$rel_name")?:[];
             $related_models = $this->jsonArrayToModels($json_objects, $rel_model_class);
             return $related_models;
@@ -422,18 +422,21 @@ class JsonModel extends \yii\base\Model
     }
 
     public function createRelatedModels(string $relation_name,
-        array $current_values = [], string $form_class_name = null): array|JsonModel
+        array $current_values = [], ?string $form_class_name = null): array|JsonModel
     {
+        if (!empty($this->_related[$relation_name])) {
+            return $this->_related[$relation_name];
+        }
         $rel_info = static::$relations[$relation_name];
         $rel_model_class = $rel_info['modelClass'];
-        if (!$form_class_name || $rel_model_class == $form_class_name) {
+        if (!$form_class_name || $rel_model_class === $form_class_name) {
             return $this->$relation_name;
         }
         $child = new $rel_model_class();
         if (!($child instanceof $rel_model_class)) {
             throw new InvalidConfigException("$form_class_name is not derived from $rel_model_class");
         }
-        if ($rel_info['type'] == 'HasMany') {
+        if ($rel_info['type'] === 'HasMany') {
             $related_models = [];
             foreach ($this->loadRelatedModels($relation_name) as $kr => $rel_model) {
                 $child = new $form_class_name();
@@ -476,14 +479,14 @@ class JsonModel extends \yii\base\Model
             $relations_handled = [];
             foreach ($relations_in_model as $rel_name => $model_relation) {
                 foreach ($relations_in_form as $rel_form_name => $rel_form_relation) {
-                    if ($rel_form_name != $rel_name && $rel_form_relation != $rel_name) {
+                    if ($rel_form_name !== $rel_name && $rel_form_relation !== $rel_name) {
                         continue;
                     }
                     if (isset($relations_handled[$rel_form_relation])) {
                         continue;
                     }
                     $related_model_name = $model_relation['model'];
-                    if ($model_relation['type'] == 'HasOne' || $model_relation['type'] == "OneToOne") {
+                    if ($model_relation['type'] === 'HasOne' || $model_relation['type'] === "OneToOne") {
                         // Look for embedded relations data in the main form
                         $post_data = null;
                         if (isset($post[$formName][$rel_name]) && is_array($post[$formName][$rel_name])) {
@@ -502,15 +505,15 @@ class JsonModel extends \yii\base\Model
                     } else {
                         // HasMany or Many2Many outside of formName
                         $post_data = null;
-                        if (is_string($rel_form_name) && isset($post[$formName][$rel_form_name]) && is_array($post[$formName][$rel_form_name])) {
+                        if (isset($post[$formName][$rel_form_name]) && is_array($post[$formName][$rel_form_name])) {
                             $post_data = $post[$formName][$rel_form_name];
                         } else if (isset($post[$formName][$rel_form_relation]) && is_array($post[$formName][$rel_form_relation])) {
                             $post_data = $post[$formName][$rel_form_relation];
-                        } else if (is_string($rel_form_name) && isset($post[$rel_form_name]) && is_array($post[$rel_form_name])) {
+                        } else if (isset($post[$rel_form_name]) && is_array($post[$rel_form_name])) {
                             $post_data = $post[$rel_form_name];
                         } else if (isset($post[$rel_form_relation]) && is_array($post[$rel_form_relation])) {
                             $post_data = $post[$rel_form_relation];
-                        } else if ($rel_form_name != $related_model_name && $rel_form_relation != $related_model_name) {
+                        } else if ($rel_form_name !== $related_model_name && $rel_form_relation !== $related_model_name) {
                             if (isset($post[$formName][$related_model_name]) && is_array($post[$formName][$related_model_name])) {
                                 $post_data = $post[$formName][$related_model_name];
                             } else if (isset($post[$related_model_name]) && is_array($post[$related_model_name])) {
@@ -532,8 +535,8 @@ class JsonModel extends \yii\base\Model
     /**
      * Refactored from loadAll() function
      * @param string $rel_name
-     * @param array $form_values
-     * @return bool
+     * @param array $post_data
+     * @return void
      */
     public function loadToRelation(string $rel_name, array $post_data): void
     {
@@ -544,7 +547,7 @@ class JsonModel extends \yii\base\Model
 		$relModelClass = $relation['modelClass'];
 		$container = [];
         $relPKAttr = [ $relModelClass::$_locator ?? 'id' ];
-        if ($relation['type'] == 'HasMany') {
+        if ($relation['type'] === 'HasMany') {
             foreach ($post_data as $form_values) {
                 $relObj = new $relModelClass;
                 $relObj->setJsonModelable($this);
@@ -553,12 +556,12 @@ class JsonModel extends \yii\base\Model
                     $form_values = [$relPKAttr[0] => $form_values];
                 }
                 if (count($form_values)) {
-                    $relObj->_attributes = array_intersect_key($form_values, $relObj->_attributes);
+                    $relObj->setAttributes($form_values);
                     $relObj->afterFind();
                     $container[] = $relObj;
                 }
             }
-        } else if ($relation['type'] == 'ManyToMany') {
+        } else if ($relation['type'] === 'ManyToMany') {
             foreach ($post_data as $form_values) {
 				if (is_array($form_values)) {
 					$id = $form_values[$relPKAttr[0]];
@@ -574,7 +577,7 @@ class JsonModel extends \yii\base\Model
         $this->_related[$rel_name] = $container;
     }
 
-	public function setAttributesFromNoArray($any)
+	public function setAttributesFromNoArray($any): void
     {
     }
 
