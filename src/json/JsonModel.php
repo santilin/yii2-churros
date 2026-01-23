@@ -227,9 +227,13 @@ class JsonModel extends \yii\base\Model
         return array_key_exists($attribute, $this->_attributes);
     }
 
-    public function setAttribute(string $name, $value)
+    public function setAttribute(string $attribute, $value)
     {
-        $this->_attributes[$name] = $value;
+        if ($this->hasAttribute($attribute)) {
+            $this->_attributes[$attribute] = $value;
+        } else {
+            $this->onUnsafeAttribute($name, $value);
+        }
     }
 
     public function getJsonId()
@@ -556,7 +560,9 @@ class JsonModel extends \yii\base\Model
                     $form_values = [$relPKAttr[0] => $form_values];
                 }
                 if (count($form_values)) {
-                    $relObj->setAttributes($form_values);
+                    foreach ($form_values as $p => $v) {
+                        $relObj->setAttribute($p, $v);
+                    }
                     $relObj->afterFind();
                     $container[] = $relObj;
                 }
@@ -700,6 +706,21 @@ class JsonModel extends \yii\base\Model
             return substr($part, 2, -2);
         }
         return $part;
+    }
+
+
+    /**
+     * This method is invoked when an unsafe attribute is being massively assigned.
+     * The default implementation will log a warning message if YII_DEBUG is on.
+     * It does nothing otherwise.
+     * @param string $name the unsafe attribute name
+     * @param mixed $value the attribute value
+     */
+    public function onUnsafeAttribute($name, $value)
+    {
+        if (YII_DEBUG) {
+            Yii::debug("Failed to set unsafe attribute '$name' in '" . get_class($this) . "'.", __METHOD__);
+        }
     }
 
 } // class
