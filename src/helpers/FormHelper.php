@@ -260,7 +260,7 @@ class FormHelper
 				if (!isset($button['htmlOptions']['title'])) {
 					$button['htmlOptions']['title'] = $caption;
 				}
-				Html::addCssClass($button['htmlOptions'], [$name, 'flex align-items-baseline']);
+				Html::addCssClass($button['htmlOptions'], [$name, 'flex']);
 				if (empty($htmlOptions['role'])) {
 					$button['htmlOptions']['role'] = 'button';
 				}
@@ -385,7 +385,7 @@ ajax;
 				$post_form = Html::beginForm(
 					self::prepareButtonUrl($button['url'], $url_return_to),
 					'post',
-					$button['formOptions']??['class' => 'd-flex align-items-baseline']);
+					$button['formOptions']??['class' => 'd-flex']);
 				foreach ($button['hiddenInputs']??[] as $hidden_name => $hidden_value) {
 					$post_form .= Html::hiddenInput($hidden_name, $hidden_value);
 				}

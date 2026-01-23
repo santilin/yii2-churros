@@ -35,7 +35,7 @@ fieldset {
   }
   & .header-toolbar {
     & a, button {
-       font-size: 0.9em !important;
+/*        font-size: 0.9em !important; */
     }
   }
   &.no-border fieldset {

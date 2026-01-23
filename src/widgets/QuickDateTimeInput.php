@@ -108,11 +108,7 @@ class QuickDateTimeInput extends MaskedInput
 
 	protected function formatToMask()
 	{
-		$format = strtr($this->format, [
-// 			" H:i:s" => " H[:i:s]",
-//  			" H:i" => "[ H:i]"
-		]);
-		return strtr($format, [
+		return strtr($this->format, [
 			'd' => '99',
 			'm' => '99',
 			'y' => '99',
