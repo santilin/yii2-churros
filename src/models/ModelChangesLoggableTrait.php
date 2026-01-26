@@ -44,7 +44,7 @@ trait ModelChangesLoggableTrait
 	public function enableModelChangesLog(bool $enabled = true)
 	{
 		if ($this->_model_changes_log !== $enabled) {
-			if ($this->_model_changes_log = $enabled) {
+			if (true === ($this->_model_changes_log = $enabled)) {
 				$this->on(self::EVENT_AFTER_INSERT, [$this, 'handleModelChanges']);
 				$this->on(self::EVENT_AFTER_UPDATE, [$this, 'handleModelChanges']);
 				$this->on(self::EVENT_AFTER_DELETE, [$this, 'handleModelChanges']);
@@ -94,12 +94,12 @@ trait ModelChangesLoggableTrait
 				$model_change->value = $this->recordDesc('short');
 				$model_change->saveOrFail();
 				$must_trigger = true;
-			} else if ($event->name == self::EVENT_AFTER_UPDATE) {
+			} else if ($event->name === self::EVENT_AFTER_UPDATE) {
 				foreach ($event->changedAttributes as $fld => $old_value) {
-					if (($current_value=$this->$fld) == $old_value) {
+					if (($current_value = $this->$fld) == $old_value) { /// @todo use cast and then ===
 						continue;
 					}
-					if ($nfield = $model_change::findChangeableFieldIndex($model_name, $fld)) {
+					if (false !== ($nfield = $model_change::findChangeableFieldIndex($model_name, $fld))) {
 						if (!$model_change->getIsNewRecord()) {
 							$model_change->resetPrimaryKeys();
 							$model_change->setIsNewRecord(true);
@@ -110,7 +110,7 @@ trait ModelChangesLoggableTrait
 						if (\Yii::$app instanceof \yii\web\Application) {
 							$model_change->changed_by = \Yii::$app->user?->identity?->id;
 						} else {
-							$model_change->changed_by = \Yii::$app->params['user_identity_id']??null;
+							$model_change->changed_by = \Yii::$app->params['user_identity_id'] ?? null;
 						}
 						$model_change->changed_at = new \yii\db\Expression("NOW()");
 						$model_change->type = $model_change::V_TYPE_UPDATE;
