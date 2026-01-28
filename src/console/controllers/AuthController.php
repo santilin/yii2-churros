@@ -370,7 +370,7 @@ class AuthController extends Controller
 		array $roles_to_create = [ 'viewer', 'creator', 'editor', 'full-editor', 'deleter', 'granter', 'admin' ])
 	{
 		$auth = $this->authManager;
-		$this->actionRemoveAllDefault($module_id);
+		$this->markAllDefault($module_id);
 		$module_desc = ucfirst($module_info['title'] ?? $module_id);
 		if (in_array('viewer', $roles_to_create)) {
 			$viewer = AuthHelper::createOrUpdateRole("$module_id.viewer",
@@ -604,7 +604,7 @@ class AuthController extends Controller
 		AuthHelper::echoLastMessage();
 	}
 
-	public function actionRemoveAllDefault(string $module_id)
+	public function actionRemoveAllUnused(string $module_id)
 	{
 		foreach ($this->authManager->getRoles() as $role) {
 			if (StringHelper::startsWith("$module_id.", $role->name) && $role->createdAt === 0) {
@@ -661,6 +661,22 @@ class AuthController extends Controller
 		foreach ($permissions as $permission) {
 			if (!isset($roles[$permission->name])) {
 				$this->stdout("  └─ Permission: " . $permission->name . "\n", Console::FG_GREEN);
+			}
+		}
+	}
+
+	protected function markAllDefault(string $module_id)
+	{
+		foreach ($this->authManager->getRoles() as $role) {
+			if (StringHelper::startsWith("$module_id.", $role->name) && $role->createdAt !== 0) {
+				$role->createdAt = 0;
+				$this->authManager->update($role->name, $role);
+			}
+		}
+		foreach ($this->authManager->getPermissions() as $perm) {
+			if (StringHelper::startsWith("$module_id.", $role->name) && $perm->createdAt !== 0) {
+				$perm->createdAt = 0;
+				$this->authManager->update($perm->name, $perm);
 			}
 		}
 	}
