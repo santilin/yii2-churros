@@ -72,7 +72,7 @@ class AuthController extends Controller
 	public function createControllerPermissions(string $module_id, string $module_desc,
 		string $model_name, array $controller,
 		?Role $viewer, ?Role $creator, ?Role $editor, ?Role $full_editor,
-		?Role $deleter, ?Role $granter, ?Role $admin)
+		?Role $deleter, ?Role $granter, ?Role $admin, array &$all_items = [])
 	{
 		$model_class = $controller['class'];
 		if (!class_exists($model_class)) {
@@ -89,6 +89,7 @@ class AuthController extends Controller
 				Yii::t('churros', '{module}: {model}: visor/a', [
 					'module' => $module_desc, 'model' => $model_title
 				]), true, $auth);
+			unset($all_items[$model_viewer->name]);
 			AuthHelper::echoLastMessage();
 			if (!$auth->hasChild($viewer, $model_viewer)) {
 				$auth->addChild($viewer, $model_viewer);
@@ -103,6 +104,7 @@ class AuthController extends Controller
 				Yii::t('churros', '{module}: {model}: creador/a', [
 					'module' => $module_desc, 'model' => $model_title
 				]), true, $auth);
+			unset($all_items[$model_creator->name]);
 			AuthHelper::echoLastMessage();
 			if (!$auth->hasChild($creator, $model_creator)) {
 				$auth->addChild($creator, $model_creator);
@@ -117,6 +119,7 @@ class AuthController extends Controller
 				Yii::t('churros', '{module}: {model}: eliminador/a', [
 					'module' => $module_desc, 'model' => $model_title
 				]), true, $auth);
+			unset($all_items[$model_deleter->name]);
 			AuthHelper::echoLastMessage();
 			if (!$auth->hasChild($deleter, $model_deleter)) {
 				$auth->addChild($deleter, $model_deleter);
@@ -131,6 +134,7 @@ class AuthController extends Controller
 				Yii::t('churros', '{module}: {model}: editor/a', [
 					'module' => $module_desc, 'model' => $model_title
 				]), true, $auth);
+			unset($all_items[$model_editor->name]);
 			AuthHelper::echoLastMessage();
 			if (!$auth->hasChild($editor, $model_editor)) {
 				$auth->addChild($editor, $model_editor);
@@ -145,6 +149,7 @@ class AuthController extends Controller
 				Yii::t('churros', '{module}: {model}: asignador/a de privilegios', [
 					'module' => $module_desc, 'model' => $model_title
 				]), true, $auth);
+			unset($all_items[$model_granter->name]);
 			AuthHelper::echoLastMessage();
 			if (!$auth->hasChild($granter, $model_granter)) {
 				$auth->addChild($granter, $model_granter);
@@ -159,6 +164,7 @@ class AuthController extends Controller
 				Yii::t('churros', '{module}: {model}: editor/a total', [
 					'module' => $module_desc, 'model' => $model_title
 				]), true, $auth);
+			unset($all_items[$model_full_editor->name]);
 			AuthHelper::echoLastMessage();
 			if (!$auth->hasChild($full_editor, $model_full_editor)) {
 				$auth->addChild($full_editor, $model_full_editor);
@@ -173,6 +179,7 @@ class AuthController extends Controller
 				Yii::t('churros', '{module}: {model}: administrador/a', [
 					'module' => $module_desc, 'model' => $model_title
 				]), true, $auth);
+			unset($all_items[$model_admin->name]);
 			AuthHelper::echoLastMessage();
 			if (!$auth->hasChild($admin, $model_admin)) {
 				$auth->addChild($admin, $model_admin);
@@ -299,6 +306,7 @@ class AuthController extends Controller
 				'perm' => Yii::t('churros', $perm_name)]);
 			$permission = AuthHelper::createOrUpdatePermission(
 				$model_perm_name . "." . $perm_name, $perm_desc, true, $auth);
+			unset($all_items[$permission->name]);
 			AuthHelper::echoLastMessage();
 			$roles_to_add = [];
 			switch ($perm_name) {
@@ -343,6 +351,8 @@ class AuthController extends Controller
 				Yii::t('churros', '{module}: acceso al inicio del módulo', [
 					'module' => $module_desc
 				]), true, $auth);
+		unset($all_items[$module_access_permission->name]);
+
 		if (!$auth->hasChild($module_access_role, $module_access_permission)) {
 			$auth->addChild($module_access_role, $module_access_permission);
 			echo "+ Permission '{$module_access_permission->name}' added to role '{$module_access_role->name}'\n";
@@ -359,22 +369,32 @@ class AuthController extends Controller
 			}
 			break; // only the first one
 		}
-
-
 	}
 
 	/**
-	 * Creates the permissions for a rbac module
+	 * Creates the permissions for a rbac module and shows the ones not used
 	 */
 	public function createModuleRbacPermissions(string $module_id, array $module_info,
 		array $roles_to_create = [ 'viewer', 'creator', 'editor', 'full-editor', 'deleter', 'granter', 'admin' ])
 	{
 		$auth = $this->authManager;
-		$this->markAllDefault($module_id);
+		$all_items = [];
+		foreach ($this->authManager->getRoles() as $role) {
+			if (StringHelper::startsWith($role->name, "$module_id.")) {
+				$all_items[$role->name] = true;
+			}
+		}
+		foreach ($this->authManager->getPermissions() as $perm) {
+			if (StringHelper::startsWith($perm->name, "$module_id.")) {
+				$all_items[$perm->name] = true;
+			}
+		}
+
 		$module_desc = ucfirst($module_info['title'] ?? $module_id);
 		if (in_array('viewer', $roles_to_create)) {
 			$viewer = AuthHelper::createOrUpdateRole("$module_id.viewer",
 				Yii::t('churros', '{module}:  visor/a ', ['module' => $module_desc]), true, $auth);
+			unset($all_items[$viewer->name]);
 			AuthHelper::echoLastMessage();
 		} else {
 			$viewer = null;
@@ -382,6 +402,7 @@ class AuthController extends Controller
 		if (in_array('creator', $roles_to_create)) {
 			$creator = AuthHelper::createOrUpdateRole("$module_id.creator",
 				Yii::t('churros', '{module}:  creador/a', ['module' => $module_desc]), true, $auth);
+			unset($all_items[$creator->name]);
 			AuthHelper::echoLastMessage();
 		} else {
 			$creator = null;
@@ -389,6 +410,7 @@ class AuthController extends Controller
 		if (in_array('editor', $roles_to_create)) {
 			$editor = AuthHelper::createOrUpdateRole("$module_id.editor",
 				Yii::t('churros', '{module}:  editor/a', ['module' => $module_desc]), true, $auth);
+			unset($all_items[$editor->name]);
 			AuthHelper::echoLastMessage();
 		} else {
 			$editor = null;
@@ -396,6 +418,7 @@ class AuthController extends Controller
 		if (in_array('full-editor', $roles_to_create)) {
 			$full_editor = AuthHelper::createOrUpdateRole("$module_id.full-editor",
 				Yii::t('churros', '{module}:  editor/a total', ['module' => $module_desc]), true, $auth);
+			unset($all_items[$full_editor->name]);
 			AuthHelper::echoLastMessage();
 		} else {
 			$full_editor = null;
@@ -403,6 +426,7 @@ class AuthController extends Controller
 		if (in_array('deleter', $roles_to_create)) {
 			$deleter = AuthHelper::createOrUpdateRole("$module_id.deleter",
 				Yii::t('churros', '{module}:  eliminador/a', ['module' => $module_desc]), true, $auth);
+			unset($all_items[$deleter->name]);
 			AuthHelper::echoLastMessage();
 		} else {
 			$deleter = null;
@@ -410,6 +434,7 @@ class AuthController extends Controller
 		if (in_array('granter', $roles_to_create)) {
 			$granter = AuthHelper::createOrUpdateRole("$module_id.granter",
 				Yii::t('churros', '{module}:  asignador/a de privilegios', ['module' => $module_desc]), true, $auth);
+			unset($all_items[$granter->name]);
 			AuthHelper::echoLastMessage();
 		} else {
 			$granter = null;
@@ -417,6 +442,7 @@ class AuthController extends Controller
 		if (in_array('admin', $roles_to_create)) {
 			$admin = AuthHelper::createOrUpdateRole("$module_id.admin",
 				Yii::t('churros', '{module}:  administrador/a', ['module' => $module_desc]), true, $auth);
+			unset($all_items[$admin->name]);
 			AuthHelper::echoLastMessage();
 		} else {
 			$admin = null;
@@ -424,9 +450,12 @@ class AuthController extends Controller
 
 		foreach ($module_info['controllers']??[] as $cname => $controller) {
 			$this->createControllerPermissions($module_id, $module_desc, $cname, $controller,
-				$viewer, $creator, $editor, $full_editor, $deleter, $granter, $admin);
+				$viewer, $creator, $editor, $full_editor, $deleter, $granter, $admin, $all_items);
 			AuthHelper::echoLastMessage();
 		}
+
+		// list unused
+		echo "Unused items:" . join(', ', array_keys($all_items)) . "\n";
 	}
 
 	/**
@@ -680,25 +709,6 @@ class AuthController extends Controller
 			}
 		}
 	}
-
-	protected function markAllDefault(string $module_id)
-	{
-		foreach ($this->authManager->getRoles() as $role) {
-			if (StringHelper::startsWith("$module_id.", $role->name) && $role->createdAt !== 0) {
-				$role->createdAt = 0;
-				$this->authManager->update($role->name, $role);
-			}
-		}
-		foreach ($this->authManager->getPermissions() as $perm) {
-			if (StringHelper::startsWith("$module_id.", $role->name) && $perm->createdAt !== 0) {
-				$perm->createdAt = 0;
-				$this->authManager->update($perm->name, $perm);
-			}
-		}
-	}
-
-
-
 
 } // class
 
