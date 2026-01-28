@@ -28,12 +28,14 @@ class AuthController extends Controller
 
 	public $db = 'db';
 	public $authManager = 'authManager';
+	/** @var bool Verbose output */
+	public bool $verbose = false;
 
     public function options($actionID)
     {
         return array_merge(
             parent::options($actionID),
-            ['create', 'delete']
+            ['create', 'delete', 'verbose']
         );
     }
 
@@ -43,7 +45,8 @@ class AuthController extends Controller
             'f' => 'format',
             't' => 'truncateTables',
             'c' => 'createFile',
-            'p' => 'seedersPath'
+            'p' => 'seedersPath',
+			'v' => 'verbose',
         ]);
     }
 
@@ -90,11 +93,11 @@ class AuthController extends Controller
 					'module' => $module_desc, 'model' => $model_title
 				]), true, $auth);
 			unset($all_items[$model_viewer->name]);
-			AuthHelper::echoLastMessage();
+			AuthHelper::echoLastMessage($this->verbose);
 			if (!$auth->hasChild($viewer, $model_viewer)) {
 				$auth->addChild($viewer, $model_viewer);
 				echo "+ Role '{$model_viewer->name}' added to role '{$viewer->name}'\n";
-			} else {
+			} elseif ($this->verbose) {
 				echo "= Role '{$model_viewer->name}' already exists in role {$viewer->name}\n";
 			}
 		}
@@ -105,11 +108,11 @@ class AuthController extends Controller
 					'module' => $module_desc, 'model' => $model_title
 				]), true, $auth);
 			unset($all_items[$model_creator->name]);
-			AuthHelper::echoLastMessage();
+			AuthHelper::echoLastMessage($this->verbose);
 			if (!$auth->hasChild($creator, $model_creator)) {
 				$auth->addChild($creator, $model_creator);
 				echo "+ Role '{$model_creator->name}' added to role '{$creator->name}'\n";
-			} else {
+			} elseif ($this->verbose) {
 				echo "= Role '{$model_creator->name}' already exists in role {$creator->name}\n";
 			}
 		}
@@ -120,11 +123,11 @@ class AuthController extends Controller
 					'module' => $module_desc, 'model' => $model_title
 				]), true, $auth);
 			unset($all_items[$model_deleter->name]);
-			AuthHelper::echoLastMessage();
+			AuthHelper::echoLastMessage($this->verbose);
 			if (!$auth->hasChild($deleter, $model_deleter)) {
 				$auth->addChild($deleter, $model_deleter);
 				echo "+ Role '{$model_deleter->name}' added to role '{$deleter->name}'\n";
-			} else {
+			} elseif ($this->verbose) {
 				echo "= Role '{$model_deleter->name}' already exists in role {$deleter->name}\n";
 			}
 		}
@@ -135,11 +138,11 @@ class AuthController extends Controller
 					'module' => $module_desc, 'model' => $model_title
 				]), true, $auth);
 			unset($all_items[$model_editor->name]);
-			AuthHelper::echoLastMessage();
+			AuthHelper::echoLastMessage($this->verbose);
 			if (!$auth->hasChild($editor, $model_editor)) {
 				$auth->addChild($editor, $model_editor);
 				echo "+ Role '{$model_editor->name}' added to role '{$editor->name}'\n";
-			} else {
+			} elseif ($this->verbose) {
 				echo "= Role '{$model_editor->name}' already exists in role {$editor->name}\n";
 			}
 		}
@@ -150,11 +153,11 @@ class AuthController extends Controller
 					'module' => $module_desc, 'model' => $model_title
 				]), true, $auth);
 			unset($all_items[$model_granter->name]);
-			AuthHelper::echoLastMessage();
+			AuthHelper::echoLastMessage($this->verbose);
 			if (!$auth->hasChild($granter, $model_granter)) {
 				$auth->addChild($granter, $model_granter);
 				echo "+ Role '{$model_granter->name}' added to role '{$granter->name}'\n";
-			} else {
+			} elseif ($this->verbose) {
 				echo "= Role '{$model_granter->name}' already exists in role {$granter->name}\n";
 			}
 		}
@@ -165,11 +168,11 @@ class AuthController extends Controller
 					'module' => $module_desc, 'model' => $model_title
 				]), true, $auth);
 			unset($all_items[$model_full_editor->name]);
-			AuthHelper::echoLastMessage();
+			AuthHelper::echoLastMessage($this->verbose);
 			if (!$auth->hasChild($full_editor, $model_full_editor)) {
 				$auth->addChild($full_editor, $model_full_editor);
 				echo "+ Role '{$model_full_editor->name}' added to role '{$full_editor->name}'\n";
-			} else {
+			} elseif ($this->verbose) {
 				echo "= Role '{$model_full_editor->name}' already exists in role {$full_editor->name}\n";
 			}
 		}
@@ -180,18 +183,18 @@ class AuthController extends Controller
 					'module' => $module_desc, 'model' => $model_title
 				]), true, $auth);
 			unset($all_items[$model_admin->name]);
-			AuthHelper::echoLastMessage();
+			AuthHelper::echoLastMessage($this->verbose);
 			if (!$auth->hasChild($admin, $model_admin)) {
 				$auth->addChild($admin, $model_admin);
 				echo "+ Role '{$model_admin->name}' added to role '{$admin->name}'\n";
-			} else {
+			} elseif ($this->verbose) {
 				echo "= Role '{$model_admin->name}' already exists in role {$admin->name}\n";
 			}
 			if ($full_editor) {
 				if (!$auth->hasChild($model_admin, $model_full_editor)) {
 					$auth->addChild($model_admin, $model_full_editor);
 					echo "+ Role '{$model_full_editor->name}' added to role '{$model_admin->name}'\n";
-				} else {
+				} elseif ($this->verbose) {
 					echo "= Role '{$model_full_editor->name}' already exists in role {$model_admin->name}\n";
 				}
 			}
@@ -199,7 +202,7 @@ class AuthController extends Controller
 				if (!$auth->hasChild($model_admin, $model_editor)) {
 					$auth->addChild($model_admin, $model_editor);
 					echo "+ Role '{$model_editor->name}' added to role '{$model_admin->name}'\n";
-				} else {
+				} elseif ($this->verbose) {
 					echo "= Role '{$model_editor->name}' already exists in role {$model_admin->name}\n";
 				}
 			}
@@ -207,7 +210,7 @@ class AuthController extends Controller
 				if (!$auth->hasChild($model_admin, $model_creator)) {
 					$auth->addChild($model_admin, $model_creator);
 					echo "+ Role '{$model_creator->name}' added to role '{$model_admin->name}'\n";
-				} else {
+				} elseif ($this->verbose) {
 					echo "= Role '{$model_creator->name}' already exists in role {$model_admin->name}\n";
 				}
 			}
@@ -215,7 +218,7 @@ class AuthController extends Controller
 				if (!$auth->hasChild($model_admin, $model_deleter)) {
 					$auth->addChild($model_admin, $model_deleter);
 					echo "+ Role '{$model_deleter->name}' added to role '{$model_admin->name}'\n";
-				} else {
+				} elseif ($this->verbose) {
 					echo "= Role '{$model_deleter->name}' already exists in role {$model_admin->name}\n";
 				}
 			}
@@ -223,7 +226,7 @@ class AuthController extends Controller
 				if (!$auth->hasChild($model_admin, $model_viewer)) {
 					$auth->addChild($model_admin, $model_viewer);
 					echo "+ Role '{$model_viewer->name}' added to role '{$model_admin->name}'\n";
-				} else {
+				} elseif ($this->verbose) {
 					echo "= Role '{$model_viewer->name}' already exists in role {$model_admin->name}\n";
 				}
 			}
@@ -231,7 +234,7 @@ class AuthController extends Controller
 				if (!$auth->hasChild($model_admin, $model_granter)) {
 					$auth->addChild($model_admin, $model_granter);
 					echo "+ Role '{$model_granter->name}' added to role '{$model_admin->name}'\n";
-				} else {
+				} elseif ($this->verbose) {
 					echo "= Role '{$model_granter->name}' already exists in role {$model_admin->name}\n";
 				}
 			}
@@ -242,7 +245,7 @@ class AuthController extends Controller
 				if (!$auth->hasChild($model_full_editor, $model_creator)) {
 					$auth->addChild($model_full_editor, $model_creator);
 					echo "+ Role '{$model_creator->name}' added to role '{$model_full_editor->name}'\n";
-				} else {
+				} elseif ($this->verbose) {
 					echo "= Role '{$model_creator->name}' already exists in role {$model_full_editor->name}\n";
 				}
 			}
@@ -250,7 +253,7 @@ class AuthController extends Controller
 				if (!$auth->hasChild($model_full_editor, $model_deleter)) {
 					$auth->addChild($model_full_editor, $model_deleter);
 					echo "+ Role '{$model_deleter->name}' added to role '{$model_full_editor->name}'\n";
-				} else {
+				} elseif ($this->verbose) {
 					echo "= Role '{$model_deleter->name}' already exists in role {$model_full_editor->name}\n";
 				}
 			}
@@ -258,7 +261,7 @@ class AuthController extends Controller
 				if (!$auth->hasChild($model_full_editor, $model_editor)) {
 					$auth->addChild($model_full_editor, $model_editor);
 					echo "+ Role '{$model_editor->name}' added to role '{$model_full_editor->name}'\n";
-				} else {
+				} elseif ($this->verbose) {
 					echo "= Role '{$model_editor->name}' already exists in role {$model_full_editor->name}\n";
 				}
 			}
@@ -269,7 +272,7 @@ class AuthController extends Controller
 				if (!$auth->hasChild($model_editor, $model_viewer)) {
 					$auth->addChild($model_editor, $model_viewer);
 					echo "+ Role '{$model_viewer->name}' added to role '{$model_editor->name}'\n";
-				} else {
+				} elseif ($this->verbose) {
 					echo "= Role '{$model_viewer->name}' already exists in role {$model_editor->name}\n";
 				}
 			}
@@ -280,7 +283,7 @@ class AuthController extends Controller
 				if (!$auth->hasChild($model_deleter, $model_viewer)) {
 					$auth->addChild($model_deleter, $model_viewer);
 					echo "+ Role '{$model_viewer->name}' added to role '{$model_deleter->name}'\n";
-				} else {
+				} elseif ($this->verbose) {
 					echo "= Role '{$model_viewer->name}' already exists in role {$model_deleter->name}\n";
 				}
 			}
@@ -291,7 +294,7 @@ class AuthController extends Controller
 				if (!$auth->hasChild($model_creator, $model_viewer)) {
 					$auth->addChild($model_creator, $model_viewer);
 					echo "+ Role '{$model_viewer->name}' added to role '{$model_creator->name}'\n";
-				} else {
+				} elseif ($this->verbose) {
 					echo "= Role '{$model_viewer->name}' already exists in role {$model_creator->name}\n";
 				}
 			}
@@ -307,7 +310,7 @@ class AuthController extends Controller
 			$permission = AuthHelper::createOrUpdatePermission(
 				$model_perm_name . "." . $perm_name, $perm_desc, true, $auth);
 			unset($all_items[$permission->name]);
-			AuthHelper::echoLastMessage();
+			AuthHelper::echoLastMessage($this->verbose);
 			$roles_to_add = [];
 			switch ($perm_name) {
 				case 'view':
@@ -333,7 +336,7 @@ class AuthController extends Controller
 				if (!$auth->hasChild($role_to_add, $permission)) {
 					$auth->addChild($role_to_add, $permission);
 					echo "+ Permission '{$permission->name}' added to role '{$role_to_add->name}'\n";
-				} else {
+				} elseif ($this->verbose) {
 					echo "= Permission '{$permission->name}' already exists in role {$role_to_add->name}\n";
 				}
 				break; // only the first one
@@ -345,7 +348,7 @@ class AuthController extends Controller
 			Yii::t('churros', '{module}: acceso al módulo', [
 				'module' => $module_desc
 			]), true, $auth);
-		AuthHelper::echoLastMessage();
+		AuthHelper::echoLastMessage($this->verbose);
 		$module_access_permission = AuthHelper::createOrUpdatePermission(
 			$module_id . ".module.index",
 				Yii::t('churros', '{module}: acceso al inicio del módulo', [
@@ -356,7 +359,7 @@ class AuthController extends Controller
 		if (!$auth->hasChild($module_access_role, $module_access_permission)) {
 			$auth->addChild($module_access_role, $module_access_permission);
 			echo "+ Permission '{$module_access_permission->name}' added to role '{$module_access_role->name}'\n";
-		} else {
+		} elseif ($this->verbose) {
 			echo "= Permission '{$module_access_permission->name}' already exists in role {$module_access_role->name}\n";
 		}
 
@@ -364,7 +367,7 @@ class AuthController extends Controller
 			if (!$auth->hasChild($role_to_add, $module_access_permission)) {
 				$auth->addChild($role_to_add, $module_access_permission);
 				echo "+ Permission '{$permission->name}' added to role '{$role_to_add->name}'\n";
-			} else {
+			} elseif ($this->verbose) {
 				echo "= Permission '{$permission->name}' already exists in role {$role_to_add->name}\n";
 			}
 			break; // only the first one
@@ -395,7 +398,7 @@ class AuthController extends Controller
 			$viewer = AuthHelper::createOrUpdateRole("$module_id.viewer",
 				Yii::t('churros', '{module}:  visor/a ', ['module' => $module_desc]), true, $auth);
 			unset($all_items[$viewer->name]);
-			AuthHelper::echoLastMessage();
+			AuthHelper::echoLastMessage($this->verbose);
 		} else {
 			$viewer = null;
 		}
@@ -403,7 +406,7 @@ class AuthController extends Controller
 			$creator = AuthHelper::createOrUpdateRole("$module_id.creator",
 				Yii::t('churros', '{module}:  creador/a', ['module' => $module_desc]), true, $auth);
 			unset($all_items[$creator->name]);
-			AuthHelper::echoLastMessage();
+			AuthHelper::echoLastMessage($this->verbose);
 		} else {
 			$creator = null;
 		}
@@ -411,7 +414,7 @@ class AuthController extends Controller
 			$editor = AuthHelper::createOrUpdateRole("$module_id.editor",
 				Yii::t('churros', '{module}:  editor/a', ['module' => $module_desc]), true, $auth);
 			unset($all_items[$editor->name]);
-			AuthHelper::echoLastMessage();
+			AuthHelper::echoLastMessage($this->verbose);
 		} else {
 			$editor = null;
 		}
@@ -419,7 +422,7 @@ class AuthController extends Controller
 			$full_editor = AuthHelper::createOrUpdateRole("$module_id.full-editor",
 				Yii::t('churros', '{module}:  editor/a total', ['module' => $module_desc]), true, $auth);
 			unset($all_items[$full_editor->name]);
-			AuthHelper::echoLastMessage();
+			AuthHelper::echoLastMessage($this->verbose);
 		} else {
 			$full_editor = null;
 		}
@@ -427,7 +430,7 @@ class AuthController extends Controller
 			$deleter = AuthHelper::createOrUpdateRole("$module_id.deleter",
 				Yii::t('churros', '{module}:  eliminador/a', ['module' => $module_desc]), true, $auth);
 			unset($all_items[$deleter->name]);
-			AuthHelper::echoLastMessage();
+			AuthHelper::echoLastMessage($this->verbose);
 		} else {
 			$deleter = null;
 		}
@@ -435,7 +438,7 @@ class AuthController extends Controller
 			$granter = AuthHelper::createOrUpdateRole("$module_id.granter",
 				Yii::t('churros', '{module}:  asignador/a de privilegios', ['module' => $module_desc]), true, $auth);
 			unset($all_items[$granter->name]);
-			AuthHelper::echoLastMessage();
+			AuthHelper::echoLastMessage($this->verbose);
 		} else {
 			$granter = null;
 		}
@@ -443,7 +446,7 @@ class AuthController extends Controller
 			$admin = AuthHelper::createOrUpdateRole("$module_id.admin",
 				Yii::t('churros', '{module}:  administrador/a', ['module' => $module_desc]), true, $auth);
 			unset($all_items[$admin->name]);
-			AuthHelper::echoLastMessage();
+			AuthHelper::echoLastMessage($this->verbose);
 		} else {
 			$admin = null;
 		}
@@ -451,7 +454,7 @@ class AuthController extends Controller
 		foreach ($module_info['controllers']??[] as $cname => $controller) {
 			$this->createControllerPermissions($module_id, $module_desc, $cname, $controller,
 				$viewer, $creator, $editor, $full_editor, $deleter, $granter, $admin, $all_items);
-			AuthHelper::echoLastMessage();
+			AuthHelper::echoLastMessage($this->verbose);
 		}
 
 		// list unused
@@ -597,7 +600,7 @@ class AuthController extends Controller
 		}
 		if (!$this->authManager->hasChild($role, $permission)) {
 			$this->authManager->addChild($role, $permission);
-			AuthHelper::echoLastMessage();
+			AuthHelper::echoLastMessage($this->verbose);
 		}
 	}
 
@@ -605,32 +608,32 @@ class AuthController extends Controller
 	{
 		$permission = AuthHelper::createOrUpdatePermission(
 			$perm_name, $perm_desc, false, $this->authManager);
-		AuthHelper::echoLastMessage();
+		AuthHelper::echoLastMessage($this->verbose);
 	}
 
 	public function actionCreateRole($perm_name, $perm_desc)
 	{
 		$permission = AuthHelper::createOrUpdateRole(
 			$perm_name, $perm_desc, false, $this->authManager);
-		AuthHelper::echoLastMessage();
+		AuthHelper::echoLastMessage($this->verbose);
 	}
 
 	public function actionRemovePermFromRole($perm_name, $role_name)
 	{
 		AuthHelper::removePermFromRole($role_name, $perm_name, $this->authManager);
-		AuthHelper::echoLastMessage();
+		AuthHelper::echoLastMessage($this->verbose);
 	}
 
 	public function actionRemoveRoles(array|string $role_name): void
 	{
 		AuthHelper::removeRoles($role_name, $this->authManager);
-		AuthHelper::echoLastMessage();
+		AuthHelper::echoLastMessage($this->verbose);
 	}
 
 	public function actionRemovePermissions(array|string $role_name): void
 	{
 		AuthHelper::removeRoles($role_name, $this->authManager);
-		AuthHelper::echoLastMessage();
+		AuthHelper::echoLastMessage($this->verbose);
 	}
 
 	public function actionRemoveAllUnused(string $module_id)
@@ -650,7 +653,7 @@ class AuthController extends Controller
 	public function actionRemoveAll()
 	{
 		$this->authManager->removeAll();
-		AuthHelper::echoLastMessage();
+		AuthHelper::echoLastMessage($this->verbose);
 	}
 
 

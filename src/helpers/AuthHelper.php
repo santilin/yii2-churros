@@ -15,10 +15,12 @@ class AuthHelper
 {
 	static protected string $lastMessage = '';
 
-	static public function echoLastMessage(string $eol = "\n")
+	static public function echoLastMessage(bool $verbose, string $eol = "\n")
 	{
 		if (trim(static::$lastMessage) != '') {
-			echo static::$lastMessage . $eol;
+			if ($verbose || static::$lastMessage[0] !== '=') {
+				echo static::$lastMessage . $eol;
+			}
 		}
 	}
 
@@ -56,7 +58,7 @@ class AuthHelper
 	}
 
 	static public function createOrUpdateRole(string $role_name, string $role_desc,
-											 bool $is_default = false, $auth = null)
+											 bool $is_default = false, $auth = null): Role
 	{
 		if ($auth == null) {
 			$auth = \Yii::$app->authManager;
