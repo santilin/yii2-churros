@@ -436,13 +436,13 @@ class AuthController extends Controller
 	{
 		$no_model_perms = [];
 		$prev_model = null;
-		if ($type == null || StringHelper::startsWith($type, 'perm')) {
+		if ($type === null || StringHelper::startsWith($type, 'perm')) {
 			$perms = $this->authManager->getItems(Item::TYPE_PERMISSION);
 			asort($perms);
 			$this->stdout("= PERMISSIONS\n");
 			foreach ($perms as $perm) {
 				$name = $perm->name;
-				if (preg_match( '/([A-Za-z_][A-Za-z_0-9]*).(index|create|view|update|delete|update|report|duplicate)/', $name, $m )) {
+				if (preg_match( '/([A-Za-z_][A-Za-z_0-9]*).(index|create|view|update|delete|update|report|duplicate|search)/', $name, $m )) {
 					if ($m[1] == "Reports") {
 						continue;
 					}
@@ -469,7 +469,7 @@ class AuthController extends Controller
 				$this->stdout($perm->name . "\n");
 			}
 		}
-		if ($type == null || StringHelper::startsWith($type, 'rol')) {
+		if ($type === null || StringHelper::startsWith($type, 'rol')) {
 			$roles = $this->authManager->getItems(Item::TYPE_ROLE);
 			asort($roles);
 			$this->stdout("\n= ROLES\n");
@@ -499,7 +499,7 @@ class AuthController extends Controller
 			}
 		}
 
-		if ($type == null || StringHelper::startsWith($type, 'user')) {
+		if ($type === null || StringHelper::startsWith($type, 'user')) {
 			$this->stdout("\n= USERS' ASSIGNMENTS\n");
 			$user_class = Yii::$app->user->identityClass;
 			$user = new $user_class;
@@ -665,6 +665,22 @@ class AuthController extends Controller
 		}
 	}
 
+	public function actionListAllUnused(string $module_id)
+	{
+		echo "# Roles\n";
+		foreach ($this->authManager->getRoles() as $role) {
+			if ($role->createdAt === 0 && preg_match("/$module_id\.[A-Z]([A-Za-z_])*\./", $role->name)) {
+				echo $role->name . ' (' . $role->description . ")\n";
+			}
+		}
+		echo "# Permissions\n";
+		foreach ($this->authManager->getPermissions() as $perm) {
+			if ($perm->createdAt === 0 && preg_match("/$module_id\.[A-Z]([A-Za-z_])*\./", $perm->name)) {
+				echo $perm->name . ' (' . $perm->description . ")\n";
+			}
+		}
+	}
+
 	protected function markAllDefault(string $module_id)
 	{
 		foreach ($this->authManager->getRoles() as $role) {
@@ -680,6 +696,8 @@ class AuthController extends Controller
 			}
 		}
 	}
+
+
 
 
 } // class
