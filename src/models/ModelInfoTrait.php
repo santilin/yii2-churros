@@ -241,10 +241,10 @@ trait ModelInfoTrait
 	}
 
 	// Used in grids
-	public function linkTo($action, $prefix = '', $format = 'short', $max_len = 0)
+	public function linkTo(string $action, string $prefix = '', string $format = 'short', int $max_len = 0)
 	{
 		$url = $prefix;
-		if ($url != '') {
+		if ($url !== '') {
 			$url .= "/";
 		}
 		$url .= $this->controllerName();
