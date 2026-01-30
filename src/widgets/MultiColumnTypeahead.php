@@ -230,9 +230,6 @@ $('#$id').blur(function(e) {
 	return true;
 });
 $('#$id').keydown(function(e) {
-	if ( e.keyCode == 13) {
-		debugger;
-	}
 	if ((e.keyCode == 13 || e.keyCode == 8 || e.key == "Delete") && mctahead_changed_$js_id) {
 		let selectedDatum = $(this).data('ttTypeahead').menu.getActiveSelectable();
 		if (!selectedDatum) {
