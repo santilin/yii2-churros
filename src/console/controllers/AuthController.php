@@ -713,5 +713,118 @@ class AuthController extends Controller
 		}
 	}
 
+	/**
+	 * Lists all permissions (direct + inherited) for a given role
+	 * @param string $role the role name
+	 */
+	public function actionListRol($role)
+	{
+		$auth = $this->authManager;
+		$roleItem = $auth->getRole($role);
+
+		if (!$roleItem) {
+			$this->stderr("Role '$role' not found.\n");
+			return 1;
+		}
+
+		$this->stdout("Role: {$roleItem->name}\n", Console::FG_YELLOW);
+		$this->stdout("Description: {$roleItem->description}\n\n");
+
+		// Get all users with this role
+		$userIds = $auth->getUserIdsByRole($role);
+		if ($userIds) {
+			$this->stdout("Users (count: " . count($userIds) . "): " . implode(', ', $userIds) . "\n");
+		}
+
+		$this->stdout("\nChild roles:\n", Console::FG_CYAN);
+		$childRoles = $auth->getChildRoles($role);
+		foreach ($childRoles as $childRole) {
+			if ($childRole->name !== $role) {
+				$this->stdout("  └─ {$childRole->name}\n", Console::FG_YELLOW);
+			}
+		}
+
+		$this->stdout("\nPermissions:\n", Console::FG_GREEN);
+		$permissions = $auth->getPermissionsByRole($role, true, '', false); // recursive: true
+
+		if (empty($permissions)) {
+			$this->stdout("  (none)\n");
+			return 0;
+		}
+
+		ksort($permissions);
+		foreach ($permissions as $name => $permission) {
+			$prefix = str_repeat('  ', substr_count($name, '.') + 1);
+			$this->stdout("{$prefix}└─ {$name}\n", Console::FG_GREEN);
+		}
+	}
+
+
+	/**
+	 * Lists all roles assigned to a user (direct assignments only)
+	 * Accepts user ID, username, or email
+	 * @param string|integer $identifier user ID, username or email
+	 */
+	public function actionListUserRoles($identifier)
+	{
+		$auth = $this->authManager;
+
+		// Use UserQuery to find user by ID, username, or email
+		$userClass = Yii::$app->user->identityClass;
+		$userQuery = $userClass::find();
+		$user = $userQuery->whereIdOrUsernameOrEmail($identifier)->one();
+
+		if (!$user) {
+			$this->stderr("User '$identifier' not found\n");
+			return 1;
+		}
+
+		$userId = $user->id;
+
+		// Get DIRECT role assignments
+		$directAssignments = $auth->getAssignments($userId);
+
+		// Get DEFAULT roles from authManager config (always strings)
+		$defaultRoles = $auth->defaultRoles;
+
+		// Combine: direct assignments + ALL default roles (they auto-apply)
+		$allRoles = array_unique(array_merge(
+			array_keys($directAssignments),
+			$defaultRoles  // defaultRoles are ALWAYS strings, no filtering needed
+		));
+
+		sort($allRoles);
+
+		if (empty($allRoles)) {
+			$this->stdout("User '{$user->username}' [ID: {$userId}]: no roles assigned\n");
+			return 0;
+		}
+
+		$this->stdout("User: {$user->username}", Console::FG_YELLOW);
+		if (isset($user->email)) {
+			$this->stdout(" ({$user->email})");
+		}
+		$this->stdout(" [ID: {$userId}]\n");
+
+		$this->stdout("All roles (direct + default):\n", Console::FG_CYAN);
+
+		foreach ($allRoles as $roleName) {
+			$isDirect = isset($directAssignments[$roleName]);
+			$role = $auth->getRole($roleName);
+			$desc = $role ? $role->description : 'N/A';
+
+			$this->stdout("  └─ {$roleName}", Console::FG_YELLOW);
+			if ($this->verbose && $desc !== 'N/A') {
+				$this->stdout(" ({$desc})");
+			}
+			if (!$isDirect && in_array($roleName, $defaultRoles)) {
+				$this->stdout(" [DEFAULT]", Console::FG_BLUE);
+			}
+			$this->stdout("\n");
+		}
+
+		return 0;
+	}
+
 } // class
 
