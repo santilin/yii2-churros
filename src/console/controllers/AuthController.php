@@ -350,27 +350,33 @@ class AuthController extends Controller
 			]), true, $auth);
 		AuthHelper::echoLastMessage($this->verbose);
 		$module_access_permission = AuthHelper::createOrUpdatePermission(
-			$module_id . ".module.index",
+			$module_id . ".index",
 				Yii::t('churros', '{module}: acceso al inicio del módulo', [
 					'module' => $module_desc
 				]), true, $auth);
 		unset($all_items[$module_access_permission->name]);
 
-		if (!$auth->hasChild($module_access_role, $module_access_permission)) {
-			$auth->addChild($module_access_role, $module_access_permission);
-			echo "+ Permission '{$module_access_permission->name}' added to role '{$module_access_role->name}'\n";
-		} elseif ($this->verbose) {
-			echo "= Permission '{$module_access_permission->name}' already exists in role {$module_access_role->name}\n";
-		}
+		// if (!$auth->hasChild($module_access_role, $module_access_permission)) {
+		// 	$auth->addChild($module_access_role, $module_access_permission);
+		// 	echo "+ Permission '{$module_access_permission->name}' added to role '{$module_access_role->name}'\n";
+		// } elseif ($this->verbose) {
+		// 	echo "= Permission '{$module_access_permission->name}' already exists in role {$module_access_role->name}\n";
+		// }
 
-		foreach (array_filter([$viewer, $editor,]) as $role_to_add) {
-			if (!$auth->hasChild($role_to_add, $module_access_permission)) {
-				$auth->addChild($role_to_add, $module_access_permission);
-				echo "+ Permission '{$permission->name}' added to role '{$role_to_add->name}'\n";
+		foreach (array_filter([$viewer, $editor,]) as $role_to_add_to) {
+			if (!$auth->hasChild($role_to_add_to, $module_access_permission)) {
+				$auth->addChild($role_to_add_to, $module_access_permission);
+				echo "+ Role '{$module_access_permission->name}' added to role '{$role_to_add_to->name}'\n";
 			} elseif ($this->verbose) {
-				echo "= Permission '{$permission->name}' already exists in role {$role_to_add->name}\n";
+				echo "= Role '{$module_access_permission->name}' already exists in role {$role_to_add_to->name}\n";
 			}
-			break; // only the first one
+		// 	if (!$auth->hasChild($module_access_role, $role_to_add)) {
+		// 		$auth->addChild($module_access_role, $role_to_add);
+		// 		echo "+ Role '{$role_to_add->name}' added to role '{$module_access_role->name}'\n";
+		// 	} elseif ($this->verbose) {
+		// 		echo "= Role '{$role_to_add->name}' already exists in role {$$module_access_role->name}\n";
+		// 	}
+		// 	break; // only the first one
 		}
 	}
 
@@ -381,7 +387,7 @@ class AuthController extends Controller
 		array $roles_to_create = [ 'viewer', 'creator', 'editor', 'full-editor', 'deleter', 'granter', 'admin' ])
 	{
 		$auth = $this->authManager;
-		$all_items = [];
+		$all_items = []; // keeps track of all module rules to keep default ones
 		foreach ($this->authManager->getRoles() as $role) {
 			if (StringHelper::startsWith($role->name, "$module_id.")) {
 				$all_items[$role->name] = true;
@@ -553,7 +559,6 @@ class AuthController extends Controller
 	 */
 	public function actionListRole($role)
 	{
-		$users_ids = $this->authManager->getUserIdsByRole($role);
 		$subroles = $this->authManager->getChildRoles($role);
 		if (count($subroles)) {
 			$s_subroles = '';
