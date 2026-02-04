@@ -51,18 +51,18 @@ class MultiColumnTypeahead extends Typeahead
 			$js = '';
 			if ($this->overwriteInputs) {
 				$js = <<<js
-$('#$form_field_id').val(item.$dbField);
+$('#$form_field_id').val(item.$dbField).trigger('change');
 js;
 			} else {
 				$js = <<<js
 if (item.$dbField != '' && $('#$form_field_id').val() == '') $('#$form_field_id').val(item.$dbField);
 js;
 			}
-			if (YII_ENV_DEV) {
-				$js .= <<<js
-console.log("$form_field_id = ", item.$dbField);
-js;
-			}
+// 			if (YII_ENV_DEV) {
+// 				$js .= <<<js
+// console.log("$form_field_id = ", item.$dbField);
+// js;
+			// }
 			$set_dest_fields_values[] = $js;
 		}
 		$s_item_fields = implode(',',$item_fields);
