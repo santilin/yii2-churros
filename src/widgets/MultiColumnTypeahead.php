@@ -55,14 +55,14 @@ $('#$form_field_id').val(item.$dbField).trigger('change');
 js;
 			} else {
 				$js = <<<js
-if (item.$dbField != '' && $('#$form_field_id').val() == '') $('#$form_field_id').val(item.$dbField);
+if (item.$dbField != '' && $('#$form_field_id').val() == '') $('#$form_field_id').val(item.$dbField).trigger('change');
 js;
 			}
-// 			if (YII_ENV_DEV) {
-// 				$js .= <<<js
-// console.log("$form_field_id = ", item.$dbField);
-// js;
-			// }
+			if (YII_ENV_DEV) {
+				$js .= <<<js
+console.log("$form_field_id = ", item.$dbField);
+js;
+			}
 			$set_dest_fields_values[] = $js;
 		}
 		$s_item_fields = implode(',',$item_fields);
@@ -173,20 +173,20 @@ js
 			$js = '';
 			if ($this->overwriteInputs) {
 				 $js = <<<js
-if (datumParts.$formField !== undefined && datumParts.$formField != '') {
-	$('#$form_field_id').val(datumParts.$formField) };
+if (datumParts.$formField !== undefined && datumParts.$formField != '' && $('#$form_field_id').val() != datumParts.$formField) {
+	$('#$form_field_id').val(datumParts.$formField).trigger('change'); };
 js;
 			} else {
 				$js = <<<js
 if (datumParts.$formField !== undefined && datumParts.$formField != '' && $('#$form_field_id').val() == '') {
-	$('#$form_field_id').val(datumParts.$formField) };
+	$('#$form_field_id').val(datumParts.$formField).trigger('change'); };
 js;
 			}
-			if (YII_ENV_DEV) {
-				$js .= <<<js
-				console.log("$form_field_id = ", datumParts.$formField);
-js;
-			}
+// 			if (YII_ENV_DEV) {
+// 				$js .= <<<js
+// 				console.log("$form_field_id = ", datumParts.$formField);
+// js;
+// 			}
 			$set_dest_fields_values[] = $js;
 			if ($nf++>0) {
 				$reset_dest_fields_values[] = <<<js

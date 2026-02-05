@@ -567,9 +567,14 @@ abstract class CrudController extends \yii\web\Controller
 	}
 
 	// Ajax
-	public function actionAutocomplete(string $search, string $format,
-		array|string $fields = [], array|string $scopes = '',
-		array|string|null $id_fields = null, string $model_format = 'long')
+	public function actionAutocomplete(
+		string $search,
+		string $format,
+		array|string $fields = [],
+		array|string $scopes = '',
+		array|string|null $id_fields = null,
+		string $model_format = 'long',
+		array $extra_options = [])
 	{
 		\Yii::$app->response->format = \yii\web\Response::FORMAT_JSON;
 		$ret = [];
