@@ -85,6 +85,8 @@ class AuthController extends Controller
 		$model = $model_class::instance();
 		$model_title = $model->t('app', "{Title_plural}");
 
+		$model_viewer = $model_creator = $model_editor = $model_full_editor
+			= $model_deleter = $model_granter = $model_admin = null;
 		// Create model roles
 		if ($viewer) {
 			$model_viewer = AuthHelper::createOrUpdateRole(

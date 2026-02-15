@@ -52,6 +52,10 @@ class AuthHelper
 			static::$lastMessage = '^ ' . $permission->name . ' => ' . $permission->description
 				. ': ' . Yii::t('churros', 'permission updated');
 		} else {
+			if ($is_default) {
+				$auth->db->createCommand()->update(
+					$auth->itemTable, ['created_at' => 0], ['name' => $perm_name])->execute();
+			}
 			static::$lastMessage = '= ' . "{$permission->name}, {$permission->description}: " . Yii::t('churros', 'permission already exists');
 		}
 		return $permission;
@@ -80,13 +84,14 @@ class AuthHelper
 				. ': ' . Yii::t('churros', 'role created');
 		} else if ($role->description != $role_desc) {
 			$role->description = $role_desc;
-			if ($is_default) {
-				$role->createdAt = 0;
-			}
 			$auth->update($role_name, $role);
 			static::$lastMessage = '^ ' . $role->name . ' => ' . $role->description
 				. ': ' . Yii::t('churros', 'role updated');
 		} else {
+			if ($is_default) {
+				$auth->db->createCommand()->update(
+					$auth->itemTable, ['created_at' => 0], ['name' => $role_name])->execute();
+			}
 			static::$lastMessage = '= ' . "{$role->name}, {$role->description}: " . Yii::t('churros', 'role already exists');
 		}
 		return $role;
