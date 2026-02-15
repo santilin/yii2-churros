@@ -84,12 +84,12 @@ trait ReportsModelTrait
 
 	public function decodeValue()
 	{
-		$value = json_decode($this->value??'', true);
-		$this->report_columns = $value['report_columns']??[];
-		$this->report_filters = $value['report_filters']??[];
-		$this->report_sorting = $value['report_sorting']??[];
-		$this->only_totals = $value['only_totals']??false;
-		$this->landscape= $value['landscape']??false;
+		$value = json_decode($this->value ?? '', true);
+		$this->report_columns = $value['report_columns'] ?? [];
+		$this->report_filters = $value['report_filters'] ?? [];
+		$this->report_sorting = $value['report_sorting'] ?? [];
+		$this->only_totals = $value['only_totals'] ?? false;
+		$this->landscape= $value['landscape'] ?? false;
 	}
 
 	protected function findColumn($attribute)
