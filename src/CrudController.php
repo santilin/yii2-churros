@@ -40,7 +40,7 @@ abstract class CrudController extends \yii\web\Controller
 	/**
 	 * An array of extra params to pass to the views
 	 */
-	protected function changeActionParams(array $actionParams, string $action_id, $model)
+	protected function changeActionParams(array $actionParams, string $action_id, $model): array
 	{
 		if (!array_key_exists('master', $actionParams) && $this->getMasterModel()) {
 			$actionParams['master'] = $this->getMasterModel();
