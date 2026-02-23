@@ -102,13 +102,6 @@ abstract class CrudController extends \yii\web\Controller
 			throw new NotFoundHttpException("Unable to create a searchModel for $this->id crud controller");
 		}
 		$form_name = $searchModel->formName();
-		// if (empty($params[$form_name])) {
-		// 	if (!empty(Yii::$app->session[$form_name . '.grid-filters'])) {
-		// 		$params[$form_name] = Yii::$app->session[$form_name. '.grid-filters'];
-		// 	}
-		// } else {
-		// 	Yii::$app->session->set($form_name . '.grid-filters', $params[$form_name]);
-		// }
 		$params['permissions'] = $this->resolvePermissions($params['permissions'] ?? []);
 		if ($master_model = $this->getMasterModel()) {
 			$relation_info = $searchModel->relationToModel($master_model);
@@ -120,11 +113,19 @@ abstract class CrudController extends \yii\web\Controller
 			}
 		}
 		$params = $this->changeActionParams($params, 'index', $searchModel);
-		return $this->render('index', [
-			'searchModel' => $searchModel,
-			'indexParams' => $params,
-			'indexGrids' => [ '_grid' => [ '_grid', '', null, [], [], [], [] ] ]
-		]);
+		if (!empty($params['embedded']) || $this->request->getIsAjax()) {
+			return $this->renderAjax('index', [
+				'searchModel' => $searchModel,
+				'indexParams' => $params,
+				'indexGrids' => [ '_grid' => [ '_grid', '', null, [], [], [], [] ] ]
+			]);
+		} else {
+			return $this->render('index', [
+				'searchModel' => $searchModel,
+				'indexParams' => $params,
+				'indexGrids' => [ '_grid' => [ '_grid', '', null, [], [], [], [] ] ]
+			]);
+		}
 	}
 
 	/**
