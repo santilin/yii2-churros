@@ -153,7 +153,11 @@ const ChurrosGrid = (function() {
 			return `<table class="table">${thead}${tbody}${tfoot}</table>`;
 		},
 		exportToCSV(id, fileName, excludedClasses = [], excludedRows = [], excludedCols = []) {
-			const table = document.getElementById(id);
+			const element = document.getElementById(id);
+			if (!element) return console.error(`Element with id '${id}' not found`);
+			// Use the element itself if it's a table, otherwise get the first descendant table
+			const table = element.tagName === 'TABLE' ? element : element.querySelector('table');
+			if (!table) return console.error(`No table found in or as element with id '${id}'`);
 			let csvRows = [];
 			for(let i = 0; i < table.rows.length; i++) {
 				if(excludedRows.includes(i)) continue;
@@ -215,7 +219,12 @@ const ChurrosGrid = (function() {
 			return true;
 		},
 		createODSFile(id, fileName, excludedClasses = [], excludedRows = [], excludedCols = []) {
-			const table = document.getElementById(id);
+			const element = document.getElementById(id);
+			if (!element) return console.error(`Element with id '${id}' not found`);
+
+			// Use the element itself if it's a table, otherwise get the first descendant table
+			const table = element.tagName === 'TABLE' ? element : element.querySelector('table');
+			if (!table) return console.error(`No table found in or as element with id '${id}'`);
 			const content = this.generateContentXML(table, excludedClasses, excludedRows, excludedCols);
 			const manifest = this.generateManifestXML();
 			const styles = this.generateStylesXML();

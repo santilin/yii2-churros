@@ -398,7 +398,8 @@ class GridView extends SimpleGridView
 		'export' => [
 			'type' => 'button',
 			'title' => 'Exportar',
-			'url' => "javascript:ChurrosGrid.createODSFile(this.dataset.table_id, this.dataset.saveas, ['filters']);",
+			'url' => "javascript:ChurrosGrid.exportToCSV(this.dataset.table_id, this.dataset.saveas, ['filters'], [], []);",
+			// 'url' => "javascript:ChurrosGrid.createODSFile(this.dataset.table_id, this.dataset.saveas, ['filters']);",
 			'htmlOptions' => [
 				'class' => 'btn btn-secondary btn-outline',
 				'data' => [
@@ -408,5 +409,19 @@ class GridView extends SimpleGridView
 			]
 		]
 	];
+
+
+	public static function addExportButtons(array &$buttons, string $table_id, ?string $filename = null): void
+	{
+		if (count($buttons) === 0) {
+			$buttons = self::EXPORT_BUTTONS;
+		} else if (!isset($buttons['export'])) {
+			$buttons = array_merge($buttons, self::EXPORT_BUTTONS);
+		}
+		$buttons['export']['htmlOptions']['data'] = [
+			'table_id' => $table_id,
+			'saveas' => $filename ?: $table_id
+		];
+	}
 
 }
