@@ -163,43 +163,45 @@ class AuthHelper
 		static::$lastMessage = join("\n", $msgs);
     }
 
-    static public function assignToUser($user_id_or_name, array|string $perms, $auth = null)
+    static public function assignToUser(array|int|string $user_id_or_names, array|string $perms, $auth = null)
     {
 		if ($auth == null) {
 			$auth = \Yii::$app->authManager;
 		}
-		if (is_numeric($user_id_or_name)) {
-			$user_name = $user_id = $user_id_or_name;
-		} else {
-            $class = Yii::$app->user->identityClass;
-            $identity = $class::find()->whereUserName($user_id_or_name)->one();
-            if ($identity == null) {
-				throw new \Exception( "$user_id_or_name: user not found" );
-            }
-			$user_id = $identity->id;
-			$user_name = $user_id_or_name;
-		}
-		$msgs = [];
-		foreach ((array) $perms as $perm_name) {
-			if ($perm_name instanceof Role) {
-				$perm_name = $perm_name->name;
-			}
-			$perm = $auth->getItem($perm_name);
-			if (!$perm) {
-				throw new \Exception( "$perm_name: permission or role not found" );
-			}
-			if (!$auth->getAssignment($perm_name, $user_id)) {
-				$auth->assign($perm, $user_id);
-				if ($perm->type == Item::TYPE_ROLE) {
-					$msgs[] = '+ ' . "role $perm_name assigned to user $user_name";
-				} else {
-					$msgs[] = '+ ' . "permission $perm_name assinged to role $user_name";
-				}
+		foreach ( (array)$user_id_or_names as $user_id_or_name) {
+			if (is_numeric($user_id_or_name)) {
+				$user_name = $user_id = $user_id_or_name;
 			} else {
-				if ($perm->type == Item::TYPE_ROLE) {
-					$msgs[] = '= ' . "$perm_name: role already assigned to user $user_name";
+				$class = Yii::$app->user->identityClass;
+				$identity = $class::find()->whereUserName($user_id_or_name)->one();
+				if ($identity == null) {
+					throw new \Exception( "$user_id_or_name: user not found" );
+				}
+				$user_id = $identity->id;
+				$user_name = $user_id_or_name;
+			}
+			$msgs = [];
+			foreach ((array) $perms as $perm_name) {
+				if ($perm_name instanceof Role) {
+					$perm_name = $perm_name->name;
+				}
+				$perm = $auth->getItem($perm_name);
+				if (!$perm) {
+					throw new \Exception( "$perm_name: permission or role not found" );
+				}
+				if (!$auth->getAssignment($perm_name, $user_id)) {
+					$auth->assign($perm, $user_id);
+					if ($perm->type == Item::TYPE_ROLE) {
+						$msgs[] = '+ ' . "role $perm_name assigned to user $user_name";
+					} else {
+						$msgs[] = '+ ' . "permission $perm_name assinged to role $user_name";
+					}
 				} else {
-					$msgs[] = '= ' . "$perm_name: permission already assigned to role $user_name";
+					if ($perm->type == Item::TYPE_ROLE) {
+						$msgs[] = '= ' . "$perm_name: role already assigned to user $user_name";
+					} else {
+						$msgs[] = '= ' . "$perm_name: permission already assigned to role $user_name";
+					}
 				}
 			}
 		}
