@@ -1,0 +1,689 @@
+<?php
+
+namespace santilin\churros;
+
+// use Yii;
+use yii\helpers\{Url,StringHelper};
+// use yii\web\{NotFoundHttpException,ForbiddenHttpException,HttpException};
+// use yii\base\ErrorException;
+use yii\db\ActiveRecordInterface as CrudModel;
+// use santilin\churros\exceptions\{DeleteModelException,SaveModelException};
+use santilin\churros\helpers\{AppHelper,FormHelper};
+use yii\base\NotSupportedException;
+/**
+ * CrudController implements the CRUD actions for yii2 models
+ */
+abstract class CrudReadOnlyController extends \yii\web\Controller
+{
+	use ControllerTrait;
+
+	protected static ?string $_prefix = null; // to be overrided
+	protected static string $_model_name; // to be overrided
+	protected array $controllerPermissions = []; // to be overrided
+
+	public ?CrudModel $model = null;
+	protected CrudModel|bool|null $masterModel = false; /// Initially false to distinguish from null
+
+	/// @todo php8.4 move to trait
+	const MSG_DEFAULT = 'The action on {la} {title} <a href="{record_url}">{record_medium}</a> has been successful.';
+	const MSG_NO_ACTION = 'The action on {La} {title} <a href="{record_url}">{record_medium}</a> has been successful.';
+	const MSG_ACCESS_DENIED = 'Access denied to this {title}.';
+	const MSG_NOT_FOUND = '{Title} with primary key {id} not found.';
+	const MSG_CREATED = '{La} {title} <a href="{record_url}">{record_medium}</a> has been successfully created.';
+	const MSG_UPDATED = '{La} {title} <a href="{record_url}">{record_medium}</a> has been successfully updated.';
+	const MSG_DELETED = '{La} {title} <strong>{record_medium}</strong> has been successfully deleted.';
+	const MSG_ERROR_DELETE = 'There has been an error deleting {la} {title} <a href="{record_url}">{record_medium}</a>';
+	const MSG_DUPLICATED = '{La} {title} <a href="{record_url}">{record_medium}</a> has been successfully duplicated.';
+	const MSG_ERROR_DELETE_INTEGRITY = 'Unable to delete {la} {title} <a href="{record_url}">{record_medium}</a> because it has related data.';
+	const MSG_ERROR_DELETE_USED_IN_RELATION = 'Unable to delete {la} {title} <a href="{record_url}">{record_medium}</a> because it is related to at least one {relation_title}.';
+	/**
+	 * An array of extra params to pass to the views
+	 */
+	protected function changeActionParams(array $actionParams, string $action_id, $model): array
+	{
+		if (!array_key_exists('master', $actionParams) && $this->getMasterModel()) {
+			$actionParams['master'] = $this->getMasterModel();
+		}
+		return $actionParams;
+	}
+
+	public function prefix() :string
+	{
+		return $this->_prefix??$this->id;
+	}
+
+	public function modelName() :string
+	{
+		return strrchr(static::$_model_name, '\\') ? substr(strrchr(static::$_model_name, '\\'), 1) : '';
+	}
+
+	public function beforeAction($action)
+	{
+        if (count($_POST) == 0 && count($_FILES) == 0 && isset($_SERVER['CONTENT_TYPE'])
+			&& substr($_SERVER['CONTENT_TYPE'], 0, 19) == 'multipart/form-data') {
+			if ($this->request->getMethod() === 'POST' && isset($_SERVER['CONTENT_LENGTH'])) {
+				if (intval($_SERVER['CONTENT_LENGTH'])>0) {
+					Yii::$app->session->addFlash('error', strtr(Yii::t('churros', 'PHP discarded POST data because of request exceeding either post_max_size={post_size} or upload_max_filesize={upload_size}'), ['{post_size}' => ini_get('post_max_size'), '{upload_size}' => ini_get('upload_max_filesize')]));
+					$this->redirect($this->request->referrer ?: Yii::$app->homeUrl);
+					return false;
+				}
+			}
+        }
+        if (YII_ENV_TEST && $action->id == "delete") {
+			$this->enableCsrfValidation = false;
+		}
+        return parent::beforeAction($action);
+	}
+
+	/**
+	 * Lists all models.
+	 * @todo Revisar, no es exactamente MVC
+	 * @return mixed
+	 */
+	public function actionIndex()
+	{
+		$params = $this->request->queryParams;
+		$searchModel = $this->createSearchModel();
+		if (!$searchModel) {
+			throw new NotFoundHttpException("Unable to create a searchModel for $this->id crud controller");
+		}
+		$form_name = $searchModel->formName();
+		$params['permissions'] = $this->resolvePermissions($params['permissions'] ?? []);
+		if ($master_model = $this->getMasterModel()) {
+			$relation_info = $searchModel->relationToModel($master_model);
+			$relation_name = "get" . ucfirst($relation_info['name']);
+			$relation = $searchModel->$relation_name();
+			foreach ($relation->link as $left_field => $right_field) {
+				$params[$form_name][$right_field] = $master_model->$left_field;
+				$searchModel->$right_field = $master_model->$left_field;
+			}
+		}
+		$params = $this->changeActionParams($params, 'index', $searchModel);
+		if (!empty($params['embedded']) || $this->request->getIsAjax()) {
+			return $this->renderAjax('index', [
+				'searchModel' => $searchModel,
+				'indexParams' => $params,
+				'indexGrids' => [ '_grid' => [ '_grid', '', null, [], [], [], [] ] ]
+			]);
+		} else {
+			return $this->render('index', [
+				'searchModel' => $searchModel,
+				'indexParams' => $params,
+				'indexGrids' => [ '_grid' => [ '_grid', '', null, [], [], [], [] ] ]
+			]);
+		}
+	}
+
+	/**
+	 * @param array $params 'parentPermissions' => parent permissions
+	 */
+	public function indexDetails($master, string $relation_name, string $view, array $params,
+								 $previous_context = null, ?string $search_model_class = null)
+	{
+		$this->action = $this->createAction('index');
+		// Tiene preferencia la clase más específica
+		if ($search_model_class && class_exists("$search_model_class{$view}_Search")) {
+			$detail = $this->createSearchModel("$search_model_class{$view}_Search");
+		} else if ($search_model_class && class_exists("{$search_model_class}_Search")) {
+			$detail = $this->createSearchModel("{$search_model_class}_Search");
+		} else {
+			$detail = $this->createSearchModel($search_model_class);
+		}
+		if (!$detail) {
+			throw new \Exception("No {$search_model_class}_Search nor $search_model_class{$view}_Search class found in " . __METHOD__);
+		}
+		$params['permissions'] = $this->resolvePermissions($params['permissions'] ?? []);
+		$params['_search_relation'] = $relation_name;
+		$params['master'] = $master;
+		$params['embedded'] = true;
+		$params['previous_context'] = $previous_context;
+		// $master->linkDetails($detail, $relation_name);
+		$this->layout = false;
+		return $this->render($view, [
+			'searchModel' => $detail,
+			'indexParams' => $this->changeActionParams($params, 'index', $detail),
+			'indexGrids' => [ '_grid' => [ '_grid', '', null, [], [], [] ] ],
+			'gridName' => $view,
+		]);
+	}
+
+
+	/**
+	 * Displays a single model.
+	 * @param integer $id
+	 * @return mixed
+	 */
+	public function actionView($id)
+	{
+		$params = $this->request->queryParams;
+		$this->model = $this->findModel($id, $params);
+		$params['permissions'] = $this->resolvePermissions($params['permissions'] ?? []);
+		if ($this->request->getIsAjax()) {
+			$this->layout = false;
+			return $this->render('_view', [
+				'model' => $this->model,
+				'viewViews' => [ '_view' => [ '', null, [], '' ] ],
+				'viewParams' => $this->changeActionParams($params, 'view', $this->model)
+			]);
+		} else {
+			return $this->render('view', [
+				'model' => $this->model,
+				'viewViews' => [ '_view' => [ '', null, [], '' ] ],
+				'viewParams' => $this->changeActionParams($params, 'view', $this->model)
+			]);
+		}
+	}
+
+	/**
+	 * Creates a new model.
+	 * @return mixed
+	 */
+	public function actionCreate($id = null)
+	{
+		throw new NotSupportedException();
+	}
+
+	/**
+	 * Creates a new model by another data,
+	 * so user don't need to input all field from scratch.
+	 *
+	 * @param mixed $id
+	 * @return mixed
+	 */
+	public function actionDuplicate($id)
+	{
+		throw new NotSupportedException();
+	}
+
+	/**
+	 * Updates an existing model.
+	 * If update is successful, the browser will be redirected to the 'view' page.
+	 * @param integer $id
+	 * @return mixed
+	 */
+	public function actionUpdate($id)
+	{
+		throw new NotSupportedException();
+	}
+
+	/**
+	 * Deletes an existing model.
+	 * @param integer $id
+	 * @return mixed
+	 */
+	public function actionDelete($id)
+	{
+		throw new NotSupportedException();
+	}
+
+	/**
+	 * Export model information into PDF format.
+	 * @param integer $id
+	 * @return mixed
+	 */
+	public function actionPdf($id)
+	{
+		$params = $this->request->queryParams;
+		$this->model = $this->findModel($id, $params);
+		if (YII_DEBUG) {
+            Yii::$app->getModule('debug')->instance->allowedIPs = [];
+        }
+		// https://stackoverflow.com/a/54568044/8711400
+		$content = $this->renderAjax('_pdf', [
+			'model' => $this->model,
+			'viewParams' => $this->changeActionParams($params, 'pdf', $this->model)
+		]);
+		$methods = [];
+		$margin_header = AppHelper::yiiparam('pdfMarginHeader', 15);
+		$margin_footer = AppHelper::yiiparam('pdfMarginFooter', 15);
+		$margin_top = AppHelper::yiiparam('pdfMarginTop', 20);
+		$margin_bottom = AppHelper::yiiparam('pdfMarginBottom', 20);
+		if ($this->findViewFile('_pdf_header')) {
+			$header_content = $this->renderPartial('_pdf_header', ['model'=>$model]);
+			// h:{00232}
+			if (strncmp($header_content,'h:{',3) === 0) {
+				$margin_top = intval(substr($header_content,3,5));
+				$header_content = substr($header_content,9);
+			}
+			$methods['setHeader'] = $header_content;
+		} else {
+			$methods['setHeader'] = date('Y-m-d H:i') . '|'
+				. $this->model->getModelInfo('title') . '|' . Yii::$app->name . ' - {PAGENO}';
+		}
+		if ($this->findViewFile('_pdf_footer')) {
+			$methods['setFooter'] = $this->renderPartial('_pdf_footer', ['model'=>$this->model]);
+		}
+		$pdf = new \kartik\mpdf\Pdf([
+			'mode' => \kartik\mpdf\Pdf::MODE_CORE,
+			'format' => \kartik\mpdf\Pdf::FORMAT_A4,
+			'orientation' => \kartik\mpdf\Pdf::ORIENT_PORTRAIT,
+			'destination' => \kartik\mpdf\Pdf::DEST_BROWSER,
+			'marginHeader' => $margin_header, // Margin from top of page
+			'marginFooter' => $margin_footer, // Margin from bottom of page
+			'marginTop' => $margin_top, // Margin from top of page to content
+			'marginBottom' => $margin_bottom, // $margin_footer,
+			'content' => $content,
+			'cssFile' => '@vendor/kartik-v/yii2-mpdf/src/assets/kv-mpdf-bootstrap.min.css',
+			'cssInline' => file_get_contents(Yii::getAlias('@app') . '/web/css/print.css'),
+			'options' => ['title' => $this->model->recordDesc()],
+			'methods' => $methods,
+		]);
+		return $pdf->render();
+	}
+
+	protected function returnTo(array|string|null $to, string $from, $model, array $redirect_params = []): string|array
+	{
+		if ($to === 'returnTo') {
+			if ($to = $this->request->post('returnTo', null)) {
+				return $to;
+			}
+			if ($to = $this->request->queryParams['returnTo']??null) {
+				return $to;
+			}
+			$to = '';
+		} else if ($to === 'referrer') {
+			if ($to = Yii::$app->request->getReferrer()) {
+				return $to;
+			}
+			$to = '';
+		}
+		$to_model = null;
+		if (empty($to)) {
+			if ($to = $this->request->post('returnTo', null)) {
+				return $to;
+			}
+			if ($to = $this->request->post('_form_successUrl', null)) {
+				return $to;
+			}
+			if ($to = $this->request->queryParams['returnTo']??null) {
+				return $to;
+			}
+			if ($this->model::$isJunctionModel && $this->getMasterModel()) {
+				$to_model = 'parent';
+				$to_action = 'view';
+			} else {
+				switch ($from) {
+					case 'create':
+						if ($this->request->post("_and_create") == '1') {
+							$to_action = 'create';
+						} else {
+							$to_action = 'view';
+						}
+						break;
+					case 'duplicate':
+						if ($this->request->post("_and_duplicate") == '1') {
+							$to_action = 'duplicate';
+						} else {
+							$to_action = 'view';
+						}
+						break;
+					case 'delete_error':
+						$to_model = 'parent';
+						$to_action = 'index';
+						break;
+					case 'view':
+					case 'update':
+					case 'not_deleted':
+						$to_action = 'view';
+						break;
+					case 'delete':
+					case 'index':
+					case '':
+						$to_action = 'index';
+						break;
+					default:
+						$to_action = $from;
+				}
+			}
+		} else {
+			if (is_array($to)) {
+				return array_merge($to, $redirect_params);
+			}
+			$form_success_url = $this->request->post('_form_successUrl', null);
+			if (!empty($form_success_url)) {
+				$action_in_url = $this->extractAction($form_success_url);
+				$action_in_to = $this->extractAction($to);
+				if ($action_in_to == $action_in_url) {
+					return $form_success_url;
+				}
+			}
+			if (!empty(parse_url($to, PHP_URL_SCHEME))) {
+				return $to;
+			}
+			list($to_model, $to_action) = AppHelper::splitString($to, '.');
+		}
+		if ($to_model) {
+			if ($to_model == 'parent') {
+				if ($this->getMasterModel()) {
+					$model = $this->masterModel;
+				} else {
+					if ($to_action == 'view' && $from == 'delete') {
+						$to_action = 'index'; // if not parent.view, then this.index.
+					}
+				}
+			} else if ($to_model == 'model') {
+			} else {
+				$model = $$to_model;
+			}
+		}
+		$pk = $model->getPrimaryKey(true);
+		switch($to_action) {
+			case 'update':
+			case 'duplicate':
+				$redirect_params = array_merge($redirect_params, $pk);
+				// no break
+			case 'create':
+// 				if (isset($_REQUEST['_form_cancelUrl'])) {
+// 					$redirect_params['_form_cancelUrl'] = $_REQUEST['_form_cancelUrl'];
+// 				}
+				break;
+			case 'index':
+				break;
+			case 'view':
+			default:
+				$redirect_params = array_merge($redirect_params, $pk);
+		}
+		if ($to_model) {
+			$redirect_params[0] = Url::to('/' . $this->getBaseRoute() . '/' . $model->controllerName()
+				. '/' . $to_action, $pk);
+		} else {
+			$redirect_params[0] = $this->getActionRoute($to_action);
+		}
+		if ($to_action == 'grid') {
+			if (!array_key_exists('sort', $redirect_params) && !empty($_REQUEST['sort'])) {
+				$redirect_params['sort'] = $_REQUEST['sort'];
+			}
+		}
+		return $redirect_params;
+	}
+
+	/**
+	 * @param $model not used, for compatibility with JsonController
+	 */
+  	public function getActionRoute($action_id = null, $model = null, $master_model = null): string
+	{
+		if ($master_model == null) {
+			$master_model = $this->getMasterModel();
+		}
+		if ($master_model) {
+			$controller_route = $this->getBaseRoute();
+			$controller_route .= '/' . $master_model->controllerName()
+				. '/' . $master_model->getPrimaryKey() . '/' .  $this->id;
+			if (is_array($action_id)) {
+				$action_id[0] = $controller_route . '/' . $action_id[0];
+				$controller_route = Url::toRoute($action_id);
+			} else if ($action_id != null) {
+				$controller_route .= '/' . $action_id;
+			}
+			return $controller_route;
+		} else if ($action_id === null) {
+			return substr(Url::toRoute('r'), 0, -2);
+		} else {
+			return Url::toRoute($action_id);
+		}
+	}
+
+	// Ajax
+	public function actionRawModel($id, array $with = [])
+	{
+		\Yii::$app->response->format = \yii\web\Response::FORMAT_JSON;
+		$params = $this->request->queryParams;
+		$this->model = $this->findModel($id, 'default', $params);
+		if ($this->model) {
+            return array_merge($this->model->getAttributes(), $this->model->getRelatedRecords());
+        } else {
+			throw new \Exception("Raw model failed");
+		}
+	}
+
+	// Ajax for the MutiColumnTypeAhead control
+	public function actionMultiAutocomplete(string $search, string $fields, int $page = 1,
+											int $per_page = 12, string $scopes = '')
+	{
+		\Yii::$app->response->format = \yii\web\Response::FORMAT_JSON;
+		$searchModel = $this->createSearchModel();
+		$conds = [];
+		$array_fields = explode(',',$fields);
+		foreach ($array_fields as $field) {
+			$conds[$field] = $search;
+		}
+		$indexParams = [
+			'or' => true,
+			 $searchModel->formName() => $conds
+		];
+		if (!empty($scopes)) {
+			$indexParams['_search_scopes'] = explode(',', $scopes);
+		}
+		$dataProvider = $searchModel->search($indexParams);
+		$dataProvider->query
+				->select($array_fields)
+				->limit($page, $per_page);
+// 				->asArray();
+		if ($dataProvider->getTotalCount()) {
+			return $dataProvider->getModels();
+		}
+		return [];
+	}
+
+	// Ajax
+	public function actionAutocomplete(
+		string $search,
+		string $format,
+		array|string $fields = [],
+		array|string $scopes = '',
+		array|string|null $id_fields = null,
+		string $model_format = 'long',
+		array $extra_options = [])
+	{
+		\Yii::$app->response->format = \yii\web\Response::FORMAT_JSON;
+		$ret = [];
+		$searchModel = $this->createSearchModel();
+		if ($id_fields == null) {
+			$id_fields = $searchModel->primaryKey();
+		}
+		if ($had_fields = !empty($fields)) {
+			if (is_string($fields)) {
+				if ($fields[0] == '[') {
+					$fields = json_decode($fields);
+				} else {
+					$fields = explode(',',$fields);
+				}
+			}
+			$model_format = '{' . implode('} {', $fields) . '}';
+		} else {
+			$fields = $searchModel->findCodeAndDescFields();
+		}
+		$fld_values = [];
+		foreach ($fields as $field) {
+			$fld_values[$field] = $search;
+		}
+		$dp_search_params = [
+			$searchModel->formName() => $fld_values,
+			'or' => true
+		];
+		if (!empty($scopes)) {
+			$dp_search_params['_search_scopes'] = $scopes;
+		}
+		$dataProvider = $searchModel->search($dp_search_params);
+		if ($had_fields) {
+			foreach ($id_fields as $id_field) {
+				if (!in_array($id_field, $fields)) {
+					$fields[] = $id_field;
+				}
+			}
+			$dataProvider->query->select(implode(',',$fields))->distinct();
+		}
+		if ($format == 'select2' || $format == 'select') {
+			foreach ($dataProvider->getModels() as $record) {
+				if (count($id_fields)>1) {
+					$id = json_encode($record->getAttributes($id_fields),true);
+				} else {
+					$id = $record->{$id_fields[0]};
+				}
+				if ($had_fields) {
+					$ret[] = [ 'id' => $id, 'text' => $record->recordDesc($model_format) ];
+				} else {
+					$ret[] = [ 'id' => $id, 'text' => $record->recordDesc($model_format) ];
+				}
+			}
+			if ($format == 'select2') {
+				return [ 'results' => $ret ];
+			} else {
+				return $ret;
+			}
+		} else {
+			foreach ($dataProvider->getModels() as $record) {
+				$ret[] = [ 'text' => $record->recordDesc($model_format) ];
+			}
+			return $ret;
+		}
+	}
+
+	public function getMasterModel()
+	{
+		if ($this->masterModel === false) {
+			$this->masterModel = null;
+			$master_id = intval($this->request->get('parent_id', 0));
+			if ($master_id !== 0) {
+				$parent_controller = $this->request->get('parent_controller');
+				if ($parent_controller) {
+					$master_model_name = 'app\\models\\'. AppHelper::camelCase($parent_controller);
+					$this->masterModel = $master_model_name::findOne($master_id);
+					if ($this->masterModel === null) {
+						throw new NotFoundHttpException(Yii::t('churros',
+							"The master record of {title} with '{id}' primary key does not exist",
+							[ 'id' => $master_id, 'title' => $master_model_name ]));
+					}
+				}
+			}
+		}
+		return $this->masterModel;
+	}
+
+    public function genBaseBreadCrumbs(string $action_id, $model, array $view_params = []): array
+	{
+		$bcs_style = $this->breadCrumbsStyle ?? ['standard'];
+		$scenario = $model->scenario?:$action_id;
+		$permissions = $view_params['permissions'] ?? true;
+		$breadcrumbs = [];
+		$master = $this->getMasterModel();
+		if ($master) {
+			$prefix = $this->getBaseRoute() . '/' . $master->controllerName(). '/';
+			$breadcrumbs['master_index'] = [
+				'label' => StringHelper::mb_ucfirst($master->getModelInfo('title_plural')),
+				'url' => [ $prefix . 'index']
+			];
+			$keys = $master->getPrimaryKey(true);
+			$keys[0] = $prefix . 'view';
+			$breadcrumbs['master_model'] = [
+				'label' => $master->recordDesc('short', 25),
+				'url' => $keys
+			];
+			if ($model::$isJunctionModel) {
+				$other_relation = $model->findOtherRelationByModel($master->getModelInfo('model_name'));
+				if ($other_relation) {
+					$other_model_class = $other_relation['modelClass'];
+					$other_model_label = $other_model_class::getModelInfo('title_plural');
+					$breadcrumbs['other_index'] = [
+						'label' => StringHelper::mb_ucfirst($other_model_label),
+						'url' => $this->getActionRoute('index')
+					];
+				}
+			} else {
+				$breadcrumbs['child_index'] = [
+					'label' => StringHelper::mb_ucfirst($model->getModelInfo('title_plural')),
+					'url' => $this->getActionRoute('index')
+				];
+			}
+		} else {
+			if (FormHelper::hasPermission($permissions, 'index') && $scenario) {
+				$breadcrumbs['model_index'] = [
+					'label' =>  $model->getModelInfo('title_plural'),
+					'url' => [ $this->id . '/index' ]
+				];
+			}
+		}
+		$prim_keys = $model->getPrimaryKey(true);
+		$pk = $model->getPrimaryKey();
+		if (empty($model->getPrimaryKey())) { // create, index or duplicate
+			$has_prim_keys = false;
+			foreach ($prim_keys as $k => $kv) {
+				if (!empty($view_params[$k])) {
+					$has_prim_keys = true;
+					$prim_keys[$k] = $view_params[$k];
+				}
+			}
+			if (!$has_prim_keys) {
+				$prim_keys = [];
+			}
+		}
+		if (!empty($prim_keys) && !$model::$isJunctionModel && !$model->isNewRecord) {
+			$breadcrumbs['model_model'] = [
+				'label' => $model->recordDesc('short', 25),
+				'url' => $scenario!='view' ? array_merge([$this->getActionRoute('view')], $prim_keys) : null,
+			];
+		}
+		return $breadcrumbs;
+	}
+
+	public function genBreadCrumbs(string $action_id, $model, array $view_params = []): array
+	{
+		$breadcrumbs = $this->genBaseBreadCrumbs($action_id, $model, $view_params);
+		$scenario = $model->scenario?:$action_id;
+		$master = $this->getMasterModel();
+		if ($master) {
+			switch( $scenario) {
+				case 'update':
+					$breadcrumbs[] = [
+						'label' => $model->recordDesc('short', 25),
+						'url' => array_merge([$this->getActionRoute('view')], $model->getPrimaryKey(true))
+					];
+				case 'create':
+					$breadcrumbs[] = $model->t('churros', 'Creating {title}');
+					break;
+				case 'index':
+					break;
+			}
+		} else {
+			$prefix = $this->getBaseRoute();
+			switch( $scenario) {
+				case 'update':
+					$breadcrumbs[] = [
+						'label' => $model->t('churros', 'Updating {record_short}'),
+					];
+					break;
+				case 'duplicate':
+					$breadcrumbs[] = [
+						'label' => Yii::t('churros', 'Duplicating ') . $model->recordDesc('short', 20),
+						'url' => array_merge([ $prefix . $this->id . '/view'], $model->getPrimaryKey(true))
+					];
+					break;
+				case 'view':
+					$breadcrumbs[] = $model->recordDesc('short', 20);
+					break;
+				case 'create':
+					$breadcrumbs[] = $model->t('churros', 'Creating {title}');
+					break;
+				case 'index':
+				case 'default':
+					break;
+				default:
+					throw new \Exception($scenario);
+			}
+		}
+		return $breadcrumbs;
+	}
+
+	protected function linkToModel($model): string
+	{
+		$pk = $model->getPrimaryKey();
+		if (is_array($pk)) {
+			$link = Url::to(array_merge([$this->getActionRoute('view')], $pk));
+		} else {
+			$link = Url::to([$this->getActionRoute('view'), 'id' => $pk]);
+		}
+		return $link;
+	}
+
+
+}
