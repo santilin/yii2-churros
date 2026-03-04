@@ -232,7 +232,7 @@ class JsonModel extends \yii\base\Model
         if ($this->hasAttribute($attribute)) {
             $this->_attributes[$attribute] = $value;
         } else {
-            $this->onUnsafeAttribute($name, $value);
+            $this->onUnsafeAttribute($attribute, $value);
         }
     }
 
@@ -563,6 +563,8 @@ class JsonModel extends \yii\base\Model
                     foreach ($form_values as $p => $v) {
                         $relObj->setAttribute($p, $v);
                     }
+                    // Remove attributes not in the form (to avoid removing values when the form doesn't have all the fields)
+                    $relObj->_attributes = array_intersect_key($relObj->_attributes, $form_values);
                     $relObj->afterFind();
                     $container[] = $relObj;
                 }
