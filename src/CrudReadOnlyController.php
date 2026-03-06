@@ -4,10 +4,8 @@ namespace santilin\churros;
 
 use Yii;
 use yii\helpers\{Url,StringHelper};
-// use yii\web\{NotFoundHttpException,ForbiddenHttpException,HttpException};
-// use yii\base\ErrorException;
+use yii\web\{NotFound};
 use yii\db\ActiveRecordInterface as CrudModel;
-// use santilin\churros\exceptions\{DeleteModelException,SaveModelException};
 use santilin\churros\helpers\{AppHelper,FormHelper};
 use yii\base\NotSupportedException;
 /**

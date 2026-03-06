@@ -2,13 +2,10 @@
 
 namespace santilin\churros;
 
-// use Yii;
+use Yii;
 use yii\filters\VerbFilter;
-// use yii\web\{NotFoundHttpException,ForbiddenHttpException,HttpException};
-// use yii\base\ErrorException;
-// use yii\db\ActiveRecordInterface as CrudModel;
-// use santilin\churros\exceptions\{DeleteModelException,SaveModelException};
-// use santilin\churros\helpers\{AppHelper,FormHelper};
+use yii\web\{ForbiddenHttpException};
+use santilin\churros\helpers\{FormHelper};
 
 /**
  * CrudController implements the CRUD actions for yii2 models
