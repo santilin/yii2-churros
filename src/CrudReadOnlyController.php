@@ -470,12 +470,16 @@ abstract class CrudReadOnlyController extends \yii\web\Controller
 		return $model->handyFieldValues($field, null);
 	}
 
-	public function actionRelatedValues(string $id, string $relation)
+	public function actionRelatedValues(string $id, string $relation, string $model_format = 'long')
 	{
 		\Yii::$app->response->format = \yii\web\Response::FORMAT_JSON;
 		$model = $this->findModel($id);
-		return $model->handyFieldValues($field, null, null, $field);
-		// return $model->$relation;
+		$models = $model->$relation;
+		$result = [];
+		foreach ($models as $model) {
+			$result[$model->id] = $model->recordDesc($model_format);
+		}
+		return $result;
 	}
 
 	// Ajax
