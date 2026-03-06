@@ -114,7 +114,7 @@ class AuthHelper
 		foreach ((array)$perm_names as $perm_name) {
 			$perm = $auth->getItem($perm_name);
 			if (!$perm) {
-				$msgs[] = 'x ' . "$perm_name: permission not found";
+				$msgs[] = 'x ' . "$perm_name: permission or role not found";
 				continue;
 			}
 			if (!$auth->hasChild($role, $perm)) {
@@ -125,7 +125,7 @@ class AuthHelper
 					$msgs[] = '+ ' . "$perm_name: permission added to role {$role->name}";
 				}
 			} else {
-				$msgs[] = '= ' . "$perm_name: permission already assigned to role {$role->name}";
+				$msgs[] = '= ' . "$perm_name: permission or role already assigned to role {$role->name}";
 			}
 		}
 		static::$lastMessage = join("\n", $msgs);

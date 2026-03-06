@@ -142,28 +142,26 @@ js
         parent::init();
     }
 
-    public function registerAssets()
-    {
-        $view = $this->getView();
+public function registerAssets()
+{
+    $view = $this->getView();
 
-        $set_dest_fields_values = [];
-        $reset_dest_fields_values = [];
-
-        $set_dest_fields_values[] = <<<js
+    // Existing exact-match logic (unchanged)
+    $set_dest_fields_values = [<<<js
 $("#{$this->typeahead_id}").val(datumParts.text);
 $("#{$this->hidden_id}").val(datumParts.id);
-js;
-        $reset_dest_fields_values[] = <<<js
+js];
+    $reset_dest_fields_values = [<<<js
 $("#{$this->typeahead_id}").val('');
 $("#{$this->hidden_id}").val('');
-js;
+js];
 
-        $js_set_fields_values = implode("\n", $set_dest_fields_values);
-        $js_reset_fields_values = implode("\n", $reset_dest_fields_values);
-        $js_exact_match_field = "'{$this->typeahead_id}'";
-        $js_id = str_replace('-', '_', $this->typeahead_id);
+    $js_set_fields_values = implode("\\n", $set_dest_fields_values);
+    $js_reset_fields_values = implode("\\n", $reset_dest_fields_values);
+    $js_exact_match_field = "'{$this->typeahead_id}'";
+    $js_id = str_replace('-', '_', $this->typeahead_id);
 
-        $view->registerJs(<<<js
+    $view->registerJs(<<<js
 let mctahead_exact_match_field_$js_id = $js_exact_match_field;
 let mctahead_changed_$js_id = false;
 
@@ -214,18 +212,19 @@ $('#{$this->typeahead_id}').on('keydown', function(e) {
     return true;
 });
 js
-        );
+    );
 
+    // ✅ FIXED: Proper searchFieldsJson handling
     $searchFieldsJson = !empty($this->searchFields)
         ? urlencode(json_encode($this->searchFields))
-        : "''";
+        : '';
 
-
-$view->registerJs(<<<JS
+    $view->registerJs(<<<JS
 (function() {
     const input = $('#{$this->typeahead_id}');
     let currentPage = 1;
     let loading = false;
+    let totalSuggestions = 0;
 
     function getMenuNode() {
         const tt = input.data('ttTypeahead');
@@ -246,11 +245,12 @@ $view->registerJs(<<<JS
                 const baseUrl = new URL("{$this->remoteUrl}", window.location.origin);
                 baseUrl.searchParams.set('{$this->resultFormatParam}', 'select');
                 baseUrl.searchParams.set('{$this->idFieldParam}', '{$this->idField}');
-                if ($searchFieldsJson) {
-                    baseUrl.searchParams.set('{$this->searchFieldsParam}', decodeURIComponent($searchFieldsJson));
+
+                // ✅ Fixed: proper conditional
+                if ('{$searchFieldsJson}') {
+                    baseUrl.searchParams.set('{$this->searchFieldsParam}', decodeURIComponent('{$searchFieldsJson}'));
                 }
 
-                // Now just modify the instance instead of cloning it
                 baseUrl.searchParams.set('{$this->searchParam}', q);
                 baseUrl.searchParams.set('{$this->pageParam}', currentPage);
                 baseUrl.searchParams.set('{$this->perPageParam}', {$this->limit});
@@ -266,47 +266,65 @@ $view->registerJs(<<<JS
                     }
 
                     const menu = getMenuNode();
-                    if (!menu) return; // Defensive check
+                    if (!menu) return;
 
                     btn.remove();
+
+                    // ✅ FIXED: Make new suggestions Typeahead-aware
                     for (const item of data) {
                         const suggestion = $('<div class="tt-suggestion tt-selectable">')
-                            .html(item.text)
-                            .data('ttSelectableObject', item);
+                            .html(item.text ? item.text : item)
+                            .data('ttSelectableObject', item)
+                            .mouseenter(function() {
+                                // Manually trigger Typeahead mouseenter for new items
+                                input.trigger('typeahead:mouseenter', [$(this)]);
+                            })
+                            .mouseleave(function() {
+                                input.trigger('typeahead:mouseleave', [$(this)]);
+                            });
                         menu.append(suggestion);
                     }
+
+                    totalSuggestions += data.length;
                     if (data.length >= {$this->limit}) {
                         menu.append(createLoadMoreButton());
                     }
                     loading = false;
+
+                    // ✅ CRITICAL: Notify Typeahead about new suggestions
+                    const tt = input.data('ttTypeahead');
+                    if (tt && tt.menu) {
+                        tt.menu._resetCursor();
+                    }
+
                 } catch (e) {
-                    debugger;
+                    console.error('Load more error:', e);
                     btn.text('Error – click to retry').css('color', 'red');
                     loading = false;
                 }
             });
     }
 
-    // Reset pagination on new async request
     input.on('typeahead:asyncrequest', function() {
         currentPage = 1;
+        totalSuggestions = 0;
     });
 
-    // After results render, append "Load more..."
-input.on('typeahead:render', function() {
-    const menu = getMenuNode();
-    if (!menu) return;
+    input.on('typeahead:render', function() {
+        const menu = getMenuNode();
+        if (!menu) return;
 
-    // Only show "Load more" if the first page was full (limit items)
-    if (menu.find('.tt-suggestion').length >= {$this->limit} && !menu.find('.tt-load-more').length) {
-        menu.append(createLoadMoreButton());
-    }
-});
-
+        // Only show "Load more" if first page was full AND no button exists
+        const suggestionCount = menu.find('.tt-suggestion').length;
+        if (suggestionCount >= {$this->limit} && !menu.find('.tt-load-more').length) {
+            menu.append(createLoadMoreButton());
+        }
+    });
 })();
 JS
-);
+    );
 
-        parent::registerAssets();
-    }
+    parent::registerAssets();
 }
+
+} // class

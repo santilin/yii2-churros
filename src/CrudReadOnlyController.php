@@ -2,7 +2,7 @@
 
 namespace santilin\churros;
 
-// use Yii;
+use Yii;
 use yii\helpers\{Url,StringHelper};
 // use yii\web\{NotFoundHttpException,ForbiddenHttpException,HttpException};
 // use yii\base\ErrorException;
@@ -463,6 +463,21 @@ abstract class CrudReadOnlyController extends \yii\web\Controller
 			return $dataProvider->getModels();
 		}
 		return [];
+	}
+
+	public function actionHandyFieldValues(string $id, string $field)
+	{
+		\Yii::$app->response->format = \yii\web\Response::FORMAT_JSON;
+		$model = $this->findModel($id);
+		return $model->handyFieldValues($field, null);
+	}
+
+	public function actionRelatedValues(string $id, string $relation)
+	{
+		\Yii::$app->response->format = \yii\web\Response::FORMAT_JSON;
+		$model = $this->findModel($id);
+		return $model->handyFieldValues($field, null, null, $field);
+		// return $model->$relation;
 	}
 
 	// Ajax
