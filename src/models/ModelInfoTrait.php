@@ -731,16 +731,20 @@ trait ModelInfoTrait
 	/**
 	 * Function shared by search and report
 	 */
-	public function searchFilterWhere(string $fldname, $value): array
+	public function searchFilterWhere(string $fldname, mixed $value): array|string|\yii\db\Expression
 	{
-		if (!isset($value['v']) || $value['v'] === null || $value['v'] === '' || (is_array($value['v']) && empty($value['v']))) {
+		if (!is_array($value)) {
+			$value = [ 'v' => $value, 'op' => '=' ];
+		} else if (!isset($value['v'])
+			|| $value['v'] === null
+			|| $value['v'] === ''
+			|| (is_array($value['v']) && empty($value['v']))) {
 			return [];
 		}
-		$fullfldname = $this->tableName() . "." . $fldname;
-		return $this->addFieldToFilterWhere($fullfldname, $value);
+		return $this->addFieldToFilterWhere($fldname, $value);
 	}
 
-	public function addFieldToFilterWhere(string $fldname, array $value): array
+	public function addFieldToFilterWhere(string $fldname, array $value): array|string|\yii\db\Expression
 	{
 		return $this->baseAddFieldToFilterWhere($fldname, $value);
 	}
