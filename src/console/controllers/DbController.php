@@ -371,7 +371,7 @@ sql;
 		}, $column_names));
 		$sql .= " FROM $table_name ";
 		if ($where) {
-			if (strpos(strtoupper($where), 'WHERE')===0 || strpos(strtoupper($where), ' WHERE ') !== FALSE) {
+			if (strpos(strtoupper(ltrim($where)), 'WHERE')===0 || strpos(strtoupper(ltrim($where)), 'INNER')===0) {
 				$sql .= $where;
 			} else {
 				$sql .= " WHERE $where";
@@ -429,7 +429,7 @@ sql;
 		}, $column_names));
 		$sql .= " FROM $table_name ";
 		if ($where) {
-			if (strpos(strtoupper($where), 'WHERE')===0 || strpos(strtoupper($where), ' WHERE ') !== FALSE) {
+			if (strpos(strtoupper(ltrim($where)), 'WHERE')===0 || strpos(strtoupper(ltrim($where)), 'INNER')===0) {
 				$sql .= $where;
 			} else {
 				$sql .= " WHERE $where";
