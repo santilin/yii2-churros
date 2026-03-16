@@ -405,6 +405,42 @@ trait ModelInfoTrait
 		return $ret;
     }
 
+	static public function createFromFaker(string $template_filename, $number = 1)
+	{
+		if (!file_exists($template_filename)) {
+			throw new \Exception("Faker template file not found: $template_filename");
+		}
+		$template = require $template_filename;
+		$faker = \Faker\Factory::create('es_ES');
+		$faker->addProvider(new \santilin\churros\fakers\Base($faker));
+		$faker->addProvider(new \santilin\churros\fakers\Person($faker));
+		$faker->addProvider(new \santilin\churros\fakers\Address($faker));
+		$faker->addProvider(new \santilin\churros\fakers\PhoneNumber($faker));
+
+		$ret = [];
+		for ($count = 0; $count < $number; ++$count) {
+			$modelname = get_called_class();
+			$model = new $modelname;
+			$attributes = [];
+			foreach ($template as $field => $generator) {
+				if (is_string($generator)) {
+					$attributes[$field] = $faker->parse($generator);
+				} elseif (is_callable($generator)) {
+					$attributes[$field] = $generator($faker);
+				} else {
+					$attributes[$field] = $generator;
+				}
+			}
+			$model->setAttributes($attributes, false);
+			if ($number == 1) {
+				return $model;
+			} else {
+				$ret[] = $model;
+			}
+		}
+		return $ret;
+	}
+
     public function controllerName($prefix = '')
     {
 		$c = self::getModelInfo('controller_name');

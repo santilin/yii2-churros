@@ -527,6 +527,8 @@ class JsonModel extends \yii\base\Model
                         if ($post_data) {
                             $this->loadToRelation($rel_name, $post_data);
                             $relations_handled[$rel_form_relation] = true;
+                        } else {
+                            $this->_related[$rel_name] = [];
                         }
                     }
                 }
