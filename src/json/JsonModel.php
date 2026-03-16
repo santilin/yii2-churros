@@ -566,6 +566,7 @@ class JsonModel extends \yii\base\Model
                     // Remove attributes not in the form (to avoid removing values when the form doesn't have all the fields)
                     $relObj->_attributes = array_intersect_key($relObj->_attributes, $form_values);
                     $relObj->afterFind();
+                    $relObj->path = $this->_path . '/' . $relObj->jsonPath() . '/' . $relObj->_id;
                     $container[] = $relObj;
                 }
             }
