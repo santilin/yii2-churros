@@ -767,22 +767,23 @@ trait ModelInfoTrait
 	/**
 	 * Function shared by search and report
 	 */
-	public function searchFilterWhere(string $fldname, mixed $value): array|string|\yii\db\Expression
+	public function searchFilterWhere(string $tablename, string $fldname, string $operator): array|string|\yii\db\Expression
 	{
-		if (!is_array($value)) {
-			$value = [ 'v' => $value, 'op' => '=' ];
-		} else if (!isset($value['v'])
-			|| $value['v'] === null
+		$value = $this->__get($fldname);
+		if (!isset($value['op']) && !isset($value['v'])) {
+			$value = ['op' => $operator, 'v' => $value];
+		}
+		if ($value['v'] === null
 			|| $value['v'] === ''
 			|| (is_array($value['v']) && empty($value['v']))) {
 			return [];
 		}
-		return $this->addFieldToFilterWhere($fldname, $value);
+		return $this->addFieldToFilterWhere($tablename, $fldname, $value);
 	}
 
-	public function addFieldToFilterWhere(string $fldname, array $value): array|string|\yii\db\Expression
+	public function addFieldToFilterWhere(string $tablename, string $fldname, array $value): array|string|\yii\db\Expression
 	{
-		return $this->baseAddFieldToFilterWhere($fldname, $value);
+		return $this->baseAddFieldToFilterWhere(($tablename ? $tablename . '.' : '') . $fldname, $value);
 	}
 
 	public function baseAddFieldToFilterWhere(string $fldname, array $value): array
