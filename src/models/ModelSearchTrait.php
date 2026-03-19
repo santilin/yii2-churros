@@ -26,7 +26,12 @@ trait ModelSearchTrait
 		if (property_exists($this, $name)) {
 			$r = new \ReflectionProperty($this, $name);
 			$r->setAccessible(true);
-			return $r->getValue($this);
+			$value = $r->getValue($this);
+			// Extract just the value for grid filter display
+			if (is_array($value) && isset($value['op']) && array_key_exists('v', $value)) {
+				return $value['v'];
+			}
+			return $value;
 		} elseif (property_exists($this, 'related_properties')) {
 			if (array_key_exists($name, $this->related_properties)) {
 				if (!isset(static::$relations[$name])) {

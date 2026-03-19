@@ -25,7 +25,12 @@ class SearchInput extends \yii\bootstrap5\InputWidget
 		$scope = $this->formName??$this->model->formName();
 		// $this->model is a ModelSearchTrait
 		$value = $this->model->$attribute;
-		$value = FormHelper::toOpExpression($value, false, $this->model->operatorForAttr(null, $attribute));
+		if (is_array($value) && isset($value['op']) && isset($value['v'])) {
+			$inputValue = $value['v'];
+		} else {
+			$value = FormHelper::toOpExpression($value, false, $this->model->operatorForAttr(null, $attribute));
+			$inputValue = $value['v'] ?? null;
+		}
 
 		if ($this->type == 'dropdown') {
 			$ret .= Html::hiddenInput("{$scope}[$attribute][op]", $value['op']);
@@ -71,13 +76,56 @@ class SearchInput extends \yii\bootstrap5\InputWidget
 					$value['v'], $this->dropDownValues, $this->options);
 			}
 		} else {
-			$ret .= Html::dropDownList("{$scope}[$attribute][op]",
-				$value['op'], FormHelper::$operators, [
-				'id' => "drop-op-$attr_class", 'class' => 'form-select search-dropdown w-auto',
-				'prompt' => 'Operador']);
+			$currentOp = $value['op'] ?: '=';
+			$currentIcon = FormHelper::$operatorIcons[$currentOp] ?? $currentOp;
+			$currentLabel = FormHelper::$operators[$currentOp] ?? $currentOp;
+			$dropdownId = "dropdown-op-$attr_class";
+
+			$ret .= Html::beginTag('div', ['class' => 'dropdown d-inline-flex me-1']);
+			$ret .= Html::button($currentIcon . ' <span class="visually-hidden">Operador</span>', [
+				'class' => 'btn btn-outline-primary btn-sm dropdown-toggle',
+				'type' => 'button',
+				'data-bs-toggle' => 'dropdown',
+				'aria-expanded' => 'false',
+				'title' => $currentLabel,
+			]);
+			$ret .= Html::beginTag('ul', ['class' => 'dropdown-menu', 'aria-labelledby' => $dropdownId]);
+			foreach (FormHelper::$operators as $op => $label) {
+				$icon = FormHelper::$operatorIcons[$op] ?? $op;
+				$active = $op === $currentOp ? ' active' : '';
+				$ret .= Html::tag('li',
+					Html::button($icon . ' ' . Html::tag('small', $label, ['class' => 'ms-2 text-muted']), [
+						'class' => 'dropdown-item' . $active,
+						'data-op' => $op,
+						'data-target' => "op-$attr_class",
+					]), ['class' => $active ? 'selected' : '']
+				);
+			}
+			$ret .= Html::endTag('ul');
+			$ret .= Html::endTag('div');
+			$ret .= Html::hiddenInput("{$scope}[$attribute][op]", $currentOp, ['id' => "op-$attr_class"]);
+			$this->view->registerJs("
+				document.querySelectorAll('[data-target=\"op-$attr_class\"]').forEach(function(btn) {
+					btn.addEventListener('click', function() {
+						var op = this.dataset.op;
+						document.getElementById('op-$attr_class').value = op;
+						var dropdown = this.closest('.dropdown');
+						var button = dropdown.querySelector('button');
+						button.innerHTML = this.innerHTML.trim();
+						button.title = this.querySelector('small').textContent;
+						dropdown.querySelectorAll('.dropdown-item').forEach(function(item) {
+							item.classList.remove('active');
+						});
+						this.classList.add('active');
+						this.closest('li').classList.add('selected');
+					});
+				});
+			");
+
 			Html::addCssClass($this->options, 'd-flex form-control');
 			Html::addCssStyle($this->options, [ 'width' => 'fit-content' ]);
-			$ret .= Html::input($control_type, "{$scope}[$attribute][v]", $value['v'], $this->options);
+			Html::addCssStyle($this->options, [ 'min-width' => '100px' ]);
+			$ret .= Html::input($control_type, "{$scope}[$attribute][v]", $inputValue, $this->options);
 		}
 		return $ret;
 	}

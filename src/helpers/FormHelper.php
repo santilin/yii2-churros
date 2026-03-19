@@ -24,11 +24,25 @@ class FormHelper
 		'>=' => '>=',
 		'>' => '>',
 		'<' => '<',
+		'IN' => '∈', 'NOT IN' => '∉',
 	];
 	static public $extra_operators = [
 		'SELECT' => 'Valor(es) de la lista',
 		'BETWEEN' => 'entre dos valores',
 		'NOT BETWEEN' => 'no entre dos valores',
+	];
+	static public $operatorIcons = [
+		'=' => '<i class="fas fa-equals"></i>',
+		'<>' => '<i class="fas fa-not-equal"></i>',
+		'START' => '<i class="fas fa-italic"></i>',
+		'NOT START' => '<i class="fas fa-ban"></i>',
+		'LIKE' => '<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 16 16"><rect x="1" y="4" width="14" height="8" fill="none" stroke="currentColor" stroke-width="1.5" rx="1"/><rect x="5" y="6" width="6" height="4" fill="currentColor" rx="0.5"/></svg>',
+		'NOT LIKE' => '<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 16 16"><rect x="1" y="4" width="14" height="8" fill="none" stroke="currentColor" stroke-width="1.5" rx="1"/><rect x="5" y="6" width="6" height="4" fill="currentColor" rx="0.5"/><line x1="1" y1="1" x2="15" y2="15" stroke="currentColor" stroke-width="2"/></svg>',
+		'<=' => '<i class="fas fa-less-than-equal"></i>',
+		'>=' => '<i class="fas fa-greater-than-equal"></i>',
+		'>' => '<i class="fas fa-greater-than"></i>',
+		'<' => '<i class="fas fa-less-than"></i>',
+		'IN' => '∈', 'NOT IN' => '∉',
 	];
 
 	static public function ti($inc=1)
