@@ -309,19 +309,29 @@ trait ModelSearchTrait
 					continue;
 				}
 			}
-			if ($value['v']!=='') {
+			if ($value['v'] ?? '' !== '') {
 				if ($value['op'] == '=') {
-					if (!is_array($value['v'])) {
-						$this->$attr = "=" . $value['v'];
-					} else if (count($value['v'])==1) {
-						$this->$attr = "=" . $value['v'][0];
+					if (is_array($value['v'])) {
+						if (count($value['v'])==1) {
+							$this->$attr = "=" . reset($value['v']);
+						} else {
+							$this->$attr = "IN('" . implode("','",$value['v']) . "')";
+						}
 					} else {
-						$this->$attr = "IN('" . implode("','",$value['v']) . "')";
+						$this->$attr = "=" . $value['v'];
 					}
 				} else if (in_array($value['op'], ['<','>','<=','>=','<>'] )) {
-					$this->$attr = $value['op'] . $value['v'];
+					if (is_array($value['v'])) {
+						$this->$attr = "IN('" . implode("','",$value['v']) . "')";
+					} else {
+						$this->$attr = $value['op'] . $value['v'];
+					}
 				} else if ($value['op'] == 'LIKE') {
-					$this->$attr = "LIKE '%{$value['v']}%'";
+					if (is_array($value['v'])) {
+						$this->$attr = "IN('" . implode("','",$value['v']) . "')";
+					} else {
+						$this->$attr = "LIKE '%{$value['v']}%'";
+					}
 				}
 			} else {
 				$this->$attr = '';

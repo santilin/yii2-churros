@@ -772,7 +772,10 @@ trait ModelInfoTrait
 		$value = $this->__get($fldname);
 		if (!isset($value['op']) && !isset($value['v'])) {
 			$value = ['op' => $operator, 'v' => $value];
+		} else if (!isset($value['v'])) {
+			$value['v'] = null;
 		}
+
 		if ($value['v'] === null
 			|| $value['v'] === ''
 			|| (is_array($value['v']) && empty($value['v']))) {
