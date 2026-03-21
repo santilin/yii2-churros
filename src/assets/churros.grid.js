@@ -182,7 +182,6 @@ const ChurrosGrid = (function() {
 			document.body.removeChild(link);
 		},
 		resetFilters(grid_id) {
-			console.log('Resetting filters on ' + grid_id);
 			const grid = document.getElementById(grid_id);
 			if (!grid) return false;
 
@@ -194,28 +193,16 @@ const ChurrosGrid = (function() {
 
 			const inputs = filters.querySelectorAll('input');
 			const selects = filters.querySelectorAll('select');
-			let changedElement = false;
 
 			inputs.forEach(input => {
-				if (input.value !== '' && !changedElement) {
-					input.value = '';
-					changedElement = input;
-				} else {
-					input.value = '';
-				}
+				input.value = '';
 			});
 
 			selects.forEach(select => {
-				if (select.selectedIndex !== 0 && !changedElement) {
-					select.selectedIndex = 0;
-					changedElement = select;
-				} else {
-					select.selectedIndex = 0;
-				}
+				select.selectedIndex = 0;
 			});
-			if (changedElement) {
-				changedElement.dispatchEvent(new Event('change', { bubbles: true }));
-			}
+
+			jQuery('#' + grid_id).yiiGridView('applyFilter');
 			return true;
 		},
 		createODSFile(id, fileName, excludedClasses = [], excludedRows = [], excludedCols = []) {
