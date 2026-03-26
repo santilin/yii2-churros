@@ -275,6 +275,9 @@ trait ControllerTrait
 	protected function resolvePermissions(...$arrays): array|bool
 	{
 		$ret = $this->userPermissions();
+		if ($ret === false) {
+			return false;
+		}
 		foreach ($arrays as $array) {
 			if ($array === false) {
 				return [];

@@ -17,7 +17,7 @@ class AuthHelper
 
 	static public function echoLastMessage(bool $verbose, string $eol = "\n")
 	{
-		if (trim(static::$lastMessage) != '') {
+		if (trim(static::$lastMessage) !== '') {
 			if ($verbose || static::$lastMessage[0] !== '=') {
 				echo static::$lastMessage . $eol;
 			}
@@ -114,7 +114,7 @@ class AuthHelper
 		foreach ((array)$perm_names as $perm_name) {
 			$perm = $auth->getItem($perm_name);
 			if (!$perm) {
-				$msgs[] = 'x ' . "$perm_name: permission or role not found";
+				$msgs[] = "x $perm_name: permission or role not found";
 				continue;
 			}
 			if (!$auth->hasChild($role, $perm)) {
@@ -128,7 +128,7 @@ class AuthHelper
 				$msgs[] = '= ' . "$perm_name: permission or role already assigned to role {$role->name}";
 			}
 		}
-		static::$lastMessage = join("\n", $msgs);
+		static::$lastMessage = join("\n", $msgs) . "\n";
 		return $role;
     }
 
@@ -146,7 +146,7 @@ class AuthHelper
 				$perm_desc, $auth);
 			if (static::$lastMessage ) $msgs[] = static::$lastMessage;
 		}
-		static::$lastMessage = join("\n", $msgs);
+		static::$lastMessage = join("\n", $msgs) . "\n";
     }
 
     static public function createRoles(array $roles, $auth = null)
@@ -160,7 +160,7 @@ class AuthHelper
 				$role_desc, static::$lastMessage, $auth);
 			if (static::$lastMessage ) $msgs[] = static::$lastMessage;
 		}
-		static::$lastMessage = join("\n", $msgs);
+		static::$lastMessage = join("\n", $msgs) . "\n";
     }
 
     static public function assignToUser(array|int|string $user_id_or_names, array|string $perms, $auth = null)
@@ -187,7 +187,8 @@ class AuthHelper
 				}
 				$perm = $auth->getItem($perm_name);
 				if (!$perm) {
-					throw new \Exception( "$perm_name: permission or role not found" );
+					$msgs[] = "x $perm_name: permission or role not found";
+					continue;
 				}
 				if (!$auth->getAssignment($perm_name, $user_id)) {
 					$auth->assign($perm, $user_id);
@@ -205,7 +206,7 @@ class AuthHelper
 				}
 			}
 		}
-		static::$lastMessage = join("\n", $msgs);
+		static::$lastMessage = join("\n", $msgs) . "\n";
     }
 
 	static public function revokeFromUser($user_id_or_name, array $perms, $auth = null)
@@ -231,7 +232,7 @@ class AuthHelper
 			}
 			$perm = $auth->getItem($perm_name);
 			if (!$perm) {
-				throw new \Exception("$perm_name: permission or role not found");
+				$msgs[] = "x $perm_name: permission or role not found";
 			}
 			$assignment = $auth->getAssignment($perm_name, $user_id);
 			if ($assignment) {
@@ -249,7 +250,7 @@ class AuthHelper
 				}
 			}
 		}
-		static::$lastMessage = join("\n", $msgs);
+		static::$lastMessage = join("\n", $msgs) . "\n";
 	}
 
 
