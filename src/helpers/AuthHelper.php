@@ -13,20 +13,37 @@ use yii\rbac\{Item,Role};
 
 class AuthHelper
 {
-	static protected string $lastMessage = '';
+	static protected array $messages = [];
 
-	static public function echoLastMessage(bool $verbose, string $eol = "\n")
+	static public function clearMessages(): void
 	{
-		if (trim(static::$lastMessage) !== '') {
-			if ($verbose || static::$lastMessage[0] !== '=') {
-				echo static::$lastMessage . $eol;
+		static::$messages = [];
+	}
+
+	static public function addMessage(string $message): void
+	{
+		static::$messages[] = $message;
+	}
+
+	static public function echoMessage(bool $verbose, string $eol = "\n")
+	{
+		foreach (static::$messages as $message) {
+			if (trim($message) !== '') {
+				if ($verbose || $message[0] !== '=') {
+					echo $message . $eol;
+				}
 			}
 		}
 	}
 
-	static public function getLastMessage()
+	static public function getMessage(): array
 	{
-		return trim(self::$lastMessage);
+		return array_map(fn($m) => trim($m), static::$messages);
+	}
+
+	static public function getMessagesAsString(string $eol = "\n"): string
+	{
+		return implode($eol, static::getMessage());
 	}
 
 	static public function createOrUpdatePermission(string $perm_name, string $perm_desc,
@@ -35,7 +52,6 @@ class AuthHelper
 		if ($auth == null) {
 			$auth = \Yii::$app->authManager;
 		}
-		static::$lastMessage = '';
 		$permission = $auth->getPermission($perm_name);
 		if (!$permission) {
 			$permission = $auth->createPermission($perm_name);
@@ -44,19 +60,19 @@ class AuthHelper
 				$permission->createdAt = 0;
 			}
 			$auth->add($permission);
-			static::$lastMessage = '+ ' . $permission->name . ' => ' . $permission->description
-				. ': ' . Yii::t('churros', 'permission created');
+			static::addMessage('+ `' . $permission->name . '` => ' . $permission->description
+				. ': ' . Yii::t('churros', 'permission created'));
 		} else if ($permission->description != $perm_desc) {
 			$permission->description = $perm_desc;
 			$auth->update($perm_name, $permission);
-			static::$lastMessage = '^ ' . $permission->name . ' => ' . $permission->description
-				. ': ' . Yii::t('churros', 'permission updated');
+			static::addMessage('^ `' . $permission->name . '` => ' . $permission->description
+				. ': ' . Yii::t('churros', 'permission updated'));
 		} else {
 			if ($is_default) {
 				$auth->db->createCommand()->update(
 					$auth->itemTable, ['created_at' => 0], ['name' => $perm_name])->execute();
 			}
-			static::$lastMessage = '= ' . "{$permission->name}, {$permission->description}: " . Yii::t('churros', 'permission already exists');
+			static::addMessage('= `' . $permission->name . '`, ' . $permission->description . ': ' . Yii::t('churros', 'permission already exists'));
 		}
 		return $permission;
 	}
@@ -67,7 +83,6 @@ class AuthHelper
 		if ($auth == null) {
 			$auth = \Yii::$app->authManager;
 		}
-		static::$lastMessage = '';
 		$role = $auth->getRole($role_name);
 		if (!$role) {
 			$perm = $auth->getPermission($role_name);
@@ -80,19 +95,19 @@ class AuthHelper
 				$role->createdAt = 0;
 			}
 			$auth->add($role);
-			static::$lastMessage = '+ ' . $role->name . ' => ' . $role->description
-				. ': ' . Yii::t('churros', 'role created');
+			static::addMessage('+ `' . $role->name . '` => ' . $role->description
+				. ': ' . Yii::t('churros', 'role created'));
 		} else if ($role->description != $role_desc) {
 			$role->description = $role_desc;
 			$auth->update($role_name, $role);
-			static::$lastMessage = '^ ' . $role->name . ' => ' . $role->description
-				. ': ' . Yii::t('churros', 'role updated');
+			static::addMessage('^ `' . $role->name . '` => ' . $role->description
+				. ': ' . Yii::t('churros', 'role updated'));
 		} else {
 			if ($is_default) {
 				$auth->db->createCommand()->update(
 					$auth->itemTable, ['created_at' => 0], ['name' => $role_name])->execute();
 			}
-			static::$lastMessage = '= ' . "{$role->name}, {$role->description}: " . Yii::t('churros', 'role already exists');
+			static::addMessage('= `' . $role->name . '`, ' . $role->description . ': ' . Yii::t('churros', 'role already exists'));
 		}
 		return $role;
 	}
@@ -102,7 +117,6 @@ class AuthHelper
 		if ($auth == null) {
 			$auth = \Yii::$app->authManager;
 		}
-		$msgs = [];
 		if (is_string($role_name)) {
 			$role = $auth->getRole($role_name);
 		} else {
@@ -114,21 +128,20 @@ class AuthHelper
 		foreach ((array)$perm_names as $perm_name) {
 			$perm = $auth->getItem($perm_name);
 			if (!$perm) {
-				$msgs[] = "x $perm_name: permission or role not found";
+				static::addMessage("x `$perm_name`: permission or role not found");
 				continue;
 			}
 			if (!$auth->hasChild($role, $perm)) {
 				$auth->addChild($role, $perm);
 				if ($perm->type == Item::TYPE_ROLE) {
-					$msgs[] = '+ ' . "$perm_name: role added to role {$role->name}";
+					static::addMessage('+ `' . $perm_name . '`: role added to role `' . $role->name . '`');
 				} else {
-					$msgs[] = '+ ' . "$perm_name: permission added to role {$role->name}";
+					static::addMessage('+ `' . $perm_name . '`: permission added to role `' . $role->name . '`');
 				}
 			} else {
-				$msgs[] = '= ' . "$perm_name: permission or role already assigned to role {$role->name}";
+				static::addMessage('= `' . $perm_name . '`: permission or role already assigned to role `' . $role->name . '`');
 			}
 		}
-		static::$lastMessage = join("\n", $msgs) . "\n";
 		return $role;
     }
 
@@ -137,16 +150,12 @@ class AuthHelper
 		if ($auth == null) {
 			$auth = \Yii::$app->authManager;
 		}
-		$msgs = [];
 		foreach( $perms as $perm_name => $perm_desc) {
 			if (is_int($perm_name)) {
 				$perm_name = $perm_desc;
 			}
-			$perm = AuthHelper::createOrUpdatePermission($perm_name,
-				$perm_desc, $auth);
-			if (static::$lastMessage ) $msgs[] = static::$lastMessage;
+			AuthHelper::createOrUpdatePermission($perm_name, $perm_desc, $auth);
 		}
-		static::$lastMessage = join("\n", $msgs) . "\n";
     }
 
     static public function createRoles(array $roles, $auth = null)
@@ -154,13 +163,9 @@ class AuthHelper
 		if ($auth == null) {
 			$auth = \Yii::$app->authManager;
 		}
-		$msgs = [];
 		foreach( $roles as $role_name => $role_desc) {
-			$role = AuthHelper::createOrUpdateRole($role_name,
-				$role_desc, static::$lastMessage, $auth);
-			if (static::$lastMessage ) $msgs[] = static::$lastMessage;
+			AuthHelper::createOrUpdateRole($role_name, $role_desc, false, $auth);
 		}
-		static::$lastMessage = join("\n", $msgs) . "\n";
     }
 
     static public function assignToUser(array|int|string $user_id_or_names, array|string $perms, $auth = null)
@@ -180,33 +185,31 @@ class AuthHelper
 				$user_id = $identity->id;
 				$user_name = $user_id_or_name;
 			}
-			$msgs = [];
 			foreach ((array) $perms as $perm_name) {
 				if ($perm_name instanceof Role) {
 					$perm_name = $perm_name->name;
 				}
 				$perm = $auth->getItem($perm_name);
 				if (!$perm) {
-					$msgs[] = "x $perm_name: permission or role not found";
+					static::addMessage("x `$perm_name`: permission or role not found");
 					continue;
 				}
 				if (!$auth->getAssignment($perm_name, $user_id)) {
 					$auth->assign($perm, $user_id);
 					if ($perm->type == Item::TYPE_ROLE) {
-						$msgs[] = '+ ' . "role $perm_name assigned to user $user_name";
+						static::addMessage('+ `' . $perm_name . '`: role assigned to user `' . $user_name . '`');
 					} else {
-						$msgs[] = '+ ' . "permission $perm_name assinged to role $user_name";
+						static::addMessage('+ `' . $perm_name . '`: permission assigned to user `' . $user_name . '`');
 					}
 				} else {
 					if ($perm->type == Item::TYPE_ROLE) {
-						$msgs[] = '= ' . "$perm_name: role already assigned to user $user_name";
+						static::addMessage('= `' . $perm_name . '`: role already assigned to user `' . $user_name . '`');
 					} else {
-						$msgs[] = '= ' . "$perm_name: permission already assigned to role $user_name";
+						static::addMessage('= `' . $perm_name . '`: permission already assigned to user `' . $user_name . '`');
 					}
 				}
 			}
 		}
-		static::$lastMessage = join("\n", $msgs) . "\n";
     }
 
 	static public function revokeFromUser($user_id_or_name, array $perms, $auth = null)
@@ -225,32 +228,30 @@ class AuthHelper
 			$user_id = $identity->id;
 			$user_name = $user_id_or_name;
 		}
-		$msgs = [];
 		foreach ($perms as $perm_name) {
 			if ($perm_name instanceof Role) {
 				$perm_name = $perm_name->name;
 			}
 			$perm = $auth->getItem($perm_name);
 			if (!$perm) {
-				$msgs[] = "x $perm_name: permission or role not found";
+				static::addMessage("x `$perm_name`: permission or role not found");
 			}
 			$assignment = $auth->getAssignment($perm_name, $user_id);
 			if ($assignment) {
 				$auth->revoke($perm, $user_id);
 				if ($perm->type == Item::TYPE_ROLE) {
-					$msgs[] = '- ' . "role $perm_name revoked from user $user_name";
+					static::addMessage('- `' . $perm_name . '`: role revoked from user `' . $user_name . '`');
 				} else {
-					$msgs[] = '- ' . "permission $perm_name revoked from user $user_name";
+					static::addMessage('- `' . $perm_name . '`: permission revoked from user `' . $user_name . '`');
 				}
 			} else {
 				if ($perm->type == Item::TYPE_ROLE) {
-					$msgs[] = '= ' . "$perm_name: role was not assigned to user $user_name";
+					static::addMessage('= `' . $perm_name . '`: role was not assigned to user `' . $user_name . '`');
 				} else {
-					$msgs[] = '= ' . "$perm_name: permission was not assigned to user $user_name";
+					static::addMessage('= `' . $perm_name . '`: permission was not assigned to user `' . $user_name . '`');
 				}
 			}
 		}
-		static::$lastMessage = join("\n", $msgs) . "\n";
 	}
 
 
@@ -261,20 +262,20 @@ class AuthHelper
 		}
 		$parent = $auth->getItem($role_name);
 		if ($parent == null) {
-			static::$lastMessage = "= Role $role_name not found";
+			static::addMessage("= Role `$role_name` not found");
 			return;
 		}
 		$perm_names = (array)$perm_names;
 		foreach ($perm_names as $perm_name) {
 			$child = $auth->getItem($perm_name);
 			if ($child == null) {
-				static::$lastMessage = "= Permission $perm_name not found in role $role_name";
+				static::addMessage("= Permission `$perm_name` not found in role `$role_name`");
 				continue;
 			}
 			if ($auth->removeChild($parent, $child)) {
-				static::$lastMessage = "- Permission $perm_name removed from role $role_name";
+				static::addMessage("- Permission `$perm_name` removed from role `$role_name`");
 			} else {
-				static::$lastMessage = "= Permission $perm_name not found in role $role_name";
+				static::addMessage("= Permission `$perm_name` not found in role `$role_name`");
 			}
 		}
 	}
@@ -287,9 +288,9 @@ class AuthHelper
 		foreach ($role_names as $role_name) {
 			$role = $auth->getItem($role_name);
 			if ($role == null) {
-				static::$lastMessage = "= `$role_name` role not found";
+				static::addMessage("= Role `$role_name` not found");
 			} else if ($auth->remove($role)) {
-				static::$lastMessage = "- `$role_name` role removed";
+				static::addMessage("- Role `$role_name` removed");
 			}
 		}
 	}
@@ -302,9 +303,9 @@ class AuthHelper
 		foreach ($perm_names as $perm_name) {
 			$perm = $auth->getItem($perm_name);
 			if ($perm == null) {
-				static::$lastMessage = "x $perm_name: permission not found";
+				static::addMessage("x `$perm_name`: permission not found");
 			} else if ($auth->remove($perm)) {
-				static::$lastMessage = "- `$perm_name` permission removed";
+				static::addMessage("- Permission `$perm_name` removed");
 			}
 		}
 	}
