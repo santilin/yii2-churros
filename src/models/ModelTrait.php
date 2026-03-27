@@ -19,10 +19,12 @@ trait ModelTrait
 	{
 		if (!empty($scopes)) {
 			if (is_string($scopes)) {
-				$scopes = explode(',', $scopes);
+				$all_scopes = explode(',', $scopes);
+			} else foreach ($scopes as $scope) {
+				$all_scopes = explode(',', $scope);
 			}
 			$save_order = $q->orderBy;
-			foreach ( (array)$scopes as $scope) {
+			foreach ($all_scopes as $scope) {
 				$scope_args = [];
 				if (is_array($scope)) {
 					$scope_func = trim(array_shift($scope));
