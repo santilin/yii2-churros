@@ -104,22 +104,33 @@ class GridView extends SimpleGridView
 				if ($column instanceof \yii\grid\ActionColumn) {
 					continue;
 				}
-				if (!$column->visible) {
-					continue;
-				}
 				if ($column->filterAttribute) {
 					$kc = $column->filterAttribute;
 				}
 				if (in_array($kc, $filter_attrs)) {
+					unset($filter_attrs[$kc]);
+				}
+				if (!$column->visible) {
+					continue;
+				}
+				if (in_array($kc, $filter_attrs)) {
 					$v = $this->filterModel->__get($kc);
-					// $v = ArrayHelper::getValue($this->filterModel, $kc);
 					if (!empty($v)) {
 						$has_filters = true;
 						break;
 					}
 				}
+				if (!$has_filters) {
+					foreach ($filter_attrs as $fa) {
+						$v = $this->filterModel->__get($fa);
+						if (!empty($v)) {
+							$has_filters = true;
+							break;
+						}
+					}
+				}
 			}
- 			if (!$has_filters) {
+ 			if (!$has_filters ) {
 				$this->filterModel = null;
 			}
 		}

@@ -20,8 +20,11 @@ trait ModelTrait
 		if (!empty($scopes)) {
 			if (is_string($scopes)) {
 				$all_scopes = explode(',', $scopes);
-			} else foreach ($scopes as $scope) {
-				$all_scopes = explode(',', $scope);
+			} else {
+				$all_scopes = [];
+				foreach ($scopes as $scope) {
+					$all_scopes = array_merge($all_scopes, explode(',', $scope));
+				}
 			}
 			$save_order = $q->orderBy;
 			foreach ($all_scopes as $scope) {
