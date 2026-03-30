@@ -568,6 +568,7 @@ js;
 				if (YII_ENV_DEV) {
 					$widget->wrapperOptions['class'] .= " {$layout_of_row}x$widget_layout";
 				}
+				Html::addCssClass($widget->options, 'form-group');
 				if ($this->widget_painter) {
 					$fs .= call_user_func($this->widget_painter, $widget, $classes, $indexf++);
 				} else {
@@ -654,7 +655,7 @@ js;
 	{
 		$ret = '';
 		$classes = $this->widget_layout_horiz_config[$layout_of_row][$widget_layout]['horizontalCssClasses'];
-		$ret .= '<div class="row w-100 mb-3">';
+		$ret .= '<div class="row w-100 mb-3 form-group">';
 		if (!empty($label)) {
 			$ret .= Html::tag('label', $label, [ 'class' => $classes['label']]);
 		}
