@@ -356,8 +356,12 @@ js;
 						$this->widgets_used[] = $widget_name;
 						if ($widget instanceof \yii\bootstrap5\ActiveField) {
 							// bs5 ActiveFields add a row container over the whole field
+							// Check inputOptions directly on the ActiveField
 							if ($widget->inputOptions['layout'] ?? false) {
 								$widget_layout = ArrayHelper::remove($widget->inputOptions, 'layout');
+							// Also check in field config (passed via $fc in form)
+							} elseif (isset($widget->fieldConfig['inputOptions']['layout'])) {
+								$widget_layout = $widget->fieldConfig['inputOptions']['layout'];
 							} else {
 								$widget_layout = $widget->layout??'large';
 							}
@@ -382,20 +386,32 @@ js;
 							}
 							if ($layout_row_layout !== 'inline') {
 								Html::addCssClass($widget->options, "layout-$layout_row_layout");
-								if ($widget_layout === 'full') {
+								// Handle 'fill' layout - break out of parent column to span full width
+								if ($widget_layout === 'fill') {
+									// Close parent column if open
+									while ($this->lastWasCol() && $open_divs == 0) {
+										$fs .= '</div>';
+										$this->removeLast();
+									}
+									// Add full-width row wrapper
+									$fs .= '<div class="row g-0">';
+									$fs .= '<div class="col-12">';
+									$fs .= $this->layoutActiveField($widget_name, $widget, $layout_row, 'large', $layout_row_layout, $indexf++);
+									$fs .= '</div></div>';
+									// Track that we added and removed a row
+									$this->removeLast(); // Remove row tracking if any
+								} elseif ($widget_layout === 'full') {
 									$col_classes = $this->columnClasses(1);
+									$open_divs++;
+									$fs .= "<div class=\"$col_classes\">";
+									$fs .= $this->layoutActiveField($widget_name, $widget, $layout_row, $widget_layout, $layout_row_layout, $indexf++);
 								} else {
 									Html::addCssClass($widget->options, 'w-100');
-									if ($widget_layout == 'fill') {
-										$col_classes = $this->columnClasses($cols - ($indexf % $cols));
-										$widget_layout = 'large';
-									} else {
-										$col_classes = $this->columnClasses($cols);
-									}
+									$col_classes = $this->columnClasses($cols);
+									$open_divs++;
+									$fs .= "<div class=\"$col_classes\">";
+									$fs .= $this->layoutActiveField($widget_name, $widget, $layout_row, $widget_layout, $layout_row_layout, $indexf++);
 								}
-								$open_divs++;
-								$fs .= "<div class=\"$col_classes\">";
-								$fs .= $this->layoutActiveField($widget_name, $widget, $layout_row, $widget_layout, $layout_row_layout, $indexf++);
 							} else {
 								$fs .= $this->layoutActiveField($widget_name, $widget, $layout_row, $widget_layout, $layout_row_layout, $indexf++);
 							}
