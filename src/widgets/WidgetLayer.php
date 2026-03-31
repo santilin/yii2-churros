@@ -73,7 +73,7 @@ class WidgetLayer
 	 * Recursivelly lays out the widgets
 	 */
 	protected function layoutWidgets(array $layout_row, array $parentOptions = [],
-		int|string $rowKey = null, array $htmlOptions = []): string
+		int|string|null $rowKey = null, array $htmlOptions = []): string
 	{
 		$ret = '';
 		// firstly, check if this is an array of containers (missing content) and
@@ -390,10 +390,9 @@ js;
 										$this->removeLast();
 									}
 									// Add full-width row wrapper
-									$fs .= '<div class="row g-0">';
 									$fs .= '<div class="col-12">';
 									$fs .= $this->layoutActiveField($widget_name, $widget, $layout_row, 'fill', $layout_row_layout, $indexf++);
-									$fs .= '</div></div>';
+									$fs .= '</div>';
 									// Track that we added and removed a row
 									$this->removeLast(); // Remove row tracking if any
 								} elseif ($widget_layout === 'full') {

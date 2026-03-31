@@ -33,8 +33,8 @@ class ActiveForm extends Bs5ActiveForm
 			'fill' => [
 				'horizontalCssClasses' => [
 					'offset' => 'offset-md-2 offset-3',
-					'label' => [ 'col-form-label w-label-12-5', 'text-end'],
-					'wrapper' => ['w-fld-87-5'],
+					'label' => [ 'col-form-label w-label-12-66', 'text-end'],
+					'wrapper' => ['w-fld-87-33'],
 					'error' => '',
 					'hint' => '',
 					'field' => '',
@@ -95,8 +95,8 @@ class ActiveForm extends Bs5ActiveForm
 			'fill' => [
 				'horizontalCssClasses' => [
 					'offset' => 'offset-md-2 offset-3',
-					'label' => [ 'col-form-label w-label-12-5', 'text-end'],
-					'wrapper' => ['w-fld-87-5'],
+					'label' => [ 'col-form-label w-label-12-66', 'text-end'],
+					'wrapper' => ['w-fld-87-33'],
 					'error' => '',
 					'hint' => '',
 					'field' => '',
@@ -157,8 +157,8 @@ class ActiveForm extends Bs5ActiveForm
 			'fill' => [
 				'horizontalCssClasses' => [
 					'offset' => 'offset-3',
-					'label' => [ 'col-form-label w-label-12-5', 'text-end'],
-					'wrapper' => ['w-fld-87-5'],
+					'label' => [ 'col-form-label w-label-12-66', 'text-end'],
+					'wrapper' => ['w-fld-87-33'],
 					'error' => '',
 					'hint' => '',
 					'field' => '',
@@ -220,8 +220,8 @@ class ActiveForm extends Bs5ActiveForm
 			'fill' => [
 				'horizontalCssClasses' => [
 					'offset' => 'offset-3',
-					'label' => [ 'col-form-label w-label-12-5', 'text-end'],
-					'wrapper' => ['w-fld-87-5'],
+					'label' => [ 'col-form-label w-label-12-66', 'text-end'],
+					'wrapper' => ['w-fld-87-33'],
 					'error' => '',
 					'hint' => '',
 					'field' => '',
@@ -283,8 +283,8 @@ class ActiveForm extends Bs5ActiveForm
 			'fill' => [
 				'horizontalCssClasses' => [
 					'offset' => 'offset-3',
-					'label' => [ 'col-form-label w-label-12-5', 'text-end'],
-					'wrapper' => ['w-fld-87-5'],
+					'label' => [ 'col-form-label w-label-12-66', 'text-end'],
+					'wrapper' => ['w-fld-87-33'],
 					'error' => '',
 					'hint' => '',
 					'field' => '',
@@ -346,9 +346,39 @@ class ActiveForm extends Bs5ActiveForm
 			],
 			'fill' => [
 				'horizontalCssClasses' => [
-					'offset' => 'offset-3',
-					'label' => [ 'col-form-label col-2', 'text-end'],
-					'wrapper' => ['col-10'],
+					'offset' => 'offset-md-2 offset-3',
+					'label' => [ 'col-form-label w-label-12-66', 'text-end'],
+					'wrapper' => ['w-fld-87-33'],
+					'error' => '',
+					'hint' => '',
+					'field' => '',
+				]
+			],
+			'large' => [
+				'horizontalCssClasses' => [
+					'offset' => 'offset-md-2 offset-3',
+					'label' => [ 'col-form-label', 'text-start text-break'],
+					'wrapper' => ['col-12'],
+					'error' => '',
+					'hint' => '',
+					'field' => '',
+				]
+			],
+			'medium' => [
+				'horizontalCssClasses' =>[
+					'offset' => 'offset-md-2 offset-3',
+					'label' => [ 'col-form-label', 'text-start'],
+					'wrapper' => ['col-lg-4 col-md-6 col-12'],
+					'error' => '',
+					'hint' => '',
+					'field' => '',
+				]
+			],
+			'short' => [
+				'horizontalCssClasses' =>[
+					'offset' => 'offset-md-3 offset-3',
+					'label' => [ 'col-form-label', 'text-start'],
+					'wrapper' => ['col-lg-3 col-md-4 col-6'],
 					'error' => '',
 					'hint' => '',
 					'field' => '',

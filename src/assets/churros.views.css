@@ -1,3 +1,14 @@
+.w-label-12-66 {
+  width: 12.5% !important;
+}
+.w-fld-87-33 {
+  width: 87% !important;
+}
+.w-fld {
+  flex: 0 0 87.34%;
+  max-width: 87.34%;
+}
+
 .header-title {
   display: flex;
   flex-direction: column;
@@ -175,13 +186,6 @@ fieldset {
       }
     }
   }
-}
-
-.w-label-12-5 {
-  width: 12.5%;
-}
-.w-fld-87-5 {
-  width: 87.5%;
 }
 
 .crud-grid-container {
