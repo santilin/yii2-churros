@@ -356,12 +356,8 @@ js;
 						$this->widgets_used[] = $widget_name;
 						if ($widget instanceof \yii\bootstrap5\ActiveField) {
 							// bs5 ActiveFields add a row container over the whole field
-							// Check inputOptions directly on the ActiveField
 							if ($widget->inputOptions['layout'] ?? false) {
 								$widget_layout = ArrayHelper::remove($widget->inputOptions, 'layout');
-							// Also check in field config (passed via $fc in form)
-							} elseif (isset($widget->fieldConfig['inputOptions']['layout'])) {
-								$widget_layout = $widget->fieldConfig['inputOptions']['layout'];
 							} else {
 								$widget_layout = $widget->layout??'large';
 							}
