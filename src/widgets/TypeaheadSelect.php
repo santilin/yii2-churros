@@ -11,7 +11,7 @@ use yii\web\JsExpression;
 class TypeaheadSelect extends KartikTypeahead
 {
     public $relatedModel = null;
-    public $idField = 'id';
+    public string|array|null $idFields = 'id';
     public $searchFields = [];
     public $exactMatch = false;
     public $suggestionsDisplay;
@@ -21,8 +21,10 @@ class TypeaheadSelect extends KartikTypeahead
     public $perPageParam = 'pagesize';
     public $searchParam = 'search';
     public $resultFormatParam = 'format';
-    public $idFieldParam = 'id_field';
+    public $idFieldParam = 'id_fields';
     public $searchFieldsParam = 'fields';
+    public $scopesParamName = 'scopes';
+    public array $scopes = [];
     public $createButton = false;
     public $limit = 8;
     public $format;
@@ -86,9 +88,13 @@ js;
             $this->remote_url .= '&';
         }
         $this->remote_url .= "{$this->searchParam}="; // filled by JS
-        $this->remote_url .= "&{$this->idFieldParam}={$this->idField}";
+        $idFieldsValue = is_array($this->idFields) ? implode(',', $this->idFields) : $this->idFields;
+        $this->remote_url .= "&{$this->idFieldParam}={$idFieldsValue}";
         $this->remote_url .= "&{$this->resultFormatParam}=select";
         $this->remote_url .= "&{$this->searchFieldsParam}={$searchFieldsValue}";
+        if (!empty($this->scopes)) {
+            $this->remote_url .= "&{$this->scopesParamName}=" . urlencode(json_encode($this->scopes));
+        }
         $this->remote_url .= "&{$this->pageParam}=1";
         $this->remote_url .= "&{$this->perPageParam}={$this->limit}";
 
@@ -218,6 +224,7 @@ js
     $searchFieldsJson = !empty($this->searchFields)
         ? urlencode(json_encode($this->searchFields))
         : '';
+    $idFieldsValue = is_array($this->idFields) ? implode(',', $this->idFields) : $this->idFields;
 
     $view->registerJs(<<<JS
 (function() {
@@ -244,7 +251,7 @@ js
                 const q = input.typeahead('val');
                 const baseUrl = new URL("{$this->remoteUrl}", window.location.origin);
                 baseUrl.searchParams.set('{$this->resultFormatParam}', 'select');
-                baseUrl.searchParams.set('{$this->idFieldParam}', '{$this->idField}');
+                baseUrl.searchParams.set('{$this->idFieldParam}', '{$idFieldsValue}');
 
                 // ✅ Fixed: proper conditional
                 if ('{$searchFieldsJson}') {

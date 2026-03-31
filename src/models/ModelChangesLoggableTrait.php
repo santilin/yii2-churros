@@ -84,7 +84,7 @@ trait ModelChangesLoggableTrait
 			if ($event->name == self::EVENT_AFTER_INSERT) {
 				$model_change->record_id = $record_id;
 				$model_change->field = $model_change::findChangeableFieldIndex($model_name);
-				$model_change->changed_at = $this->created_at;
+				$model_change->changed_at = $this->created_at ?? new \yii\db\Expression("NOW()");
 				if (YII_ENV_TEST && !$this->created_by) {
 					$model_change->changed_by = 1;
 				} else {

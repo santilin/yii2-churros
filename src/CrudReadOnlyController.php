@@ -495,8 +495,10 @@ abstract class CrudReadOnlyController extends \yii\web\Controller
 		\Yii::$app->response->format = \yii\web\Response::FORMAT_JSON;
 		$ret = [];
 		$searchModel = $this->createSearchModel();
-		if ($id_fields == null) {
+		if (!$id_fields) {
 			$id_fields = $searchModel->primaryKey();
+		} else if (is_string($id_fields)) {
+			$id_fields = explode(',', $id_fields);
 		}
 		if ($had_fields = !empty($fields)) {
 			if (is_string($fields)) {
@@ -524,6 +526,7 @@ abstract class CrudReadOnlyController extends \yii\web\Controller
 		$dataProvider = $searchModel->search($dp_search_params);
 		if ($had_fields) {
 			foreach ($id_fields as $id_field) {
+				$id_field = trim($id_field);
 				if (!in_array($id_field, $fields)) {
 					$fields[] = $id_field;
 				}

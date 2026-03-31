@@ -88,7 +88,7 @@ return [
 	'Unable to delete {la} {title} <a href="{record_url}">{record_medium}</a> because it has related data.'
 		=> 'No se ha podido borrar {la} {title} <a href="{record_url}">{record_medium}</a> porque tiene datos relacionados.',
 	'Unable to delete {la} {title} <a href="{record_url}">{record_medium}</a> because it is related to at least one {relation_title}.'
-		=> 'No se ha podido borrar {la} {title} <a href="{record_url}">{record_medium}</a> porque es usado por al menos {una} {relation_title}.',
+		=> 'No se ha podido borrar {la} {title} <a href="{record_url}">{record_medium}</a> porque es usado por al menos un/a {relation_title}.',
 
 	'Duplicating {title}: {record_short}' => 'Duplicando {title}: {record_short}',
 	'Updating {title}: {record_short}' => 'Editando {title}: {record_short}',

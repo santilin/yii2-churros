@@ -19,24 +19,54 @@ trait ModelTrait
 	{
 		if (!empty($scopes)) {
 			if (is_string($scopes)) {
+				if ($scopes[0] == '[') {
+					$scopes = json_decode($scopes);
+				}
 				$all_scopes = explode(',', $scopes);
 			} else {
 				$all_scopes = [];
 				foreach ($scopes as $scope) {
-					$all_scopes = array_merge($all_scopes, explode(',', $scope));
+					if ($scope[0] == '[') {
+						$inner_scopes = json_decode($scope);
+						foreach ($inner_scopes as $inner_scope) {
+							$all_scopes = array_merge($all_scopes, explode(',', $inner_scope));
+						}
+					} else {
+						$all_scopes = array_merge($all_scopes, explode(',', $scope));
+					}
 				}
 			}
 			$save_order = $q->orderBy;
 			foreach ($all_scopes as $scope) {
 				$scope_args = [];
+				$scope = trim($scope);
 				if (is_array($scope)) {
 					$scope_func = trim(array_shift($scope));
 					$scope_args = $scope;
+				} elseif (str_contains($scope, '(')) {
+					// Handle scope like "porPuesto(9)" or "porPuesto('text')"
+					$paren_pos = strpos($scope, '(');
+					$scope_func = substr($scope, 0, $paren_pos);
+					$args_str = substr($scope, $paren_pos + 1, -1);
+					if ($args_str !== '') {
+						// Split by comma and trim quotes if present
+						$raw_args = explode(',', $args_str);
+						foreach ($raw_args as $arg) {
+							$arg = trim($arg);
+							if ($arg[0] === "'" && $arg[strlen($arg) - 1] === "'") {
+								$scope_args[] = substr($arg, 1, -1);
+							} elseif ($arg[0] === '"' && $arg[strlen($arg) - 1] === '"') {
+								$scope_args[] = substr($arg, 1, -1);
+							} else {
+								$scope_args[] = (int)$arg;
+							}
+						}
+					}
 				} else {
-					$scope_func = trim($scope);
+					$scope_func = $scope;
 				}
 				if ($scope_func) {
-					call_user_func_array([$q,$scope_func],$scope_args);
+					call_user_func_array([$q,$scope_func], $scope_args);
 				}
 			}
 			if ($set_order_by && empty($save_order) && $q->orderBy == $save_order) {
