@@ -392,7 +392,7 @@ js;
 									// Add full-width row wrapper
 									$fs .= '<div class="row g-0">';
 									$fs .= '<div class="col-12">';
-									$fs .= $this->layoutActiveField($widget_name, $widget, $layout_row, 'large', $layout_row_layout, $indexf++);
+									$fs .= $this->layoutActiveField($widget_name, $widget, $layout_row, 'fill', $layout_row_layout, $indexf++);
 									$fs .= '</div></div>';
 									// Track that we added and removed a row
 									$this->removeLast(); // Remove row tracking if any

@@ -30,6 +30,16 @@ class ActiveForm extends Bs5ActiveForm
 					'field' => '',
 				]
 			],
+			'fill' => [
+				'horizontalCssClasses' => [
+					'offset' => 'offset-md-2 offset-3',
+					'label' => [ 'col-form-label w-label-12-5', 'text-end'],
+					'wrapper' => ['w-fld-87-5'],
+					'error' => '',
+					'hint' => '',
+					'field' => '',
+				]
+			],
 			'large' => [
 				'horizontalCssClasses' => [
 					'offset' => 'offset-md-2 offset-3',
@@ -82,6 +92,16 @@ class ActiveForm extends Bs5ActiveForm
 					'field' => '',
 				]
 			],
+			'fill' => [
+				'horizontalCssClasses' => [
+					'offset' => 'offset-md-2 offset-3',
+					'label' => [ 'col-form-label w-label-12-5', 'text-end'],
+					'wrapper' => ['w-fld-87-5'],
+					'error' => '',
+					'hint' => '',
+					'field' => '',
+				]
+			],
 			'large' => [
 				'horizontalCssClasses' => [
 					'offset' => 'offset-md-2 offset-3',
@@ -129,6 +149,16 @@ class ActiveForm extends Bs5ActiveForm
 					'offset' => 'offset-12',
 					'label' => [ 'col-form-label col-12', 'text-start'],
 					'wrapper' => ['col-12'],
+					'error' => '',
+					'hint' => '',
+					'field' => '',
+				]
+			],
+			'fill' => [
+				'horizontalCssClasses' => [
+					'offset' => 'offset-3',
+					'label' => [ 'col-form-label w-label-12-5', 'text-end'],
+					'wrapper' => ['w-fld-87-5'],
 					'error' => '',
 					'hint' => '',
 					'field' => '',
@@ -250,6 +280,16 @@ class ActiveForm extends Bs5ActiveForm
 					'field' => '',
 				]
 			],
+			'fill' => [
+				'horizontalCssClasses' => [
+					'offset' => 'offset-3',
+					'label' => [ 'col-form-label w-label-12-5', 'text-end'],
+					'wrapper' => ['w-fld-87-5'],
+					'error' => '',
+					'hint' => '',
+					'field' => '',
+				]
+			],
 			'large' => [
 				'horizontalCssClasses' => [
 					'offset' => 'offset-3',
@@ -304,6 +344,16 @@ class ActiveForm extends Bs5ActiveForm
 					'field' => '',
 				]
 			],
+			'fill' => [
+				'horizontalCssClasses' => [
+					'offset' => 'offset-3',
+					'label' => [ 'col-form-label col-2', 'text-end'],
+					'wrapper' => ['col-10'],
+					'error' => '',
+					'hint' => '',
+					'field' => '',
+				]
+			],
 			'large' => [
 				'horizontalCssClasses' => [
 					'offset' => 'offset-md-2 offset-3',
@@ -347,6 +397,16 @@ class ActiveForm extends Bs5ActiveForm
 
 		],
 		'static' => [
+			'fill' => [
+				'horizontalCssClasses' => [
+					'offset' => 'offset-md-2 offset-3',
+					'label' => [ 'col-form-label col-12', 'text-start'],
+					'wrapper' => ['col-12'],
+					'error' => '',
+					'hint' => '',
+					'field' => '',
+				]
+			],
 			'horizontalCssClasses' => [
 				'offset' => 'offset-md-2 offset-3',
 				'label' => [ 'col-form-label col-12', 'text-start'],
@@ -357,6 +417,16 @@ class ActiveForm extends Bs5ActiveForm
 			]
 		],
 		'inline' => [
+			'fill' => [
+				'horizontalCssClasses' => [
+					'offset' => '',
+					'label' => [ 'text-start'],
+					'wrapper' => [],
+					'error' => '',
+					'hint' => '',
+					'field' => '',
+				],
+			],
 			'horizontalCssClasses' => [
 				'offset' => '',
 				'label' => [ 'text-start'],
