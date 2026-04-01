@@ -114,6 +114,11 @@ class WidgetLayer
 			$layout_row_type = $layout_row['type'];
 		}
 		$layout_row_layout = $layout_row['layout'] ?? '1col';
+		if ($layout_row_type === 'container') { // deprecated
+			$layout_row_type = $layout_row['style'];
+		}
+		$container_styles = ['tabs', 'accordion', 'details', 'rows', 'cols'];
+		$is_container_type = in_array($layout_row_type, $container_styles);
 		$layout_row_style = empty($layout_row['style'])
 			? (str_contains($layout_row_layout, 'col') ? 'cols' : 'rows')
 			: $layout_row['style'];
@@ -123,7 +128,8 @@ class WidgetLayer
 		} else {
 			$cols = intval($layout_row_layout);
 		}
-		if ($layout_row_type === 'container') {
+		$is_container = $layout_row_type === 'container' || $is_container_type;
+		if ($is_container) {
 			$ret .= "<!--container $layout_row_style: $rowKey-->";
 			$row_added = false;
 			if (!$this->lastWasRow()) {
