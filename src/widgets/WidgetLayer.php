@@ -100,7 +100,7 @@ class WidgetLayer
 				$layout_row = reset($layout_row);
 			} else {
 				$layout_row = [
-					'type' => 'container',
+					'type' => 'rows',
 					'content' => $layout_row,
 					'layout' => '1col',
 					'size' => $parentOptions['size']??'large',
@@ -117,11 +117,15 @@ class WidgetLayer
 		if ($layout_row_type === 'container') { // deprecated
 			$layout_row_type = $layout_row['style'];
 		}
-		$container_styles = ['tabs', 'accordion', 'details', 'rows', 'cols'];
+		$container_styles = ['tabs', 'accordion', 'details', 'rows', 'cols', 'collapsable'];
 		$is_container_type = in_array($layout_row_type, $container_styles);
-		$layout_row_style = empty($layout_row['style'])
-			? (str_contains($layout_row_layout, 'col') ? 'cols' : 'rows')
-			: $layout_row['style'];
+		if ($is_container_type && empty($layout_row['style'])) {
+			$layout_row_style = $layout_row_type;
+		} else {
+			$layout_row_style = empty($layout_row['style'])
+				? (str_contains($layout_row_layout, 'col') ? 'cols' : 'rows')
+				: $layout_row['style'];
+		}
 		$layout_row['size'] ??= $parentOptions['size'] ?? 'large';
 		if ($layout_row_layout == 'inline') {
 			$cols = 10000;
@@ -130,7 +134,7 @@ class WidgetLayer
 		}
 		$is_container = $layout_row_type === 'container' || $is_container_type;
 		if ($is_container) {
-			$ret .= "<!--container $layout_row_style: $rowKey-->";
+			$ret .= "<!--container $layout_row_style ($layout_row_type): $rowKey-->";
 			$row_added = false;
 			if (!$this->lastWasRow()) {
 				$ret .= "<div class=\"row lay-$cols-cols lay-{$this->lastLevel()}-lvl\">";
@@ -312,8 +316,31 @@ js;
 						// $this->removeLast();
 					}
 					break;
+				case 'collapsable':
+					$toggle_id = ArrayHelper::getValue($layout_row, 'toggle-id', '');
+					$button_label = ArrayHelper::getValue($layout_row, 'button-label', '+');
+					$button_options = ArrayHelper::getValue($layout_row, 'button-options', []);
+					Html::addCssClass($button_options, ['btn', 'btn-sm', 'btn-link', 'text-secondary', 'p-0', 'me-1']);
+					$button_options['data-bs-toggle'] = 'collapse';
+					$button_options['aria-expanded'] = 'false';
+					$button_options['title'] = $button_options['title'] ?? 'Mostrar/ocultar';
+					if ($toggle_id) {
+						$button_options['data-bs-target'] = '#' . $toggle_id;
+					}
+					$button_content = ArrayHelper::remove($layout_row, 'button-content', $button_label);
+					$ret .= Html::button($button_content, $button_options);
+					$layout_row_content = array_filter($layout_row['content']);
+					foreach ($layout_row_content as $kc => $row_content) {
+						$ret .= $this->layoutWidgets((array)$row_content, [
+							'layout' => $layout_row_layout,
+							'style' => $layout_row_style,
+							'type' => $layout_row_type,
+							'size' => $layout_row['size'],
+						], $kc);
+					}
+					break;
 				default:
-					throw new \Exception($layout_row_style . ': container style not valid');
+					throw new \Exception($layout_row_style . ': container style not valid (type: ' . $layout_row_type . ')');
 			}
 			if ($row_added) {
 				$ret .= "</div>";
@@ -463,7 +490,15 @@ js;
 					$legend = Html::tag('legend', $title, $layout_row['title_options']??[]);
 					$ret .= Html::tag('fieldset', "$legend<hr/><div class=row>$row_html</div>", $layout_row['htmlOptions']??[]);
 				} else {
-					$ret .= $row_html;
+					if (!empty($layout_row['htmlOptions']) || !empty($layout_row['id'])) {
+						$tag_options = $layout_row['htmlOptions'] ?? [];
+						if (!empty($layout_row['id'])) {
+							$tag_options['id'] = $layout_row['id'];
+						}
+						$ret = Html::beginTag('div', $tag_options) . $row_html . Html::endTag('div');
+					} else {
+						$ret .= $row_html;
+					}
 				}
 				break;
 
