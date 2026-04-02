@@ -239,30 +239,27 @@ js;
 						$col_added = true;
 						$ret .= '<div class="' . $this->columnClasses($cols) . '">';
 					}
-					foreach ($layout_row['content'] as $kc => $row_content) {
-						if ($row_content === null) {
-							continue;
-						}
-						if (!is_array($row_content)) {
-							$row_content = [
-								'label' => $kc,
-								'content' => $row_content,
-								'open' => false,
-							];
-						}
-						$label = ArrayHelper::remove($row_content, 'title', $row_content['label'] ?? $kc);
-						$content = $this->layoutWidgets($row_content, [
+					$summary_content = ArrayHelper::getValue($layout_row, 'summary', []);
+					$details_content = ArrayHelper::getValue($layout_row, 'content', []);
+					$is_open = ArrayHelper::getValue($layout_row, 'open', false);
+					$ret .= Html::beginTag('details', $is_open ? ['open' => 'open'] : []);
+					if (!empty($summary_content)) {
+						$summary_html = $this->layoutWidgets($summary_content, [
 							'layout' => $layout_row_layout,
 							'style' => $layout_row_style,
 							'type' => $layout_row_type,
-						], $kc);
-						$open = ArrayHelper::remove($row_content, 'open', false);
-
-						$ret .= Html::beginTag('details', $open ? ['open' => 'open'] : []);
-						$ret .= Html::tag('summary', $label);
-						$ret .= $content;
-						$ret .= Html::endTag('details');
+						], 'summary');
+						$ret .= Html::tag('summary', $summary_html);
 					}
+					if (!empty($details_content)) {
+						$content_html = $this->layoutWidgets($details_content, [
+							'layout' => $layout_row_layout,
+							'style' => $layout_row_style,
+							'type' => $layout_row_type,
+						], 'content');
+						$ret .= $content_html;
+					}
+					$ret .= Html::endTag('details');
 					if ($col_added) {
 						$this->removeLast();
 						$ret .= "</div>";
