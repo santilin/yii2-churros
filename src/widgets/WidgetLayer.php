@@ -242,14 +242,30 @@ js;
 					$summary_content = ArrayHelper::getValue($layout_row, 'summary', []);
 					$details_content = ArrayHelper::getValue($layout_row, 'content', []);
 					$is_open = ArrayHelper::getValue($layout_row, 'open', false);
-					$ret .= Html::beginTag('details', $is_open ? ['open' => 'open'] : []);
-					if (!empty($summary_content)) {
-						$summary_html = $this->layoutWidgets($summary_content, [
-							'layout' => $layout_row_layout,
-							'style' => $layout_row_style,
-							'type' => $layout_row_type,
-						], 'summary');
-						$ret .= Html::tag('summary', $summary_html);
+					$title = ArrayHelper::getValue($layout_row, 'title', '');
+					$ret .= Html::beginTag('details', $is_open ? ['open' => 'open', 'layout-details-card' => true] : ['layout-details-card' => true]);
+					if (!empty($summary_content) || !empty($title)) {
+						$summary_header = '';
+						if (!empty($title)) {
+							$summary_header .= Html::tag('div', $title, ['class' => 'me-auto']);
+						}
+						$summary_header .= '<i class="fa-solid fa-chevron-down details-chevron' . ($is_open ? ' rotate-180' : '') . '"></i>';
+						$summary_body = '';
+						if (!empty($summary_content)) {
+							$summary_body = $this->layoutWidgets($summary_content, [
+								'layout' => $layout_row_layout,
+								'style' => $layout_row_style,
+								'type' => $layout_row_type,
+							], 'summary');
+						}
+						$summary_options = [
+							'style' => 'cursor: pointer; list-style: none;',
+						];
+						$summary_options['onclick'] = 'this.querySelector(".details-chevron").classList.toggle("rotate-180")';
+						$ret .= Html::tag('summary',
+							'<div class="d-flex align-items-center w-100">' . $summary_header . '</div>' .
+							'<div class="w-100 mt-2">' . $summary_body . '</div>',
+						$summary_options);
 					}
 					if (!empty($details_content)) {
 						$content_html = $this->layoutWidgets($details_content, [
@@ -257,7 +273,7 @@ js;
 							'style' => $layout_row_style,
 							'type' => $layout_row_type,
 						], 'content');
-						$ret .= $content_html;
+						$ret .= Html::tag('div', $content_html, ['class' => 'details-content']);
 					}
 					$ret .= Html::endTag('details');
 					if ($col_added) {
@@ -357,8 +373,17 @@ js;
 			}
 			$col_added = false;
 			switch ($layout_row_type) {
-			case 'widgets':
+			case 'fieldset':
+				if (($title = $layout_row['title']??false) != false) {
+					$legend = Html::tag('legend', $title, $layout_row['title_options']??[]);
+					$ret .= Html::tag('fieldset', "$legend<hr/><div class=row>$row_html</div>", $layout_row['htmlOptions']??[]);
+				} else {
+					$ret .= $row_html;
+				}
+				break;
+
 			case 'fields':
+			case 'widgets':
 				$indexf = 0;
 				$only_widget_names = true;
 				foreach($layout_row as $lrk => $rl) {
@@ -375,7 +400,7 @@ js;
 				if ($subtitle) {
 					$row_html .= "<div class=row><div class=col-12><div class=\"subtitle mb-3 alert alert-warning\">$subtitle</div></div></div>";
 				}
-				if ($layout_row['content'] === true) { // remaining widgets
+				if ($layout_row['content'] === true) {
 					$layout_row['content'] = array_diff(array_keys($this->widgets), $this->widgets_used);
 				}
 				foreach ($layout_row['content'] as $widget_name) {
@@ -483,19 +508,14 @@ js;
 						}
 					}
 				}
-				if (($title = $layout_row['title']??false) != false) {
-					$legend = Html::tag('legend', $title, $layout_row['title_options']??[]);
-					$ret .= Html::tag('fieldset', "$legend<hr/><div class=row>$row_html</div>", $layout_row['htmlOptions']??[]);
-				} else {
-					if (!empty($layout_row['htmlOptions']) || !empty($layout_row['id'])) {
-						$tag_options = $layout_row['htmlOptions'] ?? [];
-						if (!empty($layout_row['id'])) {
-							$tag_options['id'] = $layout_row['id'];
-						}
-						$ret = Html::beginTag('div', $tag_options) . $row_html . Html::endTag('div');
-					} else {
-						$ret .= $row_html;
+				if (!empty($layout_row['htmlOptions']) || !empty($layout_row['id'])) {
+					$tag_options = $layout_row['htmlOptions'] ?? [];
+					if (!empty($layout_row['id'])) {
+						$tag_options['id'] = $layout_row['id'];
 					}
+					$ret = Html::beginTag('div', $tag_options) . $row_html . Html::endTag('div');
+				} else {
+					$ret .= $row_html;
 				}
 				break;
 
