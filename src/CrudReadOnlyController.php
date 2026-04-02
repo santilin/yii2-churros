@@ -4,7 +4,7 @@ namespace santilin\churros;
 
 use Yii;
 use yii\helpers\{Url,StringHelper};
-use yii\web\{NotFound};
+use yii\web\{NotFoundHttpException,ForbiddenHttpException};
 use yii\db\ActiveRecordInterface as CrudModel;
 use santilin\churros\helpers\{AppHelper,FormHelper};
 use yii\base\NotSupportedException;
@@ -567,12 +567,24 @@ abstract class CrudReadOnlyController extends \yii\web\Controller
 			if ($master_id !== 0) {
 				$parent_controller = $this->request->get('parent_controller');
 				if ($parent_controller) {
-					$master_model_name = 'app\\models\\'. AppHelper::camelCase($parent_controller);
-					$this->masterModel = $master_model_name::findOne($master_id);
-					if ($this->masterModel === null) {
-						throw new NotFoundHttpException(Yii::t('churros',
-							"The master record of {title} with '{id}' primary key does not exist",
-							[ 'id' => $master_id, 'title' => $master_model_name ]));
+					$master_model_name = 'app\\models\\' . AppHelper::camelCase($parent_controller);
+					$query = $master_model_name::find();
+					$hasCanAccess = method_exists($query, 'canAccess');
+					if ($hasCanAccess) {
+						$query->canAccess();
+						$this->masterModel = $query->andWhere(['id' => $master_id])->one();
+						if ($this->masterModel === null) {
+							throw new ForbiddenHttpException(Yii::t('churros',
+								'No tiene acceso al {title} con \'id\'',
+								['id' => $master_id, 'title' => $master_model_name::getModelInfo('title')]));
+						}
+					} else {
+						$this->masterModel = $master_model_name::findOne($master_id);
+						if ($this->masterModel === null) {
+							throw new NotFoundHttpException(Yii::t('churros',
+								'The master record of {title} with \'id\' primary key does not exist',
+								['id' => $master_id, 'title' => $master_model_name]));
+						}
 					}
 				}
 			}
