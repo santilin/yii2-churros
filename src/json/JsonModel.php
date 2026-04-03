@@ -728,4 +728,10 @@ class JsonModel extends \yii\base\Model
         }
     }
 
+    public function updateFields(array $props): bool
+    {
+        $this->setAttributes($props, true); // safe only
+        return true;
+    }
+
 } // class
