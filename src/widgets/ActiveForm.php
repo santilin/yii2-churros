@@ -197,8 +197,8 @@ class ActiveForm extends Bs5ActiveForm
 			'checkbox' => [
 				'horizontalCssClasses' => [
 					'offset' => '',
-					'label' => [ 'col-lg-3 col-md-4 col-6', 'form-check-label text-start'],
-					'wrapper' => ['offset-lg-3 offset-md-3 offset-6 col-12'],
+					'label' => [ 'col12', 'form-check-label text-start'],
+					'wrapper' => ['offset-lg-3 offset-md-3 offset-0 col-12'],
 					'error' => '',
 					'hint' => '',
 					'field' => 'form-group form-check-input',
