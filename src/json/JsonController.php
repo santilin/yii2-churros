@@ -410,7 +410,7 @@ class JsonController extends \yii\web\Controller
 		}
 		list($to_model, $to_action) = AppHelper::splitString($to, '.');
 		if ($to_model) {
-			if ($to_model == 'parent') {
+			if ($to_model === 'parent') {
 				if ($model->parentModel()) {
 					$model = $model->parentModel();
 				} else {
