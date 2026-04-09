@@ -433,7 +433,7 @@ class JsonController extends \yii\web\Controller
 				}
 				break;
 			case 'index':
-				$to_action = 'view';
+				// $to_action = 'view';
 				break;
 			default:
 				$redirect_params = array_merge($redirect_params, [ 'id' => $model->getPrimaryKey()]);
