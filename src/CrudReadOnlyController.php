@@ -575,7 +575,7 @@ abstract class CrudReadOnlyController extends \yii\web\Controller
 						$this->masterModel = $query->andWhere(['id' => $master_id])->one();
 						if ($this->masterModel === null) {
 							throw new ForbiddenHttpException(Yii::t('churros',
-								'No tiene acceso al {title} con \'id\'',
+								'No tiene acceso al {title} con clave primaria {id}',
 								['id' => $master_id, 'title' => $master_model_name::getModelInfo('title')]));
 						}
 					} else {

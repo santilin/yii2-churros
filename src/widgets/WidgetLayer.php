@@ -513,7 +513,7 @@ js;
 					if (!empty($layout_row['id'])) {
 						$tag_options['id'] = $layout_row['id'];
 					}
-					$ret = Html::beginTag('div', $tag_options) . $row_html . Html::endTag('div');
+					$ret .= Html::beginTag('div', $tag_options) . $row_html . Html::endTag('div');
 				} else {
 					$ret .= $row_html;
 				}
