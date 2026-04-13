@@ -244,29 +244,26 @@ js;
 					$is_open = ArrayHelper::getValue($layout_row, 'open', false);
 					$title = ArrayHelper::getValue($layout_row, 'title', '');
 					$ret .= Html::beginTag('details', $is_open ? ['open' => 'open', 'layout-details-card' => true] : ['layout-details-card' => true]);
-					if (!empty($summary_content) || !empty($title)) {
-						$summary_header = '';
-						if (!empty($title)) {
-							$summary_header .= Html::tag('div', $title, ['class' => 'me-auto']);
-						}
-						$summary_header .= '<i class="fa-solid fa-chevron-down details-chevron' . ($is_open ? ' rotate-180' : '') . '"></i>';
-						$summary_body = '';
-						if (!empty($summary_content)) {
-							$summary_body = $this->layoutWidgets($summary_content, [
-								'layout' => $layout_row_layout,
-								'style' => $layout_row_style,
-								'type' => $layout_row_type,
-							], 'summary');
-						}
-						$summary_options = [
-							'style' => 'cursor: pointer; list-style: none;',
-						];
-						$summary_options['onclick'] = 'this.querySelector(".details-chevron").classList.toggle("rotate-180")';
-						$ret .= Html::tag('summary',
-							'<div class="d-flex align-items-center w-100">' . $summary_header . '</div>' .
-							'<div class="w-100 mt-2">' . $summary_body . '</div>',
-						$summary_options);
+				if (!empty($summary_content) || !empty($title)) {
+					$summary_header = '';
+					if (!empty($title)) {
+						$summary_header .= Html::tag('div', $title, ['class' => 'me-auto']);
+					} else if (!empty($summary_content)) {
+						$summary_header .= Html::tag('div', $this->layoutWidgets($summary_content, [
+							'layout' => $layout_row_layout,
+							'style' => $layout_row_style,
+							'type' => $layout_row_type,
+						], 'summary'), ['class' => 'flex-grow-1']);
 					}
+					$summary_header .= '<i class="fa-solid fa-chevron-down details-chevron ms-2' . ($is_open ? ' rotate-180' : '') . '"></i>';
+					$summary_options = [
+						'style' => 'cursor: pointer; list-style: none;',
+					];
+					$summary_options['onclick'] = 'this.querySelector(".details-chevron").classList.toggle("rotate-180")';
+					$ret .= Html::tag('summary',
+						'<div class="d-flex align-items-start w-100">' . $summary_header . '</div>',
+					$summary_options);
+				}
 					if (!empty($details_content)) {
 						$content_html = $this->layoutWidgets($details_content, [
 							'layout' => $layout_row_layout,
