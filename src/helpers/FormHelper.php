@@ -360,9 +360,8 @@ ajax;
 				$ret[] = Html::submitButton($title, $button['htmlOptions']);
 				break;
 			case 'reset':
-				$ret[] = Html::submitButton($title, $button['htmlOptions']);
+				$ret[] = Html::resetButton($title, $button['htmlOptions']);
 				break;
-				// no break
 			case 'button':
 			case 'button-post':
 			case 'button-trigger':

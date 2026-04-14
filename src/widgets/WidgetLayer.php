@@ -270,7 +270,7 @@ js;
 							'style' => $layout_row_style,
 							'type' => $layout_row_type,
 						], 'content');
-						$ret .= Html::tag('div', $content_html, ['class' => 'details-content']);
+						$ret .= Html::tag('div', $content_html, ['class' => 'row details-content']);
 					}
 					$ret .= Html::endTag('details');
 					if ($col_added) {

@@ -18,8 +18,6 @@ trait ModelSearchTrait
 {
 	use ModelTrait;
 
-	public $_gridPageSize = 12;
-
 	public function __get($name)
 	{
 		// GridView::renderFilter: needs activeAttribute when related property
@@ -51,12 +49,14 @@ trait ModelSearchTrait
 
 	public function __set($name, $value)
 	{
-		if (property_exists($this,$name)) {
+		if (property_exists($this, $name)) {
 			$this->$name = $value;
 		} else if ($this->hasAttribute($name)) {
 			$this->setAttribute($name, $value);
-		} else if (array_key_exists($name, $this->related_properties)) {
+		} elseif (property_exists($this, 'related_properties') && array_key_exists($name, $this->related_properties)) {
 			$this->related_properties[$name] = $value;
+		} else {
+			parent::__set($name, $value);
 		}
 	}
 
