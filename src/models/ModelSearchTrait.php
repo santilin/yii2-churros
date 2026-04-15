@@ -44,7 +44,11 @@ trait ModelSearchTrait
 				}
 			}
 		}
-		return parent::__get($name);
+		try {
+			return parent::__get($name);
+		} catch (\Exception $e) {
+			return null;
+		}
 	}
 
 	public function __set($name, $value)
@@ -56,7 +60,7 @@ trait ModelSearchTrait
 		} elseif (property_exists($this, 'related_properties') && array_key_exists($name, $this->related_properties)) {
 			$this->related_properties[$name] = $value;
 		} else {
-			parent::__set($name, $value);
+			// parent::__set($name, $value);
 		}
 	}
 

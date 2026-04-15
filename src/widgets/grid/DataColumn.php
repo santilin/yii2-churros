@@ -12,10 +12,9 @@ use yii\helpers\{ArrayHelper,Html,Inflector};
 class DataColumn extends \yii\grid\DataColumn
 {
     public $summary;
-    public $joinedTemplate;
-    public $joinedColumn;
-    public $joinedFilterContent;
-    public $joinedColumnInstance;
+    public string $joinedTemplate = '<div class="ps-2">{attr1}<div class="small text-muted">{attr2}</div></div>';
+    public string $joinedColumn;
+    public $joinedColumnInstance = null;
 
 
     /**
@@ -109,8 +108,8 @@ class DataColumn extends \yii\grid\DataColumn
             if ($joinedColumn instanceof self) {
                 $values = [];
                 // Use the value key from column definition
-                $values[$this->attribute] = $this->getDataCellValue($model, $key, $index, $this);
-                $values[$joinedColumn->attribute] = $joinedColumn->getDataCellValue($model, $key, $index);
+                $values['attr1'] = $this->getDataCellValue($model, $key, $index, $this);
+                $values['attr2'] = $joinedColumn->getDataCellValue($model, $key, $index);
                 if (!empty($this->joinedTemplate)) {
                     $result = $this->joinedTemplate;
                     foreach ($values as $attr => $value) {
@@ -119,7 +118,7 @@ class DataColumn extends \yii\grid\DataColumn
                     return $result;
                 }
                 // If no joinedTemplate, just combine values
-                return $values[$this->attribute] . $values[$joinedColumn->attribute];
+                return $values['attr1'] . $values['attr2'];
             }
         }
         return parent::renderDataCellContent($model, $key, $index);

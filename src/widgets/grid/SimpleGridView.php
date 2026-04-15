@@ -150,17 +150,34 @@ class SimpleGridView extends \yii\grid\GridView
 	 */
 	protected function processJoinedColumns(): void
 	{
+		$columnsMap = [];
+		foreach ($this->columns as $key => $column) {
+			if ($column instanceof DataColumn) {
+				$columnsMap[$key] = $column;
+				// Also index by attribute for easier lookup
+				if (!empty($column->attribute)) {
+					$columnsMap[$column->attribute] = $column;
+				}
+			}
+		}
+		
+		$keysToUnset = [];
 		foreach ($this->columns as $key => $column) {
 			if ($column instanceof DataColumn && !empty($column->joinedColumn)) {
 				$joinedKey = $column->joinedColumn;
-				if (isset($this->columns[$joinedKey]) && $this->columns[$joinedKey] instanceof DataColumn) {
-					$joinedColumn = $this->columns[$joinedKey];
-					// Store the joined column reference - we'll render its filter content in renderFilterCellContent
+				// Look up in our map (supports both key and attribute lookup)
+				$joinedColumn = $columnsMap[$joinedKey] ?? null;
+				if ($joinedColumn instanceof DataColumn) {
+					// Store the joined column reference
 					$column->joinedColumnInstance = $joinedColumn;
-					// Unset the joined column directly since parent::initColumns() already ran
-					unset($this->columns[$joinedKey]);
+					// Mark the joined column key to be unset after iteration
+					$keysToUnset[] = $joinedKey;
 				}
 			}
+		}
+		// Unset after iteration to avoid modifying array during foreach
+		foreach ($keysToUnset as $key) {
+			unset($this->columns[$key]);
 		}
 	}
 
