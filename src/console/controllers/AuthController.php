@@ -472,11 +472,11 @@ class AuthController extends Controller
 	/**
 	 * Lists all permissions, optionally by type
 	 */
-	public function actionListAll($type = null)
+	public function actionListAll(?string $type = null)
 	{
 		$no_model_perms = [];
 		$prev_model = null;
-		if ($type === null || StringHelper::startsWith($type, 'perm')) {
+		if ($type === null || $type === 'perm') {
 			$perms = $this->authManager->getItems(Item::TYPE_PERMISSION);
 			asort($perms);
 			$this->stdout("= PERMISSIONS\n");
@@ -509,7 +509,7 @@ class AuthController extends Controller
 				$this->stdout($perm->name . "\n");
 			}
 		}
-		if ($type === null || StringHelper::startsWith($type, 'rol')) {
+		if ($type === null || $type === 'rol') {
 			$roles = $this->authManager->getItems(Item::TYPE_ROLE);
 			asort($roles);
 			$this->stdout("\n= ROLES\n");
@@ -539,7 +539,7 @@ class AuthController extends Controller
 			}
 		}
 
-		if ($type === null || StringHelper::startsWith($type, 'user')) {
+		if ($type === null || $type === 'user') {
 			$this->stdout("\n= USERS' ASSIGNMENTS\n");
 			$user_class = Yii::$app->user->identityClass;
 			$user = new $user_class;
@@ -831,6 +831,92 @@ class AuthController extends Controller
 		}
 
 		return 0;
+	}
+
+	/**
+	 * Lists all users with their roles and permissions in a tree format
+	 * @param int|null $user_id Optional user ID to filter by a specific user
+	 */
+	public function actionListAllUserPerms(int|string|null $user_id = null, bool $show_perms = false)
+	{
+		$auth = $this->authManager;
+		$userClass = Yii::$app->user->identityClass;
+		$userQuery = $userClass::find();
+		if ($user_id !== null) {
+			if (is_numeric($user_id)) {
+				$userQuery->andWhere(['id' => $user_id]);
+			} else {
+				$userQuery->andWhere(['username' => $user_id]);
+			}
+		}
+		$users = $userQuery->all();
+
+		foreach ($users as $user) {
+			$this->stdout("User: {$user->username}", Console::FG_YELLOW);
+			if (isset($user->email)) {
+				$this->stdout(" ({$user->email})", Console::FG_CYAN);
+			}
+			$this->stdout(" [ID: {$user->id}]\n");
+
+			$directAssignments = $auth->getAssignments($user->id);
+			$defaultRoles = $auth->defaultRoles;
+			$allRoles = array_unique(array_merge(
+				array_keys($directAssignments),
+				$defaultRoles
+			));
+
+			if (empty($allRoles)) {
+				$this->stdout("  (no roles)\n", Console::FG_GREY);
+				continue;
+			}
+
+			$processedRoles = [];
+			$this->displayRolesTree($allRoles, '  ', $auth, $processedRoles, $show_perms);
+
+			$this->stdout("\n");
+		}
+	}
+
+	protected function displayRolesTree(array $roleNames, string $indent, $auth, array &$processedRoles, bool $show_perms): void
+	{
+		foreach ($roleNames as $roleName) {
+			if (isset($processedRoles[$roleName])) {
+				continue;
+			}
+			$processedRoles[$roleName] = true;
+
+			$role = $auth->getRole($roleName);
+			if (!$role) {
+				continue;
+			}
+
+			$this->stdout("{$indent}└─ Role: {$role->name}", Console::FG_YELLOW);
+			if ($this->verbose && $role->description) {
+				$this->stdout(" ({$role->description})", Console::FG_GREY);
+			}
+			$this->stdout("\n");
+
+			$childRoles = $auth->getChildRoles($roleName);
+			$childRoleNames = [];
+			foreach ($childRoles as $childRole) {
+				if ($childRole->name !== $roleName) {
+					$childRoleNames[] = $childRole->name;
+				}
+			}
+			if (!empty($childRoleNames)) {
+				$this->displayRolesTree($childRoleNames, $indent . '  ', $auth, $processedRoles, $show_perms);
+			}
+			if ($show_perms) {
+				$permissions = $auth->getPermissionsByRole($roleName);
+				foreach ($permissions as $perm) {
+					$this->stdout("{$indent}  └─ {$perm->name}", Console::FG_GREEN);
+					if ($this->verbose && $perm->description) {
+						$this->stdout(" ({$perm->description})", Console::FG_GREY);
+					}
+					$this->stdout("\n");
+				}
+			}
+		}
 	}
 
 } // class

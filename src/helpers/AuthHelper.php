@@ -255,7 +255,7 @@ class AuthHelper
 	}
 
 
-    static public function removePermissionsFromRole($role_name, array|string $perm_names, $auth = null)
+    static public function removeFromRole($role_name, array|string $perm_names, $auth = null)
     {
 		if ($auth == null) {
 			$auth = \Yii::$app->authManager;
