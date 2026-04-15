@@ -44,7 +44,7 @@ class BooleanColumn extends DataColumn
     /**
      * {@inheritdoc}
      */
-    protected function renderFilterCellContent()
+    public function renderFilterCellContent()
     {
 		$model = $this->grid->filterModel;
         if ($model instanceof Model && $this->attribute !== null && $model->isAttributeActive($this->attribute)) {

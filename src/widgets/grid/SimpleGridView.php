@@ -36,6 +36,7 @@ class SimpleGridView extends \yii\grid\GridView
 	protected $previousKey = null;
 	protected $recno;
 	protected $current_level = 0;
+	protected $joinedColumnFilters = [];
 
 	public $itemLabelSingle = null;
 	public $itemLabelPlural = null;
@@ -133,6 +134,49 @@ class SimpleGridView extends \yii\grid\GridView
 			}
 		}
 		return null;
+	}
+
+	/**
+	 * {@inheritdoc}
+	 */
+	protected function initColumns()
+	{
+		parent::initColumns();
+		$this->processJoinedColumns();
+	}
+
+	/**
+	 * Processes joined columns: hides the joined column but stores its filter.
+	 */
+	protected function processJoinedColumns(): void
+	{
+		foreach ($this->columns as $key => $column) {
+			if ($column instanceof DataColumn && !empty($column->joinedColumn)) {
+				$joinedKey = $column->joinedColumn;
+				if (isset($this->columns[$joinedKey]) && $this->columns[$joinedKey] instanceof DataColumn) {
+					$joinedColumn = $this->columns[$joinedKey];
+					// Store the joined column reference - we'll render its filter content in renderFilterCellContent
+					$column->joinedColumnInstance = $joinedColumn;
+					// Unset the joined column directly since parent::initColumns() already ran
+					unset($this->columns[$joinedKey]);
+				}
+			}
+		}
+	}
+
+	/**
+	 * {@inheritdoc}
+	 */
+	public function renderFilters()
+	{
+		if ($this->filterModel !== null) {
+			$cells = [];
+			foreach ($this->columns as $key => $column) {
+				$cells[] = $column->renderFilterCell();
+			}
+			return Html::tag('tr', implode('', $cells), $this->filterRowOptions);
+		}
+		return '';
 	}
 
 	// override

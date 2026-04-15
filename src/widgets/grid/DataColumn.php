@@ -12,6 +12,10 @@ use yii\helpers\{ArrayHelper,Html,Inflector};
 class DataColumn extends \yii\grid\DataColumn
 {
     public $summary;
+    public $joinedTemplate;
+    public $joinedColumn;
+    public $joinedFilterContent;
+    public $joinedColumnInstance;
 
 
     /**
@@ -93,6 +97,45 @@ class DataColumn extends \yii\grid\DataColumn
         } else {
             return Html::tag('td', $this->renderDataCellContent($model, $key, $index), $options);
         }
+    }
+
+    /**
+     * {@inheritdoc}
+     */
+    protected function renderDataCellContent($model, $key, $index)
+    {
+        if (!empty($this->joinedColumn) && $this->content === null) {
+            $joinedColumn = $this->joinedColumnInstance ?? $this->grid->columns[$this->joinedColumn] ?? null;
+            if ($joinedColumn instanceof self) {
+                $values = [];
+                // Use the value key from column definition
+                $values[$this->attribute] = $this->getDataCellValue($model, $key, $index, $this);
+                $values[$joinedColumn->attribute] = $joinedColumn->getDataCellValue($model, $key, $index);
+                if (!empty($this->joinedTemplate)) {
+                    $result = $this->joinedTemplate;
+                    foreach ($values as $attr => $value) {
+                        $result = str_replace("{{$attr}}", $value, $result);
+                    }
+                    return $result;
+                }
+                // If no joinedTemplate, just combine values
+                return $values[$this->attribute] . $values[$joinedColumn->attribute];
+            }
+        }
+        return parent::renderDataCellContent($model, $key, $index);
+    }
+
+    /**
+     * {@inheritdoc}
+     */
+    public function renderFilterCellContent()
+    {
+        $content = parent::renderFilterCellContent();
+        // If there's a joined column, render its filter as well
+        if (!empty($this->joinedColumnInstance) && $this->joinedColumnInstance instanceof DataColumn) {
+            $content .= $this->joinedColumnInstance->renderFilterCellContent();
+        }
+        return $content;
     }
 
 }
