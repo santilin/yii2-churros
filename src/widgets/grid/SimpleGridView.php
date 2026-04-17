@@ -36,7 +36,7 @@ class SimpleGridView extends \yii\grid\GridView
 	protected $previousKey = null;
 	protected $recno;
 	protected $current_level = 0;
-	protected $joinedColumnFilters = [];
+	protected $combinedColumnFilters = [];
 
 	public $itemLabelSingle = null;
 	public $itemLabelPlural = null;
@@ -142,40 +142,35 @@ class SimpleGridView extends \yii\grid\GridView
 	protected function initColumns()
 	{
 		parent::initColumns();
-		$this->processJoinedColumns();
+		$this->processCombinedColumns();
 	}
 
 	/**
-	 * Processes joined columns: hides the joined column but stores its filter.
+	 * Processes combined columns: hides the secondary column but stores its filter.
 	 */
-	protected function processJoinedColumns(): void
+	protected function processCombinedColumns(): void
 	{
 		$columnsMap = [];
 		foreach ($this->columns as $key => $column) {
 			if ($column instanceof DataColumn) {
 				$columnsMap[$key] = $column;
-				// Also index by attribute for easier lookup
 				if (!empty($column->attribute)) {
 					$columnsMap[$column->attribute] = $column;
 				}
 			}
 		}
-		
+
 		$keysToUnset = [];
 		foreach ($this->columns as $key => $column) {
-			if ($column instanceof DataColumn && !empty($column->joinedColumn)) {
-				$joinedKey = $column->joinedColumn;
-				// Look up in our map (supports both key and attribute lookup)
-				$joinedColumn = $columnsMap[$joinedKey] ?? null;
-				if ($joinedColumn instanceof DataColumn) {
-					// Store the joined column reference
-					$column->joinedColumnInstance = $joinedColumn;
-					// Mark the joined column key to be unset after iteration
-					$keysToUnset[] = $joinedKey;
+			if ($column instanceof DataColumn && !empty($column->combinedColumn)) {
+				$combinedKey = $column->combinedColumn;
+				$combinedColumn = $columnsMap[$combinedKey] ?? null;
+				if ($combinedColumn instanceof DataColumn) {
+					$column->combinedColumnInstance = $combinedColumn;
+					$keysToUnset[] = $combinedKey;
 				}
 			}
 		}
-		// Unset after iteration to avoid modifying array during foreach
 		foreach ($keysToUnset as $key) {
 			unset($this->columns[$key]);
 		}

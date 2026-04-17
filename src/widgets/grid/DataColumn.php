@@ -11,10 +11,16 @@ use yii\helpers\{ArrayHelper,Html,Inflector};
 
 class DataColumn extends \yii\grid\DataColumn
 {
-    public $summary;
-    public string $joinedTemplate = '<div class="ps-2">{attr1}<div class="small text-muted">{attr2}</div></div>';
-    public string $joinedColumn;
-    public $joinedColumnInstance = null;
+	public const COMBINED_FILTER_NONE = 0;
+	public const COMBINED_FILTER_FIRST = 1;
+	public const COMBINED_FILTER_SECOND = 2;
+	public const COMBINED_FILTER_BOTH = 3;
+
+	public $summary;
+    public string $combinedTemplate = '<div class="ps-2">{attr1}<div class="small text-muted">{attr2}</div></div>';
+    public ?string $combinedColumn = null;
+    public $combinedColumnInstance = null;
+    public int $combinedFilterType = self::COMBINED_FILTER_NONE;
 
 
     /**
@@ -103,21 +109,19 @@ class DataColumn extends \yii\grid\DataColumn
      */
     protected function renderDataCellContent($model, $key, $index)
     {
-        if (!empty($this->joinedColumn) && $this->content === null) {
-            $joinedColumn = $this->joinedColumnInstance ?? $this->grid->columns[$this->joinedColumn] ?? null;
-            if ($joinedColumn instanceof self) {
+        if ($this->combinedColumn !== null && $this->content === null) {
+            $combinedColumn = $this->combinedColumnInstance ?? $this->grid->columns[$this->combinedColumn] ?? null;
+            if ($combinedColumn instanceof self) {
                 $values = [];
-                // Use the value key from column definition
-                $values['attr1'] = $this->getDataCellValue($model, $key, $index, $this);
-                $values['attr2'] = $joinedColumn->getDataCellValue($model, $key, $index);
-                if (!empty($this->joinedTemplate)) {
-                    $result = $this->joinedTemplate;
+                $values['attr1'] = $this->getDataCellValue($model, $key, $index);
+                $values['attr2'] = $combinedColumn->getDataCellValue($model, $key, $index);
+                if (!empty($this->combinedTemplate)) {
+                    $result = $this->combinedTemplate;
                     foreach ($values as $attr => $value) {
                         $result = str_replace("{{$attr}}", $value, $result);
                     }
                     return $result;
                 }
-                // If no joinedTemplate, just combine values
                 return $values['attr1'] . $values['attr2'];
             }
         }
@@ -129,10 +133,18 @@ class DataColumn extends \yii\grid\DataColumn
      */
     public function renderFilterCellContent()
     {
-        $content = parent::renderFilterCellContent();
-        // If there's a joined column, render its filter as well
-        if (!empty($this->joinedColumnInstance) && $this->joinedColumnInstance instanceof DataColumn) {
-            $content .= $this->joinedColumnInstance->renderFilterCellContent();
+        $content = '';
+        if ($this->combinedColumn === null) {
+            $content = parent::renderFilterCellContent();
+        } elseif ($this->combinedFilterType !== self::COMBINED_FILTER_NONE) {
+            if ($this->combinedFilterType === self::COMBINED_FILTER_BOTH || $this->combinedFilterType === self::COMBINED_FILTER_FIRST) {
+                $content = parent::renderFilterCellContent();
+                if (!empty($this->combinedColumnInstance) && $this->combinedColumnInstance instanceof DataColumn) {
+                    if ($this->combinedFilterType === self::COMBINED_FILTER_BOTH || $this->combinedFilterType === self::COMBINED_FILTER_SECOND) {
+                        $content .= $this->combinedColumnInstance->renderFilterCellContent();
+                    }
+                }
+            }
         }
         return $content;
     }
