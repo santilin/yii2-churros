@@ -168,11 +168,11 @@ class WidgetLayer
 							'label' => ArrayHelper::remove($tab_content, 'title', $kc),
 							'active' => ArrayHelper::remove($tab_content, 'active', false),
 							'headerOptions' => ArrayHelper::remove($tab_content, 'headerOptions', []),
-							'content' => $this->layoutWidgets($tab_content, [
+							'content' => '<div class="row">' . $this->layoutWidgets($tab_content, [
 								'layout' => $layout_row_layout,
 								'style' => $layout_row_style,
 								'type' => $layout_row_type,
-							], $kc),
+							], $kc) . '</div>',
 						];
 					}
 					if (!$has_active && count($tab_items)) {

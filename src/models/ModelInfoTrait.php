@@ -649,7 +649,8 @@ trait ModelInfoTrait
 		string|null $format = null,
 		string|null $model_format = null,
 		array|string|null $scope = null,
-		?string $filter_fields = null): ?array
+		?string $filter_fields = null,
+		ActiveQuery|null $q = null): ?array
 	{
 		return null;
 	}

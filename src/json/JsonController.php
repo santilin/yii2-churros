@@ -241,7 +241,7 @@ class JsonController extends \yii\web\Controller
 		}
 		return $this->render('update', [
 			'model' => $this->model,
-			'viewForms' => [ '_form' => [ '', null, [], '' ] ],
+			'viewForms' => [ '_form' => [ '_form', null, null, [], '' ] ],
 			'formParams' => $this->changeActionParams($params, 'update', $this->model)
 		]);
 	}
