@@ -78,7 +78,7 @@ class WidgetLayer
 		$ret = '';
 		// firstly, check if this is an array of containers (missing content) and
 		// convert it to a proper container
-		if (!isset($layout_row['content'])) {
+		if (!array_key_exists('content', $layout_row)) {
 			if (ArrayHelper::isIndexed($layout_row)) {
 				$first_layout_row = reset($layout_row);
 				if (!is_array($first_layout_row)) {
@@ -112,7 +112,6 @@ class WidgetLayer
 			$layout_row_type = 'fields';
 		} else {
 			$layout_row_type = $layout_row['type'];
-			error_log("DEBUG entry type for inner key '$rowKey': TYPE=$layout_row_type");
 		}
 		$layout_row_layout = $layout_row['layout'] ?? '1col';
 		if ($layout_row_type === 'container') { // deprecated
@@ -551,9 +550,10 @@ js;
 				if (!isset($layout_row['htmlOptions'])) {
 					$layout_row['htmlOptions'] = [];
 				}
-				$layout_row['htmlOptions']['class'] = 'form-control readonly';
-				$ret .= $this->layoutContent($layout_row['label'], $layout_row['content'], $layout_row_layout,
-											 'large', $layout_row['htmlOptions']);
+				Html::addCssClass($layout_row['htmlOptions'], [ 'form-control readonly' ]);
+				$ret .= $this->layoutContent($layout_row['label'],
+					$layout_row['content'] ?: $layout_row['options']['emptyValue'] ?? '&nbsp;',
+					$layout_row_layout, 'large', $layout_row['htmlOptions']);
 				break;
 			case 'html':
 				$label = ArrayHelper::remove($layout_row, 'label', null);

@@ -148,7 +148,7 @@ class JsonController extends \yii\web\Controller
 		$this->model = $this->findModel($this->getPath(), $id, 'view', $params);
 		return $this->render('view', [
 			'model' => $this->model,
-			'viewViews' => [ '_view' => [ '', null, [], '' ] ],
+			'viewViews' => [ [ '_view', null, null, [], [] ] ],
 			'viewParams' => $this->changeActionParams($params, 'view', $this->model)
 		]);
 	}
