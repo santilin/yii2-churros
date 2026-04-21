@@ -101,13 +101,13 @@ abstract class CrudReadOnlyController extends \yii\web\Controller
 			return $this->renderAjax('index', [
 				'searchModel' => $searchModel,
 				'indexParams' => $params,
-				'indexGrids' => [ '_grid' => [ '_grid', '', null, [], [], [], [] ] ]
+				'indexGrids' => [ [ '_grid', null, null, [], [], [], [] ] ]
 			]);
 		} else {
 			return $this->render('index', [
 				'searchModel' => $searchModel,
 				'indexParams' => $params,
-				'indexGrids' => [ '_grid' => [ '_grid', '', null, [], [], [], [] ] ]
+				'indexGrids' => [ [ '_grid', null, null, [], [], [], [] ] ]
 			]);
 		}
 	}
@@ -140,7 +140,7 @@ abstract class CrudReadOnlyController extends \yii\web\Controller
 		return $this->render($view, [
 			'searchModel' => $detail,
 			'indexParams' => $this->changeActionParams($params, 'index', $detail),
-			'indexGrids' => [ '_grid' => [ '_grid', '', null, [], [], [] ] ],
+			'indexGrids' => [ [ '_grid', null, null, [], [], [] ] ],
 			'gridName' => $view,
 		]);
 	}
@@ -160,13 +160,13 @@ abstract class CrudReadOnlyController extends \yii\web\Controller
 			$this->layout = false;
 			return $this->render('_view', [
 				'model' => $this->model,
-				'viewViews' => [ '_view' => [ '', null, [], '' ] ],
+				'viewViews' => [ [ '_view', null, null, [], [] ] ],
 				'viewParams' => $this->changeActionParams($params, 'view', $this->model)
 			]);
 		} else {
 			return $this->render('view', [
 				'model' => $this->model,
-				'viewViews' => [ '_view' => [ '', null, [], '' ] ],
+				'viewViews' => [ [ '_view', null, [], [] ] ],
 				'viewParams' => $this->changeActionParams($params, 'view', $this->model)
 			]);
 		}

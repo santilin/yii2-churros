@@ -108,7 +108,7 @@ class JsonController extends \yii\web\Controller
 	 * @param array $params 'permissions' => parent permissions
 	 */
 	public function indexDetails($master, string $relation_name, string $view, array $params,
-								 $previous_context = null, string $search_model_class = null)
+								 $previous_context = null, ?string $search_model_class = null)
 	{
 		$params['permissions'] = $this->resolvePermissions();
 		$this->action = $this->createAction($previous_context->action->id);
@@ -178,7 +178,7 @@ class JsonController extends \yii\web\Controller
 		}
 		return $this->render('create', [
 			'model' => $this->model,
-			'viewForms' => [ '_form' => [ '', null, [], '' ] ],
+			'viewForms' => [ [ '_form', null, null, [], [] ] ],
 			'formParams' => $this->changeActionParams($params, 'create', $this->model)
 		]);
 	}
@@ -211,7 +211,7 @@ class JsonController extends \yii\web\Controller
 		}
 		return $this->render('duplicate', [
 			'model' => $this->model,
-			'viewForms' => [ '_form' => [ '', null, [], '' ] ],
+			'viewForms' => [ [ '_form', null, null, [], [] ] ],
 			'formParams' => $this->changeActionParams($params, 'duplicate', $this->model)
 		]);
 	}
@@ -241,7 +241,7 @@ class JsonController extends \yii\web\Controller
 		}
 		return $this->render('update', [
 			'model' => $this->model,
-			'viewForms' => [ '_form' => [ '_form', null, null, [], '' ] ],
+			'viewForms' => [ [ '_form', null, null, [], [] ] ],
 			'formParams' => $this->changeActionParams($params, 'update', $this->model)
 		]);
 	}

@@ -103,7 +103,7 @@ class WidgetLayer
 					'type' => 'rows',
 					'content' => $layout_row,
 					'layout' => '1col',
-					'size' => $parentOptions['size']??'large',
+					'size' => $parentOptions['size'] ?? 'large',
 					'style' => 'rows',
 				];
 			}
@@ -112,6 +112,7 @@ class WidgetLayer
 			$layout_row_type = 'fields';
 		} else {
 			$layout_row_type = $layout_row['type'];
+			error_log("DEBUG entry type for inner key '$rowKey': TYPE=$layout_row_type");
 		}
 		$layout_row_layout = $layout_row['layout'] ?? '1col';
 		if ($layout_row_type === 'container') { // deprecated

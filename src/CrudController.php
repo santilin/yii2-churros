@@ -50,7 +50,7 @@ abstract class CrudController extends CrudReadOnlyController
 		}
 		return $this->render('create', [
 			'model' => $this->model,
-			'viewForms' => [ '_form' => [ '', null, [], '' ] ],
+			'viewForms' => [ [ '_form', null , null, [], [] ] ],
 			'formParams' => $this->changeActionParams($params, 'create', $this->model)
 		]);
 	}
@@ -84,7 +84,7 @@ abstract class CrudController extends CrudReadOnlyController
 		}
 		return $this->render('duplicate', [
 			'model' => $this->model,
-			'viewForms' => [ '_form' => [ '', null, [], '' ] ],
+			'viewForms' => [ [ '_form', null, null, [], [] ] ],
 			'formParams' => $this->changeActionParams($params, 'duplicate', $this->model)
 		]);
 	}
@@ -116,7 +116,7 @@ abstract class CrudController extends CrudReadOnlyController
 		}
 		return $this->render('update', [
 			'model' => $this->model,
-			'viewForms' => [ '_form' => [ '', null, [], '' ] ],
+			'viewForms' => [ [ '_form', null, [], [] ] ],
 			'formParams' => $this->changeActionParams($params, 'update', $this->model)
 		]);
 	}

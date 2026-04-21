@@ -111,14 +111,14 @@ class FormHelper
 	 */
 	static public function viewFromRequest(array $views, array $params): array
 	{
- 		$_nv=$params[self::VIEWS_NVIEW_PARAM] ?? 0;
+ 		$_nv = $params[self::VIEWS_NVIEW_PARAM] ?? 0;
 		if ($_nv === '' || $_nv === 'false') {
 			$_nv = 0;
 		}
 		if (is_string($_nv)) {
 			foreach ($views as $view => $view_info) {
 				if ($view == $_nv || AppHelper::lastWord($view, '/') == $_nv) {
-					return [ $view, $view_info[0], $view_info[1]??[], $view_info[2] ?? ''];
+					return $view_info;
 				}
 			}
 			$_nv = 0;
@@ -126,9 +126,9 @@ class FormHelper
 		if ($_nv > (count($views)-1)) {
 			$_nv = 0;
 		}
-		foreach($views as $kv => $view) {
+		foreach($views as $kv => $view_info) {
 			if ($_nv-- == 0) {
-				return [ $kv, $view[0], $view[1]??[], $view[2]??'' ];
+				return $view_info;
 			}
 		}
 	}
@@ -143,8 +143,8 @@ class FormHelper
 		}
 		if (is_string($_nv)) {
 			foreach ($views as $view => $view_info) {
-				if ($view == $_nv || AppHelper::lastWord($view,'/') == $_nv) {
-					return [ $view_info[0], $view_info[1], $view_info[2], $view_info[3]??[], $view_info[4]??''];
+				if ($view === $_nv || AppHelper::lastWord($view, '/') === $_nv) {
+					return $view_info;
 				}
 			}
 			$_nv = 0;
@@ -154,10 +154,11 @@ class FormHelper
 		}
 		foreach($views as $kv => $view) {
 			if ($_nv-- == 0) {
-				return [ $view[0], $view[1], $view[2], $view[3]??[], $view[4]??'' ];
+				return $view;
 			}
 		}
 	}
+
 	/// @return [ view_name, title, $model_name, $permissions ]
 	static public function reportFromRequest(array $views, array $params): array
 	{
