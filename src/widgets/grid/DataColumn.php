@@ -17,7 +17,7 @@ class DataColumn extends \yii\grid\DataColumn
 	public const COMBINED_FILTER_BOTH = 3;
 
 	public $summary;
-    public string $combinedTemplate = '<div class="ps-2">{attr1}<div class="small text-muted">{attr2}</div></div>';
+    public string $combinedTemplate = '<div class="ps-2">{value1}<div class="small text-muted">{value2}</div></div>';
     public ?string $combinedColumn = null;
     public $combinedColumnInstance = null;
     public int $combinedFilterType = self::COMBINED_FILTER_NONE;
@@ -112,17 +112,12 @@ class DataColumn extends \yii\grid\DataColumn
         if ($this->combinedColumn !== null && $this->content === null) {
             $combinedColumn = $this->combinedColumnInstance ?? $this->grid->columns[$this->combinedColumn] ?? null;
             if ($combinedColumn instanceof self) {
-                $values = [];
-                $values['attr1'] = $this->getDataCellValue($model, $key, $index);
-                $values['attr2'] = $combinedColumn->getDataCellValue($model, $key, $index);
+                $val1 = $this->grid->formatter->format($this->getDataCellValue($model, $key, $index), $this->format);
+                $val2 = $this->grid->formatter->format($combinedColumn->getDataCellValue($model, $key, $index), $combinedColumn->format);
                 if (!empty($this->combinedTemplate)) {
-                    $result = $this->combinedTemplate;
-                    foreach ($values as $attr => $value) {
-                        $result = str_replace("{{$attr}}", $value, $result);
-                    }
-                    return $result;
+                    return strtr($this->combinedTemplate, ['{value1}' => $val1, '{value2}' => $val2]);
                 }
-                return $values['attr1'] . $values['attr2'];
+                return $values['value1'] . $values['value2'];
             }
         }
         return parent::renderDataCellContent($model, $key, $index);
