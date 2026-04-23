@@ -818,11 +818,13 @@ trait ModelInfoTrait
 			case "BOOL":
 				$boolValue = ($value['v'] == 'true') ? 1 : ($value['v'] == 'false' ? 0 : boolval($value['v']));
 				return [$fldname => $boolValue];
-			case '=i':
-				if (is_numeric($value['v'])) {
+			case 'IN':
+				if (is_array($value['v'])) {
+					return [ 'IN', $fldname, $value['v'] ];
+				} elseif (is_string($value['v'])) {
+					return [ 'IN', $fldname, explode(',', $value['v']) ];
+				} elseif (is_numeric($value['v'])) {
 					return [ '=', $fldname, $value['v']];
-				} else {
-					return [];
 				}
 			default:
 				throw new InvalidArgumentException($value['op'] . ': operator not supported');
