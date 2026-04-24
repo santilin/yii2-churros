@@ -405,8 +405,15 @@ abstract class CrudReadOnlyController extends \yii\web\Controller
 		}
 		if ($master_model) {
 			$controller_route = $this->getBaseRoute();
-			$controller_route .= '/' . $master_model->controllerName()
-				. '/' . $master_model->getPrimaryKey() . '/' .  $this->id;
+			$pk = $master_model->getPrimaryKey(true);
+			if (count($pk) === 1) {
+				$controller_route .= '/' . $master_model->controllerName()
+					. '/' . $master_model->getPrimaryKey(false) . '/' .  $this->id;
+			} else {
+				$pk0 = reset($pk);
+				$controller_route .= '/' . $master_model->controllerName()
+					. '/' . $pk0 . '/' .  $this->id;
+			}
 			if (is_array($action_id)) {
 				$action_id[0] = $controller_route . '/' . $action_id[0];
 				$controller_route = Url::toRoute($action_id);
