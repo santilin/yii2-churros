@@ -750,8 +750,9 @@ ajax;
 		}
 	}
 
-	static public function joinHasManyModels($parent, array|null|string $models, string $record_format = 'long',
-			string $tag = 'ul', array $tag_options = [], $context = null): string
+	static public function joinHasManyModels($parent, array|null|string $models,
+		string $record_format = 'long', string $tag = 'ul', array $tag_options = [],
+		$context = null): string
 	{
 		if (is_string($models)) {
 			return $models;
@@ -763,10 +764,20 @@ ajax;
 		$keys[0] = 'view';
 		$parent_route = Url::toRoute($keys);
 		$attrs = [];
+		if (str_ends_with($record_format, '_with_link')) {
+			$record_format = substr($record_format, 0, -10);
+			$is_link = true;
+		} else {
+			$is_link = false;
+		}
 		foreach($models as $model) {
 			if ($model != null) {
-				$url = Url::to(array_merge([$parent_route . '/'.  $model->controllerName(). '/view'], $model->getPrimaryKey(true)));
-				$attrs[] = "<a href='$url'>" .  $model->recordDesc($record_format, 0, $context) . "</a>";
+				if ($is_link) {
+					$url = Url::to(array_merge([$parent_route . '/'.  $model->controllerName(). '/view'], $model->getPrimaryKey(true)));
+					$attrs[] = "<a href='$url'>" .  $model->recordDesc($record_format, 0, $context) . "</a>";
+				} else {
+					$attrs[] = $model->recordDesc($record_format, 0, $context);
+				}
 			}
 		}
 		switch ($tag) {
