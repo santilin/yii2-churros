@@ -4,6 +4,7 @@ namespace santilin\churros\models;
 
 use santilin\churros\helpers\AppHelper;
 use santilin\churros\models\ModelChangesEvent;
+use yii\db\ActiveRecord;
 
 /**
  * A model that logs its creation, updates and deletion to a log model
@@ -81,7 +82,7 @@ trait ModelChangesLoggableTrait
 			$_log_model_changes_relation_info = static::$relations[static::$_log_model_changes_relation];
 			$record_id = strval(count($this->primaryKey())==1 ? $this->getPrimaryKey() : json_encode($this->getPrimaryKey(true)));
 			$model_change = new $_log_model_changes_relation_info['modelClass'];
-			if ($event->name == self::EVENT_AFTER_INSERT) {
+			if ($event->name === self::EVENT_AFTER_INSERT) {
 				$model_change->record_id = $record_id;
 				$model_change->field = $model_change::findChangeableFieldIndex($model_name);
 				$model_change->changed_at = $this->created_at ?? new \yii\db\Expression("NOW()");
@@ -93,6 +94,9 @@ trait ModelChangesLoggableTrait
 				$model_change->type = $model_change::V_TYPE_CREATE;
 				$model_change->value = $this->recordDesc('short');
 				$model_change->saveOrFail();
+				if (self::$isJunctionModel) {
+					$this->createJunctionChangeLogs($model_change, $_log_model_changes_relation_info);
+				}
 				$must_trigger = true;
 			} else if ($event->name === self::EVENT_AFTER_UPDATE) {
 				foreach ($event->changedAttributes as $fld => $old_value) {
@@ -138,6 +142,9 @@ trait ModelChangesLoggableTrait
 							$model_change->subtype = $model_change::V_SUBTYPE_CHANGE;
 						}
 						$model_change->saveOrFail();
+						if (self::$isJunctionModel) {
+							$this->createJunctionChangeLogs($model_change, $_log_model_changes_relation_info);
+						}
 						$must_trigger = true;
 					}
 				}
@@ -179,26 +186,44 @@ trait ModelChangesLoggableTrait
 		$changes_record->sendModelChangesNotification();
 	}
 
-
-	public function createChangesLog(int $type, int $subtype, string $field, mixed $old_value,
-									 ?int $changed_by = null, ?string $fecha = null, ?string $comments = null): false|\yii\db\ActiveRecord
+	public function createJunctionChangeLogs(ActiveRecord $main_model_change, array $relation): bool
 	{
-		$relation = static::$relations[static::$_log_model_changes_relation]??false;
-		if ($relation) {
-			$changes_log_model = new $relation['modelClass'];
-			$changes_log_model->field = $changes_log_model->findChangeableFieldIndex($this->getModelInfo('model_name'), $field);
-			if ($changes_log_model->field!==false) {
-				$changes_log_model->changed_at = $fecha ?: new \yii\db\Expression('NOW()');
-				$changes_log_model->changed_by = $changed_by;
-				$changes_log_model->record_id = $this->id;
-				$changes_log_model->type = $type;
-				$changes_log_model->subtype = $subtype;
-				$changes_log_model->value = $old_value;
-				$changes_log_model->comments = $comments;
-				$changes_log_model->save();
-				return $changes_log_model;
+		$relations = static::$relations ?? [];
+		foreach ($relations as $relName => $relDef) {
+			if ($relDef['type'] !== 'HasOne') {
+				continue;
+			}
+			try {
+				$related = $this->$relName;
+			} catch (\Exception $e) {
+				continue;
+			}
+			if (!$related instanceof ActiveRecord) {
+				continue;
+			}
+			$trait = \santilin\churros\models\ModelChangesLoggableTrait::class;
+			if (in_array($trait, class_uses($related), true)) {
+				$record_id = strval(count($related->primaryKey())==1 ? $related->getPrimaryKey() : json_encode($related->getPrimaryKey(true)));
+				if (empty($record_id)) {
+					continue;
+				}
+				$changes_log_model = new $relation['modelClass']();
+				$changes_log_model->field = $main_model_change->field;
+				$changes_log_model->changed_at = $main_model_change->changed_at;
+				$changes_log_model->changed_by = $main_model_change->changed_by;
+				$changes_log_model->record_id = $record_id;
+				$changes_log_model->type = $main_model_change->type;
+				$changes_log_model->subtype = $main_model_change->subtype;
+				$changes_log_model->value = $main_model_change->value;
+				$changes_log_model->comments = $main_model_change->comments;
+				$ret = $changes_log_model->save();
+				if (!$ret) {
+					$this->addErrorsFrom($changes_log_model, 'changes_logger');
+					return false;
+				}
 			}
 		}
-		return false;
+
+		return true;
 	}
 }
