@@ -142,6 +142,8 @@ return [
 	'Access denied to this {title}.' => 'Acceso denegado a {esta} {title}.',
 	'{Title} with primary key {id} not found.' => 'No se ha encontrado {la} {title} con clave {id}.',
 	'Data was not saved in order to maintain the database integrity' => 'Los datos no se han guardado para preservar la integridad de la base de datos',
+	'Foreign key constraint failed. Check that related records exist' => 'Error de clave foránea. Compruebe que existen los registros relacionados',
+	"The value '{offending}' in field '{field}' does not exist in the related table '{table}'" => "El valor '{offending}' en el campo '{field}' no existe en la tabla relacionada '{table}'",
 
 	'The value \'{0}\' does not exist in the category \'{1}\'' => 'El valor \'{0}\' no existe en la categoría \'{1}\'',
 	"{attribute} '{value}' does not match the mask {mask}." => "El valor '{value}' de '{attribute}' no concuerda con el formato {mask}",

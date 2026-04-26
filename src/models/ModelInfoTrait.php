@@ -560,24 +560,84 @@ trait ModelInfoTrait
 	{
 		$message = $e->getMessage();
 		$devel_info = YII_ENV_PROD ? '' : "\n$message";
-		$error = "Data was not saved in order to maintain the database integrity.";
+		$error = Yii::t("churros", "Data was not saved in order to maintain the database integrity.");
 		$error_data = [ 'offending' => '' ];
 		$error_key = get_class($e);
-		if ($e instanceof \yii\db\IntegrityException) {
+		if ($error_key === 'yii\db\IntegrityException') {
 			switch (intval($e->getCode())) {
 				case 23000:
-					$error_key = 'duplicated';
 					if (preg_match('/UNIQUE constraint failed:\s*(.*)/i', $message, $matches)) {
+						$error_key = 'duplicated';
 						$error = "The '{offending}' data is duplicated";
 						$error_data = [ 'offending' => $matches[1] ];
 					} elseif (preg_match("/1062 Duplicate entry '(.*)' for key '(.*)'/i", $message, $matches)) {
+						$error_key = 'duplicated';
 						$error = "The '{offending}' data is duplicated";
 						$error_data = [ 'offending' => $matches[1] ];
+					} elseif (preg_match('/FOREIGN KEY constraint failed/i', $message)) {
+						$error_key = 'foreign_key';
+						$sql = null;
+						if (preg_match('/The SQL being executed was:\s*(.+?)(?=\s*$)/is', $message, $matches)) {
+							$sql = trim($matches[1]);
+						}
+						$fk_info = $this->parseForeignKeyError($sql);
+						if ($fk_info['field']) {
+							$error = "The value '{offending}' in field '{field}' does not exist in the related table '{table}'";
+							$error_data = [
+								'offending' => $fk_info['value'],
+								'field' => $fk_info['field'],
+								'table' => $fk_info['table'],
+							];
+						} else {
+							$error = "Foreign key constraint failed. Check that related records exist";
+						}
 					}
 					break;
 			}
 		}
 		$this->addError($error_key, Yii::t('churros', $error, $error_data) . $devel_info);
+	}
+
+	protected function parseForeignKeyError(?string $sql): array
+	{
+		$result = [ 'field' => '', 'value' => '', 'table' => '' ];
+
+		$relations = static::$relations ?? [];
+		$attrs = $this->getAttributes();
+		$tableName = $this->getDb()->schema->getRawTableName($this->tableName());
+
+		$oneToOneTypes = ['HasOne', 'OneToOne', 'JustHasOne'];
+		foreach ($relations as $relName => $relDef) {
+			if (!in_array($relDef['type'] ?? '', $oneToOneTypes)) {
+				continue;
+			}
+			$left = $relDef['left'];
+			$leftField = is_array($left) ? ($left[1] ?? null) : (strpos($left, '.') !== false ? substr($left, strrpos($left, '.') + 1) : $left);
+			if (!$leftField || !isset($attrs[$leftField])) {
+				continue;
+			}
+			$value = $attrs[$leftField];
+			if ($value === null || $value === 0 || $value === '') {
+				continue;
+			}
+
+			try {
+				$related = $this->$relName;
+				if ($related instanceof ActiveRecord && $related->getPrimaryKey()) {
+					continue;
+				}
+			} catch (\Exception $e) {
+			}
+
+			$result = [
+				'field' => $leftField,
+				'value' => $value,
+				'table' => $relDef['relatedTablename'] ?? $relDef['table'] ?? '',
+			];
+			break;
+		}
+
+		return $result;
 	}
 
 	public function getOneError():string
