@@ -49,7 +49,7 @@ class BooleanColumn extends DataColumn
 		$model = $this->grid->filterModel;
         if ($model instanceof Model && $this->attribute !== null && $model->isAttributeActive($this->attribute)) {
 			if ($model->hasErrors($this->attribute)) {
-				Html::addCssClass($this->filterOptions, 'is-invalid');
+				// Html::addCssClass($this->filterOptions, 'is-invalid');
 				$error = ' ' . Html::error($model, $this->attribute, $this->grid->filterErrorOptions);
 			} else {
 				$error = '';

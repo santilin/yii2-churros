@@ -255,7 +255,7 @@ js;
 							'type' => $layout_row_type,
 						], 'summary'), ['class' => 'flex-grow-1']);
 					}
-					$summary_header .= '<i class="fa-solid fa-chevron-down details-chevron ms-2' . ($is_open ? ' rotate-180' : '') . '"></i>';
+					$summary_header .= '<i class="fa-solid fa-chevron-down details-chevron ms-3' . ($is_open ? ' rotate-180' : '') . '"></i>';
 					$summary_options = [
 						'style' => 'cursor: pointer; list-style: none;',
 					];
@@ -411,9 +411,9 @@ js;
 							if ($widget->inputOptions['layout'] ?? false) {
 								$widget_layout = ArrayHelper::remove($widget->inputOptions, 'layout');
 							} else {
-								$widget_layout = $widget->layout??'large';
+								$widget_layout = $widget->layout ?? 'large';
 							}
-							if ($layout_row['size'] == 'small'/* || ($cols >= 4 && $layout_row_layout != 'inline')*/) {
+							if ($layout_row['size'] === 'small'/* || ($cols >= 4 && $layout_row_layout != 'inline')*/) {
 								switch ($widget_layout) {
 									case 'short':
 										$widget_layout = 'medium';
@@ -422,7 +422,7 @@ js;
 										$widget_layout = 'large';
 										break;
 								}
-							} else if ($layout_row['size'] == 'medium' || ($cols >= 3 && $layout_row_layout != 'inline')) {
+							} else if ($layout_row['size'] === 'medium' || ($cols >= 3 && $layout_row_layout != 'inline')) {
 								switch ($widget_layout) {
 									case 'short':
 										$widget_layout = 'medium';

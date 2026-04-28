@@ -321,8 +321,27 @@ js
         const menu = getMenuNode();
         if (!menu) return;
 
+        const suggestions = menu.find('.tt-suggestion');
+        const suggestionCount = suggestions.length;
+
+        // // If only one suggestion and it matches the input, auto-select it and hide dropdown
+        // if (suggestionCount === 1) {
+        //     const suggestion = suggestions.first();
+        //     const datum = suggestion.data('ttSelectableObject');
+        //     const inputVal = input.val().trim().toLowerCase();
+        //     if (datum && datum.text && datum.text.toLowerCase() === inputVal) {
+        //         // Auto-select: set values and hide dropdown
+        //         $("#{$this->hidden_id}").val(datum.id);
+        //         mctahead_changed_{$js_id} = false;
+        //         const tt = input.data('ttTypeahead');
+        //         if (tt && tt.menu) {
+        //             tt.menu.close();
+        //         }
+        //         return;
+        //     }
+        // }
+
         // Only show "Load more" if first page was full AND no button exists
-        const suggestionCount = menu.find('.tt-suggestion').length;
         if (suggestionCount >= {$this->limit} && !menu.find('.tt-load-more').length) {
             menu.append(createLoadMoreButton());
         }

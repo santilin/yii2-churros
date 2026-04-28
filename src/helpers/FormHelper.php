@@ -246,7 +246,7 @@ class FormHelper
 				$button['htmlOptions']['tabindex'] = static::ti();
 			}
 			$caption = $title = $button['title']??$name;
-			$icon = $button['icon']??null;
+			$icon = $button['icon'] ?? null;
 			if ($icon) {
 				if (substr($icon, 0, 1) == '/') {
 					$title = Html::img($icon, array_merge([
@@ -266,7 +266,10 @@ class FormHelper
 				}
 			}
 			$url_return_to = ArrayHelper::remove($button, 'returnTo', null);
-			switch ($button['type']??'button') {
+			if (empty($button['type'])) {
+				$button['type'] = 'button';
+			}
+			switch ($button['type']) {
 			case 'a-post':
 				$button['htmlOptions']['data']['method'] = 'post';
 				// no break
@@ -371,10 +374,10 @@ ajax;
 				} else {
 					$full_url = null;
 				}
-				if ($button['type'] == 'button-post') {
+				if ($button['type'] === 'button-post') {
 					$button['htmlOptions']['data']['method'] = 'post';
 				}
-				if ($button['type'] == 'button-trigger') {
+				if ($button['type'] === 'button-trigger') {
 					$button['htmlOptions']['data']['url'] = $full_url;
 				} else {
 					if ( $full_url && !isset($button['htmlOptions']['onclick'])) {

@@ -25,7 +25,7 @@ class AuthHelper
 		static::$messages[] = $message;
 	}
 
-	static public function echoMessage(bool $verbose, string $eol = "\n")
+	static public function flushMessages(bool $verbose, string $eol = "\n")
 	{
 		foreach (static::$messages as $message) {
 			if (trim($message) !== '') {
@@ -34,6 +34,7 @@ class AuthHelper
 				}
 			}
 		}
+		self::clearMessages();
 	}
 
 	static public function getMessage(): array
@@ -49,7 +50,7 @@ class AuthHelper
 	static public function createOrUpdatePermission(string $perm_name, string $perm_desc,
 													bool $is_default = false, $auth = null)
 	{
-		if ($auth == null) {
+		if ($auth === null) {
 			$auth = \Yii::$app->authManager;
 		}
 		$permission = $auth->getPermission($perm_name);
@@ -72,7 +73,7 @@ class AuthHelper
 				$auth->db->createCommand()->update(
 					$auth->itemTable, ['created_at' => 0], ['name' => $perm_name])->execute();
 			}
-			static::addMessage('= `' . $permission->name . '`, ' . $permission->description . ': ' . Yii::t('churros', 'permission already exists'));
+			// static::addMessage('= `' . $permission->name . '`, ' . $permission->description . ': ' . Yii::t('churros', 'permission already exists'));
 		}
 		return $permission;
 	}
