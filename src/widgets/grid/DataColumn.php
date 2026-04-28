@@ -125,6 +125,7 @@ class DataColumn extends \yii\grid\DataColumn
 
     /**
      * {@inheritdoc}
+     * public because it it used by combinedColumns
      */
     public function renderFilterCellContent()
     {
