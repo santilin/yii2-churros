@@ -69,7 +69,7 @@ trait ModelChangesLoggableTrait
 	}
 
 	// Logs the changes after the model is saved or deleted
-	protected function handleModelChanges($event)
+	public function handleModelChanges($event)
 	{
 		$must_trigger = false;
 		if ($event->name == self::EVENT_AFTER_DELETE) {
@@ -94,9 +94,9 @@ trait ModelChangesLoggableTrait
 				$model_change->type = $model_change::V_TYPE_CREATE;
 				$model_change->value = $this->recordDesc('short');
 				$model_change->saveOrFail();
-				if (self::$isJunctionModel) {
-					$this->createJunctionChangeLogs($model_change, $_log_model_changes_relation_info);
-				}
+				// if (self::$isJunctionModel) {
+				// 	$this->createJunctionChangeLogs($model_change, $_log_model_changes_relation_info);
+				// }
 				$must_trigger = true;
 			} else if ($event->name === self::EVENT_AFTER_UPDATE) {
 				foreach ($event->changedAttributes as $fld => $old_value) {

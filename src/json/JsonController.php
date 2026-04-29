@@ -400,7 +400,7 @@ class JsonController extends \yii\web\Controller
 			if (!empty($form_success_url)) {
 				$action_in_url = $this->extractAction($form_success_url);
 				$action_in_to = $this->extractAction($to);
-				if ($action_in_to == $action_in_url) {
+				if ($action_in_to === $action_in_url) {
 					return $form_success_url;
 				}
 			}
@@ -465,9 +465,9 @@ class JsonController extends \yii\web\Controller
 			$route = Url::to($action_id);
 		} else {
 			$route = $this->getRoutePrefix($this->getPath(), false) . $model->getPath();
-			if ($action_id == 'index') {
+/*			if ($action_id == 'index') {
 				$route = AppHelper::removeLastWord($route, '/') . '/index';
-			} else if ($action_id) {
+			} else */if ($action_id) {
 				$route .= "/$action_id";
 			}
 		}
