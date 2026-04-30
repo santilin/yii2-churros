@@ -162,7 +162,7 @@ class JsonModel extends \yii\base\Model
         $this->_is_new_record = $is_new;
     }
 
-    public function parentModel($force = false): ?JsonModel
+    public function getParentModel($force = false): ?JsonModel
     {
         if (empty(static::$parent_model_class)) {
             return $this->_parent_model;

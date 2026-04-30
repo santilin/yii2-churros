@@ -698,7 +698,7 @@ trait ModelInfoTrait
 		array|string|null $scope = null,
 		?string $filter_fields = null): ?array
 	{
-		$ret = self::customFieldValues($fldname, $format, $model_format, $scope, $filter_fields);
+		$ret = static::customFieldValues($fldname, $format, $model_format, $scope, $filter_fields);
 		if ($ret === null) {
 			throw new \Exception("field '$fldname' not supported in " . get_called_class() . "::handyFieldValues() ");
 		}
