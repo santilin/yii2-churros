@@ -60,7 +60,10 @@ trait ModelInfoTrait
 	{
 		$t_params = array_filter($params, function($value) { return is_string($value); });
 		$translated = Yii::t($category, $message, $t_params, $language);
-		if (($language == 'es' || substr(Yii::$app->language,0,2) == 'es')) {
+		if ($language === null) {
+			$language = Yii::$app->language;
+		}
+		if (($language === 'es' || substr(Yii::$app->language,0,2) === 'es')) {
 			$male_words = EsHelper::SPANISH_MALE_WORDS;
 		} else {
 			$male_words = self::$ENGLISH_MALE_WORDS;
@@ -70,7 +73,7 @@ trait ModelInfoTrait
 		if (preg_match_all('/({([a-zA-Z0-9\._]+)})+/', $translated, $matches)) {
 			foreach ($matches[2] as $match) {
 				$bracket_match = '{'.$match.'}';
-				if (substr($match,0,6) == 'model.') {
+				if (substr($match,0,6) === 'model.') {
 					$fld = substr($match, 6);
 					$placeholders[$bracket_match] = ArrayHelper::getValue($this, $fld, '');
 				} else switch( $match) {

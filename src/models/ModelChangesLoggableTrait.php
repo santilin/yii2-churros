@@ -27,7 +27,8 @@ trait ModelChangesLoggableTrait
 	public static $V_SUBTYPE_UNEMPTY = 5;
 	public static $V_SUBTYPE_SETTRUE = 6;
 	public static $V_SUBTYPE_SETFALSE = 7;
-
+	public static $V_SUBTYPE_LINK = 8;
+	public static $V_SUBTYPE_UNLINK = 9;
 
 	/**
 	 * Whether to log changes upon save or deleted
@@ -92,11 +93,11 @@ trait ModelChangesLoggableTrait
 					$model_change->changed_by = $this->created_by ?? \Yii::$app->user?->identity?->id;
 				}
 				$model_change->type = $model_change::V_TYPE_CREATE;
+				if (self::$isJunctionModel) {
+					$model_change->subtype = $model_change::V_SUBTYPE_LINK;
+				}
 				$model_change->value = $this->recordDesc('short');
 				$model_change->saveOrFail();
-				// if (self::$isJunctionModel) {
-				// 	$this->createJunctionChangeLogs($model_change, $_log_model_changes_relation_info);
-				// }
 				$must_trigger = true;
 			} else if ($event->name === self::EVENT_AFTER_UPDATE) {
 				foreach ($event->changedAttributes as $fld => $old_value) {
@@ -158,7 +159,7 @@ trait ModelChangesLoggableTrait
 		}
 	}
 
-	public function formatModelChange(int $subtype, string $changed_field, string $changed_label, mixed $new_value, mixed $old_value): string
+	public function formatModelChange(int $subtype, string|int $changed_field, string $changed_label, mixed $new_value, mixed $old_value): string
 	{
 		switch ($subtype) {
 			case self::$V_SUBTYPE_EMPTY:
@@ -174,6 +175,8 @@ trait ModelChangesLoggableTrait
 				return  " cambió `" . $changed_label . '` a verdadero';
 			case self::$V_SUBTYPE_SETFALSE:
 				return  " cambió `" . $changed_label . '` a falso';
+			case self::$V_SUBTYPE_LINK:
+				return  " añadió {la} {title} `" . $new_value . "`";
 			default:
 				return  " cambió `" . $changed_label
 				. '` a `' . strval($new_value) . '`';
