@@ -579,11 +579,7 @@ trait ModelInfoTrait
 						$error_data = [ 'offending' => $matches[1] ];
 					} elseif (preg_match('/FOREIGN KEY constraint failed/i', $message)) {
 						$error_key = 'foreign_key';
-						$sql = null;
-						if (preg_match('/The SQL being executed was:\s*(.+?)(?=\s*$)/is', $message, $matches)) {
-							$sql = trim($matches[1]);
-						}
-						$fk_info = $this->parseForeignKeyError($sql);
+						$fk_info = $this->findInForeignKeys();
 						if ($fk_info['field']) {
 							$error = "The value '{offending}' in field '{field}' does not exist in the related table '{table}'";
 							$error_data = [
@@ -601,7 +597,7 @@ trait ModelInfoTrait
 		$this->addError($error_key, Yii::t('churros', $error, $error_data) . $devel_info);
 	}
 
-	protected function parseForeignKeyError(?string $sql): array
+	protected function findInForeignKeys(): array
 	{
 		$result = [ 'field' => '', 'value' => '', 'table' => '' ];
 
@@ -611,7 +607,7 @@ trait ModelInfoTrait
 
 		$oneToOneTypes = ['HasOne', 'OneToOne', 'JustHasOne'];
 		foreach ($relations as $relName => $relDef) {
-			if (!in_array($relDef['type'] ?? '', $oneToOneTypes)) {
+			if (!in_array($relDef['type'], $oneToOneTypes)) {
 				continue;
 			}
 			$left = $relDef['left'];
