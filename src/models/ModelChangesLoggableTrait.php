@@ -99,7 +99,10 @@ trait ModelChangesLoggableTrait
 				if (self::$isJunctionModel) {
 					$model_change->subtype = $model_change::V_SUBTYPE_LINK;
 				}
-				$model_change->value = $this->recordDesc('short');
+				$model_change->value = $this->recordDesc('log_changes');
+				if ($model_change->value == 'log_changes') {
+					$model_change->value = $this->recordDesc('short');
+				}
 				$model_change->saveOrFail();
 				$must_trigger = true;
 			} else if ($event->name === self::EVENT_AFTER_UPDATE) {
