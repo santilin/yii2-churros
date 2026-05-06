@@ -369,9 +369,10 @@ js;
 				}
 			}
 			$col_added = false;
+			$row_html = '';
 			switch ($layout_row_type) {
 			case 'fieldset':
-				if (($title = $layout_row['title']??false) != false) {
+				if (($title = $layout_row['title'] ?? false) != false) {
 					$legend = Html::tag('legend', $title, $layout_row['title_options']??[]);
 					$ret .= Html::tag('fieldset', "$legend<hr/><div class=row>$row_html</div>", $layout_row['htmlOptions']??[]);
 				} else {
@@ -400,19 +401,23 @@ js;
 				if ($layout_row['content'] === true) {
 					$layout_row['content'] = array_diff(array_keys($this->widgets), $this->widgets_used);
 				}
+				$breaking_rows = $layout_row['options']['breaking-rows'] ?? [];
 				foreach ($layout_row['content'] as $widget_name) {
 					$fs = '';
 					$open_divs = 0;
 					$widget = $this->widgets[$widget_name] ?? false;
 					if ($widget) {
+						if (in_array($widget_name, $breaking_rows, true)) {
+							$fs .= '<div class="w-100"></div>';
+						}
 						$this->widgets_used[] = $widget_name;
 						if ($widget instanceof \yii\bootstrap5\ActiveField) {
 							// bs5 ActiveFields add a row container over the whole field
-							if ($widget->inputOptions['layout'] ?? false) {
-								$widget_layout = ArrayHelper::remove($widget->inputOptions, 'layout');
-							} else {
-								$widget_layout = $widget->layout ?? 'large';
-							}
+						if ($widget->inputOptions['layout'] ?? false) {
+							$widget_layout = ArrayHelper::remove($widget->inputOptions, 'layout');
+						} else {
+							$widget_layout = $widget->layout ?? 'large';
+						}
 							if ($layout_row['size'] === 'small'/* || ($cols >= 4 && $layout_row_layout != 'inline')*/) {
 								switch ($widget_layout) {
 									case 'short':
@@ -550,7 +555,7 @@ js;
 				if (!isset($layout_row['htmlOptions'])) {
 					$layout_row['htmlOptions'] = [];
 				}
-				Html::addCssClass($layout_row['htmlOptions'], [ 'form-control readonly' ]);
+				// Html::addCssClass($layout_row['htmlOptions'], [ 'form-control readonly' ]);
 				$ret .= $this->layoutContent($layout_row['label'],
 					$layout_row['content'] ?: $layout_row['options']['emptyValue'] ?? '&nbsp;',
 					$layout_row_layout, 'large', $layout_row['htmlOptions']);

@@ -20,6 +20,9 @@ trait ModelChangesLoggableTrait
 {
 	// As of php8.1 there is not support for trait constants
 	// These constants must be in sync with the `subtype` field of the using class
+	public static $V_TYPE_CREATE = 1;
+	public static $V_TYPE_UPDATE = 2;
+	public static $V_TYPE_DELETE = 3;
 	public static $V_SUBTYPE_CHANGE = 1;
 	public static $V_SUBTYPE_EMPTY = 2;
 	public static $V_SUBTYPE_CHANGECASE = 3;
@@ -159,27 +162,34 @@ trait ModelChangesLoggableTrait
 		}
 	}
 
-	public function formatModelChange(int $subtype, string|int $changed_field, string $changed_label, mixed $new_value, mixed $old_value): string
+	public function formatModelChange(int $type, int $subtype, string|int $changed_field, string $changed_label, mixed $new_value, mixed $old_value): string
 	{
-		switch ($subtype) {
-			case self::$V_SUBTYPE_EMPTY:
-				return  " vació `" . $changed_label . '`';
-			case self::$V_SUBTYPE_CHANGECASE:
-				return  " retocó las mayúsculas de `" . $changed_label . '`';
-			case self::$V_SUBTYPE_CHANGESPACES:
-				return  " retocó los espacios de `" . $changed_label . '`';
-			case self::$V_SUBTYPE_UNEMPTY:
-				return  " rellenó `" . $changed_label
-				. '` con `' . strval($new_value) . '`';
-			case self::$V_SUBTYPE_SETTRUE:
-				return  " cambió `" . $changed_label . '` a verdadero';
-			case self::$V_SUBTYPE_SETFALSE:
-				return  " cambió `" . $changed_label . '` a falso';
-			case self::$V_SUBTYPE_LINK:
-				return  " añadió {la} {title} `" . $new_value . "`";
-			default:
-				return  " cambió `" . $changed_label
-				. '` a `' . strval($new_value) . '`';
+		if ($type === self::$V_TYPE_CREATE) {
+			switch ($subtype) {
+				case self::$V_SUBTYPE_LINK:
+					return  " añadió {la} {title} `" . $new_value . "`";
+				default:
+					return  " creó `" . strval($new_value) . '`';
+			}
+		} else if ($type === self::$V_TYPE_UPDATE) {
+			switch ($subtype) {
+				case self::$V_SUBTYPE_EMPTY:
+					return  " vació `" . $changed_label . '`';
+				case self::$V_SUBTYPE_CHANGECASE:
+					return  " retocó las mayúsculas de `" . $changed_label . '`';
+				case self::$V_SUBTYPE_CHANGESPACES:
+					return  " retocó los espacios de `" . $changed_label . '`';
+				case self::$V_SUBTYPE_UNEMPTY:
+					return  " rellenó `" . $changed_label
+					. '` con `' . strval($new_value) . '`';
+				case self::$V_SUBTYPE_SETTRUE:
+					return  " cambió `" . $changed_label . '` a verdadero';
+				case self::$V_SUBTYPE_SETFALSE:
+					return  " cambió `" . $changed_label . '` a falso';
+				default:
+					return  " cambió `" . $changed_label
+					. '` a `' . strval($new_value) . '`';
+			}
 		}
 	}
 
