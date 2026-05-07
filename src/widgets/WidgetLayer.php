@@ -552,7 +552,7 @@ js;
 					$col_added = true;
 					$ret .='<div class="' . $this->columnClasses($cols) . ' " style="display: flex; flex-direction: column">';
 				}
-				if (!isset($layout_row['htmlOptions'])) {
+				if (!array_key_exists('htmlOptions', $layout_row)) {
 					$layout_row['htmlOptions'] = [];
 				}
 				// Html::addCssClass($layout_row['htmlOptions'], [ 'form-control readonly' ]);
@@ -731,7 +731,7 @@ js;
 		if (!empty($label)) {
 			$ret .= Html::tag('label', $label, [ 'class' => $classes['label']]);
 		}
-		Html::addCssClass($contentOptions, 'field');
+		Html::addCssClass($classes['wrapper'], 'field');
 		$ret .= Html::tag('div', Html::tag('div', $content, $contentOptions), ['class' => $classes['wrapper']]);
 		$ret .= '</div>';
 		return $ret;

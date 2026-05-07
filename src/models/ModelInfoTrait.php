@@ -160,15 +160,15 @@ trait ModelInfoTrait
 					$value = $value->recordDesc($format, $max_len);
 				}
 				$sprintf_part = $matches[2][$n];
-				if ($sprintf_part == '') {
+				if ($sprintf_part === '') {
 					$sprintf_part = "%s";
-				} else if ($sprintf_part == '%T') {
+				} else if ($sprintf_part === '%T') {
 					$sprintf_part = '%s';
 					$value = Yii::$app->formatter->asDateTime($value);
-				} else if ($sprintf_part == '%D') {
+				} else if ($sprintf_part === '%D') {
 					$sprintf_part = '%s';
 					$value = Yii::$app->formatter->asDate($value);
-				} else if ($sprintf_part == '%_a') { // allowed_values
+				} else if ($sprintf_part === '%_a') { // allowed_values
 					$sprintf_part = '%s';
 					$fname = $matches[1][$n];
 					$getter = "get" . AppHelper::modelize($fname) . "Label";
