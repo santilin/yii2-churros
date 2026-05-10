@@ -113,7 +113,7 @@ class DataColumn extends \yii\grid\DataColumn
             $combinedColumn = $this->combinedColumnInstance ?? $this->grid->columns[$this->combinedColumn] ?? null;
             if ($combinedColumn instanceof self) {
                 $val1 = $this->grid->formatter->format($this->getDataCellValue($model, $key, $index), $this->format);
-                $val2 = $this->grid->formatter->format($combinedColumn->getDataCellValue($model, $key, $index), $combinedColumn->format);
+                $val2 = $combinedColumn->renderDataCellContent($model, $key, $index);
                 if (!empty($this->combinedTemplate)) {
                     return strtr($this->combinedTemplate, ['{value1}' => $val1, '{value2}' => $val2]);
                 }

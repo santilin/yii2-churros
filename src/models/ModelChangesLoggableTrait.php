@@ -165,16 +165,17 @@ trait ModelChangesLoggableTrait
 		}
 	}
 
-	public function formatModelChange(int $type, int $subtype, string|int $changed_field, string $changed_label, mixed $new_value, mixed $old_value): string
+	public function formatModelChange(int $type, ?int $subtype, string|int $changed_field, string $changed_field_name, mixed $new_value, mixed $old_value): string
 	{
 		if ($type === self::$V_TYPE_CREATE) {
 			switch ($subtype) {
 				case self::$V_SUBTYPE_LINK:
 					return  " añadió {la} {title} `" . $new_value . "`";
 				default:
-					return  " creó `" . strval($new_value) . '`';
+					return  " creó {la} {title} `" . strval($new_value) . '`';
 			}
 		} else if ($type === self::$V_TYPE_UPDATE) {
+			$changed_label = $this->getAttributeLabel($changed_field_name);
 			switch ($subtype) {
 				case self::$V_SUBTYPE_EMPTY:
 					return  " vació `" . $changed_label . '`';
