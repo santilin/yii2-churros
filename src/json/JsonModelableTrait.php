@@ -90,7 +90,7 @@ trait JsonModelableTrait
 		return $this->_root_json->get($path);
 	}
 
-	private static function pathParts(string $str): array
+	public static function pathParts(string $str): array
 	{
 		$result = [];
 		$buffer = '';
