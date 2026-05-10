@@ -13,6 +13,8 @@ class FormHelper
 	public const BCS_STANDARD = 1;
 	public const BCS_NO_HOME = 2;
 
+	public const ALL_ROWS_PAGE_SIZE = 100000;
+
 	public const VIEWS_NVIEW_PARAM = '_v';
 	static private $tabindex = 0;
 	static public $operators = [

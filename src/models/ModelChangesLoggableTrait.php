@@ -149,9 +149,9 @@ trait ModelChangesLoggableTrait
 							$model_change->subtype = $model_change::V_SUBTYPE_CHANGE;
 						}
 						$model_change->saveOrFail();
-						if (self::$isJunctionModel) {
-							$this->createJunctionChangeLogs($model_change, $_log_model_changes_relation_info);
-						}
+						// if (self::$isJunctionModel) {
+						// 	$this->createJunctionChangeLogs($model_change, $_log_model_changes_relation_info);
+						// }
 						$must_trigger = true;
 					}
 				}
