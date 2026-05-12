@@ -409,3 +409,10 @@ details[layout-details-card] {
     margin-bottom: 2px;
   }
 }
+
+.slider-container {
+  width: calc(100% - 52px);
+  display: inline-block;
+  vertical-align: middle;
+  margin-left:0px;
+}

@@ -66,7 +66,7 @@ trait ModelTrait
 					$scope_func = $scope;
 				}
 				if ($scope_func) {
-					call_user_func_array([$q,$scope_func], $scope_args);
+					call_user_func_array([$q, $scope_func], $scope_args);
 				}
 			}
 			if ($set_order_by && empty($save_order) && $q->orderBy == $save_order) {

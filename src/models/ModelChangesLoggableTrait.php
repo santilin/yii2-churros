@@ -90,7 +90,7 @@ trait ModelChangesLoggableTrait
 				$model_change->record_id = $record_id;
 				$model_change->field = $model_change::findChangeableFieldIndex($model_name);
 				$model_change->changed_at = $this->created_at ?? new \yii\db\Expression("NOW()");
-				if (YII_ENV_TEST && !$this->created_by) {
+				if (YII_ENV_TEST && !($this->created_by ?? false)) {
 					$model_change->changed_by = 1;
 				} else {
 					$model_change->changed_by = $this->created_by ?? \Yii::$app->user?->identity?->id;

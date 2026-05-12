@@ -102,6 +102,13 @@ trait RelationTrait
 						$rel_model = new $model_relation['modelClass'];
 						if (is_array($model_relation['left'])) {
 							// Sets the foreign keys of this model if multiple keys
+							if (is_array($post_data)) {
+								if (count($post_data) === 1) {
+									$post_data = reset($post_data);
+								} else {
+									throw new \Exception("stop");
+								}
+							}
 							if (is_string($post_data)) {
 								$post_data = json_decode($post_data, true);
 								$this->setAttributes($post_data, false); // not safe
