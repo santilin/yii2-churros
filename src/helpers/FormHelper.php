@@ -199,13 +199,17 @@ class FormHelper
 
 	public static function getConfig(string $form_name, string $name, $default_value = null)
 	{
+		$v = null;
 		if (isset($_SESSION['formconfig'][$form_name][$name])
 			&& $_SESSION['formconfig'][$form_name][$name] !== $default_value) {
-			return $_SESSION['formconfig'][$form_name][$name];
+			$v = $_SESSION['formconfig'][$form_name][$name];
 		} else if (isset(Yii::$app->params['formconfig'][$form_name][$name])) {
-			return Yii::$app->params['formconfig'][$form_name][$name];
-		} else {
+			$v = Yii::$app->params['formconfig'][$form_name][$name];
+		}
+		if (empty($v)) {
 			return $default_value;
+		} else {
+			return $v;
 		}
 	}
 
