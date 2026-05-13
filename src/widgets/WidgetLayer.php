@@ -407,17 +407,17 @@ js;
 					$open_divs = 0;
 					$widget = $this->widgets[$widget_name] ?? false;
 					if ($widget) {
+						$this->widgets_used[] = $widget_name;
 						if (in_array($widget_name, $breaking_rows, true)) {
 							$fs .= '<div class="w-100"></div>';
 						}
-						$this->widgets_used[] = $widget_name;
 						if ($widget instanceof \yii\bootstrap5\ActiveField) {
 							// bs5 ActiveFields add a row container over the whole field
-						if ($widget->inputOptions['layout'] ?? false) {
-							$widget_layout = ArrayHelper::remove($widget->inputOptions, 'layout');
-						} else {
-							$widget_layout = $widget->layout ?? 'large';
-						}
+							if ($widget->inputOptions['layout'] ?? false) {
+								$widget_layout = ArrayHelper::remove($widget->inputOptions, 'layout');
+							} else {
+								$widget_layout = $widget->layout ?? 'large';
+							}
 							if ($layout_row['size'] === 'small'/* || ($cols >= 4 && $layout_row_layout != 'inline')*/) {
 								switch ($widget_layout) {
 									case 'short':
