@@ -179,6 +179,25 @@ trait ModelSearchTrait
 		/// @todo move to DataProvider count()?
 		if ($add_distinct) {
 			$provider->query->distinct();
+			// Override totalCount with a fast COUNT(DISTINCT pk) to avoid the
+			// expensive subquery wrapping in Query::queryScalar() when distinct
+			// is set (SELECT COUNT(*) FROM (SELECT DISTINCT ...) c materializes
+			// all columns, very slow with many LEFT JOINs).
+			if ($provider->query instanceof \yii\db\ActiveQuery) {
+				$modelClass = $provider->query->modelClass;
+				$pk = $modelClass::primaryKey();
+				if (count($pk) == 1) {
+					$tableName = $modelClass::tableName();
+					$provider->totalCount = (int) (clone $provider->query)
+						->select(["COUNT(DISTINCT $tableName.{$pk[0]})"])
+						->limit(null)
+						->offset(null)
+						->orderBy([])
+						->groupBy([])
+						->distinct(false)
+						->scalar();
+				}
+			}
 		}
     }
 
