@@ -286,7 +286,10 @@ js;
 					if (!$this->lastWasCol()) {
 						$this->setLastCol($cols);
 						$col_added = true;
-						$ret .='<div class="' . $this->columnClasses($cols) . ' " style="display: flex; flex-direction: column">';
+						$col_options = $layout_row['htmlOptions'] ?? [];
+						Html::addCssClass($col_options, $this->columnClasses($cols));
+						$col_options['style'] = 'display: flex; flex-direction: column';
+						$ret .= Html::beginTag('div', $col_options);
 					}
 					$rows_content = '';
 					$layout_row_content = array_filter($layout_row['content']);
@@ -363,7 +366,12 @@ js;
 				if (($parentOptions['layout'] ?? $layout_row_layout) === 'inline') {
 					$ret .= "<div class=\"d-flex lay-$cols-cols lay-{$this->lastLevel()}-lvl\">";
 				} else {
-					$ret .= "<div class=\"row d-flex lay-$cols-cols lay-{$this->lastLevel()}-lvl\">";
+					$row_attrs = $layout_row['htmlOptions'] ?? [];
+					Html::addCssClass($row_attrs, "row d-flex lay-$cols-cols lay-{$this->lastLevel()}-lvl");
+					if (!empty($layout_row['id'])) {
+						$row_attrs['id'] = $layout_row['id'];
+					}
+					$ret .= Html::beginTag('div', $row_attrs);
 					$this->setLastRow($cols);
 					$row_added = true;
 				}
@@ -510,15 +518,7 @@ js;
 						}
 					}
 				}
-				if (!empty($layout_row['htmlOptions']) || !empty($layout_row['id'])) {
-					$tag_options = $layout_row['htmlOptions'] ?? [];
-					if (!empty($layout_row['id'])) {
-						$tag_options['id'] = $layout_row['id'];
-					}
-					$ret .= Html::beginTag('div', $tag_options) . $row_html . Html::endTag('div');
-				} else {
-					$ret .= $row_html;
-				}
+			$ret .= $row_html;
 				break;
 
 			case 'buttons':
