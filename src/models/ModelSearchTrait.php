@@ -92,12 +92,14 @@ trait ModelSearchTrait
 		$add_distinct = false;
 		foreach ($gridColumns as $col_attribute => $column_def) {
 			if ( $column_def === null // Allows for conditional definition of columns
-// 				|| is_int($attribute)
-				|| str_ends_with($column_def['class']??'','ActionColumn')) {
+				|| str_ends_with($column_def['class'] ?? '', 'ActionColumn')) {
 				continue;
 			}
 			if (!empty($column_def['filterAttribute'])) {
 				$this->addRelatedFieldToJoin($column_def['filterAttribute'], $provider->query);
+			}
+			if (array_key_exists('exclude_from_query', $column_def)) {
+				continue;
 			}
 			if (array_key_exists($col_attribute, $this->attributes)) { // for sorting
 				continue;
