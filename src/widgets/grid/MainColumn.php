@@ -62,6 +62,19 @@ class MainColumn extends DataColumn
      */
     protected function renderDataCellContent($model, $key, $index)
     {
+		if ($this->combinedColumn !== null && $this->content === null) {
+			$combinedColumn = $this->combinedColumnInstance ?? $this->grid->columns[$this->combinedColumn] ?? null;
+			if ($combinedColumn instanceof DataColumn) {
+				$val1 = $this->grid->formatter->format(
+					$this->getDataCellValue($model, $key, $index), $this->format);
+				$val1 = Html::a($val1, $this->generateUrl($model, $key, $index), $this->linkOptions);
+				$val2 = $combinedColumn->renderDataCellContent($model, $key, $index);
+				if (!empty($this->combinedTemplate)) {
+					return strtr($this->combinedTemplate, ['{value1}' => $val1, '{value2}' => $val2]);
+				}
+				return $val1 . $val2;
+			}
+		}
         return Html::a(
 			$this->grid->formatter->format(
 				$this->getDataCellValue($model, $key, $index), $this->format),

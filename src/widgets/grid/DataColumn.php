@@ -117,7 +117,7 @@ class DataColumn extends \yii\grid\DataColumn
                 if (!empty($this->combinedTemplate)) {
                     return strtr($this->combinedTemplate, ['{value1}' => $val1, '{value2}' => $val2]);
                 }
-                return $values['value1'] . $values['value2'];
+                return $val1 . $val2;
             }
         }
         return parent::renderDataCellContent($model, $key, $index);
