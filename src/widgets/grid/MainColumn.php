@@ -2,7 +2,6 @@
 
 namespace santilin\churros\widgets\grid;
 
-
 use yii\helpers\Html;
 use yii\helpers\Url;
 use santilin\churros\helpers\AppHelper;

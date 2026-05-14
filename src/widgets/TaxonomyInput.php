@@ -141,7 +141,6 @@ function split_by_dot(str, dot)
 		return [];
 	}
 	const ret = str.split(dot).filter(function(i) { return i });
-	console.log(str, dot, '=>', ret);
 	return ret;
 }
 
@@ -157,7 +156,6 @@ function taxonomy_values(taxonomy, values, level)
 		if (options[values[l]] === undefined) {
 			return [ [ '', 'Valor inválido' ] ];
 		}
-		console.log('Antes', options, values[l], options[values[l]]);
 		options = options[values[l]].items;
 		if (options === undefined) {
 			break;
