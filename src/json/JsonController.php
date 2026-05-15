@@ -413,6 +413,10 @@ class JsonController extends \yii\web\Controller
 			if ($to_model === 'parent') {
 				if ($model->getParentModel()) {
 					$model = $model->getParentModel();
+					if ($to_action === 'index') {
+						\Yii::warning("parent.index has no sense here");
+						$to_action = 'view';
+					}
 				} else {
 					$to_model = 'model';
 					$to_action  = 'index';
