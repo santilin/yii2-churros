@@ -264,9 +264,11 @@ trait ControllerTrait
 	protected function userPermissions(): array|bool
 	{
 		$ret = [];
-		foreach ($this->controllerPermissions as $action_permissions) {
+		foreach ($this->controllerPermissions as $kap => $action_permissions) {
 			foreach ((array)$action_permissions as $action_permission) {
-				$ret[$action_permission] = true;
+				if (\Yii::$app->user->can($action_permission)) {
+					$ret[$kap] = true;
+				}
 			}
 		}
 		return array_keys($ret);
