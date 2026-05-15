@@ -130,6 +130,7 @@ abstract class CrudReadOnlyController extends \yii\web\Controller
 		if (!$detail) {
 			throw new \Exception("No {$search_model_class}_Search nor $search_model_class{$view}_Search class found in " . __METHOD__);
 		}
+		$this->masterModel = $master;
 		$params['permissions'] = $this->resolvePermissions($params['permissions'] ?? []);
 		$params['_search_relation'] = $relation_name;
 		$params['master'] = $master;
