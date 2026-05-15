@@ -36,6 +36,7 @@ class JsonModel extends \yii\base\Model
             $rel_info = static::$relations[$name];
             $rel_name = $rel_info['relatedTablename'];
             if ($rel_info['type'] == 'HasMany') {
+                $this->ensureJsonObject();
                 if ($this->_json_object) {
                     $this->_json_object->set("$.{$rel_info['relatedTablename']}", $value);
                 } else {
@@ -48,6 +49,18 @@ class JsonModel extends \yii\base\Model
             return;
         }
         return parent::__set($name, $value);
+    }
+
+    public function ensureJsonObject(): void
+    {
+        if ($this->_json_object || !$this->_json_modelable || !$this->_path || !$this->_id) {
+            return;
+        }
+        $parent_path = $this->_path;
+        if (str_ends_with($this->_path, '/' . $this->_id)) {
+            $parent_path = substr($this->_path, 0, -(strlen($this->_id) + 1));
+        }
+        $this->_json_object = $this->_json_modelable->getJsonObject($parent_path, $this->_id, static::$_locator);
     }
 
     public function __isset($name)
@@ -135,7 +148,8 @@ class JsonModel extends \yii\base\Model
         $rel_name = $rel_info['relatedTablename'];
         $rel_model_class = $rel_info['modelClass'];
         if ($rel_info['type'] === 'HasMany') {
-            $json_objects = $this->_json_object?->get("$.$rel_name")?:[];
+            $this->ensureJsonObject();
+            $json_objects = $this->_json_object?->get("$.$rel_name") ?: [];
             $related_models = $this->jsonArrayToModels($json_objects, $rel_model_class);
             return $related_models;
         } else {
@@ -214,6 +228,7 @@ class JsonModel extends \yii\base\Model
 
     public function getJsonObject(): ?JsonObject
     {
+        $this->ensureJsonObject();
         return $this->_json_object;
     }
 

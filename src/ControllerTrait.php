@@ -266,7 +266,7 @@ trait ControllerTrait
 		$ret = [];
 		foreach ($this->controllerPermissions as $kap => $action_permissions) {
 			foreach ((array)$action_permissions as $action_permission) {
-				if (\Yii::$app->user->can($action_permission)) {
+				if (!\Yii::$app->get('user', false) || \Yii::$app->get('user')?->can($action_permission)) {
 					$ret[$kap] = true;
 				}
 			}
