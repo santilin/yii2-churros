@@ -572,20 +572,24 @@ trait RelationTrait
 
     public function createChildren(string $relation_name, ?string $form_class_name = null): array
 	{
-		// Get the relation query
-		$relation = $this->getRelation($relation_name);
+		if (!$this->isRelationPopulated($relation_name)) {
+			// Get the relation query
+			$relation = $this->getRelation($relation_name);
 
-		// Create a query for the relation
-		$query = $this->createRelationQuery($form_class_name, $relation->link, $relation->multiple);
-		$query->where = $relation->where;
+			// Create a query for the relation
+			$query = $this->createRelationQuery($form_class_name, $relation->link, $relation->multiple);
+			$query->where = $relation->where;
 
-		// Set the modelClass to your form class
-		$query->modelClass = $form_class_name;
+			// Set the modelClass to your form class
+			$query->modelClass = $form_class_name;
 
-		// Return all related records as instances of $form_class_name
-		$children = $query->all();
-		foreach ($children as $child) {
-			$child->_parent_model = $this;
+			// Return all related records as instances of $form_class_name
+			$children = $query->all();
+			foreach ($children as $child) {
+				$child->_parent_model = $this;
+			}
+		} else {
+			$children = $this->$relation_name;
 		}
 		return $children;
 	}
