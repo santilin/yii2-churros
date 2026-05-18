@@ -22,7 +22,7 @@ class AppHelper
 				$values = array_merge($values, $value);
 			} else {
 				// This is a leaf option
-				$values[] = $key;
+				$values[$key] = $value;
 			}
 		}
 		return $values;

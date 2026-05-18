@@ -730,7 +730,7 @@ trait ModelInfoTrait
 				$ret[$v[1]][$k] = $v[0];
 			}
 			return $ret;
-		} else if ($format === 'ungroup') {
+		} else if ($format === 'ungroup' || $format === 'range' ) {
 			return AppHelper::unGroupValues($values);
 		} else if ($format === 'selectize') {
 			$ret = [];
