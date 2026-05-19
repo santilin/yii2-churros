@@ -210,14 +210,16 @@ html;
 				break;
 			}
             $contentOptions = Html::renderTagAttributes($contentOptions);
-            if (YII_ENV_DEV) {
-                try {
-                    $value = $this->formatter->format($attribute['value'], $attribute['format']);
-                } catch(\yii\base\ErrorException $e) {
-                    throw new \yii\base\ErrorException(json_encode($attr_key) . ' ' . $e->getMessage());
+            if (!empty($attribute['format'])) {
+                if (YII_ENV_DEV) {
+                    try {
+                        $value = $this->formatter->format($attribute['value'], $attribute['format']);
+                    } catch(\yii\base\ErrorException $e) {
+                        throw new \yii\base\ErrorException(json_encode($attr_key) . ' ' . $e->getMessage());
+                    }
                 }
             } else {
-                $value = $this->formatter->format($attribute['value'], $attribute['format']);
+                $value = $attribute['value'];
             }
             return strtr($template, [
                 '{label}' => $attribute['label'],
