@@ -63,6 +63,7 @@ class EsHelper
 			'día' => 'day',
 			'hora' => 'hour',
 			'este' => 'this',
+			'del año' => 'of December',
 		];
 		if ( strpos($fecha_expr, 'este') === FALSE
 			|| strpos($fecha_expr, 'mañana') === FALSE

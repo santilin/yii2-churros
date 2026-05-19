@@ -24,7 +24,6 @@ class GridView extends SimpleGridView
 	public bool $hover = false;
 	public $layout = "{summary}\n{selectViews}\n{items}\n{pager}{filterCount}";
 
-
 	public function init()
 	{
 		if ($this->emptyText === null) {
@@ -95,6 +94,7 @@ class GridView extends SimpleGridView
     // Dont show emptyText here, emptyText is managed in the summary section.
     public function renderItems()
     {
+		$save_filter_model = null;
 		if ($this->filterModel && $this->dataProvider->getCount() <= 1) {
 			// No mostrar la fila de filtro si no hay valores filtrados
 			$has_filters = false;
@@ -130,8 +130,8 @@ class GridView extends SimpleGridView
 					}
 				}
 			}
- 			if (!$has_filters ) {
-				$this->filterModel = null;
+ 			if (!$has_filters) {
+				$this->showFilterRow = false;
 			}
 		}
 		$empty_text_save = $this->emptyText;

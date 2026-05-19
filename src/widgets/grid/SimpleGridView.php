@@ -29,6 +29,15 @@ class SimpleGridView extends \yii\grid\GridView
 	public $groups = [];
 	public $totalsRow = true;
 	public $onlySummary = false;
+	public $itemLabelSingle = null;
+	public $itemLabelPlural = null;
+	public $itemLabelFew = null;
+	public $itemLabelMany = null;
+	public $itemLabelAccusative = null;
+	public $grandTotalLabel = null;
+    public $layout = "{summary}\n{pager}\n{items}";
+    public $output = 'Screen';
+
 	protected $summaryColumns = [];
 	protected $savedRowData = [];
 	protected $summaryValues = [];
@@ -37,16 +46,9 @@ class SimpleGridView extends \yii\grid\GridView
 	protected $recno;
 	protected $current_level = 0;
 	protected $combinedColumnFilters = [];
+	protected bool $showFilterRow = true;
 
-	public $itemLabelSingle = null;
-	public $itemLabelPlural = null;
-	public $itemLabelFew = null;
-	public $itemLabelMany = null;
-	public $itemLabelAccusative = null;
-	public $grandTotalLabel = null;
 
-    public $layout = "{summary}\n{pager}\n{items}";
-    public $output = 'Screen';
 
 	public function __construct($config = [])
 	{
@@ -181,12 +183,8 @@ class SimpleGridView extends \yii\grid\GridView
 	 */
 	public function renderFilters()
 	{
-		if ($this->filterModel !== null) {
-			$cells = [];
-			foreach ($this->columns as $key => $column) {
-				$cells[] = $column->renderFilterCell();
-			}
-			return Html::tag('tr', implode('', $cells), $this->filterRowOptions);
+		if ($this->showFilterRow) {
+			return parent::renderFilters();
 		}
 		return '';
 	}
