@@ -217,6 +217,8 @@ html;
                     } catch(\yii\base\ErrorException $e) {
                         throw new \yii\base\ErrorException(json_encode($attr_key) . ' ' . $e->getMessage());
                     }
+                } else {
+                    $value = $this->formatter->format($attribute['value'], $attribute['format']);
                 }
             } else {
                 $value = $attribute['value'];
