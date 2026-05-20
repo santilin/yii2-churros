@@ -84,74 +84,26 @@ trait ModelChangesLoggableTrait
 		} else {
 			$model_name = $event->sender->getModelInfo('model_name');
 			$_log_model_changes_relation_info = static::$relations[static::$_log_model_changes_relation];
+			$model_change_class = $_log_model_changes_relation_info['modelClass'];
 			$record_id = strval(count($this->primaryKey())==1 ? $this->getPrimaryKey() : json_encode($this->getPrimaryKey(true)));
-			$model_change = new $_log_model_changes_relation_info['modelClass'];
 			if ($event->name === self::EVENT_AFTER_INSERT) {
-				$model_change->record_id = $record_id;
-				$model_change->field = $model_change::findChangeableFieldIndex($model_name);
-				$model_change->changed_at = $this->created_at ?? new \yii\db\Expression("NOW()");
-				if (YII_ENV_TEST && !($this->created_by ?? false)) {
-					$model_change->changed_by = 1;
-				} else {
-					$model_change->changed_by = $this->created_by ?? \Yii::$app->user?->identity?->id;
+				foreach ($this->getAttributes() as $fld => $current_value) {
+					if (false !== ($nfield = $model_change_class::findChangeableFieldIndex($model_name, $fld))) {
+						$model_change = new $model_change_class();
+						$this->internalSaveModelChangeRecord($model_change, $record_id,
+							$model_change_class::V_TYPE_CREATE, $nfield, $current_value);
+						$must_trigger = true;
+					}
 				}
-				$model_change->type = $model_change::V_TYPE_CREATE;
-				if (self::$isJunctionModel) {
-					$model_change->subtype = $model_change::V_SUBTYPE_LINK;
-				}
-				$model_change->value = $this->recordDesc('log_changes');
-				if ($model_change->value == 'log_changes') {
-					$model_change->value = $this->recordDesc('short');
-				}
-				$model_change->saveOrFail();
-				$must_trigger = true;
 			} else if ($event->name === self::EVENT_AFTER_UPDATE) {
 				foreach ($event->changedAttributes as $fld => $old_value) {
 					if (($current_value = $this->$fld) == $old_value) { /// @todo use cast and then ===
 						continue;
 					}
-					if (false !== ($nfield = $model_change::findChangeableFieldIndex($model_name, $fld))) {
-						if (!$model_change->getIsNewRecord()) {
-							$model_change->resetPrimaryKeys();
-							$model_change->setIsNewRecord(true);
-						}
-						$model_change->record_id = $record_id;
-						$model_change->field = $nfield;
-						$model_change->value = $old_value;
-						if (\Yii::$app instanceof \yii\web\Application) {
-							$model_change->changed_by = \Yii::$app->user?->identity?->id;
-						} else {
-							$model_change->changed_by = \Yii::$app->params['user_identity_id'] ?? null;
-						}
-						$model_change->changed_at = new \yii\db\Expression("NOW()");
-						$model_change->type = $model_change::V_TYPE_UPDATE;
-						if (method_exists($this, 'modelChangesComment')) {
-							$model_change->comments = $this->modelChangesComment();
-						}
-						if (is_bool($current_value)) {
-							if ($current_value) {
-								$model_change->subtype = $model_change::V_SUBTYPE_SETTRUE;
-								$model_change->value = 0;
-							} else {
-								$model_change->value = 1;
-								$model_change->subtype = $model_change::V_SUBTYPE_SETFALSE;
-							}
-						} else if ($current_value == '') {
-							$model_change->subtype = $model_change::V_SUBTYPE_EMPTY;
-						} else if ($current_value != '' && $old_value == '') {
-							$model_change->subtype = $model_change::V_SUBTYPE_UNEMPTY;
-						} else if (AppHelper::mb_strcasecmp($current_value, $old_value??'', 'UTF-8') == 0) {
-							$model_change->subtype = $model_change::V_SUBTYPE_CHANGECASE;
-						} else if (str_replace([' ',"\t","\n","\r"], '', $old_value) ==
-							str_replace([' ',"\t","\n","\r"], '', $current_value)) {
-							$model_change->subtype = $model_change::V_SUBTYPE_CHANGESPACES;
-						} else {
-							$model_change->subtype = $model_change::V_SUBTYPE_CHANGE;
-						}
-						$model_change->saveOrFail();
-						// if (self::$isJunctionModel) {
-						// 	$this->createJunctionChangeLogs($model_change, $_log_model_changes_relation_info);
-						// }
+					if (false !== ($nfield = $model_change_class::findChangeableFieldIndex($model_name, $fld))) {
+						$model_change = new $model_change_class();
+						$this->internalSaveModelChangeRecord($model_change, $record_id,
+							$model_change_class::V_TYPE_UPDATE, $nfield, $old_value, $current_value);
 						$must_trigger = true;
 					}
 				}
@@ -165,6 +117,71 @@ trait ModelChangesLoggableTrait
 		}
 	}
 
+	private function internalSaveModelChangeRecord(
+		\yii\db\ActiveRecord $model_change,
+		string $record_id,
+		int $type,
+		int $nfield,
+		mixed $old_value,
+		mixed $current_value = null,
+	): void
+	{
+		if (!$model_change->getIsNewRecord()) {
+			$model_change->resetPrimaryKeys();
+			$model_change->setIsNewRecord(true);
+		}
+		$model_change->record_id = $record_id;
+		$model_change->field = $nfield;
+		$model_change->type = $type;
+		if ($type === $model_change::V_TYPE_CREATE) {
+			$model_change->value = $old_value;
+			$model_change->changed_at = $this->created_at ?? new \yii\db\Expression("NOW()");
+			if (YII_ENV_TEST && !($this->created_by ?? false)) {
+				$model_change->changed_by = 1;
+			} else {
+				$model_change->changed_by = $this->created_by ?? \Yii::$app->user?->identity?->id;
+			}
+			if (self::$isJunctionModel) {
+				$model_change->subtype = $model_change::V_SUBTYPE_LINK;
+			}
+		} else {
+			$model_change->value = $old_value;
+			$model_change->changed_at = new \yii\db\Expression("NOW()");
+			if (\Yii::$app instanceof \yii\web\Application) {
+				$model_change->changed_by = \Yii::$app->user?->identity?->id;
+			} else {
+				$model_change->changed_by = \Yii::$app->params['user_identity_id'] ?? null;
+			}
+			if (method_exists($this, 'modelChangesComment')) {
+				$model_change->comments = $this->modelChangesComment();
+			}
+			if (is_bool($current_value)) {
+				if ($current_value) {
+					$model_change->subtype = $model_change::V_SUBTYPE_SETTRUE;
+					$model_change->value = 0;
+				} else {
+					$model_change->value = 1;
+					$model_change->subtype = $model_change::V_SUBTYPE_SETFALSE;
+				}
+			} else if ($current_value == '') {
+				$model_change->subtype = $model_change::V_SUBTYPE_EMPTY;
+			} else if ($current_value != '' && $old_value == '') {
+				$model_change->subtype = $model_change::V_SUBTYPE_UNEMPTY;
+			} else if (AppHelper::mb_strcasecmp($current_value, $old_value??'', 'UTF-8') == 0) {
+				$model_change->subtype = $model_change::V_SUBTYPE_CHANGECASE;
+			} else if (str_replace([' ',"\t","\n","\r"], '', $old_value) ==
+				str_replace([' ',"\t","\n","\r"], '', $current_value)) {
+				$model_change->subtype = $model_change::V_SUBTYPE_CHANGESPACES;
+			} else {
+				$model_change->subtype = $model_change::V_SUBTYPE_CHANGE;
+			}
+		}
+		$model_change->saveOrFail();
+	}
+
+	/**
+	 * @param ?int $subtype can be null on grouped changes
+	 */
 	public function formatModelChange(int $type, ?int $subtype, string|int $changed_field, string $changed_field_name, mixed $new_value, mixed $old_value): string
 	{
 		if ($type === self::$V_TYPE_CREATE) {
