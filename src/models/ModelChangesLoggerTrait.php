@@ -45,6 +45,9 @@ trait ModelChangesLoggerTrait
 
 	public function findNextValue($changed_model, string $changed_field)
 	{
+		if (strpos($changed_field, '.') === FALSE) {
+			return $this->value;
+		}
 		$next_model = static::find()->select('value')
 			->andWhere(['>', 'id', $this->id])
 			->andWhere(['field' => $this->field])

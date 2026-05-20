@@ -186,10 +186,12 @@ trait ModelChangesLoggableTrait
 	{
 		if ($type === self::$V_TYPE_CREATE) {
 			switch ($subtype) {
+				case 0:
+					return  " creó {la} {title} `" . $new_value . "`";
 				case self::$V_SUBTYPE_LINK:
 					return  " añadió {la} {title} `" . $new_value . "`";
 				default:
-					return  " creó {la} {title} `" . strval($new_value) . '`';
+					return strval($new_value);
 			}
 		} else if ($type === self::$V_TYPE_UPDATE) {
 			$changed_label = $this->getAttributeLabel($changed_field_name);
