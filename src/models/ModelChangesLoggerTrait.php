@@ -78,7 +78,7 @@ trait ModelChangesLoggerTrait
 	public function commentsAddon(): string
 	{
 		$ret = $this->comments;
-		$ret .= \yii\helpers\Html::a('Edit', [ $this->getModelInfo('controller_name') . '/update-comments/', 'id' => $this->id]);
+		$ret .= \yii\helpers\Html::a('Edit', [ $this->getModelInfo('controller_name') . '/update/', 'id' => $this->id]);
 		return $ret;
 	}
 
