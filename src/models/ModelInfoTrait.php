@@ -226,6 +226,9 @@ trait ModelInfoTrait
 		return $ret;
 	}
 
+	/**
+	 * With $format = false, only the url is returned
+	 */
 	public function linkToMe(string|bool $format = 'long', string $action = 'view', bool $global = false, ?string $base_route = null): string
 	{
 		if ($base_route === null) {

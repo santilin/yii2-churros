@@ -188,6 +188,9 @@ trait ModelChangesLoggableTrait
 			switch ($subtype) {
 				case self::$V_SUBTYPE_LINK:
 					return  " añadió {la} {title} `" . $new_value . "`";
+				case self::$V_SUBTYPE_CHANGE:
+					$changed_label = $this->getAttributeLabel($changed_field_name);
+					return "<mark>`$changed_label`</mark>: `$new_value`";
 				case 0: // grouped
 				default:
 					return  " creó {la} {title} `" . $new_value . "`";
