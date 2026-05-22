@@ -3,7 +3,7 @@
 namespace santilin\churros\widgets;
 use Yii;
 use yii\base\InvalidConfigException;
-use yii\helpers\{ArrayHelper,Html};
+use yii\helpers\{ArrayHelper,Html, Url};
 use yii\bootstrap5\Tabs;
 use santilin\churros\helpers\FormHelper;
 use santilin\churros\widgets\ActiveForm;
@@ -785,11 +785,12 @@ html;
 
         $ret = Html::tag('div', $content, $containerOptions);
 
-// Escape all dynamic values
-    $escapedUrl = Html::encodeJsString($url);
-    $escapedMethod = Html::encodeJsString($method);
-    $escapedContainerId = Html::encodeJsString($containerId);
-    $escapedErrorText = Html::encodeJsString($errorText);
+// Escape all dynamic values for JS single-quoted string context
+    $escapeJs = fn($v) => str_replace(["\\", "'", "\n", "\r"], ["\\\\", "\\'", "\\n", "\\r"], $v);
+    $escapedUrl = $escapeJs($url);
+    $escapedMethod = $escapeJs($method);
+    $escapedContainerId = $escapeJs($containerId);
+    $escapedErrorText = $escapeJs(Html::encode($errorText));
 
     $script = <<<JS
     (function() {

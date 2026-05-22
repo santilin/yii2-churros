@@ -30,12 +30,18 @@ class AuthController extends Controller
 	public $authManager = 'authManager';
 	/** @var bool Verbose output */
 	public bool $verbose = false;
+	/** @var string Output format for list-role: 'simple' or 'details' */
+	public string $format = 'simple';
 
     public function options($actionID)
     {
+        $options = ['verbose'];
+        if ($actionID === 'list-role') {
+            $options[] = 'format';
+        }
         return array_merge(
             parent::options($actionID),
-            ['create', 'delete', 'verbose']
+            $options
         );
     }
 
@@ -43,9 +49,6 @@ class AuthController extends Controller
     {
         return array_merge(parent::optionAliases(), [
             'f' => 'format',
-            't' => 'truncateTables',
-            'c' => 'createFile',
-            'p' => 'seedersPath',
 			'v' => 'verbose',
         ]);
     }
@@ -563,27 +566,92 @@ class AuthController extends Controller
 	 */
 	public function actionListRole($role)
 	{
-		$subroles = $this->authManager->getChildRoles($role);
-		if (count($subroles)) {
-			$s_subroles = '';
-			foreach($subroles as $subrol) {
-				if ($subrol->name != $role) {
-					$s_subroles .= $subrol->name . ", ";
-				}
-			}
-			if ($s_subroles) {
-				$this->stdout("- ".$role.":roles:$s_subroles\n");
+		$auth = $this->authManager;
+		$roleItem = $auth->getRole($role);
+		if (!$roleItem) {
+			$this->stderr("Role '$role' not found.\n");
+			return 1;
+		}
+
+		// Get direct child roles at the beginning
+		$directRoleNames = [];
+		foreach ($auth->getChildren($roleItem->name) as $child) {
+			if ($child instanceof Role) {
+				$directRoleNames[] = $child->name;
 			}
 		}
-		$role_perms = $this->authManager->getPermissionsByRole($role);
-		if (count($role_perms)) {
-			$this->stdout("- ".$role.":perms:");
-			foreach($role_perms as $perm) {
-				$this->stdout($perm->name . ", ");
+
+		if ($this->format === 'simple') {
+			if (!empty($directRoleNames)) {
+				$this->stdout("- ".$role.":roles:" . implode(', ', $directRoleNames) . "\n");
 			}
-			$this->stdout("\n");
-		} else if (empty($s_subroles)) {
-			$this->stdout("- ". $role. "\n");
+			$role_perms = $auth->getPermissionsByRole($role);
+			if (count($role_perms)) {
+				$this->stdout("- ".$role.":perms:");
+				foreach($role_perms as $perm) {
+					$this->stdout($perm->name . ", ");
+				}
+				$this->stdout("\n");
+			} else if (empty($directRoleNames)) {
+				$this->stdout("- ". $role. "\n");
+			}
+		} else if ($this->format === 'details') {
+			$this->stdout("Role: {$roleItem->name}\n", Console::FG_YELLOW);
+			$this->stdout("Description: {$roleItem->description}\n\n");
+
+			$userIds = $auth->getUserIdsByRole($role);
+			if ($userIds) {
+				$this->stdout("Users (count: " . count($userIds) . "): " . implode(', ', $userIds) . "\n");
+			}
+
+			$this->stdout("\nDirect child roles:\n", Console::FG_CYAN);
+			if (!empty($directRoleNames)) {
+				foreach ($directRoleNames as $childRoleName) {
+					$this->stdout("  └─ {$childRoleName}\n", Console::FG_YELLOW);
+				}
+			} else {
+				$this->stdout("  (none)\n");
+			}
+
+			$visited = [];
+			$printRoleTree = function ($parentName, $depth) use ($auth, &$printRoleTree, &$visited) {
+				if (in_array($parentName, $visited, true)) {
+					return;
+				}
+				$visited[] = $parentName;
+				$children = $auth->getChildren($parentName);
+				$childRoles = [];
+				foreach ($children as $name => $item) {
+					if ($item instanceof \yii\rbac\Role) {
+						$childRoles[] = $name;
+					}
+				}
+				sort($childRoles);
+				foreach ($childRoles as $childName) {
+					$this->stdout(str_repeat('  ', $depth) . "  └─ {$childName}\n", Console::FG_YELLOW);
+					$printRoleTree($childName, $depth + 1);
+				}
+			};
+			$this->stdout("\nAll descendant roles:\n", Console::FG_CYAN);
+			foreach ($directRoleNames as $directChildName) {
+				$this->stdout("  └─ {$directChildName}\n", Console::FG_YELLOW);
+				$printRoleTree($directChildName, 2);
+			}
+
+			$this->stdout("\nPermissions:\n", Console::FG_GREEN);
+			$permissions = $auth->getPermissionsByRole($role, true, '', false);
+			if (empty($permissions)) {
+				$this->stdout("  (none)\n");
+			} else {
+				uksort($permissions, 'strcasecmp');
+				foreach ($permissions as $name => $permission) {
+					$this->stdout("  └─ {$name}\n", Console::FG_GREEN);
+				}
+			}
+			return 0;
+		} else {
+			$this->stderr("Unknown format '{$this->format}'. Use 'simple' or 'details'.\n");
+			return 1;
 		}
 	}
 
@@ -725,47 +793,12 @@ class AuthController extends Controller
 	/**
 	 * Lists all permissions (direct + inherited) for a given role
 	 * @param string $role the role name
+	 * @deprecated Use actionListRole with --format=details instead
 	 */
 	public function actionListRol($role)
 	{
-		$auth = $this->authManager;
-		$roleItem = $auth->getRole($role);
-
-		if (!$roleItem) {
-			$this->stderr("Role '$role' not found.\n");
-			return 1;
-		}
-
-		$this->stdout("Role: {$roleItem->name}\n", Console::FG_YELLOW);
-		$this->stdout("Description: {$roleItem->description}\n\n");
-
-		// Get all users with this role
-		$userIds = $auth->getUserIdsByRole($role);
-		if ($userIds) {
-			$this->stdout("Users (count: " . count($userIds) . "): " . implode(', ', $userIds) . "\n");
-		}
-
-		$this->stdout("\nChild roles:\n", Console::FG_CYAN);
-		$childRoles = $auth->getChildRoles($role);
-		foreach ($childRoles as $childRole) {
-			if ($childRole->name !== $role) {
-				$this->stdout("  └─ {$childRole->name}\n", Console::FG_YELLOW);
-			}
-		}
-
-		$this->stdout("\nPermissions:\n", Console::FG_GREEN);
-		$permissions = $auth->getPermissionsByRole($role, true, '', false); // recursive: true
-
-		if (empty($permissions)) {
-			$this->stdout("  (none)\n");
-			return 0;
-		}
-
-		ksort($permissions);
-		foreach ($permissions as $name => $permission) {
-			$prefix = str_repeat('  ', substr_count($name, '.') + 1);
-			$this->stdout("{$prefix}└─ {$name}\n", Console::FG_GREEN);
-		}
+		$this->format = 'details';
+		return $this->actionListRole($role);
 	}
 
 
