@@ -785,37 +785,38 @@ html;
 
         $ret = Html::tag('div', $content, $containerOptions);
 
-// Escape all dynamic values for JS single-quoted string context
-    $escapeJs = fn($v) => str_replace(["\\", "'", "\n", "\r"], ["\\\\", "\\'", "\\n", "\\r"], $v);
-    $escapedUrl = $escapeJs($url);
-    $escapedMethod = $escapeJs($method);
-    $escapedContainerId = $escapeJs($containerId);
-    $escapedErrorText = $escapeJs(Html::encode($errorText));
+	// Escape all dynamic values for JS single-quoted string context
+		$escapeJs = fn($v) => str_replace(["\\", "'", "\n", "\r"], ["\\\\", "\\'", "\\n", "\\r"], $v);
+		$escapedUrl = $escapeJs($url);
+		$escapedMethod = $escapeJs($method);
+		$escapedContainerId = $escapeJs($containerId);
+		$escapedErrorText = $escapeJs(Html::encode($errorText));
 
-    $script = <<<JS
-    (function() {
-        const container = document.getElementById('{$escapedContainerId}');
-        if (!container) return;
+		$script = <<<JS
 
-        fetch('{$escapedUrl}', {
-            method: '{$escapedMethod}',
-            headers: {
-                'X-Requested-With': 'XMLHttpRequest',
-                'Accept': 'text/html'
-            }
-        })
-        .then(response => {
-            if (!response.ok) throw new Error('Network response was not ok');
-            return response.text();
-        })
-        .then(html => {
-            container.innerHTML = html;
-        })
-        .catch(error => {
-            console.error('AJAX loading error:', error);
-            container.innerHTML = '<div class="alert alert-danger">{$escapedErrorText}</div>';
-        });
-    })();
+(function() {
+	const container = document.getElementById('{$escapedContainerId}');
+	if (!container) return;
+
+	fetch('{$escapedUrl}', {
+		method: '{$escapedMethod}',
+		headers: {
+			'X-Requested-With': 'XMLHttpRequest',
+			'Accept': 'text/html'
+		}
+	})
+	.then(response => {
+		if (!response.ok) throw new Error('Network response was not ok');
+		return response.text();
+	})
+	.then(html => {
+		container.innerHTML = html;
+	})
+	.catch(error => {
+		console.error('AJAX loading error:', error);
+		container.innerHTML = '<div class="alert alert-danger">{$escapedErrorText}</div>';
+	});
+})();
 JS;
 		$ret .= Html::script($script, ['type' => 'text/javascript']);
         return $ret;
