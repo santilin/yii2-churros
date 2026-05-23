@@ -238,6 +238,9 @@ trait ModelInfoTrait
 			}
 		}
 		$link = $base_route . self::getModelInfo('controller_name') . "/$action";
+		if (Yii::$app->controller === null) {
+			return $format === false ? '' : $this->recordDesc($format, 0);
+		}
 		if ($format == false) {
 			return Url::to(array_merge([$link], $this->getPrimaryKey(true)), $global);
 		} else {

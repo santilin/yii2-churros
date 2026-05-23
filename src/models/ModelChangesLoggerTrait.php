@@ -11,9 +11,15 @@ trait ModelChangesLoggerTrait
 	 */
 	private function _changedModelRelationName(): string
 	{
-		$nfield = $this->field??null;
-		if (!$nfield) {
-			$nfield = substr($this->value, 0, strpos($this->value, ':'));
+		$nfield = $this->field;
+		if ($nfield === null || $nfield === false || $nfield === '') {
+			$value = $this->value ?? '';
+			if (str_starts_with($value, '[')) {
+				$parsed = json_decode($value, true);
+				$nfield = (is_array($parsed) && isset($parsed[0][0])) ? $parsed[0][0] : null;
+			} else {
+				$nfield = substr($value, 0, strpos($value, ':') ?: 0);
+			}
 		}
 		$field = $this->getStaticFieldLabel($nfield);
 		if (($pos=strpos($field, '.')) === FALSE) {
@@ -80,8 +86,10 @@ trait ModelChangesLoggerTrait
 
 	public function commentsAddon(): string
 	{
-		$ret = $this->comments;
-		$ret .= \yii\helpers\Html::a('Edit', [ $this->getModelInfo('controller_name') . '/update/', 'id' => $this->id]);
+		$ret = $this->comments ?? '';
+		if (\Yii::$app->controller !== null) {
+			$ret .= \yii\helpers\Html::a('Edit', [ $this->getModelInfo('controller_name') . '/update/', 'id' => $this->id]);
+		}
 		return $ret;
 	}
 

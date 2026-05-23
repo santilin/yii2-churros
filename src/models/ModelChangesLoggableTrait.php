@@ -89,6 +89,9 @@ trait ModelChangesLoggableTrait
 			if ($event->name === self::EVENT_AFTER_INSERT) {
 				foreach ($this->getAttributes() as $fld => $current_value) {
 					if (false !== ($nfield = $model_change_class::findChangeableFieldIndex($model_name, $fld))) {
+						if ($current_value === null || trim($current_value) === '') {
+							continue;
+						}
 						$model_change = new $model_change_class();
 						$this->internalSaveModelChangeRecord($model_change, $record_id,
 							$model_change_class::V_TYPE_CREATE, $nfield, $current_value);
