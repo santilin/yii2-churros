@@ -13,7 +13,6 @@ trait ModelChangesLoggerTrait
 	{
 		$nfield = $this->field;
 		if ($nfield === null || $nfield === false || $nfield === '') {
-			throw new \Exception("Do this really happen?");
 			$value = $this->value ?? '';
 			if (str_starts_with($value, '[')) {
 				$parsed = json_decode($value, true);
