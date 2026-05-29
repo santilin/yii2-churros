@@ -133,13 +133,13 @@ trait ModelInfoTrait
 	public function recordDesc(?string $format = null, int $max_len = 0, $context = null): string
 	{
 		$ret = $_format = '';
-		if (!$format || $format == 'short') {
+		if (!$format || $format === 'short') {
 			$_format = self::getModelInfo('record_desc_format_short');
-		} elseif ($format == 'medium') {
+		} elseif ($format === 'medium' || $format === 'form_title') {
 			$_format = self::getModelInfo('record_desc_format_medium');
-		} elseif ($format == 'long' || $format == 'large' || $format == 'full') {
+		} elseif ($format === 'long' || $format === 'large' || $format === 'full') {
 			$_format = self::getModelInfo('record_desc_format_long');
-		} else if ($format == 'code&desc') {
+		} else if ($format === 'code&desc') {
 			$fields = static::findCodeAndDescFields();
 			$_format = '{' . implode('}, {',array_filter($fields)) . '}';
 		} else if ($format == 'desc') {

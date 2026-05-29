@@ -190,13 +190,13 @@ trait ModelChangesLoggableTrait
 		if ($type === self::$V_TYPE_CREATE) {
 			switch ($subtype) {
 				case self::$V_SUBTYPE_LINK:
-					return  " añadió {la} {title} `" . $new_value . "`";
+					return  "añadió {la} {title} `" . $new_value . "`";
 				case self::$V_SUBTYPE_CHANGE:
 					$changed_label = $this->getAttributeLabel($changed_field_name);
 					return "<mark>`$changed_label`</mark>: `$new_value`";
 				case 0: // grouped
 				default:
-					return  " creó {la} {title} `" . $new_value . "`";
+					return  "creó {la} {title} `" . $new_value . "`";
 			}
 		} else if ($type === self::$V_TYPE_UPDATE) {
 			$changed_label = $this->getAttributeLabel($changed_field_name);

@@ -18,15 +18,10 @@ trait ModelTrait
 	static public function applyScopes(ActiveQuery $q, string|array|null $scopes, bool $set_order_by = true): ActiveQuery
 	{
 		if (!empty($scopes)) {
-			if (is_string($scopes)) {
-				if ($scopes[0] == '[') {
-					$scopes = json_decode($scopes);
-				}
-				$all_scopes = explode(',', $scopes);
-			} else {
-				$all_scopes = [];
-				foreach ($scopes as $scope) {
-					if ($scope[0] == '[') {
+			$all_scopes = [];
+			foreach ((array) $scopes as $scope) {
+				if (is_string($scope)) {
+					if ($scope[0] === '[') {
 						$inner_scopes = json_decode($scope);
 						foreach ($inner_scopes as $inner_scope) {
 							$all_scopes = array_merge($all_scopes, explode(',', $inner_scope));
@@ -34,16 +29,18 @@ trait ModelTrait
 					} else {
 						$all_scopes = array_merge($all_scopes, explode(',', $scope));
 					}
+				} else {
+					$all_scopes[] = $scope;
 				}
 			}
 			$save_order = $q->orderBy;
 			foreach ($all_scopes as $scope) {
 				$scope_args = [];
-				$scope = trim($scope);
 				if (is_array($scope)) {
 					$scope_func = trim(array_shift($scope));
 					$scope_args = $scope;
 				} elseif (str_contains($scope, '(')) {
+					$scope = trim($scope);
 					// Handle scope like "porPuesto(9)" or "porPuesto('text')"
 					$paren_pos = strpos($scope, '(');
 					$scope_func = substr($scope, 0, $paren_pos);
