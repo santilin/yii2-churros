@@ -94,7 +94,7 @@ trait ModelChangesLoggableTrait
 						}
 						$model_change = new $model_change_class();
 						$this->internalSaveModelChangeRecord($model_change, $record_id,
-							$model_change_class::V_TYPE_CREATE, $nfield, $current_value);
+							$model_change_class::V_TYPE_CREATE, $nfield, $this->recordDesc('short'));
 						$must_trigger = true;
 					}
 				}
