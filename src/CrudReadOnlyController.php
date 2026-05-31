@@ -136,7 +136,6 @@ abstract class CrudReadOnlyController extends \yii\web\Controller
 		$params['master'] = $master;
 		$params['embedded'] = true;
 		$params['previous_context'] = $previous_context;
-		// $master->linkDetails($detail, $relation_name);
 		$this->layout = false;
 		return $this->render($view, [
 			'searchModel' => $detail,

@@ -100,7 +100,7 @@ class JsonController extends \yii\web\Controller
 		return $this->render('index', [
 			'searchModel' => $searchModel,
 			'indexParams' => $params,
-			'indexGrids' => [ '_grid' => [ '_grid', '', null, [], [] ] ]
+			'indexGrids' => [ '_grid' => [ '_grid', '', null, [], [], [] ] ]
 		]);
 	}
 
@@ -131,7 +131,7 @@ class JsonController extends \yii\web\Controller
 		return $this->render($view, [
 			'searchModel' => $detail,
 			'indexParams' => $this->changeActionParams($params, 'index', $detail),
-			'indexGrids' => [ '_grid' => [ '', null, [] ] ],
+			'indexGrids' => [ '_grid' => [ '', null, [], [] ] ],
 			'gridName' => $view,
 		]);
 	}
@@ -385,6 +385,8 @@ class JsonController extends \yii\web\Controller
 					$to = 'parent.view';
 					break;
 				case 'view':
+					$to = 'view';
+					break;
 				case 'index':
 				case '':
 					$to = 'index';

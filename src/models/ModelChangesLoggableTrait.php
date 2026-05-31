@@ -94,7 +94,7 @@ trait ModelChangesLoggableTrait
 						}
 						$model_change = new $model_change_class();
 						$this->internalSaveModelChangeRecord($model_change, $record_id,
-							$model_change_class::V_TYPE_CREATE, $nfield, $this->recordDesc('short'));
+							$model_change_class::V_TYPE_CREATE, $nfield, $current_value);
 						$must_trigger = true;
 					}
 				}
@@ -137,7 +137,11 @@ trait ModelChangesLoggableTrait
 		$model_change->field = $nfield;
 		$model_change->type = $type;
 		if ($type === $model_change::V_TYPE_CREATE) {
-			$model_change->value = $old_value;
+			if (self::$isJunctionModel) {
+				$model_change->value = $old_value;
+			} else {
+				$model_change->value = $this->recordDesc('short');
+			}
 			$model_change->changed_at = $this->created_at ?? new \yii\db\Expression("NOW()");
 			if (YII_ENV_TEST && !($this->created_by ?? false)) {
 				$model_change->changed_by = 1;
@@ -225,6 +229,92 @@ trait ModelChangesLoggableTrait
 	{
 		$changes_record = $e->getChangesRecord();
 		$changes_record->sendModelChangesNotification();
+	}
+
+	/**
+	 * Restore the record from history at a given point in time.
+	 * Reconstructs the model state using change log records up to the given timestamp.
+	 * For the last UPDATE of each field, falls back to the current DB value.
+	 */
+	public function getRecordAtTime(string $recordId, $timestamp): ?static
+	{
+		$logModelClass = static::$relations[static::$_log_model_changes_relation]['modelClass'];
+
+		$changes = $logModelClass::find()
+			->where(['record_id' => $recordId])
+			->andWhere(['<=', 'changed_at', $timestamp])
+			->orderBy(['id' => SORT_ASC])
+			->all();
+
+		if (empty($changes)) {
+			return null;
+		}
+
+		$model = new static();
+		$dbModel = static::findOne($recordId);
+
+		// Pre-populate with DB model attributes so the model is complete
+		// for computing virtual columns via save/refresh below
+		if ($dbModel) {
+			foreach ($dbModel->getAttributes() as $name => $value) {
+				if ($model->hasAttribute($name)) {
+					$model->$name = $value;
+				}
+			}
+		}
+
+		foreach ($changes as $change) {
+			$fieldLabel = $change::getStaticFieldLabel($change->field);
+			$parts = explode('.', $fieldLabel, 2);
+			$attrName = $parts[1] ?? null;
+			if ($attrName === null || !$model->hasAttribute($attrName)) {
+				continue;
+			}
+
+			if ($change->type === $logModelClass::V_TYPE_CREATE) {
+				$model->$attrName = $change->value;
+			} elseif ($change->type === $logModelClass::V_TYPE_UPDATE) {
+				$nextModel = $logModelClass::find()
+					->where(['>', 'id', $change->id])
+					->andWhere(['field' => $change->field])
+					->andWhere(['record_id' => $recordId])
+					->andWhere(['<=', 'changed_at', $timestamp])
+					->orderBy(['id' => SORT_ASC])
+					->one();
+				if ($nextModel) {
+					$model->$attrName = $nextModel->value;
+				} else if ($dbModel) {
+					$model->$attrName = $dbModel->$attrName;
+				}
+			}
+		}
+
+		// Compute virtual generated columns (e.g. nombre_completo)
+		// by temporarily persisting in a rolled-back transaction
+		$calculated = $model->refreshableAttributes();
+		if ($calculated !== [] && $model->getDb()->getTransaction() === null) {
+			$db = $model->getDb();
+			// Clear PK to avoid conflict on INSERT
+			$pkName = $model->primaryKey()[0] ?? null;
+			$savedPk = $pkName ? $model->$pkName : null;
+			if ($pkName) {
+				$model->$pkName = null;
+			}
+			$transaction = $db->beginTransaction();
+			try {
+				$model->save(false);
+				$model->refresh();
+				$transaction->rollBack();
+			} catch (\Exception $e) {
+				$transaction->rollBack();
+			}
+			// Restore PK after rollback
+			if ($pkName && $savedPk) {
+				$model->$pkName = $savedPk;
+			}
+		}
+
+		return $model;
 	}
 
 	public function createJunctionChangeLogs(ActiveRecord $main_model_change, array $relation): bool

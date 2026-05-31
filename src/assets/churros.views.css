@@ -20,7 +20,6 @@
   }
 }
 .header-toolbar {
-  margin-bottom: 0.125rem;
   display: flex;
 /*   align-items: baseline; */
   a, button {
@@ -76,6 +75,7 @@ fieldset {
     align-items: flex-end;
     padding: 0.125em;
     display: flex;
+    margin-bottom: 0.125rem;
     justify-content: space-between;
     .subtitle, .supertitle {
       font-variant: small-caps;
