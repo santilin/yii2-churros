@@ -357,4 +357,42 @@ trait ModelChangesLoggableTrait
 
 		return true;
 	}
+
+	public function createChangesLog(int $type, ?int $subtype, string $changed_field, mixed $new_value, mixed $old_value = null, mixed $extra = null, ?string $comments = null): bool
+	{
+		$model_name = $this->getModelInfo('model_name');
+		$model_change_class = static::$relations[static::$_log_model_changes_relation]['modelClass'];
+
+		$nfield = $model_change_class::findChangeableFieldIndex($model_name, $changed_field);
+		if ($nfield === false) {
+			return false;
+		}
+
+		$record_id = strval(count($this->primaryKey())==1 ? $this->getPrimaryKey() : json_encode($this->getPrimaryKey(true)));
+
+		$model_change = new $model_change_class();
+		if (!$model_change->getIsNewRecord()) {
+			$model_change->resetPrimaryKeys();
+			$model_change->setIsNewRecord(true);
+		}
+		$model_change->record_id = $record_id;
+		$model_change->field = $nfield;
+		$model_change->type = $type;
+		$model_change->subtype = $subtype ?? $model_change::V_SUBTYPE_CHANGE;
+		if ($type === $model_change::V_TYPE_CREATE) {
+			$model_change->value = $new_value;
+		} else {
+			$model_change->value = $old_value;
+		}
+		$model_change->changed_at = new \yii\db\Expression("NOW()");
+		if (\Yii::$app instanceof \yii\web\Application) {
+			$model_change->changed_by = \Yii::$app->user?->identity?->id;
+		} else {
+			$model_change->changed_by = \Yii::$app->params['user_identity_id'] ?? null;
+		}
+		if ($comments !== null) {
+			$model_change->comments = $comments;
+		}
+		return $model_change->save();
+	}
 }
