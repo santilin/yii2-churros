@@ -764,6 +764,7 @@ html;
         $url = ArrayHelper::getValue($layout_row, 'url');
         $method = ArrayHelper::getValue($layout_row, 'method', 'GET');
         $data = ArrayHelper::getValue($layout_row, 'data', []);
+		$title = ArrayHelper::getValue($layout_row, 'title', '');
         $loadingText = ArrayHelper::getValue($layout_row, 'loadingText', 'Loading...');
         $errorText = ArrayHelper::getValue($layout_row, 'errorText', 'Error loading content');
         $containerId = ArrayHelper::getValue($layout_row, 'containerId', 'ajax-container-' . uniqid());
@@ -774,6 +775,9 @@ html;
         }
 
         // Ensure URL is absolute
+        if (is_array($url) && $title) {
+			$url['title'] = $title;
+		}
         $url = Url::to($url);
 
         $containerOptions = ArrayHelper::getValue($layout_row, 'containerOptions', []);
@@ -805,16 +809,48 @@ html;
 			'Accept': 'text/html'
 		}
 	})
-	.then(response => {
-		if (!response.ok) throw new Error('Network response was not ok');
+	.then(async response => {
+		if (!response.ok) {
+			let detail = '';
+			try {
+				const body = await response.text().catch(() => '');
+				if (body) {
+					try {
+						const json = JSON.parse(body);
+						detail = json.message || json.error || json.statusText || '';
+					} catch {
+						detail = body.substring(0, 500);
+					}
+				}
+			} catch {}
+			const err = new Error(detail
+				? `HTTP \${response.status}: \${detail}`
+				: `HTTP \${response.status} \${response.statusText}`);
+			err.status = response.status;
+			err.detail = detail;
+			throw err;
+		}
 		return response.text();
 	})
 	.then(html => {
 		container.innerHTML = html;
 	})
 	.catch(error => {
-		console.error('AJAX loading error:', error);
-		container.innerHTML = '<div class="alert alert-danger">{$escapedErrorText}</div>';
+		const status = error.status || 0;
+		console.error(`AJAX [\${status}]`, error.detail || error.message, error);
+		let msg = '{$escapedErrorText}';
+		if (status >= 500) {
+			msg = 'Error recuperando los datos del servidor.';
+		} else if (status === 404) {
+			msg = 'El recurso solicitado no está disponible.';
+		} else if (status === 403 || status === 401) {
+			msg = 'No tienes permisos para acceder a `$title`.';
+		} else if (status === 0) {
+			msg = 'No se pudo conectar con el servidor. Comprueba tu conexión.';
+		} else if (error.detail) {
+			msg = error.detail;
+		}
+		container.innerHTML = '<div class="alert alert-danger">' + msg + '</div>';
 	});
 })();
 JS;
