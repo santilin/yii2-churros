@@ -762,6 +762,10 @@ html;
     protected function layoutAjaxContent(array $layout_row, string $layout_of_row): string
     {
         $url = ArrayHelper::getValue($layout_row, 'url');
+        if (!$url) {
+            Yii::error("AJAX row type requires a 'url' parameter");
+            return Html::tag('div', 'Missing URL for AJAX content', ['class' => 'alert alert-danger']);
+        }
         $method = ArrayHelper::getValue($layout_row, 'method', 'GET');
         $data = ArrayHelper::getValue($layout_row, 'data', []);
 		$title = ArrayHelper::getValue($layout_row, 'title', '');
@@ -769,10 +773,6 @@ html;
         $errorText = ArrayHelper::getValue($layout_row, 'errorText', 'Error loading content');
         $containerId = ArrayHelper::getValue($layout_row, 'containerId', 'ajax-container-' . uniqid());
 
-        if (!$url) {
-            Yii::error("AJAX row type requires a 'url' parameter");
-            return Html::tag('div', 'Missing URL for AJAX content', ['class' => 'alert alert-danger']);
-        }
 
         // Ensure URL is absolute
         if (is_array($url) && $title) {
@@ -785,7 +785,11 @@ html;
         $containerOptions['id'] = $containerId;
 
         // Initial loading state
-        $content = Html::tag('div', $loadingText, ['class' => 'ajax-loading']);
+        $loadingContent = Html::tag('div',
+            Html::tag('i', '', ['class' => 'fa-solid fa-spinner fa-spin fa-2x']) . "\n" . Html::tag('div', $loadingText, ['class' => 'mt-2']),
+            ['class' => 'text-center p-4']
+        );
+        $content = Html::tag('div', $loadingContent, ['class' => 'ajax-loading']);
 
         $ret = Html::tag('div', $content, $containerOptions);
 
