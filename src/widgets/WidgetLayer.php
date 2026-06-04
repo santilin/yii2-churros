@@ -761,9 +761,9 @@ html;
      */
     protected function layoutAjaxContent(array $layout_row, string $layout_of_row): string
     {
-        $url = ArrayHelper::getValue($layout_row, 'url');
+        $url = ArrayHelper::getValue($layout_row, 'content');
         if (!$url) {
-            Yii::error("AJAX row type requires a 'url' parameter");
+            Yii::error("AJAX row type requires the URL as 'content'");
             return Html::tag('div', 'Missing URL for AJAX content', ['class' => 'alert alert-danger']);
         }
         $method = ArrayHelper::getValue($layout_row, 'method', 'GET');
@@ -784,6 +784,8 @@ html;
         Html::addCssClass($containerOptions, 'ajax-content-container');
         $containerOptions['id'] = $containerId;
 
+        $options = ArrayHelper::getValue($layout_row, 'options', []);
+
         // Initial loading state
         $loadingContent = Html::tag('div',
             Html::tag('i', '', ['class' => 'fa-solid fa-spinner fa-spin fa-2x']) . "\n" . Html::tag('div', $loadingText, ['class' => 'mt-2']),
@@ -799,12 +801,14 @@ html;
 		$escapedMethod = $escapeJs($method);
 		$escapedContainerId = $escapeJs($containerId);
 		$escapedErrorText = $escapeJs(Html::encode($errorText));
+		$escapedOptions = $escapeJs(json_encode($options));
 
 		$script = <<<JS
 
 (function() {
 	const container = document.getElementById('{$escapedContainerId}');
 	if (!container) return;
+	const options = JSON.parse('{$escapedOptions}');
 
 	fetch('{$escapedUrl}', {
 		method: '{$escapedMethod}',
@@ -837,6 +841,14 @@ html;
 		return response.text();
 	})
 	.then(html => {
+		if (options['remove-if-selector']) {
+			const tmp = document.createElement('div');
+			tmp.innerHTML = html;
+			if (tmp.querySelector(options['remove-if-selector'])) {
+				container.remove();
+				return;
+			}
+		}
 		container.innerHTML = html;
 	})
 	.catch(error => {

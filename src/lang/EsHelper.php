@@ -76,6 +76,10 @@ class EsHelper
 		// Convert Spanish expression to lowercase for case-insensitive matching
 		$fecha_expr = mb_strtolower($fecha_expr, 'UTF-8');
 
+		// Handle relative date expressions: "hace X días" → "-X days", "dentro de X días" → "+X days"
+		$fecha_expr = preg_replace('/^hace\s+(\d+)\s+d[ií]as?$/u', '-$1 days', $fecha_expr);
+		$fecha_expr = preg_replace('/^dentro\s+de\s+(\d+)\s+d[ií]as?$/u', '+$1 days', $fecha_expr);
+
 		// Translate Spanish words to English
 		$english_expr = strtr($fecha_expr, $translations);
 
