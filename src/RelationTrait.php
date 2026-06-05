@@ -632,12 +632,19 @@ trait RelationTrait
         }
     }
 
-    protected function findRelationByModel(string $model_name): ?array
+    public static function findRelationByModel(string $model_name): ?array
 	{
-		foreach ($this::$relations as $relation_name => $rel_info) {
-			if ($rel_info['model'] == $model_name) {
-				// $rel_info['name'] = $relation_name;
-				return $rel_info;
+		if (str_contains($model_name, '\\')) { // with namespace
+			foreach (static::$relations as $relation_name => $rel_info) {
+				if ($rel_info['modelClass'] === $model_name) {
+					return $rel_info;
+				}
+			}
+		} else {
+			foreach (static::$relations as $relation_name => $rel_info) {
+				if ($rel_info['model'] === $model_name) {
+					return $rel_info;
+				}
 			}
 		}
 		return null;
