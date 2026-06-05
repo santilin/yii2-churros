@@ -140,7 +140,7 @@ trait ModelChangesLoggableTrait
 			if (self::$isJunctionModel) {
 				$model_change->value = $old_value;
 			} else {
-				$model_change->value = $this->recordDesc('short');
+				$model_change->value = $this->recordDesc('long');
 			}
 			$model_change->changed_at = $this->created_at ?? new \yii\db\Expression("NOW()");
 			if (YII_ENV_TEST && !($this->created_by ?? false)) {
