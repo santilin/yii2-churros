@@ -99,13 +99,13 @@ class JsonModel extends \yii\base\Model
     public function jsonArrayToModels(array $json_array, ?string $child_class = null): array
     {
         $models = [];
+        if (!$child_class) {
+            $child_class = get_class($this);
+        } // do not set parent_model as the fields are not loaded
         foreach ($json_array as $rk => $rm) {
             if (is_integer($rk) && ($rm === null || $rm === false)) {
                 continue;
             }
-            if (!$child_class) {
-                $child_class = get_class($this);
-            } // do not set parent_model as the fields are not loaded
             $child = new $child_class;
             $child->_json_modelable = $this->_json_modelable;
             $primary_key_set = false;

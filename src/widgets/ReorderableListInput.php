@@ -30,7 +30,6 @@ class ReorderableListInput extends \yii\widgets\InputWidget
 		}
 		$ret = Html::activeHiddenInput($this->model, $this->attribute . '[]', $hid_options);
 		$hid_name = Html::getInputName($this->model, $this->attribute);
-		$lis = [];
 		$id = $this->options['id'] = str_replace('-','_',$input_id) . '_list';
 		$this->view->registerJs(<<<js
 function {$id}_update_order_input(element, frm) {
@@ -64,6 +63,7 @@ $('.remove-button').on('click', function() {
 js
 			);
 		}
+		$lis = [];
 		$li_options = array_merge( [ 'data' => [ 'id' => null ]], $this->itemOptions);
 		foreach ($this->items as $value => $item) {
 			$li_options['data']['id'] = $value;
