@@ -97,6 +97,7 @@ class SimpleGridView extends \yii\grid\GridView
 			}
 		}
 		parent::init();
+		$this->processCombinedColumns();
 		if (count($this->groups) != 0 || $this->totalsRow) {
 			$this->beforeRow = function($model, $key, $index, $grid) {
 				$this->updateRowData($model, $key, $index);
@@ -136,15 +137,6 @@ class SimpleGridView extends \yii\grid\GridView
 			}
 		}
 		return null;
-	}
-
-	/**
-	 * {@inheritdoc}
-	 */
-	protected function initColumns()
-	{
-		parent::initColumns();
-		$this->processCombinedColumns();
 	}
 
 	/**

@@ -352,4 +352,30 @@ trait ControllerTrait
 	}
 
 
+	public function relationsToDelete(array $relations_behaviors): array
+	{
+		$ret = [];
+		foreach ($relations_behaviors as $rel_name => $rel_beh) {
+			if ($rel_beh === 'delete') {
+				$ret[] = $rel_name;
+			}
+		}
+		return $ret;
+	}
+
+	public function restrictedDelete(array $relations_behaviors): bool
+	{
+		$ret = true;
+		foreach ($relations_behaviors as $rel_name => $rel_beh) {
+			if ($rel_beh === 'restrict') {
+				if ($this->model->usedInRelation($rel_name)) {
+					$this->model->addError($rel_name, $this->model->t('churros', $this->getResultMessage('used_in_relation'),
+																	  [ 'relation_title' => $this->model->getAttributeLabel($rel_name) ]));
+					$ret = false;
+				}
+			}
+		}
+		return $ret;
+	}
+
 } // trait

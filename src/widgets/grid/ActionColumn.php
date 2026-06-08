@@ -82,6 +82,9 @@ class ActionColumn extends \yii\grid\ActionColumn
 	{
 		if (!isset($this->buttons[$name]) && strpos($this->template, '{' . $name . '}') !== false) {
 			$this->buttons[$name] = function ($url, $model, $key) use ($name, $iconName, $additionalOptions) {
+				if (!empty($additionalOptions['no-confirm'])) {
+					unset($additionalOptions['data-confirm'], $additionalOptions['no-confirm']);
+				}
 				$options = array_merge($this->buttonOptions, $additionalOptions);
 				Html::addCssClass($options, $this->buttonOptions['class']??[]);
                 Html::addCssClass($options, $name);

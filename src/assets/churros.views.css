@@ -68,6 +68,9 @@ fieldset {
 }
 
 .grid-view {
+  table.table {
+    margin-bottom: 0 !important;
+  }
   .condensed {
     font-family: 'Open Sans', sans-serif !important;
   }
@@ -86,6 +89,17 @@ fieldset {
       flex: 0 1 auto;
     }
   }
+  /* Grid footer con Bootstrap 5 puro */
+  .grid-footer {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    /*   margin-top: 1.5rem; */
+    /*   padding-top: 1rem; */
+    border-top: 1px solid var(--bs-border-color);
+    gap: 1rem;
+  }
+
   thead {
     th {
       &.condensed {
@@ -209,16 +223,6 @@ fieldset {
   margin-left: 0.25rem;
 }
 
-/* Grid footer con Bootstrap 5 puro */
-.grid-footer {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  margin-top: 1.5rem;
-  padding-top: 1rem;
-  border-top: 1px solid var(--bs-border-color);
-  gap: 1rem;
-}
 
 .grid-items-per-page {
   padding-left: 0 !important;
