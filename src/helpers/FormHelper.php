@@ -65,7 +65,7 @@ class FormHelper
 		}
 		foreach($views as $kv => $view_info) {
 			if ($_nv-- == 0) {
-				$form_class = $view_info[1];
+				$form_class = $view_info[2];
 				$form = new $form_class;
 				return $form->formName();
 			}

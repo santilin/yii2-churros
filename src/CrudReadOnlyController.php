@@ -154,7 +154,7 @@ abstract class CrudReadOnlyController extends \yii\web\Controller
 	public function actionView($id)
 	{
 		$params = $this->request->queryParams;
-		$this->model = $this->findModel($id, $params);
+		$this->model = $this->findModel($id, 'view', $params);
 		$params['permissions'] = $this->resolvePermissions($params['permissions'] ?? []);
 		if ($this->request->getIsAjax()) {
 			$this->layout = false;
@@ -222,7 +222,7 @@ abstract class CrudReadOnlyController extends \yii\web\Controller
 	public function actionPdf($id)
 	{
 		$params = $this->request->queryParams;
-		$this->model = $this->findModel($id, $params);
+		$this->model = $this->findModel($id, 'view', $params);
 		if (YII_DEBUG) {
             Yii::$app->getModule('debug')->instance->allowedIPs = [];
         }
@@ -473,14 +473,14 @@ abstract class CrudReadOnlyController extends \yii\web\Controller
 	public function actionHandyFieldValues(string $id, string $field)
 	{
 		\Yii::$app->response->format = \yii\web\Response::FORMAT_JSON;
-		$model = $this->findModel($id);
+		$model = $this->findModel($id, 'view');
 		return $model->handyFieldValues($field, null);
 	}
 
 	public function actionRelatedValues(string $id, string $relation, string $model_format = 'long')
 	{
 		\Yii::$app->response->format = \yii\web\Response::FORMAT_JSON;
-		$model = $this->findModel($id);
+		$model = $this->findModel($id, 'view');
 		$models = $model->$relation;
 		$result = [];
 		foreach ($models as $model) {
@@ -602,7 +602,7 @@ abstract class CrudReadOnlyController extends \yii\web\Controller
     public function genBaseBreadCrumbs(string $action_id, $model, array $view_params = []): array
 	{
 		$bcs_style = $this->breadCrumbsStyle ?? ['standard'];
-		$scenario = $model->scenario?:$action_id;
+		$scenario = $model->scenario ?: $action_id;
 		$permissions = $view_params['permissions'] ?? true;
 		$breadcrumbs = [];
 		$master = $this->getMasterModel();
@@ -659,7 +659,7 @@ abstract class CrudReadOnlyController extends \yii\web\Controller
 		if (!empty($prim_keys) && !$model::$isJunctionModel && !$model->isNewRecord) {
 			$breadcrumbs['model_model'] = [
 				'label' => $model->recordDesc('short', 25),
-				'url' => $scenario!='view' ? array_merge([$this->getActionRoute('view')], $prim_keys) : null,
+				'url' => $scenario != 'view' ? array_merge([$this->getActionRoute('view')], $prim_keys) : null,
 			];
 		}
 		return $breadcrumbs;

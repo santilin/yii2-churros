@@ -186,6 +186,16 @@ trait ModelChangesLoggableTrait
 		$model_change->saveOrFail();
 	}
 
+
+	public function formatGroupedModelChanges(int $type, array $changes): string
+	{
+		$ret = [];
+		foreach ($changes as $nfield => $change) {
+			$ret[] = $this->formatModelChange($type, $change[0], $nfield, $change[1], $change[2], $change[3]);
+		}
+		return implode(', ', $ret);
+	}
+
 	/**
 	 * @param ?int $subtype can be null on grouped changes
 	 */

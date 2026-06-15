@@ -85,4 +85,10 @@ trait NoRelationTrait
 		return $this->delete();
 	}
 
+
+	public static function findRelationByModel(string $model_name): ?array
+    {
+        return null;
+    }
+
 }

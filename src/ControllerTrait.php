@@ -298,8 +298,13 @@ trait ControllerTrait
 	/**
 	 * Override to adjust the _v param
 	 */
-	protected function changeSplitParams(array $params, $values, $field): array
+	protected function changeSplitParams(array $params, array $values, string $field, array $forms): array
 	{
+		foreach ($forms as $kf =>$form) {
+			if ($form[0] === '_' . $this->action->id . '_' . strtolower($values[$field])) {
+				$params['_v'] = $kf;
+			}
+		}
 		return $params;
 	}
 

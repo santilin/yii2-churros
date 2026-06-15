@@ -471,9 +471,9 @@ class JsonController extends \yii\web\Controller
 			$route = Url::to($action_id);
 		} else {
 			$route = $this->getRoutePrefix($this->getPath(), false) . $model->getPath();
-/*			if ($action_id == 'index') {
+			if ($action_id == 'index') {
 				$route = AppHelper::removeLastWord($route, '/') . '/index';
-			} else */if ($action_id) {
+			} else if ($action_id) {
 				$route .= "/$action_id";
 			}
 		}
@@ -575,12 +575,13 @@ class JsonController extends \yii\web\Controller
 		}
 		return $this->root_model;
 	}
+
 	/**
 	 * @todo @param $context
 	 */
 	public function genBaseBreadCrumbs(string $action_id, $model, array $view_params = []): array
 	{
-		$scenario = $model->scenario?:$action_id;
+		$scenario = $model->scenario ?: $action_id;
 		$permissions = $view_params['permissions'] ?? true;
 		$breadcrumbs = [];
 		$master = $this->getMasterModel();
@@ -593,7 +594,7 @@ class JsonController extends \yii\web\Controller
 			$keys = $master->getPrimaryKey(true);
 			$keys[0] = $prefix;
 			$master_keys = $keys;
-			$master_keys[0] .= 'jsedit';
+			$master_keys[0] .= 'design';
 			$breadcrumbs['app'] = [
 				'label' => $master->recordDesc('short', 25),
 				'url' => $master_keys
