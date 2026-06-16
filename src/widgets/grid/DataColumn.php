@@ -18,6 +18,7 @@ class DataColumn extends \yii\grid\DataColumn
 
 	public $summary;
     public string $combinedTemplate = '<div class="ps-2">{value1}<div class="small text-muted">{value2}</div></div>';
+    public string $combinedHeaderTemplate = '{value1}<br><span class="small text-muted">{value2}</span>';
     public ?string $combinedColumn = null;
     public $combinedColumnInstance = null;
     public int $combinedFilterType = self::COMBINED_FILTER_NONE;
@@ -36,6 +37,19 @@ class DataColumn extends \yii\grid\DataColumn
             Html::addCssClass($this->filterInputOptions, 'form-control-sm');
         }
         parent::init();
+    }
+
+    public function renderHeaderCell()
+    {
+        if ($this->combinedColumnInstance !== null) {
+            $label1 = $this->getHeaderCellLabel();
+            $label2 = $this->combinedColumnInstance->getHeaderCellLabel();
+            $content = strtr($this->combinedHeaderTemplate, ['{value1}' => $label1, '{value2}' => $label2]);
+            $options = $this->headerOptions;
+            Html::addCssClass($options, 'combined-header');
+            return Html::tag('th', $content, $options);
+        }
+        return parent::renderHeaderCell();
     }
 
 	// Da preferencia a las labels del searchmodel

@@ -53,28 +53,24 @@ class SessionAlert extends \yii\base\Widget
     public function run()
     {
         $session = Yii::$app->session;
-        $flashes = $session->getAllFlashes();
-        $appendClass = isset($this->options['options']['class']) ? ' ' . $this->options['options']['class'] : '';
+        $flashes = $session->getAllFlashes(true);
+        $appendClass = isset($this->htmlOptions['class']) ? ' ' . $this->htmlOptions['class'] : '';
 
         foreach ($flashes as $type => $flash) {
-            if (!isset($this->alertTypes[$type])) {
-                continue;
-            }
-
-            foreach ((array) $flash as $i => $message) {
-                if (!empty($message)) {
-                    echo \yii\bootstrap5\Alert::widget([
-                        'body' => $message,
-                        'closeButton' => $this->closeButton,
-                        'options' => array_merge($this->htmlOptions, [
-                            'id' => $this->getId() . '-' . $type . '-' . $i,
-                            'class' => $this->alertTypes[$type] . $appendClass,
-                        ]),
-                    ]);
+            if (isset($this->alertTypes[$type])) {
+                foreach ((array) $flash as $i => $message) {
+                    if (!empty($message)) {
+                        echo \yii\bootstrap5\Alert::widget([
+                            'body' => $message,
+                            'closeButton' => $this->closeButton,
+                            'options' => array_merge($this->htmlOptions, [
+                                'id' => $this->getId() . '-' . $type . '-' . $i,
+                                'class' => $this->alertTypes[$type] . $appendClass,
+                            ]),
+                        ]);
+                    }
                 }
             }
-
-            $session->removeFlash($type);
         }
     }
 }
