@@ -22,7 +22,7 @@ class SearchInput extends \yii\bootstrap5\InputWidget
 			$control_type = 'text';
 		}
 		$ret = '';
-		$scope = $this->formName??$this->model->formName();
+		$scope = $this->formName ?? $this->model->formName();
 		// $this->model is a ModelSearchTrait
 		$value = $this->model->$attribute;
 		if (is_array($value) && isset($value['op']) && isset($value['v'])) {
@@ -32,7 +32,7 @@ class SearchInput extends \yii\bootstrap5\InputWidget
 			$inputValue = $value['v'] ?? null;
 		}
 
-		if ($this->type == 'dropdown') {
+		if ($this->type === 'dropdown') {
 			$ret .= Html::hiddenInput("{$scope}[$attribute][op]", $value['op']);
 			if (isset($value['v'])) {
 				if (is_array($value['v'])) {
@@ -125,6 +125,9 @@ class SearchInput extends \yii\bootstrap5\InputWidget
 			Html::addCssClass($this->options, 'd-flex form-control');
 			Html::addCssStyle($this->options, [ 'width' => 'fit-content' ]);
 			Html::addCssStyle($this->options, [ 'min-width' => '100px' ]);
+			if ($inputValue === []) {
+				$inputValue = '';
+			}
 			$ret .= Html::input($control_type, "{$scope}[$attribute][v]", $inputValue, $this->options);
 		}
 		return $ret;
