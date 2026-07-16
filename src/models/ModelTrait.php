@@ -19,8 +19,10 @@ trait ModelTrait
 	{
 		if (!empty($scopes)) {
 			$all_scopes = [];
-			foreach ((array) $scopes as $scope) {
-				if (is_string($scope)) {
+			foreach ((array) $scopes as $func => $scope) {
+				if (!is_numeric($func)) {
+					$all_scopes[] = array_merge((array) $func, (array) $scope);
+				} else if (is_string($scope)) {
 					if ($scope[0] === '[') {
 						$inner_scopes = json_decode($scope);
 						foreach ($inner_scopes as $inner_scope) {

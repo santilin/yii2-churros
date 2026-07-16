@@ -544,7 +544,7 @@ trait RelationTrait
             } else {
                 $trans->rollBack();
             }
-        } catch (Exception $exc) {
+        } catch (\Exception $exc) {
             $trans->rollBack();
             throw $exc;
         }

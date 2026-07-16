@@ -227,13 +227,13 @@ class AppHelper
 		return substr($sentence, 0, $first_word_end);
 	}
 
-	public static function camelCase($str, array $noStrip = [])
+	public static function camelCase($str, array $noStrip = [], string $change_spaces = '')
 	{
 		// non-alpha and non-numeric characters become spaces
 		$str = preg_replace('/[^a-z0-9' . implode("", $noStrip) . ']+/i', ' ', trim($str));
 		// uppercase the first character of each word
 		$str = ucwords($str);
-		$str = str_replace(" ", '', $str);
+		$str = str_replace(" ", $change_spaces, $str);
 		return $str;
 	}
 
@@ -518,6 +518,16 @@ class AppHelper
 		}
 	}
 
-
+	public static function h(string $s, bool $uc_first = true): string
+	{
+		if (is_null($s)) {
+			return '';
+		}
+		$s = trim(str_replace('_', ' ', $s));
+		if ($uc_first) {
+			$s = StringHelper::mb_ucfirst($s);
+		}
+		return $s;
+	}
 
 }

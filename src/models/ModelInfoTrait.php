@@ -606,23 +606,29 @@ trait ModelInfoTrait
 	protected function findInForeignKeys(): array
 	{
 		$result = [ 'field' => '', 'value' => '', 'table' => '' ];
-
 		$relations = static::$relations ?? [];
 		$attrs = $this->getAttributes();
 		$tableName = $this->getDb()->schema->getRawTableName($this->tableName());
 
 		$oneToOneTypes = ['HasOne', 'OneToOne', 'JustHasOne'];
+		$rels = [];
 		foreach ($relations as $relName => $relDef) {
 			if (!in_array($relDef['type'], $oneToOneTypes)) {
 				continue;
 			}
-			$left = $relDef['left'];
-			$leftField = is_array($left) ? ($left[1] ?? null) : (strpos($left, '.') !== false ? substr($left, strrpos($left, '.') + 1) : $left);
-			if (!$leftField || !isset($attrs[$leftField])) {
-				continue;
+			$rels[] = $relName;
+			$lefts = (array) $relDef['left'];
+			$value = null;
+			foreach ($lefts as $left) {
+				$left_attr = strpos($left, '.') !== false
+					? substr($left, strrpos($left, '.') + 1)
+					: $left;
+				$value = $attrs[$left_attr] ?? null;
+				if ($value === null) {
+					break;
+				}
 			}
-			$value = $attrs[$leftField];
-			if ($value === null || $value === 0 || $value === '') {
+			if ($value === null) {
 				continue;
 			}
 
@@ -635,13 +641,11 @@ trait ModelInfoTrait
 			}
 
 			$result = [
-				'field' => $leftField,
+				'field' => implode(',', $lefts),
 				'value' => $value,
 				'table' => $relDef['relatedTablename'] ?? $relDef['table'] ?? '',
 			];
-			break;
 		}
-
 		return $result;
 	}
 

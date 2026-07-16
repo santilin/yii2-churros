@@ -518,7 +518,7 @@ js;
 						}
 					}
 				}
-			$ret .= $row_html;
+				$ret .= $row_html;
 				break;
 
 			case 'buttons':
@@ -546,6 +546,7 @@ js;
 				$ret .= $this->layoutSubtitle($layout_row['content'], $layout_row_layout, 'large', $layout_row['htmlOptions']??[]);
 				break;
 			case 'label&content':
+			case 'form-control':
 				$col_added = false;
 				if (!$this->lastWasCol()) {
 					$this->setLastCol($cols);
@@ -555,6 +556,7 @@ js;
 				if (!array_key_exists('htmlOptions', $layout_row)) {
 					$layout_row['htmlOptions'] = [];
 				}
+				Html::addCssClass($layout_row['htmlOptions'], $layout_row_type);
 				// Html::addCssClass($layout_row['htmlOptions'], [ 'form-control readonly' ]);
 				$ret .= $this->layoutContent($layout_row['label'],
 					$layout_row['content'] ?: $layout_row['options']['emptyValue'] ?? '&nbsp;',
