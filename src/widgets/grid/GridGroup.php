@@ -215,7 +215,7 @@ class GridGroup extends BaseObject
 				'{group_footer_label}' => $this->footer['label'] ?? '',
 			]);
 		}
-		return $this->getSummaryContent($summary_columns, $label, $colspan, $label_options);
+		return $this->getSummaryContent($summary_columns, $label ?: '', $colspan, $label_options);
 	}
 
 	/**

@@ -145,6 +145,9 @@ class FormHelper
 		}
 		if (is_string($_nv)) {
 			foreach ($views as $view => $view_info) {
+				if (is_numeric($view)) {
+					$view = $view_info[0];
+				}
 				if ($view === $_nv || AppHelper::lastWord($view, '/') === $_nv) {
 					return $view_info;
 				}

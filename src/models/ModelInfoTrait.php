@@ -753,6 +753,38 @@ trait ModelInfoTrait
 		}
 	}
 
+	/**
+	 * Inline validator that evaluates handyFieldValues range at validation time.
+	 * Use in rules() as: ['field', 'validateInRange', 'params' => ['field' => 'name', 'allowArray' => false, 'strict' => false, 'not' => false]]
+	 */
+	public function validateInRange($attribute, $params)
+	{
+		$field = $params['field'] ?? $attribute;
+		$allowArray = $params['allowArray'] ?? false;
+		$strict = $params['strict'] ?? false;
+		$not = $params['not'] ?? false;
+		$range = array_keys($this->handyFieldValues($field, 'range'));
+		$value = $this->$field;
+		if (is_array($value)) {
+			if (!$allowArray) {
+				$this->addError($attribute, Yii::t('yii', '{attribute} is an array.'));
+				return;
+			}
+			$valid = true;
+			foreach ($value as $v) {
+				if (!in_array($v, $range, $strict)) {
+					$valid = false;
+					break;
+				}
+			}
+		} else {
+			$valid = in_array($value, $range, $strict);
+		}
+		if ($not ? $valid : !$valid) {
+			$this->addError($attribute, Yii::t('yii', "{attribute} value `$value` is not in its range of values: " . implode(', ', $range)));
+		}
+	}
+
 	public function asDate($fldname): ?YADTC
 	{
 		return YADTC::fromSQL($this->$fldname);
