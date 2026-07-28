@@ -565,14 +565,13 @@ trait ModelInfoTrait
 		}
 	}
 
-	public function addErrorFromException(\Throwable $e)
+	public function addErrorFromException(\Throwable $e, string $error_key = null)
 	{
 		$message = $e->getMessage();
-		$devel_info = YII_ENV_PROD ? '' : "\n$message";
+		$devel_info = YII_ENV_PROD ? '' : "\n<devel>$message</devel>";
 		$error = Yii::t("churros", "Data was not saved in order to maintain the database integrity.");
 		$error_data = [ 'offending' => '' ];
-		$error_key = get_class($e);
-		if ($error_key === 'yii\db\IntegrityException') {
+		if (get_class($e) === 'yii\db\IntegrityException') {
 			switch (intval($e->getCode())) {
 				case 23000:
 					if (preg_match('/UNIQUE constraint failed:\s*(.*)/i', $message, $matches)) {
@@ -587,19 +586,20 @@ trait ModelInfoTrait
 						$error_key = 'foreign_key';
 						$fk_info = $this->findInForeignKeys();
 						if ($fk_info['field']) {
-							$error = "The value '{offending}' in field '{field}' does not exist in the related table '{table}'";
 							$error_data = [
 								'offending' => $fk_info['value'],
 								'field' => $fk_info['field'],
 								'table' => $fk_info['table'],
 							];
+							$error = "The value '{offending}' in field '{field}' does not exist in the related table '{table}'";
 						} else {
-							$error = "Foreign key constraint failed. Check that related records exist";
+							$error = "Foreign key constraint failed.";
 						}
 					}
 					break;
 			}
 		}
+		$error_key ??= get_class($e);
 		$this->addError($error_key, Yii::t('churros', $error, $error_data) . $devel_info);
 	}
 

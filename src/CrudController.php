@@ -139,8 +139,9 @@ abstract class CrudController extends CrudReadOnlyController
 				$this->addWarningFlashes($this->model);
 				return $this->redirect($this->returnTo(null, 'delete', $this->model));
 			} else {
-				Yii::$app->session->addFlash('error', $this->model->t('churros', $this->getResultMessage('error_delete')));
-				$this->addErrorFlashes($this->model);
+				if (!$this->model->hasErrors()) {
+					Yii::$app->session->addFlash('error', $this->model->t('churros', $this->getResultMessage('error_delete')));
+				}
 			}
 		} catch (\yii\db\IntegrityException $e) {
 			$this->model->addError('delete', $this->model->t('churros',

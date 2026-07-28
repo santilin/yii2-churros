@@ -293,7 +293,7 @@ trait RelationTrait
 				$trans->rollBack();
 			}
             $this->isNewRecord = $wasNewRecord;
-            $this->addErrorFromException($e);
+            $this->addErrorFromException($e, 'save');
 			return false;
         }
     }
@@ -495,7 +495,11 @@ trait RelationTrait
                     $trans->rollBack();
                 }
             }
-        } catch (Exception $e) {
+		} catch (\yii\db\IntegrityException $e) {
+			$trans->rollBack();
+			$this->addErrorFromException($e, 'delete');
+			return false;
+        } catch (\Exception $e) {
             $trans->rollBack();
             throw $e;
         }
