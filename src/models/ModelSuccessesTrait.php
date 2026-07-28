@@ -8,7 +8,7 @@ Trait ModelSuccessesTrait
 	/**
 	 * @var array saving success messages (attribute name => array of messages)
 	 */
-	private ?array $_successes = null;
+	private array $_successes = [];
 
 	/**
 	 * Returns a value indicating whether there is any success after saving the model
@@ -16,7 +16,7 @@ Trait ModelSuccessesTrait
 	 */
 	public function hasSuccesses()
 	{
-		return !empty($this->_successes);
+		return count($this->_successes) !== 0;
 	}
 
 	/**
@@ -28,7 +28,7 @@ Trait ModelSuccessesTrait
 	 */
 	public function getSuccesses()
 	{
-		return $this->_successes === null ? [] : $this->_successes;
+		return $this->_successes;
 	}
 
 	/**
@@ -58,12 +58,12 @@ Trait ModelSuccessesTrait
 	 */
 	public function addSuccesses(array $items)
 	{
-		$this->_successes += $items;
+		$this->_successes = array_merge((array) $this->_successes, $items);
 	}
 
-	public function addSuccessesFrom(ModelSuccessesTrait $model)
+	public function addSuccessesFrom($model)
 	{
-		// $this->addSuccesses($model->getSuccesses);
+		self::addSuccesses($model->getSuccesses());
 	}
 
 	/**
@@ -90,7 +90,7 @@ Trait ModelSuccessesTrait
 	 */
 	public function clearSuccesses($attribute = null)
 	{
-		$this->_successes = null;
+		$this->_successes = [];
 	}
 
 	public function successMessage(string $module, string $controller, string $action)

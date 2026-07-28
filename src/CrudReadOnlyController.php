@@ -57,7 +57,7 @@ abstract class CrudReadOnlyController extends \yii\web\Controller
 
 	public function beforeAction($action)
 	{
-        if (count($_POST) == 0 && count($_FILES) == 0 && isset($_SERVER['CONTENT_TYPE'])
+        if (count($_POST) === 0 && count($_FILES) === 0 && isset($_SERVER['CONTENT_TYPE'])
 			&& substr($_SERVER['CONTENT_TYPE'], 0, 19) == 'multipart/form-data') {
 			if ($this->request->getMethod() === 'POST' && isset($_SERVER['CONTENT_LENGTH'])) {
 				if (intval($_SERVER['CONTENT_LENGTH'])>0) {
@@ -67,7 +67,7 @@ abstract class CrudReadOnlyController extends \yii\web\Controller
 				}
 			}
         }
-        if (YII_ENV_TEST && $action->id == "delete") {
+        if (YII_ENV_TEST && $action->id === "delete") {
 			$this->enableCsrfValidation = false;
 		}
         return parent::beforeAction($action);

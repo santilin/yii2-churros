@@ -36,6 +36,8 @@ class ReorderableGridView extends GridView
 	public $reorderMethod = 'post';
 	/** @var string POST parameter carrying the ordered keys (posted as `<param>[]=key`) */
 	public $reorderKeysParam = 'keys';
+	/** @var array extra key/value pairs posted alongside the keys (e.g. ['relation_name' => 'jsonModuleMenuItem']) */
+	public $reorderData = [];
 	/** @var bool whether to prepend a drag-handle column */
 	public $showHandleColumn = true;
 	/** @var string the grab-handle icon markup */
@@ -117,11 +119,14 @@ css
 			$url = Url::to($this->reorderUrl);
 			$param = $this->reorderKeysParam;
 			$method = strtoupper($this->reorderMethod);
+			$extra = Json::encode(array_merge($this->reorderData, ['_csrf' => new JsExpression('yii.getCsrfToken()')]));
 			$postJs = <<<js
+	var data = $extra;
+	data['$param'] = keys;
 	jQuery.ajax({
 		url: '$url',
 		method: '$method',
-		data: { '$param': keys, '_csrf': yii.getCsrfToken() },
+		data: data,
 		error: function (xhr) { console.error('reorder failed', xhr && xhr.responseText); }
 	});
 js;

@@ -61,7 +61,8 @@ class AppHelper
 
 	static public function removeDirRec(string $path): bool
 	{
-		return exec('rm -rf ' . escapeshellarg($path));
+		exec('rm -rf ' . escapeshellarg($path), $output, $result);
+		return $result === 0;
 	}
 
 	static public function checkWritableDir(string $path, int $perm = 0775, ?string $eol = "\n"): bool
