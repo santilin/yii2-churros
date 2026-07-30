@@ -67,13 +67,13 @@ class AppHelper
 
 	static public function checkWritableDir(string $path, int $perm = 0775, ?string $eol = "\n"): bool
 	{
-		if ($eol ) echo "Checking if $path is writable...$eol";
+		if ($eol) echo "Checking if $path is writable...$eol";
 		if (!is_dir($path)) {
-			if (@mkdir($path, $perm)) {
-				if ($eol ) echo "$path: created$eol";
+			if (@mkdir($path, $perm, true)) {
+				if ($eol) echo "$path: created$eol";
 			} else {
 				$error = error_get_last();
-				if ($eol ) echo "$path: " . $error['message'] . $eol;
+				if ($eol) echo "$path: " . $error['message'] . $eol;
 				return false;
 			}
 		} else {
@@ -83,10 +83,10 @@ class AppHelper
         }
 		if (!is_writable($path)) {
 			$whoami = exec('whoami');
-			if ($eol ) echo $path . ": not writable by $whoami user$eol";
+			if ($eol) echo $path . ": not writable by $whoami user$eol";
 			return false;
 		} else {
-			if ($eol ) echo $path . ": Ok$eol";
+			if ($eol) echo $path . ": Ok$eol";
 		}
 		return true;
 

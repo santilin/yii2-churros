@@ -195,12 +195,12 @@ trait ControllerTrait
 		$master_models = [];
 		$last_model_class = '';
 		foreach (array_reverse($models_hierarchy) as $hierarchy_model_name => $hierarchy_relation_name) {
-			if ($hierarchy_model_name == $model->getModelInfo('model_name')) {
+			if ($hierarchy_model_name === $model->getModelInfo('model_name')) {
 				$last_model_class = $hierarchy_model_name;
 				$master_models[] = $model;
 				continue;
 			}
-			if ($last_model_class == '') {
+			if ($last_model_class === '') {
 				unset($models_hierarchy[$hierarchy_model_name]);
 				continue;
 			}
@@ -234,7 +234,7 @@ trait ControllerTrait
 		array|bool $permissions = [], bool $last_one = false): array
 	{
 		$breadcrumbs = [];
-		if ($prefix == '') {
+		if ($prefix === '') {
 			$prefix = $this->getBaseRoute() . '/';
 		}
 		$prefix .= $model->controllerName(). '/';

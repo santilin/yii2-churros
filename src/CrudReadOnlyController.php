@@ -351,7 +351,7 @@ abstract class CrudReadOnlyController extends \yii\web\Controller
 			list($to_model, $to_action) = AppHelper::splitString($to, '.');
 		}
 		if ($to_model) {
-			if ($to_model == 'parent') {
+			if ($to_model === 'parent') {
 				if ($this->getMasterModel()) {
 					$model = $this->masterModel;
 				} else {
@@ -359,9 +359,17 @@ abstract class CrudReadOnlyController extends \yii\web\Controller
 						$to_action = 'index'; // if not parent.view, then this.index.
 					}
 				}
-			} else if ($to_model == 'model') {
+			} else if ($to_model === 'model') {
 			} else {
-				$model = $$to_model;
+				try {
+					$model = $model->$to_model;
+				} catch (\yii\base\UnknownPropertyException $e) {
+					try {
+						$model = $$to_model;
+					} catch (\Exception $e) {
+						throw $e;
+					}
+				}
 			}
 		}
 		$pk = $model->getPrimaryKey(true);
