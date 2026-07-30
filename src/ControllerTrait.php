@@ -215,10 +215,9 @@ trait ControllerTrait
 			$master_model = $master_models[$nbc];
 			$bc = $this->modelBreadCrumbs($master_model, $scenario, $prefix, $viewParams['permissions'] ?? [], $nbc == 0);
 			$url = $bc[1]['url'] ?? null;
-			if (is_array($url)) {
-				$url0 = ArrayHelper::remove($url, 0, '');
-				// El prefijo es sólo el path desde el padre directo
-				$prefix = Url::toRoute(array_merge([substr($url0, strlen($prefix))], $url)) . '/';
+			if (is_array($url) && $nbc > 0) {
+				$pk = $master_model->getPrimaryKey(true);
+				$prefix = $this->getBaseRoute() . '/' . $master_model->controllerName() . '/' . implode('/', $pk) . '/';
 			}
 			$breadcrumbs = array_merge($breadcrumbs, $bc);
 		}
