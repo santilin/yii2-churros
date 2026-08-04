@@ -123,11 +123,38 @@ css
 			$postJs = <<<js
 	var data = $extra;
 	data['$param'] = keys;
+	function churrosReorderAlert$fn(level, messages) {
+		if (!messages || !messages.length) { return; }
+		var box = jQuery('<div class="alert alert-' + level + ' alert-dismissible fade show reorder-alert" role="alert">'
+			+ '<button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>'
+			+ '</div>');
+		var items = [];
+		jQuery.each(messages, function (i, m) {
+			items.push(jQuery('<div>').text(m).html());
+		});
+		box.prepend(items.join('<br>'));
+		box.find('.btn-close').on('click', function () { box.remove(); });
+		jQuery('#$id').before(box);
+	}
 	jQuery.ajax({
 		url: '$url',
 		method: '$method',
 		data: data,
-		error: function (xhr) { console.error('reorder failed', xhr && xhr.responseText); }
+		success: function (response) {
+			if (response && response.result === 'error') {
+				var msgs = (response.error || []).slice();
+				if (response.warning && response.warning.length) {
+					msgs = msgs.concat(response.warning);
+				}
+				churrosReorderAlert$fn(msgs.length ? 'danger' : 'warning', msgs);
+			} else if (response && response.warning && response.warning.length) {
+				churrosReorderAlert$fn('warning', response.warning);
+			}
+		},
+		error: function (xhr) {
+			console.error('reorder failed', xhr && xhr.responseText);
+			churrosReorderAlert$fn('danger', [xhr && xhr.responseText ? xhr.responseText : 'reorder failed']);
+		}
 	});
 js;
 		}
