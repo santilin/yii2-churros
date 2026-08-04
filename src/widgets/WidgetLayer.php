@@ -34,7 +34,8 @@ class WidgetLayer
 	}
 
 	public function layout(string $type, string $form_layout = '1col',
-						   string $size = 'large', string $style = 'grid'): string
+						   string $size = 'large', string $style = 'grid',
+						   array $html_options = []): string
 	{
 		if (empty($this->widgetsLayout)) {
 			$this->widgetsLayout = [
@@ -60,7 +61,7 @@ class WidgetLayer
 			'size' => $size,
 			'style' => $style,
 			'layout' => $form_layout??'1col',
-		]);
+			], null, $html_options);
 		$not_used = array_diff(array_keys($this->widgets), $this->widgets_used);
 		if (!empty($not_used)) {
 			Yii::warning("Widgets in form not used in layout: '" . implode("','",$not_used) . "'");
@@ -108,18 +109,14 @@ class WidgetLayer
 				];
 			}
 		}
-		if (!array_key_exists('type', $layout_row)) {
-			$layout_row_type = 'fields';
-		} else {
-			$layout_row_type = $layout_row['type'];
-		}
+		$layout_row_type = $layout_row['type'] ?? 'fields';
 		$layout_row_layout = $layout_row['layout'] ?? '1col';
 		if ($layout_row_type === 'container') { // deprecated
-			$layout_row_type = $layout_row['style'];
+			throw new \Exception("deprecated `container` type: use one of 'tabs', 'accordion', 'details', 'rows', 'cols', 'collapsable");
 		}
 		$container_styles = ['tabs', 'accordion', 'details', 'rows', 'cols', 'collapsable'];
-		$is_container_type = in_array($layout_row_type, $container_styles);
-		if ($is_container_type && empty($layout_row['style'])) {
+		$is_container = in_array($layout_row_type, $container_styles);
+		if ($is_container && empty($layout_row['style'])) {
 			$layout_row_style = $layout_row_type;
 		} else {
 			$layout_row_style = empty($layout_row['style'])
@@ -127,12 +124,11 @@ class WidgetLayer
 				: $layout_row['style'];
 		}
 		$layout_row['size'] ??= $parentOptions['size'] ?? 'large';
-		if ($layout_row_layout == 'inline') {
+		if ($layout_row_layout === 'inline') {
 			$cols = 10000;
 		} else {
 			$cols = intval($layout_row_layout);
 		}
-		$is_container = $layout_row_type === 'container' || $is_container_type;
 		if ($is_container) {
 			$ret .= "<!--container $layout_row_style ($layout_row_type): $rowKey-->";
 			$row_added = false;
@@ -366,10 +362,10 @@ js;
 				if (($parentOptions['layout'] ?? $layout_row_layout) === 'inline') {
 					$ret .= "<div class=\"d-flex lay-$cols-cols lay-{$this->lastLevel()}-lvl\">";
 				} else {
-					$row_attrs = $layout_row['htmlOptions'] ?? [];
+					$row_attrs = array_merge($htmlOptions, $layout_row['htmlOptions'] ?? []);
 					Html::addCssClass($row_attrs, "row d-flex lay-$cols-cols lay-{$this->lastLevel()}-lvl");
 					if (!empty($layout_row['id'])) {
-						$row_attrs['id'] = $layout_row['id'];
+						throw  new \Exception("deprecated use of `id` in layour row. Use `htmlOptins`");
 					}
 					$ret .= Html::beginTag('div', $row_attrs);
 					$this->setLastRow($cols);
@@ -379,16 +375,8 @@ js;
 			$col_added = false;
 			$row_html = '';
 			switch ($layout_row_type) {
-			case 'fieldset':
-				if (($title = $layout_row['title'] ?? false) != false) {
-					$legend = Html::tag('legend', $title, $layout_row['title_options']??[]);
-					$ret .= Html::tag('fieldset', "$legend<hr/><div class=row>$row_html</div>", $layout_row['htmlOptions']??[]);
-				} else {
-					$ret .= $row_html;
-				}
-				break;
-
 			case 'fields':
+			case 'fieldset':
 			case 'widgets':
 				$indexf = 0;
 				$only_widget_names = true;
@@ -518,7 +506,22 @@ js;
 						}
 					}
 				}
-				$ret .= $row_html;
+				if ($layout_row_type === 'fieldset') {
+					$fieldset_options = $layout_row['htmlOptions'] ?? [];
+					// a string key in fieldsLayout names the fieldset, so views and
+					// scripts can target it without hardcoding an id in htmlOptions
+					if (!isset($fieldset_options['id']) && is_string($rowKey) && $rowKey !== '') {
+						$fieldset_options['id'] = $rowKey;
+					}
+					if (($title = $layout_row['title'] ?? false) !== false) {
+						$legend = Html::tag('legend', $title, $layout_row['title_options']??[]);
+						$ret .= Html::tag('fieldset', "$legend<hr/><div class=row>$row_html</div>", $fieldset_options);
+					} else {
+						$ret .= $row_html;
+					}
+				} else {
+					$ret .= $row_html;
+				}
 				break;
 
 			case 'buttons':
