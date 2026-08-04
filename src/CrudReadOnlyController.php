@@ -390,7 +390,7 @@ abstract class CrudReadOnlyController extends \yii\web\Controller
 				$redirect_params = array_merge($redirect_params, $pk);
 		}
 		if ($to_model) {
-			$redirect_params[0] = Url::to('/' . $this->getBaseRoute() . '/' . $model->controllerName()
+			$redirect_params[0] = Url::to('/' . $this->getBaseRoute($model)
 				. '/' . $to_action, $pk);
 		} else {
 			$redirect_params[0] = $this->getActionRoute($to_action);
@@ -615,7 +615,7 @@ abstract class CrudReadOnlyController extends \yii\web\Controller
 		$breadcrumbs = [];
 		$master = $this->getMasterModel();
 		if ($master) {
-			$prefix = $this->getBaseRoute() . '/' . $master->controllerName(). '/';
+			$prefix = $this->getBaseRoute($master) . '/';
 			$breadcrumbs['master_index'] = [
 				'label' => StringHelper::mb_ucfirst($master->getModelInfo('title_plural')),
 				'url' => [ $prefix . 'index']

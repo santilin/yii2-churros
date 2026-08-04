@@ -45,15 +45,20 @@ trait ControllerTrait
 
 	// mainly for breadcrumbs
 	// Gets the whole request path, not this controllers path
-	public function getBaseRoute(): string
+	public function getBaseRoute($model = null): string
 	{
+		$ret = '';
 		if ($this->module instanceof \yii\base\Application) {
-			return '';
+			$ret = '';
 		} else if (static::$_prefix) {
-			return '/' . static::$_prefix;
+			$ret = '/' . static::$_prefix;
 		} else {
-			return '/' . $this->module->getUniqueId();
+			$ret = '/' . $this->module->getUniqueId();
 		}
+		if ($model) {
+			$ret .= '/' . $model->controllerName();
+		}
+		return $ret;
 	}
 
 	public function getRoutePrefix($route = null, bool $add_slash = true): string
@@ -217,7 +222,7 @@ trait ControllerTrait
 			$url = $bc[1]['url'] ?? null;
 			if (is_array($url) && $nbc > 0) {
 				$pk = $master_model->getPrimaryKey(true);
-				$prefix = $this->getBaseRoute() . '/' . $master_model->controllerName() . '/' . implode('/', $pk) . '/';
+				$prefix = $this->getBaseRoute($master_model) . '/' . implode('/', $pk) . '/';
 			}
 			$breadcrumbs = array_merge($breadcrumbs, $bc);
 		}
@@ -300,8 +305,10 @@ trait ControllerTrait
 	protected function changeSplitParams(array $params, array $values, string $field, array $forms): array
 	{
 		foreach ($forms as $kf =>$form) {
-			if ($form[0] === '_' . $this->action->id . '_' . strtolower($values[$field])) {
+			$frm_name = '_' . $this->action->id . '_' . strtolower($values[$field]);
+			if ($form[0] === $frm_name || $kf === $frm_name) {
 				$params['_v'] = $kf;
+				break;
 			}
 		}
 		return $params;

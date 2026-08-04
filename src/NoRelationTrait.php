@@ -91,4 +91,8 @@ trait NoRelationTrait
         return null;
     }
 
+    public function reloadRelations(array $relations)
+    {
+    }
+
 }

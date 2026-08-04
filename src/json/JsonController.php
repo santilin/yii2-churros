@@ -470,7 +470,7 @@ class JsonController extends \yii\web\Controller
 				. '/' . implode('/', $path_parts) . '/' . $action_id[0];
 			$route = Url::to($action_id);
 		} else {
-			$route = $this->getRoutePrefix($this->getPath(), false) . $model->getPath();
+			$route = $this->getRoutePrefix($this->getPath(), false) . $model?->getPath();
 			if ($action_id == 'index') {
 				$route = AppHelper::removeLastWord($route, '/') . '/index';
 			} else if ($action_id) {
@@ -586,7 +586,7 @@ class JsonController extends \yii\web\Controller
 		$breadcrumbs = [];
 		$master = $this->getMasterModel();
 		if ($master) {
-			$prefix = $this->getBaseRoute() . '/' . $master->controllerName(). '/';
+			$prefix = '/prj/project/';
 			$breadcrumbs['root'] = [
 				'label' => StringHelper::mb_ucfirst($master->getModelInfo('title_plural')),
 				'url' => [ $prefix . 'index']
@@ -611,6 +611,7 @@ class JsonController extends \yii\web\Controller
 				];
 			}
 		}
+		$keys[0] = '/app/project';
 		$partial_path = Url::to($keys) . '/';
 		$path_parts = $model->pathParts();
 		for ($p=1; $p<count($path_parts); $p++) {

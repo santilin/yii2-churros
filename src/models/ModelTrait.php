@@ -96,7 +96,8 @@ trait ModelTrait
 	 * @param string $prefix The prefix to filter properties by.
 	 * @return array An array of property names that start with the specified prefix.
 	 */
-	public function attributesWithPrefix(string $prefix, bool $remove_prefix = false)
+	public function attributesWithPrefix(string $prefix, bool $remove_prefix = false,
+										 bool $remove_prop = false): array
 	{
 		// Get all class properties
 		$classProperties = get_object_vars($this);
@@ -106,6 +107,9 @@ trait ModelTrait
 		$lp = strlen($prefix);
 		foreach ($classProperties as $kp => $p) {
 			if (strpos($kp, $prefix) === 0) {
+				if ($remove_prop) {
+					unset($this->$kp);
+				}
 				if ($remove_prefix) {
 					$kp = substr($kp, $lp);
 				}
@@ -117,7 +121,7 @@ trait ModelTrait
 	}
 
 	/**
-	 * Get all attributes that start with a given prefix.
+	 * Get all attributes that doesn't start with a given prefix.
 	 *
 	 * @param string $prefix The prefix to filter properties by.
 	 * @return array An array of property names that start with the specified prefix.

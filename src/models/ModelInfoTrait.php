@@ -782,7 +782,9 @@ trait ModelInfoTrait
 		}
 		if ($not ? $valid : !$valid) {
 			$shown_value = is_array($value) ? implode(', ', $value) : $value;
-			$this->addError($attribute, Yii::t('yii', "{attribute} value `$shown_value` is not in its range of values: " . implode(', ', $range)));
+			$this->addError($attribute, Yii::t('yii', "{attribute} value `$shown_value` is not in its range of values: " . implode(', ', $range), [
+					'attribute' => $attribute
+				]));
 		}
 	}
 
