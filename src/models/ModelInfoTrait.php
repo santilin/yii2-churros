@@ -582,16 +582,21 @@ trait ModelInfoTrait
 						$error_key = 'duplicated';
 						$error = "The '{offending}' data is duplicated";
 						$error_data = [ 'offending' => $matches[1] ];
-					} elseif (preg_match('/FOREIGN KEY constraint failed/i', $message)) {
+					} elseif (preg_match('/foreign key constraint (?:failed|fails)/i', $message)) {
+						// sqlite says `failed`, mysql (1451, 1452) says `fails`
 						$error_key = 'foreign_key';
-						$fk_info = $this->findInForeignKeys();
-						if ($fk_info['field']) {
-							$error_data = [
-								'offending' => $fk_info['value'],
-								'field' => $fk_info['field'],
-								'table' => $fk_info['table'],
-							];
+						$fk_info = $this->findInForeignKeys($message);
+						$error_data = [
+							'offending' => $fk_info['value'],
+							'field' => $fk_info['field'],
+							'table' => $fk_info['table'],
+						];
+						if ($fk_info['kind'] === 'child') {
+							$error = "This record cannot be deleted because it is still referenced from '{table}'";
+						} elseif ($fk_info['field']) {
 							$error = "The value '{offending}' in field '{field}' does not exist in the related table '{table}'";
+						} elseif ($fk_info['table']) {
+							$error = "Foreign key constraint failed on the related table '{table}'";
 						} else {
 							$error = "Foreign key constraint failed.";
 						}
@@ -603,48 +608,90 @@ trait ModelInfoTrait
 		$this->addError($error_key, Yii::t('churros', $error, $error_data) . $devel_info);
 	}
 
-	protected function findInForeignKeys(): array
+	/**
+	 * Finds out which foreign key the database complained about.
+	 *
+	 * MySQL names the tables and the columns in the message itself, so it is parsed
+	 * first; sqlite just says that a constraint failed, and then the relations of the
+	 * model are inspected instead.
+	 *
+	 * @param string $message the message of the IntegrityException
+	 * @return array{field:string,value:string,table:string,kind:string} `kind` is
+	 *   'child' when another table still references this record (a delete that can't
+	 *   be done), 'parent' when this record points to a missing one, '' when unknown
+	 */
+	protected function findInForeignKeys(string $message = ''): array
 	{
-		$result = [ 'field' => '', 'value' => '', 'table' => '' ];
+		$result = [ 'field' => '', 'value' => '', 'table' => '', 'kind' => '' ];
 		$relations = static::$relations ?? [];
 		$attrs = $this->getAttributes();
-		$tableName = $this->getDb()->schema->getRawTableName($this->tableName());
+		$pk = $this->getPrimaryKey();
+		$pk_value = is_array($pk) ? implode(',', $pk) : (string) $pk;
 
+		// mysql 1451/1452: ... fails (`db`.`child`, CONSTRAINT `fk` FOREIGN KEY (`col`) REFERENCES `parent` (`id`))
+		if (preg_match('/foreign key constraint fails\s*\(\s*`?[^`.]*`?\.?`?([^`,\s)]+)`?\s*,\s*CONSTRAINT\s+`?[^`\s]*`?\s+FOREIGN KEY\s*\(([^)]*)\)\s*REFERENCES\s+`?([^`\s(]+)`?/is',
+				$message, $matches)) {
+			$columns = str_replace(['`', ' '], '', $matches[2]);
+			if (preg_match('/Cannot delete or update a parent row/i', $message)) {
+				// the offending table is the one that still points at this record
+				return [ 'field' => $columns, 'value' => $pk_value,
+					'table' => $matches[1], 'kind' => 'child' ];
+			}
+			$first_column = explode(',', $columns)[0];
+			return [ 'field' => $columns, 'value' => (string) ($attrs[$first_column] ?? ''),
+				'table' => $matches[3], 'kind' => 'parent' ];
+		}
+
+		// this record pointing at a missing one
 		$oneToOneTypes = ['HasOne', 'OneToOne', 'JustHasOne'];
-		$rels = [];
 		foreach ($relations as $relName => $relDef) {
-			if (!in_array($relDef['type'], $oneToOneTypes)) {
+			if (!in_array($relDef['type'] ?? '', $oneToOneTypes, true) || empty($relDef['left'])) {
 				continue;
 			}
-			$rels[] = $relName;
 			$lefts = (array) $relDef['left'];
-			$value = null;
+			$values = [];
 			foreach ($lefts as $left) {
 				$left_attr = strpos($left, '.') !== false
 					? substr($left, strrpos($left, '.') + 1)
 					: $left;
 				$value = $attrs[$left_attr] ?? null;
 				if ($value === null) {
-					break;
+					continue 2; // an incomplete key cannot be the offending one
 				}
+				$values[] = $value;
 			}
-			if ($value === null) {
-				continue;
-			}
-
 			try {
 				$related = $this->$relName;
 				if ($related instanceof ActiveRecord && $related->getPrimaryKey()) {
-					continue;
+					continue; // the related record does exist
 				}
 			} catch (\Exception $e) {
+				// unable to load it: report it, as it is the best guess
 			}
+			// the first missing one is the offending key
+			return [ 'field' => implode(',', $lefts), 'value' => implode(',', $values),
+				'table' => $relDef['relatedTablename'] ?? $relDef['table'] ?? '', 'kind' => 'parent' ];
+		}
 
-			$result = [
-				'field' => implode(',', $lefts),
-				'value' => $value,
-				'table' => $relDef['relatedTablename'] ?? $relDef['table'] ?? '',
-			];
+		// nothing on this side: another table may still reference this record
+		if ($pk_value !== '') {
+			foreach ($relations as $relName => $relDef) {
+				if (($relDef['type'] ?? '') !== 'HasMany') {
+					continue;
+				}
+				try {
+					if ($this->getRelation($relName, false) === null
+						|| $this->getRelation($relName)->count() == 0) {
+						continue;
+					}
+				} catch (\Throwable $e) {
+					continue;
+				}
+				return [ 'field' => implode(',', (array) ($relDef['right'] ?? [])),
+					'value' => $pk_value,
+					'table' => $relDef['relatedTablename'] ?? $relDef['table'] ?? $relName,
+					'kind' => 'child' ];
+			}
 		}
 		return $result;
 	}
