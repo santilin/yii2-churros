@@ -655,6 +655,11 @@ js;
 			case 'grid-cards':
 				$lo = ['class' => "card-header fld-$widget_name"];
 				$ro = ['class' => "card border-primary my-3 w-100"];
+				// Same container marker as the 'grid' style above: without it a
+				// field laid out in cards is the only one that never gets
+				// .form-group, and any CSS or script keyed on it silently
+				// misses the whole form.
+				Html::addCssClass($widget->options, 'form-group');
 				$fs .= '<div' . Html::renderTagAttributes($ro) . '>';
 				if ($this->widget_painter) {
 					$fs .= call_user_func($this->widget_painter, $widget, [
@@ -712,6 +717,10 @@ js;
 				$fs .= '<div' . Html::renderTagAttributes($ro) . '>';
 				$lo = ['class' => "card-header fld-$widget_name"];
 				if ($this->widget_painter) {
+					// No 'options' here on purpose: layoutOneField() feeds
+					// RecordView, whose painter (layAttribute) reads only
+					// labelOptions and wrapperOptions and drops the rest. A
+					// read-only attribute has no form control to mark anyway.
 					$fs .= call_user_func($this->widget_painter, $widget, [
 						'labelOptions' => $lo,
 						'wrapperOptions' => [ 'class' => "card-text fld-$widget_name" ]],

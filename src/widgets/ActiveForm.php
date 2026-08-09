@@ -13,9 +13,6 @@ class ActiveForm extends Bs5ActiveForm
 {
 	use ActiveFormTrait;
 
-	/** @var string field class that knows how to render boolean radio/checkbox lists */
-	public $fieldClass = ActiveField::class;
-
 	public $fieldConfig = [ 'template' => "{label}\n{beginWrapper}\n{input}\n{hint}\n{error}\n{endWrapper}", ];
 
 	public $errorSummaryCssClass = 'error-summary alert alert-danger';
