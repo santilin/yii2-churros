@@ -69,7 +69,7 @@ class ImageInput extends \yii\widgets\InputWidget
 		$parent_file_input =  $this->renderInputHtml('file');
 		if ($this->deleteCheck !== false && !empty($this->model->{$this->attribute})) {
 			if ($this->deleteCheck == true) {
-				$deleteCheckOptions = [ 'label' => Yii::t('churros','Delete this image') . ': ' . $this->model->{$this->attribute} ];
+				$deleteCheckOptions = [ 'label' => Yii::t('churros', 'Delete this image: {filename}', ['filename' => $this->model->{$this->attribute}]) ];
 			} else {
 				$deleteCheckOptions = $this->deleteCheck;
 			}

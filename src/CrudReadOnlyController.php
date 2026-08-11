@@ -701,7 +701,7 @@ abstract class CrudReadOnlyController extends \yii\web\Controller
 					break;
 				case 'duplicate':
 					$breadcrumbs[] = [
-						'label' => Yii::t('churros', 'Duplicating ') . $model->recordDesc('short', 20),
+						'label' => Yii::t('churros', 'Duplicating {record}', ['record' => $model->recordDesc('short', 20)]),
 						'url' => array_merge([ $prefix . $this->id . '/view'], $model->getPrimaryKey(true))
 					];
 					break;

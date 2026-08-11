@@ -422,11 +422,11 @@ class SimpleGridView extends \yii\grid\GridView
 		}
 		if ($colspan === 0) {
 			$ret = '</tr><tr>';
-			$ret .= Html::tag('td', $this->grandTotalLabel?:Yii::t('churros', 'Totals') . ' ',
+			$ret .= Html::tag('td', $this->grandTotalLabel?:Yii::t('churros', 'Totals '),
 				[ 'class' => 'total-label', 'colspan' => count($this->columns) + 1] );
 			$ret .= '</tr><tr>';
 		} else {
-			$ret = Html::tag('td', $this->grandTotalLabel?:Yii::t('churros', 'Totals') . ' ',
+			$ret = Html::tag('td', $this->grandTotalLabel?:Yii::t('churros', 'Totals '),
 				[ 'class' => 'total-label', 'colspan' => $colspan + 1 ] );
 		}
 		$nc = 0;

@@ -605,7 +605,7 @@ trait ModelInfoTrait
 			}
 		}
 		$error_key ??= get_class($e);
-		$this->addError($error_key, Yii::t('churros', $error, $error_data) . $devel_info);
+		$this->addError($error_key, Yii::t('churros', $error . ($devel_info !== '' ? '{devel_info}' : ''), $error_data + ['devel_info' => $devel_info]));
 	}
 
 	/**
@@ -829,8 +829,10 @@ trait ModelInfoTrait
 		}
 		if ($not ? $valid : !$valid) {
 			$shown_value = is_array($value) ? implode(', ', $value) : $value;
-			$this->addError($attribute, Yii::t('yii', "{attribute} value `$shown_value` is not in its range of values: " . implode(', ', $range), [
-					'attribute' => $attribute
+			$this->addError($attribute, Yii::t('yii', '{attribute} value `{shown_value}` is not in its range of values: {range}', [
+					'attribute' => $attribute,
+					'shown_value' => $shown_value,
+					'range' => implode(', ', $range),
 				]));
 		}
 	}

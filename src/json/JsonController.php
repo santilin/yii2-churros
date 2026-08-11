@@ -537,7 +537,7 @@ class JsonController extends \yii\web\Controller
 			$this->root_model = $root_model_name::findOne($this->_root_id);
 			if ($this->root_model == null) {
 				throw new NotFoundHttpException(Yii::t('churros',
-					"The root json record for '$root_model_name' does not exist"));
+					"The root json record for '{model}' does not exist", ['model' => $root_model_name]));
 			} else {
 				$this->root_model->loadRootJson(1, true /*force*/);
 			}

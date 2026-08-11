@@ -61,13 +61,13 @@ class AuthHelper
 				$permission->createdAt = 0;
 			}
 			$auth->add($permission);
-			static::addMessage('+ `' . $permission->name . '` => ' . $permission->description
-				. ': ' . Yii::t('churros', 'permission created'));
+			static::addMessage(Yii::t('churros', '+ `{name}` => {description}: permission created',
+				['name' => $permission->name, 'description' => $permission->description]));
 		} else if ($permission->description != $perm_desc) {
 			$permission->description = $perm_desc;
 			$auth->update($perm_name, $permission);
-			static::addMessage('^ `' . $permission->name . '` => ' . $permission->description
-				. ': ' . Yii::t('churros', 'permission updated'));
+			static::addMessage(Yii::t('churros', '^ `{name}` => {description}: permission updated',
+				['name' => $permission->name, 'description' => $permission->description]));
 		} else {
 			if ($is_default) {
 				$auth->db->createCommand()->update(
@@ -96,19 +96,20 @@ class AuthHelper
 				$role->createdAt = 0;
 			}
 			$auth->add($role);
-			static::addMessage('+ `' . $role->name . '` => ' . $role->description
-				. ': ' . Yii::t('churros', 'role created'));
+			static::addMessage(Yii::t('churros', '+ `{name}` => {description}: role created',
+				['name' => $role->name, 'description' => $role->description]));
 		} else if ($role->description != $role_desc) {
 			$role->description = $role_desc;
 			$auth->update($role_name, $role);
-			static::addMessage('^ `' . $role->name . '` => ' . $role->description
-				. ': ' . Yii::t('churros', 'role updated'));
+			static::addMessage(Yii::t('churros', '^ `{name}` => {description}: role updated',
+				['name' => $role->name, 'description' => $role->description]));
 		} else {
 			if ($is_default) {
 				$auth->db->createCommand()->update(
 					$auth->itemTable, ['created_at' => 0], ['name' => $role_name])->execute();
 			}
-			static::addMessage('= `' . $role->name . '`, ' . $role->description . ': ' . Yii::t('churros', 'role already exists'));
+			static::addMessage(Yii::t('churros', '= `{name}`, {description}: role already exists',
+				['name' => $role->name, 'description' => $role->description]));
 		}
 		return $role;
 	}

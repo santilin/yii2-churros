@@ -27,7 +27,7 @@ class DotDotValidator extends Validator
     {
         parent::init();
         if ($this->message === null) {
-             $this->message = Yii::t('churros', "{attribute} '{value}' does not match the mask {$this->mask}.");
+             $this->message = Yii::t('churros', "{attribute} '{value}' does not match the mask {mask}.");
         }
     }
 
@@ -37,7 +37,7 @@ class DotDotValidator extends Validator
 		if ($this->validateValue($value) === null) {
 			$model->$attribute = $this->formatValue($value);
 		} else {
-			$this->addError($model, $attribute, $this->message);
+			$this->addError($model, $attribute, $this->message, ['mask' => $this->mask]);
 		}
 	}
 
@@ -74,7 +74,7 @@ class DotDotValidator extends Validator
 		if (preg_match('/^(' . $re_str . ')$/', $value )) {
 			return null;
 		} else {
-			return [ $this->message, [] ];
+			return [ $this->message, ['mask' => $this->mask] ];
 		}
     }
 
