@@ -24,7 +24,8 @@ class Bootstrap implements BootstrapInterface
 			$app->get('i18n')->translations['churros*'] = [
 				'class' => PhpMessageSource::class,
 				'basePath' => __DIR__ . '/messages',
-				'sourceLanguage' => 'en-US',
+				// generic, so `es`, `es-ES`, `es-AR`... all reach messages/es
+				'sourceLanguage' => 'en',
 			];
 		}
 		

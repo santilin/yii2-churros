@@ -15,7 +15,7 @@ return [
     'help' => null,
     'sourcePath' => '@vendor/santilin/yii2-churros/src',
     'messagePath' => '@vendor/santilin/yii2-churros/src/messages',
-    'languages' => [ 'es-ES' ],
+    'languages' => [ 'es' ],
     'translator' => [ 'Yii::t', '$model->t' ],
     'sort' => false,
     'overwrite' => true,
