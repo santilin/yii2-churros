@@ -14,6 +14,8 @@ use yii\base\NotSupportedException;
 abstract class CrudReadOnlyController extends \yii\web\Controller
 {
 	use ControllerTrait;
+	// actionExport(): the server side of the grid's split export button
+	use ExportGridTrait;
 
 	protected static ?string $_prefix = null; // to be overrided
 	protected static string $_model_name; // to be overrided

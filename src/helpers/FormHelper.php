@@ -461,6 +461,54 @@ ajax;
 				]);
 				break;
 
+			case 'split':
+				// A split button: the main half runs 'url' (usually a javascript:
+				// quick action), the caret opens 'selections' as links built from
+				// 'menu_url'. Bootstrap 5 markup, so it needs no extra asset.
+				$splitId = 'split_' . uniqid();
+				$mainOptions = $button['htmlOptions'] ?? [];
+				$mainClass = $mainOptions['class'] ?? 'btn btn-secondary btn-outline';
+				$mainUrl = isset($button['url'])
+					? self::prepareButtonUrl($button['url'], $url_return_to) : null;
+				if ($mainUrl && !isset($mainOptions['onclick'])) {
+					$mainOptions['onclick'] = StringHelper::startsWith($mainUrl, 'javascript:')
+						? substr($mainUrl, 11) : "window.location.href='$mainUrl'";
+				}
+				unset($mainOptions['class']);
+				$mainBtn = Html::button($title, array_merge($mainOptions,
+					['type' => 'button', 'class' => $mainClass]));
+
+				$caretBtn = Html::button(
+					Html::tag('span', $button['caret_label'] ?? 'Más opciones',
+							  ['class' => 'visually-hidden']),
+					['type' => 'button',
+					 'class' => trim($mainClass . ' dropdown-toggle dropdown-toggle-split'),
+					 'data-bs-toggle' => 'dropdown',
+					 'aria-expanded' => 'false',
+					 'id' => $splitId,
+					 'encode' => false]);
+
+				$menuItems = [];
+				foreach ($button['selections'] ?? [] as $value => $label) {
+					$url_params = (array)($button['menu_url'] ?? $button['url']);
+					$url_params[$button['menu_param'] ?? 'format'] = $value;
+					$item_options = ['class' => 'dropdown-item'];
+					if (isset($button['confirm'])) {
+						$item_options['data-confirm'] = $button['confirm'];
+					}
+					// the export runs outside pjax: it returns a file, not html
+					$item_options['data-pjax'] = '0';
+					$menuItems[] = Html::a($label, Url::to($url_params), $item_options);
+				}
+				$menu = Html::ul($menuItems, [
+					'class' => 'dropdown-menu dropdown-menu-end',
+					'aria-labelledby' => $splitId,
+					'encode' => false]);
+
+				$ret[] = Html::tag('div', $mainBtn . $caretBtn . $menu,
+								   ['class' => 'btn-group d-inline-block me-1']);
+				break;
+
 			default:
 				throw new \Exception($button['type'] . ': button type not supported');
 			}

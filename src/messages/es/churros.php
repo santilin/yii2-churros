@@ -157,4 +157,9 @@ return [
 	'Previous' => 'Anterior',
 	'Finish' => 'Terminar',
 	'Rows per page' => 'Por página',
+
+	// ExportGridTrait / GridView::addSplitExportButton
+	'Export' => 'Exportar',
+	'Quick export of the rows on screen' => 'Exportación rápida de las filas en pantalla',
+	'Export all in another format' => 'Exportar todo en otro formato',
 ];

@@ -421,6 +421,14 @@ class GridView extends SimpleGridView
 		]
 	];
 
+	/** Formats the server side can produce, in menu order. */
+	const EXPORT_FORMATS = [
+		'ods' => 'ODS',
+		'pdf' => 'PDF',
+		'odt' => 'ODT',
+		'csv' => 'CSV',
+	];
+
 
 	public static function addExportButtons(array &$buttons, string $table_id, ?string $filename = null): void
 	{
@@ -432,6 +440,46 @@ class GridView extends SimpleGridView
 		$buttons['export']['htmlOptions']['data'] = [
 			'table_id' => $table_id,
 			'saveas' => $filename ?: $table_id
+		];
+	}
+
+	/**
+	 * Split export button: the main half is a quick client-side CSV of what is
+	 * on screen, the caret opens the formats the server builds from the whole
+	 * filtered set.
+	 *
+	 * The two halves are not the same thing and that matters: the quick one
+	 * exports the visible page only — 20 rows if that is the page size — while
+	 * the menu exports every row matching the current filters. Label them so
+	 * nobody mistakes one for the other.
+	 *
+	 * @param string $table_id id of the grid container the quick export reads
+	 * @param array|string $export_url route of the server action, e.g. ['export']
+	 * @param string|null $filename base name for the downloaded file
+	 * @param array|null $formats subset of EXPORT_FORMATS, in the order wanted
+	 */
+	public static function addSplitExportButton(array &$buttons, string $table_id,
+		array|string $export_url, ?string $filename = null, ?array $formats = null): void
+	{
+		$saveas = $filename ?: $table_id;
+		$url_params = (array)$export_url;
+		// keep the filters the user has typed: the server export must return the
+		// same rows the grid is showing, not the whole table
+		$url_params += Yii::$app->request->getQueryParams();
+		unset($url_params['page'], $url_params['per-page']);
+
+		$buttons['export'] = [
+			'type' => 'split',
+			'title' => Yii::t('churros', 'Export'),
+			'url' => "javascript:ChurrosGrid.exportToCSV('$table_id', '$saveas', ['filters'], [], []);",
+			'menu_url' => $url_params,
+			'menu_param' => 'format',
+			'caret_label' => Yii::t('churros', 'Export all in another format'),
+			'selections' => $formats ?: self::EXPORT_FORMATS,
+			'htmlOptions' => [
+				'class' => 'btn btn-secondary btn-outline',
+				'title' => Yii::t('churros', 'Quick export of the rows on screen'),
+			],
 		];
 	}
 
