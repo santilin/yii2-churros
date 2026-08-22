@@ -43,6 +43,73 @@ trait ControllerTrait
 		return $ret;
 	}
 
+	/**
+	 * One model per posted row, for the multiple forms.
+	 *
+	 * A multiple form posts one entry per row, named Model[key][attribute], so
+	 * what has to be loaded is not one model but one per row. Each row goes
+	 * through the very same loadAll() a single form uses, relations included:
+	 * a row is a whole post for its model, only without its form name, so it is
+	 * put back under it before loading, which is where loadAll() looks.
+	 *
+	 * It is the loadAll() of a multiple form, and it goes where loadAll() goes:
+	 * in the BEFORELOAD of the action.
+	 *
+	 * The form model of the action says everything that is needed: what to look
+	 * for in the post is its formName(), and what to fill each row into is its
+	 * own class. That is the same model the view builds the fields from, so
+	 * both ends cannot drift apart.
+	 *
+	 * Same contract as loadAll(): says whether the form arrived and leaves what
+	 * it brought. What it fills is an array of models instead of one model, so
+	 * it is taken by reference.
+	 *
+	 * False means the inputs are not there: it is the first drawing of the form
+	 * and there is nothing to save.
+	 *
+	 * @param \yii\base\Model $model the form model of the action
+	 * @param \yii\base\Model[] $models filled with one model per row, in the
+	 *        posted order
+	 * @param array $relations_in_form the ones of the single form, as returned
+	 *        by findRelationsInForm()
+	 */
+	public function loadModels($model, &$models, array $relations_in_form = []): bool
+	{
+		$models = [];
+		$rows = $this->request->post($model->formName());
+		if ($rows === null) {
+			return false;
+		}
+		$model_class = get_class($model);
+		foreach ((array) $rows as $row) {
+			if (!is_array($row)) {
+				continue;
+			}
+			$row_model = new $model_class();
+			$row_model->loadAll([$row_model->formName() => $row], $relations_in_form);
+			$models[] = $row_model;
+		}
+		return true;
+	}
+
+	/**
+	 * Validates every model of a multiple form.
+	 *
+	 * Without short circuit on purpose: the form has to show at once everything
+	 * that is wrong, not only the first row that fails.
+	 *
+	 * @param \yii\base\Model[] $models
+	 * @param mixed $attribute_names the ones to validate, all of them when null
+	 */
+	static public function validateModels(array $models, $attribute_names = null): bool
+	{
+		$valid = true;
+		foreach ($models as $model) {
+			$valid = $model->validate($attribute_names) && $valid;
+		}
+		return $valid;
+	}
+
 	// mainly for breadcrumbs
 	// Gets the whole request path, not this controllers path
 	public function getBaseRoute($model = null): string
