@@ -142,6 +142,11 @@ return [
 	'Access denied to this {title}.' => 'Acceso denegado a {esta} {title}.',
 	'{Title} with primary key {id} not found.' => 'No se ha encontrado {la} {title} con clave {id}.',
 	'Data was not saved in order to maintain the database integrity' => 'Los datos no se han guardado para preservar la integridad de la base de datos',
+	// ModelInfoTrait::addErrorFromException(): borrado impedido por hijos
+	"This record cannot be deleted because it is still referenced from '{table}'" => "No se puede borrar este registro porque todavía lo referencia '{table}'",
+	'This record cannot be deleted because it is still referenced from: {details}' => 'No se puede borrar este registro porque todavía lo referencian: {details}',
+	"{count} record(s) in '{table}'" => "{count} registro(s) de '{table}'",
+	'{ids} and {rest} more' => '{ids} y {rest} más',
 	"The value '{offending}' in field '{field}' does not exist in the related table '{table}'" => "El valor '{offending}' en el campo '{field}' no existe en la tabla relacionada '{table}'",
 	'Foreign key constraint failed.' => 'Se ha producido un error de clave foránea.',
 

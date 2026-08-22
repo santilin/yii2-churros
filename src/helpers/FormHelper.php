@@ -438,8 +438,8 @@ ajax;
 				// Dropdown menu items as normal POST links
 				$menuItems = [];
 				foreach ($selections as $value => $label) {
-					$url_params = (array) $button['url'];
-					$url_params['target'] = $value;;
+					$url_params = self::buttonUrlAsRoute($button['url']);
+					$url_params['target'] = $value;
 					if (isset($button['htmlOptions']['name'])) {
 						$url_params[$button['htmlOptions']['name']] = $value;
 					}
@@ -490,7 +490,7 @@ ajax;
 
 				$menuItems = [];
 				foreach ($button['selections'] ?? [] as $value => $label) {
-					$url_params = (array)($button['menu_url'] ?? $button['url']);
+					$url_params = self::buttonUrlAsRoute($button['menu_url'] ?? $button['url']);
 					$url_params[$button['menu_param'] ?? 'format'] = $value;
 					$item_options = ['class' => 'dropdown-item'];
 					if (isset($button['confirm'])) {
@@ -514,6 +514,37 @@ ajax;
 			}
 		}
 		return implode($sep, $ret);
+	}
+
+	/**
+	 * Turns a button url into a route array that Url::to() can still extend with
+	 * extra parameters.
+	 *
+	 * The dropdown-style buttons add their own parameter to the url. Casting a
+	 * string url with (array) works only while the url carries no query of its
+	 * own: '.../move?id=7' plus 'target' came out as '.../move?id=7?target=x',
+	 * with the second '?' making 'id' swallow the target. Splitting the query
+	 * back into route parameters lets Url::to() join them with '&'.
+	 *
+	 * Urls with a scheme or a host are left alone: they are not routes and
+	 * rebuilding them from their path would drop the host.
+	 */
+	static private function buttonUrlAsRoute(string|array $url): array
+	{
+		if (is_array($url)) {
+			return $url;
+		}
+		$parts = parse_url($url);
+		if ($parts === false || isset($parts['scheme']) || isset($parts['host'])
+			|| empty($parts['query'])) {
+			return [$url];
+		}
+		parse_str($parts['query'], $query_params);
+		$route = [$parts['path'] ?? ''];
+		if (isset($parts['fragment'])) {
+			$query_params['#'] = $parts['fragment'];
+		}
+		return array_merge($route, $query_params);
 	}
 
 	static private function prepareButtonUrl(string|array $url, ?string $url_return_to, array $params = []): string

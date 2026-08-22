@@ -591,7 +591,10 @@ trait ModelInfoTrait
 							'field' => $fk_info['field'],
 							'table' => $fk_info['table'],
 						];
-						if ($fk_info['kind'] === 'child') {
+						$error_data['details'] = $fk_info['details'] ?? '';
+						if ($fk_info['kind'] === 'child' && $error_data['details'] !== '') {
+							$error = "This record cannot be deleted because it is still referenced from: {details}";
+						} elseif ($fk_info['kind'] === 'child') {
 							$error = "This record cannot be deleted because it is still referenced from '{table}'";
 						} elseif ($fk_info['field']) {
 							$error = "The value '{offending}' in field '{field}' does not exist in the related table '{table}'";
@@ -622,7 +625,7 @@ trait ModelInfoTrait
 	 */
 	protected function findInForeignKeys(string $message = ''): array
 	{
-		$result = [ 'field' => '', 'value' => '', 'table' => '', 'kind' => '' ];
+		$result = [ 'field' => '', 'value' => '', 'table' => '', 'kind' => '', 'details' => '' ];
 		$relations = static::$relations ?? [];
 		$attrs = $this->getAttributes();
 		$pk = $this->getPrimaryKey();
@@ -690,10 +693,117 @@ trait ModelInfoTrait
 				return [ 'field' => implode(',', (array) ($relDef['right'] ?? [])),
 					'value' => $pk_value,
 					'table' => $relDef['relatedTablename'] ?? $relDef['table'] ?? $relName,
-					'kind' => 'child' ];
+					'kind' => 'child',
+					'details' => $this->describeReferencingRows() ];
 			}
 		}
+
+		// Last resort: ask the database. Not every model declares
+		// static::$relations, and junction tables rarely show up there as
+		// HasMany, so the loop above can come up empty on a delete that the
+		// database did refuse.
+		if ($pk_value !== '' && ($referencing = $this->findReferencingRows())) {
+			$first = $referencing[0];
+			return [ 'field' => $first['column'],
+				'value' => $pk_value,
+				'table' => $first['table'],
+				'kind' => 'child',
+				'details' => $this->describeReferencingRows($referencing) ];
+		}
 		return $result;
+	}
+
+	/**
+	 * Which rows, in which tables, still point at this record.
+	 *
+	 * Walks the schema instead of the declared relations: the shape of
+	 * TableSchema::$foreignKeys is `[0 => referenced table, child column =>
+	 * referenced column, ...]` and both the sqlite and the mysql schemas build
+	 * it the same way, so this works on either.
+	 *
+	 * Only runs when a delete has already failed, and getTableSchemas() is
+	 * cached, so the cost does not matter.
+	 *
+	 * @param int $max_ids how many identifiers to collect per table
+	 * @return array<int, array{table:string, column:string, count:int, ids:array}>
+	 */
+	protected function findReferencingRows(int $max_ids = 5): array
+	{
+		$found = [];
+		try {
+			$db = static::getDb();
+			$schema = $db->getSchema();
+			$my_table = $schema->getRawTableName(static::tableName());
+			foreach ($schema->getTableSchemas() as $table) {
+				if ($table->name === $my_table) {
+					continue;
+				}
+				foreach ($table->foreignKeys as $fk) {
+					$referenced = array_shift($fk);
+					if (strcasecmp((string)$referenced, $my_table) !== 0) {
+						continue;
+					}
+					// map every child column to the value of the parent column
+					// it points at; an incomplete key cannot be the offending one
+					$where = [];
+					foreach ($fk as $child_column => $parent_column) {
+						$value = $this->$parent_column ?? null;
+						if ($value === null) {
+							continue 2;
+						}
+						$where[$child_column] = $value;
+					}
+					if ($where === []) {
+						continue;
+					}
+					$query = (new \yii\db\Query())->from($table->name)->where($where);
+					$count = (int)$query->count('*', $db);
+					if ($count === 0) {
+						continue;
+					}
+					$ids = [];
+					if ($table->primaryKey && count($table->primaryKey) === 1) {
+						$ids = $query->limit($max_ids)
+							->select($table->primaryKey[0])->column($db);
+					}
+					$found[] = [
+						'table' => $table->name,
+						'column' => implode(',', array_keys($where)),
+						'count' => $count,
+						'ids' => $ids,
+					];
+				}
+			}
+		} catch (\Throwable $e) {
+			// the message is a courtesy: never let it mask the original error
+			return [];
+		}
+		return $found;
+	}
+
+	/**
+	 * The above, phrased for a person. Every table is listed, not just the
+	 * first: after deleting the children of one, the next would refuse just the
+	 * same and the user would be guessing again.
+	 */
+	protected function describeReferencingRows(?array $referencing = null): string
+	{
+		$referencing ??= $this->findReferencingRows();
+		$parts = [];
+		foreach ($referencing as $ref) {
+			$part = Yii::t('churros', '{count} record(s) in \'{table}\'',
+						   ['count' => $ref['count'], 'table' => $ref['table']]);
+			if ($ref['ids']) {
+				$shown = implode(', ', $ref['ids']);
+				if ($ref['count'] > count($ref['ids'])) {
+					$shown = Yii::t('churros', '{ids} and {rest} more',
+									['ids' => $shown, 'rest' => $ref['count'] - count($ref['ids'])]);
+				}
+				$part .= " ($shown)";
+			}
+			$parts[] = $part;
+		}
+		return implode('; ', $parts);
 	}
 
 	public function getOneError():string
