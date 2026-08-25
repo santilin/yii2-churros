@@ -308,8 +308,7 @@ trait RelationTrait
 		}
     }
 
-
-    public function saveRelated(bool $wasNewRecord, array $relatedRecords): bool
+    protected function saveRelated(bool $wasNewRecord, array $relatedRecords): bool
     {
 		$success = true;
 		foreach (array_keys($this->relatedRecords) as $rn) {

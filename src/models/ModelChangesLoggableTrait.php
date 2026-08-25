@@ -87,9 +87,19 @@ trait ModelChangesLoggableTrait
 			$model_change_class = $_log_model_changes_relation_info['modelClass'];
 			$record_id = strval(count($this->primaryKey())==1 ? $this->getPrimaryKey() : json_encode($this->getPrimaryKey(true)));
 			if ($event->name === self::EVENT_AFTER_INSERT) {
+				// Las filas de campo guardan el valor real de cada campo, así que la
+				// descripción del registro necesita hueco propio: el índice redondo del
+				// modelo (1000, 2000...), que es el que describe el alta al mostrarla.
+				if (false !== ($nmodel = $model_change_class::findChangeableFieldIndex($model_name))) {
+					$model_change = new $model_change_class();
+					$this->internalSaveModelChangeRecord($model_change, $record_id,
+						$model_change_class::V_TYPE_CREATE, $nmodel, $this->recordDesc('long'));
+					$must_trigger = true;
+				}
 				foreach ($this->getAttributes() as $fld => $current_value) {
 					if (false !== ($nfield = $model_change_class::findChangeableFieldIndex($model_name, $fld))) {
-						if ($current_value === null || trim($current_value) === '') {
+						if ($current_value === null
+							|| (is_string($current_value) && trim($current_value) === '')) {
 							continue;
 						}
 						$model_change = new $model_change_class();
@@ -137,11 +147,9 @@ trait ModelChangesLoggableTrait
 		$model_change->field = $nfield;
 		$model_change->type = $type;
 		if ($type === $model_change::V_TYPE_CREATE) {
-			if (self::$isJunctionModel) {
-				$model_change->value = $old_value;
-			} else {
-				$model_change->value = $this->recordDesc('long');
-			}
+			// En un alta $old_value es el valor inicial real del campo, o el recordDesc
+			// del registro cuando $nfield es el índice redondo del modelo.
+			$model_change->value = $old_value;
 			$model_change->changed_at = $this->created_at ?? new \yii\db\Expression("NOW()");
 			if (YII_ENV_TEST && !($this->created_by ?? false)) {
 				$model_change->changed_by = 1;

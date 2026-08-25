@@ -69,7 +69,7 @@ js
 			$li_options['data']['id'] = $value;
 			if ($this->removable) {
 				$lis[] = Html::tag('li',
-					Html::button(Yii::t('churros','<i class="fas fa-trash-alt"></i>'), ['class' => 'btn btn-danger btn-xs remove-button'])
+					Html::button(Yii::t('churros','<i class="fas fa-trash-alt"></i>'), ['class' => 'btn btn-danger btn-sm remove-button'])
 					. '&nbsp;&nbsp;<i class="fas fa-arrows-alt"></i>&nbsp;' . $item, $li_options);
 			} else {
 				$lis[] = Html::tag('li', '<i class="fas fa-arrows-alt"></i>&nbsp;' . $item, $li_options);
