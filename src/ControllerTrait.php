@@ -260,7 +260,7 @@ trait ControllerTrait
         return Url::to($params);
     }
 
-	public function genHierarchyBreadCrumbs(string $scenario, $model, array $models_hierarchy, array $viewParams = []): array
+    public function genHierarchyBreadCrumbs(string $scenario, $model, array $models_hierarchy, array $viewParams = []): array
 	{
 		$breadcrumbs = [];
 		$bread_model = $model;
@@ -285,13 +285,20 @@ trait ControllerTrait
 		$prefix = '';
 		for ($nbc = count($master_models) - 1; $nbc >= 0; $nbc--) {
 			$master_model = $master_models[$nbc];
-			$bc = $this->modelBreadCrumbs($master_model, $scenario, $prefix, $viewParams['permissions'] ?? [], $nbc == 0);
+			$bc = $this->modelBreadCrumbs($master_model, $scenario, $prefix,
+				$viewParams['permissions'] ?? [],
+				($viewParams['breadcrumbs']['action_title'] ?? false) ? false : $nbc === 0);
 			$url = $bc[1]['url'] ?? null;
 			if (is_array($url) && $nbc > 0) {
 				$pk = $master_model->getPrimaryKey(true);
 				$prefix = $this->getBaseRoute($master_model) . '/' . implode('/', $pk) . '/';
 			}
 			$breadcrumbs = array_merge($breadcrumbs, $bc);
+		}
+		if ($viewParams['breadcrumbs']['action_title'] ?? false) {
+			$breadcrumbs['last'] = [ 'label' => $viewParams['breadcrumbs']['action_title'] ];
+		} else if (count($breadcrumbs) !== 0 && !array_key_exists('last', $breadcrumbs)) {
+			$breadcrumbs['last'] = array_pop($breadcrumbs);
 		}
 		return $breadcrumbs;
 	}
@@ -447,8 +454,9 @@ trait ControllerTrait
 		foreach ($relations_behaviors as $rel_name => $rel_beh) {
 			if ($rel_beh === 'restrict') {
 				if ($this->model->usedInRelation($rel_name)) {
-					$this->model->addError($rel_name, $this->model->t('churros', $this->getResultMessage('used_in_relation'),
-																	  [ 'relation_title' => $this->model->getAttributeLabel($rel_name) ]));
+					$this->model->addError($rel_name,
+						$this->model->t('churros', $this->getResultMessage('used_in_relation'),
+						[ 'relation_title' => $this->model->getAttributeLabel($rel_name) ]));
 					$ret = false;
 				}
 			}

@@ -137,7 +137,7 @@ window.yii.churros = (function ($) {
 
 			var d = new Date(year, month-1, day);
 			if (d.getFullYear() != year || d.getMonth() != month-1 || d.getDate() != day) {
-				return null;
+				return false;
 			} else {
 				d.setHours(hour);
 				d.setMinutes(minute);
@@ -194,10 +194,11 @@ window.yii.churros = (function ($) {
 					const minutes = pad(date.getMinutes());
 					const seconds = pad(date.getSeconds());
 
-					return format
-					.replace(/YY/g, year)
-					.replace(/Y/g, year)
-					.replace(/m/g, month)
+				return format
+				.replace(/YY/g, year)
+				.replace(/Y/g, year)
+				.replace(/y/g, String(year).slice(-2))
+				.replace(/m/g, month)
 					.replace(/d/g, day)
 					.replace(/H/g, hours)
 					.replace(/i/g, minutes)

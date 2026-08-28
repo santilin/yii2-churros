@@ -288,6 +288,9 @@ js;
 						$ret .= Html::beginTag('div', $col_options);
 					}
 					$rows_content = '';
+					if ($layout_row['content'] === true) {
+						$layout_row['content'] = array_diff(array_keys($this->widgets), $this->widgets_used);
+					}
 					$layout_row_content = array_filter($layout_row['content']);
 					foreach ($layout_row_content as $kc => $row_content) {
 						$rows_content .= "<!--row: $kc-->";

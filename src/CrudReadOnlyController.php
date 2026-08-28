@@ -133,6 +133,21 @@ abstract class CrudReadOnlyController extends \yii\web\Controller
 			throw new \Exception("No {$search_model_class}_Search nor $search_model_class{$view}_Search class found in " . __METHOD__);
 		}
 		$this->masterModel = $master;
+		// Los filtros de la rejilla viajan en la url bajo el nombre de formulario del
+		// modelo de búsqueda. En una rejilla embebida $params lo fabrica quien la pinta,
+		// no es queryParams, así que hay que recogerlos de la petición para que el
+		// load() de search() los vea. La ordenación y la paginación no lo necesitan:
+		// Sort y Pagination leen la petición por su cuenta.
+		$form_name = $detail->formName();
+		if (!isset($params[$form_name])) {
+			$request = Yii::$app->getRequest();
+			if ($request instanceof \yii\web\Request) {
+				$query_params = $request->getQueryParams();
+				if (isset($query_params[$form_name])) {
+					$params[$form_name] = $query_params[$form_name];
+				}
+			}
+		}
 		$params['permissions'] = $this->resolvePermissions($params['permissions'] ?? []);
 		$params['_search_relation'] = $relation_name;
 		$params['master'] = $master;
