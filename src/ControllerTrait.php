@@ -287,7 +287,7 @@ trait ControllerTrait
 			$master_model = $master_models[$nbc];
 			$bc = $this->modelBreadCrumbs($master_model, $scenario, $prefix,
 				$viewParams['permissions'] ?? [],
-				($viewParams['breadcrumbs']['action_title'] ?? false) ? false : $nbc === 0);
+				($viewParams['breadcrumbs']['action_title'] ?? true) ? $nbc === 0 : false);
 			$url = $bc[1]['url'] ?? null;
 			if (is_array($url) && $nbc > 0) {
 				$pk = $master_model->getPrimaryKey(true);
@@ -329,11 +329,11 @@ trait ControllerTrait
 			$view_bc = [
 				'label' => $model->recordDesc('short', 25)
 			];
-			if (!$last_one) {
-				$view_bc['url'] = $keys;
-			} else if ($scenario != 'view' && FormHelper::hasPermission($permissions, 'view')) {
-				$view_bc['url'] = $keys;
-			}
+			$view_bc['url'] = $keys;
+			// if (!$last_one) {
+			// } else if ($scenario !== 'view' && FormHelper::hasPermission($permissions, 'view')) {
+			// 	$view_bc['url'] = $keys;
+			// }
 			$breadcrumbs[] = $view_bc;
 		}
 		return $breadcrumbs;

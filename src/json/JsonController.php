@@ -88,6 +88,19 @@ class JsonController extends \yii\web\Controller
 	public function actionIndex()
 	{
 		$params = Yii::$app->request->queryParams;
+		// An index lists a collection, so its json path has to end with the json
+		// path of this model: `models`, `models/Foo/fields`... A path ending in an
+		// element, as `models/Foo` does, used to render the keys of that element as
+		// if they were rows of the grid instead of failing.
+		// Only this entry point is checked: indexDetails() builds its grids from the
+		// master model's path, which does end in an element.
+		$json_path = static::$_model_name::jsonPath();
+		$path = $this->getPath();
+		if ($path !== $json_path && !str_ends_with($path, '/' . $json_path)) {
+			throw new NotFoundHttpException(Yii::t('churros',
+				"'{path}' is not a list of {items}", [
+					'path' => $path, 'items' => $json_path ]));
+		}
 		$searchModel = $this->createSearchModel($this->getPath());
 		if ($searchModel === null) {
 			$searchModel = $this->createSearchModel($this->getPath(), static::$_model_name . '_Search');

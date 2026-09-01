@@ -868,6 +868,12 @@ trait ModelInfoTrait
 		if ($ret === null) {
 			throw new \Exception("field '$fldname' not supported in " . get_called_class() . "::handyFieldValues() ");
 		}
+		// Only the models that don't generate their own handyFieldValues() get here,
+		// and those never applied the format to what customFieldValues() returned:
+		// a 'value' asked for from a form came back as the whole list.
+		if ($format && $ret) {
+			return $this->formatHandyFieldValues($fldname, $ret, $format);
+		}
 		return $ret;
 	}
 

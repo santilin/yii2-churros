@@ -1,8 +1,18 @@
+/* Etiqueta y campo de los layouts `fill`, los que ocupan la fila entera.
+   Van con WidgetLayer.php, que mete la fila en un .col-12 con w-100.
+
+   Con R = ancho de la fila externa y g = --bs-gutter-x, un campo normal está
+   dentro de un col-md-6 y su etiqueta es col-md-3, o sea el 25% de (R/2 - g),
+   que da R/8 - g/4. Uno de `fill` ocupa el ancho entero, así que su etiqueta
+   tiene que medir eso mismo pero expresado sobre (R - g): 12,5% menos g/8.
+   No basta con un porcentaje fijo porque la diferencia es una constante en
+   píxeles, no una proporción; sin la corrección el campo se iba unos 6px a la
+   derecha del resto. */
 .w-label-12-66 {
-  width: 12.5% !important;
+  width: calc(12.5% - var(--bs-gutter-x) * 0.125) !important;
 }
 .w-fld-87-33 {
-  width: 87% !important;
+  width: calc(87.5% + var(--bs-gutter-x) * 0.125) !important;
 }
 .w-fld {
   flex: 0 0 87.34%;

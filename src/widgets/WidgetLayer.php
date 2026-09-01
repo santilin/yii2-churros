@@ -445,6 +445,13 @@ js;
 										$fs .= '</div>';
 										$this->removeLast();
 									}
+									// Como en la rama else: sin w-100 la fila se queda con el ancho
+									// automático, mientras que las filas de dos columnas sí lo llevan
+									// y miden un gutter menos. Esa diferencia desalineaba las
+									// etiquetas y los campos de los layouts `fill` respecto de los
+									// demás. Lo rematan las anchuras de .w-label-12-66 y
+									// .w-fld-87-33 en churros.views.css, con la corrección en píxeles.
+									Html::addCssClass($widget->options, 'w-100');
 									// Add full-width row wrapper
 									$fs .= '<div class="col-12">';
 									$fs .= $this->layoutActiveField($widget_name, $widget, $layout_row, 'fill', $layout_row_layout, $indexf++);
