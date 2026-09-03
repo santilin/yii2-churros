@@ -189,6 +189,16 @@ class JsonController extends \yii\web\Controller
 				return $this->redirect($this->returnTo(null, 'create', $this->model));
 			}
 		}
+		if ($req->isPost) {
+			// A save that failed without adding an error would redisplay the form with
+			// nothing to explain it, which is how a silent `return false` in the writing
+			// layer looks from the browser.
+			if (!$this->model->hasErrors()) {
+				$this->model->addError('_save', $this->model->t('churros',
+					'The changes could not be saved'));
+			}
+			$this->addErrorFlashes($this->model);
+		}
 		return $this->render('create', [
 			'model' => $this->model,
 			'viewForms' => [ [ '_form', null, null, [], [] ] ],
@@ -222,6 +232,16 @@ class JsonController extends \yii\web\Controller
 				return $this->redirect($this->returnTo(null, 'duplicate', $this->model));
 			}
 		}
+		if ($req->isPost) {
+			// A save that failed without adding an error would redisplay the form with
+			// nothing to explain it, which is how a silent `return false` in the writing
+			// layer looks from the browser.
+			if (!$this->model->hasErrors()) {
+				$this->model->addError('_save', $this->model->t('churros',
+					'The changes could not be saved'));
+			}
+			$this->addErrorFlashes($this->model);
+		}
 		return $this->render('duplicate', [
 			'model' => $this->model,
 			'viewForms' => [ [ '_form', null, null, [], [] ] ],
@@ -251,6 +271,16 @@ class JsonController extends \yii\web\Controller
 				$this->addWarningFlashes($this->model);
 				return $this->redirect($this->returnTo(null, 'update', $this->model));
 			}
+		}
+		if ($req->isPost) {
+			// A save that failed without adding an error would redisplay the form with
+			// nothing to explain it, which is how a silent `return false` in the writing
+			// layer looks from the browser.
+			if (!$this->model->hasErrors()) {
+				$this->model->addError('_save', $this->model->t('churros',
+					'The changes could not be saved'));
+			}
+			$this->addErrorFlashes($this->model);
 		}
 		return $this->render('update', [
 			'model' => $this->model,
@@ -532,6 +562,19 @@ class JsonController extends \yii\web\Controller
 	public function getMasterModel()
 	{
 		return $this->getRootModel();
+	}
+
+	/**
+	 * The root model normally comes from the route (`root_model`/`root_id`). A controller
+	 * created on the fly to render one of its grids inside another module's view has no
+	 * such route, so it has to be told.
+	 */
+	public function setRootModel(JsonModelable $root_model, string $path = ''): void
+	{
+		$this->root_model = $root_model;
+		// getRootModel() is also where _path is derived from the request uri, and setting
+		// the model short-circuits it, so the json path has to come in with it.
+		$this->_path = $path;
 	}
 
 	public function getRootModel(bool $force = false)

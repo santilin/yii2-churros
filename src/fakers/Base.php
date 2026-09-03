@@ -32,7 +32,7 @@ class Base extends \Faker\Provider\Base
 		}
     }
 
-    public function integerUnsigned($max_digits = 10): int
+    public function integerUnsigned($max_digits = 9): int
     {
 		if ($max_digits == 1) {
 			return $this->generator->randomDigit();
@@ -41,7 +41,7 @@ class Base extends \Faker\Provider\Base
 		}
     }
 
-    public function integerUnsignedOrNull($max_digits = 10): ?int
+    public function integerUnsignedOrNull($max_digits = 9): ?int
     {
 		$n = $this->integerUnsigned($max_digits);
 		if ($n == 0) {
@@ -51,7 +51,7 @@ class Base extends \Faker\Provider\Base
 		}
 	}
 
-	public function integerUnsignedNonZero($max_digits = 10): int
+	public function integerUnsignedNonZero($max_digits = 9): int
 	{
 		$n = $this->integerUnsigned($max_digits);
 		if ($n == 0) {
