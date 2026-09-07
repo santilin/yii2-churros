@@ -165,7 +165,13 @@ const ChurrosGrid = (function() {
 				let row = [];
 				for(let j = 0; j < table.rows[i].cells.length; j++) {
 					if(excludedCols.includes(j)) continue;
-					let cellContent = table.rows[i].cells[j].textContent || '';
+					// Algunas columnas (p.ej. ExpandableTextColumn) meten en la
+					// misma celda un modal oculto con el texto completo y un
+					// <script>; hay que descartarlos o el textContent arrastra
+					// ese marcado y JS al CSV.
+					const cellClone = table.rows[i].cells[j].cloneNode(true);
+					cellClone.querySelectorAll('script, .modal, [aria-hidden="true"]').forEach(el => el.remove());
+					let cellContent = cellClone.textContent || '';
 					// Escapado para CSV: comillas, saltos de línea, etc
 					cellContent = '"' + cellContent.replace(/"/g, '""') + '"';
 					row.push(cellContent);
