@@ -23,7 +23,7 @@ class QuickDateTimeInput extends MaskedInput
 	public $datetype;
 	public $defaultTimes = null;
 	private $js_error_message;
-	private $orig_id;
+	protected $orig_id; // lo usa DateTimeActivatableInput
 
 	public function init()
     {
