@@ -29,6 +29,12 @@ class JsonController extends \yii\web\Controller
  	/** @var The start of the json path in the current url. If null, the url is substracted the root part */
 	protected $_path_start = null;
 
+	/**
+	 * The part of the url that comes before the json path, when it cannot be read off the
+	 * request because this controller is not the one answering it. @see setRootModel()
+	 */
+	protected ?string $_route_prefix = null;
+
 	const MSG_DEFAULT = 'The action on {la} {title} <a href="{record_url}">{record_medium}</a> has been successful.';
 	const MSG_NO_ACTION = 'The action on {La} {title} <a href="{record_url}">{record_medium}</a> has been successful.';
 	const MSG_CREATED = '{La} {title} <a href="{record_url}">{record_medium}</a> has been successfully created.';
@@ -504,16 +510,16 @@ class JsonController extends \yii\web\Controller
 	 */
 	public function getActionRoute(string|array|null $action_id, $model, $master_model = null): string
 	{
+		$prefix = $this->_route_prefix ?? $this->getRoutePrefix($this->getPath(), false);
 		if (is_array($action_id)) {
 			$path_parts = array_filter($model->pathParts());
 			if (count($path_parts) % 2 == 0) {
 				array_pop($path_parts);
 			}
-			$action_id[0] = $this->getRoutePrefix($this->getPath(), false)
-				. '/' . implode('/', $path_parts) . '/' . $action_id[0];
+			$action_id[0] = $prefix . '/' . implode('/', $path_parts) . '/' . $action_id[0];
 			$route = Url::to($action_id);
 		} else {
-			$route = $this->getRoutePrefix($this->getPath(), false) . $model?->getPath();
+			$route = $prefix . $model?->getPath();
 			if ($action_id == 'index') {
 				$route = AppHelper::removeLastWord($route, '/') . '/index';
 			} else if ($action_id) {
@@ -575,6 +581,16 @@ class JsonController extends \yii\web\Controller
 		// getRootModel() is also where _path is derived from the request uri, and setting
 		// the model short-circuits it, so the json path has to come in with it.
 		$this->_path = $path;
+		// getRoutePrefix() recovers the prefix by locating the json path inside the request
+		// uri, which only holds while this controller is the one answering the request.
+		// Rendered from another controller's view there is nothing to find and the prefix
+		// comes out empty, so build it the way the url rules read it back:
+		// <module>/<root_model>/<root_id>/<json path>. The module is what groups the url
+		// rules, so it is what gives the first segment; getBaseRoute() is for breadcrumbs
+		// and applications do override it to point somewhere else.
+		$this->_route_prefix = ($this->module instanceof \yii\base\Application
+				? '' : '/' . $this->module->getUniqueId())
+			. '/' . $root_model->controllerName() . '/' . $root_model->getPrimaryKey();
 	}
 
 	public function getRootModel(bool $force = false)
