@@ -34,7 +34,7 @@ class DevelController extends Controller
 		if ($schemafname == null) {
 			$schemafname = self::CAPELDIR . '/share/definitions/project_schema.json';
 		}
-		echo "Validating $capelfname aginst $schemafname\n";
+		echo "Validating $capelfname against $schemafname\n";
 		$data = json_decode(file_get_contents($capelfname));
 		$validator->validate($data, (object) ['$ref' => 'file://' . realpath($schemafname)]);
 		if ($validator->isValid()) {

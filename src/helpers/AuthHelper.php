@@ -81,7 +81,7 @@ class AuthHelper
 	static public function createOrUpdateRole(string $role_name, string $role_desc,
 											 bool $is_default = false, $auth = null): Role
 	{
-		if ($auth == null) {
+		if ($auth === null) {
 			$auth = \Yii::$app->authManager;
 		}
 		$role = $auth->getRole($role_name);
@@ -116,7 +116,7 @@ class AuthHelper
 
     static public function addPermissionsToRole($role_name, array|string $perm_names, $auth = null)
     {
-		if ($auth == null) {
+		if ($auth === null) {
 			$auth = \Yii::$app->authManager;
 		}
 		if (is_string($role_name)) {
@@ -149,7 +149,7 @@ class AuthHelper
 
     static public function createPermissions(array $perms, $auth = null)
     {
-		if ($auth == null) {
+		if ($auth === null) {
 			$auth = \Yii::$app->authManager;
 		}
 		foreach( $perms as $perm_name => $perm_desc) {
@@ -162,7 +162,7 @@ class AuthHelper
 
     static public function createRoles(array $roles, $auth = null)
     {
-		if ($auth == null) {
+		if ($auth === null) {
 			$auth = \Yii::$app->authManager;
 		}
 		foreach( $roles as $role_name => $role_desc) {
@@ -172,7 +172,7 @@ class AuthHelper
 
     static public function assignToUser(array|int|string $user_id_or_names, array|string $perms, $auth = null)
     {
-		if ($auth == null) {
+		if ($auth === null) {
 			$auth = \Yii::$app->authManager;
 		}
 		foreach ( (array)$user_id_or_names as $user_id_or_name) {
@@ -216,7 +216,7 @@ class AuthHelper
 
 	static public function revokeFromUser($user_id_or_name, array $perms, $auth = null)
 	{
-		if ($auth == null) {
+		if ($auth === null) {
 			$auth = \Yii::$app->authManager;
 		}
 		if (is_numeric($user_id_or_name)) {
@@ -259,7 +259,7 @@ class AuthHelper
 
     static public function removeFromRole($role_name, array|string $perm_names, $auth = null)
     {
-		if ($auth == null) {
+		if ($auth === null) {
 			$auth = \Yii::$app->authManager;
 		}
 		$parent = $auth->getItem($role_name);
@@ -284,7 +284,7 @@ class AuthHelper
 
 	static public function removeRoles(array $role_names, $auth = null)
     {
-		if ($auth == null) {
+		if ($auth === null) {
 			$auth = \Yii::$app->authManager;
 		}
 		foreach ($role_names as $role_name) {
@@ -299,7 +299,7 @@ class AuthHelper
 
 	static public function removePerms(array $perm_names, $auth = null)
     {
-		if ($auth == null) {
+		if ($auth === null) {
 			$auth = \Yii::$app->authManager;
 		}
 		foreach ($perm_names as $perm_name) {

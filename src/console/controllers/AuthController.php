@@ -659,7 +659,7 @@ class AuthController extends Controller
 	public function actionAssignPermToUser($perm_name, $user_id)
 	{
 		$permission = $this->authManager->getItem($perm_name);
-		if ($permission == null) {
+		if ($permission === null) {
 			return false;
 		}
 		$this->authManager->assign($permission, $user_id);
