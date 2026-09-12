@@ -316,6 +316,25 @@ window.yii.churros = (function ($) {
 				};
 				return map[char];
 			});
+		},
+		// Mensaje legible para el error de una llamada $.ajax, distinguiendo
+		// timeout, permisos (401/403), petición incorrecta (400) y error de
+		// servidor (5xx). xhr es el objeto que $.ajax pasa a su callback
+		// 'error'; textStatus es el segundo argumento de esa misma callback.
+		ajaxErrorMessage: function (xhr, textStatus) {
+			if (textStatus === 'timeout') {
+				return 'La operación ha tardado demasiado. Inténtalo de nuevo.';
+			}
+			if (xhr.status === 401 || xhr.status === 403) {
+				return 'No tienes permiso para hacer esta operación (' + xhr.status + ').';
+			}
+			if (xhr.status === 400) {
+				return 'Petición incorrecta (400): ' + xhr.responseText;
+			}
+			if (xhr.status >= 500) {
+				return 'Error del servidor (' + xhr.status + '): ' + xhr.responseText;
+			}
+			return 'Error ' + xhr.status + ': ' + xhr.responseText;
 		}
 	};
 })(window.jQuery);
