@@ -208,7 +208,7 @@ abstract class BaseImporter
         }
 
         // Descartamos la linea de las cabeceras
-        if (($csvline = fgetcsv($file, 0, $csvdelimiter, $csvquote)) === false) {
+        if (($csvline = fgetcsv($file, 0, $csvdelimiter, $csvquote, '\\')) === false) {
             $this->errors['csv_read_header'] = $this->filename . ": CSV file can not be read";
             return self::FILE_ERROR;
         }
@@ -216,7 +216,17 @@ abstract class BaseImporter
         $import_fields_info = $this->getImportFieldsInfo();
         $csvheaders = array_keys($import_fields_info);
         if (count($csvline) !== count($csvheaders)) {
-            $this->errors[] = "El número de columnas del fichero (" . count($csvline) . ") no coincide con el del importador (" . count($csvheaders). ")";
+            $missing = array_diff($csvheaders, $csvline);
+            $extra = array_diff($csvline, $csvheaders);
+            $detail = [];
+            if ($missing) {
+                $detail[] = 'faltan: ' . implode(', ', $missing);
+            }
+            if ($extra) {
+                $detail[] = 'sobran: ' . implode(', ', $extra);
+            }
+            $this->errors[] = "El número de columnas del fichero (" . count($csvline) . ") no coincide con el del importador (" . count($csvheaders). ")"
+                . ($detail ? ' (' . implode('; ', $detail) . ')' : '');
             return self::FILE_ERROR;
         }
         if (array_diff($csvline,$csvheaders) != []
@@ -236,7 +246,7 @@ abstract class BaseImporter
         $ret = false;
         $import_fields_info = $this->getImportFieldsInfo();
         $has_errors = false;
-        while (($csvline = fgetcsv($file, 0, $csvdelimiter, $csvquote)) !== false) {
+        while (($csvline = fgetcsv($file, 0, $csvdelimiter, $csvquote, '\\')) !== false) {
 			if ($this->start_line > 0 && $this->csvline < $this->start_line) {
 				$this->output("Saltando línea CSV {$this->csvline} hasta la {$this->start_line}");
 				++$this->csvline;
