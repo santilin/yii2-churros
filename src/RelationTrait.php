@@ -74,6 +74,8 @@ trait RelationTrait
 				$model_relation = $relations_in_model[$relation_in_form];
 				// Look for embedded relations data in the main form
 				$post_data = null;
+				$post_data_key = null;
+				$post_data_in_form = null;
 				if ($model_relation['type'] == 'HasOne' || $model_relation['type'] == "OneToOne") {
 					if (isset($post[$formName][$relation_in_form])) {
 						$post_data = $post[$formName][$relation_in_form];
@@ -85,15 +87,23 @@ trait RelationTrait
 						$post_data = $post[$model_relation['model']];
 						unset($post[$model_relation['model']]);
 					} else if (is_array($model_relation['left'])) {
+						// Ojo: no se quita todavía de $post. Un left[] compuesto puede
+						// coincidir de casualidad con el nombre de una columna propia
+						// del modelo (no pensada para esta relación); solo se retira
+						// más abajo si de verdad resulta ser el valor codificado de la
+						// relación (un string JSON), para que si no lo es, load() al
+						// final de este método la siga viendo como atributo normal.
 						foreach ($model_relation['left'] as $full_mr_left) {
 							$mr_left = AppHelper::lastWord($full_mr_left, '.');
 							if (isset($post[$formName][$mr_left])) {
 								$post_data = $post[$formName][$mr_left];
-								unset($post[$formName][$mr_left]);
+								$post_data_in_form = true;
+								$post_data_key = $mr_left;
 								break;
 							} else if (isset($post[$mr_left])) {
 								$post_data = $post[$mr_left];
-								unset($post[$mr_left]);
+								$post_data_in_form = false;
+								$post_data_key = $mr_left;
 								break;
 							}
 						}
@@ -110,11 +120,22 @@ trait RelationTrait
 								}
 							}
 							if (is_string($post_data)) {
+								if (isset($post_data_key)) {
+									if ($post_data_in_form) {
+										unset($post[$formName][$post_data_key]);
+									} else {
+										unset($post[$post_data_key]);
+									}
+								}
 								$post_data = json_decode($post_data, true);
 								$this->setAttributes($post_data, false); // not safe
-							} else {
-								throw new \Exception("stop");
 							}
+							// si $post_data no es ni array ni string (p.ej. venía de una
+							// columna propia del modelo que coincide de casualidad con
+							// uno de los left[] de esta relación, no de un valor pensado
+							// para ella), no es un dato de relación válido: se deja tal
+							// cual en $post, sin quitarla, para que la recoja el load()
+							// normal de más abajo.
 						} else if (is_array($post_data)) {
 							// creates a new relmodel and populates it
 							$rel_model->setAttributes($post_data);
