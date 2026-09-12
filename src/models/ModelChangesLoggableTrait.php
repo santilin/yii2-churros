@@ -39,6 +39,12 @@ trait ModelChangesLoggableTrait
 	protected $_model_changes_log = false;
 
 	/**
+	 * Timestamp compartido por todas las filas de un mismo guardado, para que el
+	 * agrupado del historial no parta un save que cruce el límite de un segundo.
+	 */
+	protected $_model_changes_changed_at;
+
+	/**
 	 * Whether to send notifications when a change is logged via ModelChangesEvent
 	 */
 	protected $_model_changes_notifications = false;
@@ -86,6 +92,9 @@ trait ModelChangesLoggableTrait
 			$_log_model_changes_relation_info = static::$relations[static::$_log_model_changes_relation];
 			$model_change_class = $_log_model_changes_relation_info['modelClass'];
 			$record_id = strval(count($this->primaryKey())==1 ? $this->getPrimaryKey() : json_encode($this->getPrimaryKey(true)));
+			$this->_model_changes_changed_at ??= (new \yii\db\Query())
+				->select(new \yii\db\Expression("NOW()"))
+				->scalar();
 			if ($event->name === self::EVENT_AFTER_INSERT) {
 				// Las filas de campo guardan el valor real de cada campo, así que la
 				// descripción del registro necesita hueco propio: el índice redondo del
@@ -150,7 +159,7 @@ trait ModelChangesLoggableTrait
 			// En un alta $old_value es el valor inicial real del campo, o el recordDesc
 			// del registro cuando $nfield es el índice redondo del modelo.
 			$model_change->value = $old_value;
-			$model_change->changed_at = $this->created_at ?? new \yii\db\Expression("NOW()");
+			$model_change->changed_at = $this->created_at ?? $this->_model_changes_changed_at ?? new \yii\db\Expression("NOW()");
 			if (YII_ENV_TEST && !($this->created_by ?? false)) {
 				$model_change->changed_by = 1;
 			} else {
@@ -161,7 +170,7 @@ trait ModelChangesLoggableTrait
 			}
 		} else {
 			$model_change->value = $old_value;
-			$model_change->changed_at = new \yii\db\Expression("NOW()");
+			$model_change->changed_at = $this->_model_changes_changed_at ?? new \yii\db\Expression("NOW()");
 			if (\Yii::$app instanceof \yii\web\Application) {
 				$model_change->changed_by = \Yii::$app->user?->identity?->id;
 			} else {
