@@ -90,8 +90,11 @@ class DateRangeValidator extends Validator
 					'{from-label} {from} can\'t be greater than {until-label} {until}', [
 						'from-label' => $model->getAttributeLabel($attribute),
 						'until-label' => $model->getAttributeLabel($this->untilAttribute),
-						'from' => Yii::$app->formatter->asDateTime($fromDate),
-						'until' => Yii::$app->formatter->asDateTime($untilDate)]));
+						'from' => $this->type === DateValidator::TYPE_DATE
+							? Yii::$app->formatter->asDate($fromDate) : Yii::$app->formatter->asDateTime($fromDate),
+						'until' => $this->type === DateValidator::TYPE_DATE
+							? Yii::$app->formatter->asDate($untilDate) : Yii::$app->formatter->asDateTime($untilDate)
+					]));
 			}
 		}
 		return true;
