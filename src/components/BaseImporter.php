@@ -213,6 +213,21 @@ abstract class BaseImporter
             return self::FILE_ERROR;
         }
 
+        // Las exportaciones desde Excel a veces dejan una o varias líneas en
+        // blanco antes de la fila de cabeceras (o celdas de formato que hacen
+        // que esa fila salga llena de comas). Se salta esa fila vacía para
+        // localizar la cabecera de verdad.
+        while ($this->isCsvRowEmpty($csvline)) {
+            if (($csvline = fgetcsv($file, 0, $csvdelimiter, $csvquote, '\\')) === false) {
+                $this->errors['csv_read_header'] = $this->filename . ": CSV file can not be read";
+                return self::FILE_ERROR;
+            }
+        }
+        // Idem por la derecha: muchas hojas de cálculo arrastran celdas con
+        // formato más allá de la última columna con nombre, y fgetcsv las
+        // convierte en columnas vacías de sobra que no deben contar.
+        $this->trimTrailingEmptyCsvColumns($csvline);
+
         $import_fields_info = $this->getImportFieldsInfo();
         $csvheaders = array_keys($import_fields_info);
         if (count($csvline) !== count($csvheaders)) {
@@ -223,7 +238,15 @@ abstract class BaseImporter
                 $detail[] = 'faltan: ' . implode(', ', $missing);
             }
             if ($extra) {
-                $detail[] = 'sobran: ' . implode(', ', $extra);
+                $extra_desc = [];
+                foreach ($extra as $extra_pos => $extra_value) {
+                    if ($extra_value === '' || $extra_value === null) {
+                        $extra_desc[] = 'columna ' . ($extra_pos + 1) . ' (vacía)';
+                    } else {
+                        $extra_desc[] = $extra_value;
+                    }
+                }
+                $detail[] = 'sobran: ' . implode(', ', $extra_desc);
             }
             $this->errors[] = "El número de columnas del fichero (" . count($csvline) . ") no coincide con el del importador (" . count($csvheaders). ")"
                 . ($detail ? ' (' . implode('; ', $detail) . ')' : '');
@@ -273,15 +296,55 @@ abstract class BaseImporter
         return ($has_errors ? self::IMPORTED_WITH_ERRORS : self::OK);
     }
 
+    /**
+     * Devuelve true si la fila leída por fgetcsv no contiene ningún valor
+     * real (todas sus celdas están vacías o es una fila en blanco).
+     */
+    protected function isCsvRowEmpty(array $csvline): bool
+    {
+        foreach ($csvline as $csvvalue) {
+            if (trim((string) $csvvalue) !== '') {
+                return false;
+            }
+        }
+        return true;
+    }
+
+    /**
+     * Quita las columnas vacías que arrastran al final algunas exportaciones
+     * de hojas de cálculo (celdas con formato más allá de la última columna
+     * con datos). Modifica el array por referencia.
+     * @param int $min_columns Número mínimo de columnas que debe conservar:
+     *   en las líneas de datos no se recorta por debajo del número de columnas
+     *   de la cabecera, para no convertir en una fila corta la fila cuya última
+     *   columna (real, de la cabecera) va vacía.
+     */
+    protected function trimTrailingEmptyCsvColumns(array &$csvline, int $min_columns = 0): void
+    {
+        while (count($csvline) > $min_columns && trim((string) end($csvline)) === '') {
+            array_pop($csvline);
+        }
+    }
+
     protected function importLine(array $import_fields_info, array $csvheaders, array $csvline): int
     {
 		if ($csvline === null) {
 			$this->add_error_get_last();
 			return self::FILE_ERROR;
 		} elseif ($csvline == []) {
-			return self::EMPTY_RECORD;
 			// Saltar la línea vacía (ver docs de php:fgetcsv)
-		} elseif (count($csvline) !== count($csvheaders)) {
+			return self::EMPTY_RECORD;
+		} elseif ($this->isCsvRowEmpty($csvline)) {
+			// Saltar la línea en blanco (Excel deja filas vacías sobrantes)
+			return self::EMPTY_RECORD;
+		}
+		// Se recortan las columnas vacías finales igual que en la cabecera,
+		// para que las líneas de datos no fallen por el count de abajo. El
+		// recorte se limita al número de columnas de la cabecera: si la última
+		// columna (real) de una fila va vacía, no se la convierte en una fila
+		// con menos columnas que la cabecera.
+		$this->trimTrailingEmptyCsvColumns($csvline, count($csvheaders));
+		if (count($csvline) !== count($csvheaders)) {
 			$this->errors[] = "El número de columnas de la línea {$this->csvline} no es correcto";
 			return self::FILE_ERROR;
 		} else {
