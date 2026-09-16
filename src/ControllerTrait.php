@@ -356,13 +356,15 @@ trait ControllerTrait
 		$ret = $this->userPermissions();
 		if ($ret === false) {
 			return false;
+		} else if ($ret === true) {
+			$ret = array_unique(array_keys($this->controllerPermissions));
 		}
 		foreach ($arrays as $array) {
 			if ($array === false) {
 				return [];
 			} elseif ($array === true) {
 				continue;
-			} elseif (!empty($array) && is_array($array)) {
+			} elseif (is_array($array) && !empty($array)) {
 				if ($ret === true) {
 					$ret = $array;
 				} else {
