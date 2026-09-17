@@ -435,3 +435,12 @@ details[layout-details-card] {
   vertical-align: middle;
   margin-left:0px;
 }
+
+/* Botones slow: spinner al pulsar */
+.btn-slow-loading {
+  pointer-events: none;
+}
+.btn-slow-loading .spinner-border {
+  vertical-align: middle;
+  margin-right: 0.25em;
+}

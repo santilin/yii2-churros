@@ -167,4 +167,8 @@ return [
 	'Export' => 'Exportar',
 	'Quick export of the rows on screen' => 'Exportación rápida de las filas en pantalla',
 	'Export all in another format' => 'Exportar todo en otro formato',
+	// ModelInfoTrait::validateInRange
+	'{attribute} is an array.' => '{attribute} es un array.',
+	'{attribute} value `{shown_value}` is not in its range of values: {range}'
+		=> 'El valor `{shown_value}` de {attribute} no está entre sus valores posibles: {range}',
 ];

@@ -251,9 +251,12 @@ class FormHelper
 				&& $name !== 'submit') {
 				$button['htmlOptions']['name'] = $name;
 			}
-			if (isset($button['htmlOptions']['autofocus'])) {
-				$button['htmlOptions']['tabindex'] = static::ti();
-			}
+if (isset($button['htmlOptions']['autofocus'])) {
+            $button['htmlOptions']['tabindex'] = static::ti();
+        }
+        if (!empty($button['slow'])) {
+            $button['htmlOptions']['data-slow'] = '1';
+        }
 			$caption = $title = $button['title']??$name;
 			$icon = $button['icon'] ?? null;
 			if ($icon) {

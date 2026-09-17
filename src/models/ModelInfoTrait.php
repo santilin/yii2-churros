@@ -930,7 +930,9 @@ trait ModelInfoTrait
 		$value = $this->$field;
 		if (is_array($value)) {
 			if (!$allowArray) {
-				$this->addError($attribute, Yii::t('yii', '{attribute} is an array.'));
+				$this->addError($attribute, Yii::t('churros', '{attribute} is an array.', [
+					'attribute' => $this->getAttributeLabel($attribute),
+				]));
 				return;
 			}
 			$valid = true;
@@ -945,8 +947,8 @@ trait ModelInfoTrait
 		}
 		if ($not ? $valid : !$valid) {
 			$shown_value = is_array($value) ? implode(', ', $value) : $value;
-			$this->addError($attribute, Yii::t('yii', '{attribute} value `{shown_value}` is not in its range of values: {range}', [
-					'attribute' => $attribute,
+			$this->addError($attribute, Yii::t('churros', '{attribute} value `{shown_value}` is not in its range of values: {range}', [
+					'attribute' => $this->getAttributeLabel($attribute),
 					'shown_value' => $shown_value,
 					'range' => implode(', ', $range),
 				]));

@@ -493,8 +493,29 @@ window.yii.FormController = (function() {
 			});
 			return this;
 		},
-    };
+	};
 
     return FormController;
 })();
+
+// Botones con propiedad slow: al pulsar se deshabilitan y muestran spinner
+// hasta que la acción completada (submit → recarga, AJAX → complete/error).
+$(document).on('click', '[data-slow]', function () {
+    var $btn = $(this);
+    if ($btn.hasClass('btn-slow-loading')) return;
+    $btn.addClass('btn-slow-loading');
+    $btn.prop('disabled', true);
+    $btn.data('original-html', $btn.html());
+    $btn.prepend('<span class="spinner-border spinner-border-sm" role="status" aria-label="Procesando"></span> ');
+});
+
+$(document).on('ajaxComplete ajaxError', function () {
+    $('[data-slow].btn-slow-loading').each(function () {
+        var $btn = $(this);
+        $btn.removeClass('btn-slow-loading');
+        $btn.prop('disabled', false);
+        var original = $btn.data('original-html');
+        if (original) $btn.html(original);
+    });
+});
 

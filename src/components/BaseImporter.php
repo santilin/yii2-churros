@@ -32,12 +32,14 @@ abstract class BaseImporter
 	const IGNORED_RECORD = 4;
 	const IMPORTED_WITH_ERRORS = 5;
 
+
+	public array $user_params =  [];
+
 	protected $ignore_dups = false;
 	protected $update_dups = false;
 	protected $limit = -1;
 	protected $start_line = -1;
 	protected $verbose = true;
-	protected $auto_commit = false;
 
     /**
      * @var string ruta y nombre del fichero a importar
@@ -133,16 +135,24 @@ abstract class BaseImporter
     {
     }
 
-    protected function ignoreRecord(array $record):bool
+    protected function ignoreRecord(array $record): bool
     {
 		return false;
     }
 
-    protected function recordExists($record)
+    protected function recordExists(array $record)
     {
 		return null;
     }
 
+    protected function beforeSave(mixed &$record): bool
+	{
+		return true;
+	}
+
+	protected function afterSave(mixed $record): bool
+	{
+	}
 
     /**
 		Lee los registros del fichero y los guarda en un array con los nombres de campos del modelo Importacion
@@ -159,24 +169,22 @@ abstract class BaseImporter
     {
         $this->filename = $filename;
         $this->errors = [];
-		if (!$this->auto_commit) {
-			$transaction = $this->record->getDb()->beginTransaction();
-		}
+		$transaction = $this->record->getDb()->beginTransaction();
         $ret = $this->importCsvRecords($csvdelimiter, $csvquote);
 		if ($ret == self::OK) {
 			$this->output("Insertados {$this->imported} registros");
 			$this->output("Actualizados {$this->updated} registros");
-			if (!$this->dry_run) {
-				if (!$this->auto_commit) {
-					$transaction->commit();
-				}
-			} else {
+			if ($this->dry_run) {
+				// En la simulación los registros no deben quedar grabados: todo
+				// el fichero va en una sola transacción global, que se descarta
+				// con un rollback.
+				$transaction->rollBack();
 				$this->output("NO SE HAN GUARDADO LOS REGISTROS");
+			} else {
+				$transaction->commit();
 			}
 		} else {
-			if (!$this->auto_commit) {
-				$transaction->rollBack();
-			}
+			$transaction->rollBack();
 			switch( $ret) {
 			case self::ABORTED_ON_ERROR:
 				$this->output("Aborted on error");
@@ -208,10 +216,12 @@ abstract class BaseImporter
         }
 
         // Descartamos la linea de las cabeceras
+		$fileline = 0;
         if (($csvline = fgetcsv($file, 0, $csvdelimiter, $csvquote, '\\')) === false) {
             $this->errors['csv_read_header'] = $this->filename . ": CSV file can not be read";
             return self::FILE_ERROR;
         }
+        ++$fileline; // la línea leída cuenta, sea en blanco o la cabecera
 
         // Las exportaciones desde Excel a veces dejan una o varias líneas en
         // blanco antes de la fila de cabeceras (o celdas de formato que hacen
@@ -222,6 +232,7 @@ abstract class BaseImporter
                 $this->errors['csv_read_header'] = $this->filename . ": CSV file can not be read";
                 return self::FILE_ERROR;
             }
+            ++$fileline; // las líneas en blanco también se cuentan
         }
         // Idem por la derecha: muchas hojas de cálculo arrastran celdas con
         // formato más allá de la última columna con nombre, y fgetcsv las
@@ -264,15 +275,17 @@ abstract class BaseImporter
             return self::FILE_ERROR;
         }
         $csvheaders = $csvline; // Tomamos el orden del csv, no del input fields
-        $this->csvline = 1;
         // Lee el fichero linea a linea y convierte a array la linea
         $ret = false;
         $import_fields_info = $this->getImportFieldsInfo();
         $has_errors = false;
         while (($csvline = fgetcsv($file, 0, $csvdelimiter, $csvquote, '\\')) !== false) {
+			// Se cuenta cada línea del fichero (cabecera y blancos incluidos) para
+			// que los números de línea de los errores coincidan con los reales.
+			++$fileline;
+			$this->csvline = $fileline;
 			if ($this->start_line > 0 && $this->csvline < $this->start_line) {
 				$this->output("Saltando línea CSV {$this->csvline} hasta la {$this->start_line}");
-				++$this->csvline;
 				continue;
 			} else {
 				$this->output("Leyendo línea CSV {$this->csvline}");
@@ -285,7 +298,6 @@ abstract class BaseImporter
 					return self::ABORTED_ON_ERROR;
 				}
 			}
-			++$this->csvline;
 			if ($this->limit > 0) {
 				if (--$this->limit == 0) {
 					break;
@@ -380,15 +392,20 @@ abstract class BaseImporter
 			if (!$this->ignoreRecord($this->record_to_import)) {
 				if ($has_errors) {
 					return self::RECORD_WITH_ERRORS;
-				} else {
-					// Guarda la línea original de este registro por si da error poder mostrar la línea del error
-					$this->afterReadLine($this->record_to_import, $csvline);
-					if (count($this->record_to_import) > 0) {
-						return $this->importRecord($this->record_to_import);
-					} else {
-						return self::RECORD_WITH_ERRORS;
-					}
-				}
+            } else {
+                // Guarda la línea original de este registro por si da error poder mostrar la línea del error
+                try {
+                    $this->afterReadLine($this->record_to_import, $csvline);
+                } catch (ImportException $e) {
+                    $this->addError($e->getMessage());
+                    return self::RECORD_WITH_ERRORS;
+                }
+                if (count($this->record_to_import) > 0) {
+                    return $this->importRecord($this->record_to_import, $csvline);
+                } else {
+                    return self::RECORD_WITH_ERRORS;
+                }
+            }
 			} else {
 				$this->output("Ignorando registro " . json_encode($this->record_to_import,JSON_UNESCAPED_UNICODE));
 				return self::IGNORED_RECORD;
@@ -400,13 +417,10 @@ abstract class BaseImporter
 	{
 		$has_error = $ignored = false;
 		$r = $this->createModel();
-		if ($this->auto_commit) {
-			$transaction = $r->getDb()->beginTransaction();
-		}
 		$r->setDefaultValues();
 		// no valida duplicados para poder hacer update_dups
 		$model_validated = $r->loadAll([$r->formName() => $record], array_keys($r::$relations)) && $r->validate();
-		$model_dup = $this->modelExists($r);
+		$model_dup = $this->modelExists($r, $record);
 		if (!$model_validated) {
 			if ($model_dup && count($r->getErrors()) == 1) {
 				$model_validated = true;
@@ -422,12 +436,16 @@ abstract class BaseImporter
 					} else {
 						$has_error = true;
 					}
-					if (!$has_error && !$r->saveAll(false)) {
+					if (!$has_error && (!$this->beforeSave($r) || !$r->saveAll(false))) {
 						$has_error = true;
 					} else {
-						$this->updated++;
-						if ($this->verbose) {
-							$this->output("Actualizado registro " . $r->recordDesc() . "\n" . json_encode($changes));
+						if ($this->afterSave($r)) {
+							$this->updated++;
+							if ($this->verbose) {
+								$this->output("Actualizado registro " . $r->recordDesc() . "\n" . json_encode($changes));
+							}
+						} else {
+							$has_error = true;
 						}
 					}
 				} else if ($this->ignore_dups) {
@@ -437,7 +455,7 @@ abstract class BaseImporter
 					$this->addError("Registro duplicado " . $r->recordDesc());
 					$has_error = true;
 				}
-			} elseif (!$r->saveAll(false)) {
+			} elseif (!$this->beforeSave($r) || !$r->saveAll(false)) {
 				if ($r->getFirstError('yii\db\IntegrityException')) {
 					if ($this->ignore_dups) {
 						$this->output("Ignorando registro duplicado " . $r->recordDesc());
@@ -449,19 +467,18 @@ abstract class BaseImporter
 				} else {
 					$has_error = true;
 				}
-			} else {
+			} elseif ($this->afterSave($r)) {
 				$this->imported++;
 				if ($this->verbose) {
 					$this->output("Importado registro " . $r->recordDesc());
 				}
+			} else {
+				$has_error = true;
 			}
 		} else {
 			$has_error = true;
 		}
 		if ($has_error) {
-			if ($this->auto_commit) {
-				$transaction->rollBack();
-			}
 			$ne = 0;
 			foreach ($r->getFirstErrors() as $k => $error) {
 				if ($ne == 0) {
@@ -471,10 +488,6 @@ abstract class BaseImporter
 			}
 			if ($this->abort_on_error) {
 				return self::ABORTED_ON_ERROR;
-			}
-		} else {
-			if ($this->auto_commit && !$this->dry_run) {
-				$transaction->commit();
 			}
 		}
 		return $has_error ? self::RECORD_WITH_ERRORS : self::OK;
