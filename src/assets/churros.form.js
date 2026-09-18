@@ -504,9 +504,18 @@ $(document).on('click', '[data-slow]', function () {
     var $btn = $(this);
     if ($btn.hasClass('btn-slow-loading')) return;
     $btn.addClass('btn-slow-loading');
-    $btn.prop('disabled', true);
     $btn.data('original-html', $btn.html());
     $btn.prepend('<span class="spinner-border spinner-border-sm" role="status" aria-label="Procesando"></span> ');
+    // El disabled se difiere al siguiente tick: si el botón es type=submit,
+    // el envío del formulario lo dispara el "activation behavior" del propio
+    // click, que se evalúa justo después de este listener pero dentro del
+    // mismo ciclo síncrono. Deshabilitarlo aquí mismo (antes de ese punto)
+    // hace que el navegador ya no lo considere el control que originó el
+    // submit y el formulario nunca llega a enviarse: aparece el spinner pero
+    // la acción no se ejecuta.
+    setTimeout(function () {
+        $btn.prop('disabled', true);
+    }, 0);
 });
 
 $(document).on('ajaxComplete ajaxError', function () {

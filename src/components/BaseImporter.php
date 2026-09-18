@@ -171,18 +171,22 @@ abstract class BaseImporter
         $this->errors = [];
 		$transaction = $this->record->getDb()->beginTransaction();
         $ret = $this->importCsvRecords($csvdelimiter, $csvquote);
-		if ($ret == self::OK) {
+		if ($this->dry_run) {
+			// En la simulación los registros no deben quedar grabados: todo
+			// el fichero va en una sola transacción global, que se descarta
+			// con un rollback.
+			$transaction->rollBack();
+			$this->output("NO SE HAN GUARDADO LOS REGISTROS");
+			return $ret;
+		}
+		if ($ret == self::OK || $ret == self::IMPORTED_WITH_ERRORS) {
+			// Aunque haya filas con errores (IMPORTED_WITH_ERRORS), las filas
+			// válidas ya se han grabado dentro de la misma transacción y hay
+			// que conservarlas; el rollback solo correspondería a relanzar
+			// desde cero.
 			$this->output("Insertados {$this->imported} registros");
 			$this->output("Actualizados {$this->updated} registros");
-			if ($this->dry_run) {
-				// En la simulación los registros no deben quedar grabados: todo
-				// el fichero va en una sola transacción global, que se descarta
-				// con un rollback.
-				$transaction->rollBack();
-				$this->output("NO SE HAN GUARDADO LOS REGISTROS");
-			} else {
-				$transaction->commit();
-			}
+			$transaction->commit();
 		} else {
 			$transaction->rollBack();
 			switch( $ret) {
