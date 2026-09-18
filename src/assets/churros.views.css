@@ -444,3 +444,12 @@ details[layout-details-card] {
   vertical-align: middle;
   margin-right: 0.25em;
 }
+/* Spinner por imagen (data-slow-spinner): 1em = font-size del botón, así
+   escala con él (btn-sm, btn-lg...) igual que .spinner-border-sm lo hace
+   con su propio tamaño relativo. */
+.btn-slow-loading .slow-spinner {
+  height: 1em;
+  width: 1em;
+  vertical-align: middle;
+  margin-right: 0.25em;
+}

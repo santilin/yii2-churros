@@ -257,6 +257,9 @@ class FormHelper
 			if (!empty($button['slow'])) {
 				$button['htmlOptions']['data-slow'] = '1';
 			}
+			if (!empty($button['slow-spinner'])) {
+				$button['htmlOptions']['data-slow-spinner'] = $button['slow-spinner'];
+			}
 			$caption = $title = $button['title']??$name;
 			$icon = $button['icon'] ?? null;
 			if ($icon) {

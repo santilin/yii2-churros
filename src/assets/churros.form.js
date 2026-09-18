@@ -505,7 +505,11 @@ $(document).on('click', '[data-slow]', function () {
     if ($btn.hasClass('btn-slow-loading')) return;
     $btn.addClass('btn-slow-loading');
     $btn.data('original-html', $btn.html());
-    $btn.prepend('<span class="spinner-border spinner-border-sm" role="status" aria-label="Procesando"></span> ');
+    var spinnerSrc = $btn.data('slow-spinner');
+    var $spinner = spinnerSrc
+        ? $('<img>', { src: spinnerSrc, alt: '', class: 'slow-spinner', role: 'status', 'aria-label': 'Procesando' })
+        : $('<span>', { class: 'spinner-border spinner-border-sm', role: 'status', 'aria-label': 'Procesando' });
+    $btn.prepend($spinner, ' ');
     // El disabled se difiere al siguiente tick: si el botón es type=submit,
     // el envío del formulario lo dispara el "activation behavior" del propio
     // click, que se evalúa justo después de este listener pero dentro del
