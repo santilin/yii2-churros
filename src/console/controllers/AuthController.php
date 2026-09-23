@@ -404,7 +404,7 @@ class AuthController extends Controller
 			}
 		}
 
-		$module_desc = ucfirst($module_info['title'] ?? $module_id);
+		$module_desc = mb_ucfirst($module_info['title'] ?? $module_id);
 		if (in_array('viewer', $roles_to_create)) {
 			$viewer = AuthHelper::createOrUpdateRole("$module_id.viewer",
 				Yii::t('churros', '{module}:  visor/a ', ['module' => $module_desc]), true, $auth);
