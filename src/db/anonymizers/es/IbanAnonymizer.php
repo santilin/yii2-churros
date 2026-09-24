@@ -29,7 +29,11 @@ class IbanAnonymizer
         // Eliminar espacios y mayúsculas
         $iban = strtoupper(str_replace(' ', '', $iban));
         if (mb_substr($iban, 0, 2, 'UTF-8') !== 'ES' || mb_strlen($iban, 'UTF-8') !== 24) {
-            throw new \InvalidArgumentException('Solo se admite IBAN español de 24 caracteres.');
+            // IBAN de otro país (o valor que no es un IBAN válido): no sabemos
+            // calcular su dígito de control, así que se cifra carácter a
+            // carácter sin intentar mantenerlo válido, en vez de abortar todo
+            // el proceso de anonimización por un solo valor no español.
+            return trim(chunk_split($this->anonymizeGeneric($iban), 4, ' '));
         }
 
         // Extraer campos
@@ -56,6 +60,23 @@ class IbanAnonymizer
 
         // Formato con espacios cada 4 caracteres
         return trim(chunk_split($ibanFinal, 4, ' '));
+    }
+
+    private function anonymizeGeneric(string $iban): string {
+        $chars = $this->mb_str_split_unicode($iban);
+        $anonymized = [];
+        foreach ($chars as $i => $char) {
+            if (preg_match('/^\d$/u', $char)) {
+                $hash = crc32($this->secretKey . 'generic' . $char . $i . $iban);
+                $anonymized[] = $this->digits[$hash % 10];
+            } elseif (preg_match('/^[A-Za-z]$/u', $char)) {
+                $hash = crc32($this->secretKey . 'genericletter' . $char . $i . $iban);
+                $anonymized[] = chr(65 + ($hash % 26));
+            } else {
+                $anonymized[] = $char;
+            }
+        }
+        return implode('', $anonymized);
     }
 
     private function anonymizeDigits(string $digits, string $context): string {
