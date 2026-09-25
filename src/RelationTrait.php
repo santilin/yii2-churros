@@ -54,6 +54,54 @@ trait RelationTrait
 		return $this->_parent_model;
 	}
 
+	/**
+	 * Lee atributos con punto ('relacion.atributo') a través de la relación:
+	 * capel genera reglas de validación sobre ellos (p.ej. ['participante.nie',
+	 * 'string', 'max' => 10]) y los validadores de Yii los leen con
+	 * $model->$attribute, que sin esto lanzaría UnknownPropertyException.
+	 * Si el relacionado no existe, devuelve null para que skipOnEmpty salte
+	 * la validación en vez de romper.
+	 */
+	public function __get($name)
+	{
+		if (str_contains($name, '.')) {
+			[$relation_name, $attribute] = explode('.', $name, 2);
+			if (method_exists($this, 'get' . $relation_name)) {
+				$related = $this->$relation_name;
+				if ($related === null) {
+					return null;
+				}
+				if (!is_object($related)) {
+					throw new \yii\base\UnknownPropertyException(
+						'Getting unknown property: ' . static::class . '::' . $name
+					);
+				}
+				return $related->$attribute;
+			}
+		}
+		return parent::__get($name);
+	}
+
+	/**
+	 * Escribe atributos con punto ('relacion.atributo') en el modelo
+	 * relacionado (p.ej. asignación masiva con claves con punto). Si el
+	 * relacionado no existe, se deja el comportamiento estándar (excepción).
+	 */
+	public function __set($name, $value)
+	{
+		if (str_contains($name, '.')) {
+			[$relation_name, $attribute] = explode('.', $name, 2);
+			if (method_exists($this, 'get' . $relation_name)) {
+				$related = $this->$relation_name;
+				if (is_object($related)) {
+					$related->$attribute = $value;
+					return;
+				}
+			}
+		}
+		parent::__set($name, $value);
+	}
+
     /**
      * Load all attributes including related attributes
      * @param $post
@@ -109,8 +157,30 @@ trait RelationTrait
 						}
 					}
 					if ($post_data !== null) {
-						$rel_model = new $model_relation['modelClass'];
-						if (is_array($model_relation['left'])) {
+						if (is_array($post_data) && !isset($post_data_key)) {
+							// Datos de atributos del modelo relacionado (p.ej. un
+							// textInput que postea Modelo[attr]): si el relacionado
+							// ya existe (resuelto por el link de la relación), se
+							// actualiza ÉL con lo posteado; solo si no existe se
+							// crea uno nuevo. Así loadAll()+saveAll() graban el
+							// registro existente en vez de intentar un INSERT.
+							// ($post_data_key solo se fija en la búsqueda por
+							// left[] de más abajo: si viene fijada, el dato no
+							// son atributos sino un valor codificado y sigue su
+							// rama de siempre.)
+							$rel_model = null;
+							if (!$this->getIsNewRecord()
+								&& method_exists($this, 'get' . $relation_in_form)
+							) {
+								$rel_model = $this->$relation_in_form;
+							}
+							if ($rel_model === null) {
+								// creates a new relmodel and populates it
+								$rel_model = new $model_relation['modelClass'];
+							}
+							$rel_model->setAttributes($post_data);
+							$this->populateRelation($relation_in_form, $rel_model);
+						} else if (is_array($model_relation['left'])) {
 							// Sets the foreign keys of this model if multiple keys
 							if (is_array($post_data)) {
 								if (count($post_data) === 1) {
@@ -136,10 +206,6 @@ trait RelationTrait
 							// para ella), no es un dato de relación válido: se deja tal
 							// cual en $post, sin quitarla, para que la recoja el load()
 							// normal de más abajo.
-						} else if (is_array($post_data)) {
-							// creates a new relmodel and populates it
-							$rel_model->setAttributes($post_data);
-							$this->populateRelation($relation_in_form, $rel_model);
 						}
 					}
 				} else {
@@ -340,9 +406,18 @@ trait RelationTrait
 		}
 		foreach ($this->relatedRecords as $relation_name => $records) {
 			/* @var $records ActiveRecord | ActiveRecord[] */
-			if ($records instanceof \yii\db\BaseActiveRecord && !$records->getIsNewRecord()) {
+			if ($records instanceof \yii\db\BaseActiveRecord && !$records->getIsNewRecord()
+				&& empty($records->getDirtyAttributes())
+			) {
+				// El relacionado ya existía y no ha cambiado: nada que grabar.
+				// Si viene sucio de loadAll() (datos posteados sobre el registro
+				// existente), sigue abajo y se actualiza en updateRecords().
 				continue;
-			} else if ($records instanceof \yii\db\BaseActiveRecord) {
+			} else if ($records instanceof \yii\db\BaseActiveRecord
+				&& $this->getRelation($relation_name)->multiple
+			) {
+				// Solo las relaciones múltiples viajan como arrays; un modelo
+				// único (Has-One) debe llegar como objeto a updateRecords().
 				$records = (array)$records;
 			}
 			$success = $this->updateRecords($relation_name, $records, $wasNewRecord);
@@ -350,7 +425,7 @@ trait RelationTrait
 		return $success;
     }
 
-    private function updateRecords(string $relation_name, array $records, bool $isNewRecord): bool
+    private function updateRecords(string $relation_name, $records, bool $isNewRecord): bool
     {
 		$success = true;
 		$relation = $this->getRelation($relation_name);
@@ -436,13 +511,13 @@ trait RelationTrait
 				}
 			}
 		} else {
-			//Has One
+			//Has One: $records es el modelo único (objeto, no array)
 			foreach ($link as $key => $value) {
 				$records->$key = $this->$value;
 			}
 			$relSave = $records->save();
 			if (!$relSave || !empty($records->errors)) {
-				$recordsWords = Yii:: t('churros', Inflector::camel2words(StringHelper::basename($AQ->modelClass)));
+				$recordsWords = Yii:: t('churros', Inflector::camel2words(StringHelper::basename($relation->modelClass)));
 				foreach ($records->errors as $validation) {
 					foreach ($validation as $errorMsg) {
 						$this->addError($relation_name, "$recordsWords : $errorMsg");
