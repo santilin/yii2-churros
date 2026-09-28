@@ -39,6 +39,7 @@ abstract class BaseImporter
 	protected $update_dups = false;
 	protected $limit = -1;
 	protected $start_line = -1;
+	protected $end_line = -1;
 	protected $verbose = true;
 
     /**
@@ -288,6 +289,9 @@ abstract class BaseImporter
 			// que los números de línea de los errores coincidan con los reales.
 			++$fileline;
 			$this->csvline = $fileline;
+			if ($this->end_line > 0 && $this->csvline > $this->end_line) {
+				break;
+			}
 			if ($this->start_line > 0 && $this->csvline < $this->start_line) {
 				$this->output("Saltando línea CSV {$this->csvline} hasta la {$this->start_line}");
 				continue;

@@ -51,6 +51,7 @@ abstract class CrudController extends CrudReadOnlyController
 		return $this->render('create', [
 			'model' => $this->model,
 			'viewForms' => [ [ '_form', null , null, [], [] ] ],
+			'action_title' => Yii::t('churros', 'Create'),
 			'formParams' => $this->changeActionParams($params, 'create', $this->model)
 		]);
 	}
@@ -85,6 +86,7 @@ abstract class CrudController extends CrudReadOnlyController
 		return $this->render('duplicate', [
 			'model' => $this->model,
 			'viewForms' => [ [ '_form', null, null, [], [] ] ],
+			'action_title' => Yii::t('churros', 'Duplicate'),
 			'formParams' => $this->changeActionParams($params, 'duplicate', $this->model)
 		]);
 	}
@@ -117,6 +119,7 @@ abstract class CrudController extends CrudReadOnlyController
 		return $this->render('update', [
 			'model' => $this->model,
 			'viewForms' => [ [ '_form', null, [], [] ] ],
+			'action_title' => Yii::t('churros', 'Update'),
 			'formParams' => $this->changeActionParams($params, 'update', $this->model)
 		]);
 	}

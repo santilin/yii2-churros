@@ -23,7 +23,6 @@
   display: flex;
   flex-direction: column;
   .title {
-    font-size: 1.25rem;
   }
   .supertitle {
     padding-left: 2px;

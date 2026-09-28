@@ -777,7 +777,8 @@ ajax;
 		}
 	}
 
-	public static function renderTitle(?string $supertitle, ?string $title, ?string $subtitle, bool $embedded = false): string
+	public static function renderTitle(?string $supertitle, ?string $title, ?string $subtitle,
+									   array $title_options = []): string
 	{
         $parts = [];
         if ($supertitle) {
@@ -788,7 +789,9 @@ ajax;
             }
         }
         if ($title) {
-            $parts['title'] = "<div class=title>$title</div>";
+			$title_tag = ArrayHelper::remove($title_options, 'tag', 'div');
+			Html::addCssClass($title_options, 'title');
+            $parts['title'] = Html::tag($title_tag, $title, $title_options);
         }
         if ($subtitle) {
             if (!$title && !$supertitle) {

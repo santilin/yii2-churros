@@ -150,6 +150,9 @@ class JsonModel extends \yii\base\Model
         if ($rel_info['type'] === 'HasMany') {
             $this->ensureJsonObject();
             $json_objects = $this->_json_object?->get("$.$rel_name") ?: [];
+            if (!is_array($json_objects)) {
+                return [];
+            }
             $related_models = $this->jsonArrayToModels($json_objects, $rel_model_class);
             return $related_models;
         } else {

@@ -207,6 +207,7 @@ class JsonController extends \yii\web\Controller
 		}
 		return $this->render('create', [
 			'model' => $this->model,
+			'action_title' => Yii::t('churros', 'Create'),
 			'viewForms' => [ [ '_form', null, null, [], [] ] ],
 			'formParams' => $this->changeActionParams($params, 'create', $this->model)
 		]);
