@@ -270,12 +270,6 @@ abstract class BaseImporter
         }
         if (array_diff($csvline,$csvheaders) != []
         && array_diff($csvheaders,$csvline) != []) {
-			foreach( $csvline as $key=>$value) {
-				if ($csvline[$key] != $csvheaders[$key]) {
-					echo "$key=>$value <==> $key=>" . $csvheaders[$key]. "\n";
-				}
-			}
-			// array_diff es case insensitive, usa array_udiff con strcasecmp si quieres que sea
 			$this->errors[] = "El nombre de alguna(s) columna(s) del fichero csv no es correcto: " . print_r(array_udiff($csvline, $csvheaders, "strcasecmp"),true);
             return self::FILE_ERROR;
         }
