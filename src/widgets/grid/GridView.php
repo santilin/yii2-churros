@@ -23,6 +23,18 @@ class GridView extends SimpleGridView
 	public bool $condensed = false;
 	public bool $hover = false;
 	public $layout = "{summary}\n{selectViews}\n{items}\n{pager}{filterCount}";
+	/**
+	 * Fija la cabecera de la tabla arriba al hacer scroll (`position: sticky`).
+	 * - `false`: desactivado.
+	 * - `true`: se queda en `top: 0`.
+	 * - string: desplazamiento superior, p.ej. `'56px'` si hay una barra de navegación fija.
+	 */
+	public $stickyHeader = false;
+	/**
+	 * Altura máxima del cuerpo desplazable, p.ej. `'70vh'` o `'500px'`.
+	 * Si es `null`, la tabla hace scroll con la página y la cabecera se queda fija arriba.
+	 */
+	public $stickyHeaderMaxHeight = null;
 
 	public function init()
 	{
@@ -37,6 +49,17 @@ class GridView extends SimpleGridView
 			$this->emptyText = Yii::t('churros', 'No {items} found.', [ 'items' => mb_lcfirst($configItems['items']??'items') ]);
 		}
 		parent::init();
+		if ($this->stickyHeader) {
+			Html::addCssClass($this->tableOptions, 'grid-sticky-header');
+		}
+	}
+
+	public function run()
+	{
+		if ($this->stickyHeader) {
+			$this->registerStickyHeaderCss();
+		}
+		return parent::run();
 	}
 
     /**
@@ -138,7 +161,36 @@ class GridView extends SimpleGridView
 		$this->emptyText = false;
 		$ret = parent::renderItems();
 		$this->emptyText = $empty_text_save;
+		if ($this->stickyHeaderMaxHeight !== null && $this->stickyHeaderMaxHeight !== false
+			&& $this->stickyHeaderMaxHeight !== '') {
+			return Html::tag('div', $ret, [
+				'class' => 'grid-sticky-body',
+				'style' => "max-height: {$this->stickyHeaderMaxHeight}; overflow-y: auto;",
+			]);
+		}
 		return $ret;
+	}
+
+	/**
+	 * Fija las celdas de la cabecera (`thead`, incluida la fila de filtros) arriba
+	 * con `position: sticky`. Necesitan fondo opaco y `z-index` para que las filas
+	 * del cuerpo pasen por debajo al hacer scroll.
+	 */
+	protected function registerStickyHeaderCss(): void
+	{
+		$view = $this->getView();
+		$id = $this->options['id'];
+		$top = $this->stickyHeader === true ? '0' : (string)$this->stickyHeader;
+		$view->registerCss(<<<CSS
+#$id table.grid-sticky-header > thead > tr > th,
+#$id table.grid-sticky-header > thead > tr > td {
+	position: sticky;
+	top: $top;
+	z-index: 10;
+	background-color: var(--bs-body-bg, #fff);
+}
+CSS
+		, [], "grid-sticky-header-$id");
 	}
 
 	protected function renderSelectViews()

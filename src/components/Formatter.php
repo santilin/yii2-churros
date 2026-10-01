@@ -123,7 +123,9 @@ class Formatter extends \yii\i18n\Formatter
 
 	public function asTokenized($value, string $sep = ', '): string
 	{
-		if (empty($value)) {
+		if (is_bool($value)) {
+			return $value ? 'true' : 'false';
+		} elseif (empty($value)) {
 			return '';
 		} else if(is_string($value)) {
 			$l = strlen($value);
