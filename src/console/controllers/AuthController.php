@@ -30,12 +30,17 @@ class AuthController extends Controller
 	public $authManager = 'authManager';
 	/** @var bool Verbose output */
 	public bool $verbose = false;
+	/**
+	 * @var bool Fuerza el borrado de roles/permisos aunque los tenga alguna
+	 * usuaria asignados (--force=1). Sin force, los items en uso se conservan.
+	 */
+	public bool $force = false;
 	/** @var string Output format for list-role: 'simple' or 'details' */
 	public string $format = 'simple';
 
     public function options($actionID)
     {
-        $options = ['verbose'];
+        $options = ['verbose', 'force'];
         if ($actionID === 'list-role') {
             $options[] = 'format';
         }
@@ -387,19 +392,31 @@ class AuthController extends Controller
 
 	/**
 	 * Creates the permissions for a rbac module and shows the ones not used
+	 *
+	 * @param bool $deleteUnused si es true, en vez de solo listar los items no
+	 * usados (createdAt=0 y no regenerados en esta pasada) los borra -- pero
+	 * solo los que isItemInUse() diga que nadie tiene asignados, ni directa
+	 * ni heredado por un rol intermedio.
 	 */
 	public function createModuleRbacPermissions(string $module_id, array $module_info,
-		array $roles_to_create = [ 'viewer', 'creator', 'editor', 'full-editor', 'deleter', 'granter', 'admin' ])
+		array $roles_to_create = [ 'viewer', 'creator', 'editor', 'full-editor', 'deleter', 'granter', 'admin' ],
+		bool $deleteUnused = false)
 	{
 		$auth = $this->authManager;
-		$all_items = []; // keeps track of all module rules to keep default ones
+		// keeps track of all module rules to keep default ones: createdAt=0
+		// marca los items que creó esta misma generación automática (ver
+		// AuthHelper::createOrUpdateRole()/createOrUpdatePermission() con
+		// $is_default=true); uno creado a mano (actionIndex(), permisosCeuta()...)
+		// tiene un timestamp real y no hay que listarlo aquí aunque esta pasada
+		// no lo toque, porque nunca es su trabajo tocarlo.
+		$all_items = [];
 		foreach ($this->authManager->getRoles() as $role) {
-			if (StringHelper::startsWith($role->name, "$module_id.")) {
+			if (StringHelper::startsWith($role->name, "$module_id.") && (int) $role->createdAt === 0) {
 				$all_items[$role->name] = true;
 			}
 		}
 		foreach ($this->authManager->getPermissions() as $perm) {
-			if (StringHelper::startsWith($perm->name, "$module_id.")) {
+			if (StringHelper::startsWith($perm->name, "$module_id.") && (int) $perm->createdAt === 0) {
 				$all_items[$perm->name] = true;
 			}
 		}
@@ -468,10 +485,63 @@ class AuthController extends Controller
 			AuthHelper::flushMessages($this->verbose);
 		}
 
-		// list unused
+		// list unused (or delete, with --deleteUnused=1)
 		if (count($all_items)) {
-			echo "Unused items:" . join(', ', array_keys($all_items)) . "\n";
+			if ($deleteUnused) {
+				foreach (array_keys($all_items) as $item_name) {
+					$enUso = $this->isItemInUse($item_name);
+					if ($enUso && empty($this->force)) {
+						echo "! No se borra '$item_name': sigue asignada a alguna usuaria (directa o por un rol intermedio).\n";
+						continue;
+					}
+					$item = $auth->getPermission($item_name) ?? $auth->getRole($item_name);
+					if ($item !== null && $auth->remove($item)) {
+						echo "- '$item_name' borrada" . ($enUso ? ' (forzada, estaba en uso).' : ' (no usada).') . "\n";
+					}
+				}
+			} else {
+				echo "Unused items:" . join(', ', array_keys($all_items)) . "\n";
+			}
 		}
+	}
+
+	/**
+	 * Si $itemName (rol o permiso) está asignado a alguna usuaria, directa o
+	 * indirectamente a través de los roles que lo tienen como hijo. Antes de
+	 * borrar un item "no usado" hay que comprobar esto: createdAt=0 y no
+	 * regenerado solo dice que el generador automático ya no lo reconoce,
+	 * no que nadie lo tenga concedido todavía.
+	 */
+	protected function isItemInUse(string $itemName): bool
+	{
+		$auth = $this->authManager;
+		$db = $auth->db;
+		$visitados = [];
+		$pendientes = [$itemName];
+		while ($pendientes) {
+			$actual = array_pop($pendientes);
+			if (isset($visitados[$actual])) {
+				continue;
+			}
+			$visitados[$actual] = true;
+			$asignada = $db->createCommand(
+				'SELECT 1 FROM ' . $auth->assignmentTable . ' WHERE item_name = :n LIMIT 1',
+				[':n' => $actual]
+			)->queryScalar();
+			if ($asignada !== false) {
+				return true;
+			}
+			$padres = $db->createCommand(
+				'SELECT parent FROM ' . $auth->itemChildTable . ' WHERE child = :n',
+				[':n' => $actual]
+			)->queryColumn();
+			foreach ($padres as $padre) {
+				if (!isset($visitados[$padre])) {
+					$pendientes[] = $padre;
+				}
+			}
+		}
+		return false;
 	}
 
 	/**
@@ -701,15 +771,21 @@ class AuthController extends Controller
 		AuthHelper::flushMessages($this->verbose);
 	}
 
-	public function actionRemoveRoles(array|string $role_name): void
+	public function actionRemoveRoles(array|string $role_names): void
 	{
-		AuthHelper::removeRoles($role_name, $this->authManager);
+		if (is_string($role_names)) {
+			$role_names = array_values(array_filter(array_map('trim', explode(',', $role_names))));
+		}
+		AuthHelper::removeRoles($role_names, $this->authManager);
 		AuthHelper::flushMessages($this->verbose);
 	}
 
-	public function actionRemovePermissions(array|string $role_name): void
+	public function actionRemovePermissions(array|string $perm_names): void
 	{
-		AuthHelper::removeRoles($role_name, $this->authManager);
+		if (is_string($perm_names)) {
+			$perm_names = array_values(array_filter(array_map('trim', explode(',', $perm_names))));
+		}
+		AuthHelper::removePerms($perm_names, $this->authManager);
 		AuthHelper::flushMessages($this->verbose);
 	}
 
@@ -730,6 +806,37 @@ class AuthController extends Controller
 	public function actionRemoveAll()
 	{
 		$this->authManager->removeAll();
+		AuthHelper::flushMessages($this->verbose);
+	}
+
+	/**
+	 * Borra los roles y permisos cuyo nombre coincide con una expresión LIKE
+	 * de SQL (p.ej. 'participantes.Participante.importar%'). Los que sigue
+	 * teniendo alguna usuaria asignada (directa o por un rol intermedio) no
+	 * se tocan, igual que en createModuleRbacPermissions().
+	 */
+	public function actionRemoveItemsLike(string $like): void
+	{
+		$auth = $this->authManager;
+		$nombres = $auth->db->createCommand(
+			'SELECT name FROM ' . $auth->itemTable . ' WHERE name LIKE :like ORDER BY name',
+			[':like' => $like]
+		)->queryColumn();
+		if (!$nombres) {
+			echo "No hay roles ni permisos que coincidan con '$like'.\n";
+			return;
+		}
+		foreach ($nombres as $nombre) {
+			$enUso = $this->isItemInUse($nombre);
+			if ($enUso && empty($this->force)) {
+				echo "! No se borra '$nombre': sigue asignada a alguna usuaria (directa o por un rol intermedio).\n";
+				continue;
+			}
+			$item = $auth->getPermission($nombre) ?? $auth->getRole($nombre);
+			if ($item !== null && $auth->remove($item)) {
+				echo "- '$nombre' borrado" . ($enUso ? ' (forzado, estaba en uso).' : '.') . "\n";
+			}
+		}
 		AuthHelper::flushMessages($this->verbose);
 	}
 
