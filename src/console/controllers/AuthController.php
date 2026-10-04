@@ -767,7 +767,7 @@ class AuthController extends Controller
 
 	public function actionRemovePermFromRole($perm_name, $role_name)
 	{
-		AuthHelper::removePermFromRole($role_name, $perm_name, $this->authManager);
+		AuthHelper::removeFromRole($role_name, $perm_name, $this->authManager);
 		AuthHelper::flushMessages($this->verbose);
 	}
 
@@ -1021,12 +1021,16 @@ class AuthController extends Controller
 
 	protected function displayRolesTree(array $roleNames, string $indent, $auth, array &$processedRoles, bool $show_perms): void
 	{
+		// Árbol jerárquico real: cada rol se muestra anidado bajo cada uno de
+		// sus padres (hijos directos), aunque salga en varias ramas. Por eso
+		// $processedRoles ya no es "vistos globales" sino la rama actual,
+		// solo para cortar ciclos.
+		$roleNames = array_values(array_unique($roleNames));
+		sort($roleNames, SORT_NATURAL | SORT_FLAG_CASE);
 		foreach ($roleNames as $roleName) {
-			if (isset($processedRoles[$roleName])) {
-				continue;
+			if (in_array($roleName, $processedRoles, true)) {
+				continue; // ciclo en esta rama
 			}
-			$processedRoles[$roleName] = true;
-
 			$role = $auth->getRole($roleName);
 			if (!$role) {
 				continue;
@@ -1038,16 +1042,17 @@ class AuthController extends Controller
 			}
 			$this->stdout("\n");
 
-			$childRoles = $auth->getChildRoles($roleName);
+			$processedRoles[] = $roleName;
 			$childRoleNames = [];
-			foreach ($childRoles as $childRole) {
-				if ($childRole->name !== $roleName) {
-					$childRoleNames[] = $childRole->name;
+			foreach ($auth->getChildren($roleName) as $childName => $child) {
+				if ($child instanceof Role && $childName !== $roleName) {
+					$childRoleNames[] = $childName;
 				}
 			}
 			if (!empty($childRoleNames)) {
 				$this->displayRolesTree($childRoleNames, $indent . '  ', $auth, $processedRoles, $show_perms);
 			}
+			array_pop($processedRoles);
 			if ($show_perms) {
 				$permissions = $auth->getPermissionsByRole($roleName);
 				foreach ($permissions as $perm) {
