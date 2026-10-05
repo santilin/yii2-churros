@@ -932,27 +932,38 @@ ajax;
 	}
 
 	/**
-	 * Renderiza un array como tabla Bootstrap aplicando formatos con Yii2 formatter.
+	 * Núcleo que renderiza un array de registros como tabla Bootstrap con
+	 * los formatos de Yii2 y, opcionalmente, una columna de acciones con botones.
 	 *
-	 * @param array $data Array de datos (fila - array asociativo).
-	 * @param array $columnFormats Clave = nombre columna, valor = tipo formato Yii2 (e.g. 'text', 'date', 'decimal').
-	 * @return string HTML tabla formateada.
+	 * @param array $data Filas de la tabla: array de arrays asociativos.
+	 * @param array $columnFormats Clave = nombre columna, valor = tipo de formatter (p.ej. 'text', 'date', 'raw').
+	 * @param array $buttons Botones por fila (ver arrayAsTableWithButtons()).
+	 * @param array $options Opciones de la tabla (ver arrayAsTableWithButtons()).
+	 * @return string HTML de la tabla.
 	 */
-	public static function arrayAsTable(array $data, array $columnFormats = []): string
+	private static function arrayAsTableRender(array $data, array $columnFormats = [], array $buttons = [], array $options = []): string
 	{
 		if (empty($data)) {
 			return '<p>No hay datos para mostrar.</p>';
 		}
+		$formatter = Yii::$app->formatter;
+		$with_actions = !empty($buttons);
+		$columns_keys = array_keys(reset($data));
+		if($with_actions){
+			$columns = array_filter($columns_keys, fn($col) => !str_starts_with($col, '_'));
+		}
+		$columns = array_values($columns_keys);
+		$table_class = $options['tableClass'] ?? 'table table-bordered table-striped';
 
-		$formatter = \Yii::$app->formatter;
-		$columns = array_keys(reset($data));
-
-		$html = '<table class="table table-bordered table-striped">';
+		$html = '<table class="' . Html::encode($table_class) . '">';
 		$html .= '<thead><tr>';
 
 		// Cabecera con nombres columnas
 		foreach ($columns as $col) {
 			$html .= Html::tag('th', Html::encode($col));
+		}
+		if ($with_actions) {
+			$html .= Html::tag('th', Html::encode($options['actionsColumns'] ?? 'Acciones'));
 		}
 		$html .= '</tr></thead><tbody>';
 
@@ -970,12 +981,65 @@ ajax;
 				}
 				$html .= Html::tag('td', $formattedValue);
 			}
+			if ($with_actions) {
+				$html .= Html::tag('td', static::arrayAsTableButtonsCell($buttons, $row));
+			}
 			$html .= '</tr>';
 		}
 
 		$html .= '</tbody></table>';
 
 		return $html;
+	}
+	private static function arrayAsTableButtonsCell(array $buttons, array $row): string
+	{
+		$cell = '';
+		foreach ($buttons as $name => $button) {
+			$url = $button['url'] ?? null;
+			if ($url instanceof \Closure) {
+				$url = $url($row);
+			}
+			if (empty($url)) {
+				continue;
+			}
+			$title = $button['title'] ?? (is_string($name) ? $name : '');
+			if (!empty($button['icon'])) {
+				$title = Html::tag('i', '', ['class' => $button['icon'], 'aria' => ['hidden' => 'true']]) . ' ' . $title;
+			}
+			$options = $button['htmlOptions'] ?? [];
+			if (($button['type'] ?? 'a') === 'a-post') {
+				$options['data']['method'] = 'post';
+			}
+			$options['class'] ??= 'btn btn-sm btn-link';
+			$cell .= Html::a($title, $url, $options) . ' ';
+		}
+		return $cell;
+	}
+	public static function arrayAsTable(array $data, array $columnFormats = []): string
+	{
+		return static::arrayAsTableRender($data, $columnFormats);
+	}
+	/**
+	 * Renderiza como arrayAsTable() pero añade una columna de acciones con botones por fila.
+	 *
+	 * @param array $data Filas de la tabla: array de arrays asociativos.
+	 * @param array $columnFormats Clave = nombre columna, valor = tipo de formatter (p.ej. 'text', 'date', 'raw').
+	 * @param array $buttons Botones por fila. Cada item:
+	 * 	- 'title': etiqueta del botón (por defecto el nombre del botón).
+	 * 	- 'icon': clase del icono (p.ej. 'fa-solid fa-eye').
+	 * 	- 'url': array/string con la URL (igual para todas las filas) o Closure
+	 * 	  fn(array $row): mixed que devuelve la URL de esa fila. Si es vacía, se omite el botón.
+	 * 	- 'type': 'a' (enlace; por defecto) o 'a-post' (enlace POST, p.ej. borrar).
+	 * 	- 'htmlOptions': atributos del enlace (p.ej. class, target, data-confirm).
+	 * @param array $options Opciones de la tabla:
+	 * 	- 'tableClass': clases CSS de la tabla (por defecto 'table table-bordered table-striped').
+	 * 	Las claves de cada fila que empiecen por '_' son datos internos: no se
+	 * 	renderizan como columna, pero están disponibles en las closures de 'url'.
+	 * @return string HTML de la tabla.
+	 */
+	public static function arrayAsTableWithButtons(array $data, array $columnFormats = [], array $buttons = [], array $options = []): string
+	{
+		return static::arrayAsTableRender($data, $columnFormats, $buttons, $options);
 	}
 
 	/**

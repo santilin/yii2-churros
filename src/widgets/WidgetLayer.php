@@ -290,9 +290,12 @@ js;
 					$rows_content = '';
 					if ($layout_row['content'] === true) {
 						$layout_row['content'] = array_diff(array_keys($this->widgets), $this->widgets_used);
+					} else if ($layout_row['content'] === false || $layout_row['content'] === null) {
+						$layout_row['content'] = [];
+					} else {
+						$layout_row['content'] = array_filter($layout_row['content']);
 					}
-					$layout_row_content = array_filter($layout_row['content']);
-					foreach ($layout_row_content as $kc => $row_content) {
+					foreach ($layout_row['content'] as $kc => $row_content) {
 						$rows_content .= "<!--row: $kc-->";
 						$rows_content .= $this->layoutWidgets((array)$row_content, [
 							'layout' => $layout_row_layout,
@@ -399,6 +402,10 @@ js;
 				}
 				if ($layout_row['content'] === true) {
 					$layout_row['content'] = array_diff(array_keys($this->widgets), $this->widgets_used);
+				} else if ($layout_row['content'] === false || $layout_row['content'] === null) {
+					$layout_row['content'] = [];
+				} else {
+					$layout_row['content'] = array_filter($layout_row['content']);
 				}
 				$breaking_rows = $layout_row['options']['breaking-rows'] ?? [];
 				foreach ($layout_row['content'] as $widget_name) {
