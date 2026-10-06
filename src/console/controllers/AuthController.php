@@ -391,6 +391,86 @@ class AuthController extends Controller
 	}
 
 	/**
+	 * Crea los permisos de `web_controllers` (controladores web planos, sin
+	 * modelo): capel genera un permiso por acción ahí igual que hace con los 6
+	 * estándar de `controllers` (mismo `ControllerActionDefinition::permissions()`
+	 * por debajo). A diferencia de createControllerPermissions(), no hay
+	 * jerarquía viewer/creator/editor que montar — un controlador web no tiene
+	 * convención de permisos propia —, así que cada permiso se cuelga
+	 * directamente de $admin; si una acción concreta necesita otro rol, se
+	 * reasigna a mano (como ya se hacía antes de que esto se generara solo).
+	 *
+	 * Un controlador con `access_filters: module` no reparte por acción —
+	 * `ModuleRbacAccessRule` para ese caso comprueba el permiso de controlador
+	 * entero `<modulo>.<Controlador>`, no uno por acción— así que ahí se crea un
+	 * único permiso en vez de uno por cada entrada de `perms`.
+	 *
+	 * @param array $web_controllers `Capel::MODULES[$module_id]['web_controllers']`:
+	 *   nombre de controlador -> ['perms' => [nombres de acción], 'access_filters' => [...]]
+	 */
+	public function createWebControllerPermissions(string $module_id, string $module_desc,
+		array $web_controllers, ?Role $admin, array &$all_items = [])
+	{
+		$auth = $this->authManager;
+		foreach ($web_controllers as $cname => $wc) {
+			// access_filters es el propio del controlador o, si no tiene, el heredado
+			// del módulo (ver ModuleControllerDefinition::accessFilters() en capel).
+			$access_filters = $wc['access_filters'] ?? [];
+			if (in_array('module', $access_filters, true)) {
+				$permission = AuthHelper::createOrUpdatePermission(
+					"$module_id.$cname",
+					Yii::t('churros', '{module}: {controller}: acceso completo', [
+						'module' => $module_desc, 'controller' => $cname,
+					]), true, $auth);
+				unset($all_items[$permission->name]);
+				AuthHelper::flushMessages($this->verbose);
+				if ($admin) {
+					if (!$auth->hasChild($admin, $permission)) {
+						$auth->addChild($admin, $permission);
+						echo "+ Permission '{$permission->name}' added to role '{$admin->name}'\n";
+					} elseif ($this->verbose) {
+						echo "= Permission '{$permission->name}' already exists in role {$admin->name}\n";
+					}
+				}
+				continue;
+			}
+			// sin 'rbac' ahí (y tampoco 'module', ya tratado arriba), el acceso no
+			// pasa por permisos (admin/logged/username/...) y no hay nada que crear.
+			if (!in_array('rbac', $access_filters, true)) {
+				continue;
+			}
+			foreach ($wc['perms'] ?? [] as $perm_name) {
+				// `<modulo>.index` ya lo crea createModuleRbacPermissions() (es el
+				// permiso genérico de "llegar a la portada del módulo"); un `index`
+				// propio de este controlador sería redundante y confuso con ese.
+				if ($perm_name === 'index') {
+					continue;
+				}
+				$perm_desc = Yii::t('churros', '{module}: {controller}: {perm}', [
+					'module' => $module_desc,
+					'controller' => $cname,
+					'perm' => $perm_name,
+				]);
+				// <modulo>.<Controlador>.<permiso>, igual que ModuleRbacAccessRule::
+				// matchCrudAction() para CRUD y que los permisos de Ceuta ya existentes
+				// (participantes.Ceuta.actuaciones, concedidos a mano hasta ahora).
+				$permission = AuthHelper::createOrUpdatePermission(
+					"$module_id.$cname.$perm_name", $perm_desc, true, $auth);
+				unset($all_items[$permission->name]);
+				AuthHelper::flushMessages($this->verbose);
+				if ($admin) {
+					if (!$auth->hasChild($admin, $permission)) {
+						$auth->addChild($admin, $permission);
+						echo "+ Permission '{$permission->name}' added to role '{$admin->name}'\n";
+					} elseif ($this->verbose) {
+						echo "= Permission '{$permission->name}' already exists in role {$admin->name}\n";
+					}
+				}
+			}
+		}
+	}
+
+	/**
 	 * Creates the permissions for a rbac module and shows the ones not used
 	 *
 	 * @param bool $deleteUnused si es true, en vez de solo listar los items no
@@ -482,6 +562,11 @@ class AuthController extends Controller
 		foreach ($module_info['controllers']??[] as $cname => $controller) {
 			$this->createControllerPermissions($module_id, $module_desc, $cname, $controller,
 				$viewer, $creator, $editor, $full_editor, $deleter, $granter, $admin, $all_items);
+			AuthHelper::flushMessages($this->verbose);
+		}
+		if (!empty($module_info['web_controllers'])) {
+			$this->createWebControllerPermissions($module_id, $module_desc,
+				$module_info['web_controllers'], $admin, $all_items);
 			AuthHelper::flushMessages($this->verbose);
 		}
 
