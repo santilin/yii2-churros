@@ -357,7 +357,9 @@ trait ControllerTrait
 		if ($ret === false) {
 			return false;
 		} else if ($ret === true) {
-			$ret = array_unique(array_keys($this->controllerPermissions));
+			$ret = array_unique(
+				array_merge(...array_values($this->controllerPermissions))
+			);
 		}
 		foreach ($arrays as $array) {
 			if ($array === false) {

@@ -999,7 +999,7 @@ class AuthController extends Controller
 	 * Accepts user ID, username, or email
 	 * @param string|integer $identifier user ID, username or email
 	 */
-	public function actionListUserRoles($identifier)
+	public function actionDirectUserRoles($identifier)
 	{
 		$auth = $this->authManager;
 
@@ -1015,24 +1015,8 @@ class AuthController extends Controller
 
 		$userId = $user->id;
 
-		// Get DIRECT role assignments
+		// Get DIRECT assignments only (roles and permissions)
 		$directAssignments = $auth->getAssignments($userId);
-
-		// Get DEFAULT roles from authManager config (always strings)
-		$defaultRoles = $auth->defaultRoles;
-
-		// Combine: direct assignments + ALL default roles (they auto-apply)
-		$allRoles = array_unique(array_merge(
-			array_keys($directAssignments),
-			$defaultRoles  // defaultRoles are ALWAYS strings, no filtering needed
-		));
-
-		sort($allRoles);
-
-		if (empty($allRoles)) {
-			$this->stdout("User '{$user->username}' [ID: {$userId}]: no roles assigned\n");
-			return 0;
-		}
 
 		$this->stdout("User: {$user->username}", Console::FG_YELLOW);
 		if (isset($user->email)) {
@@ -1040,19 +1024,25 @@ class AuthController extends Controller
 		}
 		$this->stdout(" [ID: {$userId}]\n");
 
-		$this->stdout("All roles (direct + default):\n", Console::FG_CYAN);
+		$this->stdout("Direct assignments (roles and permissions):\n", Console::FG_CYAN);
 
-		foreach ($allRoles as $roleName) {
-			$isDirect = isset($directAssignments[$roleName]);
-			$role = $auth->getRole($roleName);
-			$desc = $role ? $role->description : 'N/A';
-
-			$this->stdout("  └─ {$roleName}", Console::FG_YELLOW);
-			if ($this->verbose && $desc !== 'N/A') {
-				$this->stdout(" ({$desc})");
+		$itemNames = array_keys($directAssignments);
+		sort($itemNames, SORT_NATURAL | SORT_FLAG_CASE);
+		if (empty($itemNames)) {
+			$this->stdout("  (none)\n", Console::FG_GREY);
+			return 0;
+		}
+		foreach ($itemNames as $itemName) {
+			if ($auth->getRole($itemName) !== null) {
+				$this->stdout("  └─ Role: {$itemName}", Console::FG_YELLOW);
+			} else {
+				$this->stdout("  └─ {$itemName}", Console::FG_GREEN);
 			}
-			if (!$isDirect && in_array($roleName, $defaultRoles)) {
-				$this->stdout(" [DEFAULT]", Console::FG_BLUE);
+			if ($this->verbose) {
+				$item = $auth->getRole($itemName) ?? $auth->getPermission($itemName);
+				if ($item !== null && $item->description) {
+					$this->stdout(" ({$item->description})", Console::FG_GREY);
+				}
 			}
 			$this->stdout("\n");
 		}
@@ -1064,7 +1054,7 @@ class AuthController extends Controller
 	 * Lists all users with their roles and permissions in a tree format
 	 * @param int|null $user_id Optional user ID to filter by a specific user
 	 */
-	public function actionListAllUserPerms(int|string|null $user_id = null, bool $show_perms = false)
+	public function actionUserRoles(int|string|null $user_id = null, bool $show_perms = false)
 	{
 		$auth = $this->authManager;
 		$userClass = Yii::$app->user->identityClass;
@@ -1104,12 +1094,19 @@ class AuthController extends Controller
 		}
 	}
 
-	protected function displayRolesTree(array $roleNames, string $indent, $auth, array &$processedRoles, bool $show_perms): void
+
+	public function actionUserPerms(int|string|null $user_id = null)
+	{
+		return $this->actionUserRoles($user_id, true);
+	}
+
+	protected function displayRolesTree(array $roleNames, string $indent, $auth, array &$processedRoles, bool $show_perms, array &$shownPerms = []): void
 	{
 		// Árbol jerárquico real: cada rol se muestra anidado bajo cada uno de
 		// sus padres (hijos directos), aunque salga en varias ramas. Por eso
 		// $processedRoles ya no es "vistos globales" sino la rama actual,
-		// solo para cortar ciclos.
+		// solo para cortar ciclos. Los permisos, en cambio, se muestran una
+		// sola vez en todo el árbol para no repetirlos bajo cada rol.
 		$roleNames = array_values(array_unique($roleNames));
 		sort($roleNames, SORT_NATURAL | SORT_FLAG_CASE);
 		foreach ($roleNames as $roleName) {
@@ -1135,12 +1132,16 @@ class AuthController extends Controller
 				}
 			}
 			if (!empty($childRoleNames)) {
-				$this->displayRolesTree($childRoleNames, $indent . '  ', $auth, $processedRoles, $show_perms);
+				$this->displayRolesTree($childRoleNames, $indent . '  ', $auth, $processedRoles, $show_perms, $shownPerms);
 			}
 			array_pop($processedRoles);
 			if ($show_perms) {
 				$permissions = $auth->getPermissionsByRole($roleName);
 				foreach ($permissions as $perm) {
+					if (isset($shownPerms[$perm->name])) {
+						continue;
+					}
+					$shownPerms[$perm->name] = true;
 					$this->stdout("{$indent}  └─ {$perm->name}", Console::FG_GREEN);
 					if ($this->verbose && $perm->description) {
 						$this->stdout(" ({$perm->description})", Console::FG_GREY);

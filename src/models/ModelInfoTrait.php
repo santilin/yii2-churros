@@ -249,7 +249,7 @@ trait ModelInfoTrait
 		}
 	}
 
-	// Used in grids
+	// Used in grids & views
 	public function linkTo(string $action, string $prefix = '', string $format = 'short', int $max_len = 0)
 	{
 		$url = $prefix;

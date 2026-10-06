@@ -270,14 +270,14 @@ class AuthHelper
 		$perm_names = (array)$perm_names;
 		foreach ($perm_names as $perm_name) {
 			$child = $auth->getItem($perm_name);
-			if ($child == null) {
-				static::addMessage("= Permission `$perm_name` not found in role `$role_name`");
+			if ($child === null) {
+				static::addMessage("x Permission `$perm_name` not found in role `$role_name`");
 				continue;
 			}
 			if ($auth->removeChild($parent, $child)) {
 				static::addMessage("- Permission `$perm_name` removed from role `$role_name`");
 			} else {
-				static::addMessage("= Permission `$perm_name` not found in role `$role_name`");
+				static::addMessage("x Permission `$perm_name` not found in role `$role_name`");
 			}
 		}
 	}
@@ -290,7 +290,7 @@ class AuthHelper
 		foreach ($role_names as $role_name) {
 			$role = $auth->getItem($role_name);
 			if ($role == null) {
-				static::addMessage("= Role `$role_name` not found");
+				static::addMessage("x Role `$role_name` not found");
 			} else if ($auth->remove($role)) {
 				static::addMessage("- Role `$role_name` removed");
 			}

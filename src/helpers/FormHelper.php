@@ -622,6 +622,7 @@ ajax;
 		}
 		foreach ($req_perms as $req_perm) {
 			if (!in_array($req_perm, $perms)) {
+				\Yii::warning("$req_perm: permission not granted");
 				return false;
 			}
 		}
