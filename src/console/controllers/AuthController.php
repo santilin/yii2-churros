@@ -1100,6 +1100,90 @@ class AuthController extends Controller
 		return $this->actionUserRoles($user_id, true);
 	}
 
+	/**
+	 * Lista las usuarias que tienen los roles/permisos indicados (separados
+	 * por comas), directa o heredadamente por roles intermedios.
+	 * @param string $items nombres separados por comas
+	 * @param string $mode all (todos, por defecto) o any (alguno)
+	 */
+	public function actionUsersWithPerms(string $items, string $mode = 'all'): void
+	{
+		$auth = $this->authManager;
+		$nombres = array_values(array_filter(array_map('trim', explode(',', $items))));
+		if (!$nombres) {
+			$this->stderr("Indica al menos un rol o permiso separado por comas.\n");
+			return;
+		}
+		$mode = strtolower($mode) === 'any' ? 'any' : 'all';
+		$porItem = [];
+		foreach ($nombres as $nombre) {
+			$item = $auth->getRole($nombre) ?? $auth->getPermission($nombre);
+			if ($item === null) {
+				$this->stderr("'$nombre' no existe como rol ni como permiso.\n");
+				return;
+			}
+			$porItem[$nombre] = $this->userIdsWithItem($nombre);
+		}
+		$userIds = $mode === 'any'
+			? array_unique(array_merge(...array_values($porItem)))
+			: array_intersect(...array_values($porItem));
+		$userIds = array_values(array_map('intval', $userIds));
+		if (!$userIds) {
+			$this->stdout("Ninguna usuaria tiene " . ($mode === 'any' ? 'alguno' : 'todos') . " de: " . implode(', ', $nombres) . ".\n");
+			return;
+		}
+		$userClass = Yii::$app->user->identityClass;
+		$usuarios = $userClass::find()->andWhere(['id' => $userIds])->all();
+		$this->stdout(count($usuarios) . " usuaria(s) con " . ($mode === 'any' ? 'alguno' : 'todos') . " de: " . implode(', ', $nombres) . ".\n", Console::FG_CYAN);
+		foreach ($usuarios as $u) {
+			$this->stdout("- {$u->username}", Console::FG_YELLOW);
+			if (isset($u->email)) {
+				$this->stdout(" ({$u->email})", Console::FG_CYAN);
+			}
+			$this->stdout(" [ID: {$u->id}]\n");
+		}
+	}
+
+	/**
+	 * Ids de usuarias con un item (rol o permiso), directa o heredadamente a
+	 * través de los roles que lo incluyen, transitivamente.
+	 * @return int[]
+	 */
+	protected function userIdsWithItem(string $itemName): array
+	{
+		$auth = $this->authManager;
+		$db = $auth->db;
+		$visitados = [];
+		$pendientes = [$itemName];
+		while ($pendientes) {
+			$actual = array_pop($pendientes);
+			if (isset($visitados[$actual])) {
+				continue;
+			}
+			$visitados[$actual] = true;
+			$padres = $db->createCommand(
+				'SELECT parent FROM ' . $auth->itemChildTable . ' WHERE child = :n',
+				[':n' => $actual]
+			)->queryColumn();
+			foreach ($padres as $padre) {
+				if (!isset($visitados[$padre])) {
+					$pendientes[] = $padre;
+				}
+			}
+		}
+		$ph = [];
+		$params = [];
+		foreach (array_keys($visitados) as $i => $nombre) {
+			$ph[] = ":n$i";
+			$params[":n$i"] = $nombre;
+		}
+		return array_map('intval', $db->createCommand(
+			'SELECT DISTINCT user_id FROM ' . $auth->assignmentTable
+			. ' WHERE item_name IN (' . implode(',', $ph) . ')',
+			$params
+		)->queryColumn());
+	}
+
 	protected function displayRolesTree(array $roleNames, string $indent, $auth, array &$processedRoles, bool $show_perms, array &$shownPerms = []): void
 	{
 		// Árbol jerárquico real: cada rol se muestra anidado bajo cada uno de
