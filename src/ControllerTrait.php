@@ -128,22 +128,6 @@ trait ControllerTrait
 		return $ret;
 	}
 
-	public function getRoutePrefix($route = null, bool $add_slash = true): string
-	{
-		if ($route === null) {
-			$route = Url::toRoute($this->id);
-		}
-		$request_url = '/' . Yii::$app->request->getPathInfo();
-		$route_pos = strpos($request_url, $route);
-		$prefix = substr($request_url, 0, $route_pos);
-		if ($add_slash) {
-			if (substr($prefix, -1) != '/') {
-				$prefix .= '/';
-			}
-		}
-		return $prefix;
-	}
-
 	protected function getResultMessage(string $action_id): string
 	{
 		switch( $action_id) {

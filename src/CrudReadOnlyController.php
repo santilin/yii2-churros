@@ -333,8 +333,8 @@ abstract class CrudReadOnlyController extends \yii\web\Controller
 						}
 						break;
 					case 'delete_error':
-						$to_model = 'parent';
-						$to_action = 'index';
+						$to_model = null;
+						$to_action = 'view';
 						break;
 					case 'view':
 					case 'update':
@@ -749,5 +749,20 @@ abstract class CrudReadOnlyController extends \yii\web\Controller
 		return $link;
 	}
 
+	public function getRoutePrefix($route = null, bool $add_slash = true): string
+	{
+		if ($route === null) {
+			$route = Url::toRoute($this->id);
+		}
+		$request_url = '/' . Yii::$app->request->getPathInfo();
+		$route_pos = strpos($request_url, $route);
+		$prefix = substr($request_url, 0, $route_pos);
+		if ($add_slash) {
+			if (substr($prefix, -1) != '/') {
+				$prefix .= '/';
+			}
+		}
+		return $prefix;
+	}
 
 }

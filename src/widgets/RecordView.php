@@ -153,10 +153,13 @@ html;
 		if ($this->style == 'table') {
 			return $this->renderAsTable();
 		} else {
+            // El <fieldset class="record-fields"> lo construye WidgetLayer::layout()
+            // (type 'fields'), que fusiona el htmlOptions del propio $fieldsLayout
+            // raíz igual que hace con cualquier otro layout_row: añadir
+            // `'htmlOptions' => ['class' => 'no-border']` al nivel superior de
+            // $fieldsLayout llega aquí sin tocar nada en RecordView.
             $layer = new WidgetLayer($this->fieldsLayout, $this->attributes, [ $this, 'layAttribute' ], ActiveForm::FORM_FIELD_HORIZ_CLASSES);
-			return '<fieldset class="record-fields">'
-                . $layer->layout('fields', $this->layout, 'large', $this->style)
-				. '</fieldset>';
+            return $layer->layout('fields', $this->layout, 'large', $this->style);
 		}
     }
 

@@ -37,6 +37,11 @@ class WidgetLayer
 						   string $size = 'large', string $style = 'grid',
 						   array $html_options = []): string
 	{
+		// El htmlOptions del propio $widgetsLayout raíz, igual que el de
+		// cualquier otro layout_row del árbol (ver los `$layout_row['htmlOptions']`
+		// repartidos por layoutWidgets()): captado antes de que las ramas de abajo
+		// puedan sustituir $this->widgetsLayout por uno sintético sin esa clave.
+		$root_html_options = is_array($this->widgetsLayout) ? ($this->widgetsLayout['htmlOptions'] ?? []) : [];
 		if (empty($this->widgetsLayout)) {
 			$this->widgetsLayout = [
 				[
@@ -67,6 +72,16 @@ class WidgetLayer
 			Yii::warning("Widgets in form not used in layout: '" . implode("','",$not_used) . "'");
 		}
 		$this->widgets_used = [];
+		// Solo RecordView::renderRecord() pide type 'fields': es quien envolvía
+		// el resultado a mano en `<fieldset class="record-fields">`. Se mueve
+		// aquí para que pueda llevar htmlOptions, igual que cualquier otro
+		// layout_row (p.ej. `'htmlOptions' => ['class' => 'no-border']` en el
+		// $fieldsLayout raíz).
+		if ($type === 'fields') {
+			$fieldset_options = array_merge($html_options, $root_html_options);
+			Html::addCssClass($fieldset_options, 'record-fields');
+			$ret = Html::tag('fieldset', $ret, $fieldset_options);
+		}
 		return $ret;
 	}
 

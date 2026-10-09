@@ -402,7 +402,7 @@ class JsonController extends \yii\web\Controller
 			}
 			$to = '';
 		}
-		if (empty($to)) {
+		if ($to === [] || $to === '' || $to === null) {
 			if ($to = $this->request->queryParams['returnTo']??null) {
 				return $to;
 			}
@@ -412,42 +412,6 @@ class JsonController extends \yii\web\Controller
 			if ($to = $this->request->post('_form_successUrl', null)) {
 				return $to;
 			}
-			switch ($from) {
-				case 'create':
-					if ($this->request->post("_and_create") == '1') {
-						$to = 'create';
-					} else {
-						$to = 'view';
-					}
-					break;
-				case 'duplicate':
-					if ($this->request->post("_and_create") == '1') {
-						$to = 'duplicate';
-					} else {
-						$to = 'view';
-					}
-					break;
-				case 'update':
-					$to = 'view';
-					break;
-				case 'delete':
-				case 'delete_error':
-					$to = 'parent.view';
-					break;
-				case 'view':
-					$to = 'view';
-					break;
-				case 'index':
-				case '':
-					$to = 'index';
-					break;
-				default:
-					$to = $from;
-			}
-		} else {
-			if (is_array($to)) {
-				return array_merge($to, $redirect_params);
-			}
 			$form_success_url = $this->request->post('_form_successUrl', null);
 			if (!empty($form_success_url)) {
 				$action_in_url = $this->extractAction($form_success_url);
@@ -455,46 +419,87 @@ class JsonController extends \yii\web\Controller
 				if ($action_in_to === $action_in_url) {
 					return $form_success_url;
 				}
+			} else {
+				switch ($from) {
+					case 'create':
+						if ($this->request->post("_and_create") == '1') {
+							$to = 'create';
+						} else {
+							$to = 'view';
+						}
+						break;
+					case 'duplicate':
+						if ($this->request->post("_and_create") == '1') {
+							$to = 'duplicate';
+						} else {
+							$to = 'view';
+						}
+						break;
+					case 'update':
+						$to = 'view';
+						break;
+					case 'delete':
+					case 'delete_error':
+						$to = 'view';
+						break;
+					case 'view':
+						$to = 'view';
+						break;
+					case 'index':
+					case '':
+						$to = 'index';
+						break;
+					default:
+						$to = $from;
+				}
+			}
+		} else {
+			if (is_array($to)) {
+				return array_merge($to, $redirect_params);
 			}
 			if (!empty(parse_url($to, PHP_URL_SCHEME))) {
 				return $to;
 			}
 		}
-		list($to_model, $to_action) = AppHelper::splitString($to, '.');
-		if ($to_model) {
-			if ($to_model === 'parent') {
-				if ($model->getParentModel()) {
-					$model = $model->getParentModel();
-					if ($to_action === 'index') {
-						\Yii::warning("parent.index has no sense here");
-						$to_action = 'view';
+		if (is_string($to) && $to !== '' && $to[0] == '/') {
+			$redirect_params[0] = $to;
+		} else {
+			list($to_model, $to_action) = AppHelper::splitString($to, '.');
+			if ($to_model) {
+				if ($to_model === 'parent') {
+					if ($model->getParentModel()) {
+						$model = $model->getParentModel();
+						if ($to_action === 'index') {
+							\Yii::warning("parent.index has no sense here");
+							$to_action = 'view';
+						}
+					} else {
+						$to_model = 'model';
+						$to_action  = 'index';
 					}
-				} else {
-					$to_model = 'model';
-					$to_action  = 'index';
+				} else if ($to_model != 'model') {
+					$model = $$to_model;
 				}
-			} else if ($to_model != 'model') {
-				$model = $$to_model;
 			}
+			switch($to_action) {
+				case 'view':
+				case 'update':
+				case 'duplicate':
+					$redirect_params = array_merge($redirect_params, [ 'id' => $model->getPrimaryKey()]);
+					// no break
+				case 'create':
+					if (isset($_REQUEST['_form_cancelUrl'])) {
+						$redirect_params['_form_cancelUrl'] = $_REQUEST['_form_cancelUrl'];
+					}
+					break;
+				case 'index':
+					// $to_action = 'view';
+					break;
+				default:
+					$redirect_params = array_merge($redirect_params, [ 'id' => $model->getPrimaryKey()]);
+			}
+			$redirect_params[0] = $this->getActionRoute($to_action, $model);
 		}
-		switch($to_action) {
-			case 'view':
-			case 'update':
-			case 'duplicate':
-				$redirect_params = array_merge($redirect_params, [ 'id' => $model->getPrimaryKey()]);
-				// no break
-			case 'create':
-				if (isset($_REQUEST['_form_cancelUrl'])) {
-					$redirect_params['_form_cancelUrl'] = $_REQUEST['_form_cancelUrl'];
-				}
-				break;
-			case 'index':
-				// $to_action = 'view';
-				break;
-			default:
-				$redirect_params = array_merge($redirect_params, [ 'id' => $model->getPrimaryKey()]);
-		}
-		$redirect_params[0] = $this->getActionRoute($to_action, $model);
 		if (!array_key_exists('sort', $redirect_params) && !empty($_REQUEST['sort'])) {
 			$redirect_params['sort'] = $_REQUEST['sort'];
 		}
@@ -708,5 +713,22 @@ class JsonController extends \yii\web\Controller
 		return $link;
 	}
 
+	public function getRoutePrefix($route = null, bool $add_slash = true): string
+	{
+		if ($route === null) {
+			$route = $this->model?->getParentModel()?->getPath()
+				?: ($this->model?->getPath()
+				?: Url::toRoute($this->id));
+		}
+		$request_url = $_SERVER['REQUEST_URI'];
+		$route_pos = strpos($request_url, $route);
+		$prefix = substr($request_url, 0, $route_pos);
+		if ($add_slash) {
+			if (substr($prefix, -1) != '/') {
+				$prefix .= '/';
+			}
+		}
+		return $prefix;
+	}
 
 }
