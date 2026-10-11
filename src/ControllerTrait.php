@@ -323,6 +323,20 @@ trait ControllerTrait
 		return $breadcrumbs;
 	}
 
+	/**
+	 * $controllerPermissions se declara también en controladores que NO son
+	 * rbac (p.ej. access_filters: ['module']), con nombres de permiso que no
+	 * tienen por qué estar dados de alta como auth_item para esa usuaria (su
+	 * acceso real viene del rol desnudo del módulo, no de ese permiso). El
+	 * `can()` real se probó en f935bff3 y se revirtió el mismo día en
+	 * ce9ca912 ("reverted checking user permissions in ControllerTrait"): con
+	 * él, a usuarias con acceso legítimo se les ocultaban botones/migas de pan
+	 * en cuanto su rol no coincidía exactamente con el nombre declarado. Por
+	 * eso esto es solo informativo para pintar UI (ver resolvePermissions()),
+	 * nunca control de acceso — ese lo hace AccessControl/ModuleRbacAccessRule
+	 * en el propio behaviors(), o un `Yii::$app->user->can()` explícito en la
+	 * acción. No reactivar el check de abajo sin resolver antes ese desajuste.
+	 */
 	protected function userPermissions(): array|bool
 	{
 		$ret = [];

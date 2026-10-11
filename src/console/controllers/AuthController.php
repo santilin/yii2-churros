@@ -93,6 +93,36 @@ class AuthController extends Controller
 		$model = $model_class::instance();
 		$model_title = $model->t('app', "{Title_plural}");
 
+		// access_filters es el propio del controlador o, si no tiene, el heredado
+		// del módulo (ver ModuleControllerDefinition::accessFilters() en capel) —
+		// mismo criterio que createWebControllerPermissions(). Si la clave no
+		// existe todavía (capel sin regenerar con el paso que la emite para
+		// `controllers`), 'rbac' por defecto mantiene el comportamiento actual.
+		$access_filters = $controller['access_filters'] ?? ['rbac'];
+		if (in_array('module', $access_filters, true)) {
+			$permission = AuthHelper::createOrUpdatePermission(
+				"$module_id.$model_name",
+				Yii::t('churros', '{module}: {model}: acceso completo', [
+					'module' => $module_desc, 'model' => $model_title,
+				]), true, $auth);
+			unset($all_items[$permission->name]);
+			AuthHelper::flushMessages($this->verbose);
+			if ($admin) {
+				if (!$auth->hasChild($admin, $permission)) {
+					$auth->addChild($admin, $permission);
+					echo "+ Permission '{$permission->name}' added to role '{$admin->name}'\n";
+				} elseif ($this->verbose) {
+					echo "= Permission '{$permission->name}' already exists in role {$admin->name}\n";
+				}
+			}
+			return;
+		}
+		// sin 'rbac' ahí (y tampoco 'module', ya tratado arriba), el acceso no
+		// pasa por permisos (admin/logged/username/...) y no hay nada que crear.
+		if (!in_array('rbac', $access_filters, true)) {
+			return;
+		}
+
 		$model_viewer = $model_creator = $model_editor = $model_full_editor
 			= $model_deleter = $model_granter = $model_admin = null;
 		// Create model roles
@@ -313,12 +343,27 @@ class AuthController extends Controller
 		$model_perm_name = $module_id . '.' . $model_name;
 		foreach ($controller['perms'] as $perm_name) {
 			$perm_name = mb_lcfirst($perm_name);
+			// Un valor ya cualificado (con punto) es una referencia directa a un
+			// permiso mínimo que se quiere declarar tal cual, sin el prefijo
+			// "<modulo>.<Modelo>." de siempre (p.ej. para pedir el propio rol admin
+			// del módulo, como en ceutae/AcogidaAlojamiento: perms: ['ceutae.admin']).
+			// Si coincide con un ROL que ya existe, esa acción ya está cubierta por
+			// él -no hay nada que crear-: un permiso con el mismo nombre chocaría,
+			// `auth_item.name` es única entre roles y permisos.
+			if (str_contains($perm_name, '.')) {
+				if ($auth->getRole($perm_name) !== null) {
+					continue;
+				}
+				$full_perm_name = $perm_name;
+			} else {
+				$full_perm_name = $model_perm_name . "." . $perm_name;
+			}
 			$perm_desc = Yii::t('churros', '{module}: {model}: {perm}', [
 				'module' => $module_desc,
 				'model' => $model_title,
 				'perm' => Yii::t('churros', $perm_name)]);
 			$permission = AuthHelper::createOrUpdatePermission(
-				$model_perm_name . "." . $perm_name, $perm_desc, true, $auth);
+				$full_perm_name, $perm_desc, true, $auth);
 			unset($all_items[$permission->name]);
 			AuthHelper::flushMessages($this->verbose);
 			$roles_to_add = [];
@@ -352,42 +397,6 @@ class AuthController extends Controller
 				break; // only the first one
 			}
 		}
-
-		$module_access_role = AuthHelper::createOrUpdateRole(
-			$module_id,
-			Yii::t('churros', '{module}: acceso al módulo', [
-				'module' => $module_desc
-			]), true, $auth);
-		AuthHelper::flushMessages($this->verbose);
-		$module_access_permission = AuthHelper::createOrUpdatePermission(
-			$module_id . ".index",
-				Yii::t('churros', '{module}: acceso al inicio del módulo', [
-					'module' => $module_desc
-				]), true, $auth);
-		unset($all_items[$module_access_permission->name]);
-
-		// if (!$auth->hasChild($module_access_role, $module_access_permission)) {
-		// 	$auth->addChild($module_access_role, $module_access_permission);
-		// 	echo "+ Permission '{$module_access_permission->name}' added to role '{$module_access_role->name}'\n";
-		// } elseif ($this->verbose) {
-		// 	echo "= Permission '{$module_access_permission->name}' already exists in role {$module_access_role->name}\n";
-		// }
-
-		foreach (array_filter([$viewer, $editor,]) as $role_to_add_to) {
-			if (!$auth->hasChild($role_to_add_to, $module_access_permission)) {
-				$auth->addChild($role_to_add_to, $module_access_permission);
-				echo "+ Role '{$module_access_permission->name}' added to role '{$role_to_add_to->name}'\n";
-			} elseif ($this->verbose) {
-				echo "= Role '{$module_access_permission->name}' already exists in role {$role_to_add_to->name}\n";
-			}
-		// 	if (!$auth->hasChild($module_access_role, $role_to_add)) {
-		// 		$auth->addChild($module_access_role, $role_to_add);
-		// 		echo "+ Role '{$role_to_add->name}' added to role '{$module_access_role->name}'\n";
-		// 	} elseif ($this->verbose) {
-		// 		echo "= Role '{$role_to_add->name}' already exists in role {$$module_access_role->name}\n";
-		// 	}
-		// 	break; // only the first one
-		}
 	}
 
 	/**
@@ -409,7 +418,7 @@ class AuthController extends Controller
 	 *   nombre de controlador -> ['perms' => [nombres de acción], 'access_filters' => [...]]
 	 */
 	public function createWebControllerPermissions(string $module_id, string $module_desc,
-		array $web_controllers, ?Role $admin, array &$all_items = [])
+		array $web_controllers, ?Role $viewer, ?Role $editor, ?Role $admin, array &$all_items = [])
 	{
 		$auth = $this->authManager;
 		foreach ($web_controllers as $cname => $wc) {
@@ -440,30 +449,46 @@ class AuthController extends Controller
 				continue;
 			}
 			foreach ($wc['perms'] ?? [] as $perm_name) {
-				// `<modulo>.index` ya lo crea createModuleRbacPermissions() (es el
-				// permiso genérico de "llegar a la portada del módulo"); un `index`
-				// propio de este controlador sería redundante y confuso con ese.
-				if ($perm_name === 'index') {
-					continue;
+				// Mismo criterio que createControllerPermissions(): un valor ya
+				// cualificado (con punto) es una referencia directa a un permiso
+				// mínimo, no el nombre de una acción; si coincide con un ROL que ya
+				// existe, esa acción ya está cubierta por él, no hay nada que crear
+				// (y crear un permiso con el mismo nombre chocaría de todos modos).
+				if (str_contains($perm_name, '.')) {
+					if ($auth->getRole($perm_name) !== null) {
+						continue;
+					}
+					$full_perm_name = $perm_name;
+				} else {
+					// <modulo>.<Controlador>.<permiso>, igual que ModuleRbacAccessRule::
+					// matchCrudAction() para CRUD y que los permisos de Ceuta ya existentes
+					// (participantes.Ceuta.actuaciones, concedidos a mano hasta ahora).
+					$full_perm_name = "$module_id.$cname.$perm_name";
 				}
 				$perm_desc = Yii::t('churros', '{module}: {controller}: {perm}', [
 					'module' => $module_desc,
 					'controller' => $cname,
 					'perm' => $perm_name,
 				]);
-				// <modulo>.<Controlador>.<permiso>, igual que ModuleRbacAccessRule::
-				// matchCrudAction() para CRUD y que los permisos de Ceuta ya existentes
-				// (participantes.Ceuta.actuaciones, concedidos a mano hasta ahora).
+				// Caso especial `index`: es la portada del módulo (el controlador
+				// `Site` la declara así), así que además de a $admin se cuelga de
+				// $viewer/$editor -antes lo hacía un bloque aparte en
+				// createControllerPermissions(), redundante con este mismo permiso-.
 				$permission = AuthHelper::createOrUpdatePermission(
-					"$module_id.$cname.$perm_name", $perm_desc, true, $auth);
+					$full_perm_name, $perm_desc, true, $auth);
 				unset($all_items[$permission->name]);
 				AuthHelper::flushMessages($this->verbose);
-				if ($admin) {
-					if (!$auth->hasChild($admin, $permission)) {
-						$auth->addChild($admin, $permission);
-						echo "+ Permission '{$permission->name}' added to role '{$admin->name}'\n";
+				$roles_to_add = [$admin];
+				if ($perm_name === 'index') {
+					$roles_to_add[] = $viewer;
+					$roles_to_add[] = $editor;
+				}
+				foreach (array_filter($roles_to_add) as $role_to_add) {
+					if (!$auth->hasChild($role_to_add, $permission)) {
+						$auth->addChild($role_to_add, $permission);
+						echo "+ Permission '{$permission->name}' added to role '{$role_to_add->name}'\n";
 					} elseif ($this->verbose) {
-						echo "= Permission '{$permission->name}' already exists in role {$admin->name}\n";
+						echo "= Permission '{$permission->name}' already exists in role {$role_to_add->name}\n";
 					}
 				}
 			}
@@ -566,7 +591,7 @@ class AuthController extends Controller
 		}
 		if (!empty($module_info['web_controllers'])) {
 			$this->createWebControllerPermissions($module_id, $module_desc,
-				$module_info['web_controllers'], $admin, $all_items);
+				$module_info['web_controllers'], $viewer, $editor, $admin, $all_items);
 			AuthHelper::flushMessages($this->verbose);
 		}
 
