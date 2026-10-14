@@ -451,3 +451,46 @@ details[layout-details-card] {
   vertical-align: middle;
   margin-right: 0.25em;
 }
+
+/* Formulario de búsqueda inline (p. ej. `_admin_dashboard_filter` del cuadro
+   de mando de proy). Tarjeta con los campos en línea; el fieldset con borde
+   y la leyenda que genera la plantilla `_search.php` se aplanan para que solo
+   se vea la tarjeta. La colocación de cada campo la resuelve el `layout:
+   inline` del WidgetLayer. */
+.search-form {
+  border: 1px solid var(--bs-border-color-translucent);
+  border-radius: .375rem;
+  padding: 1rem 1rem .5rem;
+  margin-bottom: 1.5rem;
+  & fieldset.filters {
+    border: 0 !important;
+    padding: 0;
+    margin: 0;
+    min-width: 0;
+    & legend {
+      padding: 2px 5px !important;
+      border-radius: 4px;
+      float: none;
+      width: 100%;
+      padding: 0;
+      text-align: left;
+    }
+  }
+  & .form-control, & .form-select {
+    padding: .5rem .75rem;
+  }
+  /* Los botones no tienen etiqueta encima: se bajan a la altura de los inputs */
+  & .search-form-fields > .btn-group-sm {
+    margin-top: 2rem;
+  }
+}
+[data-bs-theme="light"] {
+  & .search-form {
+    background: #fff;
+  }
+}
+[data-bs-theme="dark"] {
+  & .search-form {
+    background: var(--bs-tertiary-bg, #2b3035);
+  }
+}

@@ -539,6 +539,7 @@ class JsonController extends \yii\web\Controller
 	// Ajax
 	public function actionAutocomplete(array $fields)
 	{
+		Yii::$app->response->format = \yii\web\Response::FORMAT_JSON;
 		$ret = [];
 		static $clientIdGetParamName = 'query';
 		$value = $_GET[$clientIdGetParamName];
@@ -556,11 +557,36 @@ class JsonController extends \yii\web\Controller
 	// Ajax
 	public function actionRawModel($id)
 	{
+		Yii::$app->response->format = \yii\web\Response::FORMAT_JSON;
 		$params = Yii::$app->request->queryParams;
 		$this->model = $this->findModel($id, $params);
 		if ($this->model) {
             return json_encode($this->model->getAttributes());
         } /// @todo else
+	}
+
+	/**
+	 * Generic ajax endpoint for widgets that need `{value: label}` suggestions for a
+	 * field (e.g. {@see \app\widgets\InputList}): builds a model scoped to the current
+	 * path -so relation/parent-chain based custom values resolve the same as in the
+	 * form- and delegates to its `handyFieldValues()`/`customFieldValues()`.
+	 *
+	 * @param string $fldname the field to get values for, usually from a `fldname` GET param
+	 */
+	public function actionFieldValues(string $fldname, ?string $model_name = null)
+	{
+		Yii::$app->response->format = \yii\web\Response::FORMAT_JSON;
+		$params = Yii::$app->request->queryParams;
+		if ($model_name === null) {
+			$model_name = $this::$_model_name;
+		}
+		$model = new $model_name();
+		$model->setPath($this->_path);
+		return $model->handyFieldValues($fldname,
+			$params['format'] ?? null,
+			$params['model_format'] ?? null,
+			$params['scope'] ?? null,
+			$params['filter_fields'] ?? null) ?? [];
 	}
 
 	public function getPath()
