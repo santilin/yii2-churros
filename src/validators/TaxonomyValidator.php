@@ -62,7 +62,7 @@ class TaxonomyValidator extends Validator
     {
 		$mask = trim($this->taxonomy['mask']);
 		$dot = $this->taxonomy['dot'];
-		if ($mask != '') {
+		if ($mask !== '') {
 			// Create a big regexp concatenating all mask groups to match all partial values
 			$mask_groups = $this->maskToGroups($mask, $dot);
 			$regexp_dot = $dot;
@@ -96,10 +96,12 @@ class TaxonomyValidator extends Validator
 		for ($l=0; $l< $ng; ++$l) {
 			$v = $input_values[$l];
 			$taxon_values = $this->getTaxonomyValues($input_values, $l);
-			if ($v != 0 && !isset($taxon_values[$v])) {
+			if (intval($v) !== 0 && !isset($taxon_values[$v])) {
 				if (!isset($taxon_values[ltrim($v, '0')])) {
-					return Yii::t('churros', 'The value \'{0}\' does not exist in the category \'{1}\'',
+					if ($l < count($input_values) - 1) { // nodo hoja
+						return Yii::t('churros', 'The value \'{0}\' does not exist in the category \'{1}\'',
 						[ $v, $this->taxonomy['levels'][$l]['title']] );
+					}
 				}
 			}
 		}
@@ -120,15 +122,19 @@ class TaxonomyValidator extends Validator
 	{
 		$mask_parts = explode($dot, $mask);
 		$parts = explode($dot, $value);
+		// Solo se formatean los segmentos presentes: no se extiende el valor
+		// hasta la máscara (los códigos pueden ser más cortos si no tienen
+		// todos los bloques de la taxonomía).
 		$ret = '';
-		for ($i=0; $i<count($mask_parts); ++$i) {
+		$n = min(count($mask_parts), count($parts));
+		for ($i=0; $i<$n; ++$i) {
 			if ($ret != '') {
 				$ret .= $dot;
 			}
 			if (substr($mask_parts[$i],0,1) == '0') {
-				$ret .= str_pad($parts[$i]??'1', strlen($mask_parts[$i]), '0', STR_PAD_LEFT);
+				$ret .= str_pad($parts[$i], strlen($mask_parts[$i]), '0', STR_PAD_LEFT);
 			} else {
-				$ret .= $parts[$i]??'1';
+				$ret .= $parts[$i];
 			}
 		}
 		return $ret;
