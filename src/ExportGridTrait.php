@@ -5,6 +5,7 @@ use Yii;
 use yii\base\InvalidConfigException;
 use yii\data\ActiveDataProvider;
 use yii\helpers\Html;
+use yii\web\ForbiddenHttpException;
 use yii\web\NotFoundHttpException;
 
 /**
@@ -34,6 +35,13 @@ trait ExportGridTrait
 	public ?string $exportFilename = null;
 
 	/**
+	 * @var bool offer extra export options with every model attribute instead
+	 * of just the grid's own columns. Internal value, set from PHP — it is
+	 * not a request parameter, so a crafted url can never turn it on.
+	 */
+	public bool $exportAllColumns = false;
+
+	/**
 	 * @var int rows per batch when walking the query. Exporting "everything"
 	 * means the row count is unbounded, so the query is walked in batches
 	 * instead of loading every model at once.
@@ -46,11 +54,19 @@ trait ExportGridTrait
 	public function actionExport(string $format = 'csv')
 	{
 		$format = strtolower($format);
+		$all_columns = false;
+		if (str_ends_with($format, '-all')) {
+			$format = substr($format, 0, -4);
+			if (!$this->exportAllColumns) {
+				throw new ForbiddenHttpException('Export of all columns is not enabled');
+			}
+			$all_columns = true;
+		}
 		if (!in_array($format, $this->exportFormats, true)) {
 			throw new NotFoundHttpException("$format: unsupported export format");
 		}
 		[$provider, $model] = $this->createExportProvider();
-		$columns = $this->resolveExportColumns($model);
+		$columns = $this->resolveExportColumns($model, $all_columns);
 		$title = $model->getModelInfo('title_plural');
 		$name = $this->exportFilename ?: preg_replace('/[^\w-]+/u', '_', (string)$title);
 
@@ -89,7 +105,7 @@ trait ExportGridTrait
 		return [$provider, $model];
 	}
 
-	protected function resolveExportColumns($model): array
+	protected function resolveExportColumns($model, bool $all_columns = false): array
 	{
 		if (is_callable($this->exportColumns)) {
 			return call_user_func($this->exportColumns, $model);
@@ -97,12 +113,41 @@ trait ExportGridTrait
 		if (is_array($this->exportColumns) && $this->exportColumns) {
 			return $this->exportColumns;
 		}
+		if (!$all_columns) {
+			$params = $this->request->queryParams;
+			$grid_columns = $this->gridColumnsFromRequest($params, $model);
+			if ($grid_columns !== null) {
+				return $grid_columns;
+			}
+		}
 		// safeAttributes() comes back alphabetical, which reads badly in a
 		// report — the id lands in the middle and the name near the end. Take
 		// the table's own order instead, keeping only the safe ones.
 		$safe = array_flip($model->safeAttributes());
 		return array_values(array_filter($model->attributes(),
 			fn($attribute) => isset($safe[$attribute])));
+	}
+
+	/**
+	 * The grid's columns as sent in the `export-columns` request parameter,
+	 * kept in the grid's order and restricted to safe attributes. Null when
+	 * the parameter is missing or nothing usable comes back in it.
+	 */
+	protected function gridColumnsFromRequest(array $params, $model): ?array
+	{
+		$columns = $params['export-columns'] ?? null;
+		if (!is_string($columns) || $columns === '') {
+			return null;
+		}
+		$safe = array_flip($model->safeAttributes());
+		$ret = [];
+		foreach (explode(',', $columns) as $attribute) {
+			$attribute = trim($attribute);
+			if ($attribute !== '' && isset($safe[$attribute])) {
+				$ret[] = $attribute;
+			}
+		}
+		return $ret === [] ? null : array_values(array_unique($ret));
 	}
 
 	/**

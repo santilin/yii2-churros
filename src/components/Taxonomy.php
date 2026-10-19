@@ -138,4 +138,117 @@ class Taxonomy
 		return substr($padded, -$padLength, $padLength);
 	}
 
+	/**
+	 * Código padre (sin el último segmento). '' si es de primer nivel.
+	 */
+	static public function parentCode(string $value, array $taxonomy): string
+	{
+		$dot = $taxonomy['dot']??'.';
+		$pos = strrpos($value, $dot);
+		return $pos === false ? '' : substr($value, 0, $pos);
+	}
+
+	/**
+	 * Último segmento del código (número de bloque).
+	 */
+	static public function blockNumber(string $value, array $taxonomy): string
+	{
+		$dot = $taxonomy['dot']??'.';
+		$pos = strrpos($value, $dot);
+		return $pos === false ? $value : substr($value, $pos + strlen($dot));
+	}
+
+	/**
+	 * True si $code está bajo $ancestor (comparando por segmentos).
+	 * Sirve para impedir mover un nodo dentro de su propio subárbol.
+	 */
+	static public function isDescendantOf(string $code, string $ancestor, array $taxonomy): bool
+	{
+		if ($ancestor === '') {
+			return true;
+		}
+		$dot = $taxonomy['dot']??'.';
+		return $code !== $ancestor
+			&& strpos($code . $dot, $ancestor . $dot) === 0;
+	}
+
+	/**
+	 * Nuevo código al mover (reparentar) un nodo bajo otro padre,
+	 * conservando su último segmento. Devuelve '' si es inválido
+	 * (moverse a sí mismo o a un descendiente).
+	 */
+	static public function reparentCode(string $code, string $newParent, array $taxonomy): string
+	{
+		if ($code === '' || $newParent === $code
+			|| ($newParent !== '' && self::isDescendantOf($newParent, $code, $taxonomy))) {
+			return '';
+		}
+		$dot = $taxonomy['dot']??'.';
+		$block = self::blockNumber($code, $taxonomy);
+		$newParentLevel = $newParent === '' ? 0 : count(explode($dot, $newParent));
+		if (!self::fitsMaskWidth($block, $newParentLevel, $taxonomy)) {
+			return '';
+		}
+		$new = $newParent === '' ? $block
+			: $newParent . $dot . $block;
+		return self::fixCode($new, $taxonomy);
+	}
+
+	/**
+	 * Nuevo código al renumerar un nodo dentro de su mismo padre.
+	 * Devuelve '' si no cabe en el ancho de la máscara.
+	 */
+	static public function renumberCode(string $code, $newNumber, array $taxonomy): string
+	{
+		$dot = $taxonomy['dot']??'.';
+		$parent = self::parentCode($code, $taxonomy);
+		$level = $parent === '' ? 0 : count(explode($dot, $parent));
+		if (!self::fitsMaskWidth((string)$newNumber, $level, $taxonomy)) {
+			return '';
+		}
+		$new = $parent === '' ? (string)$newNumber : $parent . $dot . $newNumber;
+		return self::fixCode($new, $taxonomy);
+	}
+
+	/**
+	 * True si el segmento cabe en el ancho del grupo de la máscara indicado.
+	 */
+	static private function fitsMaskWidth(string $segment, int $level, array $taxonomy): bool
+	{
+		$dot = $taxonomy['dot']??'.';
+		$mask_parts = explode($dot, $taxonomy['mask']??'');
+		if (!isset($mask_parts[$level])) {
+			return true;
+		}
+		return strlen($segment) <= strlen($mask_parts[$level]);
+	}
+
+	/**
+	 * Siguiente número de bloque libre bajo un padre, según los códigos
+	 * hermanos existentes y el ancho de la máscara. '' si no cabe.
+	 */
+	static public function nextChildCode(string $parent, array $existingCodes, array $taxonomy): string
+	{
+		$dot = $taxonomy['dot']??'.';
+		$mask_parts = explode($dot, $taxonomy['mask']??'');
+		$level = $parent === '' ? 0 : count(explode($dot, $parent));
+		$width = isset($mask_parts[$level]) ? strlen($mask_parts[$level]) : 0;
+		$max = 0;
+		$prefix = $parent === '' ? '' : $parent . $dot;
+		foreach ($existingCodes as $code) {
+			if (strpos($code, $prefix) === 0) {
+				$rest = substr($code, strlen($prefix));
+				if (strpos($rest, $dot) === false && is_numeric($rest)) {
+					$max = max($max, intval($rest));
+				}
+			}
+		}
+		$next = $max + 1;
+		if ($width > 0 && strlen((string)$next) > $width) {
+			return '';
+		}
+		$new = $prefix . ($width > 0 ? str_pad((string)$next, $width, '0', STR_PAD_LEFT) : (string)$next);
+		return self::fixCode($new, $taxonomy);
+	}
+
 } // class

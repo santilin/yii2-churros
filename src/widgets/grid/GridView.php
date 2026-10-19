@@ -206,8 +206,67 @@ CSS
 		}
 	}
 
+	/**
+	 * Attribute names of the data columns this grid is showing, in order.
+	 * Non-data columns (actions, serial, checkbox) and hidden ones are skipped.
+	 */
+	public function gridExportAttributes(): array
+	{
+		$attrs = [];
+		foreach ($this->columns as $column) {
+			if (!$column->visible) {
+				continue;
+			}
+			if ($column instanceof \yii\grid\DataColumn && !empty($column->attribute)) {
+				$attrs[] = $column->attribute;
+			}
+		}
+		return array_values(array_unique($attrs));
+	}
+
+	/**
+	 * Whether the controller offers exporting every model attribute, via its
+	 * internal `$exportAllColumns` (ExportGridTrait). Not a request value.
+	 */
+	protected function controllerAllowsExportAllColumns(): bool
+	{
+		$controller = $this->getView()->context ?? null;
+		return is_object($controller)
+			&& property_exists($controller, 'exportAllColumns')
+			&& (bool)$controller->exportAllColumns;
+	}
+
+	/**
+	 * Adds the grid's own columns to the server export urls, so actionExport()
+	 * exports what the grid shows instead of every model attribute. When the
+	 * controller sets its internal `$exportAllColumns` to true, extra options
+	 * are added to export everything instead.
+	 */
+	protected function injectGridColumnsIntoExport(): void
+	{
+		if (!isset($this->toolbarButtons['export']['menu_url'])
+			|| !is_array($this->toolbarButtons['export']['menu_url'])
+			|| isset($this->toolbarButtons['export']['menu_url']['export-columns'])) {
+			return;
+		}
+		$this->toolbarButtons['export']['menu_url']['export-columns']
+			= implode(',', $this->gridExportAttributes());
+		if ($this->controllerAllowsExportAllColumns()
+			&& isset($this->toolbarButtons['export']['selections'])
+			&& is_array($this->toolbarButtons['export']['selections'])) {
+			foreach ($this->toolbarButtons['export']['selections'] as $value => $label) {
+				if (str_ends_with((string)$value, '-all')) {
+					continue;
+				}
+				$this->toolbarButtons['export']['selections'][$value . '-all']
+					= Yii::t('churros', '{label} (all columns)', ['label' => $label]);
+			}
+		}
+	}
+
     public function renderToolbar()
     {
+		$this->injectGridColumnsIntoExport();
 		if (count($this->toolbarButtons)) {
 			if (isset($this->toolbarButtons['export'])) {
 				JSZipAsset::register($this->getView());
@@ -504,6 +563,11 @@ CSS
 	 * exports the visible page only — 20 rows if that is the page size — while
 	 * the menu exports every row matching the current filters. Label them so
 	 * nobody mistakes one for the other.
+	 *
+	 * The menu urls carry the grid's own columns (`export-columns`), so the
+	 * server exports what the grid shows. Set the controller's internal
+	 * `$exportAllColumns = true` to also offer every model attribute as
+	 * extra `{format}-all` options in the dropdown.
 	 *
 	 * @param string $table_id id of the grid container the quick export reads
 	 * @param array|string $export_url route of the server action, e.g. ['export']
