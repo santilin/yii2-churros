@@ -99,27 +99,33 @@ class AuthController extends Controller
 		// existe todavía (capel sin regenerar con el paso que la emite para
 		// `controllers`), 'rbac' por defecto mantiene el comportamiento actual.
 		$access_filters = $controller['access_filters'] ?? ['rbac'];
-		if (in_array('module', $access_filters, true)) {
-			$permission = AuthHelper::createOrUpdatePermission(
-				"$module_id.$model_name",
-				Yii::t('churros', '{module}: {model}: acceso completo', [
-					'module' => $module_desc, 'model' => $model_title,
-				]), true, $auth);
-			unset($all_items[$permission->name]);
-			AuthHelper::flushMessages($this->verbose);
-			if ($admin) {
-				if (!$auth->hasChild($admin, $permission)) {
-					$auth->addChild($admin, $permission);
-					echo "+ Permission '{$permission->name}' added to role '{$admin->name}'\n";
-				} elseif ($this->verbose) {
-					echo "= Permission '{$permission->name}' already exists in role {$admin->name}\n";
+		// access_filters puede combinar varios valores (p.ej. ['module', 'rbac']):
+		// cuando hay más de uno, se construyen los permisos del que más crea, de
+		// menos a más: admin (no crea nada, el acceso no pasa por permisos) <
+		// module (un único permiso de todo o nada) < rbac (el conjunto completo
+		// viewer/creator/.../admin por modelo más los de `perms`). Comprobar
+		// 'module' antes que 'rbac' hacía que, con ambos presentes, nunca se
+		// llegara a crear ni los roles por modelo ni los permisos de `perms`.
+		if (!in_array('rbac', $access_filters, true)) {
+			if (in_array('module', $access_filters, true)) {
+				$permission = AuthHelper::createOrUpdatePermission(
+					"$module_id.$model_name",
+					Yii::t('churros', '{module}: {model}: acceso completo', [
+						'module' => $module_desc, 'model' => $model_title,
+					]), true, $auth);
+				unset($all_items[$permission->name]);
+				AuthHelper::flushMessages($this->verbose);
+				if ($admin) {
+					if (!$auth->hasChild($admin, $permission)) {
+						$auth->addChild($admin, $permission);
+						echo "+ Permission '{$permission->name}' added to role '{$admin->name}'\n";
+					} elseif ($this->verbose) {
+						echo "= Permission '{$permission->name}' already exists in role {$admin->name}\n";
+					}
 				}
 			}
-			return;
-		}
-		// sin 'rbac' ahí (y tampoco 'module', ya tratado arriba), el acceso no
-		// pasa por permisos (admin/logged/username/...) y no hay nada que crear.
-		if (!in_array('rbac', $access_filters, true)) {
+			// sin 'rbac' ni 'module', el acceso no pasa por permisos
+			// (admin/logged/username/...) y no hay nada más que crear.
 			return;
 		}
 
@@ -425,27 +431,32 @@ class AuthController extends Controller
 			// access_filters es el propio del controlador o, si no tiene, el heredado
 			// del módulo (ver ModuleControllerDefinition::accessFilters() en capel).
 			$access_filters = $wc['access_filters'] ?? [];
-			if (in_array('module', $access_filters, true)) {
-				$permission = AuthHelper::createOrUpdatePermission(
-					"$module_id.$cname",
-					Yii::t('churros', '{module}: {controller}: acceso completo', [
-						'module' => $module_desc, 'controller' => $cname,
-					]), true, $auth);
-				unset($all_items[$permission->name]);
-				AuthHelper::flushMessages($this->verbose);
-				if ($admin) {
-					if (!$auth->hasChild($admin, $permission)) {
-						$auth->addChild($admin, $permission);
-						echo "+ Permission '{$permission->name}' added to role '{$admin->name}'\n";
-					} elseif ($this->verbose) {
-						echo "= Permission '{$permission->name}' already exists in role {$admin->name}\n";
+			// Mismo criterio que createControllerPermissions(): con varios valores a
+			// la vez (p.ej. ['module', 'rbac']), se construyen los permisos del que
+			// más crea, de menos a más: admin (nada) < module (un permiso de todo o
+			// nada) < rbac (los de `perms`). Comprobar 'module' antes que 'rbac'
+			// hacía que, con ambos presentes, nunca se llegara a crear ninguno de
+			// los de `perms`.
+			if (!in_array('rbac', $access_filters, true)) {
+				if (in_array('module', $access_filters, true)) {
+					$permission = AuthHelper::createOrUpdatePermission(
+						"$module_id.$cname",
+						Yii::t('churros', '{module}: {controller}: acceso completo', [
+							'module' => $module_desc, 'controller' => $cname,
+						]), true, $auth);
+					unset($all_items[$permission->name]);
+					AuthHelper::flushMessages($this->verbose);
+					if ($admin) {
+						if (!$auth->hasChild($admin, $permission)) {
+							$auth->addChild($admin, $permission);
+							echo "+ Permission '{$permission->name}' added to role '{$admin->name}'\n";
+						} elseif ($this->verbose) {
+							echo "= Permission '{$permission->name}' already exists in role {$admin->name}\n";
+						}
 					}
 				}
-				continue;
-			}
-			// sin 'rbac' ahí (y tampoco 'module', ya tratado arriba), el acceso no
-			// pasa por permisos (admin/logged/username/...) y no hay nada que crear.
-			if (!in_array('rbac', $access_filters, true)) {
+				// sin 'rbac' ni 'module', el acceso no pasa por permisos
+				// (admin/logged/username/...) y no hay nada más que crear.
 				continue;
 			}
 			foreach ($wc['perms'] ?? [] as $perm_name) {
