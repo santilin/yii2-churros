@@ -252,12 +252,34 @@ trait RelationTrait
 		$container = [];
         $relation = $this->getRelation($relation_name);
 		$link = $relation->link;
+		$other_attr = null;
 		if ($relation->via != null) { // Many to many with junction model
 			$relation_name = $relation->via[0];
 			$relation = $this->getRelation($relation_name);
 			$junction_link = $relation->link;
 		} else {
 			$junction_link = [];
+			// HasMany directo a un modelo puente, sin ->via() (p.ej. el
+			// formulario enlaza con la relación puente en vez de con la
+			// relación ManyToMany final que la usa como via): $link ya
+			// describe el lado hacia este modelo (sirve de $junction_link).
+			// findOtherRelationByModel() (pensado para esto, ver su uso en
+			// CrudReadOnlyController::genBaseBreadCrumbs()) da la relación
+			// del modelo puente hacia el otro extremo; de su 'left' se saca
+			// la columna propia del puente -- justo lo que llega en
+			// $form_values cuando se posteán ids sueltos (ver rama
+			// "many2many relation con _POST = array de ids sueltos" más
+			// abajo). No se reescribe $link: la rama de posteo de registros
+			// completos lo sigue necesitando tal cual.
+			$relModelClass = $relation->modelClass;
+			if ($relation->multiple && $relModelClass::$isJunctionModel) {
+				$other_relation = (new $relModelClass)->findOtherRelationByModel(
+					static::getModelInfo('model_name'));
+				if ($other_relation && is_string($other_relation['left'])) {
+					$junction_link = $link;
+					$other_attr = substr($other_relation['left'], strrpos($other_relation['left'], '.') + 1);
+				}
+			}
 		}
 		if ($relation->multiple) {
 			$relModelClass = $relation->modelClass;
@@ -307,8 +329,12 @@ trait RelationTrait
                 } else {
 					// many2many relation with _POST = array of related ids
 					$m2mkeys = [];
-					foreach ($link as $this_fk => $other_pk) {
-						$m2mkeys[$other_pk] = $relPost;
+					if ($other_attr !== null) {
+						$m2mkeys[$other_attr] = $relPost;
+					} else {
+						foreach ($link as $this_fk => $other_pk) {
+							$m2mkeys[$other_pk] = $relPost;
+						}
 					}
 					foreach ($junction_link as $rel_fk => $this_pk) {
 						$m2mkeys[$rel_fk] = $this->$this_pk;
