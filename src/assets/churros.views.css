@@ -212,6 +212,14 @@ fieldset {
   }
 }
 
+
+.crud-form .no-form-control {
+  padding: .25rem !important;
+  & .list-group {
+    margin-left: 0 !important;
+  }
+}
+
 .crud-grid-container {
   overflow-x:auto;
   width:auto;

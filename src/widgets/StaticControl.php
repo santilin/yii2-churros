@@ -3,11 +3,12 @@
 namespace santilin\churros\widgets;
 
 use Yii;
-use yii\helpers\Html;
+use yii\helpers\{ArrayHelper,Html};
 
 class StaticControl extends \yii\widgets\InputWidget
 {
 	public $value = null;
+	public bool $is_form_control = true;
 	public string $nullText = '';
 
 	public function run()
@@ -23,9 +24,13 @@ class StaticControl extends \yii\widgets\InputWidget
 		if (is_callable($value)) {
 			$value = call_user_func($value, $this->model, $this);
 		}
-        Html::addCssClass($this->options, 'form-control readonly');
+		if ($this->is_form_control) {
+			Html::addCssClass($this->options, 'form-control readonly');
+		} else {
+			Html::addCssClass($this->options, 'no-form-control');
+		}
 		if (trim(strval($value)) == '') {
-			$value = $this->nullText?:'&nbsp;';
+			$value = $this->nullText ?: '&nbsp;';
 		}
 		return Html::tag('div', $value, $this->options);
 	}

@@ -592,7 +592,6 @@ js;
 					$layout_row['htmlOptions'] = [];
 				}
 				Html::addCssClass($layout_row['htmlOptions'], $layout_row_type);
-				// Html::addCssClass($layout_row['htmlOptions'], [ 'form-control readonly' ]);
 				$ret .= $this->layoutContent($layout_row['label'],
 					$layout_row['content'] ?: $layout_row['options']['emptyValue'] ?? '&nbsp;',
 					$layout_row_layout, 'large', $layout_row['htmlOptions']);

@@ -297,6 +297,48 @@ class AuthHelper
 		}
 	}
 
+	/**
+	 * Roles disponibles, indexados por nombre => descripción.
+	 */
+	static public function getRoleOptions($auth = null): array
+	{
+		if ($auth === null) {
+			$auth = \Yii::$app->authManager;
+		}
+		$options = [];
+		foreach ($auth->getRoles() as $name => $role) {
+			$options[$name] = $role->description;
+		}
+		return $options;
+	}
+
+	/**
+	 * Permisos que no son hijos de ningún rol -- solo se pueden asignar
+	 * directamente a un usuario, nunca se heredan vía un rol. Indexados por
+	 * nombre => descripción.
+	 */
+	static public function getPermissionOptionsWithoutRole(?string $excluded = null, $auth = null): array
+	{
+		if ($auth === null) {
+			$auth = \Yii::$app->authManager;
+		}
+		$permsWithRole = [];
+		foreach ($auth->getRoles() as $roleName => $roleObj) {
+			if ($excluded === null || !preg_match("/$excluded/", $roleName)) {
+				foreach ($auth->getChildren($roleName) as $childName => $childObj) {
+					$permsWithRole[$childName] = true;
+				}
+			}
+		}
+		$options = [];
+		foreach ($auth->getPermissions() as $name => $perm) {
+			if (!isset($permsWithRole[$name])) {
+				$options[$name] = $perm->description;
+			}
+		}
+		return $options;
+	}
+
 	static public function removePerms(array $perm_names, $auth = null)
     {
 		if ($auth === null) {

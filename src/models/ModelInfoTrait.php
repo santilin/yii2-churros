@@ -928,6 +928,12 @@ trait ModelInfoTrait
 		$not = $params['not'] ?? false;
 		$range = array_keys($this->handyFieldValues($field, 'range'));
 		$value = $this->$field;
+		if ($allowArray && is_string($value) && str_contains($value, ',') && !in_array($value, $range, $strict)) {
+			// Campos "is_array" guardados como una sola columna CSV (p.ej.
+			// "AH,INSCRIP_MULTI") en vez de como array PHP real: se tratan
+			// igual que un array, separando por comas.
+			$value = array_map('trim', explode(',', $value));
+		}
 		if (is_array($value)) {
 			if (!$allowArray) {
 				$this->addError($attribute, Yii::t('churros', '{attribute} is an array.', [
