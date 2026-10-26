@@ -37,10 +37,10 @@ class WidgetLayer
 						   string $size = 'large', string $style = 'grid',
 						   array $html_options = []): string
 	{
-		// El htmlOptions del propio $widgetsLayout raíz, igual que el de
-		// cualquier otro layout_row del árbol (ver los `$layout_row['htmlOptions']`
-		// repartidos por layoutWidgets()): captado antes de que las ramas de abajo
-		// puedan sustituir $this->widgetsLayout por uno sintético sin esa clave.
+		// The htmlOptions of the root $widgetsLayout itself, like that of any
+		// other layout_row of the tree (see the `$layout_row['htmlOptions']`
+		// scattered through layoutWidgets()): captured before the branches below
+		// can replace $this->widgetsLayout with a synthetic one lacking that key.
 		$root_html_options = is_array($this->widgetsLayout) ? ($this->widgetsLayout['htmlOptions'] ?? []) : [];
 		if (empty($this->widgetsLayout)) {
 			$this->widgetsLayout = [
@@ -72,11 +72,11 @@ class WidgetLayer
 			Yii::warning("Widgets in form not used in layout: '" . implode("','",$not_used) . "'");
 		}
 		$this->widgets_used = [];
-		// Solo RecordView::renderRecord() pide type 'fields': es quien envolvía
-		// el resultado a mano en `<fieldset class="record-fields">`. Se mueve
-		// aquí para que pueda llevar htmlOptions, igual que cualquier otro
-		// layout_row (p.ej. `'htmlOptions' => ['class' => 'no-border']` en el
-		// $fieldsLayout raíz).
+		// Only RecordView::renderRecord() asks for type 'fields': it was the one
+		// wrapping the result by hand in `<fieldset class="record-fields">`. It
+		// moves here so it can carry htmlOptions, like any other layout_row
+		// (e.g. `'htmlOptions' => ['class' => 'no-border']` on the root
+		// $fieldsLayout).
 		if ($type === 'fields') {
 			$fieldset_options = array_merge($html_options, $root_html_options);
 			Html::addCssClass($fieldset_options, 'record-fields');
@@ -467,12 +467,12 @@ js;
 										$fs .= '</div>';
 										$this->removeLast();
 									}
-									// Como en la rama else: sin w-100 la fila se queda con el ancho
-									// automático, mientras que las filas de dos columnas sí lo llevan
-									// y miden un gutter menos. Esa diferencia desalineaba las
-									// etiquetas y los campos de los layouts `fill` respecto de los
-									// demás. Lo rematan las anchuras de .w-label-12-66 y
-									// .w-fld-87-33 en churros.views.css, con la corrección en píxeles.
+								// Like in the else branch: without w-100 the row keeps the
+								// automatic width, while two-column rows do have it and
+								// measure one gutter less. That difference misaligned the
+								// labels and fields of `fill` layouts with respect to the
+								// others. It is compounded by the widths of .w-label-12-66 and
+								// .w-fld-87-33 in churros.views.css, with the pixel correction.
 									Html::addCssClass($widget->options, 'w-100');
 									// Add full-width row wrapper
 									$fs .= '<div class="col-12">';

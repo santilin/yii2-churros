@@ -24,15 +24,15 @@ class GridView extends SimpleGridView
 	public bool $hover = false;
 	public $layout = "{summary}\n{selectViews}\n{items}\n{pager}{filterCount}";
 	/**
-	 * Fija la cabecera de la tabla arriba al hacer scroll (`position: sticky`).
-	 * - `false`: desactivado.
-	 * - `true`: se queda en `top: 0`.
-	 * - string: desplazamiento superior, p.ej. `'56px'` si hay una barra de navegación fija.
+	 * Keeps the table header fixed at the top while scrolling (`position: sticky`).
+	 * - `false`: disabled.
+	 * - `true`: stays at `top: 0`.
+	 * - string: top offset, e.g. `'56px'` if there is a fixed navbar.
 	 */
 	public $stickyHeader = false;
 	/**
-	 * Altura máxima del cuerpo desplazable, p.ej. `'70vh'` o `'500px'`.
-	 * Si es `null`, la tabla hace scroll con la página y la cabecera se queda fija arriba.
+	 * Max height of the scrollable body, e.g. `'70vh'` or `'500px'`.
+	 * If it is `null`, the table scrolls with the page and the header stays fixed at the top.
 	 */
 	public $stickyHeaderMaxHeight = null;
 
@@ -119,7 +119,7 @@ class GridView extends SimpleGridView
     {
 		$save_filter_model = null;
 		if ($this->filterModel && $this->dataProvider->getCount() <= 1) {
-			// No mostrar la fila de filtro si no hay valores filtrados
+			// Do not show the filter row if there are no filtered values
 			$has_filters = false;
  			$filter_attrs = $this->filterModel->activeAttributes();
 			foreach ($this->columns as $kc => $column) {
@@ -172,9 +172,9 @@ class GridView extends SimpleGridView
 	}
 
 	/**
-	 * Fija las celdas de la cabecera (`thead`, incluida la fila de filtros) arriba
-	 * con `position: sticky`. Necesitan fondo opaco y `z-index` para que las filas
-	 * del cuerpo pasen por debajo al hacer scroll.
+	 * Fixes the header cells (`thead`, including the filter row) at the top with
+	 * `position: sticky`. They need an opaque background and a `z-index` so the
+	 * body rows scroll underneath them.
 	 */
 	protected function registerStickyHeaderCss(): void
 	{

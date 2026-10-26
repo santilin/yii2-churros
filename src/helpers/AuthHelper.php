@@ -298,7 +298,7 @@ class AuthHelper
 	}
 
 	/**
-	 * Roles disponibles, indexados por nombre => descripción.
+	 * Available roles, indexed by name => description.
 	 */
 	static public function getRoleOptions($auth = null): array
 	{
@@ -313,9 +313,9 @@ class AuthHelper
 	}
 
 	/**
-	 * Permisos que no son hijos de ningún rol -- solo se pueden asignar
-	 * directamente a un usuario, nunca se heredan vía un rol. Indexados por
-	 * nombre => descripción.
+	 * Permissions that are not children of any role -- they can only be assigned
+	 * directly to a user, never inherited through a role. Indexed by
+	 * name => description.
 	 */
 	static public function getPermissionOptionsWithoutRole(?string $excluded = null, $auth = null): array
 	{

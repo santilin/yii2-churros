@@ -31,11 +31,11 @@ class AuthController extends Controller
 	/** @var bool Verbose output */
 	public bool $verbose = false;
 	/**
-	 * @var bool Fuerza el borrado de roles/permisos aunque los tenga alguna
-	 * usuaria asignados (--force=1). Sin force, los items en uso se conservan.
+	 * @var bool Forces the deletion of roles/permissions even if some user has
+	 * them assigned (--force=1). Without force, items in use are kept.
 	 */
 	public bool $force = false;
-	/** @var string Output format for list-role: 'simple' or 'details' */
+	/** @var string Output format for list-role-tree: 'simple' or 'details' */
 	public string $format = 'simple';
 
     public function options($actionID)
@@ -79,11 +79,18 @@ class AuthController extends Controller
 
 	/**
 	 * Creates the permissions for a model inside a module
+	 *
+	 * @param array $owner_roles module roles of the '-owner' chain created
+	 *   by createModuleRbacPermissions(): key 'viewer'|'editor'|
+	 *   'deleter' => Role|null. With an empty array (apps that do not forward
+	 *   it yet) the model '-owner' chain and its
+	 *   view-owner/update-owner/delete-owner permissions are not created.
 	 */
 	public function createControllerPermissions(string $module_id, string $module_desc,
 		string $model_name, array $controller,
 		?Role $viewer, ?Role $creator, ?Role $editor, ?Role $full_editor,
-		?Role $deleter, ?Role $granter, ?Role $admin, array &$all_items = [])
+		?Role $deleter, ?Role $granter, ?Role $admin,
+		array $owner_roles = [], array &$all_items = [])
 	{
 		$model_class = $controller['class'];
 		if (!class_exists($model_class)) {
@@ -93,24 +100,24 @@ class AuthController extends Controller
 		$model = $model_class::instance();
 		$model_title = $model->t('app', "{Title_plural}");
 
-		// access_filters es el propio del controlador o, si no tiene, el heredado
-		// del módulo (ver ModuleControllerDefinition::accessFilters() en capel) —
-		// mismo criterio que createWebControllerPermissions(). Si la clave no
-		// existe todavía (capel sin regenerar con el paso que la emite para
-		// `controllers`), 'rbac' por defecto mantiene el comportamiento actual.
+		// access_filters is the controller's own or, if it has none, the one inherited
+		// from the module (see ModuleControllerDefinition::accessFilters() in capel) —
+		// same criteria as createWebControllerPermissions(). If the key does not
+		// exist yet (capel not regenerated with the step that emits it for
+		// `controllers`), the default 'rbac' keeps the current behavior.
 		$access_filters = $controller['access_filters'] ?? ['rbac'];
-		// access_filters puede combinar varios valores (p.ej. ['module', 'rbac']):
-		// cuando hay más de uno, se construyen los permisos del que más crea, de
-		// menos a más: admin (no crea nada, el acceso no pasa por permisos) <
-		// module (un único permiso de todo o nada) < rbac (el conjunto completo
-		// viewer/creator/.../admin por modelo más los de `perms`). Comprobar
-		// 'module' antes que 'rbac' hacía que, con ambos presentes, nunca se
-		// llegara a crear ni los roles por modelo ni los permisos de `perms`.
+		// access_filters can combine several values (e.g. ['module', 'rbac']):
+		// when there is more than one, the permissions of the one that creates
+		// the most are built, from least to most: admin (creates nothing, access
+		// does not go through permissions) < module (a single all-or-nothing
+		// permission) < rbac (the full viewer/creator/.../admin set per model
+		// plus those of `perms`). Checking 'module' before 'rbac' meant that,
+		// with both present, neither per-model roles nor `perms` permissions were ever created.
 		if (!in_array('rbac', $access_filters, true)) {
 			if (in_array('module', $access_filters, true)) {
 				$permission = AuthHelper::createOrUpdatePermission(
 					"$module_id.$model_name",
-					Yii::t('churros', '{module}: {model}: acceso completo', [
+					Yii::t('churros', '{module}: {model}: full access', [
 						'module' => $module_desc, 'model' => $model_title,
 					]), true, $auth);
 				unset($all_items[$permission->name]);
@@ -124,8 +131,8 @@ class AuthController extends Controller
 					}
 				}
 			}
-			// sin 'rbac' ni 'module', el acceso no pasa por permisos
-			// (admin/logged/username/...) y no hay nada más que crear.
+			// without 'rbac' or 'module', access does not go through permissions
+			// (admin/logged/username/...) and there is nothing else to create.
 			return;
 		}
 
@@ -135,7 +142,7 @@ class AuthController extends Controller
 		if ($viewer) {
 			$model_viewer = AuthHelper::createOrUpdateRole(
 				str_replace('.', ".{$model_name}.", $viewer->name),
-				Yii::t('churros', '{module}: {model}: visor/a', [
+				Yii::t('churros', '{module}: {model}: viewer', [
 					'module' => $module_desc, 'model' => $model_title
 				]), true, $auth);
 			unset($all_items[$model_viewer->name]);
@@ -150,7 +157,7 @@ class AuthController extends Controller
 		if ($creator) {
 			$model_creator = AuthHelper::createOrUpdateRole(
 				str_replace('.', ".{$model_name}.", $creator->name),
-				Yii::t('churros', '{module}: {model}: creador/a', [
+				Yii::t('churros', '{module}: {model}: creator', [
 					'module' => $module_desc, 'model' => $model_title
 				]), true, $auth);
 			unset($all_items[$model_creator->name]);
@@ -165,7 +172,7 @@ class AuthController extends Controller
 		if ($deleter) {
 			$model_deleter = AuthHelper::createOrUpdateRole(
 				str_replace('.', ".{$model_name}.", $deleter->name),
-				Yii::t('churros', '{module}: {model}: eliminador/a', [
+				Yii::t('churros', '{module}: {model}: deleter', [
 					'module' => $module_desc, 'model' => $model_title
 				]), true, $auth);
 			unset($all_items[$model_deleter->name]);
@@ -180,7 +187,7 @@ class AuthController extends Controller
 		if ($editor) {
 			$model_editor = AuthHelper::createOrUpdateRole(
 				str_replace('.', ".{$model_name}.", $editor->name),
-				Yii::t('churros', '{module}: {model}: editor/a', [
+				Yii::t('churros', '{module}: {model}: editor', [
 					'module' => $module_desc, 'model' => $model_title
 				]), true, $auth);
 			unset($all_items[$model_editor->name]);
@@ -195,7 +202,7 @@ class AuthController extends Controller
 		if ($granter) {
 			$model_granter = AuthHelper::createOrUpdateRole(
 				str_replace('.', ".{$model_name}.", $granter->name),
-				Yii::t('churros', '{module}: {model}: asignador/a de privilegios', [
+				Yii::t('churros', '{module}: {model}: granter', [
 					'module' => $module_desc, 'model' => $model_title
 				]), true, $auth);
 			unset($all_items[$model_granter->name]);
@@ -210,7 +217,7 @@ class AuthController extends Controller
 		if ($full_editor) {
 			$model_full_editor = AuthHelper::createOrUpdateRole(
 				str_replace('.', ".{$model_name}.", $full_editor->name),
-				Yii::t('churros', '{module}: {model}: editor/a total', [
+				Yii::t('churros', '{module}: {model}: full editor', [
 					'module' => $module_desc, 'model' => $model_title
 				]), true, $auth);
 			unset($all_items[$model_full_editor->name]);
@@ -225,7 +232,7 @@ class AuthController extends Controller
 		if ($admin) {
 			$model_admin = AuthHelper::createOrUpdateRole(
 				str_replace('.', ".{$model_name}.", $admin->name),
-				Yii::t('churros', '{module}: {model}: administrador/a', [
+				Yii::t('churros', '{module}: {model}: administrator', [
 					'module' => $module_desc, 'model' => $model_title
 				]), true, $auth);
 			unset($all_items[$model_admin->name]);
@@ -283,6 +290,81 @@ class AuthController extends Controller
 				} elseif ($this->verbose) {
 					echo "= Role '{$model_granter->name}' already exists in role {$model_admin->name}\n";
 				}
+			}
+		}
+
+		// '-owner' chain, totally independent from the base one: no hierarchy
+		// among the -owner (editor-owner does NOT contain viewer-owner) and no
+		// link at all to the normal viewer/editor/... roles. It is only created
+		// to grant rights over one's own records. Each one hangs from its
+		// homologous '-owner' module role.
+		$model_perm_name = $module_id . '.' . $model_name;
+		$owner_descs = [
+			'viewer' => 'viewer',
+			'editor' => 'editor',
+			'deleter' => 'deleter',
+		];
+		foreach ($owner_descs as $owner_key => $owner_desc) {
+			$owner = $owner_roles[$owner_key] ?? null;
+			if ($owner === null) {
+				continue;
+			}
+			$model_owner = AuthHelper::createOrUpdateRole(
+				str_replace('.', ".{$model_name}.", $owner->name),
+				Yii::t('churros', '{module}: {model}: {desc} (own records only)', [
+					'module' => $module_desc, 'model' => $model_title,
+					'desc' => $owner_desc,
+				]), true, $auth);
+			unset($all_items[$model_owner->name]);
+			AuthHelper::flushMessages($this->verbose);
+			if (!$auth->hasChild($owner, $model_owner)) {
+				$auth->addChild($owner, $model_owner);
+				echo "+ Role '{$model_owner->name}' added to role '{$owner->name}'\n";
+			} elseif ($this->verbose) {
+				echo "= Role '{$model_owner->name}' already exists in role {$owner->name}\n";
+			}
+		}
+		// Controller '-owner' permissions: view-owner/index-owner/
+		// update-owner/delete-owner.
+		// They are only created for the actions that the controller declares in
+		// `perms`, and hang from the corresponding '-owner' MODULE role
+		// (viewer-owner/editor-owner/deleter-owner): neither from the model role
+		// nor from any role of the base chain. Each one also contains its
+		// same-named base permission (view-owner contains view, and so on), so
+		// that a user with ...view-owner also passes a plain can('...view')
+		// check; see the note where the base permissions are distributed.
+		// `index-owner` is the one used by createSearchModel() to list only the
+		// user's own records (CrudController's CREATE_SEARCH_MODEL.OWNERACCESS).
+		$declared_perms = [];
+		foreach ($controller['perms'] as $perm_name) {
+			$perm_name = mb_lcfirst($perm_name);
+			if (!str_contains($perm_name, '.')) {
+				$declared_perms[] = $perm_name;
+			}
+		}
+		foreach ([
+			'view-owner' => [['view', 'index'], 'viewer'],
+			'index-owner' => [['index'], 'viewer'],
+			'update-owner' => [['update'], 'editor'],
+			'delete-owner' => [['delete'], 'deleter'],
+		] as $owner_perm => [$actions, $owner_key]) {
+			$owner = $owner_roles[$owner_key] ?? null;
+			if ($owner === null || !array_intersect($actions, $declared_perms)) {
+				continue;
+			}
+			$permission = AuthHelper::createOrUpdatePermission(
+				$model_perm_name . '.' . $owner_perm,
+				Yii::t('churros', '{module}: {model}: {perm} (own records only)', [
+					'module' => $module_desc, 'model' => $model_title,
+					'perm' => $owner_perm,
+				]), true, $auth);
+			unset($all_items[$permission->name]);
+			AuthHelper::flushMessages($this->verbose);
+			if (!$auth->hasChild($owner, $permission)) {
+				$auth->addChild($owner, $permission);
+				echo "+ Permission '{$permission->name}' added to role '{$owner->name}'\n";
+			} elseif ($this->verbose) {
+				echo "= Permission '{$permission->name}' already exists in role {$owner->name}\n";
 			}
 		}
 
@@ -346,16 +428,15 @@ class AuthController extends Controller
 			}
 		}
 
-		$model_perm_name = $module_id . '.' . $model_name;
 		foreach ($controller['perms'] as $perm_name) {
 			$perm_name = mb_lcfirst($perm_name);
-			// Un valor ya cualificado (con punto) es una referencia directa a un
-			// permiso mínimo que se quiere declarar tal cual, sin el prefijo
-			// "<modulo>.<Modelo>." de siempre (p.ej. para pedir el propio rol admin
-			// del módulo, como en ceutae/AcogidaAlojamiento: perms: ['ceutae.admin']).
-			// Si coincide con un ROL que ya existe, esa acción ya está cubierta por
-			// él -no hay nada que crear-: un permiso con el mismo nombre chocaría,
-			// `auth_item.name` es única entre roles y permisos.
+			// An already qualified value (with a dot) is a direct reference to a
+			// minimum permission that is meant to be declared as is, without the
+			// usual "<module>.<Model>." prefix (e.g. to ask for the module's own
+			// admin role, as in ceutae/AcogidaAlojamiento: perms: ['ceutae.admin']).
+			// If it matches a ROLE that already exists, that action is already
+			// covered by it -there is nothing to create-: a permission with the
+			// same name would clash, `auth_item.name` is unique among roles and permissions.
 			if (str_contains($perm_name, '.')) {
 				if ($auth->getRole($perm_name) !== null) {
 					continue;
@@ -372,11 +453,30 @@ class AuthController extends Controller
 				$full_perm_name, $perm_desc, true, $auth);
 			unset($all_items[$permission->name]);
 			AuthHelper::flushMessages($this->verbose);
+			// Every '-owner' permission includes its same-named base one
+			// (view-owner contains view, and so on), so that whoever has
+			// ...view-owner also passes a plain `can('...view')` check; the
+			// "own records only" restriction is enforced by the rule that uses
+			// the -owner permission, not by RBAC itself.
+			$owner_counterpart = [
+				'view' => 'view-owner', 'index' => 'index-owner',
+				'update' => 'update-owner', 'delete' => 'delete-owner',
+			][$perm_name] ?? null;
+			if ($owner_counterpart !== null && !str_contains($perm_name, '.')) {
+				$owner_permission = $auth->getPermission($model_perm_name . '.' . $owner_counterpart);
+				if ($owner_permission !== null && !$auth->hasChild($owner_permission, $permission)) {
+					$auth->addChild($owner_permission, $permission);
+					echo "+ Permission '{$permission->name}' added to permission '{$owner_permission->name}'\n";
+				} elseif ($owner_permission !== null && $this->verbose) {
+					echo "= Permission '{$permission->name}' already exists in permission {$owner_permission->name}\n";
+				}
+			}
+			// Distributed ONLY along the base chain (the '-owner' chain does not
+			// receive the normal permissions: its own ...-owner ones are what it gets).
 			$roles_to_add = [];
 			switch ($perm_name) {
 				case 'view':
 				case 'index':
-				case 'informes':
 					$roles_to_add = [ $model_viewer, $model_editor, $model_full_editor, $model_admin ];
 					break;
 				case 'delete':
@@ -406,42 +506,42 @@ class AuthController extends Controller
 	}
 
 	/**
-	 * Crea los permisos de `web_controllers` (controladores web planos, sin
-	 * modelo): capel genera un permiso por acción ahí igual que hace con los 6
-	 * estándar de `controllers` (mismo `ControllerActionDefinition::permissions()`
-	 * por debajo). A diferencia de createControllerPermissions(), no hay
-	 * jerarquía viewer/creator/editor que montar — un controlador web no tiene
-	 * convención de permisos propia —, así que cada permiso se cuelga
-	 * directamente de $admin; si una acción concreta necesita otro rol, se
-	 * reasigna a mano (como ya se hacía antes de que esto se generara solo).
+	 * Creates the permissions of `web_controllers` (flat web controllers, no
+	 * model): capel generates one permission per action there just like with
+	 * the 6 standard ones of `controllers` (same `ControllerActionDefinition::`
+	 * permissions()` underneath). Unlike createControllerPermissions(), there
+	 * is no viewer/creator/editor hierarchy to build — a web controller has
+	 * no permission convention of its own —, so each permission hangs directly
+	 * from $admin; if a concrete action needs another role, it is reassigned
+	 * by hand (as it was done before this was generated automatically).
 	 *
-	 * Un controlador con `access_filters: module` no reparte por acción —
-	 * `ModuleRbacAccessRule` para ese caso comprueba el permiso de controlador
-	 * entero `<modulo>.<Controlador>`, no uno por acción— así que ahí se crea un
-	 * único permiso en vez de uno por cada entrada de `perms`.
+	 * A controller with `access_filters: module` does not distribute per action —
+	 * `ModuleRbacAccessRule` in that case checks the whole controller permission
+	 * `<module>.<Controller>`, not one per action— so there a single permission
+	 * is created instead of one for each entry of `perms`.
 	 *
 	 * @param array $web_controllers `Capel::MODULES[$module_id]['web_controllers']`:
-	 *   nombre de controlador -> ['perms' => [nombres de acción], 'access_filters' => [...]]
+	 *   controller name -> ['perms' => [action names], 'access_filters' => [...]]
 	 */
 	public function createWebControllerPermissions(string $module_id, string $module_desc,
 		array $web_controllers, ?Role $viewer, ?Role $editor, ?Role $admin, array &$all_items = [])
 	{
 		$auth = $this->authManager;
 		foreach ($web_controllers as $cname => $wc) {
-			// access_filters es el propio del controlador o, si no tiene, el heredado
-			// del módulo (ver ModuleControllerDefinition::accessFilters() en capel).
+			// access_filters is the controller's own or, if it has none, the one inherited
+			// from the module (see ModuleControllerDefinition::accessFilters() in capel).
 			$access_filters = $wc['access_filters'] ?? [];
-			// Mismo criterio que createControllerPermissions(): con varios valores a
-			// la vez (p.ej. ['module', 'rbac']), se construyen los permisos del que
-			// más crea, de menos a más: admin (nada) < module (un permiso de todo o
-			// nada) < rbac (los de `perms`). Comprobar 'module' antes que 'rbac'
-			// hacía que, con ambos presentes, nunca se llegara a crear ninguno de
-			// los de `perms`.
+			// Same criteria as createControllerPermissions(): with several values
+			// at once (e.g. ['module', 'rbac']), the permissions of the one that
+			// creates the most are built, from least to most: admin (nothing) <
+			// module (an all-or-nothing permission) < rbac (those of `perms`).
+			// Checking 'module' before 'rbac' meant that, with both present,
+			// none of those of `perms` were ever created.
 			if (!in_array('rbac', $access_filters, true)) {
 				if (in_array('module', $access_filters, true)) {
 					$permission = AuthHelper::createOrUpdatePermission(
 						"$module_id.$cname",
-						Yii::t('churros', '{module}: {controller}: acceso completo', [
+						Yii::t('churros', '{module}: {controller}: full access', [
 							'module' => $module_desc, 'controller' => $cname,
 						]), true, $auth);
 					unset($all_items[$permission->name]);
@@ -455,25 +555,25 @@ class AuthController extends Controller
 						}
 					}
 				}
-				// sin 'rbac' ni 'module', el acceso no pasa por permisos
-				// (admin/logged/username/...) y no hay nada más que crear.
+				// without 'rbac' or 'module', access does not go through permissions
+				// (admin/logged/username/...) and there is nothing else to create.
 				continue;
 			}
 			foreach ($wc['perms'] ?? [] as $perm_name) {
-				// Mismo criterio que createControllerPermissions(): un valor ya
-				// cualificado (con punto) es una referencia directa a un permiso
-				// mínimo, no el nombre de una acción; si coincide con un ROL que ya
-				// existe, esa acción ya está cubierta por él, no hay nada que crear
-				// (y crear un permiso con el mismo nombre chocaría de todos modos).
+				// Same criteria as createControllerPermissions(): an already
+				// qualified value (with a dot) is a direct reference to a minimum
+				// permission, not an action name; if it matches a ROLE that already
+				// exists, that action is already covered by it, nothing to create
+				// (and a permission with the same name would clash anyway).
 				if (str_contains($perm_name, '.')) {
 					if ($auth->getRole($perm_name) !== null) {
 						continue;
 					}
 					$full_perm_name = $perm_name;
 				} else {
-					// <modulo>.<Controlador>.<permiso>, igual que ModuleRbacAccessRule::
-					// matchCrudAction() para CRUD y que los permisos de Ceuta ya existentes
-					// (participantes.Ceuta.actuaciones, concedidos a mano hasta ahora).
+					// <module>.<Controller>.<permission>, just like ModuleRbacAccessRule::
+					// matchCrudAction() for CRUD and the already existing Ceuta
+					// permissions (participantes.Ceuta.actuaciones, granted by hand so far).
 					$full_perm_name = "$module_id.$cname.$perm_name";
 				}
 				$perm_desc = Yii::t('churros', '{module}: {controller}: {perm}', [
@@ -481,10 +581,10 @@ class AuthController extends Controller
 					'controller' => $cname,
 					'perm' => $perm_name,
 				]);
-				// Caso especial `index`: es la portada del módulo (el controlador
-				// `Site` la declara así), así que además de a $admin se cuelga de
-				// $viewer/$editor -antes lo hacía un bloque aparte en
-				// createControllerPermissions(), redundante con este mismo permiso-.
+				// Special case `index`: it is the module's front page (the `Site`
+				// controller declares it as such), so besides hanging from $admin it
+				// also hangs from $viewer/$editor -it used to be done by a separate
+				// block in createControllerPermissions(), redundant with this permission-.
 				$permission = AuthHelper::createOrUpdatePermission(
 					$full_perm_name, $perm_desc, true, $auth);
 				unset($all_items[$permission->name]);
@@ -509,22 +609,24 @@ class AuthController extends Controller
 	/**
 	 * Creates the permissions for a rbac module and shows the ones not used
 	 *
-	 * @param bool $deleteUnused si es true, en vez de solo listar los items no
-	 * usados (createdAt=0 y no regenerados en esta pasada) los borra -- pero
-	 * solo los que isItemInUse() diga que nadie tiene asignados, ni directa
-	 * ni heredado por un rol intermedio.
+	 * @param array $roles_to_create module roles to create. 'owner' adds the
+	 * '-owner' chain (viewer/editor/deleter -owner), totally independent from
+	 * the base one: no hierarchy among them nor links to the normal roles.
+	 * @param bool $deleteUnused if true, instead of only listing the unused
+	 * items (createdAt=0 and not regenerated in this pass) it deletes them --
+	 * but only those that isItemInUse() says nobody has assigned, neither
+	 * directly nor inherited through an intermediate role.
 	 */
 	public function createModuleRbacPermissions(string $module_id, array $module_info,
-		array $roles_to_create = [ 'viewer', 'creator', 'editor', 'full-editor', 'deleter', 'granter', 'admin' ],
-		bool $deleteUnused = false)
+		array $roles_to_create, bool $deleteUnused = false)
 	{
 		$auth = $this->authManager;
 		// keeps track of all module rules to keep default ones: createdAt=0
-		// marca los items que creó esta misma generación automática (ver
-		// AuthHelper::createOrUpdateRole()/createOrUpdatePermission() con
-		// $is_default=true); uno creado a mano (actionIndex(), permisosCeuta()...)
-		// tiene un timestamp real y no hay que listarlo aquí aunque esta pasada
-		// no lo toque, porque nunca es su trabajo tocarlo.
+		// marks the items that this very automatic generation created (see
+		// AuthHelper::createOrUpdateRole()/createOrUpdatePermission() with
+		// $is_default=true); one created by hand (actionIndex(), permisosCeuta()...)
+		// has a real timestamp and does not have to be listed here even if this
+		// pass does not touch it, because it is never its job to touch it.
 		$all_items = [];
 		foreach ($this->authManager->getRoles() as $role) {
 			if (StringHelper::startsWith($role->name, "$module_id.") && (int) $role->createdAt === 0) {
@@ -537,10 +639,13 @@ class AuthController extends Controller
 			}
 		}
 
+
 		$module_desc = mb_ucfirst($module_info['title'] ?? $module_id);
+		AuthHelper::createOrUpdateRole($module_id, $module_desc, true, $this->authManager);
+
 		if (in_array('viewer', $roles_to_create)) {
 			$viewer = AuthHelper::createOrUpdateRole("$module_id.viewer",
-				Yii::t('churros', '{module}:  visor/a ', ['module' => $module_desc]), true, $auth);
+				Yii::t('churros', '{module}:  viewer ', ['module' => $module_desc]), true, $auth);
 			unset($all_items[$viewer->name]);
 			AuthHelper::flushMessages($this->verbose);
 		} else {
@@ -548,7 +653,7 @@ class AuthController extends Controller
 		}
 		if (in_array('creator', $roles_to_create)) {
 			$creator = AuthHelper::createOrUpdateRole("$module_id.creator",
-				Yii::t('churros', '{module}:  creador/a', ['module' => $module_desc]), true, $auth);
+				Yii::t('churros', '{module}:  creator', ['module' => $module_desc]), true, $auth);
 			unset($all_items[$creator->name]);
 			AuthHelper::flushMessages($this->verbose);
 		} else {
@@ -556,7 +661,7 @@ class AuthController extends Controller
 		}
 		if (in_array('editor', $roles_to_create)) {
 			$editor = AuthHelper::createOrUpdateRole("$module_id.editor",
-				Yii::t('churros', '{module}:  editor/a', ['module' => $module_desc]), true, $auth);
+				Yii::t('churros', '{module}:  editor', ['module' => $module_desc]), true, $auth);
 			unset($all_items[$editor->name]);
 			AuthHelper::flushMessages($this->verbose);
 		} else {
@@ -564,7 +669,7 @@ class AuthController extends Controller
 		}
 		if (in_array('full-editor', $roles_to_create)) {
 			$full_editor = AuthHelper::createOrUpdateRole("$module_id.full-editor",
-				Yii::t('churros', '{module}:  editor/a total', ['module' => $module_desc]), true, $auth);
+				Yii::t('churros', '{module}:  full editor', ['module' => $module_desc]), true, $auth);
 			unset($all_items[$full_editor->name]);
 			AuthHelper::flushMessages($this->verbose);
 		} else {
@@ -572,7 +677,7 @@ class AuthController extends Controller
 		}
 		if (in_array('deleter', $roles_to_create)) {
 			$deleter = AuthHelper::createOrUpdateRole("$module_id.deleter",
-				Yii::t('churros', '{module}:  eliminador/a', ['module' => $module_desc]), true, $auth);
+				Yii::t('churros', '{module}:  deleter', ['module' => $module_desc]), true, $auth);
 			unset($all_items[$deleter->name]);
 			AuthHelper::flushMessages($this->verbose);
 		} else {
@@ -580,7 +685,7 @@ class AuthController extends Controller
 		}
 		if (in_array('granter', $roles_to_create)) {
 			$granter = AuthHelper::createOrUpdateRole("$module_id.granter",
-				Yii::t('churros', '{module}:  asignador/a de privilegios', ['module' => $module_desc]), true, $auth);
+				Yii::t('churros', '{module}:  granter', ['module' => $module_desc]), true, $auth);
 			unset($all_items[$granter->name]);
 			AuthHelper::flushMessages($this->verbose);
 		} else {
@@ -588,16 +693,44 @@ class AuthController extends Controller
 		}
 		if (in_array('admin', $roles_to_create)) {
 			$admin = AuthHelper::createOrUpdateRole("$module_id.admin",
-				Yii::t('churros', '{module}:  administrador/a', ['module' => $module_desc]), true, $auth);
+				Yii::t('churros', '{module}:  administrator', ['module' => $module_desc]), true, $auth);
 			unset($all_items[$admin->name]);
 			AuthHelper::flushMessages($this->verbose);
 		} else {
 			$admin = null;
 		}
 
+		// '-owner' chain: viewer/editor/deleter -owner, only if 'owner' is
+		// in $roles_to_create and its base role is going to be created. Totally
+		// INDEPENDENT from the base one: no hierarchy among the -owner nor any
+		// link with the normal roles, to grant over one's own records.
+		// There is no full-editor-owner.
+		$owner_roles = [];
+		if (in_array('owner', $roles_to_create)) {
+			foreach ([
+				'viewer' => [$viewer, 'viewer'],
+				'editor' => [$editor, 'editor'],
+				'deleter' => [$deleter, 'deleter'],
+			] as $owner_key => [$owner_base, $owner_desc]) {
+				$owner_roles[$owner_key] = null;
+				if ($owner_base === null) {
+					continue;
+				}
+				$owner = AuthHelper::createOrUpdateRole(
+					$owner_base->name . '-owner',
+					Yii::t('churros', '{module}:  {desc} (own records only)', [
+						'module' => $module_desc, 'desc' => $owner_desc,
+					]), true, $auth);
+				unset($all_items[$owner->name]);
+				AuthHelper::flushMessages($this->verbose);
+				$owner_roles[$owner_key] = $owner;
+			}
+		}
+
 		foreach ($module_info['controllers']??[] as $cname => $controller) {
 			$this->createControllerPermissions($module_id, $module_desc, $cname, $controller,
-				$viewer, $creator, $editor, $full_editor, $deleter, $granter, $admin, $all_items);
+				$viewer, $creator, $editor, $full_editor, $deleter, $granter, $admin,
+				$owner_roles, $all_items);
 			AuthHelper::flushMessages($this->verbose);
 		}
 		if (!empty($module_info['web_controllers'])) {
@@ -612,12 +745,12 @@ class AuthController extends Controller
 				foreach (array_keys($all_items) as $item_name) {
 					$enUso = $this->isItemInUse($item_name);
 					if ($enUso && empty($this->force)) {
-						echo "! No se borra '$item_name': sigue asignada a alguna usuaria (directa o por un rol intermedio).\n";
+						echo "! '$item_name' not deleted: still assigned to a user (directly or through an intermediate role).\n";
 						continue;
 					}
 					$item = $auth->getPermission($item_name) ?? $auth->getRole($item_name);
 					if ($item !== null && $auth->remove($item)) {
-						echo "- '$item_name' borrada" . ($enUso ? ' (forzada, estaba en uso).' : ' (no usada).') . "\n";
+						echo "- '$item_name' deleted" . ($enUso ? ' (forced, it was in use).' : ' (unused).') . "\n";
 					}
 				}
 			} else {
@@ -627,11 +760,11 @@ class AuthController extends Controller
 	}
 
 	/**
-	 * Si $itemName (rol o permiso) está asignado a alguna usuaria, directa o
-	 * indirectamente a través de los roles que lo tienen como hijo. Antes de
-	 * borrar un item "no usado" hay que comprobar esto: createdAt=0 y no
-	 * regenerado solo dice que el generador automático ya no lo reconoce,
-	 * no que nadie lo tenga concedido todavía.
+	 * Whether $itemName (role or permission) is assigned to some user, directly
+	 * or indirectly through the roles that have it as a child. Before deleting
+	 * an "unused" item this must be checked: createdAt=0 and not regenerated
+	 * only says that the automatic generator no longer recognizes it, not that
+	 * nobody still has it granted.
 	 */
 	protected function isItemInUse(string $itemName): bool
 	{
@@ -666,7 +799,8 @@ class AuthController extends Controller
 	}
 
 	/**
-	 * Lists all permissions, optionally by type
+	 * Lists all permissions and roles, optionally by type
+	 * @param string|null $type 'perm' or 'role'. Null lists both
 	 */
 	public function actionListAll(?string $type = null)
 	{
@@ -705,7 +839,7 @@ class AuthController extends Controller
 				$this->stdout($perm->name . "\n");
 			}
 		}
-		if ($type === null || $type === 'rol') {
+		if ($type === null || $type === 'role') {
 			$roles = $this->authManager->getItems(Item::TYPE_ROLE);
 			asort($roles);
 			$this->stdout("\n= ROLES\n");
@@ -752,7 +886,10 @@ class AuthController extends Controller
 	}
 
 	/**
-	 * Lists the roles and permissions of a role
+	 * Lists the tree of a role: its descendants, with the permissions
+	 * interleaved where they hang. A role already shown somewhere else in the
+	 * tree is not expanded again: '... shown above ...' is printed instead
+	 * of repeating its permissions.
 	 * @param string $role name
 	 */
 	public function actionListRole($role)
@@ -786,7 +923,7 @@ class AuthController extends Controller
 			} else if (empty($directRoleNames)) {
 				$this->stdout("- ". $role. "\n");
 			}
-		} else if ($this->format === 'details') {
+		} else if ($this->format === 'tree') {
 			$this->stdout("Role: {$roleItem->name}\n", Console::FG_YELLOW);
 			$this->stdout("Description: {$roleItem->description}\n\n");
 
@@ -795,49 +932,34 @@ class AuthController extends Controller
 				$this->stdout("Users (count: " . count($userIds) . "): " . implode(', ', $userIds) . "\n");
 			}
 
-			$this->stdout("\nDirect child roles:\n", Console::FG_CYAN);
-			if (!empty($directRoleNames)) {
-				foreach ($directRoleNames as $childRoleName) {
-					$this->stdout("  └─ {$childRoleName}\n", Console::FG_YELLOW);
-				}
-			} else {
-				$this->stdout("  (none)\n");
-			}
-
-			$visited = [];
-			$printRoleTree = function ($parentName, $depth) use ($auth, &$printRoleTree, &$visited) {
-				if (in_array($parentName, $visited, true)) {
-					return;
-				}
-				$visited[] = $parentName;
+			$visited = [$roleItem->name => true];
+			$printTree = function (string $parentName, int $depth) use ($auth, &$printTree, &$visited) {
 				$children = $auth->getChildren($parentName);
-				$childRoles = [];
-				foreach ($children as $name => $item) {
-					if ($item instanceof \yii\rbac\Role) {
-						$childRoles[] = $name;
+				uasort($children, fn($a, $b) => strcasecmp($a->name, $b->name));
+				$names = array_keys($children);
+				$last_index = count($names) - 1;
+				$indent = str_repeat('  ', $depth + 1);
+				foreach ($names as $index => $childName) {
+					$item = $children[$childName];
+					$glyph = $index === $last_index ? '└─ ' : '├─ ';
+					if ($item instanceof Role) {
+						if (isset($visited[$childName])) {
+							$this->stdout("{$indent}{$glyph}{$childName}  ... shown above ...\n", Console::FG_YELLOW);
+							continue;
+						}
+						$visited[$childName] = true;
+						$this->stdout("{$indent}{$glyph}{$childName}\n", Console::FG_YELLOW);
+						$printTree($childName, $depth + 1);
+					} else {
+						$this->stdout("{$indent}{$glyph}{$childName}\n", Console::FG_GREEN);
 					}
 				}
-				sort($childRoles);
-				foreach ($childRoles as $childName) {
-					$this->stdout(str_repeat('  ', $depth) . "  └─ {$childName}\n", Console::FG_YELLOW);
-					$printRoleTree($childName, $depth + 1);
-				}
 			};
-			$this->stdout("\nAll descendant roles:\n", Console::FG_CYAN);
-			foreach ($directRoleNames as $directChildName) {
-				$this->stdout("  └─ {$directChildName}\n", Console::FG_YELLOW);
-				$printRoleTree($directChildName, 2);
-			}
-
-			$this->stdout("\nPermissions:\n", Console::FG_GREEN);
-			$permissions = $auth->getPermissionsByRole($role, true, '', false);
-			if (empty($permissions)) {
+			$this->stdout("\nTree:\n", Console::FG_CYAN);
+			if (empty($auth->getChildren($roleItem->name))) {
 				$this->stdout("  (none)\n");
 			} else {
-				uksort($permissions, 'strcasecmp');
-				foreach ($permissions as $name => $permission) {
-					$this->stdout("  └─ {$name}\n", Console::FG_GREEN);
-				}
+				$printTree($roleItem->name, 0);
 			}
 			return 0;
 		} else {
@@ -931,10 +1053,10 @@ class AuthController extends Controller
 	}
 
 	/**
-	 * Borra los roles y permisos cuyo nombre coincide con una expresión LIKE
-	 * de SQL (p.ej. 'participantes.Participante.importar%'). Los que sigue
-	 * teniendo alguna usuaria asignada (directa o por un rol intermedio) no
-	 * se tocan, igual que en createModuleRbacPermissions().
+	 * Deletes the roles and permissions whose name matches a SQL LIKE
+	 * expression (e.g. 'participantes.Participante.importar%'). Those that
+	 * still have some user assigned (directly or through an intermediate role)
+	 * are not touched, just like in createModuleRbacPermissions().
 	 */
 	public function actionRemoveItemsLike(string $like): void
 	{
@@ -944,18 +1066,18 @@ class AuthController extends Controller
 			[':like' => $like]
 		)->queryColumn();
 		if (!$nombres) {
-			echo "No hay roles ni permisos que coincidan con '$like'.\n";
+			echo "No roles or permissions match '$like'.\n";
 			return;
 		}
 		foreach ($nombres as $nombre) {
 			$enUso = $this->isItemInUse($nombre);
 			if ($enUso && empty($this->force)) {
-				echo "! No se borra '$nombre': sigue asignada a alguna usuaria (directa o por un rol intermedio).\n";
+				echo "! '$nombre' not deleted: still assigned to a user (directly or through an intermediate role).\n";
 				continue;
 			}
 			$item = $auth->getPermission($nombre) ?? $auth->getRole($nombre);
 			if ($item !== null && $auth->remove($item)) {
-				echo "- '$nombre' borrado" . ($enUso ? ' (forzado, estaba en uso).' : '.') . "\n";
+				echo "- '$nombre' deleted" . ($enUso ? ' (forced, it was in use).' : '.') . "\n";
 			}
 		}
 		AuthHelper::flushMessages($this->verbose);
@@ -1017,18 +1139,6 @@ class AuthController extends Controller
 			}
 		}
 	}
-
-	/**
-	 * Lists all permissions (direct + inherited) for a given role
-	 * @param string $role the role name
-	 * @deprecated Use actionListRole with --format=details instead
-	 */
-	public function actionListRol($role)
-	{
-		$this->format = 'details';
-		return $this->actionListRole($role);
-	}
-
 
 	/**
 	 * Lists all roles assigned to a user (direct assignments only)
@@ -1137,17 +1247,17 @@ class AuthController extends Controller
 	}
 
 	/**
-	 * Lista las usuarias que tienen los roles/permisos indicados (separados
-	 * por comas), directa o heredadamente por roles intermedios.
-	 * @param string $items nombres separados por comas
-	 * @param string $mode all (todos, por defecto) o any (alguno)
+	 * Lists the users that have the indicated roles/permissions (separated by
+	 * commas), directly or inherited through intermediate roles.
+	 * @param string $items comma separated names
+	 * @param string $mode all (every one, default) or any (some)
 	 */
 	public function actionUsersWithPerms(string $items, string $mode = 'all'): void
 	{
 		$auth = $this->authManager;
 		$nombres = array_values(array_filter(array_map('trim', explode(',', $items))));
 		if (!$nombres) {
-			$this->stderr("Indica al menos un rol o permiso separado por comas.\n");
+			$this->stderr("Enter at least one role or permission, comma separated.\n");
 			return;
 		}
 		$mode = strtolower($mode) === 'any' ? 'any' : 'all';
@@ -1155,7 +1265,7 @@ class AuthController extends Controller
 		foreach ($nombres as $nombre) {
 			$item = $auth->getRole($nombre) ?? $auth->getPermission($nombre);
 			if ($item === null) {
-				$this->stderr("'$nombre' no existe como rol ni como permiso.\n");
+				$this->stderr("'$nombre' does not exist as a role or a permission.\n");
 				return;
 			}
 			$porItem[$nombre] = $this->userIdsWithItem($nombre);
@@ -1165,12 +1275,12 @@ class AuthController extends Controller
 			: array_intersect(...array_values($porItem));
 		$userIds = array_values(array_map('intval', $userIds));
 		if (!$userIds) {
-			$this->stdout("Ninguna usuaria tiene " . ($mode === 'any' ? 'alguno' : 'todos') . " de: " . implode(', ', $nombres) . ".\n");
+			$this->stdout("No user has " . ($mode === 'any' ? 'any' : 'all') . " of: " . implode(', ', $nombres) . ".\n");
 			return;
 		}
 		$userClass = Yii::$app->user->identityClass;
 		$usuarios = $userClass::find()->andWhere(['id' => $userIds])->all();
-		$this->stdout(count($usuarios) . " usuaria(s) con " . ($mode === 'any' ? 'alguno' : 'todos') . " de: " . implode(', ', $nombres) . ".\n", Console::FG_CYAN);
+		$this->stdout(count($usuarios) . " user(s) with " . ($mode === 'any' ? 'any' : 'all') . " of: " . implode(', ', $nombres) . ".\n", Console::FG_CYAN);
 		foreach ($usuarios as $u) {
 			$this->stdout("- {$u->username}", Console::FG_YELLOW);
 			if (isset($u->email)) {
@@ -1181,8 +1291,8 @@ class AuthController extends Controller
 	}
 
 	/**
-	 * Ids de usuarias con un item (rol o permiso), directa o heredadamente a
-	 * través de los roles que lo incluyen, transitivamente.
+	 * Ids of users with an item (role or permission), directly or inherited
+	 * through the roles that include it, transitively.
 	 * @return int[]
 	 */
 	protected function userIdsWithItem(string $itemName): array
@@ -1222,16 +1332,16 @@ class AuthController extends Controller
 
 	protected function displayRolesTree(array $roleNames, string $indent, $auth, array &$processedRoles, bool $show_perms, array &$shownPerms = []): void
 	{
-		// Árbol jerárquico real: cada rol se muestra anidado bajo cada uno de
-		// sus padres (hijos directos), aunque salga en varias ramas. Por eso
-		// $processedRoles ya no es "vistos globales" sino la rama actual,
-		// solo para cortar ciclos. Los permisos, en cambio, se muestran una
-		// sola vez en todo el árbol para no repetirlos bajo cada rol.
+		// Real hierarchical tree: each role is shown nested under each one of
+		// its parents (direct children), even if it appears in several branches.
+		// That is why $processedRoles is no longer "globally seen" but the
+		// current branch, only to cut cycles. Permissions, on the other hand,
+		// are shown only once in the whole tree so as not to repeat them under each role.
 		$roleNames = array_values(array_unique($roleNames));
 		sort($roleNames, SORT_NATURAL | SORT_FLAG_CASE);
 		foreach ($roleNames as $roleName) {
 			if (in_array($roleName, $processedRoles, true)) {
-				continue; // ciclo en esta rama
+				continue; // cycle in this branch
 			}
 			$role = $auth->getRole($roleName);
 			if (!$role) {

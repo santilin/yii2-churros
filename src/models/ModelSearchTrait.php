@@ -118,7 +118,7 @@ trait ModelSearchTrait
 				$add_distinct = true;
 			}
 			if ($sort_fldname != $attribute) {
-				/// @todo recursive tarea.paqueteTrabajo.proyecto.id
+				/// @todo recursive task.workPackage.project.id
 				$related_model_class = $relation['modelClass'];
 				if (!isset($provider->sort->attributes[$attribute])) {
 					$related_model_search_class = $relation['searchClass']
@@ -403,10 +403,10 @@ trait ModelSearchTrait
 				$relation = self::$relations[$relation_name]??null;
 			}
 			if ($relation) {
-				// Hay tres tipos de campos relacionados:
-				// 1. El nombre de la relación (productora, attribute = '' )
-				// 2. Relación y campo: Productora.nombre
-				// 3. La clave foranea: productura_id
+				// There are three kinds of related fields:
+				// 1. The relation name (productora, attribute = '' )
+				// 2. Relation and field: Productora.nombre
+				// 3. The foreign key: productura_id
 				$table_alias = "as_$relation_name";
 				// Activequery removes duplicate joins (added also in addSort)
 				$query->joinWith("$relation_name $table_alias");

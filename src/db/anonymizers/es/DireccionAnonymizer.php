@@ -3,11 +3,11 @@
 namespace santilin\churros\db\anonymizers\es;
 
 /*
- * Ejemplo de uso:
- * $anonymizer = new DireccionAnonymizer('tu-clave-secreta');
+ * Example usage:
+ * $anonymizer = new DireccionAnonymizer('your-secret-key');
  * $original = 'Calle de la Constitución, 23 2ºB';
  * echo "Original: $original\n";
- * echo "Anonimizada: " . $anonymizer->anonymize($original) . "\n";
+ * echo "Anonymized: " . $anonymizer->anonymize($original) . "\n";
  */
 
 class DireccionAnonymizer
@@ -18,12 +18,12 @@ class DireccionAnonymizer
 
     public function __construct(string $secretKey) {
         $this->secretKey = $secretKey;
-        // Todas las vocales relevantes en español (mayúsculas, minúsculas, acentuadas y ü)
+        // All relevant Spanish vowels (uppercase, lowercase, accented and ü)
         $this->vowels = [
             'a', 'e', 'i', 'o', 'u', 'á', 'é', 'í', 'ó', 'ú', 'ü',
             'A', 'E', 'I', 'O', 'U', 'Á', 'É', 'Í', 'Ó', 'Ú', 'Ü'
         ];
-        // Consonantes españolas (mayúsculas y minúsculas)
+        // Spanish consonants (uppercase and lowercase)
         $baseConsonants = [
             'b', 'c', 'd', 'f', 'g', 'h', 'j', 'k', 'l', 'm', 'n',
             'ñ', 'p', 'q', 'r', 's', 't', 'v', 'w', 'x', 'y', 'z'
@@ -35,14 +35,14 @@ class DireccionAnonymizer
     {
         if (empty($direccion)) {
             return $direccion;
-        }        // Separa por espacios, pero mantiene números y signos juntos a palabras
+        }        // Split by spaces, but keep numbers and signs next to words
         $words = preg_split('/(\s+)/u', $direccion, -1, PREG_SPLIT_DELIM_CAPTURE);
         $anonymized = array_map([$this, 'anonymizeWord'], $words);
         return implode('', $anonymized);
     }
 
     private function anonymizeWord(string $word): string {
-        // Si la palabra es solo espacios, retorna igual
+        // If the word is only spaces, return it unchanged
         if (preg_match('/^\s+$/u', $word)) {
             return $word;
         }
@@ -54,7 +54,7 @@ class DireccionAnonymizer
             $anonymizedLetters[] = $this->anonymizeLetter($letter, $i, $word);
         }
 
-        // Asegura al menos una vocal si hay alguna letra
+        // Ensure at least one vowel if there is any letter
         if ($this->hasLetters($letters) && !$this->containsVowel($anonymizedLetters)) {
             $position = $this->getDeterministicPosition($word);
             $anonymizedLetters[$position] = $this->getDeterministicVowel($word, $position);
@@ -64,7 +64,7 @@ class DireccionAnonymizer
     }
 
     private function anonymizeLetter(string $letter, int $index, string $word): string {
-        // Solo anonimiza letras Unicode
+        // Only anonymize Unicode letters
         if (!$this->isUnicodeLetter($letter)) {
             return $letter;
         }

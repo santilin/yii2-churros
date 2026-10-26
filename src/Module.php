@@ -19,19 +19,19 @@ class Module extends \yii\base\Module
 	}
 
 	/**
-	 * Expone los controladores de consola de churros vía controllerMap en vez
-	 * de dejar que Yii los autodescubra escaneando el directorio, y se salta
-	 * los que la propia aplicación ya extiende bajo su propio
-	 * controllerNamespace (p.ej. app\console\controllers\AuthController
-	 * extends santilin\churros\console\controllers\AuthController) -- si no,
-	 * aparecen duplicados en `./yii help` bajo `auth/*` y `churros/auth/*`
-	 * con el mismo código, y si la app sobreescribe alguna acción (como
-	 * actionUserPerms), la versión de churros queda desincronizada y sigue
-	 * siendo invocable con el nombre viejo.
+	 * Exposes the churros console controllers via controllerMap instead of
+	 * letting Yii auto-discover them by scanning the directory, and skips
+	 * those the application itself already extends under its own
+	 * controllerNamespace (e.g. app\console\controllers\AuthController
+	 * extends santilin\churros\console\controllers\AuthController) -- otherwise,
+	 * they appear duplicated in `./yii help` under `auth/*` and `churros/auth/*`
+	 * with the same code, and if the app overrides any action (such as
+	 * actionUserPerms), the churros version gets out of sync and remains
+	 * invocable under the old name.
 	 *
-	 * Solo se excluye cuando hay relación de herencia real, no por mera
-	 * coincidencia de nombre de clase (p.ej. la app puede tener su propio
-	 * DevelController sin relación con el de churros: ese no se excluye).
+	 * A controller is only skipped when there is a real inheritance
+	 * relationship, not on a mere class name match (e.g. the app may have its
+	 * own DevelController unrelated to the churros one: that one is not skipped).
 	 */
 	protected function registerConsoleControllers(): void
 	{
@@ -53,9 +53,9 @@ class Module extends \yii\base\Module
 			$id = Inflector::camel2id(substr($className, 0, -10));
 			$this->controllerMap[$id] = $churrosClass;
 		}
-		// Con controllerMap ya poblado explícitamente, que Yii no escanee
-		// además el directorio por su cuenta (volvería a listar, con el
-		// mismo id, justo los que acabamos de decidir exponer u ocultar).
+		// With controllerMap already explicitly populated, keep Yii from also
+		// scanning the directory on its own (it would list again, under the
+		// same id, exactly those we just decided to expose or hide).
 		$this->setControllerPath('@runtime/.churros-console-controllers-hidden');
 	}
 

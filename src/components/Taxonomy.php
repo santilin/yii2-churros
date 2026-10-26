@@ -139,7 +139,7 @@ class Taxonomy
 	}
 
 	/**
-	 * Código padre (sin el último segmento). '' si es de primer nivel.
+	 * Parent code (without the last segment). '' if it is first level.
 	 */
 	static public function parentCode(string $value, array $taxonomy): string
 	{
@@ -149,7 +149,7 @@ class Taxonomy
 	}
 
 	/**
-	 * Último segmento del código (número de bloque).
+	 * Last segment of the code (block number).
 	 */
 	static public function blockNumber(string $value, array $taxonomy): string
 	{
@@ -159,8 +159,8 @@ class Taxonomy
 	}
 
 	/**
-	 * True si $code está bajo $ancestor (comparando por segmentos).
-	 * Sirve para impedir mover un nodo dentro de su propio subárbol.
+	 * True if $code is under $ancestor (compared by segments).
+	 * Used to prevent moving a node inside its own subtree.
 	 */
 	static public function isDescendantOf(string $code, string $ancestor, array $taxonomy): bool
 	{
@@ -173,9 +173,9 @@ class Taxonomy
 	}
 
 	/**
-	 * Nuevo código al mover (reparentar) un nodo bajo otro padre,
-	 * conservando su último segmento. Devuelve '' si es inválido
-	 * (moverse a sí mismo o a un descendiente).
+	 * New code when moving (reparenting) a node under another parent,
+	 * keeping its last segment. Returns '' if it is invalid
+	 * (moving to itself or to a descendant).
 	 */
 	static public function reparentCode(string $code, string $newParent, array $taxonomy): string
 	{
@@ -195,8 +195,8 @@ class Taxonomy
 	}
 
 	/**
-	 * Nuevo código al renumerar un nodo dentro de su mismo padre.
-	 * Devuelve '' si no cabe en el ancho de la máscara.
+	 * New code when renumbering a node within its same parent.
+	 * Returns '' if it does not fit in the mask width.
 	 */
 	static public function renumberCode(string $code, $newNumber, array $taxonomy): string
 	{
@@ -211,7 +211,7 @@ class Taxonomy
 	}
 
 	/**
-	 * True si el segmento cabe en el ancho del grupo de la máscara indicado.
+	 * True if the segment fits in the width of the indicated mask group.
 	 */
 	static private function fitsMaskWidth(string $segment, int $level, array $taxonomy): bool
 	{
@@ -224,8 +224,8 @@ class Taxonomy
 	}
 
 	/**
-	 * Siguiente número de bloque libre bajo un padre, según los códigos
-	 * hermanos existentes y el ancho de la máscara. '' si no cabe.
+	 * Next free block number under a parent, according to the existing
+	 * sibling codes and the mask width. '' if it does not fit.
 	 */
 	static public function nextChildCode(string $parent, array $existingCodes, array $taxonomy): string
 	{

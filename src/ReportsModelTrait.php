@@ -191,7 +191,7 @@ trait ReportsModelTrait
 		$orderby = [];
 		$tablename = str_replace(['{','}','%'], '', $model->tableName() );
 
-		// Añadir join y from de los report_columns
+		// Add join and from of the report_columns
 		foreach( $columns as $kc => $column_def) {
 			$colname = $column_def['name'];
 			if (!isset($column_def['name'])) {
@@ -201,7 +201,7 @@ trait ReportsModelTrait
 			list($select_field_alias, $select_field) = $this->aliasesAndJoins($model,
 				$tablename, $column_def['attribute'], $colname, $joins);
 			$selects[$select_field_alias] = $select_field;
- 			// group by solo de los pre_summary, los otros grupos los maneja ReportView
+ 			// group by only for the pre_summary columns, the other groups are handled by ReportView
  			if (count($this->pre_summary_columns)
 				&& !in_array($column_def['name'], $this->pre_summary_columns)) {
 				$groups[] = $select_field_alias;
@@ -209,7 +209,7 @@ trait ReportsModelTrait
  			$columns[$kc]['attribute'] = $select_field_alias;
 		}
 
-		// Añadir join y where de los report_filters
+		// Add join and where of the report_filters
 		foreach( $this->report_filters as $filter_def) {
 			$colname = $filter_def['name'];
 			if (!isset($all_columns[$colname])) {
@@ -222,7 +222,7 @@ trait ReportsModelTrait
 			$model->reportFilterWhere($query, $select_field, $filter_def);
 		}
 
-		// Añadir join y orderby de los report_sorting
+		// Add join and orderby of the report_sorting
 		foreach( $this->report_sorting as $sorting_def) {
 			$colname = $sorting_def['name'];
 			if (!isset($all_columns[$colname])) {
@@ -252,7 +252,7 @@ trait ReportsModelTrait
 		return $provider;
     }
 
-	/* Añade a $joins todas las joins necesarias para este campo relacionado, multinivel */
+	/* Adds to $joins all the joins needed for this related, multi level field */
 	protected function aliasesAndJoins($left_model, string $tablename,
 		string $attribute, string $colname, array &$joins): array
 	{
@@ -285,7 +285,7 @@ trait ReportsModelTrait
 					if ($full_relation_name != $relation_table) {
 						$aliased_full_table_name = str_replace('.','_',$full_table_name);
 						$on_expression = str_replace($relation_table.'.', $aliased_full_relation_name.'.', $relation['join']); // the right part of the join
-						if (count($joins) > 0) { // último join añadido
+						if (count($joins) > 0) { // last added join
 							$join_alias = array_keys($joins)[count($joins)-1];
 							$join_table = $joins[$join_alias][0];
 							$on_expression = str_replace("$join_table.", "$join_alias.", $on_expression); // The left part of the join
@@ -343,7 +343,7 @@ trait ReportsModelTrait
 					$column_def['format'] = $allColumns[$colname]['format'];
 				}
 			} else if (substr($column_def_format, 0, 6) == 'class:') {
-				if (!isset($column_def['contentOptions'])) { // Ojo, sum_expedientes_gastos_minutos tiene contradicción de clases
+				if (!isset($column_def['contentOptions'])) { // note: sum_expedientes_gastos_minutos has conflicting classes
 					$column_def['contentOptions'] = [];
 				}
 				Html::addCssClass($column_def['contentOptions'],
@@ -363,7 +363,7 @@ trait ReportsModelTrait
 			unset($column_to_add['pre_summary']);
 			$columns[$colname] = $column_to_add;
 		}
-		// Añado también las columnas del report_sorting para que estén disponibles en el grid para los grupos
+		// Also add the report_sorting columns so they are available in the grid for the groups
 		foreach ($this->report_sorting as $column_def) {
 			$colname = $column_def['name'];
 			if (!isset($columns[$colname])) {

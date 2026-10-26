@@ -6,41 +6,42 @@ use yii\helpers\Html;
 use yii\web\View;
 
 /**
- * Una fecha que se puede anular.
+ * A date that can be deactivated.
  *
- * Muestra una de dos cosas, según el campo tenga valor o no:
- *  - con fecha: el control de fecha de `QuickDateTimeInput`, para editarla, y un botón
- *    que la anula
- *  - sin fecha: el mensaje que ponga la aplicación en `inactiveMessage` y un botón que
- *    la vuelve a activar, dejando el control vacío y listo para escribir
+ * Shows one of two things, depending on whether the field has a value or not:
+ *  - with date: the date control from `QuickDateTimeInput`, to edit it, and a button
+ *    that deactivates it
+ *  - without date: the message the application sets in `inactiveMessage` and a button
+ *    that reactivates it, leaving the control empty and ready for typing
  *
- * Las dos caras se pintan siempre y se cambia entre ellas con javascript, así que
- * anular y volver a activar no recarga la página. Lo que se guarda es el campo oculto
- * que ya mantiene `QuickDateTimeInput`: al anular se vacía, y con eso el modelo recibe
- * null.
+ * Both faces are always rendered and switched between with javascript, so
+ * deactivating and reactivating does not reload the page. What gets saved is the
+ * hidden field that `QuickDateTimeInput` already keeps: on deactivation it is
+ * emptied, and with that the model receives null.
  *
- * Sirve para date, datetime y time: el tipo lo deduce la clase padre del `format`.
+ * Works for date, datetime and time: the type is deduced by the parent class from
+ * the `format`.
  *
  *     $form->field($model, 'fin_ejecucion')->widget(DateTimeActivatableInput::class, [
  *         'format' => 'd/m/Y',
- *         'inactiveMessage' => 'Sin fecha de fin: el proyecto sigue abierto',
+ *         'inactiveMessage' => 'No end date: the project is still open',
  *     ]);
  */
 class DateTimeActivatableInput extends QuickDateTimeInput
 {
-	/** @var string el mensaje que se ve cuando la fecha está anulada */
+	/** @var string the message shown when the date is deactivated */
 	public $inactiveMessage;
 
-	/** @var string el botón que anula la fecha */
+	/** @var string the button that deactivates the date */
 	public $deactivateLabel;
 
-	/** @var string el botón que la vuelve a activar */
+	/** @var string the button that reactivates it */
 	public $activateLabel;
 
-	/** @var array opciones html de los dos botones */
+	/** @var array html options for the two buttons */
 	public $buttonOptions = [ 'class' => 'btn btn-outline-secondary' ];
 
-	/** @var array opciones html del mensaje */
+	/** @var array html options for the message */
 	public $messageOptions = [ 'class' => 'form-control-plaintext text-muted' ];
 
 	public function init()
@@ -58,9 +59,9 @@ class DateTimeActivatableInput extends QuickDateTimeInput
 	}
 
 	/**
-	 * Al hueco que pinta la clase padre —el oculto con el valor y el control con
-	 * máscara— se le añaden el botón de anular, el mensaje y el botón de activar. Los
-	 * dos estados salen en el html y se enseña uno u otro.
+	 * To the markup the parent class renders —the hidden one with the value and the
+	 * masked control— the deactivate button, the message and the activate button are
+	 * added. Both states end up in the html and one or the other is shown.
 	 */
 	protected function renderInputHtml($type)
 	{
@@ -84,7 +85,7 @@ class DateTimeActivatableInput extends QuickDateTimeInput
 		return $input . $mensaje;
 	}
 
-	/** Si el campo del modelo está vacío, o sea, la fecha anulada */
+	/** Whether the model field is empty, i.e. the date is deactivated */
 	protected function isEmptyValue(): bool
 	{
 		if (!$this->hasModel()) {
@@ -97,7 +98,7 @@ class DateTimeActivatableInput extends QuickDateTimeInput
 	{
 		parent::registerClientScript();
 		$id = $this->options['id'];
-		// el oculto que guarda el valor de verdad; el visible con mascara es `$id`
+		// the hidden one that holds the real value; the visible masked one is `$id`
 		$hidden_id = $this->orig_id;
 		$js = <<<JS
 $('#$id-deactivate').on('click', function() {

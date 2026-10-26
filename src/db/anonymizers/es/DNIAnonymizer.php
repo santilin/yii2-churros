@@ -16,25 +16,25 @@ namespace santilin\churros\db\anonymizers\es;
 */
 
 /**
- * Anonimización de DNI/NIE/CIF con valores únicos.
+ * DNI/NIE/CIF anonymization with unique values.
  *
- * El shuffle de dígitos es determinista pero no inyectivo: el espacio de
- * salida (ocho dígitos con letra de control) es menor que el de las entradas
- * reales, y con miles de DNIs distintos aparecen colisiones (dos DNIs
- * distintos producirían el mismo anonimizado). Cuando ese valor participa en
- * una clave UNIQUE de la tabla (p.ej. (ano, semana, nif)) el UPDATE de la
- * segunda fila chocaría con la clave y abortaría la anonimización.
+ * The digit shuffle is deterministic but not injective: the output
+ * space (eight digits with a control letter) is smaller than that of the real
+ * inputs, and with thousands of different DNIs collisions appear (two different
+ * DNIs would produce the same anonymized value). When that value takes part in
+ * a UNIQUE key of the table (e.g. (ano, semana, nif)) the UPDATE of the
+ * second row would clash with the key and abort the anonymization.
  *
- * Esta clase garantiza que dos originales distintos nunca obtienen el mismo
- * anonimizado, conservando las demás propiedades: mismo original -> siempre
- * el mismo anonimizado (también entre tablas, por lo que las claves ajenas
- * que referencian el DNI se mantienen coherentes), porque el mapeo se
- * comparte en todo el proceso de anonimización (una sola pasada por base y
- * tabla). Ante una colisión (incluida una colisión con uno de los valores de
- * EXCEPTIONS) el original que llega después se anonimiza con un salt
- * distinto (#1, #2, ...) hasta obtener un valor libre, siempre en formato
- * DNI/NIE/CIF válido. El resultado depende del orden de aparición, que en
- * encrypt-dbs es estable entre ejecuciones.
+ * This class guarantees that two different originals never obtain the same
+ * anonymized value, keeping the other properties: same original -> always
+ * the same anonymized value (also across tables, so the foreign keys
+ * referencing the DNI stay consistent), because the mapping is
+ * shared across the whole anonymization process (a single pass per database and
+ * table). On a collision (including a collision with one of the EXCEPTIONS
+ * values) the original that arrives later is anonymized with a different
+ * salt (#1, #2, ...) until a free value is obtained, always in a valid
+ * DNI/NIE/CIF format. The result depends on the order of appearance, which in
+ * encrypt-dbs is stable across runs.
  */
 class DNIAnonymizer
 {
@@ -43,15 +43,15 @@ class DNIAnonymizer
 	const CIF_LETTERS = 'ABCDEFGHJKLMNPQRSUVW';
 
 	/**
-	 * Valores que se devuelven sin anonimizar (no son DNIs reales, o son
-	 * DNIs de prueba/placeholder ya conocidos) y que nunca se generan como
-	 * salida para otro original distinto.
+	 * Values returned without anonymization (they are not real DNIs, or they are
+	 * known test/placeholder DNIs) and that are never generated as
+	 * output for another different original.
 	 */
 	const EXCEPTIONS = ['ADMIN', '00000000A', '59152066E'];
 
 	/**
-	 * Por secretKey: mapeo original -> anonimizado y el inverso (anonimizado
-	 * -> original), para detectar y resolver colisiones.
+	 * Per secretKey: original -> anonymized mapping and the reverse (anonymized
+	 * -> original), to detect and resolve collisions.
 	 * @var array<string,array{forward:array<string,string>,reverse:array<string,string>}>
 	 */
 	private static array $known = [];
@@ -69,7 +69,7 @@ class DNIAnonymizer
 			return $originalID;
 		}
 		if (in_array(strtoupper($originalID), self::EXCEPTIONS, true)) {
-			return $originalID; // tal cual, sin normalizar mayúsculas/minúsculas
+			return $originalID; // as is, without normalizing case
 		}
 		$originalID = strtoupper($originalID);
 
@@ -85,10 +85,10 @@ class DNIAnonymizer
 		$prevCandidate = null;
 		do {
 			$candidate = $this->generateCandidate($originalID, $suffix);
-			// Si el shuffle es insensible al salt para esta entrada (p.ej.
-			// '00000000A', cuyos dígitos son todos iguales: el shuffle no
-			// cambia nada y la salida es siempre la misma), se genera un
-			// candidato a partir de un hash del original.
+			// If the shuffle is insensitive to the salt for this input (e.g.
+			// '00000000A', whose digits are all equal: the shuffle changes
+			// nothing and the output is always the same), a candidate is
+			// generated from a hash of the original.
 			if ($candidate === $prevCandidate) {
 				$candidate = $this->hashFallbackDNI($originalID, $suffix);
 			}
@@ -108,8 +108,8 @@ class DNIAnonymizer
 	}
 
 	/**
-	 * Genera un candidato completo (con letra de control) para $originalID;
-	 * $suffix distingue reintentos ante una colisión, variando el shuffle.
+	 * Generates a full candidate (with control letter) for $originalID;
+	 * $suffix distinguishes retries on a collision, varying the shuffle.
 	 */
 	private function generateCandidate(string $originalID, int $suffix): string
 	{
@@ -122,9 +122,9 @@ class DNIAnonymizer
 	}
 
 	/**
-	 * Genera un DNI/NIE/CIF válido a partir de un hash, para entradas donde
-	 * el shuffle no puede producir salidas distintas variando el suffix
-	 * (todos los dígitos son iguales).
+	 * Generates a valid DNI/NIE/CIF from a hash, for inputs where
+	 * the shuffle cannot produce different outputs by varying the suffix
+	 * (all digits are equal).
 	 */
 	private function hashFallbackDNI(string $originalID, int $suffix): string
 	{
@@ -139,7 +139,7 @@ class DNIAnonymizer
 			$numeric = hexdec(substr(hash('sha256', $this->secretKey . '|' . $originalID . '|' . $suffix), 0, 7)) % 10000000;
 			return $firstChar . str_pad((string) $numeric, 7, '0', STR_PAD_LEFT);
 		}
-		// DNI estándar
+		// Standard DNI
 		$numeric = hexdec(substr(hash('sha256', $this->secretKey . '|' . $originalID . '|' . $suffix), 0, 8)) % 100000000;
 		$body = str_pad((string) $numeric, 8, '0', STR_PAD_LEFT);
 		$remainder = (int) $body % 23;

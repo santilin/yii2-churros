@@ -3,27 +3,27 @@
 namespace santilin\churros\db\anonymizers;
 
 /*
- * Ejemplo de uso:
- * $anonymizer = new PassportAnonymizer('tu-clave-secreta');
+ * Example usage:
+ * $anonymizer = new PassportAnonymizer('your-secret-key');
  * echo $anonymizer->anonymize('PA1234567') . "\n";
  */
 
 /**
- * Anonimización de números de pasaporte con valores únicos.
+ * Anonymization of passport numbers with unique values.
  *
- * DocumentAnonymizer cifra carácter a carácter de forma determinista, pero no
- * garantiza inyectividad: dos originales distintos podrían, en teoría,
- * producir el mismo anonimizado y chocar con una clave UNIQUE. Esta clase
- * añade esa garantía, igual que DNIAnonymizer: mismo original -> siempre el
- * mismo anonimizado (estable entre tablas si se usa el mismo secret), y ante
- * una colisión se reintenta con un salt distinto (#1, #2...) hasta obtener un
- * valor libre.
+ * DocumentAnonymizer encrypts character by character in a deterministic way, but
+ * it does not guarantee injectivity: two different originals could, in theory,
+ * produce the same anonymized value and clash with a UNIQUE key. This class adds
+ * that guarantee, just like DNIAnonymizer: same original -> always the same
+ * anonymized value (stable across tables if the same secret is used), and on a
+ * collision it retries with a different salt (#1, #2...) until a free value is
+ * obtained.
  */
 class PassportAnonymizer
 {
 	/**
-	 * Por secretKey: mapeo original -> anonimizado y el inverso, para
-	 * detectar y resolver colisiones.
+	 * Per secretKey: original -> anonymized mapping and the reverse one, to
+	 * detect and resolve collisions.
 	 * @var array<string,array{forward:array<string,string>,reverse:array<string,string>}>
 	 */
 	private static array $known = [];

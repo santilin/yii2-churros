@@ -324,18 +324,19 @@ trait ControllerTrait
 	}
 
 	/**
-	 * $controllerPermissions se declara también en controladores que NO son
-	 * rbac (p.ej. access_filters: ['module']), con nombres de permiso que no
-	 * tienen por qué estar dados de alta como auth_item para esa usuaria (su
-	 * acceso real viene del rol desnudo del módulo, no de ese permiso). El
-	 * `can()` real se probó en f935bff3 y se revirtió el mismo día en
-	 * ce9ca912 ("reverted checking user permissions in ControllerTrait"): con
-	 * él, a usuarias con acceso legítimo se les ocultaban botones/migas de pan
-	 * en cuanto su rol no coincidía exactamente con el nombre declarado. Por
-	 * eso esto es solo informativo para pintar UI (ver resolvePermissions()),
-	 * nunca control de acceso — ese lo hace AccessControl/ModuleRbacAccessRule
-	 * en el propio behaviors(), o un `Yii::$app->user->can()` explícito en la
-	 * acción. No reactivar el check de abajo sin resolver antes ese desajuste.
+	 * $controllerPermissions is also declared in controllers that are NOT
+	 * rbac (e.g. access_filters: ['module']), with permission names that do
+	 * not need to be registered as auth_item for that user (their real access
+	 * comes from the bare module role, not from that permission). The real
+	 * `can()` was tried in f935bff3 and reverted the same day in
+	 * ce9ca912 ("reverted checking user permissions in ControllerTrait"): with
+	 * it, users with legitimate access had buttons/breadcrumbs hidden as soon
+	 * as their role did not exactly match the declared name. That is why this
+	 * is only informative for rendering UI (see resolvePermissions()),
+	 * never access control — that is done by AccessControl/ModuleRbacAccessRule
+	 * in the behaviors() itself, or by an explicit `Yii::$app->user->can()` in
+	 * the action. Do not reactivate the check below without resolving that
+	 * mismatch first.
 	 */
 	protected function userPermissions(): array|bool
 	{

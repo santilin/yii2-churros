@@ -77,13 +77,13 @@ abstract class CrudReadOnlyController extends \yii\web\Controller
 
 	/**
 	 * Lists all models.
-	 * @todo Revisar, no es exactamente MVC
+	 * @todo Review, it is not exactly MVC
 	 * @return mixed
 	 */
 	public function actionIndex()
 	{
 		$params = $this->request->queryParams;
-		$searchModel = $this->createSearchModel();
+  		$searchModel = $this->createSearchModel(null, $params);
 		if (!$searchModel) {
 			throw new NotFoundHttpException("Unable to create a searchModel for $this->id crud controller");
 		}
@@ -121,9 +121,9 @@ abstract class CrudReadOnlyController extends \yii\web\Controller
 								 $previous_context = null, ?string $search_model_class = null)
 	{
 		$this->action = $this->createAction('index');
-		// Tiene preferencia la clase más específica
+		// The most specific class takes precedence
 		if ($search_model_class && class_exists("$search_model_class{$view}_Search")) {
-			$detail = $this->createSearchModel("$search_model_class{$view}_Search");
+			$detail = $this->createSearchModel("$search_model_class{$view}_Search", $params);
 		} else if ($search_model_class && class_exists("{$search_model_class}_Search")) {
 			$detail = $this->createSearchModel("{$search_model_class}_Search");
 		} else {
@@ -133,11 +133,11 @@ abstract class CrudReadOnlyController extends \yii\web\Controller
 			throw new \Exception("No {$search_model_class}_Search nor $search_model_class{$view}_Search class found in " . __METHOD__);
 		}
 		$this->masterModel = $master;
-		// Los filtros de la rejilla viajan en la url bajo el nombre de formulario del
-		// modelo de búsqueda. En una rejilla embebida $params lo fabrica quien la pinta,
-		// no es queryParams, así que hay que recogerlos de la petición para que el
-		// load() de search() los vea. La ordenación y la paginación no lo necesitan:
-		// Sort y Pagination leen la petición por su cuenta.
+		// The grid filters travel in the url under the form name of the
+		// search model. In an embedded grid $params is built by whoever renders
+		// it, it is not queryParams, so they must be picked up from the request
+		// so that search() load() sees them. Sorting and pagination do not need
+		// them: Sort and Pagination read the request on their own.
 		$form_name = $detail->formName();
 		if (!isset($params[$form_name])) {
 			$request = Yii::$app->getRequest();
@@ -466,36 +466,7 @@ abstract class CrudReadOnlyController extends \yii\web\Controller
 		}
 	}
 
-	// Ajax for the MutiColumnTypeAhead control
-	public function actionMultiAutocomplete(string $search, string $fields, int $page = 1,
-											int $per_page = 12, string $scopes = '')
-	{
-		\Yii::$app->response->format = \yii\web\Response::FORMAT_JSON;
-		$searchModel = $this->createSearchModel();
-		$conds = [];
-		$array_fields = explode(',',$fields);
-		foreach ($array_fields as $field) {
-			$conds[$field] = $search;
-		}
-		$indexParams = [
-			'or' => true,
-			 $searchModel->formName() => $conds
-		];
-		if (!empty($scopes)) {
-			$indexParams['_search_scopes'] = explode(',', $scopes);
-		}
-		$dataProvider = $searchModel->search($indexParams);
-		$dataProvider->query
-				->select($array_fields)
-				->limit($page, $per_page);
-// 				->asArray();
-		if ($dataProvider->getTotalCount()) {
-			return $dataProvider->getModels();
-		}
-		return [];
-	}
-
-	public function actionHandyFieldValues(string $id, string $field)
+	public function actionFieldValues(string $id, string $field)
 	{
 		\Yii::$app->response->format = \yii\web\Response::FORMAT_JSON;
 		$model = $this->findModel($id, 'view');
@@ -589,6 +560,35 @@ abstract class CrudReadOnlyController extends \yii\web\Controller
 			}
 			return $ret;
 		}
+	}
+
+	// Ajax for the MutiColumnTypeAhead control
+	public function actionMultiAutocomplete(string $search, string $fields, int $page = 1,
+											int $per_page = 12, string $scopes = '')
+	{
+		\Yii::$app->response->format = \yii\web\Response::FORMAT_JSON;
+		$searchModel = $this->createSearchModel();
+		$conds = [];
+		$array_fields = explode(',',$fields);
+		foreach ($array_fields as $field) {
+			$conds[$field] = $search;
+		}
+		$indexParams = [
+			'or' => true,
+			 $searchModel->formName() => $conds
+		];
+		if (!empty($scopes)) {
+			$indexParams['_search_scopes'] = explode(',', $scopes);
+		}
+		$dataProvider = $searchModel->search($indexParams);
+		$dataProvider->query
+				->select($array_fields)
+				->limit($page, $per_page);
+// 				->asArray();
+		if ($dataProvider->getTotalCount()) {
+			return $dataProvider->getModels();
+		}
+		return [];
 	}
 
 	public function getMasterModel()

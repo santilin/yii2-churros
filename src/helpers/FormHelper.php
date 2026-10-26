@@ -933,14 +933,14 @@ ajax;
 	}
 
 	/**
-	 * Núcleo que renderiza un array de registros como tabla Bootstrap con
-	 * los formatos de Yii2 y, opcionalmente, una columna de acciones con botones.
+	 * Core that renders an array of records as a Bootstrap table with
+	 * Yii2 formats and, optionally, an actions column with buttons.
 	 *
-	 * @param array $data Filas de la tabla: array de arrays asociativos.
-	 * @param array $columnFormats Clave = nombre columna, valor = tipo de formatter (p.ej. 'text', 'date', 'raw').
-	 * @param array $buttons Botones por fila (ver arrayAsTableWithButtons()).
-	 * @param array $options Opciones de la tabla (ver arrayAsTableWithButtons()).
-	 * @return string HTML de la tabla.
+	 * @param array $data Table rows: array of associative arrays.
+	 * @param array $columnFormats Key = column name, value = formatter type (e.g. 'text', 'date', 'raw').
+	 * @param array $buttons Per-row buttons (see arrayAsTableWithButtons()).
+	 * @param array $options Table options (see arrayAsTableWithButtons()).
+	 * @return string Table HTML.
 	 */
 	private static function arrayAsTableRender(array $data, array $columnFormats = [], array $buttons = [], array $options = []): string
 	{
@@ -959,7 +959,7 @@ ajax;
 		$html = '<table class="' . Html::encode($table_class) . '">';
 		$html .= '<thead><tr>';
 
-		// Cabecera con nombres columnas
+		// Header with column names
 		foreach ($columns as $col) {
 			$html .= Html::tag('th', Html::encode($col));
 		}
@@ -968,16 +968,16 @@ ajax;
 		}
 		$html .= '</tr></thead><tbody>';
 
-		// Filas con datos
+		// Data rows
 		foreach ($data as $row) {
 			$html .= '<tr>';
 			foreach ($columns as $col) {
 				$value = $row[$col] ?? null;
-				// Si hay formato definido para la columna, aplicar usando formatter
+				// If a format is defined for the column, apply it using the formatter
 				if (isset($columnFormats[$col])) {
 					$formattedValue = $formatter->{'as' . ucfirst($columnFormats[$col])}($value);
 				} else {
-					// Por defecto, codificar HTML para evitar inyección
+					// By default, encode HTML to prevent injection
 					$formattedValue = Html::encode((string)$value);
 				}
 				$html .= Html::tag('td', $formattedValue);
@@ -1021,22 +1021,22 @@ ajax;
 		return static::arrayAsTableRender($data, $columnFormats);
 	}
 	/**
-	 * Renderiza como arrayAsTable() pero añade una columna de acciones con botones por fila.
+	 * Renders like arrayAsTable() but adds an actions column with per-row buttons.
 	 *
-	 * @param array $data Filas de la tabla: array de arrays asociativos.
-	 * @param array $columnFormats Clave = nombre columna, valor = tipo de formatter (p.ej. 'text', 'date', 'raw').
-	 * @param array $buttons Botones por fila. Cada item:
-	 * 	- 'title': etiqueta del botón (por defecto el nombre del botón).
-	 * 	- 'icon': clase del icono (p.ej. 'fa-solid fa-eye').
-	 * 	- 'url': array/string con la URL (igual para todas las filas) o Closure
-	 * 	  fn(array $row): mixed que devuelve la URL de esa fila. Si es vacía, se omite el botón.
-	 * 	- 'type': 'a' (enlace; por defecto) o 'a-post' (enlace POST, p.ej. borrar).
-	 * 	- 'htmlOptions': atributos del enlace (p.ej. class, target, data-confirm).
-	 * @param array $options Opciones de la tabla:
-	 * 	- 'tableClass': clases CSS de la tabla (por defecto 'table table-bordered table-striped').
-	 * 	Las claves de cada fila que empiecen por '_' son datos internos: no se
-	 * 	renderizan como columna, pero están disponibles en las closures de 'url'.
-	 * @return string HTML de la tabla.
+	 * @param array $data Table rows: array of associative arrays.
+	 * @param array $columnFormats Key = column name, value = formatter type (e.g. 'text', 'date', 'raw').
+	 * @param array $buttons Per-row buttons. Each item:
+	 * 	- 'title': button label (defaults to the button name).
+	 * 	- 'icon': icon class (e.g. 'fa-solid fa-eye').
+	 * 	- 'url': array/string with the URL (same for all rows) or a Closure
+	 * 	  fn(array $row): mixed that returns the URL for that row. If empty, the button is omitted.
+	 * 	- 'type': 'a' (link; default) or 'a-post' (POST link, e.g. delete).
+	 * 	- 'htmlOptions': link attributes (e.g. class, target, data-confirm).
+	 * @param array $options Table options:
+	 * 	- 'tableClass': table CSS classes (default 'table table-bordered table-striped').
+	 * 	Row keys starting with '_' are internal data: they are not
+	 * 	rendered as a column, but are available in the 'url' closures.
+	 * @return string Table HTML.
 	 */
 	public static function arrayAsTableWithButtons(array $data, array $columnFormats = [], array $buttons = [], array $options = []): string
 	{
@@ -1044,11 +1044,11 @@ ajax;
 	}
 
 	/**
-	 * Renderiza un registro (array asociativo) como tabla Bootstrap con formato Yii2.
+	 * Renders a record (associative array) as a Bootstrap table with Yii2 format.
 	 *
-	 * @param array $record Array asociativo con los datos.
-	 * @param array $columnFormats Clave = nombre campo, valor = tipo formato (e.g. 'text', 'date', 'decimal').
-	 * @return string HTML tabla formateada.
+	 * @param array $record Associative array with the data.
+	 * @param array $columnFormats Key = field name, value = format type (e.g. 'text', 'date', 'decimal').
+	 * @return string Formatted table HTML.
 	 */
 	public static function recordAsTable(array $record, array $columnFormats = []): string
 	{
@@ -1062,7 +1062,7 @@ ajax;
 		$html .= '<tbody>';
 
 		foreach ($record as $key => $value) {
-			// Formatear valor según tipo dado
+			// Format value according to the given type
 			if (isset($columnFormats[$key])) {
 				$formattedValue = $formatter->{'as' . ucfirst($columnFormats[$key])}($value);
 			} else {

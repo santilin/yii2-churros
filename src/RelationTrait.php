@@ -55,12 +55,12 @@ trait RelationTrait
 	}
 
 	/**
-	 * Lee atributos con punto ('relacion.atributo') a través de la relación:
-	 * capel genera reglas de validación sobre ellos (p.ej. ['participante.nie',
-	 * 'string', 'max' => 10]) y los validadores de Yii los leen con
-	 * $model->$attribute, que sin esto lanzaría UnknownPropertyException.
-	 * Si el relacionado no existe, devuelve null para que skipOnEmpty salte
-	 * la validación en vez de romper.
+	 * Reads dotted attributes ('relacion.atributo') through the relation:
+	 * capel generates validation rules on them (e.g. ['participante.nie',
+	 * 'string', 'max' => 10]) and Yii validators read them with
+	 * $model->$attribute, which without this would throw UnknownPropertyException.
+	 * If the related record does not exist, returns null so that skipOnEmpty
+	 * skips validation instead of breaking.
 	 */
 	public function __get($name)
 	{
@@ -83,9 +83,9 @@ trait RelationTrait
 	}
 
 	/**
-	 * Escribe atributos con punto ('relacion.atributo') en el modelo
-	 * relacionado (p.ej. asignación masiva con claves con punto). Si el
-	 * relacionado no existe, se deja el comportamiento estándar (excepción).
+	 * Writes dotted attributes ('relacion.atributo') to the related
+	 * model (e.g. mass assignment with dotted keys). If the related
+	 * record does not exist, standard behavior is left (exception).
 	 */
 	public function __set($name, $value)
 	{
@@ -135,12 +135,12 @@ trait RelationTrait
 						$post_data = $post[$model_relation['model']];
 						unset($post[$model_relation['model']]);
 					} else if (is_array($model_relation['left'])) {
-						// Ojo: no se quita todavía de $post. Un left[] compuesto puede
-						// coincidir de casualidad con el nombre de una columna propia
-						// del modelo (no pensada para esta relación); solo se retira
-						// más abajo si de verdad resulta ser el valor codificado de la
-						// relación (un string JSON), para que si no lo es, load() al
-						// final de este método la siga viendo como atributo normal.
+						// Warning: not removed from $post yet. A composite left[] can
+						// coincidentally match the name of a column that belongs to the
+						// model itself (not intended for this relation); it is only removed
+						// further below if it really turns out to be the encoded value of
+						// the relation (a JSON string), so that if it is not, load() at
+						// the end of this method still sees it as a normal attribute.
 						foreach ($model_relation['left'] as $full_mr_left) {
 							$mr_left = AppHelper::lastWord($full_mr_left, '.');
 							if (isset($post[$formName][$mr_left])) {
@@ -158,16 +158,16 @@ trait RelationTrait
 					}
 					if ($post_data !== null) {
 						if (is_array($post_data) && !isset($post_data_key)) {
-							// Datos de atributos del modelo relacionado (p.ej. un
-							// textInput que postea Modelo[attr]): si el relacionado
-							// ya existe (resuelto por el link de la relación), se
-							// actualiza ÉL con lo posteado; solo si no existe se
-							// crea uno nuevo. Así loadAll()+saveAll() graban el
-							// registro existente en vez de intentar un INSERT.
-							// ($post_data_key solo se fija en la búsqueda por
-							// left[] de más abajo: si viene fijada, el dato no
-							// son atributos sino un valor codificado y sigue su
-							// rama de siempre.)
+							// Related model attribute data (e.g. a
+							// textInput that posts Model[attr]): if the related
+							// record already exists (resolved by the relation link), IT is
+							// updated with the posted data; only if it does not exist is
+							// a new one created. This way loadAll()+saveAll() save the
+							// existing record instead of attempting an INSERT.
+							// ($post_data_key is only set in the search by
+							// left[] below: if it is set, the data is not
+							// attributes but an encoded value and follows its
+							// usual branch.)
 							$rel_model = null;
 							if (!$this->getIsNewRecord()
 								&& method_exists($this, 'get' . $relation_in_form)
@@ -200,12 +200,12 @@ trait RelationTrait
 								$post_data = json_decode($post_data, true);
 								$this->setAttributes($post_data, false); // not safe
 							}
-							// si $post_data no es ni array ni string (p.ej. venía de una
-							// columna propia del modelo que coincide de casualidad con
-							// uno de los left[] de esta relación, no de un valor pensado
-							// para ella), no es un dato de relación válido: se deja tal
-							// cual en $post, sin quitarla, para que la recoja el load()
-							// normal de más abajo.
+							// if $post_data is neither array nor string (e.g. it came from a
+							// column of the model itself that coincidentally matches
+							// one of the left[] of this relation, not from a value intended
+							// for it), it is not valid relation data: it is left as
+							// is in $post, without removing it, so that the normal load()
+							// further below picks it up.
 						}
 					}
 				} else {
@@ -259,18 +259,18 @@ trait RelationTrait
 			$junction_link = $relation->link;
 		} else {
 			$junction_link = [];
-			// HasMany directo a un modelo puente, sin ->via() (p.ej. el
-			// formulario enlaza con la relación puente en vez de con la
-			// relación ManyToMany final que la usa como via): $link ya
-			// describe el lado hacia este modelo (sirve de $junction_link).
-			// findOtherRelationByModel() (pensado para esto, ver su uso en
-			// CrudReadOnlyController::genBaseBreadCrumbs()) da la relación
-			// del modelo puente hacia el otro extremo; de su 'left' se saca
-			// la columna propia del puente -- justo lo que llega en
-			// $form_values cuando se posteán ids sueltos (ver rama
-			// "many2many relation con _POST = array de ids sueltos" más
-			// abajo). No se reescribe $link: la rama de posteo de registros
-			// completos lo sigue necesitando tal cual.
+			// Direct HasMany to a junction model, without ->via() (e.g. the
+			// form links to the junction relation instead of to the
+			// final ManyToMany relation that uses it as via): $link already
+			// describes the side towards this model (serves as $junction_link).
+			// findOtherRelationByModel() (designed for this, see its use in
+			// CrudReadOnlyController::genBaseBreadCrumbs()) returns the relation
+			// from the junction model to the other end; from its 'left' the
+			// junction's own column is extracted -- exactly what arrives in
+			// $form_values when loose ids are posted (see the branch
+			// "many2many relation with _POST = array of related ids" further
+			// below). $link is not rewritten: the branch that posts full
+			// records still needs it as is.
 			$relModelClass = $relation->modelClass;
 			if ($relation->multiple && $relModelClass::$isJunctionModel) {
 				$other_relation = (new $relModelClass)->findOtherRelationByModel(
@@ -435,15 +435,15 @@ trait RelationTrait
 			if ($records instanceof \yii\db\BaseActiveRecord && !$records->getIsNewRecord()
 				&& empty($records->getDirtyAttributes())
 			) {
-				// El relacionado ya existía y no ha cambiado: nada que grabar.
-				// Si viene sucio de loadAll() (datos posteados sobre el registro
-				// existente), sigue abajo y se actualiza en updateRecords().
+				// The related record already existed and has not changed: nothing to save.
+				// If it comes dirty from loadAll() (data posted over the
+				// existing record), continue below and it gets updated in updateRecords().
 				continue;
 			} else if ($records instanceof \yii\db\BaseActiveRecord
 				&& $this->getRelation($relation_name)->multiple
 			) {
-				// Solo las relaciones múltiples viajan como arrays; un modelo
-				// único (Has-One) debe llegar como objeto a updateRecords().
+				// Only multiple relations travel as arrays; a single
+				// model (Has-One) must arrive as an object to updateRecords().
 				$records = (array)$records;
 			}
 			$success = $this->updateRecords($relation_name, $records, $wasNewRecord);
@@ -537,7 +537,7 @@ trait RelationTrait
 				}
 			}
 		} else {
-			//Has One: $records es el modelo único (objeto, no array)
+			//Has One: $records is the single model (object, not array)
 			foreach ($link as $key => $value) {
 				$records->$key = $this->$value;
 			}

@@ -39,8 +39,8 @@ trait ModelChangesLoggableTrait
 	protected $_model_changes_log = false;
 
 	/**
-	 * Timestamp compartido por todas las filas de un mismo guardado, para que el
-	 * agrupado del historial no parta un save que cruce el límite de un segundo.
+	 * Timestamp shared by all the rows of the same save, so that the history
+	 * grouping does not split a save that crosses the one second boundary.
 	 */
 	protected $_model_changes_changed_at;
 
@@ -96,9 +96,9 @@ trait ModelChangesLoggableTrait
 				->select(new \yii\db\Expression("NOW()"))
 				->scalar();
 			if ($event->name === self::EVENT_AFTER_INSERT) {
-				// Las filas de campo guardan el valor real de cada campo, así que la
-				// descripción del registro necesita hueco propio: el índice redondo del
-				// modelo (1000, 2000...), que es el que describe el alta al mostrarla.
+				// Field rows store the real value of each field, so the record
+				// description needs a slot of its own: the round index of the
+				// model (1000, 2000...), which is the one describing the insert when shown.
 				if (false !== ($nmodel = $model_change_class::findChangeableFieldIndex($model_name))) {
 					$model_change = new $model_change_class();
 					$this->internalSaveModelChangeRecord($model_change, $record_id,
@@ -156,8 +156,8 @@ trait ModelChangesLoggableTrait
 		$model_change->field = $nfield;
 		$model_change->type = $type;
 		if ($type === $model_change::V_TYPE_CREATE) {
-			// En un alta $old_value es el valor inicial real del campo, o el recordDesc
-			// del registro cuando $nfield es el índice redondo del modelo.
+			// On an insert $old_value is the real initial value of the field, or the recordDesc
+			// of the record when $nfield is the round index of the model.
 			$model_change->value = $old_value;
 			$model_change->changed_at = $this->created_at ?? $this->_model_changes_changed_at ?? new \yii\db\Expression("NOW()");
 			if (YII_ENV_TEST && !($this->created_by ?? false)) {

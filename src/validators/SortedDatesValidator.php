@@ -9,23 +9,24 @@ use yii\base\InvalidConfigException;
 use Yii;
 
 /**
- * Comprueba que una lista de campos de fecha va en orden, cada uno no anterior al que
- * le precede: `inicio <= revision <= fin`.
+ * Checks that a list of date fields is in order, each one not earlier than the
+ * one preceding it: `inicio <= revision <= fin`.
  *
- * A diferencia de DateRangeValidator, que compara dos campos, aquí la lista es de
- * longitud libre y la regla se declara una sola vez, sobre todos los atributos:
+ * Unlike DateRangeValidator, which compares two fields, here the list is of free
+ * length and the rule is declared once, over all the attributes:
  *
  *     [['inicio', 'revision', 'fin'], SortedDatesValidator::class]
  *
- * Los campos vacíos no cortan la cadena: se saltan y la comparación sigue con el
- * siguiente que tenga valor, que es lo que hace falta cuando los intermedios son
- * opcionales. El error se pone en el campo que rompe el orden.
+ * Empty fields do not break the chain: they are skipped and the comparison
+ * continues with the next one that has a value, which is what is needed when the
+ * intermediate ones are optional. The error is set on the field that breaks the
+ * order.
  */
 class SortedDatesValidator extends Validator
 {
 	/**
-	 * @var string tipo de fecha, como en DateRangeValidator: TYPE_DATE, TYPE_DATETIME
-	 * o TYPE_TIME
+	 * @var string date type, as in DateRangeValidator: TYPE_DATE, TYPE_DATETIME
+	 * or TYPE_TIME
 	 */
 	public $type = DateValidator::TYPE_DATE;
 
@@ -34,20 +35,20 @@ class SortedDatesValidator extends Validator
 	public $formatTime = 'php:' . YADTC::SQL_TIME_FORMAT;
 
 	/**
-	 * @var bool si dos fechas iguales rompen el orden. Por defecto no: lo que se pide
-	 * es que no vayan hacia atrás
+	 * @var bool whether two equal dates break the order. By default no: what is
+	 * required is that they do not go backwards
 	 */
 	public $strict = false;
 
 	/**
-	 * @var string el mensaje de error. Marcadores: {label}, {date}, {previous-label} y
+	 * @var string the error message. Markers: {label}, {date}, {previous-label} and
 	 * {previous}
 	 */
 	public $message = null;
 
 	/**
-	 * Se valida la lista entera de una vez, no atributo a atributo: el orden es una
-	 * propiedad del conjunto.
+	 * The whole list is validated at once, not attribute by attribute: the order is
+	 * a property of the set.
 	 */
 	public function validateAttributes($model, $attributes = null)
 	{
@@ -78,7 +79,7 @@ class SortedDatesValidator extends Validator
 					'timestampAttribute' => 'parsed' ] ]
 			);
 			if ($parsed->hasErrors()) {
-				// La fecha no vale: el validador de fecha del propio campo ya lo dirá
+				// The date is not valid: the date validator of the field itself will report it
 				continue;
 			}
 			if ($previous_timestamp !== null

@@ -12,23 +12,23 @@ namespace santilin\churros\db\anonymizers;
 */
 
 /**
- * Sustituye texto libre por relleno sintético determinista, sin intentar
- * "limpiar" el original en busca de datos personales (nombres, situaciones de
- * salud...): un borrado parcial al que se le escape algo es peor que uno que
- * lo sustituye del todo.
+ * Replaces free text with deterministic synthetic filler, without trying to
+ * "clean" the original in search of personal data (names, health
+ * situations...): a partial redaction that misses something is worse than one
+ * that replaces it entirely.
  *
- * Dos modos:
- * - narrativo (por defecto): relleno tipo lorem-ipsum, recortado/repetido a la
- *   longitud aproximada del original. Para textos largos (observaciones,
- *   historia, valoraciones...) donde interesa conservar que el campo tenga
- *   contenido (o no) y su longitud aproximada, para poder seguir probando
- *   cosas como truncados, "leer más", o paginación.
- * - etiqueta: elige determinísticamente una de una lista corta de etiquetas
- *   genéricas, para campos que son más una referencia corta (proveedor,
- *   entidad...) que una narración.
+ * Two modes:
+ * - narrative (default): lorem-ipsum style filler, trimmed/repeated to the
+ *   approximate length of the original. For long texts (remarks,
+ *   history, assessments...) where it matters to keep whether the field has
+ *   content (or not) and its approximate length, so that things like
+ *   truncation, "read more", or pagination can still be tested.
+ * - label: deterministically picks one from a short list of generic
+ *   labels, for fields that are more of a short reference (supplier,
+ *   entity...) than a narrative.
  *
- * Mismo original -> siempre el mismo resultado (con el mismo secret), igual
- * que el resto de anonimizadores: relanzar el proceso no cambia el dump.
+ * Same original -> always the same result (with the same secret), like
+ * the rest of the anonymizers: re-running the process does not change the dump.
  */
 class FreeTextAnonymizer
 {

@@ -3,11 +3,11 @@
 namespace santilin\churros\db\anonymizers\es;
 
 /*
- * Ejemplo de uso:
- * $anonymizer = new IbanAnonymizer('tu-clave-secreta');
+ * Usage example:
+ * $anonymizer = new IbanAnonymizer('your-secret-key');
  * $original = 'ES91 2100 0418 4502 0005 1332';
  * echo "Original: $original\n";
- * echo "Anonimizado: " . $anonymizer->anonymize($original) . "\n";
+ * echo "Anonymized: " . $anonymizer->anonymize($original) . "\n";
  */
 
 class IbanAnonymizer
@@ -26,39 +26,39 @@ class IbanAnonymizer
 		if (empty($iban)) {
 			return $iban;
 		}
-        // Eliminar espacios y mayúsculas
+        // Remove spaces and convert to uppercase
         $iban = strtoupper(str_replace(' ', '', $iban));
         if (mb_substr($iban, 0, 2, 'UTF-8') !== 'ES' || mb_strlen($iban, 'UTF-8') !== 24) {
-            // IBAN de otro país (o valor que no es un IBAN válido): no sabemos
-            // calcular su dígito de control, así que se cifra carácter a
-            // carácter sin intentar mantenerlo válido, en vez de abortar todo
-            // el proceso de anonimización por un solo valor no español.
+            // IBAN from another country (or a value that is not a valid IBAN): we
+            // cannot calculate its check digits, so it is encrypted character by
+            // character without trying to keep it valid, instead of aborting the
+            // whole anonymization process for a single non-Spanish value.
             return trim(chunk_split($this->anonymizeGeneric($iban), 4, ' '));
         }
 
-        // Extraer campos
+        // Extract fields
         // ESkk BBBB SSSS CC CCCCCCCCCC
         $bankCode   = mb_substr($iban, 4, 4, 'UTF-8');
         $branchCode = mb_substr($iban, 8, 4, 'UTF-8');
         $nationalCd = mb_substr($iban, 12, 2, 'UTF-8');
         $accountNum = mb_substr($iban, 14, 10, 'UTF-8');
 
-        // Anonimizar cada campo numérico de forma determinista
+        // Anonymize each numeric field deterministically
         $bankCode   = $this->anonymizeDigits($bankCode, 'bank');
         $branchCode = $this->anonymizeDigits($branchCode, 'branch');
         $nationalCd = $this->anonymizeDigits($nationalCd, 'national');
         $accountNum = $this->anonymizeDigits($accountNum, 'account');
 
-        // Reconstruir el BBAN
+        // Rebuild the BBAN
         $bban = $bankCode . $branchCode . $nationalCd . $accountNum;
 
-        // Calcular los dígitos de control IBAN válidos
+        // Calculate the valid IBAN check digits
         $checkDigits = $this->calculateIbanCheckDigits('ES', $bban);
 
-        // Montar el IBAN final
+        // Assemble the final IBAN
         $ibanFinal = 'ES' . $checkDigits . $bban;
 
-        // Formato con espacios cada 4 caracteres
+        // Format with spaces every 4 characters
         return trim(chunk_split($ibanFinal, 4, ' '));
     }
 
@@ -87,18 +87,18 @@ class IbanAnonymizer
                 $hash = crc32($this->secretKey . $context . $char . $i . $digits);
                 $anonymized[] = $this->digits[$hash % 10];
             } else {
-                // Por si acaso, pero en IBAN español solo deberían ser dígitos
+                // Just in case, but a Spanish IBAN should only contain digits
                 $anonymized[] = $char;
             }
         }
         return implode('', $anonymized);
     }
 
-    // Calcula los dígitos de control IBAN según el estándar internacional
+    // Calculates IBAN check digits according to the international standard
     private function calculateIbanCheckDigits($countryCode, $bban) {
-        // Mover el país y los ceros al final
+        // Move the country code and the zeros to the end
         $rearranged = $bban . $countryCode . '00';
-        // Convertir letras a números (A=10, ..., Z=35)
+        // Convert letters to numbers (A=10, ..., Z=35)
         $converted = '';
         foreach (str_split($rearranged) as $c) {
             if (ctype_alpha($c)) {
@@ -107,7 +107,7 @@ class IbanAnonymizer
                 $converted .= $c;
             }
         }
-        // Calcular el resto
+        // Calculate the remainder
         $mod = intval(substr($converted, 0, 1));
         for ($i = 1; $i < strlen($converted); $i++) {
             $mod = ($mod * 10 + intval($converted[$i])) % 97;

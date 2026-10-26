@@ -27,8 +27,8 @@ class YADTC extends \DateTime
     }
 
 	/**
-	 * Intenta crear un DateTime a partir de cualquier tipo de variable y sin tener que especificar el formato.
-	 * Si la fecha es incorrecta o ambigua, lanza una excepción.
+	 * Tries to create a DateTime from any variable type without having to specify the format.
+	 * If the date is incorrect or ambiguous, it throws an exception.
 	 */
 	static public function fromString($datetime, $format = null, ?\DateTimeZone $timezone = null): ?YADTC
 	{
@@ -123,8 +123,8 @@ class YADTC extends \DateTime
 	}
 
 	/**
-	 * Formatea una fecha desde SQL.
-	 * Útil para cuando la fecha puede ser nula.
+	 * Formats a date from SQL.
+	 * Useful when the date may be null.
 	 */
 	static public function formatFromSQL($format, $date, $onlymysql = false)
 	{
@@ -504,7 +504,7 @@ class YADTC extends \DateTime
 	}
 
     /**
-     * Convierte un string de tipo time a horas o minutos o segundos
+     * Converts a time-type string to hours or minutes or seconds
      */
     static public function timeToFloat($time, $to = 'horas'){
 
@@ -527,7 +527,7 @@ class YADTC extends \DateTime
         }
     }
     /**
-     * Convierte un float al formato time pasado como parámetro
+     * Converts a float to the time format passed as parameter
      */
     static public function floatToTime($float, $format = 'H:i'){
 
