@@ -9,7 +9,7 @@ namespace santilin\churros\widgets\grid;
 
 use Yii;
 use yii\helpers\{Html,Url};
-use santilin\churros\helpers\FormHelper;
+use santilin\churros\helpers\{FormHelper,GridFiltersHelper};
 
 
 class ActionColumn extends \yii\grid\ActionColumn
@@ -24,6 +24,14 @@ class ActionColumn extends \yii\grid\ActionColumn
 	];
     public array|bool $crudPerms = true; // by default, all perms are granted
 	public array $extraButtonsOptions = [];
+	/**
+	 * Icono que se muestra en la fila de filtros mientras se envía el filtro
+	 * (churros.grid.js le quita `d-none` en el evento `beforeFilter` de
+	 * yii.gridView.js). `false` para no mostrarlo. Si se sustituye por un
+	 * icono propio, tiene que conservar la clase `loading-filters`: es lo
+	 * único que usa el JS para encontrarlo.
+	 */
+	public string|bool $loadingFilterIcon = '<i class="fas fa-spinner fa-spin loading-filters d-none" aria-hidden="true"></i>';
 
     /**
      * Initializes the default button rendering callbacks.
@@ -125,11 +133,45 @@ class ActionColumn extends \yii\grid\ActionColumn
 
 	public function renderFilterCell()
 	{
-		return Html::tag('td', <<<html
+		$loadingIcon = $this->loadingFilterIcon !== false ? $this->loadingFilterIcon : '';
+		return Html::tag('td', $this->renderSaveFiltersButton() . <<<html
 <a class="remove-filters me-1 ms-1" role="button" data-pjax="1" href="javascript:void(0);"
-	onclick="ChurrosGrid.resetFilters('{$this->grid->id}'); return false;"><i class="fas fa-filter-circle-xmark text-secondary"></i></a><a class="run-filters me-1" role="button" href="javascript:void(0);"><i class="fas fa-filter text-secondary"></i></a>
+onclick="ChurrosGrid.resetFilters('{$this->grid->id}'); return false;"><i class="fas fa-filter-circle-xmark text-secondary"></i></a><a class="run-filters me-1" role="button" href="javascript:void(0);"><i class="fas fa-filter text-secondary"></i></a>{$loadingIcon}
 html
 		, $this->filterOptions);
+	}
+
+	/**
+	 * Botón "clip": mientras esté activo, los filtros de este grid se guardan
+	 * en la sesión y se restauran al volver. Sólo se pinta si la app ha activado
+	 * GridFiltersHelper::PARAM_SWITCH, así por defecto nada cambia.
+	 */
+	protected function renderSaveFiltersButton(): string
+	{
+		if (!GridFiltersHelper::isEnabled()) {
+			return '';
+		}
+		// La persistencia la hace CrudReadOnlyController::beforeAction(): fuera
+		// de un controlador CRUD el botón no tendría a quién pedirle nada
+		if (!(Yii::$app->controller instanceof \santilin\churros\CrudReadOnlyController)) {
+			return '';
+		}
+		$filterModel = $this->grid->filterModel;
+		if (!is_object($filterModel)) {
+			return '';
+		}
+		$on = GridFiltersHelper::isSaved($filterModel->formName());
+		$title = $on
+			? Yii::t('churros', 'The filters of this grid are saved. Click to stop saving them')
+			: Yii::t('churros', 'Click to save the filters of this grid');
+		return Html::a('<i class="fa-solid fa-thumbtack"></i>', 'javascript:void(0);', [
+			'class' => 'save-filters me-1' . ($on ? ' on' : ''),
+			'role' => 'button',
+			'data-state' => $on ? 'on' : 'off',
+			'title' => $title,
+			'aria-label' => $title,
+			'onclick' => "ChurrosGrid.saveFilters('{$this->grid->id}'); return false;",
+		]);
 	}
 
 

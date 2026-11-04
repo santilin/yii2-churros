@@ -6,7 +6,7 @@ use Yii;
 use yii\helpers\{Url,StringHelper};
 use yii\web\{NotFoundHttpException,ForbiddenHttpException};
 use yii\db\ActiveRecordInterface as CrudModel;
-use santilin\churros\helpers\{AppHelper,FormHelper};
+use santilin\churros\helpers\{AppHelper,FormHelper,GridFiltersHelper};
 use yii\base\NotSupportedException;
 /**
  * CrudController implements the CRUD actions for yii2 models
@@ -71,6 +71,13 @@ abstract class CrudReadOnlyController extends \yii\web\Controller
         }
         if (YII_ENV_TEST && $action->id === "delete") {
 			$this->enableCsrfValidation = false;
+		}
+		if (GridFiltersHelper::isEnabled()) {
+			// Restaura en la petición los filtros guardados del grid y
+			// descarta los flags _save_filters/_clear_filters
+			$this->request->setQueryParams(
+				GridFiltersHelper::handleRequest($this->request->queryParams)
+			);
 		}
         return parent::beforeAction($action);
 	}
@@ -148,7 +155,10 @@ abstract class CrudReadOnlyController extends \yii\web\Controller
 				}
 			}
 		}
-		$params['permissions'] = $this->resolvePermissions($params['permissions'] ?? []);
+		$params['permissions'] = array_intersect($this->resolvePermissions(
+			$params['permissions'] ?? [],
+			$params['masterPermissions'] ?? [])
+		);
 		$params['_search_relation'] = $relation_name;
 		$params['master'] = $master;
 		$params['embedded'] = true;

@@ -114,7 +114,7 @@ class AuthHelper
 		return $role;
 	}
 
-    static public function addPermissionsToRole($role_name, array|string $perm_names, $auth = null)
+    static public function addToRole($role_name, array|string $perm_names, $auth = null)
     {
 		if ($auth === null) {
 			$auth = \Yii::$app->authManager;

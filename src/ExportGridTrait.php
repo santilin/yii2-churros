@@ -269,7 +269,7 @@ trait ExportGridTrait
 	 * PDF through the same mpdf the per-record actionPdf() already uses, so a
 	 * project that prints records gets its export looking the same.
 	 */
-	protected function sendPdf($provider, array $columns, array $headers, string $name, $title)
+	protected function sendPdf($provider, array $columns, array $headers, string $name, string $title)
 	{
 		$this->requireClass(\kartik\mpdf\Pdf::class, 'kartik-v/yii2-mpdf', 'PDF');
 		$html = Html::tag('h1', Html::encode((string)$title));
@@ -297,7 +297,7 @@ trait ExportGridTrait
 			'filename' => "$name.pdf",
 			'content' => $html,
 			'cssFile' => '@vendor/kartik-v/yii2-mpdf/src/assets/kv-mpdf-bootstrap.min.css',
-			'options' => ['title' => (string)$title],
+			'options' => ['title' => $title],
 			'methods' => [
 				'setHeader' => date('Y-m-d H:i') . '|' . $title . '|{PAGENO}',
 			],

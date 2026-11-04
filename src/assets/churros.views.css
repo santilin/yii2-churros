@@ -133,6 +133,21 @@ fieldset {
           color: darkred !important;
           margin-top: 3px !important;
         }
+        a.save-filters i {
+          font-size: 1.125em !important;
+          vertical-align: middle !important;
+          margin-top: 3px !important;
+          color: gray !important;
+        }
+        a.save-filters.on i {
+          color: darkblue !important;
+        }
+        .loading-filters {
+          font-size: 1.125em !important;
+          vertical-align: middle !important;
+          margin-top: 3px !important;
+          color: gray !important;
+        }
         white-space: nowrap;
       }
       input, select {

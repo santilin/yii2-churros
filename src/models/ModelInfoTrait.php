@@ -553,7 +553,7 @@ trait ModelInfoTrait
 		return null;
     }
 
-	public function addErrorsFrom(ActiveRecord|JsonModel $model, $key = null)
+	public function addErrorsFrom(ModelInfoTrait|JsonModel|\yii\db\ActiveRecord $model, ?string $key = null)
 	{
 		if ($key !== null) {
 			$key = $key . '.';
@@ -565,7 +565,7 @@ trait ModelInfoTrait
 		}
 	}
 
-	public function addErrorFromException(\Throwable $e, string $error_key = null)
+	public function addErrorFromException(\Throwable $e, ?string $error_key = null)
 	{
 		$message = $e->getMessage();
 		$devel_info = YII_ENV_PROD ? '' : "\n<devel>$message</devel>";
@@ -1090,7 +1090,7 @@ trait ModelInfoTrait
 				return ['NOT LIKE', $fldname, $value['v'] . '%', false];
 			case "BETWEEN":
 			case "NOT BETWEEN":
-				return [$value['op'], $fldname, explode(',', $value['v'])];
+				return array_merge([$value['op'], $fldname], explode(',', $value['v']));
 			case "bool":
 			case "BOOL":
 				$boolValue = ($value['v'] == 'true') ? 1 : ($value['v'] == 'false' ? 0 : boolval($value['v']));

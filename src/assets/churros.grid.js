@@ -1,5 +1,9 @@
 const ChurrosGrid = (function() {
 	return {
+		// Flag de guardado/borrado de filtros pendiente de la próxima
+		// petición de filtrado (lo ponen saveFilters() y resetFilters() y lo
+		// consume el listener de 'beforeFilter' de abajo)
+		_pendingFilterFlag: null,
 		generateBs5Table(data, excludeKeys = [], columnsConfig = {}) {
 			if (!data.length) return '<table class="table"><thead></thead><tbody></tbody></table>';
 
@@ -208,6 +212,26 @@ const ChurrosGrid = (function() {
 				select.selectedIndex = 0;
 			});
 
+			ChurrosGrid._pendingFilterFlag = { name: '_clear_filters', value: '1' };
+			jQuery('#' + grid_id).yiiGridView('applyFilter');
+			return true;
+		},
+		/**
+		 * Botón "clip": pide al servidor que guarde (o deje de guardar) en la
+		 * sesión los filtros de este grid. El estado se decide aquí a partir de
+		 * data-state, para que el resultado sea el mismo si se recarga la página.
+		 */
+		saveFilters(grid_id) {
+			const grid = document.getElementById(grid_id);
+			if (!grid) return false;
+
+			const clip = grid.querySelector('.save-filters');
+			if (!clip) return false;
+
+			ChurrosGrid._pendingFilterFlag = {
+				name: '_save_filters',
+				value: clip.dataset.state === 'on' ? '0' : '1'
+			};
 			jQuery('#' + grid_id).yiiGridView('applyFilter');
 			return true;
 		},
@@ -370,3 +394,31 @@ const ChurrosGrid = (function() {
 
 	}
 })();
+// yii.gridView.js arma el formulario de filtrado y, justo antes de mandarlo,
+// dispara el evento 'beforeFilter'. Ahí se le añaden los flags
+// _save_filters/_clear_filters que han pedido saveFilters()/resetFilters(),
+// sin tocar la serialización de los propios filtros.
+jQuery(document).on('beforeFilter', function (e) {
+	const pending = ChurrosGrid._pendingFilterFlag;
+	ChurrosGrid._pendingFilterFlag = null;
+	if (!pending) return;
+	const grid = e.target;
+	const form = grid && grid.querySelector ? grid.querySelector('form.gridview-filter-form') : null;
+	if (!form) return;
+	const input = document.createElement('input');
+	input.type = 'hidden';
+	input.name = pending.name;
+	input.value = pending.value;
+	form.appendChild(input);
+});
+// Icono de carga en la fila de filtros: se enseña justo antes de mandar la
+// petición. No hace falta ocultarlo después: la fila entera (incluido este
+// icono, oculto de serie) se reemplaza al volver la respuesta, sea por Pjax
+// o por navegación completa.
+jQuery(document).on('beforeFilter', function (e) {
+	const grid = e.target;
+	const icon = grid && grid.querySelector ? grid.querySelector('.loading-filters') : null;
+	if (icon) {
+		icon.classList.remove('d-none');
+	}
+});
