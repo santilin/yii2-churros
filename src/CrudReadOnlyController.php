@@ -317,9 +317,9 @@ abstract class CrudReadOnlyController extends \yii\web\Controller
 			if ($to = $this->request->post('returnTo', null)) {
 				return $to;
 			}
-			if ($to = $this->request->post('_form_successUrl', null)) {
-				return $to;
-			}
+			// if ($to = $this->request->post('_form_successUrl', null)) {
+			// 	return $to;
+			// }
 			if ($to = $this->request->queryParams['returnTo']??null) {
 				return $to;
 			}
@@ -501,19 +501,21 @@ abstract class CrudReadOnlyController extends \yii\web\Controller
 		string $format,
 		array|string $fields = [],
 		array|string $scopes = '',
-		array|string|null $id_fields = null,
+		array|string|null $id_fields = [],
 		string $model_format = 'long',
 		array $extra_options = [])
 	{
 		\Yii::$app->response->format = \yii\web\Response::FORMAT_JSON;
 		$ret = [];
 		$searchModel = $this->createSearchModel();
-		if (!$id_fields) {
+		$had_fields = (is_array($fields) && count($fields) > 0) || (is_string($fields) && $fields !== '');
+		$had_id_fields = (is_array($id_fields) && count($id_fields) > 0) || (is_string($id_fields) && $id_fields !== '');
+		if (!$had_fields && !$had_id_fields) {
 			$id_fields = $searchModel->primaryKey();
-		} else if (is_string($id_fields)) {
+		} else if ($had_id_fields && is_string($id_fields)) {
 			$id_fields = explode(',', $id_fields);
 		}
-		if ($had_fields = !empty($fields)) {
+		if ($had_fields) {
 			if (is_string($fields)) {
 				if ($fields[0] == '[') {
 					$fields = json_decode($fields);
@@ -538,26 +540,30 @@ abstract class CrudReadOnlyController extends \yii\web\Controller
 		}
 		$dataProvider = $searchModel->search($dp_search_params);
 		if ($had_fields) {
-			foreach ($id_fields as $id_field) {
-				$id_field = trim($id_field);
-				if (!in_array($id_field, $fields)) {
-					$fields[] = $id_field;
+			$dataProvider->query->orderBy(array_flip($fields));
+			if ($had_id_fields) {
+				foreach ($id_fields  as $id_field) {
+					$id_field = trim($id_field);
+					if (!in_array($id_field, $fields)) {
+						$fields[] = $id_field;
+					}
 				}
 			}
-			$dataProvider->query->select(implode(',',$fields))->distinct();
+			$dataProvider->query->select(implode(',',$fields));
 		}
+		$dataProvider->query->distinct();
 		if ($format == 'select2' || $format == 'select') {
 			foreach ($dataProvider->getModels() as $record) {
-				if (count($id_fields)>1) {
-					$id = json_encode($record->getAttributes($id_fields),true);
+				if ($had_id_fields) {
+					if (count($id_fields)>1) {
+						$id = json_encode($record->getAttributes($id_fields),true);
+					} else {
+						$id = $record->{$id_fields[0]};
+					}
 				} else {
-					$id = $record->{$id_fields[0]};
+					$id = null;
 				}
-				if ($had_fields) {
-					$ret[] = [ 'id' => $id, 'text' => $record->recordDesc($model_format) ];
-				} else {
-					$ret[] = [ 'id' => $id, 'text' => $record->recordDesc($model_format) ];
-				}
+				$ret[] = [ 'id' => $id, 'text' => $record->recordDesc($model_format) ];
 			}
 			if ($format == 'select2') {
 				return [ 'results' => $ret ];
@@ -672,8 +678,13 @@ abstract class CrudReadOnlyController extends \yii\web\Controller
 		} else {
 			if (FormHelper::hasPermission($permissions, 'index') && $scenario) {
 				$breadcrumbs['model_index'] = [
-					'label' =>  $model->getModelInfo('title_plural'),
-					'url' => [ $this->id . '/index' ]
+					// el título de la acción index concreta (p.ej. una acción index
+					// personalizada con su propio título) gana al plural genérico
+					// del modelo, si lo trae la vista
+					'label' => $view_params['title'] ?? $model->getModelInfo('title_plural'),
+					// una acción index con nombre propio (p.ej. "partes") no es "index":
+					// el enlace debe volver a la acción que de verdad se está viendo
+					'url' => [ $this->id . '/' . $action_id ]
 				];
 			}
 		}

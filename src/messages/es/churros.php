@@ -172,4 +172,9 @@ return [
 	'{attribute} is an array.' => '{attribute} es un array.',
 	'{attribute} value `{shown_value}` is not in its range of values: {range}'
 		=> 'El valor `{shown_value}` de {attribute} no está entre sus valores posibles: {range}',
+
+	// SortesDatesValidator
+	'{label} {date} can\'t be earlier than {previous-label} {previous}' =>
+		'{label}: ({date}) no puede ser anterior a {previous-label}: ({previous})'
+
 ];

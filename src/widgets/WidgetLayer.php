@@ -125,7 +125,15 @@ class WidgetLayer
 			}
 		}
 		$layout_row_type = $layout_row['type'] ?? 'fields';
-		$layout_row_layout = $layout_row['layout'] ?? '1col';
+		// Una fila hija sin 'layout' explícito dentro de un 'rows'/'cols' hereda
+		// el layout de ese contenedor; si no, pierde el '2cols'/'3cols' del padre
+		// y cae a '1col' (ancho completo en vez de a media/tercio). La herencia
+		// sólo vale desde 'row_layout', que ponen a sabiendas case 'rows'/'cols'
+		// más abajo al recorrer su 'content' -- nunca desde $parentOptions['layout'],
+		// que en otras llamadas (la raíz de layout(), o el layout del FORMULARIO vía
+		// ActiveFormTrait) es un valor de otro espacio de nombres sin relación con
+		// esta fila.
+		$layout_row_layout = $layout_row['layout'] ?? $parentOptions['row_layout'] ?? '1col';
 		if ($layout_row_type === 'container') { // deprecated
 			throw new \Exception("deprecated `container` type: use one of 'tabs', 'accordion', 'details', 'rows', 'cols', 'collapsable");
 		}
@@ -291,7 +299,7 @@ js;
 					break;
 				case 'rows':
 					if (!$this->lastWasRow()) {
-						throw "Error en anidamiento de widgets";
+						throw new \Exception("Error en anidamiento de widgets");
 					}
 					$col_added = false;
 					if (!$this->lastWasCol()) {
@@ -314,6 +322,7 @@ js;
 						$rows_content .= "<!--row: $kc-->";
 						$rows_content .= $this->layoutWidgets((array)$row_content, [
 							'layout' => $layout_row_layout,
+							'row_layout' => $layout_row_layout,
 							'style' => $layout_row_style,
 							'type' => $layout_row_type,
 							'size' => $layout_row['size'],
@@ -324,12 +333,12 @@ js;
 						$this->removeLast();
 						$ret .= '</div>';
 					} else {
-						throw "Error";
+						throw new \Exception("Error");
 					}
 					break;
 				case 'cols':
 					if (!$this->lastWasRow()) {
-						throw "Error en anidamiento de widgets";
+						throw new \Exception("Error en anidamiento de widgets");
 					}
 					foreach ($layout_row['content'] as $kc => $row_content) {
 						$cols = intval($row_content['layout']??$layout_row_layout);
@@ -341,6 +350,7 @@ js;
 						// $this->setLastCol($cols);
 						$ret .= $this->layoutWidgets((array)$row_content, [
 							'layout' => $row_content['layout']??$layout_row_layout,
+							'row_layout' => $row_content['layout']??$layout_row_layout,
 							'style' => $layout_row_style,
 							'type' => $layout_row_type, ], $kc, $row_options);
 						// $this->removeLast();

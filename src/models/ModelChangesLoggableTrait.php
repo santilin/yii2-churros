@@ -102,7 +102,7 @@ trait ModelChangesLoggableTrait
 				if (false !== ($nmodel = $model_change_class::findChangeableFieldIndex($model_name))) {
 					$model_change = new $model_change_class();
 					$this->internalSaveModelChangeRecord($model_change, $record_id,
-						$model_change_class::V_TYPE_CREATE, $nmodel, $this->recordDesc('long'));
+						$model_change_class::V_TYPE_CREATE, $nmodel, $this->recordDesc('changes'));
 					$must_trigger = true;
 				}
 				foreach ($this->getAttributes() as $fld => $current_value) {

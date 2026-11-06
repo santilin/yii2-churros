@@ -139,6 +139,11 @@ trait ModelInfoTrait
 			$_format = self::getModelInfo('record_desc_format_medium');
 		} elseif ($format === 'long' || $format === 'large' || $format === 'full') {
 			$_format = self::getModelInfo('record_desc_format_long');
+		} elseif ($format === 'changes') {
+			// un modelo puede redefinir cómo se describe a sí mismo en el histórico de
+			// cambios sin afectar al resto de usos de recordDesc(); si no lo redefine,
+			// se queda en 'short' (más corto que el 'long' que se usaba antes aquí)
+			$_format = self::getModelInfo('record_desc_format_long');
 		} else if ($format === 'code&desc') {
 			$fields = static::findCodeAndDescFields();
 			$_format = '{' . implode('}, {',array_filter($fields)) . '}';
