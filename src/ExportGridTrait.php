@@ -171,6 +171,16 @@ trait ExportGridTrait
 				// the formatter is already translated; Yii::t('churros', 'Yes')
 				// is not, and came out in English
 				$value = Yii::$app->formatter->asBoolean($value);
+			} elseif (is_array($value)) {
+				// HasMany/ManyToMany relation: one related record per element
+				$value = implode(', ', array_map(
+					fn ($v) => is_object($v) && method_exists($v, 'recordDesc') ? $v->recordDesc() : (string)$v,
+					$value
+				));
+			} elseif (is_object($value)) {
+				// HasOne relation: (string)$value fails, related models don't
+				// implement __toString()
+				$value = method_exists($value, 'recordDesc') ? $value->recordDesc() : (string)$value;
 			}
 			$row[] = $value === null ? '' : (string)$value;
 		}
