@@ -512,6 +512,7 @@ abstract class CrudReadOnlyController extends \yii\web\Controller
 		$had_id_fields = (is_array($id_fields) && count($id_fields) > 0) || (is_string($id_fields) && $id_fields !== '');
 		if (!$had_fields && !$had_id_fields) {
 			$id_fields = $searchModel->primaryKey();
+			$had_id_fields = true;
 		} else if ($had_id_fields && is_string($id_fields)) {
 			$id_fields = explode(',', $id_fields);
 		}
