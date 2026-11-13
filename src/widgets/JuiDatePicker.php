@@ -27,16 +27,12 @@ class JuiDatePicker extends DatePicker
             'changeMonth' => true,
             'changeYear' => true,
             'autoSize' => true,
+            // El visible siempre lleva el formato del datepicker (d/m/y), así
+            // que basta con relanzar el change para que la función global de
+            // abajo sincronice el hidden
             'onSelect' => new \yii\web\JsExpression(<<<JS
-/// @todo make this valid for any language
 function(dateText, inst) {
-    console.log(dateText);
-    var parts = dateText.split('/');
-    if(parts.length === 3) {
-        var sqlDate = parts[2] + '-' + parts[1] + '-' + parts[0];
-        $('#$idHidden').val(sqlDate);
-        console.log(sqlDate);
-    }
+    $('#$idVisible').trigger('change');
 }
 JS
             ),
@@ -46,24 +42,30 @@ JS
         $optionsJson = Json::htmlEncode($clientOptions);
         $this->view->registerJs(<<<JS
 
-$('#$idVisible').datepicker($optionsJson).on('change', function() {
-    var dateText = $(this).val();
-    console.log(dateText);
-    var parts = dateText.split('/');
-    if(parts.length === 3) {
-        var sqlDate = parts[2] + '-' + parts[1] + '-' + parts[0];
-        $('#$idHidden').val(sqlDate);
-    }
-});
-
-// On page load, sync the hidden field if visible has value
-if ($('#$idVisible').val() !== '') {
-    var parts = $('#$idVisible').val().split('/');
-    if(parts.length === 3) {
-        var sqlDate = parts[2] + '-' + parts[1] + '-' + parts[0];
-        $('#$idHidden').val(sqlDate);
-    }
+if (!window.churrosJuiSync) {
+    // Sincroniza el hidden SQL (id_value) con el visible (d/m/y).
+    // Un visible vacío deja el hidden vacío; un texto sin 3 partes
+    // separadas por '/' no se toca.
+    window.churrosJuiSync = function(id) {
+        var dateText = $('#' + id).val();
+        var parts = dateText.split('/');
+        if (dateText === '') {
+            $('#' + id + '_value').val('');
+        } else if (parts.length === 3) {
+            $('#' + id + '_value').val(parts[2] + '-' + parts[1] + '-' + parts[0]);
+        }
+    };
 }
+$('#$idVisible').datepicker($optionsJson).on('change blur', function() {
+    window.churrosJuiSync('$idVisible');
+});
+// Los campos rellenados por otros scripts (p.ej. cascadas con .val())
+// no disparan change/blur: al enviar el formulario se sincronizan igual
+$('#$idVisible').closest('form').on('submit', function() {
+    window.churrosJuiSync('$idVisible');
+});
+// On page load, sync the hidden field from the visible value
+window.churrosJuiSync('$idVisible');
 JS
         , View::POS_READY);
 
