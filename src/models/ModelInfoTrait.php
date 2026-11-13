@@ -60,17 +60,43 @@ trait ModelInfoTrait
 	{
 		$t_params = array_filter($params, function($value) { return is_string($value); });
 		$translated = Yii::t($category, $message, $t_params, $language);
-		if ($language === null) {
-			$language = Yii::$app->language;
+		$ret = $this->tr_params($translated, $params);
+		$placeholders = [];
+		if (preg_match_all('/({([a-zA-Z0-9\._]+)})+/', $ret, $matches)) {
+			if ($language === null) {
+				$language = Yii::$app->language;
+			}
+			if (($language === 'es' || substr(Yii::$app->language,0,2) === 'es')) {
+				$male_words = EsHelper::SPANISH_MALE_WORDS;
+			} else {
+				$male_words = self::$ENGLISH_MALE_WORDS;
+			}
+			$female = $this->getModelInfo('female');
+			foreach ($matches[2] as $match) {
+				if (isset($male_words[$match])) {
+					$placeholders['{'.$match.'}'] = $female ? $match : $male_words[$match];
+				}
+			}
 		}
-		if (($language === 'es' || substr(Yii::$app->language,0,2) === 'es')) {
-			$male_words = EsHelper::SPANISH_MALE_WORDS;
+		if (count($placeholders)) {
+			return strtr($ret, $placeholders);
 		} else {
-			$male_words = self::$ENGLISH_MALE_WORDS;
+			return $ret;
 		}
+	}
+
+	/**
+	 * Reemplaza en $message los placeholders propios del modelo, sin traducir
+	 * nada, sin parámetro de idioma y sin las palabras de género (male_words,
+	 * que se quedan en t()): {model.xxx}, {title}, {Title}, {title_plural},
+	 * {Title_plural}, {record}, {record_link}, {record_url},
+	 * {record_long|medium|short} y cualquier {nombre} que exista en $params.
+	 * Útil para mensajes ya traducidos o que no pasan por Yii::t.
+	 */
+	public function tr_params(string $message, array $params = []): string
+	{
 		$matches = $placeholders = [];
-		$female = $this->getModelInfo('female');
-		if (preg_match_all('/({([a-zA-Z0-9\._]+)})+/', $translated, $matches)) {
+		if (preg_match_all('/({([a-zA-Z0-9\._]+)})+/', $message, $matches)) {
 			foreach ($matches[2] as $match) {
 				$bracket_match = '{'.$match.'}';
 				if (substr($match,0,6) === 'model.') {
@@ -111,23 +137,10 @@ trait ModelInfoTrait
 				case 'record_short':
 					$placeholders[$bracket_match] = $this->recordDesc('short');
 					break;
-				default:
-					if (isset($male_words[$match])) {
-						if ($female )  {
-							$placeholders[$bracket_match] = $match;
-						} else {
-							$placeholders[$bracket_match] = $male_words[$match];
-						}
-					} else { // allows any other array inside brackets
-						$value = ArrayHelper::getValue($params, $match, 'qué raro');
-						if ($value !== 'qué raro') {
-							$placeholders[$bracket_match] = $value;
-						}
-					}
 				}
 			}
 		}
-		return strtr($translated, $placeholders);
+		return strtr($message, $placeholders);
 	}
 
 	public function recordDesc(?string $format = null, int $max_len = 0, $context = null): string
