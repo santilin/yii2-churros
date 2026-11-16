@@ -434,16 +434,15 @@ class AuthController extends Controller
 			// minimum permission that is meant to be declared as is, without the
 			// usual "<module>.<Model>." prefix (e.g. to ask for the module's own
 			// admin role, as in ceutae/AcogidaAlojamiento: perms: ['ceutae.admin']).
+			$full_perm_name = str_contains($perm_name, '.')
+				? $perm_name : $model_perm_name . "." . $perm_name;
 			// If it matches a ROLE that already exists, that action is already
 			// covered by it -there is nothing to create-: a permission with the
-			// same name would clash, `auth_item.name` is unique among roles and permissions.
-			if (str_contains($perm_name, '.')) {
-				if ($auth->getRole($perm_name) !== null) {
-					continue;
-				}
-				$full_perm_name = $perm_name;
-			} else {
-				$full_perm_name = $model_perm_name . "." . $perm_name;
+			// same name would clash, `auth_item.name` is unique among roles and
+			// permissions (e.g. an unqualified 'admin' perm when the model's
+			// admin role "<module>.<Model>.admin" has just been created above).
+			if ($auth->getRole($full_perm_name) !== null) {
+				continue;
 			}
 			$perm_desc = Yii::t('churros', '{module}: {model}: {perm}', [
 				'module' => $module_desc,
