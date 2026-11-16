@@ -89,58 +89,81 @@ trait ModelInfoTrait
 	 * Reemplaza en $message los placeholders propios del modelo, sin traducir
 	 * nada, sin parámetro de idioma y sin las palabras de género (male_words,
 	 * que se quedan en t()): {model.xxx}, {title}, {Title}, {title_plural},
-	 * {Title_plural}, {record}, {record_link}, {record_url},
-	 * {record_long|medium|short} y cualquier {nombre} que exista en $params.
-	 * Útil para mensajes ya traducidos o que no pasan por Yii::t.
+	 * {Title_plural}, {record}, {record_link}, {record_url} y
+	 * {record_long|medium|short}. Los placeholders de campo aceptan el
+	 * sufijo de formato de recordDesc: {model.fecha%D} con %D fecha y %T
+	 * fecha+hora del formatter de la app. Útil para mensajes ya traducidos
+	 * o que no pasan por Yii::t.
 	 */
 	public function tr_params(string $message, array $params = []): string
 	{
 		$matches = $placeholders = [];
-		if (preg_match_all('/({([a-zA-Z0-9\._]+)})+/', $message, $matches)) {
-			foreach ($matches[2] as $match) {
-				$bracket_match = '{'.$match.'}';
-				if (substr($match,0,6) === 'model.') {
-					$fld = substr($match, 6);
-					$placeholders[$bracket_match] = ArrayHelper::getValue($this, $fld, '');
-				} else switch( $match) {
+		if (preg_match_all('/{([a-zA-Z0-9\._]+)(\%([^}])*)*}+/', $message, $matches)) {
+			foreach ($matches[0] as $n => $match) {
+				$field = $matches[1][$n];
+				if (substr($field,0,6) === 'model.') {
+					$placeholders[$match] = $this->placeholderValue(substr($field, 6), $matches[2][$n]);
+				} else switch( $field) {
 				case 'title':
-					$placeholders[$bracket_match] = lcfirst(static::getModelInfo('title'));
+					$placeholders[$match] = lcfirst(static::getModelInfo('title'));
 					break;
 				case 'title_plural':
-					$placeholders[$bracket_match] = lcfirst(static::getModelInfo('title_plural'));
+					$placeholders[$match] = lcfirst(static::getModelInfo('title_plural'));
 					break;
 				case 'Title':
-					$placeholders[$bracket_match] = ucfirst(static::getModelInfo('title'));
+					$placeholders[$match] = ucfirst(static::getModelInfo('title'));
 					break;
 				case 'Title_plural':
-					$placeholders[$bracket_match] = ucfirst(static::getModelInfo('title_plural'));
+					$placeholders[$match] = ucfirst(static::getModelInfo('title_plural'));
 					break;
 				case 'record':
-					$placeholders[$bracket_match] = $this->recordDesc();
+					$placeholders[$match] = $this->recordDesc();
 					break;
 				case 'record_link':
 					if (Yii::$app->controller) {
-						$placeholders[$bracket_match] = $this->linkToMe('medium');
+						$placeholders[$match] = $this->linkToMe('medium');
 					} else {
-						$placeholders[$bracket_match] = $this->recordDesc();
+						$placeholders[$match] = $this->recordDesc();
 					}
 					break;
 				case 'record_url':
-					$placeholders[$bracket_match] = $this->linkToMe(false, 'view');
+					$placeholders[$match] = $this->linkToMe(false, 'view');
 					break;
 				case 'record_long':
-					$placeholders[$bracket_match] = $this->recordDesc('long');
+					$placeholders[$match] = $this->recordDesc('long');
 					break;
 				case 'record_medium':
-					$placeholders[$bracket_match] = $this->recordDesc('medium');
+					$placeholders[$match] = $this->recordDesc('medium');
 					break;
 				case 'record_short':
-					$placeholders[$bracket_match] = $this->recordDesc('short');
+					$placeholders[$match] = $this->recordDesc('short');
 					break;
 				}
 			}
 		}
 		return strtr($message, $placeholders);
+	}
+
+	/**
+	 * Valor de un campo de este modelo para un placeholder con sufijo de
+	 * formato (el mismo mecanismo que usa recordDesc): sin sufijo, el valor
+	 * crudo; %D, la fecha; %T, la fecha y hora del formatter de la app;
+	 * %_a, el label del allowed_value. Si el valor es otro modelo, se
+	 * devuelve con su recordDesc().
+	 */
+	public function placeholderValue(string $field, string $suffix = '',
+		?string $format = null, int $max_len = 0): mixed
+	{
+		$value = ArrayHelper::getValue($this, $field);
+		if (is_object($value) && method_exists($value, 'recordDesc')) {
+			$value = $value->recordDesc($format, $max_len);
+		}
+		return match ($suffix) {
+			'%D' => Yii::$app->formatter->asDate($value),
+			'%T' => Yii::$app->formatter->asDateTime($value),
+			'%_a' => call_user_func([$this, 'get' . AppHelper::modelize($field) . 'Label']),
+			default => $value,
+		};
 	}
 
 	public function recordDesc(?string $format = null, int $max_len = 0, $context = null): string
@@ -173,24 +196,11 @@ trait ModelInfoTrait
 		$values = $matches = [];
 		if (preg_match_all('/{([a-zA-Z0-9\._]+)(\%([^}])*)*}+/', $_format, $matches)) {
 			foreach ($matches[0] as $n => $match) {
-				$value = ArrayHelper::getValue($this, $matches[1][$n]);
-				if (is_object($value) && method_exists($value, 'recordDesc')) {
-					$value = $value->recordDesc($format, $max_len);
-				}
+				$value = $this->placeholderValue($matches[1][$n], $matches[2][$n], $format, $max_len);
 				$sprintf_part = $matches[2][$n];
-				if ($sprintf_part === '') {
+				if ($sprintf_part === '' || in_array($sprintf_part, ['%T', '%D', '%_a'])) {
+					// los sufijos de formato se resuelven en placeholderValue()
 					$sprintf_part = "%s";
-				} else if ($sprintf_part === '%T') {
-					$sprintf_part = '%s';
-					$value = Yii::$app->formatter->asDateTime($value);
-				} else if ($sprintf_part === '%D') {
-					$sprintf_part = '%s';
-					$value = Yii::$app->formatter->asDate($value);
-				} else if ($sprintf_part === '%_a') { // allowed_values
-					$sprintf_part = '%s';
-					$fname = $matches[1][$n];
-					$getter = "get" . AppHelper::modelize($fname) . "Label";
-					$value = call_user_func([$this, $getter]);
 				}
 				$_format = str_replace($match, $sprintf_part, $_format);
 				$values[] = $value;
