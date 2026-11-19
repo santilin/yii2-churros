@@ -62,7 +62,18 @@ class WidgetLayer
 			];
 		}
 		$this->widgets_used = [];
-		$ret = $this->layoutWidgets($this->widgetsLayout, [
+		// For type 'fields' the root's own htmlOptions is reserved for the
+		// <fieldset> below, not for whatever layoutWidgets() would otherwise do
+		// with it (e.g. a root row that happens to be type 'tabs' would also
+		// read $layout_row['htmlOptions'] for its own tabContentOptions). Strip
+		// it from the copy passed down so it isn't read twice for two different
+		// purposes; a nested (non-root) 'tabs' row still gets to use its own
+		// htmlOptions for tabContentOptions as usual.
+		$widgets_layout_for_children = $this->widgetsLayout;
+		if ($type === 'fields' && is_array($widgets_layout_for_children)) {
+			unset($widgets_layout_for_children['htmlOptions']);
+		}
+		$ret = $this->layoutWidgets($widgets_layout_for_children, [
 			'size' => $size,
 			'style' => $style,
 			'layout' => $form_layout??'1col',

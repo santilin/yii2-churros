@@ -245,7 +245,8 @@ fieldset {
   padding-bottom: .5rem;
   padding-top: 2px;
   margin-bottom: .5rem;
-  padding-left: 10px;
+  padding-left: calc(var(--bs-gutter-x, 1.5rem) * 0.25);
+  padding-right: calc(var(--bs-gutter-x, 1.5rem) * 0.25);
   border-left: 4px solid green;
 }
 
