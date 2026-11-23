@@ -1285,10 +1285,4 @@ trait ModelInfoTrait
 		return $ret;
 	}
 
-	public function getAttributeValue(string $name): mixed
-	{
-		return $this->__get($name);
-	}
-
-
 } // trait ModelInfoTrait
