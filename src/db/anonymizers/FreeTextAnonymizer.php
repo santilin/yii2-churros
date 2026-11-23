@@ -80,12 +80,21 @@ class FreeTextAnonymizer
 		$seed = hexdec(substr(hash('sha256', $this->secretKey . '|' . $text), 0, 8));
 		$words = self::LOREM_WORDS;
 		$wordCount = count($words);
-		$result = '';
+		// Con acumular la longitud en vez de recalcular mb_strlen($result)
+		// en cada vuelta el coste pasa de cuadrático a lineal en la longitud
+		// del texto original (con textos de cientos de KB, la versión
+		// cuadrática tardaba segundos por campo). Las palabras y los
+		// separadores son ASCII, así que strlen() cuenta exactamente los
+		// mismos caracteres que mb_strlen().
+		$pieces = [];
+		$rlen = 0;
 		$i = 0;
-		while (mb_strlen($result) < $length) {
-			$result .= ($result === '' ? '' : ' ') . $words[($seed + $i) % $wordCount];
+		while ($rlen < $length) {
+			$w = $words[($seed + $i) % $wordCount];
+			$pieces[] = $w;
+			$rlen += strlen($w) + ($i === 0 ? 0 : 1);
 			$i++;
 		}
-		return mb_substr($result, 0, $length);
+		return mb_substr(implode(' ', $pieces), 0, $length);
 	}
 }

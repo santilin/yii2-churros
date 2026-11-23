@@ -335,6 +335,40 @@ EOF;
 		}
 	}
 
+	/**
+	 * Localiza el anonimizador de una tabla en anonymizersPath: primero el
+	 * <esquema>.<tabla>.php de la convención actual (cada anonimizador lleva
+	 * la base de datos en el nombre de fichero y solo se aplica a esa base)
+	 * y, si no existe, el <tabla>.php sin prefijo de la convención antigua.
+	 * El esquema sale del nombre cualificado de la tabla y, si la tabla no
+	 * viene cualificada, de la base de datos actual de la conexión (MySQL).
+	 *
+	 * @param \yii\db\TableSchema $tableSchema
+	 * @return array{0:string,1:string} fichero del anonimizador y nombre
+	 *   completo de su función
+	 */
+	protected function findAnonymizer(\yii\db\TableSchema $tableSchema): array
+	{
+		$schema = $tableSchema->schemaName;
+		if ($schema === null && $this->db->driverName === 'mysql') {
+			$schema = (string) $this->db->createCommand('SELECT DATABASE()')->queryScalar();
+		}
+		$candidates = [];
+		if ($schema) {
+			$candidates[] = $schema . '.' . $tableSchema->name;
+		}
+		$candidates[] = $tableSchema->name;
+		foreach ($candidates as $candidate) {
+			$file = Yii::getAlias($this->anonymizersPath) . '/' . $candidate . '.php';
+			if (file_exists($file)) {
+				return [$file, '\\app\\database\\anonymizers\\' . str_replace('.', '_', $candidate) . '_anonymizer'];
+			}
+		}
+		throw new InvalidConfigException(
+			"No hay anonimizador para {$tableSchema->fullName} en " . Yii::getAlias($this->anonymizersPath)
+		);
+	}
+
 	protected function dumpTableAsFixture($tableSchema, ?string $where = null): string
     {
 		$txt_data = "return [\n";
@@ -382,9 +416,8 @@ sql;
 		}
 		$raw_data = $this->db->createCommand($sql)->queryAll();
 		if ($this->anonymize) {
-			$anonymizer_file = Yii::getAlias($this->anonymizersPath . '/' . $tableSchema->fullName . '.php');
+			[$anonymizer_file, $anonymizer_function_name] = $this->findAnonymizer($tableSchema);
 			require $anonymizer_file;
-			$anonymizer_function_name = '\\app\\database\\anonymizers\\' . str_replace('.', '_', $tableSchema->fullName) . '_anonymizer';
 			$anonymizer_function_name($raw_data);
 		}
 		$nrow = 0;
