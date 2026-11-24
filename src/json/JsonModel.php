@@ -26,6 +26,29 @@ class JsonModel extends \yii\base\Model
     protected $_json_object = null;
     protected $_related = null;
 
+    public function __isset($name)
+    {
+        if (array_key_exists($name, $this->_attributes)) {
+            return true;
+        } else {
+            return parent::__isset($name);
+        }
+    }
+
+    public function __get($name)
+    {
+        if (array_key_exists($name, $this->_attributes)) {
+            return $this->_attributes[$name];
+        }
+        if ($this->_related && array_key_exists($name, $this->_related) && $this->_related[$name] !== null) {
+            return $this->_related[$name];
+        }
+        if (isset(static::$relations[$name])) {
+            return $this->loadRelatedModels($name);
+        }
+        return parent::__get($name);
+    }
+
     public function __set($name, $value)
     {
         if (array_key_exists($name, $this->_attributes)) {
@@ -61,29 +84,6 @@ class JsonModel extends \yii\base\Model
             $parent_path = substr($this->_path, 0, -(strlen($this->_id) + 1));
         }
         $this->_json_object = $this->_json_modelable->getJsonObject($parent_path, $this->_id, static::$_locator);
-    }
-
-    public function __isset($name)
-    {
-        if (array_key_exists($name, $this->_attributes)) {
-            return true;
-        } else {
-            return parent::__isset($name);
-        }
-    }
-
-    public function __get($name)
-    {
-        if (array_key_exists($name, $this->_attributes)) {
-            return $this->_attributes[$name];
-        }
-        if ($this->_related && array_key_exists($name, $this->_related) && $this->_related[$name] !== null) {
-            return $this->_related[$name];
-        }
-        if (isset(static::$relations[$name])) {
-            return $this->loadRelatedModels($name);
-        }
-        return parent::__get($name);
     }
 
     public function getJsonModelable(): JsonModelable
@@ -247,8 +247,27 @@ class JsonModel extends \yii\base\Model
 
     public function setAttribute(string $attribute, $value)
     {
+        return $this->__set($attribute, $value);
+    }
+
+    /**
+     * This method is invoked when an unsafe attribute is being massively assigned.
+     * The default implementation will log a warning message if YII_DEBUG is on.
+     * It does nothing otherwise.
+     * @param string $name the unsafe attribute name
+     * @param mixed $value the attribute value
+     */
+    public function onUnsafeAttribute($name, $value)
+    {
+        if (YII_DEBUG) {
+            Yii::debug("Failed to set unsafe attribute '$name' in '" . get_class($this) . "'.", __METHOD__);
+        }
+    }
+
+    public function getAttribute(string $attribute)
+    {
         if ($this->hasAttribute($attribute)) {
-            $this->_attributes[$attribute] = $value;
+            return $this->_attributes[$attribute];
         } else {
             $this->onUnsafeAttribute($attribute, $value);
         }
@@ -729,21 +748,6 @@ class JsonModel extends \yii\base\Model
             return substr($part, 2, -2);
         }
         return $part;
-    }
-
-
-    /**
-     * This method is invoked when an unsafe attribute is being massively assigned.
-     * The default implementation will log a warning message if YII_DEBUG is on.
-     * It does nothing otherwise.
-     * @param string $name the unsafe attribute name
-     * @param mixed $value the attribute value
-     */
-    public function onUnsafeAttribute($name, $value)
-    {
-        if (YII_DEBUG) {
-            Yii::debug("Failed to set unsafe attribute '$name' in '" . get_class($this) . "'.", __METHOD__);
-        }
     }
 
     public function updateFields(array $props): bool
