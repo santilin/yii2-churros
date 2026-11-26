@@ -247,7 +247,7 @@ class JsonModel extends \yii\base\Model
 
     public function setAttribute(string $attribute, $value)
     {
-        return $this->__set($attribute, $value);
+        $this->_attributes[$attribute] = $value;
     }
 
     /**
@@ -268,8 +268,6 @@ class JsonModel extends \yii\base\Model
     {
         if ($this->hasAttribute($attribute)) {
             return $this->_attributes[$attribute];
-        } else {
-            $this->onUnsafeAttribute($attribute, $value);
         }
     }
 
@@ -339,7 +337,7 @@ class JsonModel extends \yii\base\Model
         $this->_path = $json_path; // . '/'. static::jsonPath();
     }
 
-	public function loadJson(JsonModelable $json_modelable, string $json_path = null, string $id = null, string $locator = null):?JsonObject
+	public function loadJson(JsonModelable $json_modelable, ?string $json_path = null, ?string $id = null, ?string $locator = null):?JsonObject
     {
         $this->_json_modelable = $json_modelable;
         if ($id) {

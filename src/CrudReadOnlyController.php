@@ -128,6 +128,12 @@ abstract class CrudReadOnlyController extends \yii\web\Controller
 								 $previous_context = null, ?string $search_model_class = null)
 	{
 		$this->action = $this->createAction('index');
+		// Set the master model before creating the search model, because
+		// createSearchModel() implementations and their userPermissions()
+		// may already rely on getMasterModel(); if not set here, it would
+		// be resolved from request params, which can point to an ancestor
+		// of the master (e.g. the Proyecto of a PaqueteTrabajo)
+		$this->masterModel = $master;
 		// The most specific class takes precedence
 		if ($search_model_class && class_exists("$search_model_class{$view}_Search")) {
 			$detail = $this->createSearchModel("$search_model_class{$view}_Search", $params);
@@ -139,7 +145,6 @@ abstract class CrudReadOnlyController extends \yii\web\Controller
 		if (!$detail) {
 			throw new \Exception("No {$search_model_class}_Search nor $search_model_class{$view}_Search class found in " . __METHOD__);
 		}
-		$this->masterModel = $master;
 		// The grid filters travel in the url under the form name of the
 		// search model. In an embedded grid $params is built by whoever renders
 		// it, it is not queryParams, so they must be picked up from the request
